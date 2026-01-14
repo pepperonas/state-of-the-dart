@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Match, Player, Dart, Throw, Leg, GameType, GameStatus, MatchSettings } from '../types/index';
+import { Match, Player, Dart, Throw, GameType, MatchSettings } from '../types/index';
 import { calculateThrowScore, isBust, calculateAverage } from '../utils/scoring';
 import { getCheckoutSuggestion } from '../data/checkoutTable';
 import audioSystem from '../utils/audio';
+import { useTenant } from './TenantContext';
+import { usePlayer } from './PlayerContext';
 
 interface GameState {
   currentMatch: Match | null;
@@ -14,6 +16,7 @@ interface GameState {
 
 type GameAction =
   | { type: 'START_MATCH'; payload: { players: Player[]; settings: MatchSettings; gameType: GameType } }
+  | { type: 'LOAD_MATCH'; payload: Match }
   | { type: 'ADD_DART'; payload: Dart }
   | { type: 'REMOVE_DART' }
   | { type: 'CLEAR_THROW' }
@@ -34,6 +37,29 @@ const initialState: GameState = {
 
 const gameReducer = (state: GameState, action: GameAction): GameState => {
   switch (action.type) {
+    case 'LOAD_MATCH': {
+      const match = action.payload;
+      const currentPlayer = match.players[state.currentPlayerIndex];
+      const currentLeg = match.legs[match.currentLegIndex];
+      const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
+      const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
+      const startScore = match.settings.startScore || 501;
+      const remaining = startScore - totalScored;
+      
+      let checkoutSuggestion = null;
+      if (remaining <= 170 && remaining > 1) {
+        checkoutSuggestion = getCheckoutSuggestion(remaining, 3);
+      }
+      
+      return {
+        ...state,
+        currentMatch: match,
+        currentPlayerIndex: 0,
+        currentThrow: [],
+        checkoutSuggestion,
+      };
+    }
+    
     case 'START_MATCH': {
       const { players, settings, gameType } = action.payload;
       const matchId = uuidv4();
@@ -177,7 +203,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       const newThrow: Throw = {
         id: uuidv4(),
         playerId: currentPlayer.playerId,
-        darts: bustOccurred ? state.currentThrow : state.currentThrow,
+        darts: state.currentThrow,
         score: bustOccurred ? 0 : currentThrowScore,
         remaining: bustOccurred ? previousRemaining : newRemaining,
         timestamp: new Date(),
@@ -238,7 +264,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         if (currentPlayer.legsWon >= legsToWin) {
           // Set or match won
           updatedMatch.winner = currentPlayer.playerId;
-          updatedMatch.status = 'finished';
+          updatedMatch.status = 'completed';
           updatedMatch.completedAt = new Date();
           
           // Announce set or match win
@@ -358,29 +384,162 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
   }
 };
 
-const GameContext = createContext<{
+interface GameContextValue {
   state: GameState;
   dispatch: React.Dispatch<GameAction>;
-} | null>(null);
+  syncPlayerStats: () => void;
+}
+
+const GameContext = createContext<GameContextValue | null>(null);
+
+const reviveMatchDates = (match: any): Match => {
+  return {
+    ...match,
+    startedAt: match.startedAt ? new Date(match.startedAt) : new Date(),
+    completedAt: match.completedAt ? new Date(match.completedAt) : undefined,
+    pausedAt: match.pausedAt ? new Date(match.pausedAt) : undefined,
+    legs: match.legs?.map((leg: any) => ({
+      ...leg,
+      startedAt: leg.startedAt ? new Date(leg.startedAt) : new Date(),
+      completedAt: leg.completedAt ? new Date(leg.completedAt) : undefined,
+      throws: leg.throws?.map((t: any) => ({
+        ...t,
+        timestamp: t.timestamp ? new Date(t.timestamp) : new Date(),
+      })) || [],
+    })) || [],
+  };
+};
 
 export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { storage } = useTenant();
+  const { updatePlayer, players } = usePlayer();
+  
   const [state, dispatch] = useReducer(gameReducer, initialState);
   
-  // Save game state to localStorage
+  // Load match from storage when tenant changes
   useEffect(() => {
-    if (state.currentMatch) {
-      localStorage.setItem('currentMatch', JSON.stringify(state.currentMatch));
+    if (storage) {
+      const saved = storage.get<any>('currentMatch', null);
+      if (saved) {
+        const revivedMatch = reviveMatchDates(saved);
+        dispatch({ type: 'LOAD_MATCH', payload: revivedMatch });
+      }
     }
-  }, [state.currentMatch]);
+  }, [storage]);
+  
+  // Save game state to localStorage with debouncing
+  useEffect(() => {
+    if (state.currentMatch && storage) {
+      storage.setDebounced('currentMatch', state.currentMatch, 500);
+    }
+  }, [state.currentMatch, storage]);
+  
+  // Sync player statistics to PlayerContext after match completion
+  const syncPlayerStats = () => {
+    if (!state.currentMatch || state.currentMatch.status !== 'completed') return;
+    
+    state.currentMatch.players.forEach((matchPlayer) => {
+      const player = players.find(p => p.id === matchPlayer.playerId);
+      if (!player) return;
+      
+      const isWinner = state.currentMatch!.winner === matchPlayer.playerId;
+      const legsWon = matchPlayer.legsWon;
+      const legsPlayed = state.currentMatch!.legs.length;
+      
+      // Calculate highest checkout from match
+      const playerLegsWon = state.currentMatch!.legs.filter(
+        leg => leg.winner === matchPlayer.playerId
+      );
+      const checkoutsFromLegs = playerLegsWon
+        .map(leg => {
+          const lastThrow = leg.throws[leg.throws.length - 1];
+          return lastThrow?.score || 0;
+        })
+        .filter(score => score > 0);
+      
+      const highestCheckout = Math.max(
+        player.stats.highestCheckout,
+        ...checkoutsFromLegs
+      );
+      
+      // Update player stats
+      updatePlayer(matchPlayer.playerId, {
+        stats: {
+          ...player.stats,
+          gamesPlayed: player.stats.gamesPlayed + 1,
+          gamesWon: player.stats.gamesWon + (isWinner ? 1 : 0),
+          totalLegsPlayed: player.stats.totalLegsPlayed + legsPlayed,
+          totalLegsWon: player.stats.totalLegsWon + legsWon,
+          highestCheckout: highestCheckout,
+          total180s: player.stats.total180s + matchPlayer.match180s,
+          total171Plus: player.stats.total171Plus + matchPlayer.match171Plus,
+          total140Plus: player.stats.total140Plus + matchPlayer.match140Plus,
+          total100Plus: player.stats.total100Plus + matchPlayer.match100Plus,
+          total60Plus: player.stats.total60Plus + matchPlayer.match60Plus,
+          bestAverage: Math.max(player.stats.bestAverage, matchPlayer.matchAverage),
+          averageOverall: calculateOverallAverage(
+            player.stats.averageOverall,
+            player.stats.gamesPlayed,
+            matchPlayer.matchAverage
+          ),
+          checkoutPercentage: calculateCheckoutPercentage(
+            player.stats.checkoutPercentage,
+            player.stats.gamesPlayed,
+            matchPlayer.checkoutAttempts,
+            matchPlayer.checkoutsHit
+          ),
+        },
+      });
+    });
+  };
+  
+  // Auto-sync when match is completed
+  useEffect(() => {
+    if (state.currentMatch?.status === 'completed') {
+      syncPlayerStats();
+    }
+  }, [state.currentMatch?.status]);
   
   return (
-    <GameContext.Provider value={{ state, dispatch }}>
+    <GameContext.Provider value={{ state, dispatch, syncPlayerStats }}>
       {children}
     </GameContext.Provider>
   );
 };
 
-export const useGame = () => {
+// Helper function to calculate overall average
+const calculateOverallAverage = (
+  currentAvg: number,
+  gamesPlayed: number,
+  newAvg: number
+): number => {
+  if (gamesPlayed === 0) return newAvg;
+  return ((currentAvg * gamesPlayed) + newAvg) / (gamesPlayed + 1);
+};
+
+// Helper function to calculate checkout percentage
+const calculateCheckoutPercentage = (
+  currentPercentage: number,
+  gamesPlayed: number,
+  newAttempts: number,
+  newHits: number
+): number => {
+  if (gamesPlayed === 0 && newAttempts === 0) return 0;
+  
+  // Reconstruct total attempts and hits from current percentage
+  const totalAttempts = gamesPlayed > 0 
+    ? Math.round((currentPercentage / 100) * gamesPlayed * 10) // Estimate
+    : 0;
+  
+  const totalHits = Math.round((totalAttempts * currentPercentage) / 100);
+  
+  const updatedAttempts = totalAttempts + newAttempts;
+  const updatedHits = totalHits + newHits;
+  
+  return updatedAttempts > 0 ? (updatedHits / updatedAttempts) * 100 : 0;
+};
+
+export const useGame = (): GameContextValue => {
   const context = useContext(GameContext);
   if (!context) {
     throw new Error('useGame must be used within a GameProvider');

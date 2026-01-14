@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, TrendingUp, Award, Target, Activity } from 'lucide-react';
+import { ArrowLeft, Award, Activity } from 'lucide-react';
 import { usePlayer } from '../../context/PlayerContext';
 
 const StatsOverview: React.FC = () => {

@@ -18,7 +18,6 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
   isActive,
   average,
   legsWon,
-  setsWon,
 }) => {
   return (
     <motion.div

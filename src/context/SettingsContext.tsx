@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { AppSettings } from '../types/index';
+import { useTenant } from './TenantContext';
 
 interface SettingsContextType {
   settings: AppSettings;
@@ -22,14 +23,29 @@ const defaultSettings: AppSettings = {
 const SettingsContext = createContext<SettingsContextType | null>(null);
 
 export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { storage } = useTenant();
+  
   const [settings, setSettings] = useState<AppSettings>(() => {
-    const saved = localStorage.getItem('settings');
-    return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
+    if (!storage) return defaultSettings;
+    const saved = storage.get<Partial<AppSettings>>('settings', {});
+    return { ...defaultSettings, ...saved };
   });
   
+  // Reload settings when tenant changes
   useEffect(() => {
-    localStorage.setItem('settings', JSON.stringify(settings));
-  }, [settings]);
+    if (storage) {
+      const saved = storage.get<Partial<AppSettings>>('settings', {});
+      setSettings({ ...defaultSettings, ...saved });
+    } else {
+      setSettings(defaultSettings);
+    }
+  }, [storage]);
+  
+  useEffect(() => {
+    if (storage) {
+      storage.set('settings', settings);
+    }
+  }, [settings, storage]);
   
   const updateSettings = (updates: Partial<AppSettings>) => {
     setSettings(prev => ({ ...prev, ...updates }));

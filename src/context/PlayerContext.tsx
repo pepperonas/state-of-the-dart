@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Player, PlayerStats, PlayerPreferences } from '../types/index';
+import { useTenant } from './TenantContext';
 
 interface PlayerContextType {
   players: Player[];
@@ -42,28 +43,57 @@ const createDefaultPreferences = (): PlayerPreferences => ({
   vibrationEnabled: true,
 });
 
+const reviveDates = (player: Player): Player => {
+  return {
+    ...player,
+    createdAt: player.createdAt ? new Date(player.createdAt) : new Date(),
+  };
+};
+
 export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { storage } = useTenant();
+  
   const [players, setPlayers] = useState<Player[]>(() => {
-    const saved = localStorage.getItem('players');
-    return saved ? JSON.parse(saved) : [];
+    if (!storage) return [];
+    const saved = storage.get<any[]>('players', []);
+    return saved.map(reviveDates);
   });
   
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(() => {
-    const saved = localStorage.getItem('currentPlayer');
-    return saved ? JSON.parse(saved) : null;
+    if (!storage) return null;
+    const saved = storage.get<any>('currentPlayer', null);
+    return saved ? reviveDates(saved) : null;
   });
   
+  // Reload players when tenant changes
   useEffect(() => {
-    localStorage.setItem('players', JSON.stringify(players));
-  }, [players]);
+    if (storage) {
+      const saved = storage.get<any[]>('players', []);
+      setPlayers(saved.map(reviveDates));
+      
+      const savedCurrent = storage.get<any>('currentPlayer', null);
+      setCurrentPlayer(savedCurrent ? reviveDates(savedCurrent) : null);
+    } else {
+      setPlayers([]);
+      setCurrentPlayer(null);
+    }
+  }, [storage]);
   
   useEffect(() => {
-    if (currentPlayer) {
-      localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
-    } else {
-      localStorage.removeItem('currentPlayer');
+    if (storage) {
+      storage.set('players', players);
     }
-  }, [currentPlayer]);
+  }, [players, storage]);
+  
+  useEffect(() => {
+    if (storage) {
+      if (currentPlayer) {
+        storage.set('currentPlayer', currentPlayer);
+      } else {
+        storage.remove('currentPlayer');
+      }
+    }
+  }, [currentPlayer, storage]);
   
   const addPlayer = (name: string, avatar?: string): Player => {
     const newPlayer: Player = {

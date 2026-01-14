@@ -1,10 +1,22 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Target, Users, TrendingUp, Trophy, Dumbbell, Settings } from 'lucide-react';
+import { Target, Users, TrendingUp, Trophy, Dumbbell, Settings, Play, LogOut } from 'lucide-react';
+import { useTenant } from '../context/TenantContext';
+import { useGame } from '../context/GameContext';
 
 const MainMenu: React.FC = () => {
   const navigate = useNavigate();
+  const { currentTenant, setCurrentTenant, storage } = useTenant();
+  const { state } = useGame();
+  const [hasSavedMatch, setHasSavedMatch] = useState(false);
+  
+  useEffect(() => {
+    if (storage) {
+      const savedMatch = storage.get<{status?: string} | null>('currentMatch', null);
+      setHasSavedMatch(!!savedMatch && savedMatch.status === 'in-progress');
+    }
+  }, [storage, state.currentMatch]);
   
   const menuItems = [
     {
@@ -58,8 +70,27 @@ const MainMenu: React.FC = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-12"
+          className="text-center mb-8"
         >
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-2xl">
+                {currentTenant?.avatar}
+              </div>
+              <div className="text-left">
+                <p className="text-sm text-gray-400">Aktuelles Profil</p>
+                <p className="text-lg font-bold text-white">{currentTenant?.name}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setCurrentTenant(null)}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-700/50 hover:bg-gray-600/50 rounded-lg text-white transition-all"
+            >
+              <LogOut size={20} />
+              Profil wechseln
+            </button>
+          </div>
+          
           <h1 className="text-5xl md:text-7xl font-bold mb-4 bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">
             DartCounter Pro
           </h1>
@@ -67,6 +98,22 @@ const MainMenu: React.FC = () => {
             Triple-A Professional Dart Scoring System
           </p>
         </motion.div>
+        
+        {hasSavedMatch && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <button
+              onClick={() => navigate('/game')}
+              className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white rounded-xl font-bold text-lg flex items-center justify-center gap-3 shadow-lg transition-all"
+            >
+              <Play size={24} />
+              Match fortsetzen
+            </button>
+          </motion.div>
+        )}
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {menuItems.map((item, index) => {

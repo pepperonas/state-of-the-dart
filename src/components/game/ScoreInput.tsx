@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Check, X, Delete } from 'lucide-react';
 import { Dart } from '../../types/index';
-import { parseDartNotation, formatDartNotation, calculateThrowScore, getQuickScoreButtons } from '../../utils/scoring';
+import { calculateThrowScore, getQuickScoreButtons, convertScoreToDarts } from '../../utils/scoring';
 
 interface ScoreInputProps {
   currentThrow: Dart[];
@@ -20,7 +20,6 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   onConfirm,
   remaining,
 }) => {
-  const [inputMode, setInputMode] = useState<'numpad' | 'dartboard'>('numpad');
   const [currentInput, setCurrentInput] = useState('');
   
   const currentScore = calculateThrowScore(currentThrow);
@@ -35,14 +34,11 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
       if (currentInput) {
         const score = parseInt(currentInput);
         if (score >= 0 && score <= 180) {
-          // For simple score entry, we don't know the exact darts
-          // So we'll add a placeholder dart
-          onAddDart({
-            segment: score,
-            multiplier: 1,
-            score: score,
-            bed: 'single'
-          });
+          // Convert score to plausible darts
+          const darts = convertScoreToDarts(score);
+          // Add darts one by one, respecting the 3-dart limit
+          const dartsToAdd = darts.slice(0, 3 - currentThrow.length);
+          dartsToAdd.forEach(dart => onAddDart(dart));
           setCurrentInput('');
         }
       }
@@ -58,26 +54,11 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   const handleQuickScore = (score: number) => {
     if (currentThrow.length >= 3) return;
     
-    // Add the score as a single "throw" for simplicity
-    // In a real implementation, you might want to break down common scores
-    onAddDart({
-      segment: score,
-      multiplier: 1,
-      score: score,
-      bed: 'single'
-    });
-  };
-  
-  const handleDartNotation = (notation: string) => {
-    if (currentThrow.length >= 3) return;
-    
-    try {
-      const dart = parseDartNotation(notation);
-      onAddDart(dart);
-    } catch (error) {
-      // Handle invalid notation
-      console.error('Invalid dart notation:', notation);
-    }
+    // Convert score to plausible darts
+    const darts = convertScoreToDarts(score);
+    // Add darts one by one, respecting the 3-dart limit
+    const dartsToAdd = darts.slice(0, 3 - currentThrow.length);
+    dartsToAdd.forEach(dart => onAddDart(dart));
   };
   
   return (

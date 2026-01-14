@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, RotateCcw, Pause, Play, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import Confetti from 'react-confetti';
 import { useGame } from '../../context/GameContext';
 import { usePlayer } from '../../context/PlayerContext';
@@ -329,16 +328,16 @@ const GameScreen: React.FC = () => {
             
             <button
               onClick={() => {
-                if (state.currentMatch.status === 'paused') {
+                if (state.currentMatch?.status === 'paused') {
                   dispatch({ type: 'RESUME_MATCH' });
                 } else {
                   dispatch({ type: 'PAUSE_MATCH' });
                 }
               }}
               className="p-2 rounded-lg bg-gray-700/50 hover:bg-gray-600/50 text-white transition-all"
-              title={state.currentMatch.status === 'paused' ? 'Resume' : 'Pause'}
+              title={state.currentMatch?.status === 'paused' ? 'Resume' : 'Pause'}
             >
-              {state.currentMatch.status === 'paused' ? <Play size={20} /> : <Pause size={20} />}
+              {state.currentMatch?.status === 'paused' ? <Play size={20} /> : <Pause size={20} />}
             </button>
             
             <button

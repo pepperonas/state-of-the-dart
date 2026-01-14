@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { TenantProvider, useTenant } from './context/TenantContext';
 import { GameProvider } from './context/GameContext';
 import { PlayerProvider } from './context/PlayerContext';
 import { SettingsProvider } from './context/SettingsContext';
+import TenantSelector from './components/TenantSelector';
 import MainMenu from './components/MainMenu';
 import GameScreen from './components/game/GameScreen';
 import PlayerManagement from './components/player/PlayerManagement';
@@ -12,7 +14,8 @@ import TournamentMenu from './components/tournament/TournamentMenu';
 import Settings from './components/Settings';
 import './index.css';
 
-function App() {
+function AppContent() {
+  const { currentTenant } = useTenant();
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
     if (saved !== null) return saved === 'true';
@@ -27,6 +30,11 @@ function App() {
     }
     localStorage.setItem('darkMode', darkMode.toString());
   }, [darkMode]);
+
+  // Show tenant selector if no tenant is selected
+  if (!currentTenant) {
+    return <TenantSelector />;
+  }
 
   return (
     <SettingsProvider>
@@ -49,6 +57,14 @@ function App() {
         </GameProvider>
       </PlayerProvider>
     </SettingsProvider>
+  );
+}
+
+function App() {
+  return (
+    <TenantProvider>
+      <AppContent />
+    </TenantProvider>
   );
 }
 

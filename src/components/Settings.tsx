@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Moon, Sun, Volume2, Bell, Globe } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, Volume2, Bell, Globe, LogOut, User } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
+import { useTenant } from '../context/TenantContext';
 
 interface SettingsProps {
   darkMode: boolean;
@@ -11,6 +12,7 @@ interface SettingsProps {
 const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
   const navigate = useNavigate();
   const { settings, updateSettings } = useSettings();
+  const { currentTenant, setCurrentTenant } = useTenant();
   
   return (
     <div className="min-h-screen p-4 md:p-8">
@@ -167,7 +169,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
             </div>
             
             {/* Language */}
-            <div>
+            <div className="pb-6 border-b border-gray-200 dark:border-gray-700">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <Globe size={20} />
                 Language
@@ -181,6 +183,41 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 <option value="en">English</option>
                 <option value="de">Deutsch</option>
               </select>
+            </div>
+            
+            {/* Profile */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <User size={20} />
+                Profil
+              </h3>
+              
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-2xl">
+                    {currentTenant?.avatar}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-800 dark:text-white">{currentTenant?.name}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Aktives Profil
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <button
+                onClick={() => {
+                  if (confirm('Möchtest du dich wirklich abmelden? Das aktuelle Spiel wird gespeichert.')) {
+                    setCurrentTenant(null);
+                    navigate('/');
+                  }
+                }}
+                className="w-full py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition-all"
+              >
+                <LogOut size={20} />
+                Profil wechseln
+              </button>
             </div>
           </div>
         </div>
