@@ -10,53 +10,59 @@ const TrainingMenu: React.FC = () => {
       title: 'Doubles Practice',
       icon: Target,
       description: 'Focus on hitting doubles',
-      color: 'bg-blue-500',
+      gradient: 'from-primary-500 to-primary-600',
+      mode: 'doubles',
     },
     {
       title: 'Triples Practice',
       icon: Crosshair,
       description: 'Master the triple ring',
-      color: 'bg-purple-500',
+      gradient: 'from-accent-500 to-accent-600',
+      mode: 'triples',
     },
     {
       title: 'Around the Clock',
       icon: Clock,
       description: 'Hit every number in sequence',
-      color: 'bg-green-500',
+      gradient: 'from-success-500 to-success-600',
+      mode: 'around-the-clock',
     },
     {
       title: 'Checkout Training',
       icon: Award,
       description: 'Practice finishing combinations',
-      color: 'bg-yellow-500',
+      gradient: 'from-accent-600 to-accent-700',
+      mode: 'checkout-121',
     },
     {
       title: "Bob's 27",
       icon: TrendingUp,
       description: 'Classic pressure training',
-      color: 'bg-red-500',
+      gradient: 'from-primary-600 to-accent-600',
+      mode: 'bobs-27',
     },
     {
       title: 'Score Training',
       icon: Zap,
       description: 'Improve your scoring power',
-      color: 'bg-indigo-500',
+      gradient: 'from-success-600 to-success-700',
+      mode: 'score-training',
     },
   ];
   
   return (
-    <div className="min-h-screen p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8 gradient-mesh">
       <div className="max-w-4xl mx-auto">
         <button
           onClick={() => navigate('/')}
-          className="mb-6 flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+          className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
         >
           <ArrowLeft size={20} />
           Back to Menu
         </button>
         
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-          <h2 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">Training Modes</h2>
+        <div className="glass-card rounded-xl shadow-lg p-6 md:p-8">
+          <h2 className="text-3xl font-bold mb-6 text-white">Training Modes</h2>
           
           <div className="grid md:grid-cols-2 gap-4">
             {trainingModes.map((mode) => {
@@ -64,7 +70,8 @@ const TrainingMenu: React.FC = () => {
               return (
                 <button
                   key={mode.title}
-                  className={`${mode.color} rounded-lg p-6 text-white hover:opacity-90 transition-opacity`}
+                  onClick={() => navigate(`/training/${mode.mode}`)}
+                  className={`bg-gradient-to-br ${mode.gradient} rounded-lg p-6 text-white hover:shadow-lg transition-all card-hover-effect`}
                 >
                   <div className="flex items-center gap-4">
                     <Icon size={32} />
@@ -78,9 +85,9 @@ const TrainingMenu: React.FC = () => {
             })}
           </div>
           
-          <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <h3 className="font-semibold mb-2 text-gray-800 dark:text-white">Training Benefits</h3>
-            <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+          <div className="mt-8 p-4 bg-success-500/10 rounded-lg border border-success-500/30">
+            <h3 className="font-semibold mb-2 text-white">Training Benefits</h3>
+            <ul className="space-y-1 text-sm text-dark-300">
               <li>• Track your progress over time</li>
               <li>• Improve specific areas of your game</li>
               <li>• Compare your scores with personal bests</li>

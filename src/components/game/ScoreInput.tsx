@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Check, X, Delete } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Check, X, Delete, Keyboard } from 'lucide-react';
 import { Dart } from '../../types/index';
-import { calculateThrowScore, getQuickScoreButtons, convertScoreToDarts } from '../../utils/scoring';
+import { calculateThrowScore, convertScoreToDarts } from '../../utils/scoring';
 
 interface ScoreInputProps {
   currentThrow: Dart[];
@@ -21,9 +21,49 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   remaining,
 }) => {
   const [currentInput, setCurrentInput] = useState('');
+  const [inputMode, setInputMode] = useState<'quick' | 'numpad'>('numpad');
   
   const currentScore = calculateThrowScore(currentThrow);
-  const quickButtons = getQuickScoreButtons();
+  
+  // Keyboard support
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Don't capture if user is typing in an input field
+      if (e.target instanceof HTMLInputElement) return;
+      
+      if (e.key >= '0' && e.key <= '9') {
+        handleNumpadClick(e.key);
+      } else if (e.key === 'Enter') {
+        if (inputMode === 'numpad' && currentThrow.length < 3) {
+          // In numpad mode, Enter adds the score (or 0 if empty)
+          handleNumpadClick('enter');
+        } else if (currentThrow.length > 0) {
+          // If throw is complete, confirm it
+          onConfirm();
+        }
+      } else if (e.key === 'Backspace') {
+        if (currentInput) {
+          setCurrentInput(currentInput.slice(0, -1));
+        } else {
+          onRemoveDart();
+        }
+      } else if (e.key === 'Escape') {
+        if (currentInput) {
+          setCurrentInput('');
+        } else {
+          onClearThrow();
+        }
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [currentInput, currentThrow, inputMode, onConfirm, onRemoveDart, onClearThrow]);
+  // Most common scores - prominently displayed
+  const commonScores = [0, 26, 41, 45, 60, 81, 85, 100, 121, 140, 180];
+  
+  // All possible scores for dropdown
+  const allScores = Array.from({ length: 181 }, (_, i) => i);
   
   const handleNumpadClick = (value: string) => {
     if (currentThrow.length >= 3) return;
@@ -31,16 +71,10 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
     if (value === 'clear') {
       setCurrentInput('');
     } else if (value === 'enter') {
-      if (currentInput) {
-        const score = parseInt(currentInput);
-        if (score >= 0 && score <= 180) {
-          // Convert score to plausible darts
-          const darts = convertScoreToDarts(score);
-          // Add darts one by one, respecting the 3-dart limit
-          const dartsToAdd = darts.slice(0, 3 - currentThrow.length);
-          dartsToAdd.forEach(dart => onAddDart(dart));
-          setCurrentInput('');
-        }
+      // If no input, treat as 0 (no score)
+      const score = currentInput ? parseInt(currentInput) : 0;
+      if (score >= 0 && score <= 180) {
+        addScore(score);
       }
     } else {
       const newInput = currentInput + value;
@@ -51,7 +85,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
     }
   };
   
-  const handleQuickScore = (score: number) => {
+  const addScore = (score: number) => {
     if (currentThrow.length >= 3) return;
     
     // Convert score to plausible darts
@@ -59,91 +93,161 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
     // Add darts one by one, respecting the 3-dart limit
     const dartsToAdd = darts.slice(0, 3 - currentThrow.length);
     dartsToAdd.forEach(dart => onAddDart(dart));
+    setCurrentInput('');
+  };
+  
+  const handleQuickScore = (score: number) => {
+    addScore(score);
   };
   
   return (
-    <div className="glass-card rounded-xl shadow-lg p-6 w-full max-w-md">
-      <div className="mb-4">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-lg font-bold text-white">Score Input</h3>
-          <span className="text-2xl font-bold text-green-600 dark:text-green-400">
-            {remaining}
-          </span>
+    <div className="glass-card rounded-xl shadow-lg p-4 md:p-6 w-full max-w-md">
+      {/* Header with Remaining Score */}
+      <div className="mb-4 text-center">
+        <div className="text-sm text-dark-400 mb-1">Remaining</div>
+        <div className={`text-5xl font-bold ${
+          remaining <= 170 ? 'text-primary-400 neon-primary' : 'text-white'
+        }`}>
+          {remaining}
         </div>
-        
-        <div className="flex gap-2 mb-4">
-          {[0, 1, 2].map((index) => (
-            <div
-              key={index}
-              className="flex-1 h-12 rounded-lg border-2 border-gray-600 bg-gray-800/50 flex items-center justify-center"
-            >
-              {currentThrow[index] ? (
-                <span className="font-bold text-lg text-white">
-                  {currentThrow[index].score}
-                </span>
-              ) : (
-                <span className="text-gray-500">-</span>
-              )}
-            </div>
-          ))}
-        </div>
-        
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-sm text-gray-400">Current Throw:</span>
+      </div>
+      
+      {/* Current Throw Display */}
+      <div className="flex gap-2 mb-4">
+        {[0, 1, 2].map((index) => (
+          <div
+            key={index}
+            className={`flex-1 h-16 rounded-lg border-2 flex items-center justify-center transition-all ${
+              currentThrow[index]
+                ? 'border-primary-500 bg-primary-500/10'
+                : 'border-dark-700 bg-dark-900/50'
+            }`}
+          >
+            {currentThrow[index] ? (
+              <span className="font-bold text-2xl text-white">
+                {currentThrow[index].score}
+              </span>
+            ) : (
+              <span className="text-dark-600 text-xl">-</span>
+            )}
+          </div>
+        ))}
+        <div className="flex flex-col justify-center items-center bg-accent-500/10 border-2 border-accent-500/30 rounded-lg px-3">
+          <span className="text-xs text-dark-400">Total</span>
           <span className="text-2xl font-bold text-white">{currentScore}</span>
         </div>
       </div>
       
-      {/* Quick Score Buttons */}
-      <div className="grid grid-cols-5 gap-2 mb-4">
-        {quickButtons.map((score) => (
-          <button
-            key={score}
-            onClick={() => handleQuickScore(score)}
+      {/* Mode Switcher */}
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={() => setInputMode('numpad')}
+          className={`flex-1 py-2 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
+            inputMode === 'numpad'
+              ? 'bg-primary-500 text-white'
+              : 'bg-dark-800 text-dark-400 hover:bg-dark-700'
+          }`}
+        >
+          <Keyboard size={16} />
+          Numpad
+        </button>
+        <button
+          onClick={() => setInputMode('quick')}
+          className={`flex-1 py-2 rounded-lg font-semibold transition-all ${
+            inputMode === 'quick'
+              ? 'bg-primary-500 text-white'
+              : 'bg-dark-800 text-dark-400 hover:bg-dark-700'
+          }`}
+        >
+          Quick Scores
+        </button>
+      </div>
+      
+      {inputMode === 'quick' ? (
+        <>
+          {/* Common Scores - Large Buttons */}
+          <div className="grid grid-cols-5 gap-2 mb-3">
+            {commonScores.map((score) => (
+              <button
+                key={score}
+                onClick={() => handleQuickScore(score)}
+                disabled={currentThrow.length >= 3}
+                className={`p-3 text-lg font-bold rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed ${
+                  score === 180 
+                    ? 'bg-accent-500/80 hover:bg-accent-600 text-white'
+                    : score >= 100
+                    ? 'bg-primary-500/60 hover:bg-primary-600 text-white'
+                    : score === 0
+                    ? 'bg-dark-700/60 hover:bg-dark-600 text-white'
+                    : 'bg-success-500/60 hover:bg-success-600 text-white'
+                }`}
+              >
+                {score}
+              </button>
+            ))}
+          </div>
+          
+          {/* All Scores Dropdown */}
+          <select
+            onChange={(e) => {
+              const score = parseInt(e.target.value);
+              if (!isNaN(score)) {
+                handleQuickScore(score);
+                e.target.value = '';
+              }
+            }}
             disabled={currentThrow.length >= 3}
-            className="p-2 text-sm font-semibold rounded-lg bg-gray-700/50 hover:bg-gray-600/50 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="w-full p-3 mb-4 rounded-lg bg-dark-800 border-2 border-dark-700 text-white font-semibold disabled:opacity-30"
+            value=""
           >
-            {score}
-          </button>
-        ))}
-      </div>
-      
-      {/* Numpad */}
-      <div className="grid grid-cols-3 gap-2 mb-4">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-          <button
-            key={num}
-            onClick={() => handleNumpadClick(num.toString())}
-            className="p-4 text-lg font-semibold rounded-lg bg-gray-700/50 hover:bg-gray-600/50 text-white transition-all"
-          >
-            {num}
-          </button>
-        ))}
-        <button
-          onClick={() => handleNumpadClick('clear')}
-          className="p-4 text-lg font-semibold rounded-lg bg-red-900/30 hover:bg-red-900/40 text-red-400 transition-all"
-        >
-          C
-        </button>
-        <button
-          onClick={() => handleNumpadClick('0')}
-          className="p-4 text-lg font-semibold rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
-        >
-          0
-        </button>
-        <button
-          onClick={() => handleNumpadClick('enter')}
-          className="p-4 text-lg font-semibold rounded-lg bg-green-900/30 hover:bg-green-900/40 text-green-400 transition-all"
-        >
-          ↵
-        </button>
-      </div>
-      
-      {/* Current Input Display */}
-      {currentInput && (
-        <div className="mb-4 p-3 bg-gray-700/50 rounded-lg text-center text-2xl font-bold text-white">
-          {currentInput}
-        </div>
+            <option value="">More Scores (0-180)...</option>
+            {allScores.map(score => (
+              <option key={score} value={score}>{score}</option>
+            ))}
+          </select>
+        </>
+      ) : (
+        <>
+          {/* Numpad */}
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            {[7, 8, 9, 4, 5, 6, 1, 2, 3].map((num) => (
+              <button
+                key={num}
+                onClick={() => handleNumpadClick(num.toString())}
+                className="p-4 text-xl font-bold rounded-lg bg-dark-800 hover:bg-dark-700 text-white transition-all"
+              >
+                {num}
+              </button>
+            ))}
+            <button
+              onClick={() => handleNumpadClick('clear')}
+              className="p-4 text-lg font-bold rounded-lg bg-red-600/40 hover:bg-red-600/60 text-white transition-all"
+            >
+              Clear
+            </button>
+            <button
+              onClick={() => handleNumpadClick('0')}
+              className="p-4 text-xl font-bold rounded-lg bg-dark-800 hover:bg-dark-700 text-white transition-all"
+            >
+              0
+            </button>
+            <button
+              onClick={() => handleNumpadClick('enter')}
+              className="p-4 text-lg font-bold rounded-lg bg-success-500/60 hover:bg-success-600 text-white transition-all"
+            >
+              Enter
+            </button>
+          </div>
+          
+          {/* Current Input Display */}
+          <div className="mb-4 p-4 bg-dark-900/50 rounded-lg text-center border-2 border-dark-700">
+            {currentInput ? (
+              <span className="text-3xl font-bold text-white">{currentInput}</span>
+            ) : (
+              <span className="text-dark-600">Type score...</span>
+            )}
+          </div>
+        </>
       )}
       
       {/* Action Buttons */}
@@ -151,29 +255,34 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
         <button
           onClick={onRemoveDart}
           disabled={currentThrow.length === 0}
-          className="flex items-center justify-center gap-2 p-3 rounded-lg bg-orange-500 text-white hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="flex items-center justify-center gap-1 p-3 rounded-lg bg-dark-700 hover:bg-dark-600 text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
         >
-          <Delete size={20} />
-          Undo
+          <Delete size={18} />
+          <span className="hidden sm:inline">Undo</span>
         </button>
         
         <button
           onClick={onClearThrow}
           disabled={currentThrow.length === 0}
-          className="flex items-center justify-center gap-2 p-3 rounded-lg bg-red-500 text-white hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="flex items-center justify-center gap-1 p-3 rounded-lg bg-red-600 hover:bg-red-500 text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
         >
-          <X size={20} />
-          Clear
+          <X size={18} />
+          <span className="hidden sm:inline">Clear</span>
         </button>
         
         <button
           onClick={onConfirm}
           disabled={currentThrow.length === 0}
-          className="flex items-center justify-center gap-2 p-3 rounded-lg bg-green-500 text-white hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="flex items-center justify-center gap-1 p-3 rounded-lg bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold shadow-lg"
         >
           <Check size={20} />
-          OK
+          <span>OK</span>
         </button>
+      </div>
+      
+      {/* Keyboard Shortcuts Hint */}
+      <div className="mt-3 text-center text-xs text-dark-500">
+        ⌨️ Keyboard: 0-9 to type, Enter to confirm, Backspace to undo, Esc to clear
       </div>
     </div>
   );

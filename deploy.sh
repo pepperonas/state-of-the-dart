@@ -14,7 +14,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-PROJECT_DIR="/Users/martin/cursor/dart4friends/state-of-the-dart"
+PROJECT_DIR="/Users/martin/cursor/state-of-the-dart"
 VPS_HOST="root@69.62.121.168"
 VPS_PATH="/var/www/stateofthedart"
 LOCAL_BUILD_PATH="dist"

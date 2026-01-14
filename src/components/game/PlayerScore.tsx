@@ -47,7 +47,7 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.3 }}
         className={`text-4xl font-bold text-center mb-3 ${
-          remaining <= 170 ? 'text-green-400 neon-green' : 'text-white'
+          remaining <= 170 ? 'text-success-400 neon-success' : 'text-white'
         }`}
       >
         {remaining}
@@ -68,14 +68,32 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
         </div>
       </div>
       
-      {player.match180s > 0 && (
-        <div className="mt-2 flex items-center justify-center gap-2">
-          <span className="text-2xl font-bold text-red-500">180</span>
-          <span className="text-sm text-gray-400">
-            ×{player.match180s}
-          </span>
-        </div>
-      )}
+      <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+        {player.match180s > 0 && (
+          <div className="bg-red-500/20 rounded p-1 text-center">
+            <span className="font-bold text-red-400">180</span>
+            <span className="text-gray-400"> ×{player.match180s}</span>
+          </div>
+        )}
+        {player.match140Plus > 0 && (
+          <div className="bg-orange-500/20 rounded p-1 text-center">
+            <span className="font-bold text-orange-400">140+</span>
+            <span className="text-gray-400"> ×{player.match140Plus}</span>
+          </div>
+        )}
+        {player.match100Plus > 0 && (
+          <div className="bg-yellow-500/20 rounded p-1 text-center">
+            <span className="font-bold text-yellow-400">100+</span>
+            <span className="text-gray-400"> ×{player.match100Plus}</span>
+          </div>
+        )}
+        {player.matchHighestScore > 0 && (
+          <div className="bg-blue-500/20 rounded p-1 text-center">
+            <span className="font-bold text-blue-400">High</span>
+            <span className="text-gray-400"> {player.matchHighestScore}</span>
+          </div>
+        )}
+      </div>
     </motion.div>
   );
 };

@@ -2,6 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Performance: Critical CSS inlining */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Accessibility - Screen Reader Only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.sr-only:focus,
+.sr-only:active {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Smooth scrolling with reduced motion support */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Font display optimization */
+@font-face {
+  font-display: swap;
+}
+
+/* Will-change for animated elements */
+.animate-spin,
+.animate-bounce,
+.animate-pulse {
+  will-change: transform;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -83,38 +130,115 @@
   }
   
   .glass-card {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      0 4px 24px rgba(0, 0, 0, 0.1),
+      0 1px 2px rgba(0, 0, 0, 0.2);
   }
   
-  .neon-green {
-    color: #00ff41;
-    text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41, 0 0 30px #00ff41;
+  .glass-card-hover {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.15),
+      0 2px 4px rgba(0, 0, 0, 0.2);
   }
   
-  .neon-red {
-    color: #ff073a;
-    text-shadow: 0 0 10px #ff073a, 0 0 20px #ff073a, 0 0 30px #ff073a;
+  .glass-card-gold {
+    background: linear-gradient(
+      135deg,
+      rgba(168, 85, 247, 0.08),
+      rgba(14, 165, 233, 0.08)
+    );
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    box-shadow: 
+      0 8px 32px rgba(168, 85, 247, 0.2),
+      0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .neon-primary {
+    color: #0ea5e9;
+    text-shadow: 0 0 20px rgba(14, 165, 233, 0.5);
+  }
+  
+  .neon-success {
+    color: #22c55e;
+    text-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+  }
+  
+  /* Modern minimal background */
+  .minimal-bg {
+    background: linear-gradient(
+      180deg,
+      #0a0a0a 0%,
+      #171717 100%
+    );
+  }
+  
+  .gradient-mesh {
+    background:
+      radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.05) 0px, transparent 50%),
+      #0a0a0a;
+  }
+  
+  .card-hover-effect {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .card-hover-effect:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.2),
+      0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Mobile Touch Targets - min 44x44px for accessibility */
+  .touch-target {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Performance optimizations */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+
+  /* Reduce motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
-/* Scrollbar styling */
+/* Minimal Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-100 dark:bg-gray-800;
+  background: rgba(23, 23, 23, 0.5);
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-400 dark:bg-gray-600 rounded;
+  background: rgba(115, 115, 115, 0.5);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-500 dark:bg-gray-500;
+  background: rgba(115, 115, 115, 0.8);
 }

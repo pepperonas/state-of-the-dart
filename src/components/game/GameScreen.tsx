@@ -5,6 +5,7 @@ import Confetti from 'react-confetti';
 import { useGame } from '../../context/GameContext';
 import { usePlayer } from '../../context/PlayerContext';
 import { useSettings } from '../../context/SettingsContext';
+import { useGameAchievements } from '../../hooks/useGameAchievements';
 import Dartboard from '../dartboard/Dartboard';
 import ScoreInput from './ScoreInput';
 import PlayerScore from './PlayerScore';
@@ -18,11 +19,31 @@ const GameScreen: React.FC = () => {
   const { state, dispatch } = useGame();
   const { players, addPlayer } = usePlayer();
   const { settings } = useSettings();
+  const { checkMatchAchievements, checkLegAchievements } = useGameAchievements();
   
   useEffect(() => {
     audioSystem.setEnabled(settings.soundVolume > 0);
     audioSystem.setVolume(settings.soundVolume);
   }, [settings.soundVolume]);
+
+  // Check achievements when match is completed
+  useEffect(() => {
+    if (state.currentMatch?.status === 'completed' && state.currentMatch.winner) {
+      const match = state.currentMatch;
+      const winnerId = match.winner;
+
+      if (winnerId) {
+        // Check match achievements for all players
+        checkMatchAchievements(match, winnerId, (playerId) => playerId === winnerId);
+
+        // Check leg achievements for winner
+        const lastLeg = match.legs[match.legs.length - 1];
+        if (lastLeg) {
+          checkLegAchievements(lastLeg, match, winnerId);
+        }
+      }
+    }
+  }, [state.currentMatch?.status, state.currentMatch?.winner, checkMatchAchievements, checkLegAchievements]);
   const [showSetup, setShowSetup] = useState(!state.currentMatch);
   const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
   const [showPlayerNameInput, setShowPlayerNameInput] = useState(false);
@@ -44,6 +65,9 @@ const GameScreen: React.FC = () => {
   }, [state.currentMatch]);
   
   const handleStartGame = () => {
+    // Play a start sound to unlock audio system
+    audioSystem.playSound('/sounds/effects/get_ready.mp3', true);
+    
     if (selectedPlayers.length < 2) {
       // Add a guest player if only one selected
       const guestPlayer = addPlayer(`Guest ${Date.now() % 1000}`, '👤');
@@ -63,18 +87,70 @@ const GameScreen: React.FC = () => {
   
   const handleDartHit = (dart: Dart) => {
     dispatch({ type: 'ADD_DART', payload: dart });
+    // Play a subtle click sound for dart hit feedback
+    audioSystem.playSound('/sounds/OMNI/pop.mp3', false);
   };
+  
+  // Auto-confirm after 3rd dart
+  useEffect(() => {
+    if (state.currentThrow.length === 3) {
+      // Auto-confirm after a short delay to show the 3rd dart
+      const timer = setTimeout(() => {
+        handleConfirmThrow();
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [state.currentThrow.length]);
   
   const handleConfirmThrow = () => {
     const currentScore = calculateThrowScore(state.currentThrow);
     
-    // Play sounds and animations
-    if (currentScore === 180) {
-      setShowConfetti(true);
-      audioSystem.announceScore(180);
-      setTimeout(() => setShowConfetti(false), 3000);
-    } else if (currentScore >= 100) {
-      audioSystem.announceScore(currentScore);
+    // Check if this will be a checkout or bust BEFORE confirming
+    // so we can skip the score announcement if it's going to be a special sound
+    const currentPlayer = state.currentMatch?.players[state.currentPlayerIndex];
+    const currentLeg = state.currentMatch?.legs[state.currentMatch.currentLegIndex];
+    
+    if (currentPlayer && currentLeg) {
+      const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
+      const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
+      const startScore = state.currentMatch?.settings.startScore || 501;
+      const remaining = startScore - totalScored;
+      const newRemaining = remaining - currentScore;
+      
+      // Don't announce score if it's a checkout (will be announced by GameContext)
+      const isCheckout = newRemaining === 0 && state.currentThrow.length > 0;
+      
+      // Don't announce score if it's a bust (will be announced by GameContext)
+      const requiresDouble = state.currentMatch?.settings.doubleOut || false;
+      const lastDart = state.currentThrow[state.currentThrow.length - 1];
+      const willBust = newRemaining < 0 || 
+                       newRemaining === 1 || 
+                       (newRemaining === 0 && requiresDouble && lastDart?.multiplier !== 2);
+      
+      // Only announce score if not checkout or bust
+      if (!isCheckout && !willBust) {
+        if (currentScore === 180) {
+          setShowConfetti(true);
+          audioSystem.announceScore(180);
+          setTimeout(() => setShowConfetti(false), 3000);
+        } else {
+          // Always announce the score (0-180)
+          audioSystem.announceScore(currentScore);
+        }
+      } else if (currentScore === 180) {
+        // Still show confetti for 180s even if it's a checkout
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 3000);
+      }
+    } else {
+      // Fallback: just announce the score
+      if (currentScore === 180) {
+        setShowConfetti(true);
+        audioSystem.announceScore(180);
+        setTimeout(() => setShowConfetti(false), 3000);
+      } else {
+        audioSystem.announceScore(currentScore);
+      }
     }
     
     dispatch({ type: 'CONFIRM_THROW' });
@@ -104,21 +180,21 @@ const GameScreen: React.FC = () => {
   
   if (showSetup) {
     return (
-      <div className="min-h-screen p-4 md:p-8 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="min-h-screen p-4 md:p-8 gradient-mesh">
         <div className="max-w-4xl mx-auto">
           <button
             onClick={() => navigate('/')}
-            className="mb-6 flex items-center gap-2 text-gray-200 hover:text-white transition-colors"
+            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
           >
             <ArrowLeft size={20} />
             Back to Menu
           </button>
           
-          <div className="glass-card rounded-xl shadow-lg p-6">
+          <div className="glass-card rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-3xl font-bold mb-6 text-white">Game Setup</h2>
             
             <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3 text-gray-200">Select Players</h3>
+              <h3 className="text-lg font-semibold mb-3 text-white">Select Players</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {players.map((player) => (
                   <button
@@ -132,31 +208,31 @@ const GameScreen: React.FC = () => {
                     }}
                     className={`p-3 rounded-lg border-2 transition-all ${
                       selectedPlayers.find(p => p.id === player.id)
-                        ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                        : 'border-gray-300 dark:border-gray-600'
+                        ? 'border-success-500 bg-success-500/20 shadow-lg'
+                        : 'border-dark-700 hover:border-dark-600'
                     }`}
                   >
                     <div className="text-2xl mb-1">{player.avatar}</div>
-                    <div className="text-sm font-medium text-gray-800 dark:text-gray-200">{player.name}</div>
+                    <div className="text-sm font-medium text-white">{player.name}</div>
                   </button>
                 ))}
                 {!showPlayerNameInput ? (
                   <button
                     onClick={() => setShowPlayerNameInput(true)}
-                    className="p-3 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 transition-all"
+                    className="p-3 rounded-lg border-2 border-dashed border-dark-700 hover:border-dark-600 transition-all"
                   >
                     <div className="text-2xl mb-1">➕</div>
-                    <div className="text-sm font-medium text-gray-800 dark:text-gray-200">Add Player</div>
+                    <div className="text-sm font-medium text-white">Add Player</div>
                   </button>
                 ) : (
-                  <div className="p-3 rounded-lg border-2 border-green-500 bg-green-50 dark:bg-green-900/20">
+                  <div className="p-3 rounded-lg border-2 border-success-500 bg-success-500/20">
                     <div className="space-y-2">
                       <div className="flex gap-2">
                         {['🎯', '🏆', '👑', '🔥', '⭐', '💪', '🎪', '🦅'].map(emoji => (
                           <button
                             key={emoji}
                             onClick={() => setNewPlayerAvatar(emoji)}
-                            className={`text-2xl p-1 rounded ${newPlayerAvatar === emoji ? 'bg-green-500 text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                            className={`text-2xl p-1 rounded ${newPlayerAvatar === emoji ? 'bg-success-500 text-white' : 'hover:bg-dark-700'}`}
                           >
                             {emoji}
                           </button>
@@ -176,7 +252,7 @@ const GameScreen: React.FC = () => {
                           }
                         }}
                         placeholder="Player name..."
-                        className="w-full px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200"
+                        className="w-full px-2 py-1 rounded border border-dark-700 bg-dark-800 text-white placeholder-dark-500"
                         autoFocus
                       />
                       <div className="flex gap-2">
@@ -191,7 +267,7 @@ const GameScreen: React.FC = () => {
                             }
                           }}
                           disabled={!newPlayerName.trim()}
-                          className="flex-1 py-1 px-2 bg-green-500 text-white rounded text-sm hover:bg-green-600 disabled:bg-gray-400"
+                          className="flex-1 py-1 px-2 bg-success-500 hover:bg-success-600 text-white rounded text-sm disabled:bg-dark-700 disabled:cursor-not-allowed transition-all"
                         >
                           Add
                         </button>
@@ -201,7 +277,7 @@ const GameScreen: React.FC = () => {
                             setNewPlayerName('');
                             setNewPlayerAvatar('🎯');
                           }}
-                          className="flex-1 py-1 px-2 bg-gray-500 text-white rounded text-sm hover:bg-gray-600"
+                          className="flex-1 py-1 px-2 bg-dark-700 hover:bg-dark-600 text-white rounded text-sm transition-all"
                         >
                           Cancel
                         </button>
@@ -214,7 +290,7 @@ const GameScreen: React.FC = () => {
             
             <div className="grid md:grid-cols-2 gap-6 mb-6">
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-200">
+                <label className="block text-sm font-medium mb-2 text-white">
                   Starting Score
                 </label>
                 <select
@@ -230,7 +306,7 @@ const GameScreen: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-200">
+                <label className="block text-sm font-medium mb-2 text-white">
                   Legs to Win
                 </label>
                 <select
@@ -297,6 +373,85 @@ const GameScreen: React.FC = () => {
     );
   }
   
+  // Check if match is completed - show winner screen
+  if (state.currentMatch.status === 'completed' && state.currentMatch.winner) {
+    const currentMatch = state.currentMatch;
+    const winner = currentMatch.players.find(p => p.playerId === currentMatch.winner);
+    const loser = currentMatch.players.find(p => p.playerId !== currentMatch.winner);
+    
+    return (
+      <div className="min-h-screen p-4 gradient-mesh">
+        <Confetti recycle={true} numberOfPieces={200} gravity={0.15} />
+        <div className="max-w-4xl mx-auto">
+          <div className="glass-card-gold p-12 text-center">
+            <div className="mb-8">
+              <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent mb-4 animate-bounce">
+                🏆
+              </h1>
+              <h2 className="text-4xl md:text-6xl font-bold text-white mb-2">
+                {winner?.name} gewinnt!
+              </h2>
+              <p className="text-2xl text-dark-300">
+                {winner?.legsWon} - {loser?.legsWon}
+              </p>
+            </div>
+            
+            {/* Winner Stats */}
+            <div className="grid md:grid-cols-3 gap-4 mb-8">
+              <div className="glass-card p-4">
+                <div className="text-dark-400 text-sm mb-1">Average</div>
+                <div className="text-3xl font-bold text-white">
+                  {winner?.matchAverage.toFixed(2)}
+                </div>
+              </div>
+              <div className="glass-card p-4">
+                <div className="text-dark-400 text-sm mb-1">Highest Score</div>
+                <div className="text-3xl font-bold text-white">
+                  {winner?.matchHighestScore}
+                </div>
+              </div>
+              <div className="glass-card p-4">
+                <div className="text-dark-400 text-sm mb-1">180s</div>
+                <div className="text-3xl font-bold text-white">
+                  {winner?.match180s}
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex flex-col md:flex-row gap-4 justify-center">
+              <button
+                onClick={() => {
+                  dispatch({ type: 'START_MATCH', payload: {
+                    players: currentMatch.players.map(mp => 
+                      players.find(p => p.id === mp.playerId)!
+                    ),
+                    settings: currentMatch.settings,
+                    gameType: currentMatch.type
+                  }});
+                }}
+                className="px-8 py-4 bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white rounded-xl font-bold text-lg transition-all shadow-lg"
+              >
+                🔄 Rematch
+              </button>
+              <button
+                onClick={() => navigate('/stats')}
+                className="px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl font-bold text-lg transition-all shadow-lg"
+              >
+                📊 Statistiken
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="px-8 py-4 bg-gradient-to-r from-dark-600 to-dark-700 hover:from-dark-700 hover:to-dark-800 text-white rounded-xl font-bold text-lg transition-all shadow-lg"
+              >
+                🏠 Hauptmenü
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   const currentPlayer = state.currentMatch.players[state.currentPlayerIndex];
   const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
   const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
@@ -305,13 +460,13 @@ const GameScreen: React.FC = () => {
   const remaining = (state.currentMatch.settings.startScore || 501) - totalScored - currentThrowScore;
   
   return (
-    <div className="min-h-screen p-4 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen p-4 md:p-8 gradient-mesh">
       {showConfetti && <Confetti recycle={false} numberOfPieces={300} gravity={0.3} />}
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-6">
           <button
             onClick={() => navigate('/')}
-            className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
+            className="flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
           >
             <ArrowLeft size={20} />
             Menu
@@ -320,7 +475,7 @@ const GameScreen: React.FC = () => {
           <div className="flex gap-2">
             <button
               onClick={handleUndoThrow}
-              className="p-2 rounded-lg bg-gray-700/50 hover:bg-gray-600/50 text-white transition-all"
+              className="glass-card p-3 rounded-lg hover:glass-card-hover text-white transition-all"
               title="Undo last throw"
             >
               <RotateCcw size={20} />
@@ -334,7 +489,7 @@ const GameScreen: React.FC = () => {
                   dispatch({ type: 'PAUSE_MATCH' });
                 }
               }}
-              className="p-2 rounded-lg bg-gray-700/50 hover:bg-gray-600/50 text-white transition-all"
+              className="glass-card p-3 rounded-lg hover:glass-card-hover text-white transition-all"
               title={state.currentMatch?.status === 'paused' ? 'Resume' : 'Pause'}
             >
               {state.currentMatch?.status === 'paused' ? <Play size={20} /> : <Pause size={20} />}
@@ -342,7 +497,7 @@ const GameScreen: React.FC = () => {
             
             <button
               onClick={handleEndMatch}
-              className="p-2 rounded-lg bg-red-500 text-white hover:bg-red-600"
+              className="p-3 rounded-lg bg-red-600 hover:bg-red-500 text-white transition-all"
               title="End match"
             >
               <X size={20} />
@@ -377,12 +532,21 @@ const GameScreen: React.FC = () => {
           {/* Center Section - Dartboard and Input */}
           <div className="lg:col-span-1 flex flex-col items-center space-y-6">
             {settings.showDartboardHelper && (
-              <div className="w-full max-w-sm">
+              <div className="w-full max-w-sm space-y-3">
                 <Dartboard
                   onDartHit={handleDartHit}
                   highlightedSegments={state.checkoutSuggestion || []}
                   size={320}
                 />
+                {/* Miss Button */}
+                <button
+                  onClick={() => handleDartHit({ segment: 0, multiplier: 0, score: 0 })}
+                  disabled={state.currentThrow.length >= 3}
+                  className="w-full py-3 bg-dark-800 hover:bg-dark-700 disabled:bg-dark-900 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-all border-2 border-dark-600 hover:border-dark-500 disabled:border-dark-800 flex items-center justify-center gap-2"
+                >
+                  <X size={20} />
+                  Miss / No Score
+                </button>
               </div>
             )}
             

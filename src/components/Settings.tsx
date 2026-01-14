@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Moon, Sun, Volume2, Bell, Globe, LogOut, User } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, Volume2, Bell, Globe, LogOut, User, Play, Download, Upload, Smartphone } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import { useTenant } from '../context/TenantContext';
+import audioSystem from '../utils/audio';
+import { exportTenantData, importTenantData } from '../utils/exportImport';
 
 interface SettingsProps {
   darkMode: boolean;
@@ -13,35 +15,191 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
   const navigate = useNavigate();
   const { settings, updateSettings } = useSettings();
   const { currentTenant, setCurrentTenant } = useTenant();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // PWA Installation
+  interface BeforeInstallPromptEvent extends Event {
+    prompt: () => Promise<void>;
+    userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+  }
+
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstallable, setIsInstallable] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(() => {
+    return window.matchMedia('(display-mode: standalone)').matches;
+  });
+
+  useEffect(() => {
+    // Listen for beforeinstallprompt event
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      setIsInstallable(true);
+    };
+
+    // Listen for appinstalled event
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setIsInstallable(false);
+      setDeferredPrompt(null);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) {
+      alert('ℹ️ Installation ist derzeit nicht verfügbar.\n\nTipp: Auf iOS verwende "Zum Home-Bildschirm" im Safari-Menü.');
+      return;
+    }
+
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      console.log('PWA installation accepted');
+    } else {
+      console.log('PWA installation dismissed');
+    }
+    
+    setDeferredPrompt(null);
+    setIsInstallable(false);
+  };
+
+  const handleExport = () => {
+    if (!currentTenant) return;
+    
+    try {
+      exportTenantData(currentTenant.id, currentTenant.name);
+      alert('✅ Daten erfolgreich exportiert!');
+    } catch (error) {
+      alert('❌ Export fehlgeschlagen. Bitte versuche es erneut.');
+      console.error(error);
+    }
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImportFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !currentTenant) return;
+
+    if (!file.name.endsWith('.json')) {
+      alert('❌ Bitte wähle eine JSON-Datei aus.');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      '⚠️ Achtung: Der Import überschreibt alle aktuellen Daten!\n\n' +
+      'Möchtest du vorher ein Backup exportieren?'
+    );
+
+    if (!confirmed) {
+      event.target.value = '';
+      return;
+    }
+
+    try {
+      await importTenantData(file, currentTenant.id);
+      alert('✅ Daten erfolgreich importiert!\n\nDie Seite wird neu geladen...');
+      window.location.reload();
+    } catch (error) {
+      alert('❌ Import fehlgeschlagen. Bitte überprüfe die Datei.');
+      console.error(error);
+    }
+
+    event.target.value = '';
+  };
   
   return (
-    <div className="min-h-screen p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8 gradient-mesh">
       <div className="max-w-4xl mx-auto">
         <button
           onClick={() => navigate('/')}
-          className="mb-6 flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+          className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
         >
           <ArrowLeft size={20} />
           Back to Menu
         </button>
         
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-          <h2 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">Settings</h2>
+        <div className="glass-card rounded-xl shadow-lg p-6 md:p-8">
+          <h2 className="text-3xl font-bold mb-6 text-white">Settings</h2>
           
           <div className="space-y-6">
+            {/* PWA Installation */}
+            {(isInstallable || isInstalled) && (
+              <div className="pb-6 border-b border-dark-700">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
+                  <Smartphone size={20} />
+                  Progressive Web App
+                </h3>
+                
+                {isInstalled ? (
+                  <div className="p-4 bg-success-500/20 border border-success-500 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-success-500 rounded-full flex items-center justify-center">
+                        <Smartphone size={20} className="text-white" />
+                      </div>
+                      <div>
+                        <p className="text-white font-semibold">App installiert! ✅</p>
+                        <p className="text-dark-300 text-sm">Die App läuft als eigenständige Anwendung.</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleInstallClick}
+                      className="w-full py-4 bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white rounded-lg font-bold text-lg flex items-center justify-center gap-3 transition-all shadow-lg hover:shadow-xl"
+                    >
+                      <Smartphone size={24} />
+                      App installieren
+                    </button>
+                    
+                    <div className="mt-3 p-3 bg-primary-500/10 border border-primary-500/30 rounded-lg">
+                      <p className="text-sm text-dark-300">
+                        📱 <strong className="text-white">Vorteile:</strong>
+                      </p>
+                      <ul className="text-sm text-dark-300 mt-2 space-y-1 ml-4 list-disc">
+                        <li>Offline-Funktionalität</li>
+                        <li>Schnellerer Zugriff vom Homescreen</li>
+                        <li>Native App-Erfahrung</li>
+                        <li>Keine Browser-Leiste</li>
+                      </ul>
+                    </div>
+                    
+                    <div className="mt-3 p-3 bg-dark-800 rounded-lg">
+                      <p className="text-xs text-dark-400">
+                        💡 <strong>iOS:</strong> Nutze "Zum Home-Bildschirm" im Safari-Menü<br/>
+                        💡 <strong>Android:</strong> Klicke auf "App installieren" oben
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+            
             {/* Theme */}
-            <div className="pb-6 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <div className="pb-6 border-b border-dark-700">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
                 {darkMode ? <Moon size={20} /> : <Sun size={20} />}
                 Appearance
               </h3>
               
               <div className="flex items-center justify-between">
-                <span className="text-gray-700 dark:text-gray-300">Dark Mode</span>
+                <span className="text-dark-300">Dark Mode</span>
                 <button
                   onClick={() => setDarkMode(!darkMode)}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    darkMode ? 'bg-green-500' : 'bg-gray-300'
+                    darkMode ? 'bg-success-500' : 'bg-dark-600'
                   }`}
                 >
                   <span
@@ -54,8 +212,8 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
             </div>
             
             {/* Sound */}
-            <div className="pb-6 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <div className="pb-6 border-b border-dark-700">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
                 <Volume2 size={20} />
                 Sound
               </h3>
@@ -63,8 +221,8 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               <div className="space-y-4">
                 <div>
                   <label className="flex items-center justify-between mb-2">
-                    <span className="text-gray-700 dark:text-gray-300">Volume</span>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">{settings.soundVolume}%</span>
+                    <span className="text-dark-300">Volume</span>
+                    <span className="text-sm text-dark-400">{settings.soundVolume}%</span>
                   </label>
                   <input
                     type="range"
@@ -76,12 +234,21 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                   />
                 </div>
                 
+                {/* Test Sound Button */}
+                <button
+                  onClick={() => audioSystem.testSound()}
+                  className="w-full py-2 px-4 bg-success-500 hover:bg-success-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition-all"
+                >
+                  <Play size={18} />
+                  Test Sound (100)
+                </button>
+                
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-700 dark:text-gray-300">Vibration</span>
+                  <span className="text-dark-300">Vibration</span>
                   <button
                     onClick={() => updateSettings({ vibrationEnabled: !settings.vibrationEnabled })}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      settings.vibrationEnabled ? 'bg-green-500' : 'bg-gray-300'
+                      settings.vibrationEnabled ? 'bg-success-500' : 'bg-dark-700'
                     }`}
                   >
                     <span
@@ -95,19 +262,19 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
             </div>
             
             {/* Game Settings */}
-            <div className="pb-6 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <div className="pb-6 border-b border-dark-700">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
                 <Bell size={20} />
                 Game
               </h3>
               
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-700 dark:text-gray-300">Show Checkout Hints</span>
+                  <span className="text-dark-300">Show Checkout Hints</span>
                   <button
                     onClick={() => updateSettings({ showCheckoutHints: !settings.showCheckoutHints })}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      settings.showCheckoutHints ? 'bg-green-500' : 'bg-gray-300'
+                      settings.showCheckoutHints ? 'bg-success-500' : 'bg-dark-700'
                     }`}
                   >
                     <span
@@ -119,11 +286,11 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-700 dark:text-gray-300">Auto Next Player</span>
+                  <span className="text-dark-300">Auto Next Player</span>
                   <button
                     onClick={() => updateSettings({ autoNextPlayer: !settings.autoNextPlayer })}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      settings.autoNextPlayer ? 'bg-green-500' : 'bg-gray-300'
+                      settings.autoNextPlayer ? 'bg-success-500' : 'bg-dark-700'
                     }`}
                   >
                     <span
@@ -135,11 +302,11 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-700 dark:text-gray-300">Show Stats During Game</span>
+                  <span className="text-dark-300">Show Stats During Game</span>
                   <button
                     onClick={() => updateSettings({ showStatsDuringGame: !settings.showStatsDuringGame })}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      settings.showStatsDuringGame ? 'bg-green-500' : 'bg-gray-300'
+                      settings.showStatsDuringGame ? 'bg-success-500' : 'bg-dark-700'
                     }`}
                   >
                     <span
@@ -151,11 +318,11 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-700 dark:text-gray-300">Show Dartboard Helper</span>
+                  <span className="text-dark-300">Show Dartboard Helper</span>
                   <button
                     onClick={() => updateSettings({ showDartboardHelper: !settings.showDartboardHelper })}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      settings.showDartboardHelper ? 'bg-green-500' : 'bg-gray-300'
+                      settings.showDartboardHelper ? 'bg-success-500' : 'bg-dark-700'
                     }`}
                   >
                     <span
@@ -169,8 +336,8 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
             </div>
             
             {/* Language */}
-            <div className="pb-6 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <div className="pb-6 border-b border-dark-700">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
                 <Globe size={20} />
                 Language
               </h3>
@@ -178,16 +345,56 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               <select
                 value={settings.language}
                 onChange={(e) => updateSettings({ language: e.target.value as 'en' | 'de' })}
-                className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+                className="w-full p-2 rounded-lg border border-dark-700 bg-dark-800 text-white"
               >
                 <option value="en">English</option>
                 <option value="de">Deutsch</option>
               </select>
             </div>
             
+            {/* Data Management */}
+            <div className="pb-6 border-b border-dark-700">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
+                <Download size={20} />
+                Datenverwaltung
+              </h3>
+              
+              <div className="space-y-3">
+                <button
+                  onClick={handleExport}
+                  className="w-full py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition-all"
+                >
+                  <Download size={20} />
+                  Alle Daten exportieren (JSON)
+                </button>
+                
+                <button
+                  onClick={handleImportClick}
+                  className="w-full py-3 bg-success-500 hover:bg-success-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition-all"
+                >
+                  <Upload size={20} />
+                  Daten importieren (JSON)
+                </button>
+                
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".json"
+                  onChange={handleImportFile}
+                  className="hidden"
+                />
+                
+                <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                  <p className="text-sm text-yellow-800 dark:text-yellow-300">
+                    ℹ️ Exportiert werden: Spieler, Matches, Einstellungen, Statistiken, Training-Sessions
+                  </p>
+                </div>
+              </div>
+            </div>
+            
             {/* Profile */}
             <div>
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
                 <User size={20} />
                 Profil
               </h3>
@@ -199,7 +406,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                   </div>
                   <div>
                     <p className="font-semibold text-gray-800 dark:text-white">{currentTenant?.name}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-dark-400">
                       Aktives Profil
                     </p>
                   </div>

@@ -77,6 +77,8 @@ const Dartboard: React.FC<DartboardProps> = ({
       height={size} 
       className="dart-shadow rounded-full"
       style={{ touchAction: 'none' }}
+      role="application"
+      aria-label="Interactive Dartboard"
     >
       {/* Board background */}
       <circle cx={radius} cy={radius} r={radius} fill="#1a1a1a" />

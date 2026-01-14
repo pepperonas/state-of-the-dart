@@ -1,0 +1,68 @@
+name: Version Management
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: 'Version bump type'
+        required: false
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - manual
+
+jobs:
+  version-info:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Get current version
+      id: version
+      run: |
+        VERSION=$(node -p "require('./package.json').version")
+        echo "current=$VERSION" >> $GITHUB_OUTPUT
+        echo "Current version: $VERSION"
+    
+    outputs:
+      current_version: ${{ steps.version.outputs.current }}
+
+  # This job can be manually triggered to bump version
+  bump-version:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    needs: version-info
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+    
+    - name: Configure Git
+      run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "actions@github.com"
+    
+    - name: Bump version
+      run: |
+        npm run version:bump
+        NEW_VERSION=$(npm run version:show --silent)
+        echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+    
+    - name: Commit changes
+      run: |
+        git add .
+        git commit -m "chore: bump version to v$NEW_VERSION" || echo "No changes to commit"
+        git tag "v$NEW_VERSION"
+    
+    - name: Push changes
+      run: |
+        git push origin main
+        git push origin "v$NEW_VERSION"

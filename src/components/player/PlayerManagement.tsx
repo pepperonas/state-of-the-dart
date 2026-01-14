@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Edit2, Trash2, User } from 'lucide-react';
+import { ArrowLeft, Plus, Edit2, Trash2, User, Eye } from 'lucide-react';
 import { usePlayer } from '../../context/PlayerContext';
 
 const PlayerManagement: React.FC = () => {
@@ -28,22 +28,22 @@ const PlayerManagement: React.FC = () => {
   };
   
   return (
-    <div className="min-h-screen p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8 gradient-mesh">
       <div className="max-w-4xl mx-auto">
         <button
           onClick={() => navigate('/')}
-          className="mb-6 flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+          className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
         >
           <ArrowLeft size={20} />
           Back to Menu
         </button>
         
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <div className="glass-card rounded-xl shadow-lg p-6 md:p-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-3xl font-bold text-gray-800 dark:text-white">Players</h2>
+            <h2 className="text-3xl font-bold text-white">Players</h2>
             <button
               onClick={() => setShowAddPlayer(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white rounded-lg font-semibold transition-all"
             >
               <Plus size={20} />
               Add Player
@@ -51,7 +51,7 @@ const PlayerManagement: React.FC = () => {
           </div>
           
           {showAddPlayer && (
-            <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div className="mb-6 p-4 bg-dark-900/50 rounded-lg border border-dark-700">
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -59,12 +59,12 @@ const PlayerManagement: React.FC = () => {
                   onChange={(e) => setNewPlayerName(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleAddPlayer()}
                   placeholder="Enter player name"
-                  className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+                  className="flex-1 px-3 py-2 rounded-lg border border-dark-700 bg-dark-800 text-white placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
                   autoFocus
                 />
                 <button
                   onClick={handleAddPlayer}
-                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                  className="px-4 py-2 bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white rounded-lg font-semibold transition-all"
                 >
                   Add
                 </button>
@@ -73,7 +73,7 @@ const PlayerManagement: React.FC = () => {
                     setShowAddPlayer(false);
                     setNewPlayerName('');
                   }}
-                  className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                  className="px-4 py-2 bg-dark-700 hover:bg-dark-600 text-white rounded-lg font-semibold transition-all"
                 >
                   Cancel
                 </button>
@@ -84,9 +84,9 @@ const PlayerManagement: React.FC = () => {
           <div className="space-y-3">
             {players.length === 0 ? (
               <div className="text-center py-12">
-                <User size={48} className="mx-auto text-gray-400 dark:text-gray-500 mb-4" />
-                <p className="text-gray-500 dark:text-gray-400">No players yet</p>
-                <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
+                <User size={64} className="mx-auto text-dark-600 mb-4" />
+                <p className="text-white text-lg font-semibold">No players yet</p>
+                <p className="text-sm text-dark-400 mt-2">
                   Add your first player to get started
                 </p>
               </div>
@@ -94,10 +94,10 @@ const PlayerManagement: React.FC = () => {
               players.map((player) => (
                 <div
                   key={player.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                  className="flex items-center justify-between p-4 bg-dark-900/50 border border-dark-700 rounded-lg hover:border-dark-600 transition-all"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center text-xl font-bold">
+                    <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center text-xl font-bold text-white shadow-lg">
                       {player.avatar}
                     </div>
                     {editingPlayer === player.id ? (
@@ -126,11 +126,19 @@ const PlayerManagement: React.FC = () => {
                   
                   <div className="flex items-center gap-2">
                     <button
+                      onClick={() => navigate(`/players/${player.id}`)}
+                      className="p-2 text-primary-400 hover:bg-primary-500/20 rounded-lg transition-colors"
+                      title="View Profile"
+                    >
+                      <Eye size={18} />
+                    </button>
+                    <button
                       onClick={() => {
                         setEditingPlayer(player.id);
                         setEditName(player.name);
                       }}
-                      className="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg"
+                      className="p-2 text-accent-400 hover:bg-accent-500/20 rounded-lg transition-colors"
+                      title="Edit Name"
                     >
                       <Edit2 size={18} />
                     </button>
@@ -140,7 +148,8 @@ const PlayerManagement: React.FC = () => {
                           deletePlayer(player.id);
                         }
                       }}
-                      className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+                      className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                      title="Delete Player"
                     >
                       <Trash2 size={18} />
                     </button>

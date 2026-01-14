@@ -4,9 +4,44 @@ class AudioSystem {
   private audioCache: Map<string, HTMLAudioElement> = new Map();
   private enabled: boolean = true;
   private volume: number = 0.7;
+  private audioContext: AudioContext | null = null;
+  private isUnlocked: boolean = false;
+  private soundQueue: string[] = [];
+  private isPlaying: boolean = false;
 
   constructor() {
     this.preloadSounds();
+    this.initAudioContext();
+  }
+
+  private initAudioContext() {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      // Create AudioContext (for iOS/Safari compatibility)
+      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      // Unlock audio on first user interaction
+      const unlockAudio = () => {
+        if (this.audioContext && this.audioContext.state === 'suspended') {
+          this.audioContext.resume().then(() => {
+            this.isUnlocked = true;
+            console.log('✅ Audio system unlocked');
+          });
+        }
+        
+        // Remove listeners after first interaction
+        document.removeEventListener('touchstart', unlockAudio);
+        document.removeEventListener('touchend', unlockAudio);
+        document.removeEventListener('click', unlockAudio);
+      };
+      
+      document.addEventListener('touchstart', unlockAudio, false);
+      document.addEventListener('touchend', unlockAudio, false);
+      document.addEventListener('click', unlockAudio, false);
+    } catch (error) {
+      console.warn('AudioContext not supported:', error);
+    }
   }
 
   private async preloadSounds() {
@@ -44,18 +79,111 @@ class AudioSystem {
     }
   }
 
-  async playSound(soundPath: string) {
-    if (!this.enabled) return;
+  private async playSoundImmediate(soundPath: string): Promise<void> {
+    if (!this.enabled) {
+      console.log('🔇 Audio disabled, skipping:', soundPath);
+      return;
+    }
+    
+    // Resume AudioContext if suspended (iOS/Safari fix)
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      try {
+        await this.audioContext.resume();
+      } catch (error) {
+        console.warn('Failed to resume AudioContext:', error);
+      }
+    }
     
     try {
       const audio = await this.loadSound(soundPath);
-      if (!audio) return;
+      if (!audio) {
+        console.warn('❌ Audio element not loaded:', soundPath);
+        return;
+      }
       
       // Stop any currently playing instance of this sound
       audio.currentTime = 0;
-      await audio.play();
+      audio.volume = this.volume;
+      
+      return new Promise((resolve, reject) => {
+        audio.onended = () => {
+          console.log('✅ Finished playing:', soundPath);
+          resolve();
+        };
+        
+        audio.onerror = () => {
+          console.warn('❌ Error playing:', soundPath);
+          reject();
+        };
+        
+        const playPromise = audio.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('🔊 Playing sound:', soundPath);
+            })
+            .catch((error) => {
+              // Handle autoplay restrictions
+              if (error.name === 'NotAllowedError') {
+                console.warn('⚠️ Audio blocked by browser autoplay policy. User interaction required.');
+              } else if (error.name === 'NotSupportedError') {
+                console.warn('⚠️ Audio format not supported:', soundPath);
+              } else {
+                console.warn('❌ Failed to play sound:', soundPath, error);
+              }
+              reject(error);
+            });
+        }
+      });
     } catch (error) {
-      console.warn('Failed to play sound:', soundPath, error);
+      console.warn('❌ Error in playSound:', soundPath, error);
+      throw error;
+    }
+  }
+
+  private async processQueue() {
+    if (this.isPlaying || this.soundQueue.length === 0) {
+      return;
+    }
+    
+    this.isPlaying = true;
+    
+    while (this.soundQueue.length > 0) {
+      const soundPath = this.soundQueue.shift();
+      if (soundPath) {
+        try {
+          await this.playSoundImmediate(soundPath);
+          // Small delay between sounds
+          await new Promise(resolve => setTimeout(resolve, 100));
+        } catch (error) {
+          console.warn('Error playing queued sound:', error);
+        }
+      }
+    }
+    
+    this.isPlaying = false;
+  }
+
+  async playSound(soundPath: string, priority: boolean = false) {
+    if (!this.enabled) {
+      console.log('🔇 Audio disabled');
+      return;
+    }
+    
+    if (priority) {
+      // High priority sounds (checkout, bust) - play immediately and clear queue
+      this.soundQueue = [];
+      this.isPlaying = false;
+      try {
+        await this.playSoundImmediate(soundPath);
+      } catch (error) {
+        console.warn('Failed to play priority sound:', error);
+      }
+    } else {
+      // Normal sounds - add to queue
+      this.soundQueue.push(soundPath);
+      this.processQueue();
     }
   }
 
@@ -73,21 +201,25 @@ class AudioSystem {
 
   announceScore(score: number) {
     // Play only caller sound for the score - no speech synthesis
-    this.playSound(`/sounds/caller/${score}.mp3`);
+    // Check if file exists, fallback to 0 if not
+    const soundPath = `/sounds/caller/${score}.mp3`;
+    this.playSound(soundPath, false);
   }
 
   announceCheckout(score: number, finishType: 'leg' | 'set' | 'match' = 'leg') {
-    // Play only checkout sound based on finish type - no speech synthesis
+    // Play checkout sound based on finish type - HIGH PRIORITY
     const soundPath = finishType === 'leg' 
       ? `/sounds/gameshot/legs/${score}.mp3`
-      : `/sounds/gameshot/sets/${score}.mp3`;
+      : finishType === 'set'
+      ? `/sounds/gameshot/sets/${score}.mp3`
+      : `/sounds/gameshot/legs/${score}.mp3`; // Fallback to legs sound
     
-    this.playSound(soundPath);
+    this.playSound(soundPath, true); // Priority sound!
   }
 
   announceBust() {
-    // Play only caller sound for bust - no speech synthesis
-    this.playSound('/sounds/caller/0.mp3');
+    // Play bust sound - HIGH PRIORITY
+    this.playSound('/sounds/caller/0.mp3', true); // Priority sound!
   }
 
   setEnabled(enabled: boolean) {
@@ -100,6 +232,22 @@ class AudioSystem {
     this.audioCache.forEach(audio => {
       audio.volume = this.volume;
     });
+  }
+
+  // Test method to verify audio is working
+  async testSound() {
+    console.log('🎵 Testing audio system...');
+    console.log('  - Enabled:', this.enabled);
+    console.log('  - Volume:', this.volume);
+    console.log('  - AudioContext state:', this.audioContext?.state);
+    console.log('  - Unlocked:', this.isUnlocked);
+    
+    await this.playSound('/sounds/caller/100.mp3');
+  }
+
+  // Check if audio system is ready
+  isReady(): boolean {
+    return this.enabled && (this.audioContext?.state === 'running' || this.audioContext === null);
   }
 
   // Additional sound effects

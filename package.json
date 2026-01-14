@@ -1,7 +1,7 @@
 {
   "name": "state-of-the-dart",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.0.1",
   "type": "module",
   "description": "Professional Dart Scoring System with Multi-User Support",
   "repository": {
@@ -14,7 +14,13 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "coverage": "vitest run --coverage",
+    "version:bump": "node scripts/bump-version.js",
+    "version:show": "node -p \"require('./package.json').version\""
   },
   "dependencies": {
     "@types/uuid": "^11.0.0",
@@ -23,25 +29,33 @@
     "react-confetti": "^6.4.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.12.0",
+    "recharts": "^2.12.0",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
     "@types/node": "^24.10.8",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.7.0",
+    "@vitest/ui": "^1.0.4",
     "autoprefixer": "^10.4.23",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "jsdom": "^23.0.1",
     "lucide-react": "^0.562.0",
     "postcss": "^8.5.6",
-    "recharts": "^3.6.0",
     "tailwindcss": "^3.4.19",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
-    "vite": "^5.4.21"
+    "vite": "^5.4.21",
+    "vite-plugin-pwa": "^0.17.4",
+    "vitest": "^1.0.4",
+    "workbox-window": "^7.0.0"
   }
 }

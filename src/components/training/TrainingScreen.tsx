@@ -1,0 +1,609 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, Check, X } from 'lucide-react';
+import { Dart, TrainingType } from '../../types';
+import Dartboard from '../dartboard/Dartboard';
+import audioSystem from '../../utils/audio';
+import { useSettings } from '../../context/SettingsContext';
+
+interface TrainingState {
+  currentTarget: number;
+  currentTargetMultiplier?: number;
+  score: number;
+  attempts: number;
+  hits: number;
+  round: number;
+  totalRounds: number;
+  completed: boolean;
+}
+
+const TrainingScreen: React.FC = () => {
+  const navigate = useNavigate();
+  const { mode } = useParams<{ mode: TrainingType }>();
+  const { settings } = useSettings();
+  
+  const [currentThrow, setCurrentThrow] = useState<Dart[]>([]);
+  const [trainingState, setTrainingState] = useState<TrainingState>({
+    currentTarget: 1,
+    currentTargetMultiplier: 2, // for doubles
+    score: 0,
+    attempts: 0,
+    hits: 0,
+    round: 1,
+    totalRounds: 20,
+    completed: false,
+  });
+
+  useEffect(() => {
+    audioSystem.setEnabled(settings.soundVolume > 0);
+    audioSystem.setVolume(settings.soundVolume);
+  }, [settings.soundVolume]);
+
+  useEffect(() => {
+    // Initialize training based on mode
+    initializeTraining();
+  }, [mode]);
+
+  const initializeTraining = () => {
+    switch (mode) {
+      case 'doubles':
+        setTrainingState({
+          currentTarget: 1,
+          currentTargetMultiplier: 2,
+          score: 0,
+          attempts: 0,
+          hits: 0,
+          round: 1,
+          totalRounds: 20,
+          completed: false,
+        });
+        break;
+      case 'triples':
+        setTrainingState({
+          currentTarget: 20,
+          currentTargetMultiplier: 3,
+          score: 0,
+          attempts: 0,
+          hits: 0,
+          round: 1,
+          totalRounds: 20,
+          completed: false,
+        });
+        break;
+      case 'around-the-clock':
+        setTrainingState({
+          currentTarget: 1,
+          currentTargetMultiplier: 1,
+          score: 0,
+          attempts: 0,
+          hits: 0,
+          round: 1,
+          totalRounds: 20,
+          completed: false,
+        });
+        break;
+      case 'checkout-121':
+        setTrainingState({
+          currentTarget: 121,
+          score: 121,
+          attempts: 0,
+          hits: 0,
+          round: 1,
+          totalRounds: 10,
+          completed: false,
+        });
+        break;
+      case 'bobs-27':
+        setTrainingState({
+          currentTarget: 1,
+          score: 27,
+          attempts: 0,
+          hits: 0,
+          round: 1,
+          totalRounds: 20,
+          completed: false,
+        });
+        break;
+      case 'score-training':
+        setTrainingState({
+          currentTarget: 60,
+          score: 0,
+          attempts: 0,
+          hits: 0,
+          round: 1,
+          totalRounds: 20,
+          completed: false,
+        });
+        break;
+    }
+  };
+
+  const getTrainingTitle = () => {
+    switch (mode) {
+      case 'doubles': return 'Doubles Practice';
+      case 'triples': return 'Triples Practice';
+      case 'around-the-clock': return 'Around the Clock';
+      case 'checkout-121': return 'Checkout Training';
+      case 'bobs-27': return "Bob's 27";
+      case 'score-training': return 'Score Training';
+      default: return 'Training';
+    }
+  };
+
+  const getTrainingDescription = () => {
+    switch (mode) {
+      case 'doubles':
+        return `Hit Double ${trainingState.currentTarget} | Progress: ${trainingState.currentTarget - 1}/20`;
+      case 'triples':
+        return `Hit Triple ${trainingState.currentTarget} | Progress: ${20 - trainingState.currentTarget}/20`;
+      case 'around-the-clock':
+        return `Hit ${trainingState.currentTarget} (any segment) | Progress: ${trainingState.currentTarget - 1}/20`;
+      case 'checkout-121':
+        return `Checkout ${trainingState.score} remaining`;
+      case 'bobs-27':
+        return `Score: ${trainingState.score} | Target: ${trainingState.currentTarget}`;
+      case 'score-training':
+        return `Score ${trainingState.currentTarget}+ in 3 darts`;
+      default:
+        return '';
+    }
+  };
+
+  const getProgressInfo = () => {
+    switch (mode) {
+      case 'doubles':
+      case 'triples':
+      case 'around-the-clock':
+        return `Attempt ${trainingState.attempts} / ${trainingState.totalRounds}`;
+      case 'bobs-27':
+      case 'score-training':
+        return `Round ${trainingState.round} / ${trainingState.totalRounds}`;
+      case 'checkout-121':
+        return `Attempt ${trainingState.attempts} / ${trainingState.totalRounds}`;
+      default:
+        return `Round ${trainingState.round} / ${trainingState.totalRounds}`;
+    }
+  };
+
+  const handleDartHit = (dart: Dart) => {
+    if (trainingState.completed || currentThrow.length >= 3) return;
+    
+    setCurrentThrow(prev => [...prev, dart]);
+    audioSystem.playSound('/sounds/OMNI/pop.mp3');
+  };
+  
+  // Auto-confirm after 3rd dart in training mode
+  useEffect(() => {
+    if (currentThrow.length === 3 && !trainingState.completed) {
+      const timer = setTimeout(() => {
+        handleConfirmThrow();
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [currentThrow.length, trainingState.completed]);
+
+  const handleConfirmThrow = () => {
+    if (currentThrow.length === 0) return;
+
+    const throwScore = currentThrow.reduce((sum, dart) => sum + dart.score, 0);
+    let isHit = false;
+    let newState = { ...trainingState };
+
+    // Increment attempts for all modes
+    newState.attempts++;
+
+    switch (mode) {
+      case 'doubles': {
+        // Check if any dart hit the double target
+        isHit = currentThrow.some(
+          dart => dart.segment === trainingState.currentTarget && dart.multiplier === 2
+        );
+        
+        if (isHit) {
+          newState.hits++;
+          newState.score += trainingState.currentTarget * 2;
+          audioSystem.announceScore(trainingState.currentTarget * 2);
+          
+          // Move to next double (1-20)
+          if (trainingState.currentTarget < 20) {
+            newState.currentTarget++;
+          } else {
+            // Completed all doubles!
+            newState.completed = true;
+            audioSystem.playSound('/sounds/effects/get_ready.mp3', true);
+          }
+        }
+        
+        // Check if max attempts reached without completing
+        if (newState.attempts >= newState.totalRounds && !newState.completed) {
+          newState.completed = true;
+        }
+        break;
+      }
+
+      case 'triples': {
+        // Check if any dart hit the triple target
+        isHit = currentThrow.some(
+          dart => dart.segment === trainingState.currentTarget && dart.multiplier === 3
+        );
+        
+        if (isHit) {
+          newState.hits++;
+          newState.score += trainingState.currentTarget * 3;
+          audioSystem.announceScore(trainingState.currentTarget * 3);
+          
+          // Move to next triple (20, 19, 18... 1)
+          if (trainingState.currentTarget > 1) {
+            newState.currentTarget--;
+          } else {
+            // Completed all triples!
+            newState.completed = true;
+            audioSystem.playSound('/sounds/effects/get_ready.mp3', true);
+          }
+        }
+        
+        // Check if max attempts reached without completing
+        if (newState.attempts >= newState.totalRounds && !newState.completed) {
+          newState.completed = true;
+        }
+        break;
+      }
+
+      case 'around-the-clock': {
+        // Check if any dart hit the target number (any multiplier)
+        isHit = currentThrow.some(
+          dart => dart.segment === trainingState.currentTarget
+        );
+        
+        if (isHit) {
+          newState.hits++;
+          newState.score += throwScore;
+          audioSystem.announceScore(throwScore);
+          
+          // Move to next number (1-20)
+          if (trainingState.currentTarget < 20) {
+            newState.currentTarget++;
+          } else {
+            // Completed around the clock!
+            newState.completed = true;
+            audioSystem.playSound('/sounds/effects/get_ready.mp3', true);
+          }
+        }
+        
+        // Check if max attempts reached without completing
+        if (newState.attempts >= newState.totalRounds && !newState.completed) {
+          newState.completed = true;
+        }
+        break;
+      }
+
+      case 'checkout-121': {
+        // Checkout practice - need to hit exactly the remaining score
+        const lastDart = currentThrow[currentThrow.length - 1];
+        
+        if (throwScore === trainingState.score && lastDart.multiplier === 2) {
+          // Successful checkout!
+          isHit = true;
+          newState.hits++;
+          newState.score = 0;
+          audioSystem.announceCheckout(trainingState.score, 'match');
+          newState.completed = true;
+        } else if (throwScore < trainingState.score) {
+          // Valid score, reduce remaining
+          newState.score -= throwScore;
+          audioSystem.announceScore(throwScore);
+        } else {
+          // Bust!
+          audioSystem.announceBust();
+        }
+        
+        // Check if max attempts reached without completing
+        if (newState.attempts >= newState.totalRounds && !newState.completed) {
+          newState.completed = true;
+        }
+        break;
+      }
+
+      case 'bobs-27': {
+        // Bob's 27: Start with 27 points, must hit current target or lose 3 points
+        isHit = currentThrow.some(
+          dart => dart.segment === trainingState.currentTarget
+        );
+        
+        if (isHit) {
+          newState.hits++;
+          newState.score += 3;
+          audioSystem.playSound('/sounds/OMNI/pop-success.mp3');
+        } else {
+          newState.score -= 3;
+          audioSystem.playSound('/sounds/caller/0.mp3');
+        }
+
+        // Move to next number (1-20, then repeat)
+        newState.currentTarget = (trainingState.currentTarget % 20) + 1;
+        newState.round++;
+        
+        // Check completion conditions
+        if (newState.score <= 0) {
+          newState.completed = true;
+          newState.score = 0;
+          audioSystem.playSound('/sounds/OMNI/woosh.mp3');
+        } else if (newState.round > newState.totalRounds) {
+          newState.completed = true;
+          audioSystem.playSound('/sounds/effects/get_ready.mp3', true);
+        }
+        break;
+      }
+
+      case 'score-training': {
+        // Score training: try to score 60+ per throw
+        isHit = throwScore >= trainingState.currentTarget;
+        
+        if (isHit) {
+          newState.hits++;
+          audioSystem.playSound('/sounds/OMNI/pop-success.mp3');
+        }
+        
+        newState.score += throwScore;
+        audioSystem.announceScore(throwScore);
+        newState.round++;
+        
+        // Complete after totalRounds throws
+        if (newState.round > newState.totalRounds) {
+          newState.completed = true;
+          audioSystem.playSound('/sounds/effects/get_ready.mp3', true);
+        }
+        break;
+      }
+    }
+
+    setTrainingState(newState);
+    setCurrentThrow([]);
+  };
+
+  const handleClearThrow = () => {
+    setCurrentThrow([]);
+  };
+
+  const handleRemoveDart = () => {
+    setCurrentThrow(prev => prev.slice(0, -1));
+  };
+
+  const handleRestart = () => {
+    initializeTraining();
+    setCurrentThrow([]);
+  };
+
+  const accuracy = trainingState.attempts > 0 
+    ? Math.round((trainingState.hits / trainingState.attempts) * 100) 
+    : 0;
+
+  return (
+    <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => navigate('/training')}
+            className="flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
+          >
+            <ArrowLeft size={20} />
+            Back
+          </button>
+          <h1 className="text-2xl md:text-3xl font-bold text-white">{getTrainingTitle()}</h1>
+          <button
+            onClick={handleRestart}
+            className="px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg font-semibold transition-all"
+          >
+            Restart
+          </button>
+        </div>
+
+        {/* Training Info */}
+        <div className="glass-card p-4 mb-4">
+          <div className="flex items-center justify-between text-white">
+            <div className="flex-1">
+              <p className="text-xl md:text-2xl font-bold">{getTrainingDescription()}</p>
+              <p className="text-sm text-dark-400">
+                {getProgressInfo()}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-3xl font-bold text-success-400">{trainingState.score}</p>
+              <p className="text-sm text-dark-400">Score</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="glass-card p-4 text-center">
+            <p className="text-2xl font-bold text-white">{trainingState.attempts}</p>
+            <p className="text-sm text-dark-400">Attempts</p>
+          </div>
+          <div className="glass-card p-4 text-center">
+            <p className="text-2xl font-bold text-success-400">{trainingState.hits}</p>
+            <p className="text-sm text-dark-400">Hits</p>
+          </div>
+          <div className="glass-card p-4 text-center">
+            <p className="text-2xl font-bold text-primary-400">{accuracy}%</p>
+            <p className="text-sm text-dark-400">Accuracy</p>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Dartboard */}
+          <div className="glass-card p-6 space-y-4">
+            <Dartboard
+              onDartHit={handleDartHit}
+              interactive={!trainingState.completed}
+            />
+            {/* Miss Button */}
+            <button
+              onClick={() => handleDartHit({ segment: 0, multiplier: 0, score: 0 })}
+              disabled={currentThrow.length >= 3 || trainingState.completed}
+              className="w-full py-3 bg-dark-800 hover:bg-dark-700 disabled:bg-dark-900 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-all border-2 border-dark-600 hover:border-dark-500 disabled:border-dark-800 flex items-center justify-center gap-2"
+            >
+              <X size={20} />
+              Miss / No Score
+            </button>
+          </div>
+
+          {/* Controls */}
+          <div className="space-y-4">
+            {/* Current Throw */}
+            <div className="glass-card p-6">
+              <h3 className="text-lg font-bold text-white mb-4">Current Throw</h3>
+              <div className="flex gap-2 mb-4">
+                {currentThrow.map((dart, index) => (
+                  <div
+                    key={index}
+                    className="flex-1 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-lg"
+                  >
+                    {dart.score}
+                  </div>
+                ))}
+                {[...Array(3 - currentThrow.length)].map((_, index) => (
+                  <div
+                    key={`empty-${index}`}
+                    className="flex-1 h-16 bg-dark-900/50 rounded-lg border-2 border-dashed border-dark-700"
+                  />
+                ))}
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={handleConfirmThrow}
+                  disabled={currentThrow.length === 0 || trainingState.completed}
+                  className="flex-1 py-3 bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 disabled:from-dark-700 disabled:to-dark-700 disabled:cursor-not-allowed text-white rounded-lg font-bold flex items-center justify-center gap-2 transition-all"
+                >
+                  <Check size={20} />
+                  Confirm
+                </button>
+                <button
+                  onClick={handleRemoveDart}
+                  disabled={currentThrow.length === 0 || trainingState.completed}
+                  className="px-4 py-3 bg-dark-700 hover:bg-dark-600 disabled:bg-dark-800 disabled:cursor-not-allowed text-white rounded-lg transition-all"
+                >
+                  Undo
+                </button>
+                <button
+                  onClick={handleClearThrow}
+                  disabled={currentThrow.length === 0 || trainingState.completed}
+                  className="px-4 py-3 bg-red-600 hover:bg-red-500 disabled:bg-dark-800 disabled:cursor-not-allowed text-white rounded-lg transition-all"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+
+            {/* Completion Message */}
+            {trainingState.completed && (
+              <div className="glass-card-gold p-6 border-2 border-primary-500">
+                <h3 className="text-3xl font-bold text-white mb-4 text-center">
+                  Training Complete! 🎯
+                </h3>
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="text-center glass-card p-3">
+                    <p className="text-2xl font-bold text-white">{trainingState.score}</p>
+                    <p className="text-xs text-dark-400">Final Score</p>
+                  </div>
+                  <div className="text-center glass-card p-3">
+                    <p className="text-2xl font-bold text-success-400">{trainingState.hits}</p>
+                    <p className="text-xs text-dark-400">Hits</p>
+                  </div>
+                  <div className="text-center glass-card p-3">
+                    <p className="text-2xl font-bold text-primary-400">{accuracy}%</p>
+                    <p className="text-xs text-dark-400">Accuracy</p>
+                  </div>
+                </div>
+                <div className="text-sm text-dark-300 mb-4 text-center">
+                  {trainingState.hits} hits in {trainingState.attempts} attempts
+                  {mode === 'doubles' && trainingState.currentTarget === 20 && trainingState.hits === 20 && (
+                    <p className="text-success-400 font-bold mt-2">🏆 Perfect! All doubles hit!</p>
+                  )}
+                  {mode === 'triples' && trainingState.currentTarget === 1 && trainingState.hits === 20 && (
+                    <p className="text-success-400 font-bold mt-2">🏆 Perfect! All triples hit!</p>
+                  )}
+                  {mode === 'around-the-clock' && trainingState.currentTarget === 20 && trainingState.hits === 20 && (
+                    <p className="text-success-400 font-bold mt-2">🏆 Perfect! Full circuit completed!</p>
+                  )}
+                  {mode === 'checkout-121' && trainingState.score === 0 && (
+                    <p className="text-success-400 font-bold mt-2">🏆 Checkout successful!</p>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleRestart}
+                    className="flex-1 py-3 bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white rounded-lg font-bold transition-all"
+                  >
+                    Try Again
+                  </button>
+                  <button
+                    onClick={() => navigate('/training')}
+                    className="flex-1 py-3 bg-gradient-to-r from-dark-600 to-dark-700 hover:from-dark-700 hover:to-dark-800 text-white rounded-lg font-bold transition-all"
+                  >
+                    Back to Menu
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Instructions */}
+            <div className="glass-card p-6">
+              <h3 className="text-lg font-bold text-white mb-2">Instructions</h3>
+              <div className="text-sm text-dark-300 space-y-1">
+                {mode === 'doubles' && (
+                  <>
+                    <p>• Hit all doubles from D1 to D20</p>
+                    <p>• Click the double ring on the dartboard</p>
+                    <p>• Progress to the next double on each hit</p>
+                  </>
+                )}
+                {mode === 'triples' && (
+                  <>
+                    <p>• Hit all triples from T20 to T1</p>
+                    <p>• Click the triple ring on the dartboard</p>
+                    <p>• Progress to the next triple on each hit</p>
+                  </>
+                )}
+                {mode === 'around-the-clock' && (
+                  <>
+                    <p>• Hit all numbers from 1 to 20 in order</p>
+                    <p>• Any segment (single, double, triple) counts</p>
+                    <p>• Complete the circuit as fast as possible</p>
+                  </>
+                )}
+                {mode === 'checkout-121' && (
+                  <>
+                    <p>• Checkout the remaining score</p>
+                    <p>• Must finish on a double</p>
+                    <p>• Practice common checkout combinations</p>
+                  </>
+                )}
+                {mode === 'bobs-27' && (
+                  <>
+                    <p>• Start with 27 points</p>
+                    <p>• Hit the target number: +3 points</p>
+                    <p>• Miss the target: -3 points</p>
+                    <p>• Don't let your score reach 0!</p>
+                  </>
+                )}
+                {mode === 'score-training' && (
+                  <>
+                    <p>• Try to score 60+ per throw</p>
+                    <p>• Aim for high-scoring segments</p>
+                    <p>• Build consistency and power</p>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default TrainingScreen;

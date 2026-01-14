@@ -1,0 +1,305 @@
+// Export/Import utilities for all app data
+
+import { TenantStorage } from './storage';
+import { ExportData } from '../types';
+
+/**
+ * Export all data for the current tenant to a JSON file
+ */
+export const exportTenantData = (tenantId: string, tenantName: string): void => {
+  try {
+    const storage = new TenantStorage(tenantId);
+    
+    // Gather all data from localStorage
+    const exportData: ExportData = {
+      version: '1.0.0',
+      exportedAt: new Date(),
+      players: storage.get('players', []),
+      matches: storage.get('matches', []),
+      tournaments: storage.get('tournaments', []),
+      trainingSessions: storage.get('trainingSessions', []),
+      achievements: storage.get('achievements', []),
+      settings: storage.get('settings', {
+        theme: 'dark',
+        language: 'de',
+        soundVolume: 0.7,
+        showCheckoutHints: true,
+        checkoutRange: 170,
+        showAverage: true,
+        doubleOut: true,
+        doubleIn: false,
+        soundEnabled: true,
+        volume: 0.7,
+        autoNextPlayer: true,
+        showStatsDuringGame: true,
+        confirmScores: false,
+        vibrationEnabled: false,
+        showDartboardHelper: true,
+      }),
+    };
+    
+    // Add tenant info
+    const fullExport = {
+      ...exportData,
+      tenantId,
+      tenantName,
+    };
+    
+    // Create JSON blob
+    const jsonString = JSON.stringify(fullExport, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    
+    // Create download link
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `state-of-the-dart-${tenantName}-${new Date().toISOString().split('T')[0]}.json`;
+    
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+    
+    // Cleanup
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    console.log('✅ Data exported successfully');
+  } catch (error) {
+    console.error('❌ Export failed:', error);
+    throw new Error('Failed to export data');
+  }
+};
+
+/**
+ * Import data from a JSON file
+ */
+export const importTenantData = (file: File, tenantId: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    
+    reader.onload = (event) => {
+      try {
+        const jsonString = event.target?.result as string;
+        const importData = JSON.parse(jsonString);
+        
+        // Validate data structure
+        if (!importData.version || !importData.exportedAt) {
+          throw new Error('Invalid export file format');
+        }
+        
+        const storage = new TenantStorage(tenantId);
+        
+        // Import all data
+        if (importData.players) storage.set('players', importData.players);
+        if (importData.matches) storage.set('matches', importData.matches);
+        if (importData.tournaments) storage.set('tournaments', importData.tournaments);
+        if (importData.trainingSessions) storage.set('trainingSessions', importData.trainingSessions);
+        if (importData.achievements) storage.set('achievements', importData.achievements);
+        if (importData.settings) storage.set('settings', importData.settings);
+        
+        console.log('✅ Data imported successfully');
+        resolve();
+      } catch (error) {
+        console.error('❌ Import failed:', error);
+        reject(new Error('Failed to import data. Invalid file format.'));
+      }
+    };
+    
+    reader.onerror = () => {
+      reject(new Error('Failed to read file'));
+    };
+    
+    reader.readAsText(file);
+  });
+};
+
+/**
+ * Export match history as CSV for analysis in Excel/Google Sheets
+ */
+export const exportMatchHistoryCSV = (matches: any[], playerName: string): void => {
+  try {
+    // CSV Header
+    const headers = [
+      'Date',
+      'Player',
+      'Opponent',
+      'Result',
+      'Score',
+      'Average',
+      'Highest Score',
+      '180s',
+      '140+',
+      '100+',
+      'Checkout %',
+      'Darts Thrown',
+      'First 9 Avg'
+    ];
+    
+    // CSV Rows
+    const rows = matches.map(match => {
+      const player = match.players.find((p: any) => p.name === playerName);
+      const opponent = match.players.find((p: any) => p.name !== playerName);
+      
+      return [
+        new Date(match.startedAt).toLocaleDateString(),
+        player?.name || '-',
+        opponent?.name || '-',
+        match.winner === player?.playerId ? 'Win' : 'Loss',
+        `${player?.legsWon || 0} - ${opponent?.legsWon || 0}`,
+        player?.matchAverage.toFixed(2) || '0',
+        player?.matchHighestScore || '0',
+        player?.match180s || '0',
+        player?.match140Plus || '0',
+        player?.match100Plus || '0',
+        player?.checkoutAttempts > 0 
+          ? ((player?.checkoutsHit / player?.checkoutAttempts) * 100).toFixed(1) + '%'
+          : '0%',
+        '-', // Could calculate from throws
+        '-', // Could calculate from first 9 darts
+      ];
+    });
+    
+    // Combine header and rows
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+    
+    // Create and download CSV
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `match-history-${playerName}-${new Date().toISOString().split('T')[0]}.csv`;
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    console.log('✅ Match history exported as CSV');
+  } catch (error) {
+    console.error('❌ CSV export failed:', error);
+    throw new Error('Failed to export match history');
+  }
+};
+
+/**
+ * Calculate improvement metrics over time
+ */
+export interface ImprovementMetrics {
+  averageImprovement: number;
+  checkoutImprovement: number;
+  consistencyImprovement: number;
+  trend: 'improving' | 'stable' | 'declining';
+  recentAverage: number;
+  historicAverage: number;
+  bestPeriod: {
+    start: Date;
+    end: Date;
+    average: number;
+  };
+  worstPeriod: {
+    start: Date;
+    end: Date;
+    average: number;
+  };
+}
+
+export const calculateImprovement = (matches: any[]): ImprovementMetrics => {
+  if (matches.length === 0) {
+    return {
+      averageImprovement: 0,
+      checkoutImprovement: 0,
+      consistencyImprovement: 0,
+      trend: 'stable',
+      recentAverage: 0,
+      historicAverage: 0,
+      bestPeriod: { start: new Date(), end: new Date(), average: 0 },
+      worstPeriod: { start: new Date(), end: new Date(), average: 0 },
+    };
+  }
+  
+  // Sort matches by date
+  const sortedMatches = [...matches].sort((a, b) => 
+    new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime()
+  );
+  
+  // Calculate recent vs historic average (last 10 vs all previous)
+  const recentMatches = sortedMatches.slice(-10);
+  const historicMatches = sortedMatches.slice(0, -10);
+  
+  const recentAvg = recentMatches.reduce((sum, m) => {
+    const player = m.players[0]; // Assuming first player
+    return sum + (player.matchAverage || 0);
+  }, 0) / recentMatches.length;
+  
+  const historicAvg = historicMatches.length > 0
+    ? historicMatches.reduce((sum, m) => {
+        const player = m.players[0];
+        return sum + (player.matchAverage || 0);
+      }, 0) / historicMatches.length
+    : recentAvg;
+  
+  const averageImprovement = recentAvg - historicAvg;
+  
+  // Calculate checkout improvement
+  const recentCheckout = recentMatches.reduce((sum, m) => {
+    const player = m.players[0];
+    return sum + (player.checkoutAttempts > 0 
+      ? (player.checkoutsHit / player.checkoutAttempts) 
+      : 0);
+  }, 0) / recentMatches.length;
+  
+  const historicCheckout = historicMatches.length > 0
+    ? historicMatches.reduce((sum, m) => {
+        const player = m.players[0];
+        return sum + (player.checkoutAttempts > 0 
+          ? (player.checkoutsHit / player.checkoutAttempts) 
+          : 0);
+      }, 0) / historicMatches.length
+    : recentCheckout;
+  
+  const checkoutImprovement = (recentCheckout - historicCheckout) * 100;
+  
+  // Determine trend
+  let trend: 'improving' | 'stable' | 'declining' = 'stable';
+  if (averageImprovement > 2) trend = 'improving';
+  else if (averageImprovement < -2) trend = 'declining';
+  
+  // Find best and worst periods (sliding window of 5 matches)
+  let bestPeriod = { start: new Date(), end: new Date(), average: 0 };
+  let worstPeriod = { start: new Date(), end: new Date(), average: 999 };
+  
+  for (let i = 0; i <= sortedMatches.length - 5; i++) {
+    const window = sortedMatches.slice(i, i + 5);
+    const windowAvg = window.reduce((sum, m) => sum + m.players[0].matchAverage, 0) / 5;
+    
+    if (windowAvg > bestPeriod.average) {
+      bestPeriod = {
+        start: new Date(window[0].startedAt),
+        end: new Date(window[4].startedAt),
+        average: windowAvg,
+      };
+    }
+    
+    if (windowAvg < worstPeriod.average) {
+      worstPeriod = {
+        start: new Date(window[0].startedAt),
+        end: new Date(window[4].startedAt),
+        average: windowAvg,
+      };
+    }
+  }
+  
+  return {
+    averageImprovement,
+    checkoutImprovement,
+    consistencyImprovement: 0, // TODO: Calculate standard deviation
+    trend,
+    recentAverage: recentAvg,
+    historicAverage: historicAvg,
+    bestPeriod,
+    worstPeriod,
+  };
+};

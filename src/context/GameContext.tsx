@@ -387,7 +387,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
 interface GameContextValue {
   state: GameState;
   dispatch: React.Dispatch<GameAction>;
-  syncPlayerStats: () => void;
+  syncPlayerStats: (liveUpdate?: boolean) => void;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -434,9 +434,24 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [state.currentMatch, storage]);
   
-  // Sync player statistics to PlayerContext after match completion
-  const syncPlayerStats = () => {
-    if (!state.currentMatch || state.currentMatch.status !== 'completed') return;
+  // Sync player statistics to PlayerContext (called during and after match)
+  const syncPlayerStats = (liveUpdate: boolean = false) => {
+    if (!state.currentMatch || !storage) return;
+    
+    // Only save to match history if completed
+    const shouldSaveMatch = state.currentMatch.status === 'completed' && !liveUpdate;
+    
+    // Save completed match to matches history (only on completion)
+    if (shouldSaveMatch) {
+      const matches = storage.get<Match[]>('matches', []);
+      const matchExists = matches.some(m => m.id === state.currentMatch!.id);
+      
+      if (!matchExists) {
+        matches.push(state.currentMatch);
+        storage.set('matches', matches);
+        console.log('✅ Match saved to history');
+      }
+    }
     
     state.currentMatch.players.forEach((matchPlayer) => {
       const player = players.find(p => p.id === matchPlayer.playerId);
@@ -445,6 +460,32 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const isWinner = state.currentMatch!.winner === matchPlayer.playerId;
       const legsWon = matchPlayer.legsWon;
       const legsPlayed = state.currentMatch!.legs.length;
+      
+      // For live updates, update current performance stats but not permanent records
+      if (liveUpdate) {
+        // Get all checkouts from completed legs
+        const playerLegsWon = state.currentMatch!.legs.filter(
+          leg => leg.winner === matchPlayer.playerId && leg.completedAt
+        );
+        const checkoutsFromLegs = playerLegsWon
+          .map(leg => {
+            const lastThrow = leg.throws[leg.throws.length - 1];
+            return lastThrow?.score || 0;
+          })
+          .filter(score => score > 0);
+        
+        const highestCheckoutThisMatch = Math.max(0, ...checkoutsFromLegs);
+        
+        updatePlayer(matchPlayer.playerId, {
+          stats: {
+            ...player.stats,
+            // Update these live during the game (best performances)
+            bestAverage: Math.max(player.stats.bestAverage, matchPlayer.matchAverage),
+            highestCheckout: Math.max(player.stats.highestCheckout, highestCheckoutThisMatch),
+          },
+        });
+        return; // Skip the rest for live updates
+      }
       
       // Calculate highest checkout from match
       const playerLegsWon = state.currentMatch!.legs.filter(
@@ -496,9 +537,16 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Auto-sync when match is completed
   useEffect(() => {
     if (state.currentMatch?.status === 'completed') {
-      syncPlayerStats();
+      syncPlayerStats(false); // Final sync
     }
   }, [state.currentMatch?.status]);
+  
+  // Live sync during game (every throw)
+  useEffect(() => {
+    if (state.currentMatch && state.currentMatch.status === 'in-progress') {
+      syncPlayerStats(true); // Live update
+    }
+  }, [state.currentMatch?.legs]);
   
   return (
     <GameContext.Provider value={{ state, dispatch, syncPlayerStats }}>
