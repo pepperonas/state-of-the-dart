@@ -26,13 +26,26 @@ const GameScreen: React.FC = () => {
     audioSystem.setVolume(settings.soundVolume);
   }, [settings.soundVolume]);
 
-  // Check achievements when match is completed
+  // Track processed matches to avoid duplicate achievement checks
+  const [processedMatchIds, setProcessedMatchIds] = useState<Set<string>>(new Set());
+
+  // Check achievements when match is completed (only once per match)
   useEffect(() => {
-    if (state.currentMatch?.status === 'completed' && state.currentMatch.winner) {
+    if (state.currentMatch?.status === 'completed' && state.currentMatch.winner && state.currentMatch.id) {
       const match = state.currentMatch;
+      const matchId = match.id;
+      
+      // Skip if we already processed this match
+      if (processedMatchIds.has(matchId)) {
+        return;
+      }
+
       const winnerId = match.winner;
 
       if (winnerId) {
+        // Mark as processed
+        setProcessedMatchIds(prev => new Set(prev).add(matchId));
+
         // Check match achievements for all players
         checkMatchAchievements(match, winnerId, (playerId) => playerId === winnerId);
 
@@ -43,7 +56,7 @@ const GameScreen: React.FC = () => {
         }
       }
     }
-  }, [state.currentMatch?.status, state.currentMatch?.winner, checkMatchAchievements, checkLegAchievements]);
+  }, [state.currentMatch?.status, state.currentMatch?.winner, state.currentMatch?.id, checkMatchAchievements, checkLegAchievements, processedMatchIds]);
   const [showSetup, setShowSetup] = useState(!state.currentMatch);
   const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
   const [showPlayerNameInput, setShowPlayerNameInput] = useState(false);
@@ -380,9 +393,11 @@ const GameScreen: React.FC = () => {
     const loser = currentMatch.players.find(p => p.playerId !== currentMatch.winner);
     
     return (
-      <div className="min-h-screen p-4 gradient-mesh">
-        <Confetti recycle={true} numberOfPieces={200} gravity={0.15} />
-        <div className="max-w-4xl mx-auto">
+      <div className="min-h-screen p-4 gradient-mesh flex items-center justify-center">
+        <div className="fixed inset-0 pointer-events-none z-0">
+          <Confetti recycle={true} numberOfPieces={200} gravity={0.15} />
+        </div>
+        <div className="max-w-4xl w-full relative z-10">
           <div className="glass-card-gold p-12 text-center">
             <div className="mb-8">
               <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent mb-4 animate-bounce">
