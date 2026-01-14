@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Activity, TrendingUp, TrendingDown, Minus, Download } from 'lucide-react';
+import { ArrowLeft, Activity, TrendingUp, TrendingDown, Minus, Download, Users } from 'lucide-react';
 import { usePlayer } from '../../context/PlayerContext';
 import { useTenant } from '../../context/TenantContext';
 import { 
@@ -17,7 +17,8 @@ const StatsOverview: React.FC = () => {
   const { players } = usePlayer();
   const { storage } = useTenant();
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
-  const [selectedTab, setSelectedTab] = useState<'overview' | 'progress' | 'history'>('overview');
+  const [selectedTab, setSelectedTab] = useState<'overview' | 'progress' | 'history' | 'compare'>('overview');
+  const [comparePlayerIds, setComparePlayerIds] = useState<string[]>([]);
   
   // Load matches from storage
   const matches: Match[] = useMemo(() => {
@@ -296,6 +297,17 @@ const StatsOverview: React.FC = () => {
                   }`}
                 >
                   Verlauf ({playerMatches.length})
+                </button>
+                <button
+                  onClick={() => setSelectedTab('compare')}
+                  className={`flex-1 px-6 py-3 font-semibold transition-all ${
+                    selectedTab === 'compare'
+                      ? 'text-white border-b-2 border-primary-500 bg-primary-500/5'
+                      : 'text-dark-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Users size={16} className="inline mr-2" />
+                  Vergleich
                 </button>
               </div>
             </div>
@@ -864,6 +876,16 @@ const StatsOverview: React.FC = () => {
                 )}
               </div>
             )}
+
+            {selectedTab === 'compare' && (
+              <PlayerComparisonView 
+                players={players}
+                comparePlayerIds={comparePlayerIds}
+                setComparePlayerIds={setComparePlayerIds}
+                matches={matches}
+                storage={storage}
+              />
+            )}
           </>
         )}
       </div>
@@ -892,6 +914,327 @@ const StatCard: React.FC<{ label: string; value: string | number; color?: string
         {icon && <span className="text-2xl">{icon}</span>}
         {value}
       </div>
+    </div>
+  );
+};
+
+// Player Comparison Component
+const PlayerComparisonView: React.FC<{
+  players: any[];
+  comparePlayerIds: string[];
+  setComparePlayerIds: (ids: string[]) => void;
+  matches: Match[];
+  storage: any;
+}> = ({ players, comparePlayerIds, setComparePlayerIds, matches }) => {
+  
+  const togglePlayer = (playerId: string) => {
+    if (comparePlayerIds.includes(playerId)) {
+      setComparePlayerIds(comparePlayerIds.filter(id => id !== playerId));
+    } else if (comparePlayerIds.length < 4) {
+      setComparePlayerIds([...comparePlayerIds, playerId]);
+    }
+  };
+
+  // Calculate stats for compared players
+  const comparisonData = useMemo(() => {
+    return comparePlayerIds.map(playerId => {
+      const player = players.find(p => p.id === playerId);
+      if (!player) return null;
+
+      const playerMatches = matches.filter(match => 
+        match.players.some(p => p.playerId === playerId)
+      );
+
+      const totalGames = playerMatches.length;
+      const wins = playerMatches.filter(m => m.winner === playerId).length;
+      const winRate = totalGames > 0 ? (wins / totalGames) * 100 : 0;
+
+      // Calculate averages from match data
+      const matchData = playerMatches.map(match => {
+        const playerData = match.players.find(p => p.playerId === playerId);
+        return playerData;
+      }).filter((p): p is NonNullable<typeof p> => p !== null && p !== undefined);
+
+      const avgScore = matchData.length > 0
+        ? matchData.reduce((sum, p) => sum + (p.matchAverage || 0), 0) / matchData.length
+        : 0;
+
+      const total180s = matchData.reduce((sum, p) => sum + (p.match180s || 0), 0);
+      
+      const totalCheckoutAttempts = matchData.reduce((sum, p) => sum + (p.checkoutAttempts || 0), 0);
+      const totalCheckoutsHit = matchData.reduce((sum, p) => sum + (p.checkoutsHit || 0), 0);
+      const checkoutRate = totalCheckoutAttempts > 0
+        ? (totalCheckoutsHit / totalCheckoutAttempts) * 100
+        : 0;
+
+      const highestScore = matchData.reduce((max, p) => Math.max(max, p.matchHighestScore || 0), 0);
+
+      return {
+        player,
+        totalGames,
+        wins,
+        winRate,
+        avgScore,
+        total180s,
+        checkoutRate,
+        highestScore,
+      };
+    }).filter(Boolean);
+  }, [comparePlayerIds, players, matches]);
+
+  // Prepare radar chart data
+  const radarData = useMemo(() => {
+    if (comparisonData.length === 0) return [];
+
+    const categories = [
+      { category: 'Average', max: 100 },
+      { category: 'Win Rate', max: 100 },
+      { category: 'Checkout %', max: 100 },
+      { category: '180s', max: 20 },
+      { category: 'Consistency', max: 100 },
+    ];
+
+    return categories.map(cat => {
+      const dataPoint: any = { category: cat.category };
+      comparisonData.forEach((data, index) => {
+        let value = 0;
+        switch (cat.category) {
+          case 'Average':
+            value = Math.min((data!.avgScore / 100) * 100, 100);
+            break;
+          case 'Win Rate':
+            value = data!.winRate;
+            break;
+          case 'Checkout %':
+            value = data!.checkoutRate;
+            break;
+          case '180s':
+            value = Math.min(data!.total180s, 20);
+            break;
+          case 'Consistency':
+            value = data!.totalGames > 0 ? Math.min((data!.totalGames / 50) * 100, 100) : 0;
+            break;
+        }
+        dataPoint[`player${index}`] = value;
+      });
+      return dataPoint;
+    });
+  }, [comparisonData]);
+
+  const colors = ['#0ea5e9', '#a855f7', '#22c55e', '#f59e0b'];
+
+  if (players.length === 0) {
+    return (
+      <div className="glass-card p-8 text-center">
+        <Users size={64} className="mx-auto mb-4 text-dark-600" />
+        <p className="text-dark-400 text-lg font-semibold">Keine Spieler vorhanden</p>
+        <p className="text-dark-500 text-sm mt-2">Erstelle Spieler, um sie zu vergleichen</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Player Selection */}
+      <div className="glass-card p-6">
+        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+          <Users size={24} />
+          Spieler auswählen (max. 4)
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {players.map((player) => (
+            <button
+              key={player.id}
+              onClick={() => togglePlayer(player.id)}
+              disabled={!comparePlayerIds.includes(player.id) && comparePlayerIds.length >= 4}
+              className={`p-4 rounded-lg border-2 transition-all ${
+                comparePlayerIds.includes(player.id)
+                  ? 'border-primary-500 bg-primary-500/20'
+                  : 'border-dark-700 bg-dark-900/50 hover:border-dark-600'
+              } ${
+                !comparePlayerIds.includes(player.id) && comparePlayerIds.length >= 4
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'cursor-pointer'
+              }`}
+            >
+              <div className="text-3xl mb-2">{player.avatar}</div>
+              <div className="font-semibold text-white text-sm">{player.name}</div>
+              {comparePlayerIds.includes(player.id) && (
+                <div className="text-xs text-primary-400 mt-1">✓ Ausgewählt</div>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {comparePlayerIds.length < 2 && (
+        <div className="glass-card p-8 text-center">
+          <p className="text-dark-400 text-lg font-semibold">Wähle mindestens 2 Spieler zum Vergleichen</p>
+          <p className="text-dark-500 text-sm mt-2">Klicke auf die Spieler oben, um sie auszuwählen</p>
+        </div>
+      )}
+
+      {comparisonData.length >= 2 && (
+        <>
+          {/* Radar Comparison */}
+          <div className="glass-card p-6">
+            <h3 className="text-xl font-bold text-white mb-4">📊 Leistungsvergleich</h3>
+            <div className="bg-dark-900 rounded-lg p-4">
+              <ResponsiveContainer width="100%" height={400}>
+                <RadarChart data={radarData}>
+                  <PolarGrid stroke="#404040" />
+                  <PolarAngleAxis dataKey="category" stroke="#737373" style={{ fontSize: '12px' }} />
+                  <PolarRadiusAxis angle={90} domain={[0, 100]} stroke="#404040" />
+                  {comparisonData.map((data, index) => (
+                    <Radar
+                      key={index}
+                      name={data!.player.name}
+                      dataKey={`player${index}`}
+                      stroke={colors[index]}
+                      fill={colors[index]}
+                      fillOpacity={0.3}
+                    />
+                  ))}
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#0a0a0a',
+                      border: '1px solid #404040',
+                      borderRadius: '8px',
+                    }}
+                  />
+                  <Legend />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Stats Comparison Table */}
+          <div className="glass-card p-6">
+            <h3 className="text-xl font-bold text-white mb-4">📈 Statistik-Vergleich</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-dark-700">
+                    <th className="text-left p-3 text-dark-400 font-semibold">Kategorie</th>
+                    {comparisonData.map((data, index) => (
+                      <th key={index} className="text-center p-3 text-white font-semibold">
+                        <div className="flex flex-col items-center gap-2">
+                          <span className="text-2xl">{data!.player.avatar}</span>
+                          <span>{data!.player.name}</span>
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-dark-800">
+                    <td className="p-3 text-dark-300">Spiele</td>
+                    {comparisonData.map((data, index) => (
+                      <td key={index} className="p-3 text-center text-white font-bold">
+                        {data!.totalGames}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-dark-800">
+                    <td className="p-3 text-dark-300">Siege</td>
+                    {comparisonData.map((data, index) => (
+                      <td key={index} className="p-3 text-center text-success-400 font-bold">
+                        {data!.wins}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-dark-800">
+                    <td className="p-3 text-dark-300">Siegrate</td>
+                    {comparisonData.map((data, index) => (
+                      <td key={index} className="p-3 text-center text-primary-400 font-bold">
+                        {data!.winRate.toFixed(1)}%
+                      </td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-dark-800">
+                    <td className="p-3 text-dark-300">Durchschnitt</td>
+                    {comparisonData.map((data, index) => (
+                      <td key={index} className="p-3 text-center text-white font-bold">
+                        {data!.avgScore.toFixed(2)}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-dark-800">
+                    <td className="p-3 text-dark-300">180s</td>
+                    {comparisonData.map((data, index) => (
+                      <td key={index} className="p-3 text-center text-accent-400 font-bold">
+                        {data!.total180s}
+                      </td>
+                    ))}
+                  </tr>
+                  <tr className="border-b border-dark-800">
+                    <td className="p-3 text-dark-300">Checkout-Quote</td>
+                    {comparisonData.map((data, index) => (
+                      <td key={index} className="p-3 text-center text-success-400 font-bold">
+                        {data!.checkoutRate.toFixed(1)}%
+                      </td>
+                    ))}
+                  </tr>
+                  <tr>
+                    <td className="p-3 text-dark-300">Höchster Score</td>
+                    {comparisonData.map((data, index) => (
+                      <td key={index} className="p-3 text-center text-amber-400 font-bold">
+                        {data!.highestScore}
+                      </td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Bar Chart Comparison */}
+          <div className="glass-card p-6">
+            <h3 className="text-xl font-bold text-white mb-4">📊 Direktvergleich</h3>
+            <div className="bg-dark-900 rounded-lg p-4">
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart
+                  data={[
+                    {
+                      name: 'Average',
+                      ...Object.fromEntries(comparisonData.map((d, i) => [`player${i}`, d!.avgScore])),
+                    },
+                    {
+                      name: 'Win Rate %',
+                      ...Object.fromEntries(comparisonData.map((d, i) => [`player${i}`, d!.winRate])),
+                    },
+                    {
+                      name: 'Checkout %',
+                      ...Object.fromEntries(comparisonData.map((d, i) => [`player${i}`, d!.checkoutRate])),
+                    },
+                  ]}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
+                  <XAxis dataKey="name" stroke="#737373" />
+                  <YAxis stroke="#737373" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#0a0a0a',
+                      border: '1px solid #404040',
+                      borderRadius: '8px',
+                    }}
+                  />
+                  <Legend />
+                  {comparisonData.map((data, index) => (
+                    <Bar
+                      key={index}
+                      dataKey={`player${index}`}
+                      fill={colors[index]}
+                      name={data!.player.name}
+                      radius={[8, 8, 0, 0]}
+                    />
+                  ))}
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
