@@ -1,8 +1,15 @@
 {
-  "name": "dart-counter",
+  "name": "state-of-the-dart",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "description": "Professional Dart Scoring System with Multi-User Support",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pepperonas/state-of-the-dart.git"
+  },
+  "author": "Martin Pfeffer <martin.pfeffer@celox.io>",
+  "homepage": "https://stateofthedart.com",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
