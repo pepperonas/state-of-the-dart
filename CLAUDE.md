@@ -118,6 +118,8 @@ The audio system (`src/utils/audio.ts`) uses HTML5 Audio API with preloading and
 - **PlayerManagement** - Player CRUD operations with profile navigation
 - **PlayerProfile** - Detailed player profile with personal bests, charts, and career stats
 - **StatsOverview** - Comprehensive statistics with 10+ interactive charts (Recharts)
+  - 4 tabs: Übersicht, Fortschritt, Verlauf, Vergleich
+  - Player Comparison: Compare up to 4 players with radar charts, stats tables, and bar charts
 - **Leaderboard** - Ranking system with 7 categories (average, wins, 180s, etc.)
 
 **Achievements:**
@@ -310,11 +312,14 @@ The app expects specific MP3 files in `public/sounds/`. Missing files will fail 
 ## Recent Updates (v0.0.1)
 
 ### Latest Features (2026-01-14)
+- ✨ Added Player Comparison feature (compare up to 4 players)
 - ✨ Added Achievement System (20 achievements)
 - ✨ Added Player Profile pages with personal bests
 - ✨ Added Leaderboard with 7 ranking categories
 - ✨ Implemented Personal Bests tracking
 - ✨ Enhanced navigation with profile access
+- 🐛 Fixed winner screen centering and button clickability
+- 🐛 Fixed achievement notification loop
 - 🎨 Improved UI consistency across all components
 - 📊 Added multiple new charts and visualizations
 - ⚡ Performance optimizations with lazy loading

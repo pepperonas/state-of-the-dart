@@ -43,6 +43,10 @@
   - Line Charts: Average- und Checkout-Entwicklung
   - Area Charts: Legs Gewonnen/Verloren
   - Composed Charts: Monatliche Performance-Trends
+- **Player Comparison** - Compare up to 4 players side-by-side with:
+  - Radar Chart: 5-dimensional skill comparison
+  - Stats Table: Detailed head-to-head comparison
+  - Bar Chart: Visual metric comparison
 - **Real-Time Stats** - Live scoring with instant calculations
 - **Player Statistics** - Average, checkout %, high scores, 180s, 171+, 140+, 100+
 - **Match History** - Complete tracking of all games played
