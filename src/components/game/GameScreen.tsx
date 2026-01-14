@@ -5,6 +5,7 @@ import Confetti from 'react-confetti';
 import { useGame } from '../../context/GameContext';
 import { usePlayer } from '../../context/PlayerContext';
 import { useSettings } from '../../context/SettingsContext';
+import { useTenant } from '../../context/TenantContext';
 import { useGameAchievements } from '../../hooks/useGameAchievements';
 import Dartboard from '../dartboard/Dartboard';
 import ScoreInput from './ScoreInput';
@@ -12,6 +13,7 @@ import PlayerScore from './PlayerScore';
 import CheckoutSuggestion from '../dartboard/CheckoutSuggestion';
 import { Dart, Player, GameType, MatchSettings } from '../../types/index';
 import { calculateThrowScore } from '../../utils/scoring';
+import { PersonalBests, createEmptyPersonalBests, updatePersonalBests } from '../../types/personalBests';
 import audioSystem from '../../utils/audio';
 
 const GameScreen: React.FC = () => {
@@ -19,6 +21,7 @@ const GameScreen: React.FC = () => {
   const { state, dispatch } = useGame();
   const { players, addPlayer } = usePlayer();
   const { settings } = useSettings();
+  const { storage } = useTenant();
   const { checkMatchAchievements, checkLegAchievements } = useGameAchievements();
   
   useEffect(() => {
@@ -42,7 +45,7 @@ const GameScreen: React.FC = () => {
 
       const winnerId = match.winner;
 
-      if (winnerId) {
+      if (winnerId && storage) {
         // Mark as processed
         setProcessedMatchIds(prev => new Set(prev).add(matchId));
 
@@ -54,9 +57,47 @@ const GameScreen: React.FC = () => {
         if (lastLeg) {
           checkLegAchievements(lastLeg, match, winnerId);
         }
+
+        // Update Personal Bests for all players
+        const personalBestsData = storage.get<Record<string, PersonalBests>>('personalBests', {});
+        
+        match.players.forEach((matchPlayer) => {
+          const playerId = matchPlayer.playerId;
+          const currentBests = personalBestsData[playerId] || createEmptyPersonalBests(playerId);
+          
+          // Calculate shortest leg for this player
+          const playerLegs = match.legs.filter(leg => leg.winner === playerId);
+          const shortestLegDarts = playerLegs.length > 0 
+            ? Math.min(...playerLegs.map(leg => {
+                const playerThrows = leg.throws.filter(t => t.playerId === playerId);
+                return playerThrows.length * 3; // Each throw = 3 darts
+              }))
+            : undefined;
+
+          // Update personal bests
+          const updatedBests = updatePersonalBests(currentBests, {
+            matchAverage: matchPlayer.matchAverage,
+            highestScore: matchPlayer.matchHighestScore,
+            score180s: matchPlayer.match180s,
+            checkoutsHit: matchPlayer.checkoutsHit,
+            checkoutAttempts: matchPlayer.checkoutAttempts,
+            legsWon: matchPlayer.legsWon,
+            legsLost: match.players.length - 1 - matchPlayer.legsWon, // Simplified
+            isWinner: playerId === winnerId,
+            gameId: match.id,
+            gameDate: new Date(match.startedAt),
+            shortestLegDarts,
+          });
+
+          personalBestsData[playerId] = updatedBests;
+        });
+
+        // Save updated personal bests
+        storage.set('personalBests', personalBestsData);
+        console.log('✅ Personal Bests updated for all players');
       }
     }
-  }, [state.currentMatch?.status, state.currentMatch?.winner, state.currentMatch?.id, checkMatchAchievements, checkLegAchievements, processedMatchIds]);
+  }, [state.currentMatch?.status, state.currentMatch?.winner, state.currentMatch?.id, checkMatchAchievements, checkLegAchievements, processedMatchIds, storage]);
   const [showSetup, setShowSetup] = useState(!state.currentMatch);
   const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
   const [showPlayerNameInput, setShowPlayerNameInput] = useState(false);
