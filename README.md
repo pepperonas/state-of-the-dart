@@ -125,6 +125,34 @@
 
 ---
 
+## 🧪 Automated Testing & CI/CD
+
+**Continuous Integration** ist bereits eingerichtet mit GitHub Actions!
+
+### Automatische Tests bei jedem Push
+- ✅ **Linting** - ESLint Checks
+- ✅ **Unit Tests** - Vitest (20 Tests)
+- ✅ **Build** - TypeScript Compilation + Vite Build
+- ✅ **Multi-Node** - Tests auf Node.js 18.x & 20.x
+
+### Test Status Badge
+[![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
+
+### Workflow Trigger
+Tests laufen automatisch bei:
+- 🔄 Push auf `main`, `master`, oder `develop` Branches
+- 🔀 Pull Requests auf diese Branches
+
+### Lokale Tests ausführen
+```bash
+npm run test        # Tests im Watch-Modus
+npm run test:run    # Tests einmalig
+npm run test:ui     # Tests mit UI
+npm run coverage    # Mit Coverage Report
+```
+
+---
+
 ## 🚀 Quick Start
 
 ### Prerequisites

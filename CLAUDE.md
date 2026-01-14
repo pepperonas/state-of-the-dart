@@ -25,8 +25,39 @@ npm run coverage     # Generate coverage report
 npm run lint         # Run ESLint checks
 npm run preview      # Preview production build locally
 
+# Versioning
+npm run version:bump # Bump version (0.0.1 → 0.0.2, 0.0.9 → 0.1.0, 0.9.9 → 1.0.0)
+npm run version:show # Show current version
+
 # Installation
 npm install          # Install all dependencies
+```
+
+## CI/CD Pipeline
+
+### GitHub Actions Workflows
+
+**Test Workflow** (`.github/workflows/test.yml`):
+- Triggers: Push to main/master/develop, Pull Requests
+- Matrix Strategy: Node.js 18.x & 20.x
+- Steps:
+  1. Checkout code
+  2. Setup Node.js with npm cache
+  3. Install dependencies (`npm ci`)
+  4. Run linter (`npm run lint`)
+  5. Run tests (`npm run test:run`)
+  6. Build app (`npm run build`)
+- Status Badge: [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
+
+**Version Management Workflow** (`.github/workflows/version.yml`):
+- Triggers: Manual (workflow_dispatch)
+- Automatically bumps version, commits, tags, and pushes
+
+### Deployment
+
+Deployment to https://stateofthedart.com/ via `./deploy.sh`:
+```bash
+./deploy.sh  # SSH to VPS, pull, build, deploy
 ```
 
 ## Architecture
