@@ -7,10 +7,12 @@ import { usePlayer } from '../../context/PlayerContext';
 import { useSettings } from '../../context/SettingsContext';
 import { useTenant } from '../../context/TenantContext';
 import { useGameAchievements } from '../../hooks/useGameAchievements';
+import { useAchievementHints } from '../../hooks/useAchievementHints';
 import Dartboard from '../dartboard/Dartboard';
 import ScoreInput from './ScoreInput';
 import PlayerScore from './PlayerScore';
 import CheckoutSuggestion from '../dartboard/CheckoutSuggestion';
+import AchievementHint from '../achievements/AchievementHint';
 import { Dart, Player, GameType, MatchSettings } from '../../types/index';
 import { calculateThrowScore } from '../../utils/scoring';
 import { PersonalBests, createEmptyPersonalBests, updatePersonalBests } from '../../types/personalBests';
@@ -24,10 +26,25 @@ const GameScreen: React.FC = () => {
   const { storage } = useTenant();
   const { checkMatchAchievements, checkLegAchievements } = useGameAchievements();
   
+  // Track achievement hints
+  const [dismissedHints, setDismissedHints] = useState<Set<string>>(new Set());
+  const currentMatchPlayer = state.currentMatch?.players[state.currentPlayerIndex];
+  const hints = useAchievementHints(
+    currentMatchPlayer?.playerId || null,
+    currentMatchPlayer ? {
+      matchAverage: currentMatchPlayer.matchAverage,
+      score180s: currentMatchPlayer.match180s,
+      checkoutRate: currentMatchPlayer.checkoutAttempts > 0 
+        ? (currentMatchPlayer.checkoutsHit / currentMatchPlayer.checkoutAttempts) * 100 
+        : 0,
+    } : undefined
+  ).filter(hint => !dismissedHints.has(hint.achievementId));
+  
   useEffect(() => {
-    audioSystem.setEnabled(settings.soundVolume > 0);
-    audioSystem.setVolume(settings.soundVolume);
-  }, [settings.soundVolume]);
+    audioSystem.setEnabled(settings.soundVolume > 0 || (settings.callerVolume ?? 0) > 0 || (settings.effectsVolume ?? 0) > 0);
+    audioSystem.setCallerVolume(settings.callerVolume ?? settings.soundVolume);
+    audioSystem.setEffectsVolume(settings.effectsVolume ?? settings.soundVolume);
+  }, [settings.soundVolume, settings.callerVolume, settings.effectsVolume]);
 
   // Track processed matches to avoid duplicate achievement checks
   const [processedMatchIds, setProcessedMatchIds] = useState<Set<string>>(new Set());
@@ -103,6 +120,25 @@ const GameScreen: React.FC = () => {
   const [showPlayerNameInput, setShowPlayerNameInput] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
   const [newPlayerAvatar, setNewPlayerAvatar] = useState('🎯');
+  
+  // Load last players from storage
+  const getLastPlayers = (): string[] => {
+    if (!storage) return [];
+    return storage.get<string[]>('lastPlayerIds', []);
+  };
+  
+  const saveLastPlayers = (playerIds: string[]) => {
+    if (!storage) return;
+    storage.set('lastPlayerIds', playerIds);
+  };
+  
+  const loadLastPlayers = () => {
+    const lastPlayerIds = getLastPlayers();
+    const lastPlayers = players.filter(p => lastPlayerIds.includes(p.id));
+    if (lastPlayers.length > 0) {
+      setSelectedPlayers(lastPlayers);
+    }
+  };
   const [showConfetti, setShowConfetti] = useState(false);
   const [gameSettings, setGameSettings] = useState<MatchSettings>({
     startScore: 501,
@@ -128,10 +164,15 @@ const GameScreen: React.FC = () => {
       setSelectedPlayers([...selectedPlayers, guestPlayer]);
     }
     
+    const finalPlayers = selectedPlayers.length >= 2 ? selectedPlayers : [...selectedPlayers, addPlayer('Guest', '👤')];
+    
+    // Save last players for quick select
+    saveLastPlayers(finalPlayers.map(p => p.id));
+    
     dispatch({
       type: 'START_MATCH',
       payload: {
-        players: selectedPlayers.length >= 2 ? selectedPlayers : [...selectedPlayers, addPlayer('Guest', '👤')],
+        players: finalPlayers,
         settings: gameSettings,
         gameType: 'x01' as GameType,
       },
@@ -248,7 +289,18 @@ const GameScreen: React.FC = () => {
             <h2 className="text-3xl font-bold mb-6 text-white">Game Setup</h2>
             
             <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3 text-white">Select Players</h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-semibold text-white">Select Players</h3>
+                {getLastPlayers().length > 0 && (
+                  <button
+                    onClick={loadLastPlayers}
+                    className="px-3 py-1.5 text-sm bg-primary-500/20 hover:bg-primary-500/30 text-primary-400 rounded-lg border border-primary-500/30 transition-all font-medium flex items-center gap-2"
+                  >
+                    <RotateCcw size={14} />
+                    Letzte Spieler
+                  </button>
+                )}
+              </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {players.map((player) => (
                   <button
@@ -508,9 +560,9 @@ const GameScreen: React.FC = () => {
     );
   }
   
-  const currentPlayer = state.currentMatch.players[state.currentPlayerIndex];
-  const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
-  const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
+  const currentPlayer = state.currentMatch!.players[state.currentPlayerIndex];
+  const currentLeg = state.currentMatch!.legs[state.currentMatch!.currentLegIndex];
+  const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer!.playerId);
   const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
   const currentThrowScore = calculateThrowScore(state.currentThrow);
   const remaining = (state.currentMatch.settings.startScore || 501) - totalScored - currentThrowScore;
@@ -631,29 +683,29 @@ const GameScreen: React.FC = () => {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-400">Average:</span>
-                    <span className="font-semibold text-white">{currentPlayer.matchAverage.toFixed(2)}</span>
+                    <span className="font-semibold text-white">{currentPlayer!.matchAverage.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Highest Score:</span>
-                    <span className="font-semibold text-white">{currentPlayer.matchHighestScore}</span>
+                    <span className="font-semibold text-white">{currentPlayer!.matchHighestScore}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">180s:</span>
-                    <span className="font-semibold text-white">{currentPlayer.match180s}</span>
+                    <span className="font-semibold text-white">{currentPlayer!.match180s}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">140+:</span>
-                    <span className="font-semibold text-white">{currentPlayer.match140Plus}</span>
+                    <span className="font-semibold text-white">{currentPlayer!.match140Plus}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">100+:</span>
-                    <span className="font-semibold text-white">{currentPlayer.match100Plus}</span>
+                    <span className="font-semibold text-white">{currentPlayer!.match100Plus}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Checkout %:</span>
                     <span className="font-semibold text-white">
-                      {currentPlayer.checkoutAttempts > 0
-                        ? ((currentPlayer.checkoutsHit / currentPlayer.checkoutAttempts) * 100).toFixed(1)
+                      {currentPlayer!.checkoutAttempts > 0
+                        ? ((currentPlayer!.checkoutsHit / currentPlayer!.checkoutAttempts) * 100).toFixed(1)
                         : '0.0'}%
                     </span>
                   </div>
@@ -663,6 +715,16 @@ const GameScreen: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Achievement Hints */}
+      {hints.length > 0 && (
+        <AchievementHint
+          hints={hints}
+          onDismiss={(achievementId) => {
+            setDismissedHints(prev => new Set(prev).add(achievementId));
+          }}
+        />
+      )}
     </div>
   );
 };

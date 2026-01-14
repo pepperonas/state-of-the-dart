@@ -12,6 +12,8 @@ const defaultSettings: AppSettings = {
   theme: 'auto',
   language: 'en',
   soundVolume: 70,
+  callerVolume: 70,
+  effectsVolume: 70,
   showCheckoutHints: true,
   autoNextPlayer: true,
   showStatsDuringGame: true,

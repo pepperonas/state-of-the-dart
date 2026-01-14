@@ -3,7 +3,9 @@
 class AudioSystem {
   private audioCache: Map<string, HTMLAudioElement> = new Map();
   private enabled: boolean = true;
-  private volume: number = 0.7;
+  private volume: number = 0.7; // Master volume (deprecated, kept for backward compatibility)
+  private callerVolume: number = 0.7;
+  private effectsVolume: number = 0.7;
   private audioContext: AudioContext | null = null;
   private isUnlocked: boolean = false;
   private soundQueue: string[] = [];
@@ -103,7 +105,7 @@ class AudioSystem {
       
       // Stop any currently playing instance of this sound
       audio.currentTime = 0;
-      audio.volume = this.volume;
+      audio.volume = this.getVolumeForSound(soundPath);
       
       return new Promise((resolve, reject) => {
         audio.onended = () => {
@@ -194,7 +196,7 @@ class AudioSystem {
     utterance.lang = language === 'de' ? 'de-DE' : 'en-US';
     utterance.rate = 1.0;
     utterance.pitch = 1.0;
-    utterance.volume = this.volume;
+    utterance.volume = this.callerVolume; // Use caller volume for speech
     
     speechSynthesis.speak(utterance);
   }
@@ -228,10 +230,40 @@ class AudioSystem {
 
   setVolume(volume: number) {
     this.volume = Math.max(0, Math.min(1, volume / 100));
+    // Set both caller and effects to the same volume (for backward compatibility)
+    this.callerVolume = this.volume;
+    this.effectsVolume = this.volume;
     // Update volume for all cached audio elements
     this.audioCache.forEach(audio => {
       audio.volume = this.volume;
     });
+  }
+
+  setCallerVolume(volume: number) {
+    this.callerVolume = Math.max(0, Math.min(1, volume / 100));
+  }
+
+  setEffectsVolume(volume: number) {
+    this.effectsVolume = Math.max(0, Math.min(1, volume / 100));
+  }
+
+  getCallerVolume(): number {
+    return this.callerVolume * 100;
+  }
+
+  getEffectsVolume(): number {
+    return this.effectsVolume * 100;
+  }
+
+  private getVolumeForSound(path: string): number {
+    // Determine if this is a caller sound or an effect
+    if (path.includes('/caller/') || path.includes('/gameshot/') || path.includes('/yourequire/') || path.includes('/requires/')) {
+      return this.callerVolume;
+    } else if (path.includes('/effects/') || path.includes('/OMNI/')) {
+      return this.effectsVolume;
+    }
+    // Default to effects volume
+    return this.effectsVolume;
   }
 
   // Test method to verify audio is working

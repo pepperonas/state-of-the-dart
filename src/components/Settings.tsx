@@ -219,29 +219,63 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               </h3>
               
               <div className="space-y-4">
+                {/* Caller Volume */}
                 <div>
                   <label className="flex items-center justify-between mb-2">
-                    <span className="text-dark-300">Volume</span>
-                    <span className="text-sm text-dark-400">{settings.soundVolume}%</span>
+                    <span className="text-dark-300">Caller Volume (Scores)</span>
+                    <span className="text-sm text-dark-400">{settings.callerVolume ?? settings.soundVolume}%</span>
                   </label>
                   <input
                     type="range"
                     min="0"
                     max="100"
-                    value={settings.soundVolume}
-                    onChange={(e) => updateSettings({ soundVolume: parseInt(e.target.value) })}
+                    value={settings.callerVolume ?? settings.soundVolume}
+                    onChange={(e) => {
+                      const volume = parseInt(e.target.value);
+                      updateSettings({ callerVolume: volume });
+                      audioSystem.setCallerVolume(volume);
+                    }}
+                    className="w-full"
+                  />
+                </div>
+
+                {/* Effects Volume */}
+                <div>
+                  <label className="flex items-center justify-between mb-2">
+                    <span className="text-dark-300">Effects Volume (UI)</span>
+                    <span className="text-sm text-dark-400">{settings.effectsVolume ?? settings.soundVolume}%</span>
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={settings.effectsVolume ?? settings.soundVolume}
+                    onChange={(e) => {
+                      const volume = parseInt(e.target.value);
+                      updateSettings({ effectsVolume: volume });
+                      audioSystem.setEffectsVolume(volume);
+                    }}
                     className="w-full"
                   />
                 </div>
                 
-                {/* Test Sound Button */}
-                <button
-                  onClick={() => audioSystem.testSound()}
-                  className="w-full py-2 px-4 bg-success-500 hover:bg-success-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition-all"
-                >
-                  <Play size={18} />
-                  Test Sound (100)
-                </button>
+                {/* Test Sound Buttons */}
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => audioSystem.playSound('/sounds/caller/180.mp3')}
+                    className="py-2 px-4 bg-success-500 hover:bg-success-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition-all"
+                  >
+                    <Play size={18} />
+                    Caller Test
+                  </button>
+                  <button
+                    onClick={() => audioSystem.playSound('/sounds/OMNI/pop-success.mp3')}
+                    className="py-2 px-4 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition-all"
+                  >
+                    <Play size={18} />
+                    Effect Test
+                  </button>
+                </div>
                 
                 <div className="flex items-center justify-between">
                   <span className="text-dark-300">Vibration</span>

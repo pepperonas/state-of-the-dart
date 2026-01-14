@@ -308,7 +308,9 @@ export interface AppState {
 export interface AppSettings {
   theme: 'light' | 'dark' | 'auto';
   language: 'de' | 'en';
-  soundVolume: number;
+  soundVolume: number; // Deprecated: kept for backward compatibility
+  callerVolume?: number; // Volume for caller sounds (scores, checkouts)
+  effectsVolume?: number; // Volume for effects (UI sounds, game events)
   showCheckoutHints: boolean;
   autoNextPlayer: boolean;
   showStatsDuringGame: boolean;
