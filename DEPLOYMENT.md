@@ -14,7 +14,7 @@
 ### 1. Lokaler Build
 
 ```bash
-cd /Users/martin/cursor/dart4friends/dart4friends
+cd /Users/martin/cursor/dart4friends/state-of-the-dart
 
 # Dependencies installieren (falls nötig)
 npm install
