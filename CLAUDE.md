@@ -311,7 +311,19 @@ The app expects specific MP3 files in `public/sounds/`. Missing files will fail 
 
 ## Recent Updates (v0.0.1)
 
-### Latest Features (2026-01-14)
+### Latest Features (2026-01-15)
+- ✨ **Round-by-Round Chart** in Match History - visualizes match progression with 3 darts = 1 round
+- ✨ **Top 5 Improvements** (#1-5/36):
+  - Personal Bests Auto-Update - automatic tracking after each match
+  - Undo Last Throw - already implemented, fully functional
+  - Last Players Quick-Select - fast rematch with saved players
+  - Achievement Progress Hints - notifications when close to unlocking
+  - Sound Mixing - separate volume controls for Caller (scores) and Effects (UI sounds)
+- 🎨 **Modern Theme for TenantSelector** - consistent glassmorphism design
+- 📝 **German Documentation** - complete README.de.md translation
+- 📊 **Enhanced Match History** - interactive LineChart with Recharts
+
+### Previous Features (2026-01-14)
 - ✨ Added Player Comparison feature (compare up to 4 players)
 - ✨ Added Achievement System (20 achievements)
 - ✨ Added Player Profile pages with personal bests
@@ -323,8 +335,6 @@ The app expects specific MP3 files in `public/sounds/`. Missing files will fail 
 - 🎨 Improved UI consistency across all components
 - 📊 Added multiple new charts and visualizations
 - ⚡ Performance optimizations with lazy loading
-
-### Previous Updates
 - ✨ Complete training modes implementation
 - ✨ PWA with install button and offline support
 - ✨ Export/Import functionality
