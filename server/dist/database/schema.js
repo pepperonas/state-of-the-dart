@@ -2,15 +2,46 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.defaultAchievements = exports.schema = void 0;
 exports.schema = `
--- Tenants (Profiles)
-CREATE TABLE IF NOT EXISTS tenants (
+-- Users (with Authentication & Subscription)
+CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT,
   name TEXT NOT NULL,
   avatar TEXT,
+  email_verified INTEGER DEFAULT 0,
+  verification_token TEXT,
+  verification_token_expires INTEGER,
+  reset_password_token TEXT,
+  reset_password_expires INTEGER,
+  google_id TEXT UNIQUE,
+  subscription_status TEXT DEFAULT 'trial',
+  subscription_plan TEXT,
+  trial_ends_at INTEGER,
+  subscription_ends_at INTEGER,
+  stripe_customer_id TEXT,
+  stripe_subscription_id TEXT,
   created_at INTEGER NOT NULL,
   last_active INTEGER NOT NULL
 );
 
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
+CREATE INDEX IF NOT EXISTS idx_users_verification_token ON users(verification_token);
+CREATE INDEX IF NOT EXISTS idx_users_subscription_status ON users(subscription_status);
+
+-- Tenants (Profiles) - now linked to users
+CREATE TABLE IF NOT EXISTS tenants (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  avatar TEXT,
+  created_at INTEGER NOT NULL,
+  last_active INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_tenants_user ON tenants(user_id);
 CREATE INDEX IF NOT EXISTS idx_tenants_last_active ON tenants(last_active);
 
 -- Players

@@ -9,6 +9,8 @@ const helmet_1 = __importDefault(require("helmet"));
 const morgan_1 = __importDefault(require("morgan"));
 const compression_1 = __importDefault(require("compression"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
+const express_session_1 = __importDefault(require("express-session"));
+const passport_1 = __importDefault(require("./config/passport"));
 const config_1 = require("./config");
 const database_1 = require("./database");
 // Initialize Express app
@@ -22,9 +24,30 @@ app.use((0, cors_1.default)({
     origin: config_1.config.corsOrigins,
     credentials: true,
 }));
-// Body parsing
-app.use(express_1.default.json({ limit: '10mb' }));
+// Body parsing (except for webhooks)
+app.use((req, res, next) => {
+    if (req.originalUrl === '/api/payment/webhook') {
+        next();
+    }
+    else {
+        express_1.default.json({ limit: '10mb' })(req, res, next);
+    }
+});
 app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
+// Session middleware
+app.use((0, express_session_1.default)({
+    secret: config_1.config.sessionSecret,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: config_1.config.isProduction,
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+}));
+// Passport initialization
+app.use(passport_1.default.initialize());
+app.use(passport_1.default.session());
 // Compression
 app.use((0, compression_1.default)());
 // Logging
@@ -53,6 +76,8 @@ app.get('/health', (req, res) => {
     });
 });
 // Import routes
+const auth_1 = __importDefault(require("./routes/auth"));
+const payment_1 = __importDefault(require("./routes/payment"));
 const tenants_1 = __importDefault(require("./routes/tenants"));
 const players_1 = __importDefault(require("./routes/players"));
 const matches_1 = __importDefault(require("./routes/matches"));
@@ -74,11 +99,28 @@ app.get('/api', (req, res) => {
     });
 });
 // Use route handlers
+app.use('/api/auth', auth_1.default);
+app.use('/api/payment', payment_1.default);
 app.use('/api/tenants', tenants_1.default);
 app.use('/api/players', players_1.default);
 app.use('/api/matches', matches_1.default);
 app.use('/api/training', training_1.default);
 app.use('/api/achievements', achievements_1.default);
+// Google OAuth routes
+app.get('/api/auth/google', passport_1.default.authenticate('google', { scope: ['profile', 'email'] }));
+app.get('/api/auth/google/callback', passport_1.default.authenticate('google', { failureRedirect: `${config_1.config.appUrl}/login?error=google_auth_failed` }), (req, res) => {
+    // Successful authentication
+    const user = req.user;
+    // Generate JWT
+    const jwt = require('jsonwebtoken');
+    const token = jwt.sign({
+        userId: user.id,
+        email: user.email,
+        subscriptionStatus: user.subscription_status
+    }, config_1.config.jwtSecret, { expiresIn: config_1.config.jwtExpiresIn });
+    // Redirect to app with token
+    res.redirect(`${config_1.config.appUrl}/auth/callback?token=${token}`);
+});
 // 404 handler
 app.use((req, res) => {
     res.status(404).json({ error: 'Endpoint not found' });
