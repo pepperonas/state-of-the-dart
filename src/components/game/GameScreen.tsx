@@ -254,6 +254,23 @@ const GameScreen: React.FC = () => {
     }
     
     dispatch({ type: 'CONFIRM_THROW' });
+    
+    // Announce remaining score after the throw (with delay for score announcement)
+    if (currentPlayer && currentLeg) {
+      const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
+      const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
+      const startScore = state.currentMatch?.settings.startScore || 501;
+      const remaining = startScore - totalScored;
+      const newRemaining = remaining - currentScore;
+      
+      // Only announce if in checkout range and not bust/checkout
+      if (newRemaining > 0 && newRemaining <= 170) {
+        setTimeout(() => {
+          audioSystem.announceRemaining(newRemaining, true);
+        }, 1500); // Delay to let score announcement finish
+      }
+    }
+    
     if (settings.autoNextPlayer) {
       setTimeout(() => {
         dispatch({ type: 'NEXT_PLAYER' });
