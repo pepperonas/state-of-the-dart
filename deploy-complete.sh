@@ -10,8 +10,8 @@ echo "=================================================="
 echo ""
 
 # Configuration - BITTE ANPASSEN!
-VPS_IP="YOUR_VPS_IP_HERE"  # z.B. "123.45.67.89"
-VPS_USER="root"
+VPS_IP="147.93.61.153"  # z.B. "123.45.67.89"
+VPS_USER="u246949900"
 FRONTEND_PATH="/var/www/stateofthedart"
 BACKEND_PATH="/opt/stateofthedart"
 
@@ -33,7 +33,7 @@ if [ "$VPS_IP" = "YOUR_VPS_IP_HERE" ]; then
     echo -e "${RED}❌ FEHLER: Bitte setze VPS_IP in diesem Script!${NC}"
     echo ""
     echo "Öffne deploy-complete.sh und ändere:"
-    echo '  VPS_IP="YOUR_VPS_IP_HERE"'
+    echo '  VPS_IP="147.93.61.153"'
     echo "zu deiner echten VPS IP, z.B.:"
     echo '  VPS_IP="123.45.67.89"'
     exit 1

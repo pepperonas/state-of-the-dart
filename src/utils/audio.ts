@@ -208,6 +208,18 @@ class AudioSystem {
     this.playSound(soundPath, false);
   }
 
+  announceRemaining(remaining: number, isCurrentPlayer: boolean = true) {
+    // Announce remaining score
+    // "You require X" for current player, "Requires X" for opponent
+    if (remaining <= 0 || remaining > 170) return; // Only announce checkout ranges
+    
+    const soundPath = isCurrentPlayer
+      ? `/sounds/yourequire/${remaining}.mp3`
+      : `/sounds/requires/${remaining}.mp3`;
+    
+    this.playSound(soundPath, false);
+  }
+
   announceCheckout(score: number, finishType: 'leg' | 'set' | 'match' = 'leg') {
     // Play checkout sound based on finish type - HIGH PRIORITY
     const soundPath = finishType === 'leg' 
