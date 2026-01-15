@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Target, Users, TrendingUp, Trophy, Award, Dumbbell, Settings, Play, LogOut, Medal } from 'lucide-react';
 import { useTenant } from '../context/TenantContext';
-import { useGame } from '../context/GameContext';
 import UserMenu from './auth/UserMenu';
 import SyncStatus from './sync/SyncStatus';
 import packageJson from '../../package.json';
@@ -11,7 +10,6 @@ import packageJson from '../../package.json';
 const MainMenu: React.FC = () => {
   const navigate = useNavigate();
   const { currentTenant, setCurrentTenant, storage } = useTenant();
-  const { state } = useGame();
   // Compute hasSavedMatch directly from storage
   const hasSavedMatch = React.useMemo(() => {
     if (storage) {
