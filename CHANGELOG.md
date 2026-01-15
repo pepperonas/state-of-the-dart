@@ -8,6 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - At patch 9, minor increments: 0.0.9 → 0.1.0
 - At minor 9, major increments: 0.9.x → 1.0.0
 
+## [Unreleased]
+
+### Added (2026-01-15)
+- 📊 **Round-by-Round Chart** in Match History - Visualizes match progression with LineChart (3 darts = 1 round)
+- 🏆 **Top 5 Improvements** implemented (#1-5/36):
+  - **#1 Personal Bests Auto-Update** - Automatic tracking after each match completion
+  - **#2 Undo Last Throw** - Button to reverse accidental score entries (already implemented)
+  - **#3 Last Players Quick-Select** - Fast rematch with automatically saved player selection
+  - **#4 Achievement Progress Hints** - Animated notifications when approaching achievement unlock
+  - **#5 Sound Mixing** - Separate volume controls for Caller (scores/checkouts) and Effects (UI sounds)
+- 🎨 **Modern Theme for TenantSelector** - Glassmorphism design consistent with main app
+- 📝 **German Documentation** - Complete README.de.md translation
+- 🎯 **IMPROVEMENTS.md** - Documented all 36 planned improvements with priorities
+
+### Changed
+- 🔊 **Audio System** - Added category-based volume control (Caller vs Effects)
+- 🎮 **Game Setup** - Added "Letzte Spieler" quick-select button
+- 📊 **Match History** - Enhanced with interactive round progression chart
+- 🎯 **TenantSelector** - Updated color scheme from green/blue to primary/accent (blue/purple)
+
+---
+
 ## [0.0.1] - 2026-01-14
 
 ### Added
@@ -43,6 +65,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Match history with detailed analysis
   - Improvement metrics and trends
   - Personal bests tracking
+- 🏆 **Achievement System** (20 achievements)
+  - 6 categories: First Steps, Scoring, Checkout, Training, Consistency, Special
+  - 5 tiers: Bronze, Silver, Gold, Platinum, Diamond
+  - Progress tracking and notifications
+  - Hidden achievements
+  - Points system (5-500 points per achievement)
+- 👤 **Player Profiles & Leaderboard**
+  - Detailed player pages with 8 personal best categories
+  - Performance charts and skill radar
+  - Career timeline
+  - Leaderboard with 7 ranking categories
+  - Top 3 medals (Gold, Silver, Bronze)
+- 🔄 **Player Comparison**
+  - Compare up to 4 players simultaneously
+  - Radar chart with 5-dimensional skill comparison
+  - Detailed stats table
+  - Visual bar chart comparison
 - 🎯 Interactive SVG dartboard
 - 💾 Robust data management with TenantStorage
 - 🌐 Multi-language support (EN/DE)
