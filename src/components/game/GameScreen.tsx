@@ -268,9 +268,22 @@ const GameScreen: React.FC = () => {
     dispatch({ type: 'CLEAR_THROW' });
   };
   
+  const handleBackToMenu = () => {
+    if (state.currentMatch?.status === 'in-progress') {
+      if (confirm('Match pausieren und zum Hauptmenü zurückkehren?\n\nDas Match wird gespeichert und kann später fortgesetzt werden.')) {
+        dispatch({ type: 'PAUSE_MATCH' });
+        navigate('/');
+      }
+    } else {
+      navigate('/');
+    }
+  };
+
   const handleEndMatch = () => {
-    dispatch({ type: 'END_MATCH' });
-    navigate('/');
+    if (confirm('Match wirklich beenden?\n\nDas Match wird als abgebrochen markiert.')) {
+      dispatch({ type: 'END_MATCH' });
+      navigate('/');
+    }
   };
   
   if (showSetup) {
@@ -573,18 +586,18 @@ const GameScreen: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <button
-            onClick={() => navigate('/')}
+            onClick={handleBackToMenu}
             className="flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
           >
             <ArrowLeft size={20} />
-            Menu
+            Zurück zum Menü
           </button>
           
           <div className="flex gap-2">
             <button
               onClick={handleUndoThrow}
               className="glass-card p-3 rounded-lg hover:glass-card-hover text-white transition-all"
-              title="Undo last throw"
+              title="Letzten Wurf rückgängig machen"
             >
               <RotateCcw size={20} />
             </button>
@@ -598,7 +611,7 @@ const GameScreen: React.FC = () => {
                 }
               }}
               className="glass-card p-3 rounded-lg hover:glass-card-hover text-white transition-all"
-              title={state.currentMatch?.status === 'paused' ? 'Resume' : 'Pause'}
+              title={state.currentMatch?.status === 'paused' ? 'Fortsetzen' : 'Pausieren'}
             >
               {state.currentMatch?.status === 'paused' ? <Play size={20} /> : <Pause size={20} />}
             </button>
@@ -606,7 +619,7 @@ const GameScreen: React.FC = () => {
             <button
               onClick={handleEndMatch}
               className="p-3 rounded-lg bg-red-600 hover:bg-red-500 text-white transition-all"
-              title="End match"
+              title="Match beenden"
             >
               <X size={20} />
             </button>
