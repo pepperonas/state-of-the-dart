@@ -90,19 +90,30 @@
   - Training History mit Filterung
 - **Impact:** Motiviert zum regelmäßigen Training, zeigt Verbesserungen
 
-### 6c. SQLite Backend (VPS)
-- **Status:** 💭 IDEA
-- **Priorität:** 📌 MEDIUM (großes Projekt)
-- **Aufwand:** ~40-60 Stunden
-- **Beschreibung:** Backend-Server mit SQLite für Datenspeicherung
-- **Technisch:**
-  - Node.js/Express Backend auf VPS
-  - SQLite Datenbank
-  - REST API für alle CRUD-Operationen
-  - Authentication (JWT)
-  - Sync zwischen LocalStorage und Server
-  - Offline-First mit Background-Sync
-- **Impact:** Cloud-Speicherung, Multi-Device-Sync, Datensicherheit
+### 6c. SQLite Backend (VPS) + Auth & Payment
+- **Status:** ✅ DONE
+- **Priorität:** 🔥 CRITICAL
+- **Aufwand:** ~60-80 Stunden (COMPLETED!)
+- **Beschreibung:** Komplettes Backend mit Authentication & Payment System
+- **Implementiert:**
+  - ✅ Node.js/Express Backend
+  - ✅ SQLite Datenbank
+  - ✅ REST API für alle Daten
+  - ✅ Email-Registration mit Verification
+  - ✅ Secure Login (bcrypt + JWT)
+  - ✅ Google OAuth 2.0
+  - ✅ SMTP Email-System (Nodemailer)
+  - ✅ 30-Tage Trial Period
+  - ✅ Stripe Integration (Monthly + Lifetime)
+  - ✅ Stripe Webhooks
+  - ✅ Rate Limiting & Security
+  - ✅ Frontend Login/Register UI
+  - ✅ Protected Routes
+  - ✅ User Menu mit Subscription Status
+  - ✅ Payment Checkout Flow
+  - ✅ Customer Portal
+- **Impact:** 🚀 Professionelle Cloud-Lösung, Monetarisierung möglich!
+- **Dokumentation:** `AUTHENTICATION.md`, `server/SETUP.md`, `server/README.md`
 
 ---
 

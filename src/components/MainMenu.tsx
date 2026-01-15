@@ -4,20 +4,21 @@ import { motion } from 'framer-motion';
 import { Target, Users, TrendingUp, Trophy, Award, Dumbbell, Settings, Play, LogOut, Medal } from 'lucide-react';
 import { useTenant } from '../context/TenantContext';
 import { useGame } from '../context/GameContext';
+import UserMenu from './auth/UserMenu';
 import packageJson from '../../package.json';
 
 const MainMenu: React.FC = () => {
   const navigate = useNavigate();
   const { currentTenant, setCurrentTenant, storage } = useTenant();
   const { state } = useGame();
-  // Compute hasSavedMatch directly from storage and state
+  // Compute hasSavedMatch directly from storage
   const hasSavedMatch = React.useMemo(() => {
     if (storage) {
       const savedMatch = storage.get<{status?: string} | null>('currentMatch', null);
       return !!savedMatch && savedMatch.status === 'in-progress';
     }
     return false;
-  }, [storage, state.currentMatch]);
+  }, [storage]);
   
   const menuItems = [
     {
@@ -104,13 +105,16 @@ const MainMenu: React.FC = () => {
                 <p className="text-lg font-semibold text-white">{currentTenant?.name}</p>
               </div>
             </div>
-            <button
-              onClick={() => setCurrentTenant(null)}
-              className="flex items-center gap-2 px-4 py-2 glass-card hover:glass-card-hover rounded-lg text-white border border-white/10 transition-all"
-            >
-              <LogOut size={20} />
-              Profil wechseln
-            </button>
+            <div className="flex items-center gap-3">
+              <UserMenu />
+              <button
+                onClick={() => setCurrentTenant(null)}
+                className="flex items-center gap-2 px-4 py-2 glass-card hover:glass-card-hover rounded-lg text-white border border-white/10 transition-all"
+              >
+                <LogOut size={20} />
+                <span className="hidden sm:inline">Profil wechseln</span>
+              </button>
+            </div>
           </div>
           
           <div className="inline-block px-8 py-4 rounded-2xl bg-dark-900/40 backdrop-blur-sm border border-white/10 shadow-2xl mb-4">
