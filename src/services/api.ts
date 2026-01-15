@@ -86,6 +86,129 @@ export const api = {
     googleAuth: () => {
       window.location.href = `${API_URL}/api/auth/google`;
     },
+
+    updateProfile: (name: string, avatar: string) =>
+      apiClient('/api/auth/profile', {
+        method: 'PATCH',
+        body: JSON.stringify({ name, avatar }),
+      }),
+
+    updateEmail: (newEmail: string, password: string) =>
+      apiClient('/api/auth/email', {
+        method: 'PATCH',
+        body: JSON.stringify({ newEmail, password }),
+      }),
+
+    deleteAccount: (password: string) =>
+      apiClient('/api/auth/account', {
+        method: 'DELETE',
+        body: JSON.stringify({ password }),
+      }),
+  },
+
+  // Tenants
+  tenants: {
+    getAll: () => apiClient('/api/tenants'),
+    
+    create: (tenant: any) =>
+      apiClient('/api/tenants', {
+        method: 'POST',
+        body: JSON.stringify(tenant),
+      }),
+    
+    update: (id: string, tenant: any) =>
+      apiClient(`/api/tenants/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(tenant),
+      }),
+    
+    delete: (id: string) =>
+      apiClient(`/api/tenants/${id}`, {
+        method: 'DELETE',
+      }),
+  },
+
+  // Players
+  players: {
+    getAll: () => apiClient('/api/players'),
+    
+    getById: (id: string) => apiClient(`/api/players/${id}`),
+    
+    create: (player: any) =>
+      apiClient('/api/players', {
+        method: 'POST',
+        body: JSON.stringify(player),
+      }),
+    
+    update: (id: string, player: any) =>
+      apiClient(`/api/players/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(player),
+      }),
+    
+    delete: (id: string) =>
+      apiClient(`/api/players/${id}`, {
+        method: 'DELETE',
+      }),
+  },
+
+  // Matches
+  matches: {
+    getAll: () => apiClient('/api/matches'),
+    
+    getById: (id: string) => apiClient(`/api/matches/${id}`),
+    
+    create: (match: any) =>
+      apiClient('/api/matches', {
+        method: 'POST',
+        body: JSON.stringify(match),
+      }),
+    
+    update: (id: string, match: any) =>
+      apiClient(`/api/matches/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(match),
+      }),
+    
+    delete: (id: string) =>
+      apiClient(`/api/matches/${id}`, {
+        method: 'DELETE',
+      }),
+  },
+
+  // Training
+  training: {
+    getAll: () => apiClient('/api/training'),
+    
+    getById: (id: string) => apiClient(`/api/training/${id}`),
+    
+    create: (session: any) =>
+      apiClient('/api/training', {
+        method: 'POST',
+        body: JSON.stringify(session),
+      }),
+    
+    update: (id: string, session: any) =>
+      apiClient(`/api/training/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(session),
+      }),
+    
+    delete: (id: string) =>
+      apiClient(`/api/training/${id}`, {
+        method: 'DELETE',
+      }),
+  },
+
+  // Achievements
+  achievements: {
+    getByPlayer: (playerId: string) => apiClient(`/api/achievements/${playerId}`),
+    
+    update: (playerId: string, achievements: any) =>
+      apiClient(`/api/achievements/${playerId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ achievements }),
+      }),
   },
 
   // Payment

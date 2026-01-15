@@ -5,6 +5,7 @@ import { Target, Users, TrendingUp, Trophy, Award, Dumbbell, Settings, Play, Log
 import { useTenant } from '../context/TenantContext';
 import { useGame } from '../context/GameContext';
 import UserMenu from './auth/UserMenu';
+import SyncStatus from './sync/SyncStatus';
 import packageJson from '../../package.json';
 
 const MainMenu: React.FC = () => {
@@ -57,6 +58,13 @@ const MainMenu: React.FC = () => {
       gradient: 'from-amber-600 to-amber-700',
     },
     {
+      title: 'Global Leaderboard',
+      icon: Trophy,
+      description: 'Compete worldwide',
+      onClick: () => navigate('/global-leaderboard'),
+      gradient: 'from-primary-600 to-accent-600',
+    },
+    {
       title: 'Tournament',
       icon: Trophy,
       description: 'Create or join tournaments',
@@ -106,6 +114,7 @@ const MainMenu: React.FC = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <SyncStatus />
               <UserMenu />
               <button
                 onClick={() => setCurrentTenant(null)}

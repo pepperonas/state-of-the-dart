@@ -71,13 +71,24 @@ const UserMenu: React.FC = () => {
             <div className="py-2">
               <button
                 onClick={() => {
+                  navigate('/account');
+                  setIsOpen(false);
+                }}
+                className="w-full px-4 py-2 text-left flex items-center gap-2 text-white hover:bg-dark-800 transition-colors"
+              >
+                <User size={18} />
+                Account
+              </button>
+
+              <button
+                onClick={() => {
                   navigate('/settings');
                   setIsOpen(false);
                 }}
                 className="w-full px-4 py-2 text-left flex items-center gap-2 text-white hover:bg-dark-800 transition-colors"
               >
                 <Settings size={18} />
-                Einstellungen
+                App Einstellungen
               </button>
 
               <button

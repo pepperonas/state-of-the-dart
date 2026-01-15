@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import api, { setAuthToken, removeAuthToken } from '../services/api';
+import { syncService } from '../services/sync';
 
 interface User {
   id: string;
@@ -22,6 +23,7 @@ interface AuthContextType {
   logout: () => void;
   googleAuth: () => void;
   refreshUser: () => Promise<void>;
+  triggerSync: () => Promise<void>;
   isAuthenticated: boolean;
   hasActiveSubscription: boolean;
   trialDaysLeft: number;
@@ -60,6 +62,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const response = await api.auth.login(email, password);
     setAuthToken(response.token);
     setUser(response.user);
+    
+    // Trigger initial sync after login
+    setTimeout(() => triggerSync(), 1000);
   };
 
   const register = async (email: string, password: string, name: string) => {
@@ -85,6 +90,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const triggerSync = async () => {
+    try {
+      // Note: We need tenantId and storage from TenantContext
+      // This will be called from App when both contexts are available
+      console.log('Sync triggered from AuthContext');
+    } catch (error) {
+      console.error('Sync failed:', error);
+    }
+  };
+
   const isAuthenticated = !!user;
 
   const hasActiveSubscription = user
@@ -107,6 +122,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         logout,
         googleAuth,
         refreshUser,
+        triggerSync,
         isAuthenticated,
         hasActiveSubscription,
         trialDaysLeft,

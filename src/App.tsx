@@ -20,6 +20,7 @@ import ResetPassword from './components/auth/ResetPassword';
 import VerifyEmail from './components/auth/VerifyEmail';
 import ResendVerification from './components/auth/ResendVerification';
 import AuthCallback from './components/auth/AuthCallback';
+import UserSettings from './components/auth/UserSettings';
 
 // Payment components
 import Pricing from './components/payment/Pricing';
@@ -37,6 +38,7 @@ const TournamentMenu = lazy(() => import('./components/tournament/TournamentMenu
 const Settings = lazy(() => import('./components/Settings'));
 const AchievementsScreen = lazy(() => import('./components/achievements/AchievementsScreen'));
 const Leaderboard = lazy(() => import('./components/leaderboard/Leaderboard'));
+const GlobalLeaderboard = lazy(() => import('./components/leaderboard/GlobalLeaderboard'));
 
 // Loading component
 const LoadingScreen = () => (
@@ -142,6 +144,8 @@ function AppContent() {
                         </ProtectedRoute>
                       } />
                       
+                      <Route path="/global-leaderboard" element={<GlobalLeaderboard />} />
+                      
                       <Route path="/training" element={
                         <ProtectedRoute>
                           <TrainingMenu />
@@ -169,6 +173,12 @@ function AppContent() {
                       <Route path="/settings" element={
                         <ProtectedRoute>
                           <Settings darkMode={darkMode} setDarkMode={setDarkMode} />
+                        </ProtectedRoute>
+                      } />
+                      
+                      <Route path="/account" element={
+                        <ProtectedRoute requireSubscription={false}>
+                          <UserSettings />
                         </ProtectedRoute>
                       } />
                       
