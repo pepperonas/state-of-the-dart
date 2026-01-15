@@ -23,6 +23,13 @@ const MainMenu: React.FC = () => {
   
   const menuItems = [
     {
+      title: 'Dashboard',
+      icon: TrendingUp,
+      description: 'View your activity',
+      onClick: () => navigate('/dashboard'),
+      gradient: 'from-primary-600 to-accent-600',
+    },
+    {
       title: 'Quick Game',
       icon: Target,
       description: 'Start a quick game of 501',

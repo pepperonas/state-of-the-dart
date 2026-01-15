@@ -39,6 +39,7 @@ const Settings = lazy(() => import('./components/Settings'));
 const AchievementsScreen = lazy(() => import('./components/achievements/AchievementsScreen'));
 const Leaderboard = lazy(() => import('./components/leaderboard/Leaderboard'));
 const GlobalLeaderboard = lazy(() => import('./components/leaderboard/GlobalLeaderboard'));
+const Dashboard = lazy(() => import('./components/dashboard/Dashboard'));
 
 // Loading component
 const LoadingScreen = () => (
@@ -105,6 +106,12 @@ function AppContent() {
                       <Route path="/" element={
                         <ProtectedRoute>
                           <MainMenu />
+                        </ProtectedRoute>
+                      } />
+                      
+                      <Route path="/dashboard" element={
+                        <ProtectedRoute>
+                          <Dashboard />
                         </ProtectedRoute>
                       } />
                       
