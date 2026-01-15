@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Match } from '../../types';
-import { Calendar, Target, Award, ChevronDown, ChevronUp } from 'lucide-react';
+import { Match, Throw } from '../../types';
+import { Calendar, Target, Award, ChevronDown, ChevronUp, TrendingUp } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface MatchHistoryProps {
   matches: Match[];
@@ -17,6 +18,61 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
   
   const toggleMatch = (matchId: string) => {
     setExpandedMatch(expandedMatch === matchId ? null : matchId);
+  };
+
+  // Prepare round-by-round data for chart
+  const prepareRoundData = (match: Match) => {
+    const allThrows: Throw[] = [];
+    
+    // Collect all throws from all legs
+    match.legs.forEach(leg => {
+      allThrows.push(...leg.throws);
+    });
+    
+    // Sort by timestamp
+    const sortedThrows = allThrows.sort((a, b) => 
+      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
+    
+    // Group by player and round (3 darts = 1 round)
+    const playerRounds: Record<string, { round: number; score: number }[]> = {};
+    
+    match.players.forEach(player => {
+      const playerThrows = sortedThrows.filter(t => t.playerId === player.playerId);
+      const rounds: { round: number; score: number }[] = [];
+      
+      for (let i = 0; i < playerThrows.length; i += 1) {
+        const roundNumber = Math.floor(i / 3) + 1;
+        const throwScore = playerThrows[i].score;
+        
+        // Check if this round already exists
+        const existingRound = rounds.find(r => r.round === roundNumber);
+        if (existingRound) {
+          existingRound.score += throwScore;
+        } else {
+          rounds.push({ round: roundNumber, score: throwScore });
+        }
+      }
+      
+      playerRounds[player.playerId] = rounds;
+    });
+    
+    // Merge data for chart
+    const maxRounds = Math.max(...Object.values(playerRounds).map(r => r.length));
+    const chartData = [];
+    
+    for (let i = 1; i <= maxRounds; i++) {
+      const dataPoint: any = { round: i };
+      
+      match.players.forEach(player => {
+        const roundData = playerRounds[player.playerId]?.find(r => r.round === i);
+        dataPoint[player.name] = roundData?.score || 0;
+      });
+      
+      chartData.push(dataPoint);
+    }
+    
+    return chartData;
   };
   
   return (
@@ -96,7 +152,60 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
               
               {/* Expanded Details */}
               {isExpanded && (
-                <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-white/50 dark:bg-gray-800/50">
+                <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-white/50 dark:bg-gray-800/50 space-y-6">
+                  {/* Round-by-Round Chart */}
+                  <div className="glass-card p-6 rounded-xl">
+                    <h4 className="font-bold text-white mb-4 flex items-center gap-2">
+                      <TrendingUp size={20} className="text-primary-400" />
+                      Runden-Verlauf
+                    </h4>
+                    <div className="bg-dark-900 rounded-lg p-4">
+                      <ResponsiveContainer width="100%" height={300}>
+                        <LineChart data={prepareRoundData(match)}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
+                          <XAxis 
+                            dataKey="round" 
+                            stroke="#737373" 
+                            style={{ fontSize: '12px' }}
+                            label={{ value: 'Runde', position: 'insideBottom', offset: -5, fill: '#737373' }}
+                          />
+                          <YAxis 
+                            stroke="#737373" 
+                            style={{ fontSize: '12px' }}
+                            label={{ value: 'Punkte', angle: -90, position: 'insideLeft', fill: '#737373' }}
+                          />
+                          <Tooltip 
+                            contentStyle={{ 
+                              backgroundColor: '#0a0a0a', 
+                              border: '1px solid #404040', 
+                              borderRadius: '8px', 
+                              padding: '12px' 
+                            }} 
+                            labelStyle={{ color: '#fff', fontWeight: 'bold' }}
+                            itemStyle={{ color: '#fff' }}
+                            formatter={(value: number) => [`${value} Punkte`, '']}
+                          />
+                          <Legend 
+                            wrapperStyle={{ paddingTop: '20px' }}
+                            iconType="line"
+                          />
+                          {match.players.map((p, index) => (
+                            <Line
+                              key={p.playerId}
+                              type="monotone"
+                              dataKey={p.name}
+                              stroke={index === 0 ? '#0ea5e9' : '#a855f7'}
+                              strokeWidth={3}
+                              dot={{ fill: index === 0 ? '#0ea5e9' : '#a855f7', r: 5 }}
+                              activeDot={{ r: 7 }}
+                              name={p.name}
+                            />
+                          ))}
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
                   <div className="grid md:grid-cols-2 gap-6">
                     {/* Player Stats */}
                     <div>
