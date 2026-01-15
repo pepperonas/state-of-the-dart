@@ -2,9 +2,11 @@
   <img src="public/images/state-of-the-dart-thumb-xs.jpg" alt="State of the Dart" width="800" />
 </div>
 
+> 🇩🇪 **Deutsch** | [🇬🇧 English](README.en.md)
+
 # 🎯 State of the Dart
 
-**Professional Dart Scoring System** - A feature-rich, web-based dart scoring application with multi-user support, professional statistics tracking, and live deployment.
+**Professionelles Dart-Zählsystem** - Eine funktionsreiche, webbasierte Dart-Scoring-Anwendung mit Multi-User-Support, professionellem Statistik-Tracking und Live-Deployment.
 
 [![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green)](https://stateofthedart.com)
 ![Version](https://img.shields.io/badge/Version-0.0.1-blue)
@@ -14,486 +16,465 @@
 ![Vite](https://img.shields.io/badge/Vite-5.4-blue)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-blue)
 
-🌐 **[Live App](https://stateofthedart.com)** | 📱 **[Install as PWA](PWA.md)** | 📊 **[Charts Guide](CHARTS.md)** | 🔄 **[Versioning](VERSIONING.md)** | 📖 **[Deployment Guide](DEPLOYMENT.md)** | ⚡ **[Performance Guide](PERFORMANCE.md)** | 🏷️ **[Meta Tags Guide](META_TAGS.md)** | 🐛 **[Report Issues](https://github.com/pepperonas/state-of-the-dart/issues)**
+🌐 **[Live App](https://stateofthedart.com)** | 📱 **[Als PWA installieren](PWA.md)** | 📊 **[Charts Guide](CHARTS.md)** | 🔄 **[Versionierung](VERSIONING.md)** | 📖 **[Deployment Guide](DEPLOYMENT.md)** | ⚡ **[Performance Guide](PERFORMANCE.md)** | 🏷️ **[Meta Tags Guide](META_TAGS.md)** | 🐛 **[Issues melden](https://github.com/pepperonas/state-of-the-dart/issues)**
 
 ---
 
 ## ✨ Features
 
-### 👥 Multi-Tenant System
-- **Personal Profiles** - Each player has their own isolated profile with separate data
-- **Profile Management** - Easy switching between profiles with visual avatars
-- **Data Isolation** - Complete separation of stats, settings, and game history
-- **Unlimited Profiles** - Create as many profiles as needed
+### 👥 Multi-Tenant-System
+- **Persönliche Profile** - Jeder Spieler hat sein eigenes isoliertes Profil mit separaten Daten
+- **Profilverwaltung** - Einfaches Wechseln zwischen Profilen mit visuellen Avataren
+- **Datenisolation** - Vollständige Trennung von Stats, Einstellungen und Spielhistorie
+- **Unbegrenzte Profile** - Erstelle so viele Profile wie benötigt
 
-### 🎮 Game Modes
-- **X01 Games** - Full support for 301/501/701/1001 with customizable settings
-- **Double Out/In** - Configurable checkout rules
-- **Best of Sets/Legs** - Tournament-style match formats
-- **Multi-player** - Support for 2+ players with custom avatars and names
-- **Continue Match** - Resume interrupted games automatically
-- **Training Modes** - 6 training modes including Doubles/Triples practice, Around the Clock, and Bob's 27 (UI ready)
-- **Tournament System** - Knockout, Round Robin, League, and Swiss System formats (UI ready)
+### 🎮 Spielmodi
+- **X01-Spiele** - Vollständige Unterstützung für 301/501/701/1001 mit anpassbaren Einstellungen
+- **Double Out/In** - Konfigurierbare Checkout-Regeln
+- **Best of Sets/Legs** - Turnier-Matchformate
+- **Multi-Player** - Unterstützung für 2+ Spieler mit eigenen Avataren und Namen
+- **Match fortsetzen** - Unterbrochene Spiele automatisch fortsetzen
+- **Trainingsmodi** - 6 Trainingsmodi inkl. Doubles/Triples-Training, Around the Clock und Bob's 27
+- **Turniersystem** - Knockout, Round Robin, Liga und Swiss System (UI fertig)
 
-### 📊 Advanced Statistics & Charts
-- **10+ Interactive Charts** - Beautiful visualizations with Recharts
-  - Radar Chart: Performance-Profil (Average, Checkout %, 180s, Win Rate)
-  - Pie Chart: Win/Loss-Statistik
-  - Bar Charts: Score-Verteilung, High Scores
-  - Line Charts: Average- und Checkout-Entwicklung
-  - Area Charts: Legs Gewonnen/Verloren
-  - Composed Charts: Monatliche Performance-Trends
-- **Player Comparison** - Compare up to 4 players side-by-side with:
-  - Radar Chart: 5-dimensional skill comparison
-  - Stats Table: Detailed head-to-head comparison
-  - Bar Chart: Visual metric comparison
-- **Real-Time Stats** - Live scoring with instant calculations
-- **Player Statistics** - Average, checkout %, high scores, 180s, 171+, 140+, 100+
-- **Match History** - Complete tracking of all games played
-- **Trend Analysis** - Improvement metrics and performance trends
-- **Personal Bests** - Track highest checkouts, best averages, 9-darters
-- **Export/Import** - JSON for full data backup, CSV for match history
-- **Automatic Sync** - Stats updated automatically after each match
+### 📊 Erweiterte Statistiken & Charts
+- **10+ interaktive Charts** - Wunderschöne Visualisierungen mit Recharts
+  - Radar-Chart: Performance-Profil (Average, Checkout %, 180s, Win Rate)
+  - Pie-Chart: Sieg/Niederlage-Statistik
+  - Bar-Charts: Score-Verteilung, High Scores
+  - Linien-Charts: Average- und Checkout-Entwicklung
+  - **Runden-Chart**: Match-Verlauf Runde für Runde (3 Würfe = 1 Runde)
+  - Area-Charts: Legs Gewonnen/Verloren
+  - Composed-Charts: Monatliche Performance-Trends
+- **Spielervergleich** - Vergleiche bis zu 4 Spieler nebeneinander mit:
+  - Radar-Chart: 5-dimensionaler Skill-Vergleich
+  - Stats-Tabelle: Detaillierter Head-to-Head-Vergleich
+  - Bar-Chart: Visuelle Metrik-Vergleiche
+- **Echtzeit-Stats** - Live-Scoring mit sofortiger Berechnung
+- **Spieler-Statistiken** - Average, Checkout %, High Scores, 180s, 171+, 140+, 100+
+- **Match-Historie** - Vollständiges Tracking aller gespielten Spiele
+- **Trendanalyse** - Verbesserungs-Metriken und Performance-Trends
+- **Persönliche Bestleistungen** - Tracke höchste Checkouts, beste Averages, 9-Darter
+- **Export/Import** - JSON für vollständige Datensicherung, CSV für Match-Historie
+- **Automatische Synchronisation** - Stats werden automatisch nach jedem Match aktualisiert
 
 ### 🏆 Achievements & Gamification
-- **20 Achievements** - Across 6 categories (First Steps, Scoring, Checkout, Training, Consistency, Special)
-- **Tier System** - Bronze, Silver, Gold, Platinum, Diamond tiers
-- **Rarity Levels** - Common, Rare, Epic, Legendary achievements
-- **Progress Tracking** - See progress for locked achievements
-- **Notifications** - Animated popups when achievements are unlocked
-- **Points System** - Earn points for achievements (up to 500 per achievement)
-- **Hidden Achievements** - Special secret achievements to discover
+- **20 Achievements** - In 6 Kategorien (Erste Schritte, Scoring, Checkout, Training, Konsistenz, Spezial)
+- **Tier-System** - Bronze, Silber, Gold, Platin, Diamant
+- **Seltenheitsstufen** - Common, Rare, Epic, Legendary Achievements
+- **Fortschritts-Tracking** - Sieh deinen Fortschritt für gesperrte Achievements
+- **Benachrichtigungen** - Animierte Popups beim Freischalten
+- **Punktesystem** - Verdiene Punkte für Achievements (bis zu 500 pro Achievement)
+- **Versteckte Achievements** - Spezielle geheime Achievements zum Entdecken
+- **Achievement-Hinweise** - Zeigt Fortschritt an, wenn du kurz vor einem Achievement stehst
 
-### 👤 Player Profiles & Leaderboard
-- **Detailed Player Profiles** - Individual pages for each player with:
-  - **8 Personal Best Categories** - Highest score, best average, most 180s, highest checkout, best checkout rate, shortest leg, longest win streak, most legs won
-  - **Performance Charts** - Track improvement over last 10 games
-  - **Skill Radar** - 5-dimensional skill visualization
-  - **Career Timeline** - From first to last game with all stats
-  - **Achievement Showcase** - Display unlocked achievements
-- **Leaderboard Rankings** - Competitive rankings in 7 categories:
-  - Best Average, Most Wins, Win Rate, Most 180s, Checkout Rate, Achievements, Total Points
-  - Top 3 get special medals (🏆 Gold, 🥈 Silver, 🥉 Bronze)
-  - Click on any player to view their profile
+### 👤 Spielerprofile & Bestenliste
+- **Detaillierte Spielerprofile** - Individuelle Seiten für jeden Spieler mit:
+  - **8 Persönliche Bestleistungen** - Höchster Score, bester Average, meiste 180s, höchstes Checkout, beste Checkout-Rate, kürzestes Leg, längste Siegesserie, meiste Legs gewonnen
+  - **Performance-Charts** - Verfolge Verbesserungen über die letzten 10 Spiele
+  - **Skill-Radar** - 5-dimensionale Skill-Visualisierung
+  - **Karriere-Zeitachse** - Vom ersten bis zum letzten Spiel mit allen Stats
+  - **Achievement-Showcase** - Zeige freigeschaltete Achievements
+- **Bestenlisten-Rankings** - Wettbewerbs-Rankings in 7 Kategorien:
+  - Bester Average, Meiste Siege, Win-Rate, Meiste 180s, Checkout-Rate, Achievements, Gesamtpunkte
+  - Top 3 bekommen spezielle Medaillen (🏆 Gold, 🥈 Silber, 🥉 Bronze)
+  - Klicke auf jeden Spieler, um sein Profil anzuzeigen
 
-### 🔊 Professional Audio System
-- **Score Announcements** - Professional caller voice for every score (0-180)
-- **Checkout Calls** - Special announcements for leg/set/match wins
-- **Bust Notifications** - Clear audio feedback for invalid throws
-- **400+ Audio Files** - Complete professional dart calling experience
-- **Volume Control** - Adjustable volume and mute options
+### 🔊 Professionelles Audio-System
+- **Score-Ansagen** - Professionelle Caller-Stimme für jeden Score (0-180)
+- **Checkout-Calls** - Spezielle Ansagen für Leg/Set/Match-Siege
+- **Bust-Benachrichtigungen** - Klares Audio-Feedback für ungültige Würfe
+- **Separate Lautstärke** - Unabhängige Kontrolle für Caller und Effects
+- **400+ Audio-Dateien** - Vollständiges professionelles Dart-Calling-Erlebnis
+- **Lautstärkeregelung** - Separate Regler für Caller (Scores) und Effects (UI-Sounds)
 
-### 🎨 Modern UI/UX
-- **Dark Mode Optimized** - High-contrast design with perfect readability
-- **Glassmorphism Design** - Modern, sleek interface with blur effects
-- **Responsive Layout** - Works on desktop, tablet, and mobile devices
-- **Smooth Animations** - Framer Motion powered transitions and effects
-- **Confetti Celebrations** - Visual feedback for 180s and wins
+### 🎯 Verbesserungen
+- **Personal Bests Auto-Update** - Automatische Aktualisierung nach jedem Match
+- **Undo Last Throw** - Rückgängig-Button für versehentliche Eingaben
+- **Letzte Spieler Quick-Select** - Schnellauswahl der zuletzt verwendeten Spieler
+- **Achievement-Fortschritts-Hinweise** - Benachrichtigungen wenn du nahe an einem Achievement bist
+- **Sound-Mixing** - Separate Lautstärke für Caller vs. Effects
+
+### 🎨 Modernes UI/UX
+- **Dark Mode optimiert** - Hochkontrast-Design mit perfekter Lesbarkeit
+- **Glassmorphism-Design** - Modernes, schlankes Interface mit Blur-Effekten
+- **Responsive Layout** - Funktioniert auf Desktop, Tablet und mobilen Geräten
+- **Sanfte Animationen** - Framer Motion powered Transitions und Effekte
+- **Konfetti-Feiern** - Visuelles Feedback für 180s und Siege
 
 ### ⚡ Performance & PWA
-- **Progressive Web App** - Install on any device, works offline
-- **Code Splitting** - Lazy loading reduces initial bundle by 70%
-- **Service Worker** - Offline support with smart caching
-- **Optimized Build** - Minified, tree-shaken, gzipped assets
-- **PageSpeed Score** - 90-100 on all metrics (Performance, Accessibility, SEO)
-- **Mobile-First** - Touch-optimized with 44px minimum targets
-- **WCAG 2.1 Compliant** - Accessibility features built-in
-
-### 💾 Robust Data Management
-- **Safe localStorage** - Error handling for quota exceeded scenarios
-- **Debounced Saving** - 90% reduction in storage writes
-- **Date Handling** - Correct serialization/deserialization
-- **Auto-Recovery** - Graceful fallback when storage fails
-- **Tenant Isolation** - Complete data separation per profile
-
----
-
-## 📱 PWA Installation
-
-**State of the Dart** kann als Progressive Web App (PWA) installiert werden!
-
-### Schnellinstallation
-
-1. **Besuche** https://stateofthedart.com
-2. **Klicke** auf "App installieren" im Browser oder in den Einstellungen ⚙️
-3. **Genieße** die native App-Erfahrung mit Offline-Support!
-
-### Features der PWA
-- ✅ **Offline-Funktionalität** - Spiele ohne Internet
-- ✅ **Homescreen-Icon** - Schnellzugriff wie native App
-- ✅ **Auto-Updates** - Immer die neueste Version
-- ✅ **~30MB Cache** - Schnelle Ladezeiten
-- ✅ **Plattformübergreifend** - Android, iOS, Windows, Mac, Linux
-
-📖 **[Ausführliche Installationsanleitung](PWA.md)**
-
----
-
-## 🧪 Automated Testing & CI/CD
-
-**Continuous Integration** ist bereits eingerichtet mit GitHub Actions!
-
-### Automatische Tests bei jedem Push
-- ✅ **Linting** - ESLint Checks
-- ✅ **Unit Tests** - Vitest (20 Tests)
-- ✅ **Build** - TypeScript Compilation + Vite Build
-- ✅ **Multi-Node** - Tests auf Node.js 18.x & 20.x
-
-### Test Status Badge
-[![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
-
-### Workflow Trigger
-Tests laufen automatisch bei:
-- 🔄 Push auf `main`, `master`, oder `develop` Branches
-- 🔀 Pull Requests auf diese Branches
-
-### Lokale Tests ausführen
-```bash
-npm run test        # Tests im Watch-Modus
-npm run test:run    # Tests einmalig
-npm run test:ui     # Tests mit UI
-npm run coverage    # Mit Coverage Report
-```
+- **Progressive Web App** - Auf jedem Gerät installierbar, funktioniert offline
+- **Code-Splitting** - Lazy Loading reduziert Initial-Bundle um 70%
+- **Service Worker** - Offline-Support mit intelligentem Caching
+- **Optimierter Build** - Minifizierte, tree-shaken, gzipped Assets
+- **PageSpeed Score** - 90-100 auf allen Metriken (Performance, Accessibility, SEO)
+- **Mobile-First** - Touch-optimiert mit 44px Minimum-Targets
+- **WCAG 2.1 konform** - Eingebaute Accessibility-Features
 
 ---
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Node.js 18+ and npm/yarn
-- Modern web browser (Chrome, Firefox, Safari, Edge)
-
 ### Installation
 
 ```bash
-# Clone the repository
+# Repository klonen
 git clone https://github.com/pepperonas/state-of-the-dart.git
 cd state-of-the-dart
 
-# Install dependencies
+# Dependencies installieren
 npm install
 
-# Start development server
+# Entwicklungsserver starten
 npm run dev
 ```
 
-The app will be available at `http://localhost:5173`
+Die App läuft auf `http://localhost:5173`
 
-### Build for Production
+### Build für Produktion
 
 ```bash
-# Create production build
+# Production Build erstellen
 npm run build
 
-# Preview production build
+# Build lokal testen
 npm run preview
 ```
 
 ### Testing
 
 ```bash
-# Run tests once
-npm run test:run
-
-# Run tests in watch mode
+# Tests ausführen
 npm test
 
-# Run tests with UI
+# Tests mit UI
 npm run test:ui
 
-# Generate coverage report
+# Test Coverage
 npm run coverage
 ```
 
-The project uses **Vitest** for unit testing with:
-- **Testing Library** for component testing
-- **jsdom** for DOM simulation
-- **Coverage reporting** via V8
-
-Tests are automatically run on every push via GitHub Actions.
-
-### Deploy to Production
-
-```bash
-# Deploy to VPS (requires SSH access)
-./deploy.sh
-```
-
-See [DEPLOYMENT.md](DEPLOYMENT.md) for full deployment guide.
-
 ---
 
-## 🎯 How to Use
+## 📁 Projektstruktur
 
-### 1. Create Your Profile
-- On first launch, you'll see the profile selector
-- Click "Neues Profil erstellen"
-- Choose an avatar and enter your name
-- Your profile is created and activated
-
-### 2. Start a Game
-- Click "Quick Game" from the main menu
-- Select players (or create new ones on the fly)
-- Choose game settings (501, legs to win, double-out)
-- Click "Start Game"
-
-### 3. Play
-- Use the numpad or quick score buttons to enter scores
-- Click dartboard segments for precise dart entry
-- Confirm throws with the OK button
-- Audio announcements guide you through the game
-
-### 4. Training & Tournaments
-- Click "Training" to access practice modes (UI ready)
-- Click "Tournament" to set up competitions (UI ready)
-- Features coming soon: full functionality for all modes
-
-### 5. View Statistics
-- Click "Statistics" from the main menu
-- View your personal stats, averages, and achievements
-- All data is saved and synced automatically
-
-### 6. Switch Profiles
-- Click "Profil wechseln" in the main menu or settings
-- Select a different profile to view their data
-- Each profile has completely separate statistics
-
----
-
-## 🏗️ Technical Architecture
-
-### Tech Stack
-- **Frontend**: React 19 with TypeScript
-- **Build Tool**: Vite 5.4 with optimized production builds
-- **Styling**: Tailwind CSS with custom glassmorphism
-- **State Management**: React Context API with useReducer
-- **Routing**: React Router v7
-- **Animations**: Framer Motion
-- **Storage**: TenantStorage (multi-tenant localStorage wrapper)
-- **Deployment**: Nginx on VPS with Let's Encrypt SSL
-
-### Project Structure
 ```
 state-of-the-dart/
-├── public/
-│   └── sounds/              # Professional audio files (400+)
-│       ├── caller/          # Score announcements (0-180)
-│       ├── gameshot/        # Checkout sounds (legs/sets)
-│       ├── effects/         # Game effects
-│       ├── john/            # Commentary audio
-│       ├── requires/        # Checkout requirements
-│       ├── yourequire/      # Player-specific requirements
-│       ├── texts/           # Text-to-speech backups
-│       └── ringtone/        # Call sounds
 ├── src/
-│   ├── components/
-│   │   ├── game/           # Game components (GameScreen, ScoreInput, PlayerScore)
-│   │   ├── dartboard/      # Dartboard and CheckoutSuggestion
-│   │   ├── stats/          # StatsOverview
-│   │   ├── player/         # PlayerManagement
-│   │   ├── training/       # TrainingMenu
-│   │   ├── tournament/     # TournamentMenu
-│   │   ├── TenantSelector.tsx  # Profile selection
-│   │   ├── MainMenu.tsx    # Main navigation
-│   │   └── Settings.tsx    # Settings page
-│   ├── context/
-│   │   ├── TenantContext.tsx    # Multi-tenant management
-│   │   ├── GameContext.tsx      # Game state & logic
-│   │   ├── PlayerContext.tsx    # Player management
-│   │   └── SettingsContext.tsx  # App settings
-│   ├── data/
-│   │   └── checkoutTable.ts    # Checkout combinations
-│   ├── types/
-│   │   └── index.ts           # TypeScript definitions
-│   └── utils/
-│       ├── scoring.ts         # Game logic & validation
-│       ├── storage.ts         # Safe localStorage wrapper (TenantStorage)
-│       └── audio.ts           # Audio system
-├── deploy.sh              # Automated deployment script
-├── DEPLOYMENT.md          # Deployment documentation
-├── CLAUDE.md              # AI assistant guidance
-└── package.json
+│   ├── components/           # React-Komponenten
+│   │   ├── achievements/     # Achievement-System
+│   │   ├── dartboard/        # Dartboard & Checkout
+│   │   ├── game/             # Game-Screen & Score-Input
+│   │   ├── leaderboard/      # Bestenlisten
+│   │   ├── player/           # Spielerverwaltung & Profile
+│   │   ├── stats/            # Statistiken & Charts
+│   │   ├── tournament/       # Turniersystem
+│   │   └── training/         # Trainingsmodi
+│   ├── context/              # React Context (State Management)
+│   │   ├── AchievementContext.tsx
+│   │   ├── GameContext.tsx
+│   │   ├── PlayerContext.tsx
+│   │   ├── SettingsContext.tsx
+│   │   └── TenantContext.tsx
+│   ├── hooks/                # Custom React Hooks
+│   │   ├── useAchievementHints.ts
+│   │   └── useGameAchievements.ts
+│   ├── types/                # TypeScript Typen
+│   │   ├── achievements.ts
+│   │   ├── index.ts
+│   │   └── personalBests.ts
+│   ├── utils/                # Utility-Funktionen
+│   │   ├── audio.ts          # Audio-System
+│   │   ├── exportImport.ts   # Daten-Export/Import
+│   │   ├── scoring.ts        # Scoring-Logik
+│   │   └── storage.ts        # LocalStorage-Wrapper
+│   ├── data/                 # Statische Daten
+│   │   └── checkoutTable.ts  # Checkout-Vorschläge
+│   └── tests/                # Unit Tests
+├── public/
+│   ├── sounds/               # 400+ Audio-Dateien
+│   └── images/               # Bilder & Thumbnails
+├── dist/                     # Production Build
+└── deploy.sh                 # Deployment-Script
 ```
 
-### Key Implementation Details
+---
 
-#### Multi-Tenant System
-- **TenantStorage** - Wrapper around localStorage with tenant prefix
-- **TenantContext** - Manages current profile and profile switching
-- **Data Isolation** - All contexts scope data by tenant ID
-- **Profile Management** - Create, switch, and delete profiles safely
+## 🎮 Nutzung
 
-#### Score Validation
-- **Bust Detection** - Validates throws against double-out rules
-- **Bogey Numbers** - Detects impossible checkouts (169, 168, 166, etc.)
-- **Checkout Suggestions** - Real-time suggestions for 2-170
-- **Score Distribution** - Tracks and validates all score patterns
+### 1. Profil erstellen
+- Wähle einen Avatar und Namen
+- Dein Profil wird lokal gespeichert
+- Wechsle jederzeit zwischen Profilen
 
-#### Data Persistence
-- **Safe Storage** - Error handling for quota exceeded
-- **Debounced Writes** - Reduces storage operations by 90%
-- **Date Revival** - Proper serialization of Date objects
-- **Auto-Recovery** - Fallback when storage fails
+### 2. Spiel starten
+- Wähle Spieler aus
+- Konfiguriere Spieleinstellungen (301/501/701/1001)
+- Starte das Match
 
-#### Type System
-- **Comprehensive TypeScript** - Full type coverage for all features
-- **Future-Ready** - Types defined for training, tournaments, achievements
-- **Export/Import** - Complete data portability structures
-- **Strict Mode** - All TypeScript strict checks enabled
+### 3. Score eingeben
+- **Numpad**: Direkte Eingabe von Scores
+- **Quick Scores**: Häufige Scores mit einem Klick (26, 41, 45, 60, 85, 100, 140, 180)
+- **Dartboard**: Visuell auf Board klicken
+- **Miss-Button**: Fehlwurf registrieren
+
+### 4. Statistiken ansehen
+- **Übersicht**: Gesamtstatistiken mit Charts
+- **Fortschritt**: Entwicklung über Zeit
+- **Verlauf**: Detaillierte Match-Historie mit Runden-Charts
+- **Vergleich**: Multi-Player-Vergleich
+
+### 5. Achievements freischalten
+- Spiele Matches um Achievements zu verdienen
+- 20 Achievements in 6 Kategorien
+- Erhalte Hinweise, wenn du kurz vor einem Achievement stehst
 
 ---
 
-## 🎨 Customization
+## 🛠️ Technologie-Stack
 
-### Adding New Game Modes
-Extend the `GameType` enum in `src/types/index.ts` and implement scoring logic in `src/utils/scoring.ts`.
-
-### Custom Themes
-Modify Tailwind configuration in `tailwind.config.js` and update CSS variables in `src/index.css`.
-
-### Audio Packs
-Replace MP3 files in `public/sounds/` with your own recordings maintaining the same file structure.
+- **Frontend**: React 19.2 + TypeScript 5.9
+- **Build Tool**: Vite 5.4
+- **Styling**: Tailwind CSS 3.4
+- **State Management**: React Context API
+- **Charts**: Recharts 2.12
+- **Animations**: Framer Motion 12.26
+- **Routing**: React Router DOM 7.12
+- **Testing**: Vitest 1.0 + React Testing Library 16.1
+- **PWA**: vite-plugin-pwa 0.17
+- **Icons**: Lucide React 0.562
+- **Deployment**: Custom rsync script
 
 ---
 
-## 📝 Development
+## 📊 Statistiken & Charts
 
+Die App bietet umfangreiche Statistik-Features:
+
+### Spieler-Statistiken
+- Spiele gespielt/gewonnen/verloren
+- Average (Gesamt, Leg, Match)
+- Highest Score, 180s, 171+, 140+, 100+, 60+
+- Checkout-Prozentsatz
+- Beste Averages, kürzestes Leg
+- 9-Darter-Finishes
+- Score-Verteilung
+
+### Charts & Visualisierungen
+1. **Performance-Radar** - 5 Dimensionen (Average, Win Rate, Checkout %, 180s, Konsistenz)
+2. **Win/Loss Pie-Chart** - Visuelles Verhältnis von Siegen zu Niederlagen
+3. **Average-Entwicklung** - Linien-Chart über Zeit
+4. **Checkout-Quote-Entwicklung** - Trend-Linie
+5. **Score-Verteilung** - Bar-Chart (180s, 140+, 100+, 60+)
+6. **Treffer pro Segment** - Dartboard-Segmente Analyse
+7. **Match-Verlauf Runden-Chart** - Zeigt jede Runde (3 Würfe) im Match-Verlauf
+8. **Vergleichs-Charts** - Multi-Player Radar & Bar Charts
+
+Siehe [CHARTS.md](CHARTS.md) für detaillierte Chart-Dokumentation.
+
+---
+
+## 🏆 Achievement-System
+
+20 Achievements in 6 Kategorien:
+
+### Kategorien
+1. **Erste Schritte** (5) - Rookie bis Legend
+2. **Scoring** (5) - Von Ton 80 bis World Class
+3. **Checkout** (4) - Perfekte Finishes
+4. **Training** (3) - Trainingserfolge
+5. **Konsistenz** (2) - Siegesserien ohne Bust
+6. **Spezial** (1) - 9-Darter (Hidden)
+
+### Tier-System
+- **Bronze** (5-25 Punkte) - Einstiegs-Achievements
+- **Silber** (30-75 Punkte) - Fortgeschrittene
+- **Gold** (100-150 Punkte) - Experten
+- **Platin** (200-300 Punkte) - Meister
+- **Diamant** (500 Punkte) - Legenden
+
+Siehe vollständige Liste in `src/types/achievements.ts`
+
+---
+
+## 📱 PWA-Installation
+
+### Desktop (Chrome/Edge)
+1. Klicke auf das ⊕-Symbol in der Adressleiste
+2. Oder: "App installieren" in den Einstellungen
+
+### iOS Safari
+1. Teilen-Button (↑)
+2. "Zum Home-Bildschirm"
+3. "Hinzufügen"
+
+### Android Chrome
+1. Menü (⋮)
+2. "App installieren"
+3. Bestätigen
+
+Siehe [PWA.md](PWA.md) für detaillierte Anleitung.
+
+---
+
+## 🔄 Daten-Export/Import
+
+### JSON-Export (Vollständig)
+- Alle Spieler
+- Alle Matches
+- Alle Einstellungen
+- Alle Achievements
+- Alle Personal Bests
+
+### CSV-Export (Match-Historie)
+- Match-Datum & -Uhrzeit
+- Spieler & Scores
+- Statistiken pro Match
+- Importierbar in Excel/Sheets
+
+**Location**: Einstellungen → Datenverwaltung
+
+---
+
+## ⚡ Performance-Optimierungen
+
+- **Code-Splitting**: ~70% kleinerer Initial-Bundle
+- **Lazy Loading**: Route-basierte Component-Lazy-Loading
+- **Image Optimization**: WebP + Responsive Images
+- **Service Worker**: Intelligentes Caching
+- **Tree Shaking**: Unbenutzter Code wird entfernt
+- **Minification**: CSS/JS komprimiert
+- **Gzip Compression**: ~70% kleinere Assets
+
+Google PageSpeed Insights Score: **95-100/100**
+
+Siehe [PERFORMANCE.md](PERFORMANCE.md) für Details.
+
+---
+
+## 🧪 Testing
+
+### Unit Tests
+- Utils (Scoring, Storage)
+- Components
+- Hooks
+- Context
+
+### Test-Befehle
 ```bash
-# Run development server with hot reload
-npm run dev
-
-# Run linter
-npm run lint
-
-# Type checking (included in build)
-npm run build
-
-# Preview production build locally
-npm run preview
+npm test              # Watch-Modus
+npm run test:run      # Einmalig
+npm run test:ui       # Mit UI
+npm run coverage      # Coverage-Report
 ```
 
-### Development Tips
-- Use React DevTools for debugging context
-- Check browser console for storage warnings
-- Test with multiple profiles to verify isolation
-- Use network throttling to test slow connections
+### CI/CD
+- GitHub Actions läuft automatisch bei Push
+- Lint + Tests + Build
+- Badge im README
 
 ---
 
 ## 🚀 Deployment
 
-The app is currently deployed at **https://stateofthedart.com**
-
-### Quick Deploy
+### Automatisches Deployment
 ```bash
 ./deploy.sh
 ```
 
-### Manual Deploy
-```bash
-# Build
-npm run build
+Das Script führt aus:
+1. `npm run build` - Production Build
+2. `rsync` - Upload zu Server
+3. Permissions setzen
+4. Verifizierung
 
-# Upload to VPS
-rsync -avz --progress --delete dist/ root@YOUR_VPS:/var/www/stateofthedart/
-
-# Reload Nginx
-ssh root@YOUR_VPS "nginx -s reload"
-```
-
-See [DEPLOYMENT.md](DEPLOYMENT.md) for complete deployment guide including:
-- VPS setup
-- Nginx configuration
-- SSL certificate setup
-- Troubleshooting
+Siehe [DEPLOYMENT.md](DEPLOYMENT.md) für Details.
 
 ---
 
-## 🐛 Known Issues & Limitations
+## 🔢 Versionierung
 
-- Audio files require HTTPS in production (browser security)
-- localStorage limited to ~5-10MB per origin
-- No backend - all data stored client-side
-- No cross-device sync (each device has separate profiles)
-- Training modes: UI complete, functionality in development
-- Tournament system: UI complete, functionality in development
+- **Aktuell**: v0.0.1
+- **Schema**: MAJOR.MINOR.PATCH
+- **Auto-Increment**: `npm run version:bump`
+
+Siehe [VERSIONING.md](VERSIONING.md) für Details.
 
 ---
 
-## 🔜 Roadmap
+## 🗺️ Roadmap
 
-### In Progress
-- [x] Training modes UI (6 modes: Doubles, Triples, Around the Clock, Checkout, Bob's 27, Score Training)
-- [x] Tournament system UI (Knockout, Round Robin, League, Swiss System)
-- [ ] Training modes functionality implementation
-- [ ] Tournament bracket and match management
+### ✅ Abgeschlossen
+- [x] Multi-Tenant-System
+- [x] X01-Spiele (301/501/701/1001)
+- [x] Erweiterte Statistiken mit 10+ Charts
+- [x] Export/Import (JSON/CSV)
+- [x] PWA mit Offline-Support
+- [x] Achievement-System (20 Achievements)
+- [x] Spielerprofile & Personal Bests
+- [x] Bestenlisten
+- [x] Spielervergleich (bis zu 4 Spieler)
+- [x] Runden-Chart im Match-Verlauf
+- [x] Personal Bests Auto-Update (#1/36)
+- [x] Undo Last Throw (#2/36)
+- [x] Last Players Quick-Select (#3/36)
+- [x] Achievement-Fortschritts-Hinweise (#4/36)
+- [x] Sound-Mixing (Separate Lautstärke) (#5/36)
 
-### Planned Features
-- [ ] Cricket game mode
-- [ ] Match replay and analysis
-- [ ] Export/Import data (JSON)
-- [ ] Cloud sync (optional backend)
-- [ ] Mobile apps (React Native)
-- [ ] Live multiplayer (WebRTC)
-- [ ] Performance analytics and charts
-- [ ] Video recording integration
+### 🔄 In Entwicklung
+Siehe [IMPROVEMENTS.md](IMPROVEMENTS.md) für 31 weitere geplante Features (#6-36)
+
+### 🎯 Geplant (HIGH Priority)
+- [ ] Cricket-Spielmodus (#7)
+- [ ] Turniersystem-Implementierung (#8)
+- [ ] Head-to-Head-Stats (#11)
+- [ ] Theme-Varianten (#19)
+- [ ] Keyboard-Shortcuts (#21)
+- [ ] Smart-Checkout-Trainer (#29)
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-### Code Style
-- Use TypeScript strict mode
-- Follow React Hooks best practices
-- Write meaningful commit messages
-- Add JSDoc comments for complex functions
+Contributions sind willkommen! Bitte:
+1. Fork das Repo
+2. Erstelle einen Feature-Branch
+3. Committe deine Änderungen
+4. Push zum Branch
+5. Erstelle einen Pull Request
 
 ---
 
-## 📄 License
+## 📄 Lizenz
 
-This project is open source. License file to be added.
-
----
-
-## 🙏 Acknowledgments
-
-- Professional dart calling audio system
-- React and Vite communities for amazing tools
-- Tailwind CSS for the styling framework
-- All dart players who tested and provided feedback
+MIT License - siehe [LICENSE](LICENSE) für Details.
 
 ---
 
-## 📞 Contact
+## 👨‍💻 Autor
 
-**Martin Pfeffer**  
+**Martin Pfeffer**
 - Website: [celox.io](https://celox.io)
-- Email: martin.pfeffer@celox.io
 - GitHub: [@pepperonas](https://github.com/pepperonas)
 
-**Project Links**  
-- Live Demo: [stateofthedart.com](https://stateofthedart.com)
-- Repository: [github.com/pepperonas/state-of-the-dart](https://github.com/pepperonas/state-of-the-dart)
-- Issues: [Report a Bug](https://github.com/pepperonas/state-of-the-dart/issues)
+---
+
+## 🙏 Danksagungen
+
+- **React Team** - Für das fantastische Framework
+- **Recharts** - Für die Chart-Library
+- **Tailwind CSS** - Für das CSS-Framework
+- **Framer Motion** - Für Animations-Library
+- **Vite** - Für den schnellen Build-Tool
 
 ---
 
-<p align="center">
-  <strong>Made with ❤️ for dart players worldwide</strong><br>
-  <sub>© 2026 Martin Pfeffer | celox.io</sub>
-</p>
-
-<p align="center">
-  <a href="https://stateofthedart.com">
-    <img src="https://img.shields.io/badge/Try_it_now-stateofthedart.com-green?style=for-the-badge" alt="Try it now">
-  </a>
-</p>
+<div align="center">
+  <p>Made with ❤️ and 🎯 by Martin Pfeffer</p>
+  <p>© 2026 celox.io | Version 0.0.1</p>
+  <p>
+    <a href="https://stateofthedart.com">🌐 Live Demo</a> •
+    <a href="https://github.com/pepperonas/state-of-the-dart">📦 GitHub</a> •
+    <a href="https://github.com/pepperonas/state-of-the-dart/issues">🐛 Issues</a>
+  </p>
+</div>
