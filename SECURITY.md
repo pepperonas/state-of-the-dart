@@ -174,12 +174,12 @@ GOOGLE_CALLBACK_URL=http://localhost:3001/api/auth/google/callback
 
 ```bash
 # server/.env
-SMTP_HOST=premium269-4.web-hosting.com
+SMTP_HOST=your-smtp-server.com
 SMTP_PORT=465
 SMTP_SECURE=true
-SMTP_USER=stateofthedart@celox.io
+SMTP_USER=your-email@your-domain.com
 SMTP_PASSWORD=your-secure-password-here  # ⚠️ GEHEIM!
-SMTP_FROM=State of the Dart <stateofthedart@celox.io>
+SMTP_FROM=Your App Name <your-email@your-domain.com>
 ```
 
 ---

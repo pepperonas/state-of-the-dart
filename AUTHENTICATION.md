@@ -81,10 +81,10 @@ Siehe `server/SETUP.md` für vollständige Anleitung!
 JWT_SECRET=your-super-secret-key-min-32-chars
 
 # SMTP (Email)
-SMTP_HOST=premium269-4.web-hosting.com
+SMTP_HOST=your-smtp-server.com
 SMTP_PORT=465
-SMTP_USER=stateofthedart@celox.io
-SMTP_PASS=your-password
+SMTP_USER=your-email@your-domain.com
+SMTP_PASS=your-secure-password
 
 # Google OAuth
 GOOGLE_CLIENT_ID=your-client-id

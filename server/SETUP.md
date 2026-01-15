@@ -115,20 +115,25 @@ GOOGLE_CALLBACK_URL=https://your-domain.com/api/auth/google/callback
 
 ---
 
-## 3️⃣ **SMTP bereits konfiguriert** ✅
+## 3️⃣ **SMTP konfigurieren** ⚙️
 
-Die SMTP-Einstellungen sind bereits in der `.env` gesetzt:
+⚠️ **WICHTIG:** Trage deine eigenen SMTP-Credentials in `.env` ein!
 
 ```env
-SMTP_HOST=premium269-4.web-hosting.com
+SMTP_HOST=your-smtp-server.com
 SMTP_PORT=465
 SMTP_SECURE=true
-SMTP_USER=stateofthedart@celox.io
-SMTP_PASSWORD=EgQr@uyh--Xo
-SMTP_FROM=State of the Dart <stateofthedart@celox.io>
+SMTP_USER=your-email@your-domain.com
+SMTP_PASSWORD=your-secure-smtp-password
+SMTP_FROM=Your App Name <your-email@your-domain.com>
 ```
 
-✅ **Fertig!** Emails werden automatisch versendet.
+**Beispiel SMTP-Provider:**
+- Gmail: `smtp.gmail.com` (Port 465)
+- Outlook: `smtp.office365.com` (Port 587)
+- Custom: Frage deinen Hosting-Provider
+
+✅ Nach Konfiguration werden Emails automatisch versendet.
 
 ---
 
@@ -311,6 +316,6 @@ SESSION_SECRET=$(openssl rand -base64 32)
 
 ## 📞 **Support**
 
-Bei Fragen: `stateofthedart@celox.io`
+Bei Fragen: Check GitHub Issues oder die Dokumentation!
 
 **Viel Erfolg! 🎯🚀**

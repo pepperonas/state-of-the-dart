@@ -190,13 +190,13 @@ SESSION_SECRET=$(node -e "console.log(require('crypto').randomBytes(64).toString
 # CORS Origins
 CORS_ORIGINS=https://stateofthedart.com
 
-# SMTP Configuration
-SMTP_HOST=premium269-4.web-hosting.com
+# SMTP Configuration (TRAGE DEINE CREDENTIALS EIN!)
+SMTP_HOST=your-smtp-server.com
 SMTP_PORT=465
 SMTP_SECURE=true
-SMTP_USER=stateofthedart@celox.io
-SMTP_PASSWORD=EgQr@uyh--Xo
-SMTP_FROM=State of the Dart <stateofthedart@celox.io>
+SMTP_USER=your-email@your-domain.com
+SMTP_PASSWORD=your-secure-smtp-password
+SMTP_FROM=Your App Name <your-email@your-domain.com>
 
 # Google OAuth
 GOOGLE_CLIENT_ID=<DEINE_GOOGLE_CLIENT_ID>
