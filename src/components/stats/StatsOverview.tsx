@@ -1047,20 +1047,20 @@ const PlayerComparisonView: React.FC<{
               key={player.id}
               onClick={() => togglePlayer(player.id)}
               disabled={!comparePlayerIds.includes(player.id) && comparePlayerIds.length >= 4}
-              className={`p-4 rounded-lg border-2 transition-all ${
+              className={`glass-card p-5 rounded-xl border-2 transition-all ${
                 comparePlayerIds.includes(player.id)
-                  ? 'border-primary-500 bg-primary-500/20'
-                  : 'border-dark-700 bg-dark-900/50 hover:border-dark-600'
+                  ? 'border-primary-500 bg-primary-500/10 shadow-lg'
+                  : 'border-dark-700 hover:border-dark-600 hover:bg-dark-800/50'
               } ${
                 !comparePlayerIds.includes(player.id) && comparePlayerIds.length >= 4
                   ? 'opacity-50 cursor-not-allowed'
-                  : 'cursor-pointer'
+                  : 'cursor-pointer hover:scale-105'
               }`}
             >
-              <div className="text-3xl mb-2">{player.avatar}</div>
-              <div className="font-semibold text-white text-sm">{player.name}</div>
+              <div className="text-4xl mb-3">{player.avatar}</div>
+              <div className="font-bold text-white text-base">{player.name}</div>
               {comparePlayerIds.includes(player.id) && (
-                <div className="text-xs text-primary-400 mt-1">✓ Ausgewählt</div>
+                <div className="text-xs text-primary-400 mt-2 font-semibold">✓ Ausgewählt</div>
               )}
             </button>
           ))}
