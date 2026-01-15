@@ -99,7 +99,7 @@ class SyncService {
       }
 
       // 5. Sync Achievements
-      const achievements = storage.getAll();
+      const achievements = (storage as any).getAll();
       for (const [key, value] of Object.entries(achievements)) {
         if (key.startsWith('achievements_')) {
           const playerId = key.replace('achievements_', '');

@@ -29,7 +29,7 @@ interface AdminStats {
   expiredUsers: number;
 }
 
-export const AdminPanel: React.FC = () => {
+const AdminPanel: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -354,3 +354,6 @@ export const AdminPanel: React.FC = () => {
     </div>
   );
 };
+
+
+export default AdminPanel;

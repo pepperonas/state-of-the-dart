@@ -9,7 +9,7 @@
 **Professionelles Dart-Zählsystem** - Eine funktionsreiche, webbasierte Dart-Scoring-Anwendung mit Multi-User-Support, professionellem Statistik-Tracking und Live-Deployment.
 
 [![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green)](https://stateofthedart.com)
-![Version](https://img.shields.io/badge/Version-0.0.1-blue)
+![Version](https://img.shields.io/badge/Version-1.0.0-blue)
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
 ![React](https://img.shields.io/badge/React-19.2-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)
@@ -22,11 +22,17 @@
 
 ## ✨ Features
 
-### 👥 Multi-Tenant-System
-- **Persönliche Profile** - Jeder Spieler hat sein eigenes isoliertes Profil mit separaten Daten
+### 👥 Multi-User & Authentication System
+- **Benutzerregistrierung** - E-Mail-Registrierung mit Verifizierung
+- **Sichere Authentifizierung** - JWT-basierte Authentifizierung mit bcrypt
+- **Google OAuth** - Schnelle Anmeldung mit Google-Konto
+- **30-Tage-Testzeitraum** - Kostenlose Testphase für alle neuen Benutzer
+- **Stripe-Integration** - Monatliche oder Lifetime-Abonnements
+- **Persönliche Profile** - Jeder Benutzer hat eigene isolierte Profile mit separaten Daten
 - **Profilverwaltung** - Einfaches Wechseln zwischen Profilen mit visuellen Avataren
 - **Datenisolation** - Vollständige Trennung von Stats, Einstellungen und Spielhistorie
-- **Unbegrenzte Profile** - Erstelle so viele Profile wie benötigt
+- **Cloud-Synchronisation** - Automatische Datensicherung in der Cloud
+- **👑 Admin-System** - Vollständige User-Management-Funktionen für Administratoren
 
 ### 🎮 Spielmodi
 - **X01-Spiele** - Vollständige Unterstützung für 301/501/701/1001 mit anpassbaren Einstellungen
@@ -75,10 +81,21 @@
   - **Skill-Radar** - 5-dimensionale Skill-Visualisierung
   - **Karriere-Zeitachse** - Vom ersten bis zum letzten Spiel mit allen Stats
   - **Achievement-Showcase** - Zeige freigeschaltete Achievements
+  - **🎯 Dart-Heatmap** - Visualisierung der Trefferbereiche (Rot = häufig, Blau = selten)
 - **Bestenlisten-Rankings** - Wettbewerbs-Rankings in 7 Kategorien:
   - Bester Average, Meiste Siege, Win-Rate, Meiste 180s, Checkout-Rate, Achievements, Gesamtpunkte
   - Top 3 bekommen spezielle Medaillen (🏆 Gold, 🥈 Silber, 🥉 Bronze)
   - Klicke auf jeden Spieler, um sein Profil anzuzeigen
+- **Globale Bestenliste** - Wetteifere mit Spielern weltweit
+
+### 👑 Admin-System (NEU in v1.0.0)
+- **User-Management** - Vollständige Verwaltung aller registrierten Benutzer
+- **Subscription-Kontrolle** - Gewähre oder widerrufe Lifetime-Access
+- **Admin-Rechte** - Mache andere Benutzer zu Admins
+- **User-Statistiken** - Dashboard mit Gesamtübersicht
+- **Filter & Suche** - Filtere nach Subscription-Status (Trial, Active, Lifetime, Expired)
+- **Benutzer löschen** - Lösche Benutzer permanent mit allen Daten
+- **Echtzeit-Updates** - Änderungen werden sofort angezeigt
 
 ### 🔊 Professionelles Audio-System
 - **Score-Ansagen** - Professionelle Caller-Stimme für jeden Score (0-180)
@@ -88,12 +105,14 @@
 - **400+ Audio-Dateien** - Vollständiges professionelles Dart-Calling-Erlebnis
 - **Lautstärkeregelung** - Separate Regler für Caller (Scores) und Effects (UI-Sounds)
 
-### 🎯 Verbesserungen
+### 🎯 Verbesserungen & Training
 - **Personal Bests Auto-Update** - Automatische Aktualisierung nach jedem Match
 - **Undo Last Throw** - Rückgängig-Button für versehentliche Eingaben
 - **Letzte Spieler Quick-Select** - Schnellauswahl der zuletzt verwendeten Spieler
 - **Achievement-Fortschritts-Hinweise** - Benachrichtigungen wenn du nahe an einem Achievement bist
 - **Sound-Mixing** - Separate Lautstärke für Caller vs. Effects
+- **Training-Statistiken** - Detaillierte Charts und Analyse für alle Trainingsmodi
+- **Match-Sharing** - Teile deine besten Matches mit anderen
 
 ### 🎨 Modernes UI/UX
 - **Dark Mode optimiert** - Hochkontrast-Design mit perfekter Lesbarkeit
@@ -115,14 +134,14 @@
 
 ## 🚀 Quick Start
 
-### Installation
+### Frontend Installation
 
 ```bash
 # Repository klonen
 git clone https://github.com/pepperonas/state-of-the-dart.git
 cd state-of-the-dart
 
-# Dependencies installieren
+# Frontend Dependencies installieren
 npm install
 
 # Entwicklungsserver starten
@@ -130,6 +149,36 @@ npm run dev
 ```
 
 Die App läuft auf `http://localhost:5173`
+
+### Backend Installation (für Cloud-Sync & Admin-Features)
+
+```bash
+# Backend Setup
+cd server
+
+# Dependencies installieren
+npm install
+
+# .env Datei erstellen (siehe server/env.example)
+cp env.example .env
+# Trage deine Credentials ein (SMTP, Stripe, Google OAuth)
+
+# TypeScript kompilieren
+npm run build
+
+# Admin-Konto erstellen
+npm run create:admin
+
+# Optional: Demo-Daten generieren
+npm run seed:demo
+
+# Server starten
+npm start
+```
+
+Der Backend-Server läuft auf `http://localhost:3001`
+
+📚 **Vollständige Setup-Anleitung**: Siehe [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) und [server/SETUP.md](server/SETUP.md)
 
 ### Build für Produktion
 

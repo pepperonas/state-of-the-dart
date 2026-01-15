@@ -9,7 +9,7 @@
 **Professional Dart Scoring System** - A feature-rich, web-based dart scoring application with multi-user support, professional statistics tracking, and live deployment.
 
 [![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green)](https://stateofthedart.com)
-![Version](https://img.shields.io/badge/Version-0.0.1-blue)
+![Version](https://img.shields.io/badge/Version-1.0.0-blue)
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
 ![React](https://img.shields.io/badge/React-19.2-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)
@@ -22,11 +22,17 @@
 
 ## ✨ Features
 
-### 👥 Multi-Tenant System
-- **Personal Profiles** - Each player has their own isolated profile with separate data
+### 👥 Multi-User & Authentication System
+- **User Registration** - Email registration with verification
+- **Secure Authentication** - JWT-based authentication with bcrypt
+- **Google OAuth** - Quick sign-in with Google account
+- **30-Day Trial Period** - Free trial for all new users
+- **Stripe Integration** - Monthly or lifetime subscriptions
+- **Personal Profiles** - Each user has isolated profiles with separate data
 - **Profile Management** - Easy switching between profiles with visual avatars
 - **Data Isolation** - Complete separation of stats, settings, and game history
-- **Unlimited Profiles** - Create as many profiles as needed
+- **Cloud Sync** - Automatic cloud data backup
+- **👑 Admin System** - Complete user management for administrators
 
 ### 🎮 Game Modes
 - **X01 Games** - Full support for 301/501/701/1001 with customizable settings
@@ -73,10 +79,21 @@
   - **Skill Radar** - 5-dimensional skill visualization
   - **Career Timeline** - From first to last game with all stats
   - **Achievement Showcase** - Display unlocked achievements
+  - **🎯 Dart Heatmap** - Visualization of hit areas (Red = frequent, Blue = rare)
 - **Leaderboard Rankings** - Competitive rankings in 7 categories:
   - Best Average, Most Wins, Win Rate, Most 180s, Checkout Rate, Achievements, Total Points
   - Top 3 get special medals (🏆 Gold, 🥈 Silver, 🥉 Bronze)
   - Click on any player to view their profile
+- **Global Leaderboard** - Compete with players worldwide
+
+### 👑 Admin System (NEW in v1.0.0)
+- **User Management** - Complete management of all registered users
+- **Subscription Control** - Grant or revoke lifetime access
+- **Admin Rights** - Make other users administrators
+- **User Statistics** - Dashboard with overall overview
+- **Filter & Search** - Filter by subscription status (Trial, Active, Lifetime, Expired)
+- **Delete Users** - Permanently delete users with all data
+- **Real-time Updates** - Changes displayed immediately
 
 ### 🔊 Professional Audio System
 - **Score Announcements** - Professional caller voice for every score (0-180)

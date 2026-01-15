@@ -81,7 +81,8 @@ const Dashboard: React.FC = () => {
       // Calculate streak (simplified)
       let currentStreak = 0;
       for (let i = completedMatches.length - 1; i >= 0; i--) {
-        if (completedMatches[i].winner) {
+        const match = completedMatches[i] as any;
+        if (match.winner) {
           currentStreak++;
         } else {
           break;
