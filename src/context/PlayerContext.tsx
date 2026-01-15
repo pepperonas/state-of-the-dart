@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Player, PlayerStats, PlayerPreferences } from '../types/index';
+import { Player, PlayerStats, PlayerPreferences, HeatmapData, Dart } from '../types/index';
 import { useTenant } from './TenantContext';
+import { createEmptyHeatmapData, updateHeatmapData } from '../utils/heatmap';
 
 interface PlayerContextType {
   players: Player[];
@@ -11,6 +12,8 @@ interface PlayerContextType {
   deletePlayer: (id: string) => void;
   setCurrentPlayer: (player: Player | null) => void;
   getPlayer: (id: string) => Player | undefined;
+  getPlayerHeatmap: (playerId: string) => HeatmapData;
+  updatePlayerHeatmap: (playerId: string, newDarts: Dart[]) => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | null>(null);
@@ -131,6 +134,33 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     return players.find(player => player.id === id);
   };
   
+  const getPlayerHeatmap = (playerId: string): HeatmapData => {
+    if (!storage) return createEmptyHeatmapData(playerId);
+    
+    const key = `heatmap-${playerId}`;
+    const saved = storage.get<any>(key, null);
+    
+    if (saved) {
+      // Revive Date objects
+      return {
+        ...saved,
+        lastUpdated: new Date(saved.lastUpdated)
+      };
+    }
+    
+    return createEmptyHeatmapData(playerId);
+  };
+  
+  const updatePlayerHeatmap = (playerId: string, newDarts: Dart[]) => {
+    if (!storage) return;
+    
+    const currentHeatmap = getPlayerHeatmap(playerId);
+    const updatedHeatmap = updateHeatmapData(currentHeatmap, newDarts);
+    
+    const key = `heatmap-${playerId}`;
+    storage.set(key, updatedHeatmap);
+  };
+  
   return (
     <PlayerContext.Provider value={{
       players,
@@ -140,6 +170,8 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       deletePlayer,
       setCurrentPlayer,
       getPlayer,
+      getPlayerHeatmap,
+      updatePlayerHeatmap,
     }}>
       {children}
     </PlayerContext.Provider>

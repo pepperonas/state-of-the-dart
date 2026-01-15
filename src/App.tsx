@@ -17,6 +17,7 @@ const PlayerProfile = lazy(() => import('./components/player/PlayerProfile'));
 const StatsOverview = lazy(() => import('./components/stats/StatsOverview'));
 const TrainingMenu = lazy(() => import('./components/training/TrainingMenu'));
 const TrainingScreen = lazy(() => import('./components/training/TrainingScreen'));
+const TrainingStats = lazy(() => import('./components/training/TrainingStats'));
 const TournamentMenu = lazy(() => import('./components/tournament/TournamentMenu'));
 const Settings = lazy(() => import('./components/Settings'));
 const AchievementsScreen = lazy(() => import('./components/achievements/AchievementsScreen'));
@@ -73,6 +74,7 @@ function AppContent() {
                     <Route path="/leaderboard" element={<Leaderboard />} />
                     <Route path="/training" element={<TrainingMenu />} />
                     <Route path="/training/:mode" element={<TrainingScreen />} />
+                    <Route path="/training-stats" element={<TrainingStats />} />
                     <Route path="/tournament" element={<TournamentMenu />} />
                     <Route path="/settings" element={<Settings darkMode={darkMode} setDarkMode={setDarkMode} />} />
                     <Route path="*" element={<Navigate to="/" replace />} />

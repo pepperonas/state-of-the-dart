@@ -21,7 +21,7 @@ import audioSystem from '../../utils/audio';
 const GameScreen: React.FC = () => {
   const navigate = useNavigate();
   const { state, dispatch } = useGame();
-  const { players, addPlayer } = usePlayer();
+  const { players, addPlayer, updatePlayerHeatmap } = usePlayer();
   const { settings } = useSettings();
   const { storage } = useTenant();
   const { checkMatchAchievements, checkLegAchievements } = useGameAchievements();
@@ -236,6 +236,11 @@ const GameScreen: React.FC = () => {
         // Still show confetti for 180s even if it's a checkout
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 3000);
+      }
+      
+      // Update heatmap for this player with the current darts
+      if (state.currentThrow.length > 0) {
+        updatePlayerHeatmap(currentPlayer.playerId, state.currentThrow);
       }
     } else {
       // Fallback: just announce the score

@@ -154,6 +154,24 @@ export interface Dart {
   bed?: 'single' | 'double' | 'triple' | 'outer-bull' | 'bull' | 'miss';
 }
 
+// Heatmap Types
+export interface HeatmapData {
+  playerId: string;
+  segments: {
+    [key: string]: number; // "segment-multiplier" -> count (e.g., "20-3" = triple 20)
+  };
+  totalDarts: number;
+  lastUpdated: Date;
+}
+
+export interface SegmentHeat {
+  segment: number;
+  multiplier: number;
+  count: number;
+  percentage: number;
+  color: string; // hex color based on frequency
+}
+
 // Training Types
 export type TrainingType = 
   | 'singles' 
@@ -176,6 +194,14 @@ export interface TrainingSession {
   completedAt?: Date;
   score?: number;
   personalBest?: boolean;
+  // Statistics
+  totalDarts?: number;
+  totalHits?: number;
+  totalAttempts?: number;
+  hitRate?: number; // percentage
+  averageScore?: number;
+  highestScore?: number;
+  duration?: number; // in seconds
 }
 
 export interface TrainingSettings {

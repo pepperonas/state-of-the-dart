@@ -59,12 +59,50 @@
 - **Impact:** Motiviert Spieler
 
 ### 6. Sound Mixing
-- **Status:** 🔄 IN PROGRESS
+- **Status:** ✅ DONE
 - **Priorität:** ⭐ HIGH
 - **Aufwand:** ~1 Stunde
 - **Beschreibung:** Separate Lautstärke für Caller vs. Effects
 - **Technisch:** Zwei Volume-Slider in Settings, Audio-Kategorisierung
 - **Impact:** Bessere Audio-Kontrolle
+
+### 6a. Dartboard Heatmap
+- **Status:** 🔄 IN PROGRESS
+- **Priorität:** ⭐ HIGH
+- **Aufwand:** ~4-6 Stunden
+- **Beschreibung:** Visualisierung der Trefferverteilung auf dem Dartboard
+- **Technisch:** 
+  - Heatmap-Overlay auf SVG Dartboard
+  - Farbverlauf: Blau (selten) → Grün → Gelb → Rot (oft)
+  - Aggregation aller Würfe pro Segment
+  - Anzeige in Spielerprofil & Stats
+- **Impact:** Zeigt Stärken/Schwächen visuell, hilft beim Training
+
+### 6b. Training Mode Statistics
+- **Status:** 🔄 IN PROGRESS
+- **Priorität:** ⭐ HIGH
+- **Aufwand:** ~3-4 Stunden
+- **Beschreibung:** Detaillierte Statistiken für alle Trainingsmodi
+- **Technisch:**
+  - Training Session Tracking
+  - Stats pro Modus (Erfolgsrate, Durchschnitt, Best Score)
+  - Verlaufs-Charts für Trainings-Fortschritt
+  - Training History mit Filterung
+- **Impact:** Motiviert zum regelmäßigen Training, zeigt Verbesserungen
+
+### 6c. SQLite Backend (VPS)
+- **Status:** 💭 IDEA
+- **Priorität:** 📌 MEDIUM (großes Projekt)
+- **Aufwand:** ~40-60 Stunden
+- **Beschreibung:** Backend-Server mit SQLite für Datenspeicherung
+- **Technisch:**
+  - Node.js/Express Backend auf VPS
+  - SQLite Datenbank
+  - REST API für alle CRUD-Operationen
+  - Authentication (JWT)
+  - Sync zwischen LocalStorage und Server
+  - Offline-First mit Background-Sync
+- **Impact:** Cloud-Speicherung, Multi-Device-Sync, Datensicherheit
 
 ---
 

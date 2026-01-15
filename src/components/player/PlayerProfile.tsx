@@ -1,16 +1,18 @@
 import React, { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Trophy, Target, TrendingUp, Award, Calendar, Zap, Star } from 'lucide-react';
+import { ArrowLeft, Trophy, Target, TrendingUp, Award, Calendar, Zap, Star, Flame } from 'lucide-react';
 import { usePlayer } from '../../context/PlayerContext';
 import { useAchievements } from '../../context/AchievementContext';
 import { useTenant } from '../../context/TenantContext';
 import { PersonalBests, createEmptyPersonalBests } from '../../types/personalBests';
 import { LineChart, Line, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { DartboardHeatmap } from '../dartboard/DartboardHeatmap';
+import { calculateAccuracyStats } from '../../utils/heatmap';
 
 const PlayerProfile: React.FC = () => {
   const navigate = useNavigate();
   const { playerId } = useParams<{ playerId: string }>();
-  const { players } = usePlayer();
+  const { players, getPlayerHeatmap } = usePlayer();
   const { getPlayerProgress, getUnlockedAchievements } = useAchievements();
   const { storage } = useTenant();
 
@@ -68,6 +70,18 @@ const PlayerProfile: React.FC = () => {
       { skill: 'Achievements', value: achievementProgress ? (achievementProgress.unlockedAchievements.length / 20) * 100 : 0, max: 100 },
     ];
   }, [personalBests, achievementProgress]);
+
+  // Heatmap data
+  const heatmapData = useMemo(() => {
+    if (!playerId) return null;
+    return getPlayerHeatmap(playerId);
+  }, [playerId, getPlayerHeatmap]);
+
+  // Accuracy stats
+  const accuracyStats = useMemo(() => {
+    if (!heatmapData) return null;
+    return calculateAccuracyStats(heatmapData);
+  }, [heatmapData]);
 
   if (!player || !playerId) {
     return (
@@ -297,6 +311,54 @@ const PlayerProfile: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Heatmap Section */}
+        {heatmapData && heatmapData.totalDarts > 0 && (
+          <div className="glass-card p-6 mb-6">
+            <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+              <Flame className="text-primary-400" size={24} />
+              Wurf-Heatmap
+            </h2>
+            
+            {/* Accuracy Stats */}
+            {accuracyStats && (
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                <div className="bg-dark-900 rounded-lg p-3 text-center">
+                  <div className="text-sm text-dark-400 mb-1">Miss Rate</div>
+                  <div className="text-xl font-bold text-error-400">
+                    {accuracyStats.missRate.toFixed(1)}%
+                  </div>
+                </div>
+                <div className="bg-dark-900 rounded-lg p-3 text-center">
+                  <div className="text-sm text-dark-400 mb-1">Triple Rate</div>
+                  <div className="text-xl font-bold text-success-400">
+                    {accuracyStats.tripleRate.toFixed(1)}%
+                  </div>
+                </div>
+                <div className="bg-dark-900 rounded-lg p-3 text-center">
+                  <div className="text-sm text-dark-400 mb-1">Double Rate</div>
+                  <div className="text-xl font-bold text-primary-400">
+                    {accuracyStats.doubleRate.toFixed(1)}%
+                  </div>
+                </div>
+                <div className="bg-dark-900 rounded-lg p-3 text-center">
+                  <div className="text-sm text-dark-400 mb-1">Lieblings-Feld</div>
+                  <div className="text-xl font-bold text-amber-400">
+                    {accuracyStats.favoriteSegment || '-'}
+                  </div>
+                </div>
+                <div className="bg-dark-900 rounded-lg p-3 text-center">
+                  <div className="text-sm text-dark-400 mb-1">Total Darts</div>
+                  <div className="text-xl font-bold text-white">
+                    {heatmapData.totalDarts}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <DartboardHeatmap heatmapData={heatmapData} size={450} />
+          </div>
+        )}
 
         {/* Recent Achievements */}
         {achievements.length > 0 && (

@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Check, X } from 'lucide-react';
-import { Dart, TrainingType } from '../../types';
+import { ArrowLeft, Check, X, BarChart } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
+import { Dart, TrainingType, TrainingSession, TrainingResult } from '../../types';
 import Dartboard from '../dartboard/Dartboard';
 import audioSystem from '../../utils/audio';
 import { useSettings } from '../../context/SettingsContext';
+import { usePlayer } from '../../context/PlayerContext';
+import { useTenant } from '../../context/TenantContext';
 
 interface TrainingState {
   currentTarget: number;
@@ -21,6 +24,8 @@ const TrainingScreen: React.FC = () => {
   const navigate = useNavigate();
   const { mode } = useParams<{ mode: TrainingType }>();
   const { settings } = useSettings();
+  const { currentPlayer, updatePlayerHeatmap } = usePlayer();
+  const { storage } = useTenant();
   
   const [currentThrow, setCurrentThrow] = useState<Dart[]>([]);
   const [trainingState, setTrainingState] = useState<TrainingState>({
@@ -34,6 +39,11 @@ const TrainingScreen: React.FC = () => {
     completed: false,
   });
 
+  // Training Session Tracking
+  const sessionRef = useRef<TrainingSession | null>(null);
+  const sessionStartTimeRef = useRef<Date | null>(null);
+  const [showStats, setShowStats] = useState(false);
+
   useEffect(() => {
     audioSystem.setEnabled(settings.soundVolume > 0);
     audioSystem.setVolume(settings.soundVolume);
@@ -42,7 +52,65 @@ const TrainingScreen: React.FC = () => {
   useEffect(() => {
     // Initialize training based on mode
     initializeTraining();
+    initializeSession();
   }, [mode]);
+
+  const initializeSession = () => {
+    if (!currentPlayer || !mode) return;
+
+    const session: TrainingSession = {
+      id: uuidv4(),
+      type: mode,
+      playerId: currentPlayer.id,
+      results: [],
+      settings: {},
+      startedAt: new Date(),
+      totalDarts: 0,
+      totalHits: 0,
+      totalAttempts: 0,
+      hitRate: 0,
+      averageScore: 0,
+      highestScore: 0,
+    };
+
+    sessionRef.current = session;
+    sessionStartTimeRef.current = new Date();
+  };
+
+  const saveSession = () => {
+    if (!sessionRef.current || !storage) return;
+
+    const session = sessionRef.current;
+    
+    // Calculate final stats
+    const duration = sessionStartTimeRef.current 
+      ? Math.floor((new Date().getTime() - sessionStartTimeRef.current.getTime()) / 1000)
+      : 0;
+
+    session.completedAt = new Date();
+    session.duration = duration;
+    session.hitRate = session.totalAttempts && session.totalAttempts > 0 
+      ? (session.totalHits! / session.totalAttempts) * 100 
+      : 0;
+
+    // Get existing sessions
+    const existingSessions = storage.get<TrainingSession[]>('trainingSessions', []);
+    
+    // Check if this is a personal best for this training mode
+    const previousBest = existingSessions
+      .filter(s => s.type === session.type && s.playerId === session.playerId)
+      .sort((a, b) => (b.score || 0) - (a.score || 0))[0];
+    
+    if (!previousBest || (session.score && session.score > (previousBest.score || 0))) {
+      session.personalBest = true;
+    }
+
+    // Save session
+    const updatedSessions = [...existingSessions, session];
+    storage.set('trainingSessions', updatedSessions);
+
+    sessionRef.current = null;
+  };
 
   const initializeTraining = () => {
     switch (mode) {
@@ -357,6 +425,40 @@ const TrainingScreen: React.FC = () => {
       }
     }
 
+    // Update session stats
+    if (sessionRef.current && currentPlayer) {
+      const session = sessionRef.current;
+      
+      // Add result
+      const result: TrainingResult = {
+        targetSegment: trainingState.currentTarget,
+        targetMultiplier: trainingState.currentTargetMultiplier,
+        dartsThrown: currentThrow,
+        hit: isHit,
+        timestamp: new Date(),
+        score: throwScore,
+      };
+      session.results.push(result);
+      
+      // Update stats
+      session.totalDarts = (session.totalDarts || 0) + currentThrow.length;
+      session.totalHits = newState.hits;
+      session.totalAttempts = newState.attempts;
+      session.score = newState.score;
+      session.averageScore = session.totalAttempts > 0 
+        ? session.results.reduce((sum, r) => sum + (r.score || 0), 0) / session.totalAttempts
+        : 0;
+      session.highestScore = Math.max(session.highestScore || 0, throwScore);
+      
+      // Update heatmap
+      updatePlayerHeatmap(currentPlayer.id, currentThrow);
+      
+      // Save session if completed
+      if (newState.completed) {
+        saveSession();
+      }
+    }
+
     setTrainingState(newState);
     setCurrentThrow([]);
   };
@@ -371,6 +473,7 @@ const TrainingScreen: React.FC = () => {
 
   const handleRestart = () => {
     initializeTraining();
+    initializeSession();
     setCurrentThrow([]);
   };
 
