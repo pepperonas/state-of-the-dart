@@ -201,6 +201,7 @@ router.post('/login', async (req: Request, res: Response) => {
         email: user.email,
         name: user.name,
         avatar: user.avatar,
+        isAdmin: user.is_admin === 1,
         subscriptionStatus: user.subscription_status,
         trialEndsAt: user.trial_ends_at,
         subscriptionEndsAt: user.subscription_ends_at,
@@ -302,7 +303,9 @@ router.post('/reset-password', async (req: Request, res: Response) => {
 /**
  * Get current user
  */
-router.get('/me', async (req: AuthRequest, res: Response) => {
+import { authenticateToken } from '../middleware/auth';
+
+router.get('/me', authenticateToken, async (req: AuthRequest, res: Response) => {
   const token = req.headers.authorization?.replace('Bearer ', '');
 
   if (!token) {
@@ -384,7 +387,7 @@ router.post('/resend-verification', async (req: Request, res: Response) => {
 /**
  * Update user profile (name, avatar)
  */
-router.patch('/profile', async (req: AuthRequest, res: Response) => {
+router.patch('/profile', authenticateToken, async (req: AuthRequest, res: Response) => {
   const { name, avatar } = req.body;
   const userId = req.user?.id;
 
@@ -430,7 +433,7 @@ router.patch('/profile', async (req: AuthRequest, res: Response) => {
 /**
  * Update user email (requires re-verification)
  */
-router.patch('/email', async (req: AuthRequest, res: Response) => {
+router.patch('/email', authenticateToken, async (req: AuthRequest, res: Response) => {
   const { newEmail, password } = req.body;
   const userId = req.user?.id;
 
@@ -497,7 +500,7 @@ router.patch('/email', async (req: AuthRequest, res: Response) => {
 /**
  * Delete user account (requires password confirmation)
  */
-router.delete('/account', async (req: AuthRequest, res: Response) => {
+router.delete('/account', authenticateToken, async (req: AuthRequest, res: Response) => {
   const { password } = req.body;
   const userId = req.user?.id;
 

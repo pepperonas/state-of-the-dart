@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
   reset_password_token TEXT,
   reset_password_expires INTEGER,
   google_id TEXT UNIQUE,
+  is_admin INTEGER DEFAULT 0,
   subscription_status TEXT DEFAULT 'trial',
   subscription_plan TEXT,
   trial_ends_at INTEGER,

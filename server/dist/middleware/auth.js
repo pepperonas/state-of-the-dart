@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.optionalAuth = exports.authenticateTenant = void 0;
+exports.optionalAuth = exports.authenticateToken = exports.authenticateTenant = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const config_1 = require("../config");
 const authenticateTenant = (req, res, next) => {
@@ -22,6 +22,25 @@ const authenticateTenant = (req, res, next) => {
     }
 };
 exports.authenticateTenant = authenticateTenant;
+const authenticateToken = (req, res, next) => {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) {
+        return res.status(401).json({ error: 'No authentication token provided' });
+    }
+    try {
+        const decoded = jsonwebtoken_1.default.verify(token, config_1.config.jwtSecret);
+        req.user = {
+            id: decoded.userId,
+            email: decoded.email,
+            subscriptionStatus: decoded.subscriptionStatus,
+        };
+        next();
+    }
+    catch (error) {
+        return res.status(401).json({ error: 'Invalid or expired token' });
+    }
+};
+exports.authenticateToken = authenticateToken;
 const optionalAuth = (req, res, next) => {
     const token = req.headers.authorization?.replace('Bearer ', '');
     if (token) {

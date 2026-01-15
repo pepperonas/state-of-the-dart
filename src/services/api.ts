@@ -226,6 +226,44 @@ export const api = {
 
     getStatus: () => apiClient('/api/payment/status'),
   },
+
+  // Admin
+  admin: {
+    getUsers: () => apiClient('/api/admin/users'),
+    
+    getStats: () => apiClient('/api/admin/stats'),
+    
+    updateSubscription: (userId: string, data: { subscriptionStatus: string; subscriptionPlan?: string; subscriptionEndsAt?: number }) =>
+      apiClient(`/api/admin/users/${userId}/subscription`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    
+    grantLifetime: (userId: string) =>
+      apiClient(`/api/admin/users/${userId}/grant-lifetime`, {
+        method: 'POST',
+      }),
+    
+    revokeAccess: (userId: string) =>
+      apiClient(`/api/admin/users/${userId}/revoke`, {
+        method: 'POST',
+      }),
+    
+    deleteUser: (userId: string) =>
+      apiClient(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+      }),
+    
+    makeAdmin: (userId: string) =>
+      apiClient(`/api/admin/users/${userId}/make-admin`, {
+        method: 'POST',
+      }),
+    
+    removeAdmin: (userId: string) =>
+      apiClient(`/api/admin/users/${userId}/admin`, {
+        method: 'DELETE',
+      }),
+  },
 };
 
 export default api;

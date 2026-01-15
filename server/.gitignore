@@ -1,0 +1,5 @@
+
+# Database files
+database.sqlite
+database.sqlite-journal
+data/

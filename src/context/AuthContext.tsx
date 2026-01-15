@@ -8,6 +8,7 @@ interface User {
   name: string;
   avatar: string;
   emailVerified: boolean;
+  isAdmin?: boolean;
   subscriptionStatus: string;
   subscriptionPlan?: string;
   trialEndsAt?: number;

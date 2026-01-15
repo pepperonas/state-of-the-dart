@@ -40,6 +40,7 @@ const AchievementsScreen = lazy(() => import('./components/achievements/Achievem
 const Leaderboard = lazy(() => import('./components/leaderboard/Leaderboard'));
 const GlobalLeaderboard = lazy(() => import('./components/leaderboard/GlobalLeaderboard'));
 const Dashboard = lazy(() => import('./components/dashboard/Dashboard'));
+const AdminPanel = lazy(() => import('./components/admin/AdminPanel'));
 
 // Loading component
 const LoadingScreen = () => (
@@ -186,6 +187,12 @@ function AppContent() {
                       <Route path="/account" element={
                         <ProtectedRoute requireSubscription={false}>
                           <UserSettings />
+                        </ProtectedRoute>
+                      } />
+                      
+                      <Route path="/admin" element={
+                        <ProtectedRoute requireSubscription={false}>
+                          <AdminPanel />
                         </ProtectedRoute>
                       } />
                       

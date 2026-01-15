@@ -89,6 +89,7 @@ import matchesRouter from './routes/matches';
 import trainingRouter from './routes/training';
 import achievementsRouter from './routes/achievements';
 import leaderboardRouter from './routes/leaderboard';
+import adminRouter from './routes/admin';
 
 // API Routes
 app.get('/api', (req: Request, res: Response) => {
@@ -116,6 +117,7 @@ app.use('/api/matches', matchesRouter);
 app.use('/api/training', trainingRouter);
 app.use('/api/achievements', achievementsRouter);
 app.use('/api/leaderboard', leaderboardRouter);
+app.use('/api/admin', adminRouter);
 
 // Google OAuth routes
 app.get('/api/auth/google',

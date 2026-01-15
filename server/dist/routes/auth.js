@@ -156,6 +156,7 @@ router.post('/login', async (req, res) => {
                 email: user.email,
                 name: user.name,
                 avatar: user.avatar,
+                isAdmin: user.is_admin === 1,
                 subscriptionStatus: user.subscription_status,
                 trialEndsAt: user.trial_ends_at,
                 subscriptionEndsAt: user.subscription_ends_at,
@@ -241,7 +242,8 @@ router.post('/reset-password', async (req, res) => {
 /**
  * Get current user
  */
-router.get('/me', async (req, res) => {
+const auth_1 = require("../middleware/auth");
+router.get('/me', auth_1.authenticateToken, async (req, res) => {
     const token = req.headers.authorization?.replace('Bearer ', '');
     if (!token) {
         return res.status(401).json({ error: 'No authentication token provided' });
@@ -304,6 +306,155 @@ router.post('/resend-verification', async (req, res) => {
     catch (error) {
         console.error('Resend verification error:', error);
         res.status(500).json({ error: 'Failed to resend verification email' });
+    }
+});
+/**
+ * Update user profile (name, avatar)
+ */
+router.patch('/profile', auth_1.authenticateToken, async (req, res) => {
+    const { name, avatar } = req.body;
+    const userId = req.user?.id;
+    if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    if (!name || name.trim().length === 0) {
+        return res.status(400).json({ error: 'Name is required' });
+    }
+    const db = (0, database_1.getDatabase)();
+    try {
+        db.prepare(`
+      UPDATE users SET
+        name = ?,
+        avatar = ?
+      WHERE id = ?
+    `).run(name.trim(), avatar || '👤', userId);
+        // Get updated user
+        const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+        res.json({
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            avatar: user.avatar,
+            emailVerified: user.email_verified === 1,
+            subscriptionStatus: user.subscription_status,
+            subscriptionPlan: user.subscription_plan,
+            trialEndsAt: user.trial_ends_at,
+            subscriptionEndsAt: user.subscription_ends_at,
+            createdAt: user.created_at,
+        });
+    }
+    catch (error) {
+        console.error('Update profile error:', error);
+        res.status(500).json({ error: 'Failed to update profile' });
+    }
+});
+/**
+ * Update user email (requires re-verification)
+ */
+router.patch('/email', auth_1.authenticateToken, async (req, res) => {
+    const { newEmail, password } = req.body;
+    const userId = req.user?.id;
+    if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    if (!newEmail || !password) {
+        return res.status(400).json({ error: 'New email and password are required' });
+    }
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newEmail)) {
+        return res.status(400).json({ error: 'Invalid email format' });
+    }
+    const db = (0, database_1.getDatabase)();
+    try {
+        // Get current user
+        const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        // Verify password
+        const validPassword = await bcryptjs_1.default.compare(password, user.password_hash);
+        if (!validPassword) {
+            return res.status(401).json({ error: 'Invalid password' });
+        }
+        // Check if new email already exists
+        const existingUser = db.prepare('SELECT id FROM users WHERE email = ? AND id != ?').get(newEmail.toLowerCase(), userId);
+        if (existingUser) {
+            return res.status(400).json({ error: 'Email already in use' });
+        }
+        // Generate verification token
+        const verificationToken = crypto_1.default.randomBytes(32).toString('hex');
+        const verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000;
+        // Update email (set to unverified)
+        db.prepare(`
+      UPDATE users SET
+        email = ?,
+        email_verified = 0,
+        verification_token = ?,
+        verification_token_expires = ?
+      WHERE id = ?
+    `).run(newEmail.toLowerCase(), verificationToken, verificationTokenExpires, userId);
+        // Send verification email to new address
+        await email_1.emailService.sendVerificationEmail(newEmail, verificationToken, user.name);
+        res.json({ message: 'Email updated. Please verify your new email address.' });
+    }
+    catch (error) {
+        console.error('Update email error:', error);
+        res.status(500).json({ error: 'Failed to update email' });
+    }
+});
+/**
+ * Delete user account (requires password confirmation)
+ */
+router.delete('/account', auth_1.authenticateToken, async (req, res) => {
+    const { password } = req.body;
+    const userId = req.user?.id;
+    if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    if (!password) {
+        return res.status(400).json({ error: 'Password is required' });
+    }
+    const db = (0, database_1.getDatabase)();
+    try {
+        // Get user
+        const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        // For Google OAuth users (no password), allow deletion without password check
+        if (user.password_hash) {
+            // Verify password
+            const validPassword = await bcryptjs_1.default.compare(password, user.password_hash);
+            if (!validPassword) {
+                return res.status(401).json({ error: 'Invalid password' });
+            }
+        }
+        // Cancel Stripe subscription if exists
+        if (user.stripe_subscription_id) {
+            try {
+                const stripe = require('stripe')(config_1.config.stripe.secretKey);
+                await stripe.subscriptions.cancel(user.stripe_subscription_id);
+            }
+            catch (stripeError) {
+                console.error('Stripe cancellation error:', stripeError);
+                // Continue with deletion even if Stripe fails
+            }
+        }
+        // Delete all user data
+        db.prepare('DELETE FROM training_sessions WHERE user_id = ?').run(userId);
+        db.prepare('DELETE FROM match_throws WHERE match_id IN (SELECT id FROM matches WHERE user_id = ?)').run(userId);
+        db.prepare('DELETE FROM match_legs WHERE match_id IN (SELECT id FROM matches WHERE user_id = ?)').run(userId);
+        db.prepare('DELETE FROM matches WHERE user_id = ?').run(userId);
+        db.prepare('DELETE FROM player_achievements WHERE player_id IN (SELECT id FROM players WHERE user_id = ?)').run(userId);
+        db.prepare('DELETE FROM players WHERE user_id = ?').run(userId);
+        db.prepare('DELETE FROM tenants WHERE user_id = ?').run(userId);
+        db.prepare('DELETE FROM users WHERE id = ?').run(userId);
+        res.json({ message: 'Account deleted successfully' });
+    }
+    catch (error) {
+        console.error('Delete account error:', error);
+        res.status(500).json({ error: 'Failed to delete account' });
     }
 });
 exports.default = router;

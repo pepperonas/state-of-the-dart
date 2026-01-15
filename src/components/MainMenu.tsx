@@ -1,8 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Target, Users, TrendingUp, Trophy, Award, Dumbbell, Settings, Play, LogOut, Medal } from 'lucide-react';
+import { Target, Users, TrendingUp, Trophy, Award, Dumbbell, Settings, Play, LogOut, Medal, Shield } from 'lucide-react';
 import { useTenant } from '../context/TenantContext';
+import { useAuth } from '../context/AuthContext';
 import UserMenu from './auth/UserMenu';
 import SyncStatus from './sync/SyncStatus';
 import packageJson from '../../package.json';
@@ -10,6 +11,7 @@ import packageJson from '../../package.json';
 const MainMenu: React.FC = () => {
   const navigate = useNavigate();
   const { currentTenant, setCurrentTenant, storage } = useTenant();
+  const { user } = useAuth();
   // Compute hasSavedMatch directly from storage
   const hasSavedMatch = React.useMemo(() => {
     if (storage) {
@@ -91,6 +93,17 @@ const MainMenu: React.FC = () => {
       gradient: 'from-dark-600 to-dark-700',
     },
   ];
+
+  // Add Admin Panel button only if user is admin
+  if (user?.isAdmin) {
+    menuItems.push({
+      title: '👑 Admin Panel',
+      icon: Shield,
+      description: 'Manage users and subscriptions',
+      onClick: () => navigate('/admin'),
+      gradient: 'from-amber-500 to-amber-700',
+    });
+  }
   
   return (
     <div className="min-h-screen p-4 md:p-8 gradient-mesh">

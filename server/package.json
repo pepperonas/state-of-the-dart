@@ -8,7 +8,9 @@
     "dev": "nodemon src/index.ts",
     "build": "tsc",
     "test": "jest",
-    "setup:stripe": "node scripts/setup-stripe-products.js"
+    "setup:stripe": "node scripts/setup-stripe-products.js",
+    "create:admin": "ts-node scripts/create-admin.ts",
+    "seed:demo": "ts-node scripts/seed-demo-data.ts"
   },
   "keywords": [
     "darts",
