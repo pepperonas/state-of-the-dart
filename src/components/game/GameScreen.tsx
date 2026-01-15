@@ -48,6 +48,10 @@ const GameScreen: React.FC = () => {
 
   // Track processed matches to avoid duplicate achievement checks
   const [processedMatchIds, setProcessedMatchIds] = useState<Set<string>>(new Set());
+  
+  // Confirmation dialogs
+  const [showBackConfirm, setShowBackConfirm] = useState(false);
+  const [showEndConfirm, setShowEndConfirm] = useState(false);
 
   // Check achievements when match is completed (only once per match)
   useEffect(() => {
@@ -292,20 +296,26 @@ const GameScreen: React.FC = () => {
   
   const handleBackToMenu = () => {
     if (state.currentMatch?.status === 'in-progress') {
-      if (confirm('Match pausieren und zum Hauptmenü zurückkehren?\n\nDas Match wird gespeichert und kann später fortgesetzt werden.')) {
-        dispatch({ type: 'PAUSE_MATCH' });
-        navigate('/');
-      }
+      setShowBackConfirm(true);
     } else {
       navigate('/');
     }
   };
 
+  const confirmBackToMenu = () => {
+    dispatch({ type: 'PAUSE_MATCH' });
+    setShowBackConfirm(false);
+    navigate('/');
+  };
+
   const handleEndMatch = () => {
-    if (confirm('Match wirklich beenden?\n\nDas Match wird als abgebrochen markiert.')) {
-      dispatch({ type: 'END_MATCH' });
-      navigate('/');
-    }
+    setShowEndConfirm(true);
+  };
+  
+  const confirmEndMatch = () => {
+    dispatch({ type: 'END_MATCH' });
+    setShowEndConfirm(false);
+    navigate('/');
   };
   
   if (showSetup) {
@@ -759,6 +769,58 @@ const GameScreen: React.FC = () => {
             setDismissedHints(prev => new Set(prev).add(achievementId));
           }}
         />
+      )}
+
+      {/* Back to Menu Confirmation Dialog */}
+      {showBackConfirm && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="glass-card rounded-2xl p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold text-white mb-4">⏸️ Match pausieren?</h3>
+            <p className="text-gray-300 mb-6">
+              Das Match wird gespeichert und kann später fortgesetzt werden.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowBackConfirm(false)}
+                className="flex-1 px-4 py-3 bg-dark-700 hover:bg-dark-600 text-white rounded-xl font-semibold transition-all"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={confirmBackToMenu}
+                className="flex-1 px-4 py-3 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-semibold transition-all"
+              >
+                Pausieren
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* End Match Confirmation Dialog */}
+      {showEndConfirm && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="glass-card rounded-2xl p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold text-white mb-4">❌ Match beenden?</h3>
+            <p className="text-gray-300 mb-6">
+              Das Match wird als abgebrochen markiert und kann nicht fortgesetzt werden.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowEndConfirm(false)}
+                className="flex-1 px-4 py-3 bg-dark-700 hover:bg-dark-600 text-white rounded-xl font-semibold transition-all"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={confirmEndMatch}
+                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl font-semibold transition-all"
+              >
+                Match beenden
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
