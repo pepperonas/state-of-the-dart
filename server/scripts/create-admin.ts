@@ -4,9 +4,9 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import { schema, defaultAchievements } from '../src/database/schema';
 
-const ADMIN_EMAIL = 'martin.pfeffer@celox.io';
+const ADMIN_EMAIL = 'martinpaush@gmail.com';
 const ADMIN_PASSWORD = 'd8jhFWJ3hErj';
-const ADMIN_NAME = 'Martin Pfeffer';
+const ADMIN_NAME = 'Martin';
 
 async function createAdmin() {
   const dbPath = path.join(__dirname, '..', 'database.sqlite');
