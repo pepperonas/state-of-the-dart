@@ -269,6 +269,7 @@ router.get('/me', auth_1.authenticateToken, async (req, res) => {
             subscriptionPlan: user.subscription_plan,
             trialEndsAt: user.trial_ends_at,
             subscriptionEndsAt: user.subscription_ends_at,
+            isAdmin: user.is_admin === 1,
             createdAt: user.created_at,
         });
     }
