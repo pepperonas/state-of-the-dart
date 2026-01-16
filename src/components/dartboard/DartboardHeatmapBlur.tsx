@@ -31,26 +31,85 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
         : heatmapData.segments;
       const maxCount = heatmapData.totalDarts > 0 ? heatmapData.totalDarts / 100 : 1;
       
-      Object.entries(segments).forEach(([segmentKey, data]: [string, any]) => {
-        const [segment, multiplier] = segmentKey.split('-').map(Number);
-        const xCoords = data.x || [];
-        const yCoords = data.y || [];
+      // Dartboard dimensions (relative to size)
+      const center = size / 2;
+      const outerRadius = size * 0.45;
+      const tripleRadius = outerRadius * 0.63; // Triple ring
+      const doubleRadius = outerRadius * 0.95; // Double ring
+      const singleRadius = outerRadius * 0.85; // Single area
+      
+      // Segment angles (20 is at top = -90 degrees)
+      const segmentAngles: Record<number, number> = {
+        20: -90, 1: -72, 18: -54, 4: -36, 13: -18,
+        6: 0, 10: 18, 15: 36, 2: 54, 17: 72,
+        3: 90, 19: 108, 7: 126, 16: 144, 8: 162,
+        11: 180, 14: 198, 9: 216, 12: 234, 5: 252
+      };
+      
+      Object.entries(segments).forEach(([segmentKey, count]: [string, any]) => {
+        // Parse segment key: "3x20" or "2x7" format
+        let multiplier: number;
+        let segment: number;
         
-        // Add each dart hit as a point
-        for (let i = 0; i < Math.min(xCoords.length, yCoords.length); i++) {
+        if (segmentKey.includes('x')) {
+          // Format: "3x20" or "2x7"
+          const parts = segmentKey.split('x');
+          multiplier = parseInt(parts[0]);
+          segment = parseInt(parts[1]);
+        } else if (segmentKey.includes('-')) {
+          // Format: "3-20" or "2-7"
+          const parts = segmentKey.split('-');
+          multiplier = parseInt(parts[0]);
+          segment = parseInt(parts[1]);
+        } else {
+          console.warn('Unknown segment format:', segmentKey);
+          return;
+        }
+        
+        const hitCount = typeof count === 'number' ? count : (count?.count || 0);
+        if (hitCount === 0) return;
+        
+        // Get angle for this segment
+        const baseAngle = segmentAngles[segment] || 0;
+        const angleRad = (baseAngle * Math.PI) / 180;
+        
+        // Determine radius based on multiplier
+        let baseRadius: number;
+        if (multiplier === 3) {
+          baseRadius = tripleRadius; // Triple ring
+        } else if (multiplier === 2) {
+          baseRadius = doubleRadius; // Double ring
+        } else {
+          baseRadius = singleRadius; // Single area
+        }
+        
+        // Generate points for each hit with small variations
+        for (let i = 0; i < hitCount; i++) {
+          // Add small random variation (±2° angle, ±2% radius)
+          const angleVariation = (Math.random() - 0.5) * 4; // ±2 degrees
+          const radiusVariation = (Math.random() - 0.5) * (baseRadius * 0.02); // ±2% radius
+          
+          const finalAngle = angleRad + (angleVariation * Math.PI / 180);
+          const finalRadius = baseRadius + radiusVariation;
+          
+          const x = center + Math.cos(finalAngle) * finalRadius;
+          const y = center + Math.sin(finalAngle) * finalRadius;
+          
           points.push({
-            x: xCoords[i],
-            y: yCoords[i],
-            intensity: 1 / maxCount
+            x,
+            y,
+            intensity: hitCount / maxCount
           });
         }
       });
+      
+      console.log(`🎯 Generated ${points.length} dart points from segments`);
     } catch (e) {
       console.error('Failed to parse heatmap segments:', e);
     }
     
     return points;
-  }, [heatmapData]);
+  }, [heatmapData, size]);
 
   // Draw dartboard background (professional style like in game)
   useEffect(() => {
