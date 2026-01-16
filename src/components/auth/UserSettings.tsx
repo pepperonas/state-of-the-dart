@@ -98,7 +98,16 @@ const UserSettings: React.FC = () => {
         window.location.href = response.url;
       }
     } catch (err: any) {
-      setError(err.message || 'Fehler beim Öffnen des Kundenportals');
+      console.error('Stripe Portal Error:', err);
+      // Don't show error to user if they don't have a Stripe customer yet
+      // This happens for Google Auth users who haven't made a payment
+      if (err.message?.includes('400')) {
+        setError('Du hast noch keine Zahlungen getätigt. Das Kundenportal ist nur für zahlende Kunden verfügbar.');
+      } else {
+        setError(err.message || 'Fehler beim Öffnen des Kundenportals');
+      }
+      setLoading(null);
+    } finally {
       setLoading(null);
     }
   };

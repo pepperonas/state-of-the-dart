@@ -15,6 +15,8 @@ const config_1 = require("./config");
 const database_1 = require("./database");
 // Initialize Express app
 const app = (0, express_1.default)();
+// Trust proxy - required when behind Nginx
+app.set('trust proxy', true);
 // Initialize database
 (0, database_1.initDatabase)();
 // Security middleware

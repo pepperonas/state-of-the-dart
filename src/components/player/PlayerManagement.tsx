@@ -91,15 +91,6 @@ const PlayerManagement: React.FC = () => {
             </div>
           )}
           
-          {/* Debug Info */}
-          <div className="mb-4 p-3 bg-blue-500/20 border border-blue-500 rounded-lg">
-            <p className="text-white text-sm">
-              <strong>Debug:</strong> Loading: {loading ? 'Yes' : 'No'} | 
-              Players Count: {players.length} | 
-              Players Array: {JSON.stringify(players.map(p => p.name))}
-            </p>
-          </div>
-          
           <div className="space-y-3">
             {loading ? (
               <div className="text-center py-12">

@@ -12,6 +12,9 @@ import { initDatabase } from './database';
 // Initialize Express app
 const app = express();
 
+// Trust proxy - required when behind Nginx
+app.set('trust proxy', true);
+
 // Initialize database
 initDatabase();
 
