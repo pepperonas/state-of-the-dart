@@ -76,7 +76,14 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       try {
         setLoading(true);
         const response = await api.players.getAll();
+        console.log('🔍 PlayerContext: API Response:', response);
+        console.log('🔍 PlayerContext: Players count:', response.players?.length);
+        if (response.players?.[0]) {
+          console.log('🔍 PlayerContext: First player:', response.players[0]);
+          console.log('🔍 PlayerContext: First player stats:', response.players[0].stats);
+        }
         const loadedPlayers = response.players.map(reviveDates);
+        console.log('🔍 PlayerContext: Loaded players:', loadedPlayers);
         setPlayers(loadedPlayers);
         
         // Restore current player from localStorage (UI state only)
@@ -86,7 +93,7 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
           setCurrentPlayer(current || null);
         }
       } catch (error) {
-        console.error('Failed to load players:', error);
+        console.error('❌ Failed to load players:', error);
         setPlayers([]);
       } finally {
         setLoading(false);

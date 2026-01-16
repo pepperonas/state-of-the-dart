@@ -52,7 +52,7 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
     return points;
   }, [heatmapData]);
 
-  // Draw dartboard background
+  // Draw dartboard background (professional style like in game)
   useEffect(() => {
     const canvas = dartboardRef.current;
     if (!canvas) return;
@@ -61,122 +61,117 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
     if (!ctx) return;
     
     const center = size / 2;
-    const outerRadius = size * 0.42;
-    const bullRadius = size * 0.06;
-    const outerBullRadius = size * 0.13;
-    const tripleInnerRadius = outerRadius * 0.58;
-    const tripleOuterRadius = outerRadius * 0.65;
-    const doubleInnerRadius = outerRadius * 0.96;
+    const radius = size * 0.45;
+    const segmentAngle = 18;
     
     // Clear canvas
     ctx.clearRect(0, 0, size, size);
     
     // Background circle
-    ctx.fillStyle = '#0a0a0a';
+    ctx.fillStyle = '#1a1a1a';
     ctx.beginPath();
-    ctx.arc(center, center, outerRadius, 0, Math.PI * 2);
+    ctx.arc(center, center, radius, 0, Math.PI * 2);
     ctx.fill();
     
-    // Draw segments
-    SEGMENTS.forEach((segment, index) => {
-      const angleStep = (2 * Math.PI) / 20;
-      const startAngle = index * angleStep - Math.PI / 2 - angleStep / 2;
-      const endAngle = startAngle + angleStep;
-      
-      // Segment colors (alternating black/white pattern)
-      const isEven = index % 2 === 0;
-      const blackColor = '#1a1a1a';
-      const whiteColor = '#2a2a2a';
-      
-      // Draw outer single
-      ctx.fillStyle = isEven ? blackColor : whiteColor;
+    // Wire rings (silver)
+    const drawWireRing = (r: number) => {
+      ctx.strokeStyle = '#c0c0c0';
+      ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.arc(center, center, doubleInnerRadius, startAngle, endAngle);
-      ctx.arc(center, center, outerRadius * 0.89, endAngle, startAngle, true);
+      ctx.arc(center, center, r, 0, Math.PI * 2);
+      ctx.stroke();
+    };
+    
+    drawWireRing(radius * 0.95);  // Outer
+    drawWireRing(radius * 0.85);  // Double outer
+    drawWireRing(radius * 0.53);  // Triple outer
+    drawWireRing(radius * 0.43);  // Triple inner
+    drawWireRing(radius * 0.11);  // Outer bull
+    drawWireRing(radius * 0.06);  // Bull
+    
+    // Helper to draw segment arc
+    const drawSegmentArc = (index: number, innerR: number, outerR: number, color: string) => {
+      const startAngle = (index * segmentAngle - 90 - segmentAngle / 2) * Math.PI / 180;
+      const endAngle = ((index + 1) * segmentAngle - 90 - segmentAngle / 2) * Math.PI / 180;
+      
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(center, center, outerR, startAngle, endAngle);
+      ctx.arc(center, center, innerR, endAngle, startAngle, true);
       ctx.closePath();
       ctx.fill();
       
-      // Draw double ring
-      ctx.fillStyle = '#8b0000';
-      ctx.beginPath();
-      ctx.arc(center, center, doubleInnerRadius, startAngle, endAngle);
-      ctx.arc(center, center, outerRadius * 0.89, endAngle, startAngle, true);
-      ctx.closePath();
-      ctx.globalAlpha = 0.3;
-      ctx.fill();
-      ctx.globalAlpha = 1;
-      
-      // Draw mid single
-      ctx.fillStyle = isEven ? blackColor : whiteColor;
-      ctx.beginPath();
-      ctx.arc(center, center, outerRadius * 0.89, startAngle, endAngle);
-      ctx.arc(center, center, tripleOuterRadius, endAngle, startAngle, true);
-      ctx.closePath();
-      ctx.fill();
-      
-      // Draw triple ring
-      ctx.fillStyle = '#006400';
-      ctx.beginPath();
-      ctx.arc(center, center, tripleOuterRadius, startAngle, endAngle);
-      ctx.arc(center, center, tripleInnerRadius, endAngle, startAngle, true);
-      ctx.closePath();
-      ctx.globalAlpha = 0.3;
-      ctx.fill();
-      ctx.globalAlpha = 1;
-      
-      // Draw inner single
-      ctx.fillStyle = isEven ? blackColor : whiteColor;
-      ctx.beginPath();
-      ctx.arc(center, center, tripleInnerRadius, startAngle, endAngle);
-      ctx.arc(center, center, outerBullRadius, endAngle, startAngle, true);
-      ctx.closePath();
-      ctx.fill();
-      
-      // Segment lines
-      ctx.strokeStyle = '#404040';
+      // Wire line
+      ctx.strokeStyle = '#c0c0c0';
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(
-        center + outerBullRadius * Math.cos(startAngle),
-        center + outerBullRadius * Math.sin(startAngle)
+        center + innerR * Math.cos(startAngle),
+        center + innerR * Math.sin(startAngle)
       );
       ctx.lineTo(
-        center + outerRadius * Math.cos(startAngle),
-        center + outerRadius * Math.sin(startAngle)
+        center + outerR * Math.cos(startAngle),
+        center + outerR * Math.sin(startAngle)
       );
       ctx.stroke();
+    };
+    
+    // Draw all segments
+    SEGMENTS.forEach((segment, index) => {
+      const isEven = index % 2 === 0;
       
-      // Segment numbers
+      // Colors matching the game dartboard
+      const redColor = '#e30613';
+      const greenColor = '#00a651';
+      const blackColor = '#000000';
+      const whiteColor = '#f4f1e8';
+      
+      // Double ring (red/green alternating)
+      drawSegmentArc(index, radius * 0.85, radius * 0.95, isEven ? redColor : greenColor);
+      
+      // Outer single (black/white alternating)
+      drawSegmentArc(index, radius * 0.53, radius * 0.85, isEven ? blackColor : whiteColor);
+      
+      // Triple ring (red/green alternating)
+      drawSegmentArc(index, radius * 0.43, radius * 0.53, isEven ? redColor : greenColor);
+      
+      // Inner single (black/white alternating)
+      drawSegmentArc(index, radius * 0.11, radius * 0.43, isEven ? blackColor : whiteColor);
+      
+      // Number labels
+      const numberAngle = (index * segmentAngle - 90) * Math.PI / 180;
+      const numberRadius = radius * 1.08;
+      
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 16px Arial';
+      ctx.font = `bold ${size * 0.045}px Arial`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      const numberAngle = index * angleStep - Math.PI / 2;
-      const numberRadius = outerRadius + 20;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+      ctx.shadowBlur = 4;
       ctx.fillText(
         segment.toString(),
         center + numberRadius * Math.cos(numberAngle),
         center + numberRadius * Math.sin(numberAngle)
       );
+      ctx.shadowBlur = 0;
     });
     
     // Outer Bull (green)
-    ctx.fillStyle = '#1a4d1a';
+    ctx.fillStyle = '#00a651';
     ctx.beginPath();
-    ctx.arc(center, center, outerBullRadius, 0, Math.PI * 2);
+    ctx.arc(center, center, radius * 0.11, 0, Math.PI * 2);
     ctx.fill();
+    ctx.strokeStyle = '#c0c0c0';
+    ctx.lineWidth = 1;
+    ctx.stroke();
     
     // Bull (red)
-    ctx.fillStyle = '#4d1a1a';
+    ctx.fillStyle = '#e30613';
     ctx.beginPath();
-    ctx.arc(center, center, bullRadius, 0, Math.PI * 2);
+    ctx.arc(center, center, radius * 0.06, 0, Math.PI * 2);
     ctx.fill();
-    
-    // Outer border
-    ctx.strokeStyle = '#404040';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(center, center, outerRadius, 0, Math.PI * 2);
+    ctx.strokeStyle = '#c0c0c0';
+    ctx.lineWidth = 1;
     ctx.stroke();
     
   }, [size]);
@@ -336,7 +331,7 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
               width={size}
               height={size}
               className="absolute inset-0"
-              style={{ opacity: 0.8 }}
+              style={{ opacity: 0.9 }}
             />
             
             {/* Heatmap overlay */}
@@ -347,7 +342,7 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
               className="absolute inset-0"
               style={{ 
                 mixBlendMode: 'screen',
-                opacity: 0.85
+                opacity: 0.75
               }}
             />
           </div>
