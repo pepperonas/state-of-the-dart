@@ -47,22 +47,28 @@ passport.use(
         const name = profile.displayName || profile.name?.givenName || 'User';
         const avatar = profile.photos?.[0]?.value || name.charAt(0).toUpperCase();
         const trialEndsAt = Date.now() + config.trialPeriodDays * 24 * 60 * 60 * 1000;
+        
+        // Check if user should be admin
+        const userEmail = email?.toLowerCase() || `${profile.id}@google.oauth`;
+        const isAdmin = userEmail === 'martinpaush@gmail.com';
+        const subscriptionStatus = isAdmin ? 'lifetime' : 'trial';
 
         db.prepare(`
           INSERT INTO users (
             id, email, name, avatar, google_id,
-            email_verified, subscription_status, trial_ends_at,
+            email_verified, subscription_status, trial_ends_at, is_admin,
             created_at, last_active
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).run(
           userId,
-          email?.toLowerCase() || `${profile.id}@google.oauth`,
+          userEmail,
           name,
           avatar,
           profile.id,
           1, // Email verified via Google
-          'trial',
+          subscriptionStatus,
           trialEndsAt,
+          isAdmin ? 1 : 0,
           Date.now(),
           Date.now()
         );

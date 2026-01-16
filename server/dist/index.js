@@ -121,7 +121,8 @@ app.get('/api/auth/google/callback', passport_1.default.authenticate('google', {
     const token = jwt.sign({
         userId: user.id,
         email: user.email,
-        subscriptionStatus: user.subscription_status
+        subscriptionStatus: user.subscription_status,
+        isAdmin: user.is_admin === 1
     }, config_1.config.jwtSecret, { expiresIn: config_1.config.jwtExpiresIn });
     // Redirect to app with token
     res.redirect(`${config_1.config.appUrl}/auth/callback?token=${token}`);

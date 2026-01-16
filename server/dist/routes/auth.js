@@ -43,16 +43,19 @@ router.post('/register', async (req, res) => {
         const verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
         // Calculate trial end date
         const trialEndsAt = Date.now() + config_1.config.trialPeriodDays * 24 * 60 * 60 * 1000;
+        // Check if user should be admin
+        const isAdmin = email.toLowerCase() === 'martinpaush@gmail.com';
+        const subscriptionStatus = isAdmin ? 'lifetime' : 'trial';
         // Create user
         const userId = (0, uuid_1.v4)();
         db.prepare(`
       INSERT INTO users (
         id, email, password_hash, name, avatar,
         email_verified, verification_token, verification_token_expires,
-        subscription_status, trial_ends_at,
+        subscription_status, trial_ends_at, is_admin,
         created_at, last_active
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(userId, email.toLowerCase(), passwordHash, name, name.charAt(0).toUpperCase(), 0, verificationToken, verificationTokenExpires, 'trial', trialEndsAt, Date.now(), Date.now());
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(userId, email.toLowerCase(), passwordHash, name, name.charAt(0).toUpperCase(), 0, verificationToken, verificationTokenExpires, subscriptionStatus, trialEndsAt, isAdmin ? 1 : 0, Date.now(), Date.now());
         // Send verification email
         await email_1.emailService.sendVerificationEmail(email, verificationToken, name);
         res.status(201).json({
@@ -147,7 +150,8 @@ router.post('/login', async (req, res) => {
         const token = jsonwebtoken_1.default.sign({
             userId: user.id,
             email: user.email,
-            subscriptionStatus: user.subscription_status
+            subscriptionStatus: user.subscription_status,
+            isAdmin: user.is_admin === 1
         }, config_1.config.jwtSecret, { expiresIn: config_1.config.jwtExpiresIn });
         res.json({
             token,

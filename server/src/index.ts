@@ -136,7 +136,8 @@ app.get('/api/auth/google/callback',
       { 
         userId: user.id,
         email: user.email,
-        subscriptionStatus: user.subscription_status 
+        subscriptionStatus: user.subscription_status,
+        isAdmin: user.is_admin === 1
       },
       config.jwtSecret,
       { expiresIn: config.jwtExpiresIn }

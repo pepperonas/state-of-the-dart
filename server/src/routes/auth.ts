@@ -50,15 +50,19 @@ router.post('/register', async (req: Request, res: Response) => {
     // Calculate trial end date
     const trialEndsAt = Date.now() + config.trialPeriodDays * 24 * 60 * 60 * 1000;
 
+    // Check if user should be admin
+    const isAdmin = email.toLowerCase() === 'martinpaush@gmail.com';
+    const subscriptionStatus = isAdmin ? 'lifetime' : 'trial';
+
     // Create user
     const userId = uuidv4();
     db.prepare(`
       INSERT INTO users (
         id, email, password_hash, name, avatar,
         email_verified, verification_token, verification_token_expires,
-        subscription_status, trial_ends_at,
+        subscription_status, trial_ends_at, is_admin,
         created_at, last_active
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       userId,
       email.toLowerCase(),
@@ -68,8 +72,9 @@ router.post('/register', async (req: Request, res: Response) => {
       0,
       verificationToken,
       verificationTokenExpires,
-      'trial',
+      subscriptionStatus,
       trialEndsAt,
+      isAdmin ? 1 : 0,
       Date.now(),
       Date.now()
     );
@@ -188,7 +193,8 @@ router.post('/login', async (req: Request, res: Response) => {
       { 
         userId: user.id,
         email: user.email,
-        subscriptionStatus: user.subscription_status 
+        subscriptionStatus: user.subscription_status,
+        isAdmin: user.is_admin === 1
       },
       config.jwtSecret,
       { expiresIn: config.jwtExpiresIn } as jwt.SignOptions
