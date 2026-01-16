@@ -1079,26 +1079,130 @@
   background: var(--sp-brass) !important;
 }
 
-/* Add paper texture to specific elements */
-.steampunk .max-w-md > div:first-child,
-.steampunk .max-w-xl > div:first-child {
-  position: relative;
+/* ============================================================
+   UNIVERSAL MENU ITEMS - AAA GAME QUALITY
+   ============================================================ */
+
+/* ALL menu item containers */
+.steampunk .grid > button,
+.steampunk .grid > div > button,
+.steampunk [class*="grid"] button {
+  padding: 1.75rem !important;
+  min-height: 120px !important;
 }
 
-/* Decorative gear corners */
-.steampunk .glass-card {
-  position: relative;
+/* ALL menu item text */
+.steampunk .grid button h3,
+.steampunk .grid button p,
+.steampunk button h3,
+.steampunk button p:not(.text-xs) {
+  font-size: 1.25rem !important; /* 20px */
+  font-weight: 700 !important;
+  line-height: 1.4 !important;
+  color: #1a1410 !important;
 }
 
-.steampunk .rounded-2xl::after {
-  font-size: 20px;
-  position: absolute;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  opacity: 0.2;
-  animation: sp-rotate 20s linear infinite;
+.steampunk button p.text-sm {
+  font-size: 1rem !important; /* 16px */
+  font-weight: 600 !important;
 }
+
+/* ALL menu icons - NO OVERLAP */
+.steampunk button svg:not([class*="w-6"]):not([class*="w-8"]) {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  flex-shrink: 0 !important;
+}
+
+/* Icon + Text containers - proper spacing */
+.steampunk button > div.flex {
+  gap: 1.5rem !important;
+  align-items: center !important;
+}
+
+/* ALL flex containers with icons */
+.steampunk .flex.items-center svg {
+  flex-shrink: 0 !important;
+  margin-right: 0.75rem !important;
+}
+
+/* ============================================================
+   DASHBOARD & STATS - AAA GAME QUALITY  
+   ============================================================ */
+
+/* Dashboard cards */
+.steampunk .glass-card h2,
+.steampunk .glass-card h3 {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+}
+
+/* Stats numbers */
+.steampunk .text-3xl,
+.steampunk .text-4xl,
+.steampunk .text-5xl {
+  font-size: 3rem !important; /* 48px */
+  line-height: 1.2 !important;
+}
+
+.steampunk .text-2xl {
+  font-size: 2rem !important; /* 32px */
+}
+
+.steampunk .text-xl {
+  font-size: 1.5rem !important; /* 24px */
+}
+
+.steampunk .text-lg {
+  font-size: 1.25rem !important; /* 20px */
+}
+
+/* ============================================================
+   TABLE IMPROVEMENTS - AAA GAME QUALITY
+   ============================================================ */
+
+.steampunk table th,
+.steampunk table td {
+  padding: 1.25rem 1.5rem !important;
+  font-size: 1.125rem !important;
+}
+
+.steampunk table th {
+  font-size: 1.25rem !important;
+}
+
+/* ============================================================
+   BADGE & TAG IMPROVEMENTS
+   ============================================================ */
+
+.steampunk span[class*="px-"],
+.steampunk span[class*="py-"] {
+  padding: 0.625rem 1.25rem !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+}
+
+/* ============================================================
+   MODAL & DIALOG IMPROVEMENTS
+   ============================================================ */
+
+.steampunk [role="dialog"] h2,
+.steampunk [role="dialog"] h3 {
+  font-size: 2rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.steampunk [role="dialog"] p {
+  font-size: 1.125rem !important;
+  line-height: 1.75 !important;
+}
+
+/* ============================================================
+   DECORATIVE ELEMENTS
+   ============================================================ */
 
 @keyframes sp-rotate-slow {
   from { transform: translateX(-50%) rotate(0deg); }
@@ -1276,4 +1380,341 @@
   box-shadow: 
     inset 0 1px 2px rgba(255, 255, 255, 0.3),
     0 2px 8px rgba(218, 165, 32, 0.5);
+}
+
+/* ============================================================
+   NAVIGATION & BACK BUTTONS - AAA GAME QUALITY
+   ============================================================ */
+
+.steampunk button[class*="mb-"] svg:first-child,
+.steampunk a[class*="mb-"] svg:first-child {
+  width: 24px !important;
+  height: 24px !important;
+  margin-right: 12px !important;
+}
+
+/* Back button text */
+.steampunk button:has(svg) > span,
+.steampunk a:has(svg) > span {
+  font-size: 1.125rem !important;
+  font-weight: 600 !important;
+}
+
+/* ============================================================
+   LIST ITEMS - AAA GAME QUALITY
+   ============================================================ */
+
+.steampunk li {
+  font-size: 1.125rem !important;
+  line-height: 1.75 !important;
+  margin-bottom: 0.75rem !important;
+}
+
+/* ============================================================
+   PROGRESS BARS & SLIDERS - ALREADY DONE ABOVE
+   ============================================================ */
+
+/* ============================================================
+   DROPDOWN & SELECT IMPROVEMENTS
+   ============================================================ */
+
+.steampunk select option {
+  font-size: 1rem !important;
+  padding: 0.75rem !important;
+  background: #f4e4c1 !important;
+  color: #2d2317 !important;
+}
+
+/* ============================================================
+   CHECKBOX & RADIO IMPROVEMENTS  
+   ============================================================ */
+
+.steampunk input[type="checkbox"],
+.steampunk input[type="radio"] {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+}
+
+.steampunk input[type="checkbox"] + label,
+.steampunk input[type="radio"] + label {
+  font-size: 1.125rem !important;
+  margin-left: 1rem !important;
+}
+
+/* ============================================================
+   TOGGLE SWITCHES - AAA GAME QUALITY
+   ============================================================ */
+
+.steampunk button[role="switch"] {
+  min-width: 64px !important;
+  height: 36px !important;
+}
+
+.steampunk button[role="switch"] > span {
+  width: 28px !important;
+  height: 28px !important;
+}
+
+/* ============================================================
+   CARD GRID IMPROVEMENTS
+   ============================================================ */
+
+.steampunk .grid-cols-2 > *,
+.steampunk .grid-cols-3 > *,
+.steampunk .grid-cols-4 > * {
+  min-height: 140px !important;
+  padding: 1.5rem !important;
+}
+
+/* Grid item icons */
+.steampunk .grid > * svg {
+  width: 48px !important;
+  height: 48px !important;
+  margin-bottom: 1rem !important;
+}
+
+/* Grid item text */
+.steampunk .grid > * p,
+.steampunk .grid > * h3,
+.steampunk .grid > * h4 {
+  font-size: 1.125rem !important;
+  line-height: 1.5 !important;
+}
+
+/* ============================================================
+   USER MENU & PROFILE - AAA GAME QUALITY
+   ============================================================ */
+
+.steampunk [class*="UserMenu"] button {
+  min-height: 64px !important;
+  padding: 0.75rem 1.25rem !important;
+}
+
+.steampunk [class*="UserMenu"] span {
+  font-size: 1.125rem !important;
+}
+
+.steampunk [class*="UserMenu"] svg {
+  width: 28px !important;
+  height: 28px !important;
+}
+
+/* ============================================================
+   ACHIEVEMENT & NOTIFICATION - AAA GAME QUALITY
+   ============================================================ */
+
+.steampunk [class*="Achievement"] {
+  padding: 1.5rem !important;
+  min-height: 100px !important;
+}
+
+.steampunk [class*="Achievement"] h3,
+.steampunk [class*="Achievement"] h4 {
+  font-size: 1.5rem !important;
+}
+
+.steampunk [class*="Achievement"] p {
+  font-size: 1.125rem !important;
+}
+
+.steampunk [class*="Achievement"] svg {
+  width: 48px !important;
+  height: 48px !important;
+}
+
+/* ============================================================
+   GAME SCREEN HUD - AAA GAME QUALITY
+   ============================================================ */
+
+/* Player scores */
+.steampunk [class*="PlayerScore"] {
+  padding: 1.5rem !important;
+}
+
+.steampunk [class*="PlayerScore"] .text-4xl,
+.steampunk [class*="PlayerScore"] .text-5xl,
+.steampunk [class*="PlayerScore"] .text-6xl {
+  font-size: 4rem !important; /* 64px for scores */
+  font-weight: 800 !important;
+}
+
+.steampunk [class*="PlayerScore"] .text-lg,
+.steampunk [class*="PlayerScore"] .text-xl {
+  font-size: 1.5rem !important; /* 24px for player names */
+}
+
+/* Score input */
+.steampunk [class*="ScoreInput"] button {
+  min-width: 80px !important;
+  min-height: 80px !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+}
+
+.steampunk [class*="ScoreInput"] input {
+  font-size: 2rem !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+}
+
+/* Dartboard display */
+.steampunk [class*="Dartboard"] text {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+}
+
+/* ============================================================
+   TRAINING SCREEN - AAA GAME QUALITY
+   ============================================================ */
+
+.steampunk [class*="Training"] h2 {
+  font-size: 2.5rem !important;
+}
+
+.steampunk [class*="Training"] h3 {
+  font-size: 2rem !important;
+}
+
+.steampunk [class*="Training"] button {
+  min-height: 100px !important;
+  font-size: 1.5rem !important;
+}
+
+/* ============================================================
+   STATS & CHARTS - AAA GAME QUALITY
+   ============================================================ */
+
+/* Chart labels */
+.steampunk [class*="recharts"] text {
+  font-size: 16px !important;
+  fill: #e8d4b0 !important;
+  font-weight: 600 !important;
+}
+
+/* Legend text */
+.steampunk .recharts-legend-item-text {
+  font-size: 18px !important;
+  color: #e8d4b0 !important;
+}
+
+/* Tooltip */
+.steampunk .recharts-tooltip-label {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #2d2317 !important;
+}
+
+.steampunk .recharts-tooltip-item {
+  font-size: 16px !important;
+  color: #2d2317 !important;
+}
+
+/* ============================================================
+   LEADERBOARD - AAA GAME QUALITY
+   ============================================================ */
+
+.steampunk [class*="Leaderboard"] .text-2xl {
+  font-size: 2.5rem !important;
+}
+
+.steampunk [class*="Leaderboard"] td {
+  font-size: 1.25rem !important;
+  padding: 1.5rem !important;
+}
+
+.steampunk [class*="Leaderboard"] th {
+  font-size: 1.5rem !important;
+  padding: 1.25rem !important;
+}
+
+/* Rank badges */
+.steampunk [class*="Leaderboard"] .text-3xl,
+.steampunk [class*="Leaderboard"] .text-4xl {
+  font-size: 2.5rem !important;
+}
+
+/* ============================================================
+   PLAYER PROFILE - AAA GAME QUALITY
+   ============================================================ */
+
+.steampunk [class*="PlayerProfile"] h1 {
+  font-size: 3rem !important;
+}
+
+.steampunk [class*="PlayerProfile"] .text-6xl,
+.steampunk [class*="PlayerProfile"] .text-8xl {
+  font-size: 6rem !important; /* Avatar emoji */
+}
+
+/* Personal bests cards */
+.steampunk [class*="PlayerProfile"] .grid .text-2xl {
+  font-size: 2.5rem !important;
+  font-weight: 800 !important;
+}
+
+/* ============================================================
+   SETTINGS SPECIFIC - EXTRA IMPROVEMENTS
+   ============================================================ */
+
+/* Volume percentage display */
+.steampunk [class*="Settings"] label span:last-child {
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  color: #daa520 !important;
+}
+
+/* Info boxes */
+.steampunk [class*="bg-primary-500/10"],
+.steampunk [class*="bg-blue-500/10"],
+.steampunk [class*="bg-yellow-500/10"] {
+  padding: 1.25rem !important;
+  border-width: 3px !important;
+}
+
+.steampunk [class*="bg-primary-500/10"] p,
+.steampunk [class*="bg-blue-500/10"] p,
+.steampunk [class*="bg-yellow-500/10"] p {
+  font-size: 1.125rem !important;
+  line-height: 1.6 !important;
+}
+
+/* ============================================================
+   TOURNAMENT - AAA GAME QUALITY
+   ============================================================ */
+
+.steampunk [class*="Tournament"] button {
+  min-height: 100px !important;
+}
+
+.steampunk [class*="Tournament"] h3 {
+  font-size: 2rem !important;
+}
+
+/* ============================================================
+   RESPONSIVE - ENSURE MOBILE IS ALSO AAA
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .steampunk h1 {
+    font-size: 2rem !important;
+  }
+  
+  .steampunk h2 {
+    font-size: 1.75rem !important;
+  }
+  
+  .steampunk h3 {
+    font-size: 1.5rem !important;
+  }
+  
+  .steampunk button {
+    min-height: 64px !important;
+    font-size: 1rem !important;
+  }
+  
+  .steampunk input:not([type="range"]) {
+    font-size: 1rem !important;
+  }
 }
