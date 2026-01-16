@@ -147,9 +147,22 @@ ssh root@69.62.121.168 "netstat -tlnp | grep 3002"
 ```
 
 ### Google OAuth leitet auf localhost
+
+**Ursache 1: Frontend .env fehlt**
 - Prüfe ob `.env` lokal existiert mit `VITE_API_URL=https://api.stateofthedart.com`
 - Frontend neu bauen: `npm run build`
 - Neu deployen
+
+**Ursache 2: Backend .env unvollständig (HÄUFIGSTER FEHLER!)**
+- Die `GOOGLE_CALLBACK_URL` fehlt oder zeigt auf localhost
+- Prüfen: `ssh root@69.62.121.168 "grep GOOGLE_CALLBACK /var/www/stateofthedart-backend/.env"`
+- Muss sein: `GOOGLE_CALLBACK_URL=https://api.stateofthedart.com/api/auth/google/callback`
+- Nach Änderung: `pm2 restart stateofthedart-backend`
+
+**Ursache 3: Browser-Cache (PWA)**
+- Hard Refresh: `Cmd+Shift+R`
+- Oder: DevTools → Application → Storage → "Clear site data"
+- Oder: Inkognito-Fenster testen
 
 ### Spieler/Daten fehlen
 - Prüfe ob User dem richtigen Tenant zugeordnet ist
@@ -191,3 +204,34 @@ ssh root@69.62.121.168 "systemctl reload nginx"
 - Heatmap-Visualisierung verbessert (mehr Kontrast, präsentere Farben)
 - Demo-Spieler mit charakteristischen Heatmaps erstellt
 - Registrierung: Email-Fehler blockieren nicht mehr die Account-Erstellung
+- **KRITISCH: Backend .env komplett überarbeitet:**
+  - `GOOGLE_CALLBACK_URL` hinzugefügt (fehlte komplett!)
+  - `APP_URL`, `API_URL`, `CORS_ORIGINS` hinzugefügt
+  - `NODE_ENV=production` gesetzt
+  - `PORT=3002` (war 3001, Konflikt mit kiezform-v3)
+  - `DATABASE_URL` korrigiert auf `./data/state-of-the-dart.db`
+
+---
+
+## ⚠️ KRITISCHE .env Variablen
+
+Diese Variablen MÜSSEN auf dem VPS gesetzt sein, sonst funktioniert OAuth nicht:
+
+```env
+# PFLICHT für Google OAuth!
+GOOGLE_CALLBACK_URL=https://api.stateofthedart.com/api/auth/google/callback
+
+# PFLICHT für CORS und Redirects!
+APP_URL=https://stateofthedart.com
+API_URL=https://api.stateofthedart.com
+CORS_ORIGINS=https://stateofthedart.com,https://api.stateofthedart.com
+
+# PFLICHT: Korrekter Port (3002, nicht 3001!)
+PORT=3002
+NODE_ENV=production
+```
+
+**Prüf-Befehl:**
+```bash
+ssh root@69.62.121.168 "grep -E 'GOOGLE_CALLBACK|APP_URL|API_URL|CORS|PORT|NODE_ENV' /var/www/stateofthedart-backend/.env"
+```

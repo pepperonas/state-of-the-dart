@@ -64,6 +64,53 @@ echo "   Backend deployed"
 # ============================================
 echo "4/4 Backend neu starten..."
 
+# ============================================
+# KRITISCH: VPS .env validieren
+# ============================================
+echo "   Validiere VPS .env..."
+
+REQUIRED_VARS="GOOGLE_CALLBACK_URL APP_URL API_URL CORS_ORIGINS"
+MISSING_VARS=""
+
+for var in $REQUIRED_VARS; do
+  if ! ssh ${VPS_USER}@${VPS_IP} "grep -q '^${var}=' ${BACKEND_PATH}/.env" 2>/dev/null; then
+    MISSING_VARS="$MISSING_VARS $var"
+  fi
+done
+
+if [ -n "$MISSING_VARS" ]; then
+  echo ""
+  echo "========================================"
+  echo "  ⚠️  WARNUNG: VPS .env unvollständig!"
+  echo "========================================"
+  echo "Fehlende Variablen:$MISSING_VARS"
+  echo ""
+  echo "Diese Variablen MÜSSEN gesetzt sein:"
+  echo "  GOOGLE_CALLBACK_URL=https://api.stateofthedart.com/api/auth/google/callback"
+  echo "  APP_URL=https://stateofthedart.com"
+  echo "  API_URL=https://api.stateofthedart.com"
+  echo "  CORS_ORIGINS=https://stateofthedart.com,https://api.stateofthedart.com"
+  echo ""
+  echo "Deployment wird abgebrochen!"
+  exit 1
+fi
+
+# Prüfe ob GOOGLE_CALLBACK_URL auf Production zeigt
+CALLBACK_URL=$(ssh ${VPS_USER}@${VPS_IP} "grep '^GOOGLE_CALLBACK_URL=' ${BACKEND_PATH}/.env | cut -d'=' -f2")
+if [[ "$CALLBACK_URL" == *"localhost"* ]]; then
+  echo ""
+  echo "========================================"
+  echo "  ❌ FEHLER: GOOGLE_CALLBACK_URL zeigt auf localhost!"
+  echo "========================================"
+  echo "Aktuell: $CALLBACK_URL"
+  echo "Erwartet: https://api.stateofthedart.com/api/auth/google/callback"
+  echo ""
+  echo "Deployment wird abgebrochen!"
+  exit 1
+fi
+
+echo "   VPS .env OK ✓"
+
 ssh ${VPS_USER}@${VPS_IP} << ENDSSH
   cd ${BACKEND_PATH}
 

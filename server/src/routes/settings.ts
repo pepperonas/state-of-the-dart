@@ -42,7 +42,7 @@ router.get('/', authenticateTenant, (req: AuthRequest, res: Response) => {
 router.put('/', authenticateTenant, (req: AuthRequest, res: Response) => {
   const db = getDatabase();
   const settings = req.body;
-  
+
   try {
     // Upsert settings
     const stmt = db.prepare(`
