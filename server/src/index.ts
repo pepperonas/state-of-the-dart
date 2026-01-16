@@ -70,6 +70,10 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => {
+    // Skip rate limiting for auth routes (Google OAuth makes multiple redirects)
+    return req.path.startsWith('/api/auth/');
+  }
 });
 app.use('/api/', limiter);
 
