@@ -11,13 +11,46 @@ const router = express_1.default.Router();
 router.get('/', auth_1.authenticateTenant, (req, res) => {
     const db = (0, database_1.getDatabase)();
     try {
-        const players = db.prepare(`
+        const rawPlayers = db.prepare(`
       SELECT p.*, ps.*
       FROM players p
       LEFT JOIN player_stats ps ON p.id = ps.player_id
       WHERE p.tenant_id = ?
       ORDER BY p.created_at DESC
     `).all(req.tenantId);
+        // Transform flat structure to nested structure
+        const players = rawPlayers.map((row) => ({
+            id: row.id,
+            name: row.name,
+            avatar: row.avatar,
+            createdAt: row.created_at,
+            stats: {
+                gamesPlayed: row.games_played || 0,
+                gamesWon: row.games_won || 0,
+                totalLegsPlayed: row.total_legs_played || 0,
+                totalLegsWon: row.total_legs_won || 0,
+                highestCheckout: row.highest_checkout || 0,
+                total180s: row.total_180s || 0,
+                total171Plus: row.total_171_plus || 0,
+                total140Plus: row.total_140_plus || 0,
+                total100Plus: row.total_100_plus || 0,
+                total60Plus: row.total_60_plus || 0,
+                bestAverage: row.best_average || 0,
+                averageOverall: row.average_overall || 0,
+                checkoutPercentage: row.checkout_percentage || 0,
+                checkoutsByDouble: {},
+                scoreDistribution: {},
+                bestLeg: row.best_leg || 999,
+                nineDartFinishes: row.nine_dart_finishes || 0,
+            },
+            preferences: {
+                preferredCheckouts: {},
+                soundEnabled: true,
+                callerLanguage: 'en',
+                callerVoice: 'male',
+                vibrationEnabled: true,
+            }
+        }));
         res.json({ players });
     }
     catch (error) {
@@ -30,15 +63,48 @@ router.get('/:id', auth_1.authenticateTenant, (req, res) => {
     const { id } = req.params;
     const db = (0, database_1.getDatabase)();
     try {
-        const player = db.prepare(`
+        const row = db.prepare(`
       SELECT p.*, ps.*
       FROM players p
       LEFT JOIN player_stats ps ON p.id = ps.player_id
       WHERE p.id = ? AND p.tenant_id = ?
     `).get(id, req.tenantId);
-        if (!player) {
+        if (!row) {
             return res.status(404).json({ error: 'Player not found' });
         }
+        // Transform flat structure to nested structure
+        const player = {
+            id: row.id,
+            name: row.name,
+            avatar: row.avatar,
+            createdAt: row.created_at,
+            stats: {
+                gamesPlayed: row.games_played || 0,
+                gamesWon: row.games_won || 0,
+                totalLegsPlayed: row.total_legs_played || 0,
+                totalLegsWon: row.total_legs_won || 0,
+                highestCheckout: row.highest_checkout || 0,
+                total180s: row.total_180s || 0,
+                total171Plus: row.total_171_plus || 0,
+                total140Plus: row.total_140_plus || 0,
+                total100Plus: row.total_100_plus || 0,
+                total60Plus: row.total_60_plus || 0,
+                bestAverage: row.best_average || 0,
+                averageOverall: row.average_overall || 0,
+                checkoutPercentage: row.checkout_percentage || 0,
+                checkoutsByDouble: {},
+                scoreDistribution: {},
+                bestLeg: row.best_leg || 999,
+                nineDartFinishes: row.nine_dart_finishes || 0,
+            },
+            preferences: {
+                preferredCheckouts: {},
+                soundEnabled: true,
+                callerLanguage: 'en',
+                callerVoice: 'male',
+                vibrationEnabled: true,
+            }
+        };
         res.json(player);
     }
     catch (error) {
@@ -64,13 +130,46 @@ router.post('/', auth_1.authenticateTenant, (req, res) => {
       INSERT INTO player_stats (player_id)
       VALUES (?)
     `).run(id);
-        const player = db.prepare(`
+        const row = db.prepare(`
       SELECT p.*, ps.*
       FROM players p
       LEFT JOIN player_stats ps ON p.id = ps.player_id
       WHERE p.id = ?
     `).get(id);
-        res.status(201).json(player);
+        // Transform to nested structure
+        const player = {
+            id: row.id,
+            name: row.name,
+            avatar: row.avatar,
+            createdAt: row.created_at,
+            stats: {
+                gamesPlayed: row.games_played || 0,
+                gamesWon: row.games_won || 0,
+                totalLegsPlayed: row.total_legs_played || 0,
+                totalLegsWon: row.total_legs_won || 0,
+                highestCheckout: row.highest_checkout || 0,
+                total180s: row.total_180s || 0,
+                total171Plus: row.total_171_plus || 0,
+                total140Plus: row.total_140_plus || 0,
+                total100Plus: row.total_100_plus || 0,
+                total60Plus: row.total_60_plus || 0,
+                bestAverage: row.best_average || 0,
+                averageOverall: row.average_overall || 0,
+                checkoutPercentage: row.checkout_percentage || 0,
+                checkoutsByDouble: {},
+                scoreDistribution: {},
+                bestLeg: row.best_leg || 999,
+                nineDartFinishes: row.nine_dart_finishes || 0,
+            },
+            preferences: {
+                preferredCheckouts: {},
+                soundEnabled: true,
+                callerLanguage: 'en',
+                callerVoice: 'male',
+                vibrationEnabled: true,
+            }
+        };
+        res.status(201).json({ player });
     }
     catch (error) {
         console.error('Error creating player:', error);
