@@ -164,7 +164,7 @@ npm start
 
 Oder mit PM2:
 ```bash
-pm2 start dist/index.js --name state-of-the-dart-api
+pm2 start dist/index.js --name stateofthedart-backend
 pm2 save
 ```
 

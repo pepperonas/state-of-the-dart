@@ -16,7 +16,7 @@
 ![Vite](https://img.shields.io/badge/Vite-5.4-blue)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-blue)
 
-🌐 **[Live App](https://stateofthedart.com)** | 📱 **[Als PWA installieren](PWA.md)** | 📊 **[Charts Guide](CHARTS.md)** | 🔄 **[Versionierung](VERSIONING.md)** | 📖 **[Deployment Guide](DEPLOYMENT.md)** | ⚡ **[Performance Guide](PERFORMANCE.md)** | 🏷️ **[Meta Tags Guide](META_TAGS.md)** | 🐛 **[Issues melden](https://github.com/pepperonas/state-of-the-dart/issues)**
+🌐 **[Live App](https://stateofthedart.com)** | 📖 **[Deployment Guide](DEPLOYMENT_VPS.md)** | 🏗️ **[Architektur](ARCHITECTURE.md)** | 🐛 **[Issues melden](https://github.com/pepperonas/state-of-the-dart/issues)**
 
 ---
 
@@ -332,7 +332,7 @@ Die App bietet umfangreiche Statistik-Features:
 7. **Match-Verlauf Runden-Chart** - Zeigt jede Runde (3 Würfe) im Match-Verlauf
 8. **Vergleichs-Charts** - Multi-Player Radar & Bar Charts
 
-Siehe [CHARTS.md](CHARTS.md) für detaillierte Chart-Dokumentation.
+Alle Charts werden mit der Recharts-Library erstellt.
 
 ---
 
@@ -375,7 +375,7 @@ Siehe vollständige Liste in `src/types/achievements.ts`
 2. "App installieren"
 3. Bestätigen
 
-Siehe [PWA.md](PWA.md) für detaillierte Anleitung.
+Die App kann auf Desktop (Chrome/Edge), iOS (Safari) und Android (Chrome) installiert werden.
 
 ---
 
@@ -410,7 +410,7 @@ Siehe [PWA.md](PWA.md) für detaillierte Anleitung.
 
 Google PageSpeed Insights Score: **95-100/100**
 
-Siehe [PERFORMANCE.md](PERFORMANCE.md) für Details.
+PWA-Konfiguration in `vite.config.ts`.
 
 ---
 
@@ -450,17 +450,15 @@ Das Script führt aus:
 3. Permissions setzen
 4. Verifizierung
 
-Siehe [DEPLOYMENT.md](DEPLOYMENT.md) für Details.
+Siehe [DEPLOYMENT_VPS.md](DEPLOYMENT_VPS.md) für Details.
 
 ---
 
 ## 🔢 Versionierung
 
-- **Aktuell**: v0.0.1
+- **Aktuell**: v0.1.0
 - **Schema**: MAJOR.MINOR.PATCH
 - **Auto-Increment**: `npm run version:bump`
-
-Siehe [VERSIONING.md](VERSIONING.md) für Details.
 
 ---
 

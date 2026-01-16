@@ -15,7 +15,14 @@
       "Bash(node:*)",
       "Bash(git add:*)",
       "Bash(git commit -m \"$(cat <<''EOF''\n🎯 Fix: Heatmap-Daten werden jetzt bei jedem Wurf aktualisiert\n\n- updatePlayerHeatmap wird jetzt im GameContext aufgerufen\n- Neuer useEffect Hook trackt bestätigte Würfe\n- Ref verhindert doppelte Updates\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(scp:*)",
+      "Bash(chmod:*)",
+      "Bash(./deploy.sh:*)",
+      "Bash(sqlite3:*)",
+      "Bash(npx ts-node:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

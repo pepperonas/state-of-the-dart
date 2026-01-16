@@ -1,37 +1,70 @@
 import { Dart, HeatmapData, SegmentHeat } from '../types';
 
+// Extended type for segment data with coordinates
+interface SegmentData {
+  x: number[];
+  y: number[];
+  count: number;
+}
+
 /**
  * Updates heatmap data with new darts
+ * Stores x/y coordinates for visual heatmap rendering
  */
 export const updateHeatmapData = (
   currentData: HeatmapData,
   newDarts: Dart[]
 ): HeatmapData => {
-  const segments = { ...currentData.segments };
-  
+  // Deep clone segments to avoid mutation
+  const segments: Record<string, SegmentData> = {};
+
+  // Convert existing data to new format if needed
+  Object.entries(currentData.segments).forEach(([key, value]) => {
+    if (typeof value === 'number') {
+      // Old format: just a count - no coordinates available
+      segments[key] = { x: [], y: [], count: value };
+    } else if (value && typeof value === 'object') {
+      // New format with x/y arrays
+      const data = value as any;
+      segments[key] = {
+        x: [...(data.x || [])],
+        y: [...(data.y || [])],
+        count: data.count || data.x?.length || 0
+      };
+    }
+  });
+
   newDarts.forEach(dart => {
+    let key: string;
+
     // Skip misses (segment 0)
     if (dart.segment === 0) {
-      const key = '0-0'; // miss
-      segments[key] = (segments[key] || 0) + 1;
-      return;
+      key = '0-0'; // miss
+    } else if (dart.segment === 25 || dart.segment === 50) {
+      // Handle bulls
+      key = dart.segment === 50 ? '25-2' : '25-1'; // bull or outer bull
+    } else {
+      // Regular segments
+      key = `${dart.segment}-${dart.multiplier}`;
     }
-    
-    // Handle bulls
-    if (dart.segment === 25 || dart.segment === 50) {
-      const key = dart.segment === 50 ? '25-2' : '25-1'; // bull or outer bull
-      segments[key] = (segments[key] || 0) + 1;
-      return;
+
+    // Initialize if not exists
+    if (!segments[key]) {
+      segments[key] = { x: [], y: [], count: 0 };
     }
-    
-    // Regular segments
-    const key = `${dart.segment}-${dart.multiplier}`;
-    segments[key] = (segments[key] || 0) + 1;
+
+    // Add coordinates if available
+    const dartWithCoords = dart as any;
+    if (typeof dartWithCoords.x === 'number' && typeof dartWithCoords.y === 'number') {
+      segments[key].x.push(dartWithCoords.x);
+      segments[key].y.push(dartWithCoords.y);
+    }
+    segments[key].count++;
   });
-  
+
   return {
     ...currentData,
-    segments,
+    segments: segments as any,
     totalDarts: currentData.totalDarts + newDarts.length,
     lastUpdated: new Date()
   };

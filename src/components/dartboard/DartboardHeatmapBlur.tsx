@@ -19,114 +19,62 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dartboardRef = useRef<HTMLCanvasElement>(null);
 
-  // Parse segments and create point cloud
+  // Parse segments and create point cloud with proper intensity scaling
   const dartPoints = useMemo(() => {
     const points: { x: number; y: number; intensity: number }[] = [];
-    
+
     if (!heatmapData.segments) return points;
-    
+
     try {
-      const segments = typeof heatmapData.segments === 'string' 
-        ? JSON.parse(heatmapData.segments) 
+      const segments = typeof heatmapData.segments === 'string'
+        ? JSON.parse(heatmapData.segments)
         : heatmapData.segments;
-      const maxCount = heatmapData.totalDarts > 0 ? heatmapData.totalDarts / 100 : 1;
-      
-      // Dartboard dimensions (relative to size)
+
       const center = size / 2;
-      const outerRadius = size * 0.45;
-      const tripleRadius = outerRadius * 0.63; // Triple ring
-      const doubleRadius = outerRadius * 0.95; // Double ring
-      const singleRadius = outerRadius * 0.85; // Single area
-      
-      // Segment angles (20 is at top = -90 degrees)
-      const segmentAngles: Record<number, number> = {
-        20: -90, 1: -72, 18: -54, 4: -36, 13: -18,
-        6: 0, 10: 18, 15: 36, 2: 54, 17: 72,
-        3: 90, 19: 108, 7: 126, 16: 144, 8: 162,
-        11: 180, 14: 198, 9: 216, 12: 234, 5: 252
-      };
-      
+      const scale = size * 0.45; // Scale for normalized coordinates
+
+      // First pass: find max count per segment to normalize properly
+      let maxSegmentCount = 0;
+      Object.values(segments).forEach((data: any) => {
+        if (data && typeof data === 'object' && Array.isArray(data.x)) {
+          maxSegmentCount = Math.max(maxSegmentCount, data.x.length);
+        }
+      });
+
+      // Use the top segment count for normalization (makes hot spots really hot)
+      const normalizationFactor = maxSegmentCount > 0 ? maxSegmentCount : 1;
+
       Object.entries(segments).forEach(([segmentKey, data]: [string, any]) => {
-        // Check if data has x/y coordinate arrays (new format with actual positions)
-        if (data && typeof data === 'object' && Array.isArray(data.x) && Array.isArray(data.y)) {
+        // Check if data has x/y coordinate arrays (format with actual positions)
+        if (data && typeof data === 'object' && Array.isArray(data.x) && Array.isArray(data.y) && data.x.length > 0) {
           // Use existing x/y coordinates directly
           const hitCount = data.x.length;
+          // Intensity based on how this segment compares to the hottest segment
+          // This makes the contrast much more visible
+          const segmentIntensity = hitCount / normalizationFactor;
+
           for (let i = 0; i < hitCount; i++) {
             // x/y are normalized coordinates (-1 to 1), convert to canvas coordinates
-            const x = center + data.x[i] * (size * 0.45);
-            const y = center + data.y[i] * (size * 0.45);
+            const x = center + data.x[i] * scale;
+            const y = center + data.y[i] * scale;
 
             points.push({
               x,
               y,
-              intensity: hitCount / maxCount
+              // Higher intensity for segments with more hits
+              intensity: segmentIntensity
             });
           }
-          return;
         }
-
-        // Simple count format - generate points based on segment/multiplier
-        // Parse segment key - supports multiple formats
-        let multiplier: number;
-        let segment: number;
-
-        if (segmentKey.includes('x')) {
-          // Format: "3x20" (multiplier x segment)
-          const parts = segmentKey.split('x');
-          multiplier = parseInt(parts[0]);
-          segment = parseInt(parts[1]);
-        } else if (segmentKey.includes('-')) {
-          // Format: "20-3" (segment-multiplier) - standard format
-          const parts = segmentKey.split('-');
-          segment = parseInt(parts[0]);
-          multiplier = parseInt(parts[1]);
-        } else {
-          console.warn('Unknown segment format:', segmentKey);
-          return;
-        }
-
-        const hitCount = typeof data === 'number' ? data : 0;
-        if (hitCount === 0) return;
-
-        // Get angle for this segment
-        const baseAngle = segmentAngles[segment] || 0;
-        const angleRad = (baseAngle * Math.PI) / 180;
-
-        // Determine radius based on multiplier
-        let baseRadius: number;
-        if (multiplier === 3) {
-          baseRadius = tripleRadius; // Triple ring
-        } else if (multiplier === 2) {
-          baseRadius = doubleRadius; // Double ring
-        } else {
-          baseRadius = singleRadius; // Single area
-        }
-
-        // Generate points for each hit with small variations
-        for (let i = 0; i < hitCount; i++) {
-          // Add small random variation (±2° angle, ±2% radius)
-          const angleVariation = (Math.random() - 0.5) * 4; // ±2 degrees
-          const radiusVariation = (Math.random() - 0.5) * (baseRadius * 0.02); // ±2% radius
-
-          const finalAngle = angleRad + (angleVariation * Math.PI / 180);
-          const finalRadius = baseRadius + radiusVariation;
-
-          const x = center + Math.cos(finalAngle) * finalRadius;
-          const y = center + Math.sin(finalAngle) * finalRadius;
-
-          points.push({
-            x,
-            y,
-            intensity: hitCount / maxCount
-          });
-        }
+        // Note: We only render points with actual coordinates
+        // Old count-only format is preserved but not visualized
       });
-      
-      console.log(`🎯 Generated ${points.length} dart points from segments`);
+
+      console.log(`🎯 Generated ${points.length} dart points from segments (max segment: ${maxSegmentCount})`);
     } catch (e) {
       console.error('Failed to parse heatmap segments:', e);
     }
-    
+
     return points;
   }, [heatmapData, size]);
 
@@ -258,10 +206,10 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || dartPoints.length === 0) return;
-    
-    const ctx = canvas.getContext('2d');
+
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return;
-    
+
     const center = size / 2;
     const scale = size / 2;
     
@@ -276,30 +224,35 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
     if (!tempCtx) return;
     
     // Draw heatmap points with radial gradients
+    // Use smaller radius for more concentrated heat spots
+    const pointRadius = size * 0.045; // Slightly larger for more presence
+
     dartPoints.forEach(point => {
       // Points already have absolute canvas coordinates
       const x = point.x;
       const y = point.y;
-      const radius = size * 0.08; // Blur radius
-      
-      const gradient = tempCtx.createRadialGradient(x, y, 0, x, y, radius);
-      
-      // Intensity-based color (0-1)
-      const intensity = Math.min(1, point.intensity * 100);
-      
-      gradient.addColorStop(0, `rgba(255, 0, 0, ${intensity * 0.8})`); // Red center
-      gradient.addColorStop(0.3, `rgba(255, 100, 0, ${intensity * 0.6})`); // Orange
-      gradient.addColorStop(0.6, `rgba(255, 200, 0, ${intensity * 0.4})`); // Yellow
-      gradient.addColorStop(1, 'rgba(0, 255, 100, 0)'); // Transparent edge
-      
+
+      const gradient = tempCtx.createRadialGradient(x, y, 0, x, y, pointRadius);
+
+      // Intensity is already normalized (0-1) based on segment popularity
+      // Apply power curve to make hot spots more prominent
+      const intensity = Math.pow(point.intensity, 0.4); // Flatter curve = more visible low-intensity areas
+
+      // Much higher alpha values for better visibility against dartboard
+      gradient.addColorStop(0, `rgba(255, 30, 0, ${Math.min(1, intensity * 1.5)})`); // Bright red center
+      gradient.addColorStop(0.15, `rgba(255, 80, 0, ${Math.min(1, intensity * 1.3)})`); // Orange
+      gradient.addColorStop(0.4, `rgba(255, 160, 0, ${intensity * 1.0})`); // Yellow-orange
+      gradient.addColorStop(0.7, `rgba(200, 255, 50, ${intensity * 0.5})`); // Yellow-green glow
+      gradient.addColorStop(1, 'rgba(100, 255, 100, 0)'); // Transparent edge
+
       tempCtx.fillStyle = gradient;
       tempCtx.beginPath();
-      tempCtx.arc(x, y, radius, 0, Math.PI * 2);
+      tempCtx.arc(x, y, pointRadius, 0, Math.PI * 2);
       tempCtx.fill();
     });
     
-    // Apply blur filter to smooth out the heatmap
-    ctx.filter = 'blur(20px)';
+    // Apply blur filter to smooth out the heatmap (less blur = more contrast)
+    ctx.filter = 'blur(12px)';
     ctx.drawImage(tempCanvas, 0, 0);
     ctx.filter = 'none';
     
@@ -312,46 +265,46 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
       const g = data[i + 1];
       const b = data[i + 2];
       const a = data[i + 3];
-      
+
       if (a > 0) {
         // Calculate intensity from RGB
         const intensity = (r + g + b) / (3 * 255);
-        
-        // Apply L.A. heatmap color scheme
-        if (intensity < 0.2) {
-          // Blue (cold)
-          data[i] = 59;
-          data[i + 1] = 130;
-          data[i + 2] = 246;
-          data[i + 3] = intensity * 255 * 2;
-        } else if (intensity < 0.4) {
-          // Cyan
-          const t = (intensity - 0.2) / 0.2;
-          data[i] = 59 + (78 - 59) * t;
-          data[i + 1] = 130 + (199 - 130) * t;
-          data[i + 2] = 246 + (244 - 246) * t;
-          data[i + 3] = intensity * 255 * 2;
-        } else if (intensity < 0.6) {
-          // Green
-          const t = (intensity - 0.4) / 0.2;
-          data[i] = 78 + (34 - 78) * t;
-          data[i + 1] = 199 + (197 - 199) * t;
-          data[i + 2] = 244 + (94 - 244) * t;
-          data[i + 3] = intensity * 255 * 2.5;
-        } else if (intensity < 0.8) {
-          // Yellow
-          const t = (intensity - 0.6) / 0.2;
-          data[i] = 34 + (234 - 34) * t;
-          data[i + 1] = 197 + (179 - 197) * t;
-          data[i + 2] = 94 + (8 - 94) * t;
-          data[i + 3] = intensity * 255 * 3;
+
+        // Apply vibrant heatmap color scheme with higher alpha values
+        if (intensity < 0.15) {
+          // Blue (cold) - more visible
+          data[i] = 80;
+          data[i + 1] = 150;
+          data[i + 2] = 255;
+          data[i + 3] = Math.min(255, intensity * 255 * 4);
+        } else if (intensity < 0.35) {
+          // Cyan to Green
+          const t = (intensity - 0.15) / 0.2;
+          data[i] = 80 + (50 - 80) * t;
+          data[i + 1] = 150 + (220 - 150) * t;
+          data[i + 2] = 255 + (150 - 255) * t;
+          data[i + 3] = Math.min(255, intensity * 255 * 4);
+        } else if (intensity < 0.55) {
+          // Green to Yellow
+          const t = (intensity - 0.35) / 0.2;
+          data[i] = 50 + (255 - 50) * t;
+          data[i + 1] = 220 + (220 - 220) * t;
+          data[i + 2] = 150 + (50 - 150) * t;
+          data[i + 3] = Math.min(255, intensity * 255 * 4.5);
+        } else if (intensity < 0.75) {
+          // Yellow to Orange
+          const t = (intensity - 0.55) / 0.2;
+          data[i] = 255;
+          data[i + 1] = 220 + (140 - 220) * t;
+          data[i + 2] = 50 + (0 - 50) * t;
+          data[i + 3] = Math.min(255, intensity * 255 * 5);
         } else {
-          // Red/Orange (hot)
-          const t = (intensity - 0.8) / 0.2;
-          data[i] = 234 + (249 - 234) * t;
-          data[i + 1] = 179 + (115 - 179) * t;
-          data[i + 2] = 8 + (22 - 8) * t;
-          data[i + 3] = Math.min(255, intensity * 255 * 3.5);
+          // Orange to Red (hot) - maximum visibility
+          const t = (intensity - 0.75) / 0.25;
+          data[i] = 255;
+          data[i + 1] = 140 + (50 - 140) * t;
+          data[i + 2] = 0;
+          data[i + 3] = Math.min(255, 180 + intensity * 75);
         }
       }
     }
@@ -363,34 +316,26 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
   // Calculate top segments
   const topSegments = useMemo(() => {
     if (!heatmapData.segments) return [];
-    
+
     try {
-      const segments = typeof heatmapData.segments === 'string' 
-        ? JSON.parse(heatmapData.segments) 
+      const segments = typeof heatmapData.segments === 'string'
+        ? JSON.parse(heatmapData.segments)
         : heatmapData.segments;
       const segmentCounts: { segment: number; multiplier: number; count: number }[] = [];
-      
-      Object.entries(segments).forEach(([key, data]: [string, any]) => {
-        let segment: number;
-        let multiplier: number;
 
-        if (key.includes('x')) {
-          // Format: "3x20" (multiplier x segment)
-          const parts = key.split('x');
-          multiplier = parseInt(parts[0]);
-          segment = parseInt(parts[1]);
-        } else {
-          // Format: "20-3" (segment-multiplier) - standard format
-          const parts = key.split('-');
-          segment = parseInt(parts[0]);
-          multiplier = parseInt(parts[1]);
-        }
+      Object.entries(segments).forEach(([key, data]: [string, any]) => {
+        // Parse key format: "20-3" (segment-multiplier)
+        const parts = key.split('-');
+        const segment = parseInt(parts[0]);
+        const multiplier = parseInt(parts[1]);
 
         // Support both simple count and object with x/y/count
         const count = typeof data === 'number' ? data : (data?.count || data?.x?.length || 0);
-        segmentCounts.push({ segment, multiplier, count });
+        if (count > 0) {
+          segmentCounts.push({ segment, multiplier, count });
+        }
       });
-      
+
       return segmentCounts
         .sort((a, b) => b.count - a.count)
         .slice(0, compact ? 3 : 5);
@@ -434,9 +379,9 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
               width={size}
               height={size}
               className="absolute inset-0"
-              style={{ 
+              style={{
                 mixBlendMode: 'screen',
-                opacity: 0.75
+                opacity: 0.9
               }}
             />
           </div>

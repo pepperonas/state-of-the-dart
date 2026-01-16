@@ -1,394 +1,193 @@
-# 🚀 VPS Deployment Anleitung für v0.0.2
+# VPS Deployment Anleitung
 
-## Schnellstart
+## Aktuelles Server-Setup (Stand: 2026-01-16)
+
+| Komponente | Pfad / Wert |
+|------------|-------------|
+| **VPS IP** | `69.62.121.168` |
+| **SSH User** | `root` |
+| **SSH Port** | `22` (Standard) |
+| **Frontend** | `/var/www/stateofthedart` |
+| **Backend** | `/var/www/stateofthedart-backend` |
+| **Datenbank** | `/var/www/stateofthedart-backend/data/state-of-the-dart.db` |
+| **PM2 Prozess** | `stateofthedart-backend` |
+| **Backend Port** | `3002` |
+| **Frontend URL** | `https://stateofthedart.com` |
+| **API URL** | `https://api.stateofthedart.com` |
+
+---
+
+## Schnellstart Deployment
 
 ```bash
-# 1. VPS-IP im Script eintragen
-nano deploy-complete.sh
-# Ändere: VPS_IP="YOUR_VPS_IP_HERE" zu deiner echten IP
+# 1. Frontend bauen und deployen
+npm run build
+rsync -avz --delete dist/ root@69.62.121.168:/var/www/stateofthedart/
 
-# 2. Script ausführen
-./deploy-complete.sh
+# 2. Backend bauen und deployen (falls Code-Änderungen)
+cd server && npm run build && cd ..
+rsync -avz --exclude='node_modules' --exclude='data' server/ root@69.62.121.168:/var/www/stateofthedart-backend/
+ssh root@69.62.121.168 "cd /var/www/stateofthedart-backend && npm install --production && pm2 restart stateofthedart-backend"
 
-# 3. Auf VPS: Echte Credentials eintragen
-ssh root@YOUR_VPS_IP
-nano /opt/stateofthedart/server/.env
-# Trage echte Werte ein für:
-# - SMTP_PASS
-# - GOOGLE_CLIENT_ID
-# - GOOGLE_CLIENT_SECRET  
-# - STRIPE_SECRET_KEY
-
-# 4. Backend neu starten
-pm2 restart state-of-the-dart-api
+# 3. Nur Backend neu starten
+ssh root@69.62.121.168 "pm2 restart stateofthedart-backend"
 ```
 
 ---
 
-## Was das Script macht
+## Wichtige Dateien auf dem Server
 
-### ✅ Frontend Deployment
-- Baut React App mit Production-Config
-- Uploaded nach `/var/www/stateofthedart`
-- Konfiguriert Nginx für `stateofthedart.com`
+### Backend .env (`/var/www/stateofthedart-backend/.env`)
 
-### ✅ Backend Deployment
-- Baut Express.js API
-- Uploaded nach `/opt/stateofthedart/server`
-- Installiert Dependencies
-- Erstellt `.env` mit Platzhaltern
-- Erstellt Admin-Konto (`martin.pfeffer@celox.io`)
-- Generiert Demo-Daten (4 Spieler, 20 Matches)
-- Startet mit PM2
+```env
+# Database
+DATABASE_URL=./data/state-of-the-dart.db
 
-### ✅ Nginx Konfiguration
-- Frontend: `stateofthedart.com`
-- Backend API: `api.stateofthedart.com`
-- Gzip Compression
-- Static Asset Caching
-- Reverse Proxy für API
+# JWT & Session
+JWT_SECRET=<secret>
+SESSION_SECRET=<secret>
 
-### ✅ Optional: SSL
-- Let's Encrypt Zertifikate
-- Automatische Erneuerung
-- HTTPS für beide Domains
+# SMTP (WICHTIG: SMTP_PASSWORD, nicht SMTP_PASS!)
+SMTP_HOST=premium269-4.web-hosting.com
+SMTP_PORT=465
+SMTP_USER=stateofthedart@celox.io
+SMTP_PASSWORD=<password>
 
----
+# Google OAuth
+GOOGLE_CLIENT_ID=<client_id>
+GOOGLE_CLIENT_SECRET=<client_secret>
 
-## Voraussetzungen auf dem VPS
+# Stripe
+STRIPE_SECRET_KEY=<stripe_key>
+STRIPE_WEBHOOK_SECRET=<webhook_secret>
 
-Das Script installiert automatisch:
-- ✅ Node.js 20.x
-- ✅ PM2 (Process Manager)
-- ✅ Nginx (falls nicht vorhanden)
-- ✅ Certbot (für SSL, optional)
+# URLs
+CLIENT_URL=https://stateofthedart.com
+SERVER_URL=https://api.stateofthedart.com
+APP_URL=https://stateofthedart.com
+API_URL=https://api.stateofthedart.com
+CORS_ORIGINS=https://stateofthedart.com,https://api.stateofthedart.com
+GOOGLE_CALLBACK_URL=https://api.stateofthedart.com/api/auth/google/callback
 
-**Minimale VPS-Anforderungen:**
-- Ubuntu 20.04+ oder Debian 11+
-- 1 GB RAM
-- 10 GB Speicher
-- Root-Zugriff
+# Server
+PORT=3002
+NODE_ENV=production
+```
+
+### Frontend .env (lokal: `.env`)
+
+```env
+VITE_API_URL=https://api.stateofthedart.com
+VITE_STRIPE_PUBLISHABLE_KEY=<publishable_key>
+```
 
 ---
 
 ## DNS-Einstellungen
 
-Stelle sicher, dass folgende DNS-Records gesetzt sind:
-
 ```
-A     stateofthedart.com     → DEINE_VPS_IP
-A     www.stateofthedart.com → DEINE_VPS_IP
-A     api.stateofthedart.com → DEINE_VPS_IP
+A     stateofthedart.com     → 69.62.121.168
+A     www.stateofthedart.com → 69.62.121.168
+A     api.stateofthedart.com → 69.62.121.168
 ```
 
 ---
 
-## Nach dem Deployment
-
-### 1. Credentials eintragen
+## PM2 Commands
 
 ```bash
-ssh root@YOUR_VPS_IP
-cd /opt/stateofthedart/server
-nano .env
+# Status
+ssh root@69.62.121.168 "pm2 status"
+
+# Logs (live)
+ssh root@69.62.121.168 "pm2 logs stateofthedart-backend"
+
+# Logs (letzte 50 Zeilen)
+ssh root@69.62.121.168 "pm2 logs stateofthedart-backend --lines 50 --nostream"
+
+# Neu starten
+ssh root@69.62.121.168 "pm2 restart stateofthedart-backend"
+
+# Speichern (für Autostart)
+ssh root@69.62.121.168 "pm2 save"
 ```
 
-Ersetze die Platzhalter:
+---
 
-```env
-# SMTP (für Email-Verifikation)
-SMTP_PASS=<DEIN_ECHTES_PASSWORT>
-
-# Google OAuth
-GOOGLE_CLIENT_ID=<DEINE_ECHTE_CLIENT_ID>
-GOOGLE_CLIENT_SECRET=<DEIN_ECHTES_SECRET>
-
-# Stripe
-STRIPE_SECRET_KEY=<DEIN_ECHTER_STRIPE_KEY>
-```
-
-### 2. Backend neu starten
+## Datenbank Management
 
 ```bash
-pm2 restart state-of-the-dart-api
-pm2 save
+# Datenbank-Backup erstellen
+ssh root@69.62.121.168 "cp /var/www/stateofthedart-backend/data/state-of-the-dart.db /var/www/stateofthedart-backend/data/backup-\$(date +%Y%m%d).db"
+
+# Lokale DB zum Server kopieren
+scp server/database.sqlite root@69.62.121.168:/var/www/stateofthedart-backend/data/state-of-the-dart.db
+
+# Heatmaps regenerieren (lokal)
+cd server && npx ts-node scripts/regenerate-heatmaps.ts
+
+# Datenbank-Inhalt prüfen
+ssh root@69.62.121.168 "sqlite3 /var/www/stateofthedart-backend/data/state-of-the-dart.db 'SELECT COUNT(*) FROM players'"
 ```
-
-### 3. Status prüfen
-
-```bash
-# PM2 Status
-pm2 status
-
-# Backend Logs
-pm2 logs state-of-the-dart-api
-
-# Health Check
-curl https://api.stateofthedart.com/health
-
-# Nginx Status
-systemctl status nginx
-```
-
-### 4. App testen
-
-1. Öffne https://stateofthedart.com
-2. Klicke auf "Login"
-3. Logge als Admin ein:
-   - Email: `martin.pfeffer@celox.io`
-   - Passwort: `d8jhFWJ3hErj`
-4. Im Main Menu sollte "👑 Admin Panel" erscheinen
-5. Prüfe Demo-Daten in Statistics/Players
 
 ---
 
 ## Troubleshooting
 
 ### Backend startet nicht
-
 ```bash
-# Logs prüfen
-pm2 logs state-of-the-dart-api --lines 100
-
-# Manuell starten
-cd /opt/stateofthedart/server
-node dist/index.js
-```
-
-### Frontend zeigt 404
-
-```bash
-# Nginx Config prüfen
-nginx -t
-
-# Nginx neu laden
-systemctl reload nginx
-
-# Logs prüfen
-tail -f /var/log/nginx/error.log
+ssh root@69.62.121.168 "pm2 logs stateofthedart-backend --lines 100 --nostream"
+ssh root@69.62.121.168 "cd /var/www/stateofthedart-backend && node dist/index.js"
 ```
 
 ### API nicht erreichbar
-
 ```bash
-# Port 3001 prüfen
-netstat -tlnp | grep 3001
-
-# Firewall prüfen
-ufw status
-
-# Falls geschlossen:
-ufw allow 80/tcp
-ufw allow 443/tcp
+curl https://api.stateofthedart.com/health
+ssh root@69.62.121.168 "netstat -tlnp | grep 3002"
 ```
 
-### SSL-Fehler
+### Google OAuth leitet auf localhost
+- Prüfe ob `.env` lokal existiert mit `VITE_API_URL=https://api.stateofthedart.com`
+- Frontend neu bauen: `npm run build`
+- Neu deployen
 
+### Spieler/Daten fehlen
+- Prüfe ob User dem richtigen Tenant zugeordnet ist
+- Tenant-Zuordnung ändern:
 ```bash
-# Zertifikate erneuern
-certbot renew
-
-# Nginx neu laden
-systemctl reload nginx
-```
-
-### Datenbank-Fehler
-
-```bash
-cd /opt/stateofthedart/server
-
-# Datenbank neu erstellen
-rm database.sqlite
-npm run create:admin
-npm run seed:demo
-
-# Backend neu starten
-pm2 restart state-of-the-dart-api
+ssh root@69.62.121.168 "sqlite3 /var/www/stateofthedart-backend/data/state-of-the-dart.db \"UPDATE tenants SET user_id = '<neue_user_id>' WHERE id = '<tenant_id>'\""
 ```
 
 ---
 
-## Nützliche Commands
+## Nginx Konfiguration
 
-### PM2 Management
+Die Nginx-Config befindet sich unter `/etc/nginx/sites-available/stateofthedart.com`:
 
-```bash
-# Status
-pm2 status
-
-# Logs (live)
-pm2 logs state-of-the-dart-api
-
-# Logs (letzte 100 Zeilen)
-pm2 logs state-of-the-dart-api --lines 100
-
-# Neu starten
-pm2 restart state-of-the-dart-api
-
-# Stoppen
-pm2 stop state-of-the-dart-api
-
-# Löschen
-pm2 delete state-of-the-dart-api
-
-# Beim Boot starten
-pm2 startup
-pm2 save
-```
-
-### Nginx Management
+- Frontend: Reverse Proxy zu statischen Dateien
+- API: Reverse Proxy zu `localhost:3002`
+- SSL: Let's Encrypt Zertifikate
 
 ```bash
 # Config testen
-nginx -t
+ssh root@69.62.121.168 "nginx -t"
 
-# Neu laden
-systemctl reload nginx
-
-# Neu starten
-systemctl restart nginx
-
-# Status
-systemctl status nginx
-
-# Logs
-tail -f /var/log/nginx/access.log
-tail -f /var/log/nginx/error.log
+# Nginx neu laden
+ssh root@69.62.121.168 "systemctl reload nginx"
 ```
-
-### Database Management
-
-```bash
-cd /opt/stateofthedart/server
-
-# Admin erstellen
-npm run create:admin
-
-# Demo-Daten
-npm run seed:demo
-
-# Datenbank-Backup
-cp database.sqlite database.backup.$(date +%Y%m%d).sqlite
-
-# Datenbank wiederherstellen
-cp database.backup.YYYYMMDD.sqlite database.sqlite
-pm2 restart state-of-the-dart-api
-```
-
----
-
-## Update auf neue Version
-
-```bash
-# Lokal: Neue Version bauen
-npm run build
-cd server && npm run build && cd ..
-
-# Deployment-Script erneut ausführen
-./deploy-complete.sh
-
-# Auf VPS: Backend neu starten
-ssh root@YOUR_VPS_IP 'pm2 restart state-of-the-dart-api'
-```
-
----
-
-## Sicherheit
-
-### ⚠️ WICHTIG nach Deployment:
-
-1. **Ändere Admin-Passwort** im Admin Panel
-2. **Ändere JWT_SECRET** in `.env` (generiere mit `openssl rand -hex 32`)
-3. **Ändere SESSION_SECRET** in `.env`
-4. **Ändere SMTP-Passwort** (falls im Chat gepostet)
-5. **Ändere Stripe Keys** (falls im Chat gepostet)
-6. **Ändere Google OAuth Keys** (falls im Chat gepostet)
-
-### Firewall konfigurieren
-
-```bash
-# UFW installieren
-apt-get install ufw
-
-# Ports öffnen
-ufw allow 22/tcp   # SSH
-ufw allow 80/tcp   # HTTP
-ufw allow 443/tcp  # HTTPS
-
-# Aktivieren
-ufw enable
-
-# Status
-ufw status
-```
-
-### Automatische Updates
-
-```bash
-# Unattended Upgrades installieren
-apt-get install unattended-upgrades
-
-# Konfigurieren
-dpkg-reconfigure -plow unattended-upgrades
-```
-
----
-
-## Monitoring
-
-### PM2 Monitoring
-
-```bash
-# PM2 Plus (kostenlos)
-pm2 link <secret> <public>
-
-# Oder: PM2 Web UI
-pm2 web
-```
-
-### Nginx Monitoring
-
-```bash
-# Access Logs analysieren
-tail -f /var/log/nginx/access.log | grep -v "bot"
-
-# Error Rate
-tail -f /var/log/nginx/error.log
-```
-
-### Disk Space
-
-```bash
-# Speicher prüfen
-df -h
-
-# Logs rotieren
-logrotate -f /etc/logrotate.conf
-```
-
----
-
-## Support
-
-Bei Problemen:
-
-1. **Logs prüfen**: `pm2 logs state-of-the-dart-api`
-2. **Health Check**: `curl https://api.stateofthedart.com/health`
-3. **Nginx Logs**: `tail -f /var/log/nginx/error.log`
-4. **GitHub Issues**: https://github.com/pepperonas/state-of-the-dart/issues
 
 ---
 
 ## Changelog
 
-### v0.0.2 (2026-01-16)
-- Vollständiges Authentication-System
-- Admin Panel für User-Management
-- Cloud-Synchronisation
-- Dart-Heatmap
-- Training-Statistiken
-- Demo-Daten Generator
-
----
-
-**🎉 Viel Erfolg mit dem Deployment!**
+### 2026-01-16
+- Backend-Pfad konsolidiert auf `/var/www/stateofthedart-backend`
+- Datenbank-Pfad: `/var/www/stateofthedart-backend/data/state-of-the-dart.db`
+- PM2 Prozess: `stateofthedart-backend`
+- Alte Backups und Duplikate entfernt
+- Heatmap-Regeneration Script erstellt
+- Google OAuth Fix (Frontend .env)
+- SMTP-Konfiguration: `SMTP_PASSWORD` (nicht `SMTP_PASS`)
+- Heatmap-Visualisierung verbessert (mehr Kontrast, präsentere Farben)
+- Demo-Spieler mit charakteristischen Heatmaps erstellt
+- Registrierung: Email-Fehler blockieren nicht mehr die Account-Erstellung

@@ -152,7 +152,7 @@ The database automatically initializes with the following tables:
 
 3. **Start with PM2:**
    ```bash
-   pm2 start dist/index.js --name "state-of-the-dart-api"
+   pm2 start dist/index.js --name "stateofthedart-backend"
    ```
 
 4. **Save PM2 configuration:**
@@ -161,7 +161,7 @@ The database automatically initializes with the following tables:
    pm2 startup
    ```
 
-5. **Configure Nginx as reverse proxy** (see deployment guide)
+5. **Configure Nginx as reverse proxy** (see DEPLOYMENT_VPS.md)
 
 ### Environment Variables (Production)
 
@@ -200,7 +200,7 @@ NODE_ENV=development
 View PM2 logs:
 
 ```bash
-pm2 logs state-of-the-dart-api
+pm2 logs stateofthedart-backend
 ```
 
 ## 📄 License

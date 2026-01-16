@@ -79,13 +79,30 @@ router.post('/register', async (req: Request, res: Response) => {
       Date.now()
     );
 
-    // Send verification email
-    await emailService.sendVerificationEmail(email, verificationToken, name);
+    // Send verification email (don't fail registration if email fails)
+    let emailSent = false;
+    let emailError = null;
+    try {
+      await emailService.sendVerificationEmail(email, verificationToken, name);
+      emailSent = true;
+    } catch (emailErr: any) {
+      console.error('Failed to send verification email:', emailErr.message);
+      emailError = emailErr.message;
+    }
 
-    res.status(201).json({
-      message: 'Registration successful. Please check your email to verify your account.',
-      userId,
-    });
+    if (emailSent) {
+      res.status(201).json({
+        message: 'Registration successful. Please check your email to verify your account.',
+        userId,
+      });
+    } else {
+      // User created but email failed - still success but with warning
+      res.status(201).json({
+        message: 'Account created, but we could not send the verification email. Please use "Resend verification" later.',
+        userId,
+        emailWarning: emailError,
+      });
+    }
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({ error: 'Failed to register user' });
