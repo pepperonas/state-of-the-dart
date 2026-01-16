@@ -48,9 +48,9 @@ const Login: React.FC = () => {
           <h2 className="text-2xl font-bold text-white mb-6">Login</h2>
 
           {error && (
-            <div className="mb-4 p-4 bg-error-500/10 border border-error-500/30 rounded-lg flex items-center gap-2 text-error-400">
-              <AlertCircle size={20} />
-              <span>{error}</span>
+            <div className="mb-4 p-4 bg-red-500/20 border-2 border-red-500 rounded-lg flex items-center gap-3 text-white shadow-lg shadow-red-500/20 animate-shake">
+              <AlertCircle size={24} className="text-red-400 flex-shrink-0" />
+              <span className="font-semibold text-base">{error}</span>
             </div>
           )}
 
