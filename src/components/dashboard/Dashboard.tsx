@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTenant } from '../../context/TenantContext';
+import { api } from '../../services/api';
 
 interface RecentActivity {
   id: string;
@@ -43,18 +44,16 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     loadDashboardData();
-  }, [storage]);
+  }, []);
 
-  const loadDashboardData = () => {
-    if (!storage) {
-      setLoading(false);
-      return;
-    }
+  const loadDashboardData = async () => {
+    setLoading(true);
 
     try {
-      // Load matches
-      const matches = storage.get('matches', []);
+      // Load matches from API (Database-First!)
+      const matches = await api.matches.getAll();
       const completedMatches = matches.filter((m: any) => m.status === 'completed');
+      console.log('✅ Dashboard: Matches loaded from API:', matches.length);
       
       // Calculate stats
       const totalMatches = completedMatches.length;

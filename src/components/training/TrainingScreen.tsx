@@ -8,6 +8,7 @@ import audioSystem from '../../utils/audio';
 import { useSettings } from '../../context/SettingsContext';
 import { usePlayer } from '../../context/PlayerContext';
 import { useTenant } from '../../context/TenantContext';
+import { api } from '../../services/api';
 
 interface TrainingState {
   currentTarget: number;
@@ -77,8 +78,8 @@ const TrainingScreen: React.FC = () => {
     sessionStartTimeRef.current = new Date();
   };
 
-  const saveSession = () => {
-    if (!sessionRef.current || !storage) return;
+  const saveSession = async () => {
+    if (!sessionRef.current) return;
 
     const session = sessionRef.current;
     
@@ -93,21 +94,25 @@ const TrainingScreen: React.FC = () => {
       ? (session.totalHits! / session.totalAttempts) * 100 
       : 0;
 
-    // Get existing sessions
-    const existingSessions = storage.get<TrainingSession[]>('trainingSessions', []);
-    
-    // Check if this is a personal best for this training mode
-    const previousBest = existingSessions
-      .filter(s => s.type === session.type && s.playerId === session.playerId)
-      .sort((a, b) => (b.score || 0) - (a.score || 0))[0];
-    
-    if (!previousBest || (session.score && session.score > (previousBest.score || 0))) {
-      session.personalBest = true;
-    }
+    try {
+      // Get existing sessions from API (Database-First!)
+      const existingSessions = await api.training.getAll();
+      
+      // Check if this is a personal best for this training mode
+      const previousBest = existingSessions
+        .filter((s: TrainingSession) => s.type === session.type && s.playerId === session.playerId)
+        .sort((a: TrainingSession, b: TrainingSession) => (b.score || 0) - (a.score || 0))[0];
+      
+      if (!previousBest || (session.score && session.score > (previousBest.score || 0))) {
+        session.personalBest = true;
+      }
 
-    // Save session
-    const updatedSessions = [...existingSessions, session];
-    storage.set('trainingSessions', updatedSessions);
+      // Save session to API
+      await api.training.create(session);
+      console.log('✅ Training session saved to API');
+    } catch (error) {
+      console.error('❌ Failed to save training session:', error);
+    }
 
     sessionRef.current = null;
   };
@@ -453,9 +458,9 @@ const TrainingScreen: React.FC = () => {
       // Update heatmap
       updatePlayerHeatmap(currentPlayer.id, currentThrow);
       
-      // Save session if completed
+      // Save session if completed (non-blocking)
       if (newState.completed) {
-        saveSession();
+        saveSession().catch(err => console.error('Failed to save session:', err));
       }
     }
 

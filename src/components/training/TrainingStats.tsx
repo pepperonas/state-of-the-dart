@@ -1,10 +1,11 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, BarChart, TrendingUp, Target, Calendar, Filter, Trophy } from 'lucide-react';
 import { TrainingSession, TrainingType } from '../../types';
 import { usePlayer } from '../../context/PlayerContext';
 import { useTenant } from '../../context/TenantContext';
 import { LineChart, Line, BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { api } from '../../services/api';
 
 const TrainingStats: React.FC = () => {
   const navigate = useNavigate();
@@ -13,17 +14,28 @@ const TrainingStats: React.FC = () => {
   
   const [selectedType, setSelectedType] = useState<TrainingType | 'all'>('all');
   const [sortBy, setSortBy] = useState<'date' | 'score' | 'accuracy'>('date');
+  const [allSessions, setAllSessions] = useState<TrainingSession[]>([]);
 
-  // Get all training sessions
-  const allSessions = useMemo(() => {
-    if (!storage) return [];
-    const sessions = storage.get<TrainingSession[]>('trainingSessions', []);
-    return sessions.map(s => ({
-      ...s,
-      startedAt: new Date(s.startedAt),
-      completedAt: s.completedAt ? new Date(s.completedAt) : undefined
-    }));
-  }, [storage]);
+  // Load training sessions from API (Database-First!)
+  useEffect(() => {
+    const loadSessions = async () => {
+      try {
+        const sessions = await api.training.getAll();
+        const formattedSessions = sessions.map((s: any) => ({
+          ...s,
+          startedAt: new Date(s.startedAt),
+          completedAt: s.completedAt ? new Date(s.completedAt) : undefined
+        }));
+        setAllSessions(formattedSessions);
+        console.log('✅ Training sessions loaded from API:', sessions.length);
+      } catch (error) {
+        console.error('❌ Failed to load training sessions:', error);
+        setAllSessions([]);
+      }
+    };
+    
+    loadSessions();
+  }, []);
 
   // Filter sessions by player
   const playerSessions = useMemo(() => {

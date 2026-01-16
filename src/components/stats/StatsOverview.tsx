@@ -18,6 +18,7 @@ import {
 import { Match } from '../../types';
 import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
 import { Flame, FileSpreadsheet, FileText } from 'lucide-react';
+import { api } from '../../services/api';
 
 const StatsOverview: React.FC = () => {
   const navigate = useNavigate();
@@ -28,12 +29,27 @@ const StatsOverview: React.FC = () => {
   const [comparePlayerIds, setComparePlayerIds] = useState<string[]>([]);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const exportMenuRef = useRef<HTMLDivElement>(null);
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [loadingMatches, setLoadingMatches] = useState(true);
   
-  // Load matches from storage
-  const matches: Match[] = useMemo(() => {
-    if (!storage) return [];
-    return storage.get<Match[]>('matches', []);
-  }, [storage]);
+  // Load matches from API (Database-First!)
+  useEffect(() => {
+    const loadMatches = async () => {
+      try {
+        setLoadingMatches(true);
+        const fetchedMatches = await api.matches.getAll();
+        setMatches(fetchedMatches);
+        console.log('✅ Matches loaded from API:', fetchedMatches.length);
+      } catch (error) {
+        console.error('❌ Failed to load matches:', error);
+        setMatches([]);
+      } finally {
+        setLoadingMatches(false);
+      }
+    };
+    
+    loadMatches();
+  }, []);
   
   // Select first player by default
   React.useEffect(() => {
