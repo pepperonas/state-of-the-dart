@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { UserPlus, Mail, Lock, User, AlertCircle, Loader, CheckCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 
 const Register: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { register, googleAuth } = useAuth();
   

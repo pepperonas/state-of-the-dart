@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { LogIn, Mail, Lock, AlertCircle, Loader } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 
 const Login: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { login, googleAuth } = useAuth();
   
@@ -38,14 +40,14 @@ const Login: React.FC = () => {
         <div className="text-center mb-8">
           <div className="text-6xl mb-4">🎯</div>
           <h1 className="text-4xl font-bold text-white mb-2">
-            State of the Dart
+            {t('common.app_name')}
           </h1>
-          <p className="text-dark-300">Melde dich an um fortzufahren</p>
+          <p className="text-dark-300">{t('auth.login_subtitle')}</p>
         </div>
 
         {/* Login Card */}
         <div className="glass-card p-8 rounded-2xl shadow-2xl">
-          <h2 className="text-2xl font-bold text-white mb-6">Login</h2>
+          <h2 className="text-2xl font-bold text-white mb-6">{t('auth.login')}</h2>
 
           {error && (
             <div className="mb-4 p-4 bg-red-500/20 border-2 border-red-500 rounded-lg flex items-center gap-3 text-white shadow-lg shadow-red-500/20 animate-shake">
@@ -58,7 +60,7 @@ const Login: React.FC = () => {
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-white mb-2">
-                Email
+                {t('auth.email')}
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400" size={20} />
@@ -66,7 +68,7 @@ const Login: React.FC = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="deine@email.de"
+                  placeholder={t('auth.email_placeholder')}
                   className="w-full pl-10 pr-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   required
                 />
@@ -76,7 +78,7 @@ const Login: React.FC = () => {
             {/* Password */}
             <div>
               <label className="block text-sm font-medium text-white mb-2">
-                Passwort
+                {t('auth.password')}
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400" size={20} />
@@ -97,7 +99,7 @@ const Login: React.FC = () => {
                 to="/forgot-password"
                 className="text-sm text-primary-400 hover:text-primary-300 transition-colors"
               >
-                Passwort vergessen?
+                {t('auth.forgot_password')}
               </Link>
             </div>
 
@@ -110,12 +112,12 @@ const Login: React.FC = () => {
               {loading ? (
                 <>
                   <Loader className="animate-spin" size={20} />
-                  Anmelden...
+                  {t('common.loading')}
                 </>
               ) : (
                 <>
                   <LogIn size={20} />
-                  Anmelden
+                  {t('auth.login_button')}
                 </>
               )}
             </button>
@@ -127,7 +129,9 @@ const Login: React.FC = () => {
               <div className="w-full border-t border-dark-600"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-dark-900 text-dark-400">Oder</span>
+              <span className="px-4 bg-dark-900 text-dark-400">
+                {t('common.language') === 'de' ? 'Oder' : 'Or'}
+              </span>
             </div>
           </div>
 
@@ -142,14 +146,14 @@ const Login: React.FC = () => {
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            Mit Google anmelden
+            {t('auth.sign_in_google')}
           </button>
 
           {/* Register Link */}
           <div className="mt-6 text-center text-sm text-dark-300">
-            Noch kein Account?{' '}
+            {t('auth.no_account')}{' '}
             <Link to="/register" className="text-primary-400 hover:text-primary-300 font-semibold">
-              Jetzt registrieren
+              {t('auth.register')}
             </Link>
           </div>
         </div>

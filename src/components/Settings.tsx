@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Moon, Sun, Volume2, Bell, Globe, LogOut, User, Play, Download, Upload, Smartphone, Palette, Check, Sparkles } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useSettings } from '../context/SettingsContext';
 import { useTenant } from '../context/TenantContext';
 import audioSystem from '../utils/audio';
@@ -12,6 +13,7 @@ interface SettingsProps {
 }
 
 const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { settings, updateSettings } = useSettings();
   const { currentTenant, setCurrentTenant } = useTenant();
@@ -127,11 +129,11 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
           className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
         >
           <ArrowLeft size={20} />
-          Back to Menu
+          {t('menu.back_to_menu')}
         </button>
         
         <div className="glass-card rounded-xl shadow-lg p-6 md:p-8">
-          <h2 className="text-3xl font-bold mb-6 text-white">Settings</h2>
+          <h2 className="text-3xl font-bold mb-6 text-white">{t('settings.settings')}</h2>
           
           <div className="space-y-6">
             {/* PWA Installation */}
@@ -416,17 +418,21 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
             <div className="pb-6 border-b border-dark-700">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
                 <Globe size={20} />
-                Language
+                Language / Sprache
               </h3>
               
               <select
                 value={settings.language}
                 onChange={(e) => updateSettings({ language: e.target.value as 'en' | 'de' })}
-                className="w-full p-2 rounded-lg border border-dark-700 bg-dark-800 text-white"
+                className="w-full p-3 rounded-lg border-2 border-dark-700 bg-dark-800 text-white font-semibold hover:border-primary-500 focus:border-primary-500 focus:outline-none transition-colors cursor-pointer"
               >
-                <option value="en">English</option>
-                <option value="de">Deutsch</option>
+                <option value="de">🇩🇪 Deutsch</option>
+                <option value="en">🇬🇧 English</option>
               </select>
+              
+              <p className="text-sm text-dark-300 mt-2">
+                Language changes are applied instantly
+              </p>
             </div>
             
             {/* Data Management */}

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { AppSettings } from '../types/index';
 import { useTenant } from './TenantContext';
+import i18n from '../i18n/config';
 
 interface SettingsContextType {
   settings: AppSettings;
@@ -10,7 +11,7 @@ interface SettingsContextType {
 
 const defaultSettings: AppSettings = {
   theme: 'modern',
-  language: 'en',
+  language: 'de', // Default auf Deutsch
   soundVolume: 70,
   callerVolume: 70,
   effectsVolume: 70,
@@ -51,8 +52,11 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       // Normalize theme
       normalized.theme = normalizeTheme(normalized.theme);
       setSettings(normalized);
+      // Sync language with i18n
+      i18n.changeLanguage(normalized.language);
     } else {
       setSettings(defaultSettings);
+      i18n.changeLanguage(defaultSettings.language);
     }
   }, [storage]);
   
@@ -61,6 +65,11 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       storage.set('settings', settings);
     }
   }, [settings, storage]);
+
+  // Sync language changes with i18n
+  useEffect(() => {
+    i18n.changeLanguage(settings.language);
+  }, [settings.language]);
   
   const updateSettings = (updates: Partial<AppSettings>) => {
     setSettings(prev => ({ ...prev, ...updates }));
