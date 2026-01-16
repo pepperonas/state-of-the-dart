@@ -121,20 +121,9 @@ const MainMenu: React.FC = () => {
           transition={{ duration: 0.5 }}
           className="text-center mb-8"
         >
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center text-2xl shadow-lg">
-                {currentTenant?.avatar}
-              </div>
-              <div className="text-left">
-                <p className="text-sm text-dark-400">Aktuelles Profil</p>
-                <p className="text-lg font-semibold text-white">{currentTenant?.name}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <SyncStatus />
-              <UserMenu />
-            </div>
+          <div className="flex items-center justify-end mb-6 gap-3">
+            <SyncStatus />
+            <UserMenu />
           </div>
           
           <div className="inline-block px-8 py-4 rounded-2xl bg-dark-900/40 backdrop-blur-sm border border-white/10 shadow-2xl mb-4">
