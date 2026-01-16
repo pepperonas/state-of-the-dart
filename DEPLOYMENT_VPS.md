@@ -1,94 +1,32 @@
 # VPS Deployment Anleitung
 
-## Aktuelles Server-Setup (Stand: 2026-01-16)
+## Server-Setup
 
-| Komponente | Pfad / Wert |
-|------------|-------------|
+| Komponente | Wert |
+|------------|------|
 | **VPS IP** | `69.62.121.168` |
-| **SSH User** | `root` |
-| **SSH Port** | `22` (Standard) |
 | **Frontend** | `/var/www/stateofthedart` |
 | **Backend** | `/var/www/stateofthedart-backend` |
 | **Datenbank** | `/var/www/stateofthedart-backend/data/state-of-the-dart.db` |
 | **PM2 Prozess** | `stateofthedart-backend` |
-| **Backend Port** | `3002` |
-| **Frontend URL** | `https://stateofthedart.com` |
-| **API URL** | `https://api.stateofthedart.com` |
+| **Port** | `3002` |
+| **URLs** | `stateofthedart.com` / `api.stateofthedart.com` |
 
 ---
 
-## Schnellstart Deployment
+## Deployment
 
 ```bash
-# 1. Frontend bauen und deployen
-npm run build
-rsync -avz --delete dist/ root@69.62.121.168:/var/www/stateofthedart/
+# Alles deployen (empfohlen)
+./deploy.sh
 
-# 2. Backend bauen und deployen (falls Code-Änderungen)
+# Nur Frontend
+npm run build && rsync -avz --delete dist/ root@69.62.121.168:/var/www/stateofthedart/
+
+# Nur Backend
 cd server && npm run build && cd ..
-rsync -avz --exclude='node_modules' --exclude='data' server/ root@69.62.121.168:/var/www/stateofthedart-backend/
-ssh root@69.62.121.168 "cd /var/www/stateofthedart-backend && npm install --production && pm2 restart stateofthedart-backend"
-
-# 3. Nur Backend neu starten
+rsync -avz --exclude='node_modules' --exclude='data' --exclude='.env' server/dist/ root@69.62.121.168:/var/www/stateofthedart-backend/dist/
 ssh root@69.62.121.168 "pm2 restart stateofthedart-backend"
-```
-
----
-
-## Wichtige Dateien auf dem Server
-
-### Backend .env (`/var/www/stateofthedart-backend/.env`)
-
-```env
-# Database
-DATABASE_URL=./data/state-of-the-dart.db
-
-# JWT & Session
-JWT_SECRET=<secret>
-SESSION_SECRET=<secret>
-
-# SMTP (WICHTIG: SMTP_PASSWORD, nicht SMTP_PASS!)
-SMTP_HOST=premium269-4.web-hosting.com
-SMTP_PORT=465
-SMTP_USER=stateofthedart@celox.io
-SMTP_PASSWORD=<password>
-
-# Google OAuth
-GOOGLE_CLIENT_ID=<client_id>
-GOOGLE_CLIENT_SECRET=<client_secret>
-
-# Stripe
-STRIPE_SECRET_KEY=<stripe_key>
-STRIPE_WEBHOOK_SECRET=<webhook_secret>
-
-# URLs
-CLIENT_URL=https://stateofthedart.com
-SERVER_URL=https://api.stateofthedart.com
-APP_URL=https://stateofthedart.com
-API_URL=https://api.stateofthedart.com
-CORS_ORIGINS=https://stateofthedart.com,https://api.stateofthedart.com
-GOOGLE_CALLBACK_URL=https://api.stateofthedart.com/api/auth/google/callback
-
-# Server
-PORT=3002
-NODE_ENV=production
-```
-
-### Frontend .env (lokal: `.env`)
-
-```env
-VITE_API_URL=https://api.stateofthedart.com
-VITE_STRIPE_PUBLISHABLE_KEY=<publishable_key>
-```
-
----
-
-## DNS-Einstellungen
-
-```
-A     stateofthedart.com     → 69.62.121.168
-A     www.stateofthedart.com → 69.62.121.168
-A     api.stateofthedart.com → 69.62.121.168
 ```
 
 ---
@@ -96,194 +34,99 @@ A     api.stateofthedart.com → 69.62.121.168
 ## PM2 Commands
 
 ```bash
-# Status
-ssh root@69.62.121.168 "pm2 status"
-
-# Logs (live)
-ssh root@69.62.121.168 "pm2 logs stateofthedart-backend"
-
-# Logs (letzte 50 Zeilen)
-ssh root@69.62.121.168 "pm2 logs stateofthedart-backend --lines 50 --nostream"
-
-# Neu starten
-ssh root@69.62.121.168 "pm2 restart stateofthedart-backend"
-
-# Speichern (für Autostart)
-ssh root@69.62.121.168 "pm2 save"
-```
-
----
-
-## Datenbank Management
-
-```bash
-# Datenbank-Backup erstellen
-ssh root@69.62.121.168 "cp /var/www/stateofthedart-backend/data/state-of-the-dart.db /var/www/stateofthedart-backend/data/backup-\$(date +%Y%m%d).db"
-
-# Lokale DB zum Server kopieren
-scp server/database.sqlite root@69.62.121.168:/var/www/stateofthedart-backend/data/state-of-the-dart.db
-
-# Heatmaps regenerieren (lokal)
-cd server && npx ts-node scripts/regenerate-heatmaps.ts
-
-# Datenbank-Inhalt prüfen
-ssh root@69.62.121.168 "sqlite3 /var/www/stateofthedart-backend/data/state-of-the-dart.db 'SELECT COUNT(*) FROM players'"
+ssh root@69.62.121.168 "pm2 status"                                    # Status
+ssh root@69.62.121.168 "pm2 logs stateofthedart-backend --lines 50"    # Logs
+ssh root@69.62.121.168 "pm2 restart stateofthedart-backend"            # Restart
 ```
 
 ---
 
 ## Troubleshooting
 
-### Backend startet nicht
-```bash
-ssh root@69.62.121.168 "pm2 logs stateofthedart-backend --lines 100 --nostream"
-ssh root@69.62.121.168 "cd /var/www/stateofthedart-backend && node dist/index.js"
-```
-
-### API nicht erreichbar
-```bash
-curl https://api.stateofthedart.com/health
-ssh root@69.62.121.168 "netstat -tlnp | grep 3002"
-```
-
 ### Google OAuth leitet auf localhost
-
-**Ursache 1: Frontend .env fehlt**
-- Prüfe ob `.env` lokal existiert mit `VITE_API_URL=https://api.stateofthedart.com`
-- Frontend neu bauen: `npm run build`
-- Neu deployen
-
-**Ursache 2: Backend .env unvollständig (HÄUFIGSTER FEHLER!)**
-- Die `GOOGLE_CALLBACK_URL` fehlt oder zeigt auf localhost
-- Prüfen: `ssh root@69.62.121.168 "grep GOOGLE_CALLBACK /var/www/stateofthedart-backend/.env"`
-- Muss sein: `GOOGLE_CALLBACK_URL=https://api.stateofthedart.com/api/auth/google/callback`
-- Nach Änderung: `pm2 restart stateofthedart-backend`
-
-**Ursache 3: Browser-Cache (PWA)**
-- Hard Refresh: `Cmd+Shift+R`
-- Oder: DevTools → Application → Storage → "Clear site data"
-- Oder: Inkognito-Fenster testen
-
-### Spieler/Daten fehlen
-- Prüfe ob User dem richtigen Tenant zugeordnet ist
-- Tenant-Zuordnung ändern:
 ```bash
-ssh root@69.62.121.168 "sqlite3 /var/www/stateofthedart-backend/data/state-of-the-dart.db \"UPDATE tenants SET user_id = '<neue_user_id>' WHERE id = '<tenant_id>'\""
+# Prüfen
+ssh root@69.62.121.168 "grep GOOGLE_CALLBACK /var/www/stateofthedart-backend/.env"
+# Muss sein: GOOGLE_CALLBACK_URL=https://api.stateofthedart.com/api/auth/google/callback
 ```
 
-### SQLite WAL-Korruption (Foreign Key Constraint Failed)
+### Spieler/Matches fehlen (Multi-Tenant Bug)
+**Symptom:** User sieht keine Daten obwohl welche existieren.
+**Ursache:** User hat mehrere Tenants, falscher wurde ausgewählt.
+**Fix:** Query in `auth.ts` verwendet `ORDER BY last_active DESC LIMIT 1`
 
-**Symptom:** `FOREIGN KEY constraint failed` bei Settings, obwohl Tenant existiert.
-
-**Ursache:** SQLite WAL-Datei ist korrupt - Daten in WAL wurden nicht in Hauptdatei geschrieben.
-
-**Diagnose:**
+### SQLite WAL-Korruption
+**Symptom:** `FOREIGN KEY constraint failed` obwohl Daten existieren.
 ```bash
-# Prüfe ob WAL-Checkpoint funktioniert
+# Diagnose
 ssh root@69.62.121.168 "sqlite3 /var/www/stateofthedart-backend/data/state-of-the-dart.db 'PRAGMA wal_checkpoint(FULL)'"
-# Wenn "database disk image is malformed" → WAL ist korrupt
 
-# Prüfe Integrität
-ssh root@69.62.121.168 "sqlite3 /var/www/stateofthedart-backend/data/state-of-the-dart.db 'PRAGMA integrity_check'"
-```
-
-**Fix:**
-```bash
-# 1. Backend stoppen
+# Fix
 ssh root@69.62.121.168 "pm2 stop stateofthedart-backend"
-
-# 2. Korrupte WAL-Dateien löschen
-ssh root@69.62.121.168 "rm -f /var/www/stateofthedart-backend/data/state-of-the-dart.db-shm /var/www/stateofthedart-backend/data/state-of-the-dart.db-wal"
-
-# 3. Lokale (intakte) DB hochladen
+ssh root@69.62.121.168 "rm -f /var/www/stateofthedart-backend/data/*.db-shm /var/www/stateofthedart-backend/data/*.db-wal"
 scp server/data/state-of-the-dart.db root@69.62.121.168:/var/www/stateofthedart-backend/data/
-
-# 4. Backend neu starten
 ssh root@69.62.121.168 "pm2 restart stateofthedart-backend"
 ```
+**Prävention:** Server macht automatisch WAL-Checkpoint alle 5 Min.
 
-**Prävention:** Der Server führt jetzt alle 5 Minuten automatisch `PRAGMA wal_checkpoint(PASSIVE)` aus und vor dem Shutdown `PRAGMA wal_checkpoint(TRUNCATE)`.
+### Login zeigt "Email nicht verifiziert"
+**Fix:** Login-Response muss `emailVerified` Feld enthalten (`auth.ts`)
 
 ---
 
-## Nginx Konfiguration
+## Backend .env (VPS)
 
-Die Nginx-Config befindet sich unter `/etc/nginx/sites-available/stateofthedart.com`:
+```env
+PORT=3002
+NODE_ENV=production
+DATABASE_URL=./data/state-of-the-dart.db
 
-- Frontend: Reverse Proxy zu statischen Dateien
-- API: Reverse Proxy zu `localhost:3002`
-- SSL: Let's Encrypt Zertifikate
+# URLs (KRITISCH!)
+APP_URL=https://stateofthedart.com
+API_URL=https://api.stateofthedart.com
+CORS_ORIGINS=https://stateofthedart.com,https://api.stateofthedart.com
+GOOGLE_CALLBACK_URL=https://api.stateofthedart.com/api/auth/google/callback
 
-```bash
-# Config testen
-ssh root@69.62.121.168 "nginx -t"
+# Secrets
+JWT_SECRET=<secret>
+SESSION_SECRET=<secret>
+GOOGLE_CLIENT_ID=<id>
+GOOGLE_CLIENT_SECRET=<secret>
+STRIPE_SECRET_KEY=<key>
+STRIPE_WEBHOOK_SECRET=<secret>
 
-# Nginx neu laden
-ssh root@69.62.121.168 "systemctl reload nginx"
+# SMTP
+SMTP_HOST=premium269-4.web-hosting.com
+SMTP_PORT=465
+SMTP_USER=stateofthedart@celox.io
+SMTP_PASSWORD=<password>
 ```
+
+**Prüfen:**
+```bash
+ssh root@69.62.121.168 "grep -E 'GOOGLE_CALLBACK|APP_URL|PORT' /var/www/stateofthedart-backend/.env"
+```
+
+---
+
+## Bekannte Bugs & Fixes
+
+| Bug | Ursache | Fix | Datei |
+|-----|---------|-----|-------|
+| OAuth localhost redirect | `GOOGLE_CALLBACK_URL` fehlt/falsch | VPS .env korrigieren | `.env` |
+| Spieler fehlen | Multi-Tenant Query ohne Sortierung | `ORDER BY last_active DESC` | `auth.ts:40` |
+| WAL-Korruption | Checkpoint nicht ausgeführt | Auto-Checkpoint alle 5 Min | `database/index.ts` |
+| "Email nicht verifiziert" | `emailVerified` fehlt in Response | Feld hinzugefügt | `routes/auth.ts` |
+| Theme kaputt | CSS mit 1900 Zeilen !important | Komplett neu geschrieben | `index.css` |
 
 ---
 
 ## Changelog
 
-### 2026-01-16 (Abend)
-- **Cyberpunk Theme komplett neu erstellt:**
-  - CSS von ~1900 Zeilen auf ~620 Zeilen reduziert
-  - Keine `!important` Overrides mehr
-  - Neon-Gelb (#f0e130) als Hauptakzentfarbe
-  - Cyan (#00f0ff) für Primary-Buttons
-  - Subtiles Neon-Grid im Hintergrund
-  - Moderne Fonts: Orbitron (Headlines), Rajdhani (Body)
-  - Konsistente Größenverhältnisse
-- **SQLite WAL-Korruption gefixt:**
-  - Automatischer WAL-Checkpoint alle 5 Minuten
-  - Finaler Checkpoint beim Shutdown
-  - Troubleshooting-Anleitung hinzugefügt
-- **Login emailVerified Bug gefixt:**
-  - Login-Response enthält jetzt `emailVerified` Feld
-- **Multi-Tenant Bug gefixt:**
-  - User mit mehreren Tenants bekamen falschen Tenant (ohne Daten)
-  - Query verwendet jetzt `ORDER BY last_active DESC` für zuletzt aktiven Tenant
-
 ### 2026-01-16
-- Backend-Pfad konsolidiert auf `/var/www/stateofthedart-backend`
-- Datenbank-Pfad: `/var/www/stateofthedart-backend/data/state-of-the-dart.db`
-- PM2 Prozess: `stateofthedart-backend`
-- Alte Backups und Duplikate entfernt
-- Heatmap-Regeneration Script erstellt
-- Google OAuth Fix (Frontend .env)
-- SMTP-Konfiguration: `SMTP_PASSWORD` (nicht `SMTP_PASS`)
-- Heatmap-Visualisierung verbessert (mehr Kontrast, präsentere Farben)
-- Demo-Spieler mit charakteristischen Heatmaps erstellt
-- Registrierung: Email-Fehler blockieren nicht mehr die Account-Erstellung
-- **KRITISCH: Backend .env komplett überarbeitet:**
-  - `GOOGLE_CALLBACK_URL` hinzugefügt (fehlte komplett!)
-  - `APP_URL`, `API_URL`, `CORS_ORIGINS` hinzugefügt
-  - `NODE_ENV=production` gesetzt
-  - `PORT=3002` (war 3001, Konflikt mit kiezform-v3)
-  - `DATABASE_URL` korrigiert auf `./data/state-of-the-dart.db`
-
----
-
-## ⚠️ KRITISCHE .env Variablen
-
-Diese Variablen MÜSSEN auf dem VPS gesetzt sein, sonst funktioniert OAuth nicht:
-
-```env
-# PFLICHT für Google OAuth!
-GOOGLE_CALLBACK_URL=https://api.stateofthedart.com/api/auth/google/callback
-
-# PFLICHT für CORS und Redirects!
-APP_URL=https://stateofthedart.com
-API_URL=https://api.stateofthedart.com
-CORS_ORIGINS=https://stateofthedart.com,https://api.stateofthedart.com
-
-# PFLICHT: Korrekter Port (3002, nicht 3001!)
-PORT=3002
-NODE_ENV=production
-```
-
-**Prüf-Befehl:**
-```bash
-ssh root@69.62.121.168 "grep -E 'GOOGLE_CALLBACK|APP_URL|API_URL|CORS|PORT|NODE_ENV' /var/www/stateofthedart-backend/.env"
-```
+- Cyberpunk Theme neu erstellt (620 statt 1900 Zeilen CSS)
+- SQLite WAL-Checkpoint Prävention
+- Multi-Tenant Query Fix
+- Login emailVerified Fix
+- Backend .env komplett überarbeitet
+- Port 3002 (statt 3001, Konflikt mit kiezform-v3)
