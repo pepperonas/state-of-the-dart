@@ -18,7 +18,7 @@ router.get('/', auth_1.authenticateTenant, (req, res) => {
       WHERE p.tenant_id = ?
       ORDER BY p.created_at DESC
     `).all(req.tenantId);
-        res.json(players);
+        res.json({ players });
     }
     catch (error) {
         console.error('Error fetching players:', error);
