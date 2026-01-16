@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Trophy, Target, Award, TrendingUp, Flame, Calendar,
-  ArrowRight, Loader, Play, Users, Dumbbell
+  ArrowRight, Loader, Play, Users, Dumbbell, ArrowLeft
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTenant } from '../../context/TenantContext';
@@ -158,6 +158,15 @@ const Dashboard: React.FC = () => {
   return (
     <div className="min-h-screen p-4 md:p-8 gradient-mesh">
       <div className="max-w-7xl mx-auto">
+        {/* Back Button */}
+        <button
+          onClick={() => navigate('/')}
+          className="mb-6 flex items-center gap-2 text-white hover:text-primary-400 transition-colors group"
+        >
+          <ArrowLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
+          <span className="font-medium">Zurück zum Hauptmenü</span>
+        </button>
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">
