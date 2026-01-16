@@ -150,6 +150,15 @@ export const api = {
       apiClient(`/api/players/${id}`, {
         method: 'DELETE',
       }),
+    
+    // Heatmap
+    getHeatmap: (id: string) => apiClient(`/api/players/${id}/heatmap`),
+    
+    updateHeatmap: (id: string, heatmapData: any) =>
+      apiClient(`/api/players/${id}/heatmap`, {
+        method: 'POST',
+        body: JSON.stringify(heatmapData),
+      }),
   },
 
   // Matches

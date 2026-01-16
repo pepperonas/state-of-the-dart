@@ -276,10 +276,13 @@ router.get('/:id/heatmap', authenticateTenant, (req: AuthRequest, res: Response)
 // Update player heatmap
 router.post('/:id/heatmap', authenticateTenant, (req: AuthRequest, res: Response) => {
   const { id } = req.params;
-  const { segments, totalDarts } = req.body;
+  const { segments, total_darts, totalDarts } = req.body;
+  
+  // Accept both camelCase and snake_case
+  const dartsCount = total_darts !== undefined ? total_darts : totalDarts;
 
-  if (!segments || totalDarts === undefined) {
-    return res.status(400).json({ error: 'segments and totalDarts are required' });
+  if (!segments || dartsCount === undefined) {
+    return res.status(400).json({ error: 'segments and total_darts/totalDarts are required' });
   }
 
   const db = getDatabase();
@@ -299,7 +302,7 @@ router.post('/:id/heatmap', authenticateTenant, (req: AuthRequest, res: Response
         segments = excluded.segments,
         total_darts = excluded.total_darts,
         last_updated = excluded.last_updated
-    `).run(id, JSON.stringify(segments), totalDarts, Date.now());
+    `).run(id, JSON.stringify(segments), dartsCount, Date.now());
 
     res.json({ message: 'Heatmap updated successfully' });
   } catch (error) {

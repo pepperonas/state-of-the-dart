@@ -86,6 +86,29 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         console.log('🔍 PlayerContext: Loaded players:', loadedPlayers);
         setPlayers(loadedPlayers);
         
+        // Load heatmap data for each player and cache in localStorage
+        if (storage) {
+          for (const player of loadedPlayers) {
+            try {
+              const heatmapResponse = await api.players.getHeatmap(player.id);
+              console.log(`🗺️ Loaded heatmap for ${player.name}:`, heatmapResponse);
+              
+              if (heatmapResponse && heatmapResponse.total_darts > 0) {
+                // Store in localStorage for offline access
+                const heatmapData = {
+                  playerId: player.id,
+                  segments: heatmapResponse.segments,
+                  totalDarts: heatmapResponse.total_darts,
+                  lastUpdated: new Date(heatmapResponse.last_updated || Date.now())
+                };
+                storage.set(`heatmap-${player.id}`, heatmapData);
+              }
+            } catch (error) {
+              console.error(`❌ Failed to load heatmap for ${player.name}:`, error);
+            }
+          }
+        }
+        
         // Restore current player from localStorage (UI state only)
         if (storage) {
           const savedCurrentId = storage.get<string>('currentPlayerId', '');
@@ -174,6 +197,7 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const getPlayerHeatmap = (playerId: string): HeatmapData => {
     if (!storage) return createEmptyHeatmapData(playerId);
     
+    // Try to load from localStorage first (for offline support)
     const key = `heatmap-${playerId}`;
     const saved = storage.get<any>(key, null);
     
@@ -185,6 +209,7 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       };
     }
     
+    // Fallback: try to load from API (will be handled by separate useEffect)
     return createEmptyHeatmapData(playerId);
   };
   
@@ -196,6 +221,19 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     
     const key = `heatmap-${playerId}`;
     storage.set(key, updatedHeatmap);
+    
+    // Sync to API in background
+    if (user) {
+      const apiData = {
+        segments: updatedHeatmap.segments,
+        total_darts: updatedHeatmap.totalDarts,
+        last_updated: updatedHeatmap.lastUpdated.toISOString()
+      };
+      
+      api.players.updateHeatmap(playerId, apiData)
+        .then(() => console.log('✅ Heatmap synced to API'))
+        .catch(err => console.error('❌ Failed to sync heatmap to API:', err));
+    }
   };
   
   return (
