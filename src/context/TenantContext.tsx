@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { safeGetItem, safeSetItem, TenantStorage } from '../utils/storage';
+import { toDateOrNow } from '../utils/dateUtils';
 
 export interface Tenant {
   id: string;
@@ -25,8 +26,8 @@ const TenantContext = createContext<TenantContextType | null>(null);
 const reviveTenantDates = (tenant: any): Tenant => {
   return {
     ...tenant,
-    createdAt: tenant.createdAt ? new Date(tenant.createdAt) : new Date(),
-    lastActive: tenant.lastActive ? new Date(tenant.lastActive) : new Date(),
+    createdAt: toDateOrNow(tenant.createdAt),
+    lastActive: toDateOrNow(tenant.lastActive),
   };
 };
 

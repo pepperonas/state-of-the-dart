@@ -8,6 +8,7 @@ import { PersonalBests, createEmptyPersonalBests } from '../../types/personalBes
 import { LineChart, Line, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
 import { calculateAccuracyStats } from '../../utils/heatmap';
+import { formatDate } from '../../utils/dateUtils';
 
 const PlayerProfile: React.FC = () => {
   const navigate = useNavigate();
@@ -226,7 +227,7 @@ const PlayerProfile: React.FC = () => {
               <div className="text-amber-400 text-sm mb-1">🎯 Höchster Score</div>
               <div className="text-2xl font-bold text-white">{personalBests.highestScore.value}</div>
               <div className="text-xs text-dark-500 mt-1">
-                {new Date(personalBests.highestScore.date).toLocaleDateString('de-DE')}
+                {formatDate(personalBests.highestScore.date)}
               </div>
             </div>
             <div className="bg-dark-900 rounded-lg p-4 border-2 border-primary-500/30">
@@ -235,14 +236,14 @@ const PlayerProfile: React.FC = () => {
                 {personalBests.bestAverage.value.toFixed(2)}
               </div>
               <div className="text-xs text-dark-500 mt-1">
-                {new Date(personalBests.bestAverage.date).toLocaleDateString('de-DE')}
+                {formatDate(personalBests.bestAverage.date)}
               </div>
             </div>
             <div className="bg-dark-900 rounded-lg p-4 border-2 border-accent-500/30">
               <div className="text-accent-400 text-sm mb-1">🔥 Meiste 180s</div>
               <div className="text-2xl font-bold text-white">{personalBests.most180s.value}</div>
               <div className="text-xs text-dark-500 mt-1">
-                {new Date(personalBests.most180s.date).toLocaleDateString('de-DE')}
+                {formatDate(personalBests.most180s.date)}
               </div>
             </div>
             <div className="bg-dark-900 rounded-lg p-4 border-2 border-success-500/30">
@@ -250,7 +251,7 @@ const PlayerProfile: React.FC = () => {
               <div className="text-2xl font-bold text-white">{personalBests.highestCheckout.value}</div>
               <div className="text-xs text-dark-500 mt-1">
                 {personalBests.highestCheckout.value > 0
-                  ? new Date(personalBests.highestCheckout.date).toLocaleDateString('de-DE')
+                  ? formatDate(personalBests.highestCheckout.date)
                   : '-'}
               </div>
             </div>
@@ -261,7 +262,7 @@ const PlayerProfile: React.FC = () => {
               </div>
               <div className="text-xs text-dark-500 mt-1">
                 {personalBests.bestCheckoutRate.value > 0
-                  ? new Date(personalBests.bestCheckoutRate.date).toLocaleDateString('de-DE')
+                  ? formatDate(personalBests.bestCheckoutRate.date)
                   : '-'}
               </div>
             </div>
@@ -272,7 +273,7 @@ const PlayerProfile: React.FC = () => {
               </div>
               <div className="text-xs text-dark-500 mt-1">
                 {personalBests.shortestLeg.darts < 999
-                  ? new Date(personalBests.shortestLeg.date).toLocaleDateString('de-DE')
+                  ? formatDate(personalBests.shortestLeg.date)
                   : '-'}
               </div>
             </div>
@@ -288,7 +289,7 @@ const PlayerProfile: React.FC = () => {
               <div className="text-2xl font-bold text-white">{personalBests.mostLegsWon.value}</div>
               <div className="text-xs text-dark-500 mt-1">
                 {personalBests.mostLegsWon.value > 0
-                  ? new Date(personalBests.mostLegsWon.date).toLocaleDateString('de-DE')
+                  ? formatDate(personalBests.mostLegsWon.date)
                   : '-'}
               </div>
             </div>
@@ -477,11 +478,7 @@ const PlayerProfile: React.FC = () => {
               <div>
                 <div className="text-sm text-dark-500">Erstes Spiel</div>
                 <div className="text-lg font-semibold text-white">
-                  {new Date(personalBests.firstGameDate).toLocaleDateString('de-DE', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
+                  {formatDate(personalBests.firstGameDate, { year: 'numeric', month: 'long', day: 'numeric' })}
                 </div>
               </div>
               <div className="flex-1 mx-4 h-1 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full" />
@@ -489,11 +486,7 @@ const PlayerProfile: React.FC = () => {
                 <div className="text-sm text-dark-500">Letztes Spiel</div>
                 <div className="text-lg font-semibold text-white">
                   {personalBests.lastGameDate
-                    ? new Date(personalBests.lastGameDate).toLocaleDateString('de-DE', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })
+                    ? formatDate(personalBests.lastGameDate, { year: 'numeric', month: 'long', day: 'numeric' })
                     : '-'}
                 </div>
               </div>

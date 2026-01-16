@@ -5,6 +5,7 @@ import { ExportData } from '../types';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { formatDate, formatDateShort } from './dateUtils';
 
 /**
  * Export all data for the current tenant to a JSON file
@@ -143,9 +144,9 @@ export const exportMatchHistoryCSV = (matches: any[], playerName: string): void 
       const players = match.players || [];
       const player = players.find((p: any) => p.name === playerName);
       const opponent = players.find((p: any) => p.name !== playerName);
-      
+
       return [
-        new Date(match.startedAt || 0).toLocaleDateString(),
+        formatDate(match.startedAt),
         player?.name || '-',
         opponent?.name || '-',
         match.winner === player?.playerId ? 'Win' : 'Loss',
@@ -214,9 +215,9 @@ export const exportMatchHistoryExcel = (matches: any[], playerName: string): voi
       const players = match.players || [];
       const player = players.find((p: any) => p.name === playerName);
       const opponent = players.find((p: any) => p.name !== playerName);
-      
+
       return [
-        new Date(match.startedAt || 0).toLocaleDateString(),
+        formatDate(match.startedAt),
         player?.name || '-',
         opponent?.name || '-',
         match.winner === player?.playerId ? 'Win' : 'Loss',
@@ -226,7 +227,7 @@ export const exportMatchHistoryExcel = (matches: any[], playerName: string): voi
         player?.match180s || 0,
         player?.match140Plus || 0,
         player?.match100Plus || 0,
-        player?.checkoutAttempts > 0 
+        player?.checkoutAttempts > 0
           ? parseFloat(((player?.checkoutsHit / player?.checkoutAttempts) * 100).toFixed(1))
           : 0,
         player?.legsWon || 0,
@@ -291,7 +292,7 @@ export const exportMatchHistoryExcel = (matches: any[], playerName: string): voi
       ['Win Rate', `${winRate}%`],
       ['Average (Avg)', avgAverage],
       ['Total 180s', total180s],
-      ['Export Date', new Date().toLocaleDateString()],
+      ['Export Date', formatDate(new Date())],
     ];
     
     const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
@@ -322,7 +323,7 @@ export const exportMatchHistoryPDF = (matches: any[], playerName: string): void 
     // Add player info
     doc.setFontSize(12);
     doc.text(`Player: ${playerName}`, 14, 30);
-    doc.text(`Export Date: ${new Date().toLocaleDateString()}`, 14, 37);
+    doc.text(`Export Date: ${formatDate(new Date())}`, 14, 37);
     doc.text(`Total Matches: ${matches.length}`, 14, 44);
     
     // Calculate summary stats
@@ -340,9 +341,9 @@ export const exportMatchHistoryPDF = (matches: any[], playerName: string): void 
       const players = match.players || [];
       const player = players.find((p: any) => p.name === playerName);
       const opponent = players.find((p: any) => p.name !== playerName);
-      
+
       return [
-        new Date(match.startedAt || 0).toLocaleDateString(),
+        formatDate(match.startedAt),
         opponent?.name || '-',
         match.winner === player?.playerId ? 'W' : 'L',
         `${player?.legsWon || 0}-${opponent?.legsWon || 0}`,

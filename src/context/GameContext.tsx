@@ -431,18 +431,49 @@ interface GameContextValue {
 const GameContext = createContext<GameContextValue | null>(null);
 
 const reviveMatchDates = (match: any): Match => {
+  // Import inline to avoid circular dependency
+  const toDateOrNow = (value: unknown): Date => {
+    if (value === null || value === undefined) return new Date();
+    if (value instanceof Date) return isNaN(value.getTime()) ? new Date() : value;
+    if (typeof value === 'number') {
+      const timestamp = value < 10000000000 ? value * 1000 : value;
+      const date = new Date(timestamp);
+      return isNaN(date.getTime()) ? new Date() : date;
+    }
+    if (typeof value === 'string') {
+      const date = new Date(value);
+      return isNaN(date.getTime()) ? new Date() : date;
+    }
+    return new Date();
+  };
+
+  const toDateOrUndefined = (value: unknown): Date | undefined => {
+    if (value === null || value === undefined) return undefined;
+    if (value instanceof Date) return isNaN(value.getTime()) ? undefined : value;
+    if (typeof value === 'number') {
+      const timestamp = value < 10000000000 ? value * 1000 : value;
+      const date = new Date(timestamp);
+      return isNaN(date.getTime()) ? undefined : date;
+    }
+    if (typeof value === 'string') {
+      const date = new Date(value);
+      return isNaN(date.getTime()) ? undefined : date;
+    }
+    return undefined;
+  };
+
   return {
     ...match,
-    startedAt: match.startedAt ? new Date(match.startedAt) : new Date(),
-    completedAt: match.completedAt ? new Date(match.completedAt) : undefined,
-    pausedAt: match.pausedAt ? new Date(match.pausedAt) : undefined,
+    startedAt: toDateOrNow(match.startedAt),
+    completedAt: toDateOrUndefined(match.completedAt),
+    pausedAt: toDateOrUndefined(match.pausedAt),
     legs: match.legs?.map((leg: any) => ({
       ...leg,
-      startedAt: leg.startedAt ? new Date(leg.startedAt) : new Date(),
-      completedAt: leg.completedAt ? new Date(leg.completedAt) : undefined,
+      startedAt: toDateOrNow(leg.startedAt),
+      completedAt: toDateOrUndefined(leg.completedAt),
       throws: leg.throws?.map((t: any) => ({
         ...t,
-        timestamp: t.timestamp ? new Date(t.timestamp) : new Date(),
+        timestamp: toDateOrNow(t.timestamp),
       })) || [],
     })) || [],
   };

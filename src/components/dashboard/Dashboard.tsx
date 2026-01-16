@@ -7,6 +7,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useTenant } from '../../context/TenantContext';
 import { api } from '../../services/api';
+import { formatDate } from '../../utils/dateUtils';
 
 interface RecentActivity {
   id: string;
@@ -109,7 +110,7 @@ const Dashboard: React.FC = () => {
             id: match.id,
             type: 'match',
             title: match.winner ? 'Spiel gewonnen!' : 'Spiel beendet',
-            description: `${match.gameType} - ${new Date(match.completedAt).toLocaleDateString()}`,
+            description: `${match.gameType} - ${formatDate(match.completedAt)}`,
             timestamp: match.completedAt,
             icon: match.winner ? '🏆' : '🎯',
           });

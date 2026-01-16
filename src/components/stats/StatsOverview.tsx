@@ -19,6 +19,7 @@ import { Match } from '../../types';
 import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
 import { Flame, FileSpreadsheet, FileText } from 'lucide-react';
 import { api } from '../../services/api';
+import { formatDate, getTimestampForSort } from '../../utils/dateUtils';
 
 const VALID_TABS = ['overview', 'progress', 'history', 'compare', 'heatmap'] as const;
 type TabType = typeof VALID_TABS[number];
@@ -113,14 +114,14 @@ const StatsOverview: React.FC = () => {
   // Prepare chart data
   const progressData = useMemo(() => {
     return playerMatches
-      .sort((a, b) => new Date(a.startedAt || 0).getTime() - new Date(b.startedAt || 0).getTime())
+      .sort((a, b) => getTimestampForSort(a.startedAt) - getTimestampForSort(b.startedAt))
       .map((match, index) => {
         const players = match.players || [];
         const player = players.find((p: any) => p.playerId === selectedPlayerId);
         const legs = match.legs || [];
         return {
           match: `#${index + 1}`,
-          date: new Date(match.startedAt || 0).toLocaleDateString('de-DE', { month: 'short', day: 'numeric' }),
+          date: formatDate(match.startedAt, { month: 'short', day: 'numeric' }),
           average: player?.matchAverage || 0,
           checkoutPercent: player && player.checkoutAttempts > 0
             ? (player.checkoutsHit / player.checkoutAttempts) * 100
@@ -188,9 +189,9 @@ const StatsOverview: React.FC = () => {
   // Monthly performance data
   const monthlyData = useMemo(() => {
     const monthlyStats: Record<string, { games: number; avgSum: number; wins: number }> = {};
-    
+
     playerMatches.forEach(match => {
-      const month = new Date(match.startedAt || 0).toLocaleDateString('de-DE', { year: 'numeric', month: 'short' });
+      const month = formatDate(match.startedAt, { year: 'numeric', month: 'short' });
       if (!monthlyStats[month]) {
         monthlyStats[month] = { games: 0, avgSum: 0, wins: 0 };
       }

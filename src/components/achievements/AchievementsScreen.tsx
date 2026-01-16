@@ -11,6 +11,7 @@ import {
   getRarityColor,
   ACHIEVEMENTS,
 } from '../../types/achievements';
+import { formatDate } from '../../utils/dateUtils';
 
 const AchievementsScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -160,10 +161,10 @@ const AchievementsScreen: React.FC = () => {
                 Freigeschaltet
               </span>
               <span>
-                {new Date(
+                {formatDate(
                   playerProgress?.unlockedAchievements.find(u => u.achievementId === achievement.id)
-                    ?.unlockedAt || ''
-                ).toLocaleDateString('de-DE')}
+                    ?.unlockedAt
+                )}
               </span>
             </div>
           </div>

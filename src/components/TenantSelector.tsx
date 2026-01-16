@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Plus, X, LogIn, Trash2 } from 'lucide-react';
 import { useTenant } from '../context/TenantContext';
+import { formatDate } from '../utils/dateUtils';
 
 const TenantSelector: React.FC = () => {
   const { tenants, currentTenant, setCurrentTenant, addTenant, deleteTenant } = useTenant();
@@ -87,7 +88,7 @@ const TenantSelector: React.FC = () => {
                     <h3 className="text-2xl font-bold text-white mb-1">{tenant.name}</h3>
                     <p className="text-sm text-dark-400 flex items-center gap-2">
                       <span className="w-2 h-2 bg-primary-500 rounded-full animate-pulse"></span>
-                      Zuletzt aktiv: {new Date(tenant.lastActive).toLocaleDateString('de-DE')}
+                      Zuletzt aktiv: {formatDate(tenant.lastActive)}
                     </p>
                   </div>
                   <LogIn size={28} className="text-dark-500 group-hover:text-primary-400 transition-colors" />

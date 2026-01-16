@@ -6,6 +6,7 @@ import { usePlayer } from '../../context/PlayerContext';
 import { useTenant } from '../../context/TenantContext';
 import { LineChart, Line, BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { api } from '../../services/api';
+import { toDateOrNow, formatDateTime, formatDateShort } from '../../utils/dateUtils';
 
 const TrainingStats: React.FC = () => {
   const navigate = useNavigate();
@@ -23,8 +24,8 @@ const TrainingStats: React.FC = () => {
         const sessions = await api.training.getAll();
         const formattedSessions = sessions.map((s: any) => ({
           ...s,
-          startedAt: new Date(s.startedAt),
-          completedAt: s.completedAt ? new Date(s.completedAt) : undefined
+          startedAt: toDateOrNow(s.startedAt),
+          completedAt: s.completedAt ? toDateOrNow(s.completedAt) : undefined
         }));
         setAllSessions(formattedSessions);
         console.log('✅ Training sessions loaded from API:', sessions.length);
@@ -74,7 +75,7 @@ const TrainingStats: React.FC = () => {
         session: `#${index + 1}`,
         score: session.score || 0,
         accuracy: session.hitRate || 0,
-        date: session.startedAt.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
+        date: formatDateShort(session.startedAt)
       }));
   }, [sortedSessions]);
 
@@ -344,13 +345,7 @@ const TrainingStats: React.FC = () => {
                           )}
                         </div>
                         <div className="text-xs text-dark-400">
-                          {session.startedAt.toLocaleString('de-DE', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
+                          {formatDateTime(session.startedAt)}
                         </div>
                       </div>
                     </div>

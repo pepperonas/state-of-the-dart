@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Match, Throw } from '../../types';
 import { Calendar, Target, Award, ChevronDown, ChevronUp, TrendingUp } from 'lucide-react';
+import { formatDate, getTimestampForSort } from '../../utils/dateUtils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface MatchHistoryProps {
@@ -12,8 +13,8 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
   const [expandedMatch, setExpandedMatch] = useState<string | null>(null);
   
   // Sort matches by date (newest first)
-  const sortedMatches = [...matches].sort((a, b) => 
-    new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
+  const sortedMatches = [...matches].sort((a, b) =>
+    getTimestampForSort(b.startedAt) - getTimestampForSort(a.startedAt)
   );
   
   const toggleMatch = (matchId: string) => {
@@ -39,7 +40,7 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
 
     // Sort by timestamp
     const sortedThrows = allThrows.sort((a, b) =>
-      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      getTimestampForSort(a.timestamp) - getTimestampForSort(b.timestamp)
     );
 
     // Group by player and round (3 darts = 1 round)
@@ -134,7 +135,7 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                     <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-3">
                       <span className="flex items-center gap-1">
                         <Calendar size={14} />
-                        {new Date(match.startedAt).toLocaleDateString('de-DE')}
+                        {formatDate(match.startedAt)}
                       </span>
                       <span>Score: {player.legsWon} - {opponent?.legsWon ?? 0}</span>
                       <span>Avg: {(player.matchAverage ?? 0).toFixed(2)}</span>
