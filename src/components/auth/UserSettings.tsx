@@ -137,9 +137,9 @@ const UserSettings: React.FC = () => {
         )}
 
         {error && (
-          <div className="mb-6 p-4 bg-error-500/10 border border-error-500/30 rounded-lg flex items-center gap-2 text-error-400">
-            <AlertCircle size={20} />
-            <span>{error}</span>
+          <div className="mb-6 p-4 bg-red-500/20 border-2 border-red-500 rounded-lg flex items-center gap-3 shadow-lg">
+            <AlertCircle size={24} className="text-red-500 flex-shrink-0" />
+            <span className="text-white font-semibold">{error}</span>
           </div>
         )}
 
@@ -246,7 +246,7 @@ const UserSettings: React.FC = () => {
                 <CreditCard size={24} />
                 Abonnement verwalten
               </h2>
-              <p className="text-dark-300 mb-4">
+              <p className="text-white mb-4 font-medium">
                 Verwalte dein Abo, ändere Zahlungsmethoden oder kündige.
               </p>
               <button
@@ -333,14 +333,14 @@ const UserSettings: React.FC = () => {
           </div>
 
           {/* Danger Zone */}
-          <div className="glass-card p-6 rounded-xl border-2 border-error-500/30">
-            <h2 className="text-2xl font-bold text-error-400 mb-4 flex items-center gap-2">
-              <Trash2 size={24} />
-              Gefahrenzone
+          <div className="glass-card p-6 rounded-xl border-2 border-error-500/50 bg-red-500/5">
+            <h2 className="text-2xl font-bold text-red-400 mb-4 flex items-center gap-2 drop-shadow-[0_2px_4px_rgba(239,68,68,0.5)]">
+              <Trash2 size={24} className="text-red-500" />
+              <span className="text-white">🚨 Gefahrenzone</span>
             </h2>
 
-            <p className="text-white mb-4">
-              Wenn du deinen Account löschst, werden <strong className="text-red-400">alle deine Daten unwiderruflich gelöscht</strong>.
+            <p className="text-white mb-4 text-base font-medium">
+              Wenn du deinen Account löschst, werden <strong className="text-red-400 bg-red-500/20 px-2 py-1 rounded">alle deine Daten unwiderruflich gelöscht</strong>.
               Dies beinhaltet: Matches, Stats, Achievements, Personal Bests, Tenants und Spieler.
             </p>
 
