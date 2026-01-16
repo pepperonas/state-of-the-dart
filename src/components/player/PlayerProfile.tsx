@@ -6,7 +6,7 @@ import { useAchievements } from '../../context/AchievementContext';
 import { useTenant } from '../../context/TenantContext';
 import { PersonalBests, createEmptyPersonalBests } from '../../types/personalBests';
 import { LineChart, Line, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { DartboardHeatmapPro } from '../dartboard/DartboardHeatmapPro';
+import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
 import { calculateAccuracyStats } from '../../utils/heatmap';
 
 const PlayerProfile: React.FC = () => {
@@ -357,7 +357,7 @@ const PlayerProfile: React.FC = () => {
                 </div>
               )}
 
-              <DartboardHeatmapPro heatmapData={heatmapData} size={500} />
+              <DartboardHeatmapBlur heatmapData={heatmapData} size={500} />
             </>
           ) : (
             <div className="bg-dark-900 rounded-lg p-8 text-center border-2 border-dashed border-dark-700">

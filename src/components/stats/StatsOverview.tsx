@@ -11,7 +11,7 @@ import {
 import MatchHistory from './MatchHistory';
 import { calculateImprovement, exportMatchHistoryCSV } from '../../utils/exportImport';
 import { Match } from '../../types';
-import { DartboardHeatmapPro } from '../dartboard/DartboardHeatmapPro';
+import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
 import { Flame } from 'lucide-react';
 
 const StatsOverview: React.FC = () => {
@@ -956,7 +956,7 @@ const StatsOverview: React.FC = () => {
 
                     {/* Heatmap Visualization */}
                     <div className="glass-card p-8 border-2 border-primary-500/20">
-                      <DartboardHeatmapPro heatmapData={heatmapData} size={600} />
+                      <DartboardHeatmapBlur heatmapData={heatmapData} size={600} />
                     </div>
                   </div>
                 ) : (
