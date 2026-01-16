@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cache wird gelöscht...</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        h1 { margin-bottom: 1rem; }
+        p { opacity: 0.9; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Cache wird gelöscht...</h1>
+        <div class="spinner"></div>
+        <p id="status">Bitte warten...</p>
+    </div>
+
+    <script>
+        const statusEl = document.getElementById('status');
+        
+        async function clearEverything() {
+            try {
+                // 1. Unregister all service workers
+                statusEl.textContent = 'Service Worker wird entfernt...';
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (const registration of registrations) {
+                    await registration.unregister();
+                    console.log('Service Worker unregistered');
+                }
+                
+                // 2. Clear all caches
+                statusEl.textContent = 'Cache wird gelöscht...';
+                const cacheNames = await caches.keys();
+                await Promise.all(
+                    cacheNames.map(cacheName => caches.delete(cacheName))
+                );
+                console.log('All caches cleared');
+                
+                // 3. Clear localStorage
+                statusEl.textContent = 'LocalStorage wird gelöscht...';
+                localStorage.clear();
+                console.log('LocalStorage cleared');
+                
+                // 4. Clear sessionStorage
+                sessionStorage.clear();
+                console.log('SessionStorage cleared');
+                
+                // 5. Redirect to login
+                statusEl.textContent = 'Fertig! Weiterleitung...';
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 500);
+                
+            } catch (error) {
+                console.error('Error clearing cache:', error);
+                statusEl.textContent = 'Fehler! Bitte Browser-Cache manuell leeren.';
+            }
+        }
+        
+        // Start clearing immediately
+        clearEverything();
+    </script>
+</body>
+</html>
