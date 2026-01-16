@@ -30,25 +30,76 @@ const PlayerProfile: React.FC = () => {
     return getPlayerProgress(playerId);
   }, [playerId, getPlayerProgress]);
 
+  // Convert player stats to PersonalBests format
   const personalBests = useMemo((): PersonalBests => {
-    if (!playerId || !storage) return createEmptyPersonalBests('');
-    const saved = storage.get<Record<string, PersonalBests>>('personalBests', {});
-    return saved[playerId] || createEmptyPersonalBests(playerId);
-  }, [playerId, storage]);
+    if (!player) return createEmptyPersonalBests(playerId || '');
+    
+    return {
+      playerId: player.id,
+      bestAverage: {
+        value: player.stats.bestAverage || 0,
+        date: new Date(),
+        gameId: ''
+      },
+      highestScore: {
+        value: 180, // Max possible score (will be tracked separately in future)
+        date: new Date(),
+        gameId: ''
+      },
+      bestCheckoutRate: {
+        value: player.stats.checkoutPercentage || 0,
+        date: new Date(),
+        gameId: ''
+      },
+      highestCheckout: {
+        value: player.stats.highestCheckout || 0,
+        date: new Date(),
+        gameId: ''
+      },
+      most180s: {
+        value: player.stats.total180s || 0,
+        date: new Date(),
+        gameId: ''
+      },
+      mostLegsWon: {
+        value: player.stats.totalLegsWon || 0,
+        date: new Date(),
+        gameId: ''
+      },
+      longestWinningStreak: {
+        value: 0, // TODO: Calculate from matches
+        startDate: new Date(),
+        endDate: new Date()
+      },
+      shortestLeg: {
+        darts: player.stats.bestLeg || 999,
+        date: new Date(),
+        gameId: ''
+      },
+      totalGamesPlayed: player.stats.gamesPlayed || 0,
+      totalWins: player.stats.gamesWon || 0,
+      totalLosses: (player.stats.gamesPlayed - player.stats.gamesWon) || 0,
+      totalLegsWon: player.stats.totalLegsWon || 0,
+      totalLegsLost: (player.stats.totalLegsPlayed - player.stats.totalLegsWon) || 0,
+      total180s: player.stats.total180s || 0,
+      totalCheckouts: 0, // TODO: Track separately
+      firstGameDate: undefined,
+      lastGameDate: undefined
+    };
+  }, [player, playerId]);
 
-  const recentMatches = useMemo(() => {
-    if (!storage) return [];
-    const allMatches = storage.get<any[]>('matches', []);
-    return allMatches
-      .filter(m => m.players.some((p: any) => p.playerId === playerId))
-      .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
-      .slice(0, 10);
-  }, [storage, playerId]);
+  const recentMatches = useMemo((): any[] => {
+    // TODO: Load matches from API
+    // For now, return empty array as matches are not yet loaded from backend
+    return [];
+  }, [playerId]);
 
   // Performance chart data
   const performanceData = useMemo(() => {
+    if (recentMatches.length === 0) return [];
+    
     return recentMatches.map((match, index) => {
-      const playerData = match.players.find((p: any) => p.playerId === playerId);
+      const playerData = match.players?.find((p: any) => p.playerId === playerId);
       return {
         game: `#${recentMatches.length - index}`,
         average: playerData?.matchAverage || 0,
@@ -59,17 +110,19 @@ const PlayerProfile: React.FC = () => {
     }).reverse();
   }, [recentMatches, playerId]);
 
-  // Radar chart data
+  // Radar chart data - use player.stats directly
   const radarData = useMemo(() => {
-    const pb = personalBests;
+    if (!player) return [];
+    
+    const stats = player.stats;
     return [
-      { skill: 'Average', value: Math.min(pb.bestAverage.value / 100 * 100, 100), max: 100 },
-      { skill: 'Checkout', value: pb.bestCheckoutRate.value, max: 100 },
-      { skill: '180s', value: Math.min(pb.most180s.value / 10 * 100, 100), max: 100 },
-      { skill: 'Consistency', value: pb.totalGamesPlayed > 0 ? (pb.totalWins / pb.totalGamesPlayed) * 100 : 0, max: 100 },
+      { skill: 'Average', value: Math.min((stats.averageOverall / 80) * 100, 100), max: 100 },
+      { skill: 'Checkout', value: stats.checkoutPercentage || 0, max: 100 },
+      { skill: '180s', value: Math.min((stats.total180s / 20) * 100, 100), max: 100 },
+      { skill: 'Consistency', value: stats.gamesPlayed > 0 ? (stats.gamesWon / stats.gamesPlayed) * 100 : 0, max: 100 },
       { skill: 'Achievements', value: achievementProgress ? (achievementProgress.unlockedAchievements.length / 20) * 100 : 0, max: 100 },
     ];
-  }, [personalBests, achievementProgress]);
+  }, [player, achievementProgress]);
 
   // Heatmap data
   const heatmapData = useMemo(() => {
