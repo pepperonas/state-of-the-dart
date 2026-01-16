@@ -145,10 +145,10 @@ const GameScreen: React.FC = () => {
   };
   const [showConfetti, setShowConfetti] = useState(false);
   const [gameSettings, setGameSettings] = useState<MatchSettings>({
-    startScore: 501,
+    startScore: 301,
     legsToWin: 3,
     setsToWin: 1,
-    doubleOut: true,
+    doubleOut: false,
     doubleIn: false,
   });
   
