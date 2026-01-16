@@ -76,9 +76,15 @@ const StatsOverview: React.FC = () => {
   
   // Filter matches for selected player
   const playerMatches = useMemo(() => {
-    return matches.filter(match => 
-      match.players.some(p => p.playerId === selectedPlayerId)
-    );
+    if (!matches || matches.length === 0) return [];
+    return matches.filter(match => {
+      // Handle matches from API which might not have players array
+      if (!match.players || !Array.isArray(match.players)) {
+        // If no players array, check if winner matches selectedPlayerId
+        return match.winner === selectedPlayerId;
+      }
+      return match.players.some((p: any) => p.playerId === selectedPlayerId);
+    });
   }, [matches, selectedPlayerId]);
   
   // Get heatmap data for selected player
@@ -95,12 +101,14 @@ const StatsOverview: React.FC = () => {
   // Prepare chart data
   const progressData = useMemo(() => {
     return playerMatches
-      .sort((a, b) => new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime())
+      .sort((a, b) => new Date(a.startedAt || 0).getTime() - new Date(b.startedAt || 0).getTime())
       .map((match, index) => {
-        const player = match.players.find(p => p.playerId === selectedPlayerId);
+        const players = match.players || [];
+        const player = players.find((p: any) => p.playerId === selectedPlayerId);
+        const legs = match.legs || [];
         return {
           match: `#${index + 1}`,
-          date: new Date(match.startedAt).toLocaleDateString('de-DE', { month: 'short', day: 'numeric' }),
+          date: new Date(match.startedAt || 0).toLocaleDateString('de-DE', { month: 'short', day: 'numeric' }),
           average: player?.matchAverage || 0,
           checkoutPercent: player && player.checkoutAttempts > 0
             ? (player.checkoutsHit / player.checkoutAttempts) * 100
@@ -109,7 +117,7 @@ const StatsOverview: React.FC = () => {
           score140: player?.match140Plus || 0,
           score100: player?.match100Plus || 0,
           legsWon: player?.legsWon || 0,
-          legsLost: player ? (match.legs.length - player.legsWon) : 0,
+          legsLost: player ? (legs.length - (player.legsWon || 0)) : 0,
           highestScore: player?.matchHighestScore || 0,
         };
       });
@@ -170,14 +178,15 @@ const StatsOverview: React.FC = () => {
     const monthlyStats: Record<string, { games: number; avgSum: number; wins: number }> = {};
     
     playerMatches.forEach(match => {
-      const month = new Date(match.startedAt).toLocaleDateString('de-DE', { year: 'numeric', month: 'short' });
+      const month = new Date(match.startedAt || 0).toLocaleDateString('de-DE', { year: 'numeric', month: 'short' });
       if (!monthlyStats[month]) {
         monthlyStats[month] = { games: 0, avgSum: 0, wins: 0 };
       }
-      const player = match.players.find(p => p.playerId === selectedPlayerId);
+      const players = match.players || [];
+      const player = players.find((p: any) => p.playerId === selectedPlayerId);
       if (player) {
         monthlyStats[month].games++;
-        monthlyStats[month].avgSum += player.matchAverage;
+        monthlyStats[month].avgSum += player.matchAverage || 0;
         if (match.winner === selectedPlayerId) {
           monthlyStats[month].wins++;
         }
