@@ -154,8 +154,8 @@ SESSION_SECRET=9g4b0c3d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z7a8b9c0d1e2f3
 3. Application type: **Web application**
 4. Name: `State of the Dart`
 5. Authorized redirect URIs:
-   - Development: `http://localhost:3001/api/auth/google/callback`
-   - Production: `https://your-domain.com/api/auth/google/callback`
+   - Development: `http://localhost:3002/api/auth/google/callback`
+   - Production: `https://api.stateofthedart.com/api/auth/google/callback`
 
 ### **2. Keys kopieren:**
 
@@ -163,7 +163,7 @@ SESSION_SECRET=9g4b0c3d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z7a8b9c0d1e2f3
 # server/.env
 GOOGLE_CLIENT_ID=123456789-abcdefg.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=GOCSPX-abc123def456
-GOOGLE_CALLBACK_URL=http://localhost:3001/api/auth/google/callback
+GOOGLE_CALLBACK_URL=http://localhost:3002/api/auth/google/callback
 ```
 
 ---

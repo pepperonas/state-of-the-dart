@@ -9,14 +9,14 @@
 **Professional Dart Scoring System** - A feature-rich, web-based dart scoring application with multi-user support, professional statistics tracking, and live deployment.
 
 [![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green)](https://stateofthedart.com)
-![Version](https://img.shields.io/badge/Version-0.0.2-blue)
+![Version](https://img.shields.io/badge/Version-0.1.0-blue)
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
 ![React](https://img.shields.io/badge/React-19.2-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)
 ![Vite](https://img.shields.io/badge/Vite-5.4-blue)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-blue)
 
-🌐 **[Live App](https://stateofthedart.com)** | 📱 **[Install as PWA](PWA.md)** | 📊 **[Charts Guide](CHARTS.md)** | 🔄 **[Versioning](VERSIONING.md)** | 📖 **[Deployment Guide](DEPLOYMENT.md)** | ⚡ **[Performance Guide](PERFORMANCE.md)** | 🏷️ **[Meta Tags Guide](META_TAGS.md)** | 🐛 **[Report Issues](https://github.com/pepperonas/state-of-the-dart/issues)**
+🌐 **[Live App](https://stateofthedart.com)** | 📖 **[Deployment Guide](DEPLOYMENT_VPS.md)** | 🏗️ **[Architecture](ARCHITECTURE.md)** | 🐛 **[Report Issues](https://github.com/pepperonas/state-of-the-dart/issues)**
 
 ---
 
@@ -45,12 +45,13 @@
 
 ### 📊 Advanced Statistics & Charts
 - **10+ Interactive Charts** - Beautiful visualizations with Recharts
-  - Radar Chart: Performance-Profil (Average, Checkout %, 180s, Win Rate)
-  - Pie Chart: Win/Loss-Statistik
-  - Bar Charts: Score-Verteilung, High Scores
-  - Line Charts: Average- und Checkout-Entwicklung
-  - Area Charts: Legs Gewonnen/Verloren
-  - Composed Charts: Monatliche Performance-Trends
+  - Radar Chart: Performance profile (Average, Checkout %, 180s, Win Rate)
+  - Pie Chart: Win/Loss statistics
+  - Bar Charts: Score distribution, High Scores
+  - Line Charts: Average and checkout progression
+  - Round Chart: Match progression round by round (3 darts = 1 round)
+  - Area Charts: Legs won/lost
+  - Composed Charts: Monthly performance trends
 - **Player Comparison** - Compare up to 4 players side-by-side with:
   - Radar Chart: 5-dimensional skill comparison
   - Stats Table: Detailed head-to-head comparison
@@ -60,7 +61,11 @@
 - **Match History** - Complete tracking of all games played
 - **Trend Analysis** - Improvement metrics and performance trends
 - **Personal Bests** - Track highest checkouts, best averages, 9-darters
-- **Export/Import** - JSON for full data backup, CSV for match history
+- **Multi-Format Export (NEW in v0.1.0)** - Export stats in 3 formats:
+  - **CSV Export** - Text-based, compatible with Excel/Google Sheets
+  - **Excel Export (.xlsx)** - Native Excel files with summary sheet
+  - **PDF Export** - Professional reports with formatted tables
+- **Export/Import** - JSON for full data backup
 - **Automatic Sync** - Stats updated automatically after each match
 
 ### 🏆 Achievements & Gamification
@@ -79,14 +84,21 @@
   - **Skill Radar** - 5-dimensional skill visualization
   - **Career Timeline** - From first to last game with all stats
   - **Achievement Showcase** - Display unlocked achievements
-  - **🎯 Dart Heatmap** - Visualization of hit areas (Red = frequent, Blue = rare)
+  - **🔥 L.A. Style Heatmap (NEW in v0.0.5)** - Professional throw visualization:
+    - Smooth blur effects (20px Gaussian Blur)
+    - 6-level color gradient (Blue → Cyan → Green → Yellow → Orange → Red)
+    - Professional dartboard design (Red/Green/Black/White)
+    - Silver wire rings like real dartboards
+    - Screen blend mode for smooth overlay
+    - Top 5 hotspots with progress bars
+    - Accuracy stats (Miss Rate, Triple Rate, Double Rate, Favorite Field)
 - **Leaderboard Rankings** - Competitive rankings in 7 categories:
   - Best Average, Most Wins, Win Rate, Most 180s, Checkout Rate, Achievements, Total Points
   - Top 3 get special medals (🏆 Gold, 🥈 Silver, 🥉 Bronze)
   - Click on any player to view their profile
 - **Global Leaderboard** - Compete with players worldwide
 
-### 👑 Admin System (NEW in v1.0.0)
+### 👑 Admin System
 - **User Management** - Complete management of all registered users
 - **Subscription Control** - Grant or revoke lifetime access
 - **Admin Rights** - Make other users administrators
@@ -198,6 +210,34 @@ npm run dev
 
 The app will be available at `http://localhost:5173`
 
+### Backend Installation (for Cloud-Sync & Admin Features)
+
+```bash
+# Backend setup
+cd server
+
+# Install dependencies
+npm install
+
+# Create .env file (see server/env.example)
+cp env.example .env
+# Enter your credentials (SMTP, Stripe, Google OAuth)
+
+# Compile TypeScript
+npm run build
+
+# Create admin account
+npm run create:admin
+
+# Optional: Generate demo data
+npm run seed:demo
+
+# Start server
+npm start
+```
+
+The backend server runs on `http://localhost:3002`
+
 ### Build for Production
 
 ```bash
@@ -238,7 +278,7 @@ Tests are automatically run on every push via GitHub Actions.
 ./deploy.sh
 ```
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for full deployment guide.
+See [DEPLOYMENT_VPS.md](DEPLOYMENT_VPS.md) for full deployment guide.
 
 ---
 
@@ -420,7 +460,7 @@ rsync -avz --progress --delete dist/ root@YOUR_VPS:/var/www/stateofthedart/
 ssh root@YOUR_VPS "nginx -s reload"
 ```
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for complete deployment guide including:
+See [DEPLOYMENT_VPS.md](DEPLOYMENT_VPS.md) for complete deployment guide including:
 - VPS setup
 - Nginx configuration
 - SSL certificate setup
@@ -431,9 +471,6 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for complete deployment guide including:
 ## 🐛 Known Issues & Limitations
 
 - Audio files require HTTPS in production (browser security)
-- localStorage limited to ~5-10MB per origin
-- No backend - all data stored client-side
-- No cross-device sync (each device has separate profiles)
 - Training modes: UI complete, functionality in development
 - Tournament system: UI complete, functionality in development
 
@@ -441,21 +478,25 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for complete deployment guide including:
 
 ## 🔜 Roadmap
 
-### In Progress
-- [x] Training modes UI (6 modes: Doubles, Triples, Around the Clock, Checkout, Bob's 27, Score Training)
-- [x] Tournament system UI (Knockout, Round Robin, League, Swiss System)
-- [ ] Training modes functionality implementation
-- [ ] Tournament bracket and match management
+### ✅ Completed
+- [x] Multi-Tenant System
+- [x] X01 Games (301/501/701/1001)
+- [x] Advanced Statistics with 10+ Charts
+- [x] Export/Import (JSON/CSV/Excel/PDF)
+- [x] PWA with Offline Support
+- [x] Achievement System (20 Achievements)
+- [x] Player Profiles & Personal Bests
+- [x] Leaderboards
+- [x] Player Comparison (up to 4 players)
+- [x] Round Chart in Match History
+- [x] L.A. Style Heatmap
 
-### Planned Features
+### 🎯 Planned
 - [ ] Cricket game mode
-- [ ] Match replay and analysis
-- [ ] Export/Import data (JSON)
-- [ ] Cloud sync (optional backend)
-- [ ] Mobile apps (React Native)
-- [ ] Live multiplayer (WebRTC)
-- [ ] Performance analytics and charts
-- [ ] Video recording integration
+- [ ] Tournament system implementation
+- [ ] Head-to-Head stats
+- [ ] Keyboard shortcuts
+- [ ] Smart checkout trainer
 
 ---
 

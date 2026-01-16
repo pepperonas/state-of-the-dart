@@ -151,7 +151,7 @@ npm install
 npm run dev
 ```
 
-Server läuft auf: `http://localhost:3001`
+Server läuft auf: `http://localhost:3002`
 
 ### Production:
 

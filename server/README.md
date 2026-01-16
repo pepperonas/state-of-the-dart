@@ -34,7 +34,7 @@ cp env.example .env
 Edit `.env`:
 
 ```env
-PORT=3001
+PORT=3002
 NODE_ENV=development
 DATABASE_PATH=./data/state-of-the-dart.db
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
@@ -166,13 +166,14 @@ The database automatically initializes with the following tables:
 ### Environment Variables (Production)
 
 ```env
-PORT=3001
+PORT=3002
 NODE_ENV=production
-DATABASE_PATH=/var/www/state-of-the-dart/data/database.db
+DATABASE_URL=./data/state-of-the-dart.db
 JWT_SECRET=<generate-secure-random-string>
-CORS_ORIGINS=https://your-domain.com,https://www.your-domain.com
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=100
+CORS_ORIGINS=https://stateofthedart.com,https://api.stateofthedart.com
+APP_URL=https://stateofthedart.com
+API_URL=https://api.stateofthedart.com
+GOOGLE_CALLBACK_URL=https://api.stateofthedart.com/api/auth/google/callback
 ```
 
 ## 📝 Development

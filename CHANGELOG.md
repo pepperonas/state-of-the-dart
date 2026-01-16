@@ -120,7 +120,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ---
 
-## [0.0.5] - 2025-12-XX
+## [0.0.5] - 2026-01-15
 
 ### ✨ Hinzugefügt
 - L.A. Style Heatmap mit Smooth Blur-Effekten

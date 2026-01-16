@@ -101,7 +101,7 @@
   - Klicke auf jeden Spieler, um sein Profil anzuzeigen
 - **Globale Bestenliste** - Wetteifere mit Spielern weltweit
 
-### 👑 Admin-System (NEU in v1.0.0)
+### 👑 Admin-System
 - **User-Management** - Vollständige Verwaltung aller registrierten Benutzer
 - **Subscription-Kontrolle** - Gewähre oder widerrufe Lifetime-Access
 - **Admin-Rechte** - Mache andere Benutzer zu Admins
@@ -189,9 +189,9 @@ npm run seed:demo
 npm start
 ```
 
-Der Backend-Server läuft auf `http://localhost:3001`
+Der Backend-Server läuft auf `http://localhost:3002`
 
-📚 **Vollständige Setup-Anleitung**: Siehe [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) und [server/SETUP.md](server/SETUP.md)
+📚 **Vollständige Setup-Anleitung**: Siehe [DEPLOYMENT_VPS.md](DEPLOYMENT_VPS.md) und [server/SETUP.md](server/SETUP.md)
 
 ### Build für Produktion
 
@@ -481,16 +481,12 @@ Siehe [DEPLOYMENT_VPS.md](DEPLOYMENT_VPS.md) für Details.
 - [x] Achievement-Fortschritts-Hinweise (#4/36)
 - [x] Sound-Mixing (Separate Lautstärke) (#5/36)
 
-### 🔄 In Entwicklung
-Siehe [IMPROVEMENTS.md](IMPROVEMENTS.md) für 31 weitere geplante Features (#6-36)
-
-### 🎯 Geplant (HIGH Priority)
-- [ ] Cricket-Spielmodus (#7)
-- [ ] Turniersystem-Implementierung (#8)
-- [ ] Head-to-Head-Stats (#11)
-- [ ] Theme-Varianten (#19)
-- [ ] Keyboard-Shortcuts (#21)
-- [ ] Smart-Checkout-Trainer (#29)
+### 🎯 Geplant
+- [ ] Cricket-Spielmodus
+- [ ] Turniersystem-Implementierung
+- [ ] Head-to-Head-Stats
+- [ ] Keyboard-Shortcuts
+- [ ] Smart-Checkout-Trainer
 
 ---
 

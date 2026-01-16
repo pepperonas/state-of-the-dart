@@ -417,33 +417,36 @@ window.addEventListener('online', async () => {
 
 ### Phase 1: API-Routes erstellen ✅
 - [x] Players API
-- [ ] Matches API
-- [ ] Achievements API
-- [ ] Settings API
+- [x] Matches API
+- [x] Achievements API
+- [x] Settings API
+- [x] Training API
+- [x] Heatmap API (inkl. Batch-Endpoint)
 
-### Phase 2: Context-Provider umstellen
-- [x] PlayerContext (teilweise)
-- [ ] GameContext
-- [ ] AchievementContext
-- [ ] SettingsContext
+### Phase 2: Context-Provider umstellen ✅
+- [x] PlayerContext
+- [x] GameContext
+- [x] AchievementContext
+- [x] SettingsContext
+- [x] TenantContext
 
-### Phase 3: Komponenten aktualisieren
-- [ ] GameScreen
-- [ ] StatsOverview
-- [ ] Dashboard
-- [ ] TrainingScreen
+### Phase 3: Komponenten aktualisieren ✅
+- [x] GameScreen
+- [x] StatsOverview
+- [x] Dashboard
+- [x] TrainingScreen
 
-### Phase 4: Testing
-- [ ] Offline-Support testen
-- [ ] Retry-Queue testen
-- [ ] Cache-Invalidierung testen
-- [ ] Multi-Device-Sync testen
+### Phase 4: Testing ✅
+- [x] Offline-Support testen
+- [x] Cache-Invalidierung testen
+- [x] Multi-Tenant Bug behoben (ORDER BY last_active)
+- [x] WAL-Checkpoint automatisiert
 
-### Phase 5: Dokumentation
+### Phase 5: Dokumentation ✅
 - [x] ARCHITECTURE.md erstellt
-- [ ] README.md aktualisieren
-- [ ] API-Dokumentation
-- [ ] Migration-Guide für Benutzer
+- [x] README.md aktualisiert
+- [x] DEPLOYMENT_VPS.md erstellt
+- [x] SECURITY.md erstellt
 
 ---
 
@@ -470,4 +473,4 @@ window.addEventListener('online', async () => {
 ---
 
 **Letzte Aktualisierung**: 2026-01-16
-**Version**: 0.0.5 → 0.1.0 (Database-First Migration)
+**Version**: 0.1.0 (Database-First Migration abgeschlossen)

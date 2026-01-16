@@ -24,7 +24,7 @@ npm run coverage     # Generate coverage report
 ### Backend (server/ directory)
 ```bash
 cd server
-npm run dev          # Start with nodemon (localhost:3001)
+npm run dev          # Start with nodemon (localhost:3002)
 npm run build        # Compile TypeScript
 npm start            # Run compiled server
 npm run create:admin # Create admin account
@@ -90,3 +90,14 @@ npm test -- src/tests/utils/scoring.test.ts
 - Audio files cached for 30 days, fonts for 1 year
 - Production builds drop console.log via terser
 - Manual chunk splitting for react-vendor, charts, utils, icons
+
+## Deployment
+
+- **VPS IP**: `69.62.121.168`
+- **Port**: `3002` (Backend)
+- **Frontend**: `/var/www/stateofthedart`
+- **Backend**: `/var/www/stateofthedart-backend`
+- **PM2 Process**: `stateofthedart-backend`
+- **URLs**: `stateofthedart.com` / `api.stateofthedart.com`
+
+Siehe `DEPLOYMENT_VPS.md` für Details.
