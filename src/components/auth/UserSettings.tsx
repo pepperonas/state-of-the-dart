@@ -296,14 +296,17 @@ const UserSettings: React.FC = () => {
                 />
               </div>
 
-              <div className="p-4 bg-warning-500/10 border border-warning-500/30 rounded-lg text-warning-400 text-sm">
-                ⚠️ Du wirst ausgeloggt und musst deine neue Email-Adresse verifizieren.
+              <div className="p-4 bg-yellow-500/20 border-2 border-yellow-500 rounded-lg">
+                <p className="text-yellow-200 text-sm font-semibold flex items-center gap-2">
+                  <AlertCircle size={18} />
+                  ⚠️ Du wirst ausgeloggt und musst deine neue Email-Adresse verifizieren.
+                </p>
               </div>
 
               <button
                 type="submit"
                 disabled={loading === 'email'}
-                className="w-full py-3 bg-gradient-to-r from-warning-500 to-warning-600 hover:from-warning-600 hover:to-warning-700 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 text-white rounded-lg font-semibold flex items-center justify-center gap-2 shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading === 'email' ? (
                   <>
@@ -327,23 +330,26 @@ const UserSettings: React.FC = () => {
               Gefahrenzone
             </h2>
 
-            <p className="text-dark-300 mb-4">
-              Wenn du deinen Account löschst, werden <strong>alle deine Daten unwiderruflich gelöscht</strong>.
+            <p className="text-white mb-4">
+              Wenn du deinen Account löschst, werden <strong className="text-red-400">alle deine Daten unwiderruflich gelöscht</strong>.
               Dies beinhaltet: Matches, Stats, Achievements, Personal Bests, Tenants und Spieler.
             </p>
 
             {!confirmDelete ? (
               <button
                 onClick={() => setConfirmDelete(true)}
-                className="w-full py-3 bg-error-500/10 hover:bg-error-500/20 text-error-400 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all border border-error-500/30"
+                className="w-full py-3 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all border-2 border-red-500"
               >
                 <Trash2 size={20} />
                 Account löschen
               </button>
             ) : (
               <div className="space-y-4">
-                <div className="p-4 bg-error-500/10 border border-error-500/30 rounded-lg text-error-400 text-sm">
-                  ⚠️ <strong>WARNUNG:</strong> Diese Aktion kann nicht rückgängig gemacht werden!
+                <div className="p-4 bg-red-600/20 border-2 border-red-500 rounded-lg">
+                  <p className="text-red-200 text-sm font-bold flex items-center gap-2">
+                    <AlertCircle size={20} className="flex-shrink-0" />
+                    ⚠️ WARNUNG: Diese Aktion kann nicht rückgängig gemacht werden!
+                  </p>
                 </div>
 
                 <input
