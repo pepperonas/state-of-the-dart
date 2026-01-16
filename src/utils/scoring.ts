@@ -230,35 +230,102 @@ export const validateScore = (score: number): boolean => {
   return !impossibleScores.includes(score);
 };
 
+/**
+ * Generate realistic x/y coordinates for a dart hit
+ * Coordinates are normalized (-1 to 1, where 0,0 is center)
+ */
+const generateDartCoordinates = (segment: number, multiplier: 0 | 1 | 2 | 3, bed: string): { x: number; y: number } => {
+  // Segment order clockwise from top (20 at top = 0°)
+  const segmentOrder = [20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5];
+  
+  // Miss - random position outside the board
+  if (multiplier === 0) {
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 1.1 + Math.random() * 0.3; // Outside the board
+    return {
+      x: Math.cos(angle) * radius,
+      y: Math.sin(angle) * radius
+    };
+  }
+  
+  // Bull or Outer Bull
+  if (segment === 25 || segment === 50) {
+    const angle = Math.random() * Math.PI * 2;
+    const radius = segment === 50 
+      ? Math.random() * 0.04 // Bull (inner circle)
+      : 0.04 + Math.random() * 0.08; // Outer Bull
+    return {
+      x: Math.cos(angle) * radius,
+      y: Math.sin(angle) * radius
+    };
+  }
+  
+  // Regular segments (1-20)
+  const segmentIndex = segmentOrder.indexOf(segment);
+  if (segmentIndex === -1) {
+    // Fallback for invalid segment
+    return { x: 0, y: 0 };
+  }
+  
+  // Calculate angle for this segment (20 segments = 18° each)
+  const baseAngle = (segmentIndex * 18 - 90) * (Math.PI / 180); // -90 to start at top
+  const angleVariation = (Math.random() - 0.5) * 15 * (Math.PI / 180); // ±7.5° variation
+  const angle = baseAngle + angleVariation;
+  
+  // Calculate radius based on multiplier
+  let radius;
+  switch (multiplier) {
+    case 3: // Triple ring (outer third)
+      radius = 0.63 + (Math.random() - 0.5) * 0.06;
+      break;
+    case 2: // Double ring (outermost)
+      radius = 0.95 + (Math.random() - 0.5) * 0.06;
+      break;
+    case 1: // Single (inner area or between triple and double)
+    default:
+      // Randomly choose inner single or outer single
+      const isInnerSingle = Math.random() > 0.5;
+      radius = isInnerSingle
+        ? 0.25 + Math.random() * 0.3 // Inner single
+        : 0.7 + Math.random() * 0.2; // Outer single
+      break;
+  }
+  
+  return {
+    x: Math.cos(angle) * radius,
+    y: Math.sin(angle) * radius
+  };
+};
+
 export const convertScoreToDarts = (score: number): Dart[] => {
-  // Convert a numeric score into plausible darts
-  // This is a simplified approach - for common scores we use typical combinations
+  // Convert a numeric score into plausible darts WITH x/y coordinates for heatmap
   
   if (score === 0) {
-    return [{ segment: 0, multiplier: 0, score: 0, bed: 'miss' }];
+    const coords = generateDartCoordinates(0, 0, 'miss');
+    return [{ segment: 0, multiplier: 0, score: 0, bed: 'miss', ...coords }];
   }
   
   if (score === 180) {
     return [
-      { segment: 20, multiplier: 3, score: 60, bed: 'triple' },
-      { segment: 20, multiplier: 3, score: 60, bed: 'triple' },
-      { segment: 20, multiplier: 3, score: 60, bed: 'triple' },
+      { segment: 20, multiplier: 3, score: 60, bed: 'triple', ...generateDartCoordinates(20, 3, 'triple') },
+      { segment: 20, multiplier: 3, score: 60, bed: 'triple', ...generateDartCoordinates(20, 3, 'triple') },
+      { segment: 20, multiplier: 3, score: 60, bed: 'triple', ...generateDartCoordinates(20, 3, 'triple') },
     ];
   }
   
   if (score === 140) {
     return [
-      { segment: 20, multiplier: 3, score: 60, bed: 'triple' },
-      { segment: 20, multiplier: 3, score: 60, bed: 'triple' },
-      { segment: 20, multiplier: 1, score: 20, bed: 'single' },
+      { segment: 20, multiplier: 3, score: 60, bed: 'triple', ...generateDartCoordinates(20, 3, 'triple') },
+      { segment: 20, multiplier: 3, score: 60, bed: 'triple', ...generateDartCoordinates(20, 3, 'triple') },
+      { segment: 20, multiplier: 1, score: 20, bed: 'single', ...generateDartCoordinates(20, 1, 'single') },
     ];
   }
   
   if (score === 100) {
     return [
-      { segment: 20, multiplier: 3, score: 60, bed: 'triple' },
-      { segment: 20, multiplier: 1, score: 20, bed: 'single' },
-      { segment: 20, multiplier: 1, score: 20, bed: 'single' },
+      { segment: 20, multiplier: 3, score: 60, bed: 'triple', ...generateDartCoordinates(20, 3, 'triple') },
+      { segment: 20, multiplier: 1, score: 20, bed: 'single', ...generateDartCoordinates(20, 1, 'single') },
+      { segment: 20, multiplier: 1, score: 20, bed: 'single', ...generateDartCoordinates(20, 1, 'single') },
     ];
   }
   
@@ -268,7 +335,7 @@ export const convertScoreToDarts = (score: number): Dart[] => {
   
   // Try to use T20s (60) first
   while (remaining >= 60 && darts.length < 3) {
-    darts.push({ segment: 20, multiplier: 3, score: 60, bed: 'triple' });
+    darts.push({ segment: 20, multiplier: 3, score: 60, bed: 'triple', ...generateDartCoordinates(20, 3, 'triple') });
     remaining -= 60;
   }
   
@@ -276,21 +343,21 @@ export const convertScoreToDarts = (score: number): Dart[] => {
   if (remaining > 0 && darts.length < 3) {
     // Try to use T19 (57) or T18 (54) if applicable
     if (remaining >= 57 && darts.length < 2) {
-      darts.push({ segment: 19, multiplier: 3, score: 57, bed: 'triple' });
+      darts.push({ segment: 19, multiplier: 3, score: 57, bed: 'triple', ...generateDartCoordinates(19, 3, 'triple') });
       remaining -= 57;
     } else if (remaining >= 54 && darts.length < 2) {
-      darts.push({ segment: 18, multiplier: 3, score: 54, bed: 'triple' });
+      darts.push({ segment: 18, multiplier: 3, score: 54, bed: 'triple', ...generateDartCoordinates(18, 3, 'triple') });
       remaining -= 54;
     } else if (remaining >= 51 && darts.length < 2) {
-      darts.push({ segment: 17, multiplier: 3, score: 51, bed: 'triple' });
+      darts.push({ segment: 17, multiplier: 3, score: 51, bed: 'triple', ...generateDartCoordinates(17, 3, 'triple') });
       remaining -= 51;
     } else if (remaining > 20) {
       // Use a single with remaining score capped at 20
       const dartScore = Math.min(remaining, 20);
-      darts.push({ segment: dartScore, multiplier: 1, score: dartScore, bed: 'single' });
+      darts.push({ segment: dartScore, multiplier: 1, score: dartScore, bed: 'single', ...generateDartCoordinates(dartScore, 1, 'single') });
       remaining -= dartScore;
     } else if (remaining > 0) {
-      darts.push({ segment: remaining, multiplier: 1, score: remaining, bed: 'single' });
+      darts.push({ segment: remaining, multiplier: 1, score: remaining, bed: 'single', ...generateDartCoordinates(remaining, 1, 'single') });
       remaining = 0;
     }
   }
@@ -301,21 +368,23 @@ export const convertScoreToDarts = (score: number): Dart[] => {
     if (dartScore > 20) {
       const segment = Math.floor(dartScore / 3);
       if (segment <= 20) {
-        darts.push({ segment, multiplier: 3, score: segment * 3, bed: 'triple' });
+        const coords = generateDartCoordinates(segment, 3, 'triple');
+        darts.push({ segment, multiplier: 3, score: segment * 3, bed: 'triple', ...coords });
         remaining -= segment * 3;
       } else {
-        darts.push({ segment: 20, multiplier: 1, score: 20, bed: 'single' });
+        darts.push({ segment: 20, multiplier: 1, score: 20, bed: 'single', ...generateDartCoordinates(20, 1, 'single') });
         remaining -= 20;
       }
     } else {
-      darts.push({ segment: dartScore, multiplier: 1, score: dartScore, bed: 'single' });
+      darts.push({ segment: dartScore, multiplier: 1, score: dartScore, bed: 'single', ...generateDartCoordinates(dartScore, 1, 'single') });
       remaining = 0;
     }
   }
   
   // Ensure we always return at least one dart
   if (darts.length === 0) {
-    darts.push({ segment: 0, multiplier: 0, score: 0, bed: 'miss' });
+    const coords = generateDartCoordinates(0, 0, 'miss');
+    darts.push({ segment: 0, multiplier: 0, score: 0, bed: 'miss', ...coords });
   }
   
   return darts;

@@ -75,6 +75,15 @@ CREATE TABLE IF NOT EXISTS player_stats (
   FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
 );
 
+-- Player Heatmap (aggregated dart throw data)
+CREATE TABLE IF NOT EXISTS heatmap_data (
+  player_id TEXT PRIMARY KEY,
+  segments TEXT NOT NULL, -- JSON object
+  total_darts INTEGER DEFAULT 0,
+  last_updated INTEGER NOT NULL,
+  FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
+);
+
 -- Matches
 CREATE TABLE IF NOT EXISTS matches (
   id TEXT PRIMARY KEY,

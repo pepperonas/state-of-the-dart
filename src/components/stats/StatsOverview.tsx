@@ -937,11 +937,26 @@ const PlayerComparisonView: React.FC<{
 
   // Calculate stats for compared players - USE PLAYER STATS instead of match data
   const comparisonData = useMemo(() => {
-    return comparePlayerIds.map(playerId => {
+    console.log('🔍 Comparison Debug:');
+    console.log('  - comparePlayerIds:', comparePlayerIds);
+    console.log('  - players:', players);
+    
+    const result = comparePlayerIds.map(playerId => {
       const player = players.find(p => p.id === playerId);
-      if (!player || !player.stats) return null;
+      console.log(`  - Player ${playerId}:`, player);
+      
+      if (!player) {
+        console.log(`    ❌ Player not found!`);
+        return null;
+      }
+      
+      if (!player.stats) {
+        console.log(`    ❌ Player has no stats!`);
+        return null;
+      }
 
       const stats = player.stats;
+      console.log(`    ✅ Stats:`, stats);
 
       return {
         player,
@@ -954,11 +969,17 @@ const PlayerComparisonView: React.FC<{
         highestScore: stats.highestCheckout || 0,
       };
     }).filter(Boolean);
+    
+    console.log('  - Final comparisonData:', result);
+    return result;
   }, [comparePlayerIds, players]);
 
   // Prepare radar chart data
   const radarData = useMemo(() => {
-    if (comparisonData.length === 0) return [];
+    if (comparisonData.length === 0) {
+      console.log('🔍 Radar Data: No comparison data');
+      return [];
+    }
 
     const categories = [
       { category: 'Average', max: 100 },
@@ -968,7 +989,7 @@ const PlayerComparisonView: React.FC<{
       { category: 'Consistency', max: 100 },
     ];
 
-    return categories.map(cat => {
+    const result = categories.map(cat => {
       const dataPoint: any = { category: cat.category };
       comparisonData.forEach((data, index) => {
         let value = 0;
@@ -996,6 +1017,9 @@ const PlayerComparisonView: React.FC<{
       });
       return dataPoint;
     });
+    
+    console.log('🔍 Radar Data:', result);
+    return result;
   }, [comparisonData]);
 
   const colors = ['#0ea5e9', '#a855f7', '#22c55e', '#f59e0b'];
