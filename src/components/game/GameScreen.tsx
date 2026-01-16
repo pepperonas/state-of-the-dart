@@ -233,6 +233,37 @@ const GameScreen: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [state.currentThrow.length]);
+
+  // Auto-confirm on checkout (when remaining reaches exactly 0)
+  useEffect(() => {
+    if (!state.currentMatch || state.currentThrow.length === 0) return;
+
+    const currentPlayer = state.currentMatch.players[state.currentPlayerIndex];
+    const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
+    if (!currentPlayer || !currentLeg || currentLeg.winner) return;
+
+    // Calculate remaining score
+    const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
+    const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
+    const startScore = state.currentMatch.settings.startScore || 501;
+    const remaining = startScore - totalScored;
+    const currentScore = calculateThrowScore(state.currentThrow);
+    const newRemaining = remaining - currentScore;
+
+    // Check if this is a valid checkout
+    const requiresDouble = state.currentMatch.settings.doubleOut || false;
+    const lastDart = state.currentThrow[state.currentThrow.length - 1];
+    const isValidCheckout = newRemaining === 0 &&
+      (!requiresDouble || lastDart?.multiplier === 2);
+
+    if (isValidCheckout) {
+      // Auto-confirm checkout after short delay
+      const timer = setTimeout(() => {
+        handleConfirmThrow();
+      }, 400);
+      return () => clearTimeout(timer);
+    }
+  }, [state.currentThrow]);
   
   const handleConfirmThrow = () => {
     const currentScore = calculateThrowScore(state.currentThrow);
