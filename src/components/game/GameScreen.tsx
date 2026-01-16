@@ -13,6 +13,7 @@ import ScoreInput from './ScoreInput';
 import PlayerScore from './PlayerScore';
 import CheckoutSuggestion from '../dartboard/CheckoutSuggestion';
 import AchievementHint from '../achievements/AchievementHint';
+import SpinnerWheel from './SpinnerWheel';
 import { Dart, Player, GameType, MatchSettings } from '../../types/index';
 import { calculateThrowScore } from '../../utils/scoring';
 import { PersonalBests, createEmptyPersonalBests, updatePersonalBests } from '../../types/personalBests';
@@ -74,7 +75,14 @@ const GameScreen: React.FC = () => {
 
   // Track processed matches to avoid duplicate achievement checks
   const [processedMatchIds, setProcessedMatchIds] = useState<Set<string>>(new Set());
-  
+
+  // Spinner wheel state
+  const [showSpinner, setShowSpinner] = useState(false);
+  const [pendingGameStart, setPendingGameStart] = useState<{
+    players: Player[];
+    settings: MatchSettings;
+  } | null>(null);
+
   // Confirmation dialogs
   const [showBackConfirm, setShowBackConfirm] = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
@@ -187,9 +195,9 @@ const GameScreen: React.FC = () => {
   const handleStartGame = async () => {
     // Play a start sound to unlock audio system
     audioSystem.playSound('/sounds/effects/get_ready.mp3', true);
-    
+
     let finalPlayers = selectedPlayers;
-    
+
     if (selectedPlayers.length < 2) {
       // Add a guest player if only one selected
       try {
@@ -202,19 +210,39 @@ const GameScreen: React.FC = () => {
         return;
       }
     }
-    
+
     // Save last players for quick select
     saveLastPlayers(finalPlayers.map(p => p.id));
-    
+
+    // Show spinner wheel to determine starting player
+    setPendingGameStart({
+      players: finalPlayers,
+      settings: gameSettings,
+    });
+    setShowSetup(false);
+    setShowSpinner(true);
+  };
+
+  const handleSpinnerComplete = (startingPlayerIndex: number) => {
+    if (!pendingGameStart) return;
+
+    // Reorder players so the winner goes first
+    const reorderedPlayers = [
+      ...pendingGameStart.players.slice(startingPlayerIndex),
+      ...pendingGameStart.players.slice(0, startingPlayerIndex),
+    ];
+
     dispatch({
       type: 'START_MATCH',
       payload: {
-        players: finalPlayers,
-        settings: gameSettings,
+        players: reorderedPlayers,
+        settings: pendingGameStart.settings,
         gameType: 'x01' as GameType,
       },
     });
-    setShowSetup(false);
+
+    setShowSpinner(false);
+    setPendingGameStart(null);
   };
   
   const handleDartHit = (dart: Dart) => {
@@ -882,6 +910,14 @@ const GameScreen: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Spinner Wheel for determining starting player */}
+      {showSpinner && pendingGameStart && (
+        <SpinnerWheel
+          players={pendingGameStart.players}
+          onComplete={handleSpinnerComplete}
+        />
       )}
     </div>
   );
