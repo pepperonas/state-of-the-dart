@@ -19,8 +19,19 @@ router.post('/create-checkout', authenticateTenant, async (req: AuthRequest, res
   const db = getDatabase();
 
   try {
-    // Get user
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.tenantId) as any;
+    // Get user - use req.user?.id if available (new auth system), otherwise look up via tenant
+    const userId = req.user?.id;
+    let user: any;
+
+    if (userId) {
+      user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+    } else if (req.tenantId) {
+      // Fallback: look up user via tenant's user_id
+      const tenant = db.prepare('SELECT user_id FROM tenants WHERE id = ?').get(req.tenantId) as any;
+      if (tenant?.user_id) {
+        user = db.prepare('SELECT * FROM users WHERE id = ?').get(tenant.user_id);
+      }
+    }
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -52,7 +63,19 @@ router.post('/create-portal', authenticateTenant, async (req: AuthRequest, res: 
   const db = getDatabase();
 
   try {
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.tenantId) as any;
+    // Get user - use req.user?.id if available (new auth system), otherwise look up via tenant
+    const userId = req.user?.id;
+    let user: any;
+
+    if (userId) {
+      user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+    } else if (req.tenantId) {
+      // Fallback: look up user via tenant's user_id
+      const tenant = db.prepare('SELECT user_id FROM tenants WHERE id = ?').get(req.tenantId) as any;
+      if (tenant?.user_id) {
+        user = db.prepare('SELECT * FROM users WHERE id = ?').get(tenant.user_id);
+      }
+    }
 
     if (!user || !user.stripe_customer_id) {
       return res.status(400).json({ error: 'No active subscription found' });

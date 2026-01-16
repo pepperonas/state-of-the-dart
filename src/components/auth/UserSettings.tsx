@@ -268,8 +268,8 @@ const UserSettings: React.FC = () => {
             </form>
           </div>
 
-          {/* Subscription Management */}
-          {user.subscriptionStatus !== 'none' && (
+          {/* Subscription Management - only show for paying customers (not trial) */}
+          {(user.subscriptionStatus === 'active' || user.subscriptionStatus === 'lifetime') && (
             <div className="glass-card p-6 rounded-xl">
               <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
                 <CreditCard size={24} />
