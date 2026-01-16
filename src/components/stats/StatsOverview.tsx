@@ -11,13 +11,15 @@ import {
 import MatchHistory from './MatchHistory';
 import { calculateImprovement, exportMatchHistoryCSV } from '../../utils/exportImport';
 import { Match } from '../../types';
+import { DartboardHeatmapPro } from '../dartboard/DartboardHeatmapPro';
+import { Flame } from 'lucide-react';
 
 const StatsOverview: React.FC = () => {
   const navigate = useNavigate();
-  const { players } = usePlayer();
+  const { players, getPlayerHeatmap } = usePlayer();
   const { storage } = useTenant();
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
-  const [selectedTab, setSelectedTab] = useState<'overview' | 'progress' | 'history' | 'compare'>('overview');
+  const [selectedTab, setSelectedTab] = useState<'overview' | 'progress' | 'history' | 'compare' | 'heatmap'>('overview');
   const [comparePlayerIds, setComparePlayerIds] = useState<string[]>([]);
   
   // Load matches from storage
@@ -41,6 +43,12 @@ const StatsOverview: React.FC = () => {
       match.players.some(p => p.playerId === selectedPlayerId)
     );
   }, [matches, selectedPlayerId]);
+  
+  // Get heatmap data for selected player
+  const heatmapData = useMemo(() => {
+    if (!selectedPlayerId) return null;
+    return getPlayerHeatmap(selectedPlayerId);
+  }, [selectedPlayerId, getPlayerHeatmap]);
   
   // Calculate improvement metrics
   const improvement = useMemo(() => {
@@ -308,6 +316,17 @@ const StatsOverview: React.FC = () => {
                 >
                   <Users size={16} className="inline mr-2" />
                   Vergleich
+                </button>
+                <button
+                  onClick={() => setSelectedTab('heatmap')}
+                  className={`flex-1 px-6 py-3 font-semibold transition-all ${
+                    selectedTab === 'heatmap'
+                      ? 'text-white border-b-2 border-primary-500 bg-primary-500/5'
+                      : 'text-dark-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Flame size={16} className="inline mr-2" />
+                  Heatmap
                 </button>
               </div>
             </div>
@@ -885,6 +904,86 @@ const StatsOverview: React.FC = () => {
                 matches={matches}
                 storage={storage}
               />
+            )}
+
+            {selectedTab === 'heatmap' && (
+              <div className="space-y-6">
+                {/* Heatmap Header */}
+                <div className="glass-card p-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <h2 className="text-3xl font-bold text-white flex items-center gap-3">
+                      <Flame size={32} className="text-orange-400" />
+                      🎯 Wurf-Heatmap
+                    </h2>
+                  </div>
+                  <p className="text-dark-300 text-lg">
+                    Visualisierung aller Würfe von <span className="font-bold text-primary-400">{selectedPlayer?.name}</span>
+                  </p>
+                </div>
+
+                {/* Heatmap Content */}
+                {heatmapData && heatmapData.totalDarts > 0 ? (
+                  <div className="space-y-6">
+                    {/* Stats Cards */}
+                    <div className="grid md:grid-cols-4 gap-4">
+                      <div className="glass-card p-6 border-2 border-blue-500/30">
+                        <div className="text-sm text-blue-300 mb-1 font-semibold">Total Würfe</div>
+                        <div className="text-4xl font-bold text-white">{heatmapData.totalDarts}</div>
+                        <div className="text-xs text-dark-400 mt-2">Alle aufgezeichneten Darts</div>
+                      </div>
+                      <div className="glass-card p-6 border-2 border-green-500/30">
+                        <div className="text-sm text-green-300 mb-1 font-semibold">Segments getroffen</div>
+                        <div className="text-4xl font-bold text-white">
+                          {Object.keys(heatmapData.segments || {}).length}
+                        </div>
+                        <div className="text-xs text-dark-400 mt-2">Unterschiedliche Felder</div>
+                      </div>
+                      <div className="glass-card p-6 border-2 border-orange-500/30">
+                        <div className="text-sm text-orange-300 mb-1 font-semibold">Präzision</div>
+                        <div className="text-4xl font-bold text-white">
+                          {selectedPlayer ? selectedPlayer.stats.checkoutPercentage.toFixed(1) : 0}%
+                        </div>
+                        <div className="text-xs text-dark-400 mt-2">Checkout Rate</div>
+                      </div>
+                      <div className="glass-card p-6 border-2 border-red-500/30">
+                        <div className="text-sm text-red-300 mb-1 font-semibold">180s</div>
+                        <div className="text-4xl font-bold text-white">
+                          {selectedPlayer?.stats.total180s || 0}
+                        </div>
+                        <div className="text-xs text-dark-400 mt-2">Maximum Scores</div>
+                      </div>
+                    </div>
+
+                    {/* Heatmap Visualization */}
+                    <div className="glass-card p-8 border-2 border-primary-500/20">
+                      <DartboardHeatmapPro heatmapData={heatmapData} size={600} />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="glass-card p-12 text-center border-2 border-dashed border-dark-700">
+                    <div className="text-8xl mb-6">🎯</div>
+                    <h3 className="text-3xl font-bold text-white mb-4">Noch keine Wurf-Daten</h3>
+                    <p className="text-dark-300 text-xl mb-6">
+                      Spiele ein Match, um deine Wurf-Heatmap zu sehen!
+                    </p>
+                    <p className="text-dark-400 mb-6">
+                      Die Heatmap zeigt dir auf einen Blick, wo du am häufigsten triffst:
+                    </p>
+                    <div className="flex items-center justify-center gap-6 text-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-red-500 shadow-lg" style={{ boxShadow: '0 0 20px #ef444480' }}></div>
+                        <span className="text-white font-semibold">Hot-Zones</span>
+                        <span className="text-dark-400">(oft getroffen)</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-blue-500 shadow-lg" style={{ boxShadow: '0 0 20px #3b82f680' }}></div>
+                        <span className="text-white font-semibold">Cold-Zones</span>
+                        <span className="text-dark-400">(selten getroffen)</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </>
         )}
