@@ -93,6 +93,7 @@ import trainingRouter from './routes/training';
 import achievementsRouter from './routes/achievements';
 import leaderboardRouter from './routes/leaderboard';
 import adminRouter from './routes/admin';
+import settingsRouter from './routes/settings';
 
 // API Routes
 app.get('/api', (req: Request, res: Response) => {
@@ -107,6 +108,7 @@ app.get('/api', (req: Request, res: Response) => {
       training: '/api/training',
       achievements: '/api/achievements',
       leaderboard: '/api/leaderboard',
+      settings: '/api/settings',
     },
   });
 });
@@ -121,6 +123,7 @@ app.use('/api/training', trainingRouter);
 app.use('/api/achievements', achievementsRouter);
 app.use('/api/leaderboard', leaderboardRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/settings', settingsRouter);
 
 // Google OAuth routes
 app.get('/api/auth/google',

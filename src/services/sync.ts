@@ -104,7 +104,7 @@ class SyncService {
         if (key.startsWith('achievements_')) {
           const playerId = key.replace('achievements_', '');
           try {
-            await api.achievements.update(playerId, value);
+            await api.achievements.updateProgress(playerId, value);
           } catch (err) {
             console.warn('Achievements sync error:', err);
           }
@@ -139,7 +139,7 @@ class SyncService {
           await api.training.update(data.id, data);
           break;
         case 'achievement':
-          await api.achievements.update(data.playerId, data.achievements);
+          await api.achievements.updateProgress(data.playerId, data.achievements);
           break;
       }
     } catch (err) {

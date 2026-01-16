@@ -244,6 +244,21 @@ CREATE TABLE IF NOT EXISTS personal_bests (
   last_updated INTEGER NOT NULL,
   FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
 );
+
+-- User Settings
+CREATE TABLE IF NOT EXISTS user_settings (
+  tenant_id TEXT PRIMARY KEY,
+  theme TEXT DEFAULT 'dark',
+  language TEXT DEFAULT 'de',
+  sound_enabled INTEGER DEFAULT 1,
+  caller_voice TEXT DEFAULT 'john',
+  caller_language TEXT DEFAULT 'en',
+  auto_next_player INTEGER DEFAULT 1,
+  show_checkout_suggestions INTEGER DEFAULT 1,
+  enable_achievements_hints INTEGER DEFAULT 1,
+  updated_at INTEGER NOT NULL,
+  FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+);
 `;
 
 // Default achievements to seed

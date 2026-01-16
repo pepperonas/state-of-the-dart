@@ -211,12 +211,37 @@ export const api = {
 
   // Achievements
   achievements: {
-    getByPlayer: (playerId: string) => apiClient(`/api/achievements/${playerId}`),
+    getAll: () => apiClient('/api/achievements'),
     
-    update: (playerId: string, achievements: any) =>
-      apiClient(`/api/achievements/${playerId}`, {
+    getByPlayer: (playerId: string) => apiClient(`/api/achievements/player/${playerId}`),
+    
+    unlock: (playerId: string, achievementId: string) =>
+      apiClient(`/api/achievements/player/${playerId}/unlock`, {
+        method: 'POST',
+        body: JSON.stringify({ achievementId }),
+      }),
+    
+    updateProgress: (playerId: string, achievements: any) =>
+      apiClient(`/api/achievements/player/${playerId}/progress`, {
         method: 'PUT',
         body: JSON.stringify({ achievements }),
+      }),
+  },
+
+  // Settings
+  settings: {
+    get: () => apiClient('/api/settings'),
+    
+    update: (settings: any) =>
+      apiClient('/api/settings', {
+        method: 'PUT',
+        body: JSON.stringify(settings),
+      }),
+    
+    updateSetting: (key: string, value: any) =>
+      apiClient(`/api/settings/${key}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ value }),
       }),
   },
 

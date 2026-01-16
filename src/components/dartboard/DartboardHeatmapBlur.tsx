@@ -23,7 +23,10 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
   const dartPoints = useMemo(() => {
     const points: { x: number; y: number; intensity: number }[] = [];
     
-    if (!heatmapData.segments) return points;
+    if (!heatmapData.segments) {
+      console.log('🗺️ DartboardHeatmap: No segments data');
+      return points;
+    }
     
     try {
       const segments = typeof heatmapData.segments === 'string' 
@@ -31,10 +34,15 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
         : heatmapData.segments;
       const maxCount = heatmapData.totalDarts > 0 ? heatmapData.totalDarts / 100 : 1;
       
+      console.log('🗺️ DartboardHeatmap: Processing segments:', segments);
+      console.log('🗺️ DartboardHeatmap: Total darts:', heatmapData.totalDarts);
+      
       Object.entries(segments).forEach(([segmentKey, data]: [string, any]) => {
         const [segment, multiplier] = segmentKey.split('-').map(Number);
         const xCoords = data.x || [];
         const yCoords = data.y || [];
+        
+        console.log(`🗺️ Segment ${segmentKey}: ${xCoords.length} points`, { xCoords, yCoords });
         
         // Add each dart hit as a point
         for (let i = 0; i < Math.min(xCoords.length, yCoords.length); i++) {
@@ -45,6 +53,8 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
           });
         }
       });
+      
+      console.log('🗺️ DartboardHeatmap: Total points generated:', points.length);
     } catch (e) {
       console.error('Failed to parse heatmap segments:', e);
     }

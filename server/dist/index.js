@@ -87,6 +87,7 @@ const training_1 = __importDefault(require("./routes/training"));
 const achievements_1 = __importDefault(require("./routes/achievements"));
 const leaderboard_1 = __importDefault(require("./routes/leaderboard"));
 const admin_1 = __importDefault(require("./routes/admin"));
+const settings_1 = __importDefault(require("./routes/settings"));
 // API Routes
 app.get('/api', (req, res) => {
     res.json({
@@ -100,6 +101,7 @@ app.get('/api', (req, res) => {
             training: '/api/training',
             achievements: '/api/achievements',
             leaderboard: '/api/leaderboard',
+            settings: '/api/settings',
         },
     });
 });
@@ -113,6 +115,7 @@ app.use('/api/training', training_1.default);
 app.use('/api/achievements', achievements_1.default);
 app.use('/api/leaderboard', leaderboard_1.default);
 app.use('/api/admin', admin_1.default);
+app.use('/api/settings', settings_1.default);
 // Google OAuth routes
 app.get('/api/auth/google', passport_1.default.authenticate('google', { scope: ['profile', 'email'] }));
 app.get('/api/auth/google/callback', passport_1.default.authenticate('google', { failureRedirect: `${config_1.config.appUrl}/login?error=google_auth_failed` }), (req, res) => {
