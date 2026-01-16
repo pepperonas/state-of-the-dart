@@ -312,53 +312,76 @@ const PlayerProfile: React.FC = () => {
           </div>
         </div>
 
-        {/* Heatmap Section */}
-        {heatmapData && heatmapData.totalDarts > 0 && (
-          <div className="glass-card p-6 mb-6">
-            <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-              <Flame className="text-primary-400" size={24} />
-              Wurf-Heatmap
-            </h2>
-            
-            {/* Accuracy Stats */}
-            {accuracyStats && (
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-                <div className="bg-dark-900 rounded-lg p-3 text-center">
-                  <div className="text-sm text-dark-400 mb-1">Miss Rate</div>
-                  <div className="text-xl font-bold text-error-400">
-                    {accuracyStats.missRate.toFixed(1)}%
+        {/* Heatmap Section - ALWAYS SHOW */}
+        <div className="glass-card p-6 mb-6">
+          <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+            <Flame className="text-primary-400" size={24} />
+            🎯 Wurf-Heatmap
+          </h2>
+          
+          {heatmapData && heatmapData.totalDarts > 0 ? (
+            <>
+              {/* Accuracy Stats */}
+              {accuracyStats && (
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                  <div className="bg-dark-900 rounded-lg p-3 text-center">
+                    <div className="text-sm text-dark-400 mb-1">Miss Rate</div>
+                    <div className="text-xl font-bold text-error-400">
+                      {accuracyStats.missRate.toFixed(1)}%
+                    </div>
+                  </div>
+                  <div className="bg-dark-900 rounded-lg p-3 text-center">
+                    <div className="text-sm text-dark-400 mb-1">Triple Rate</div>
+                    <div className="text-xl font-bold text-success-400">
+                      {accuracyStats.tripleRate.toFixed(1)}%
+                    </div>
+                  </div>
+                  <div className="bg-dark-900 rounded-lg p-3 text-center">
+                    <div className="text-sm text-dark-400 mb-1">Double Rate</div>
+                    <div className="text-xl font-bold text-primary-400">
+                      {accuracyStats.doubleRate.toFixed(1)}%
+                    </div>
+                  </div>
+                  <div className="bg-dark-900 rounded-lg p-3 text-center">
+                    <div className="text-sm text-dark-400 mb-1">Lieblings-Feld</div>
+                    <div className="text-xl font-bold text-amber-400">
+                      {accuracyStats.favoriteSegment || '-'}
+                    </div>
+                  </div>
+                  <div className="bg-dark-900 rounded-lg p-3 text-center">
+                    <div className="text-sm text-dark-400 mb-1">Total Darts</div>
+                    <div className="text-xl font-bold text-white">
+                      {heatmapData.totalDarts}
+                    </div>
                   </div>
                 </div>
-                <div className="bg-dark-900 rounded-lg p-3 text-center">
-                  <div className="text-sm text-dark-400 mb-1">Triple Rate</div>
-                  <div className="text-xl font-bold text-success-400">
-                    {accuracyStats.tripleRate.toFixed(1)}%
-                  </div>
+              )}
+
+              <DartboardHeatmap heatmapData={heatmapData} size={450} />
+            </>
+          ) : (
+            <div className="bg-dark-900 rounded-lg p-8 text-center border-2 border-dashed border-dark-700">
+              <div className="text-6xl mb-4">🎯</div>
+              <h3 className="text-xl font-bold text-white mb-2">Noch keine Wurf-Daten</h3>
+              <p className="text-dark-300 mb-4">
+                Spiele ein Match, um deine Wurf-Heatmap zu sehen!
+              </p>
+              <p className="text-dark-400 text-sm">
+                Die Heatmap zeigt dir, wo du am häufigsten triffst:
+              </p>
+              <div className="flex items-center justify-center gap-4 mt-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded bg-red-500"></div>
+                  <span className="text-dark-300">Hot-Zones (oft getroffen)</span>
                 </div>
-                <div className="bg-dark-900 rounded-lg p-3 text-center">
-                  <div className="text-sm text-dark-400 mb-1">Double Rate</div>
-                  <div className="text-xl font-bold text-primary-400">
-                    {accuracyStats.doubleRate.toFixed(1)}%
-                  </div>
-                </div>
-                <div className="bg-dark-900 rounded-lg p-3 text-center">
-                  <div className="text-sm text-dark-400 mb-1">Lieblings-Feld</div>
-                  <div className="text-xl font-bold text-amber-400">
-                    {accuracyStats.favoriteSegment || '-'}
-                  </div>
-                </div>
-                <div className="bg-dark-900 rounded-lg p-3 text-center">
-                  <div className="text-sm text-dark-400 mb-1">Total Darts</div>
-                  <div className="text-xl font-bold text-white">
-                    {heatmapData.totalDarts}
-                  </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded bg-blue-500"></div>
+                  <span className="text-dark-300">Cold-Zones (selten getroffen)</span>
                 </div>
               </div>
-            )}
-
-            <DartboardHeatmap heatmapData={heatmapData} size={450} />
-          </div>
-        )}
+            </div>
+          )}
+        </div>
 
         {/* Recent Achievements */}
         {achievements.length > 0 && (
