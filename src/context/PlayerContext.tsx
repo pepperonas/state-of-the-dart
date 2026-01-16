@@ -2,14 +2,17 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { v4 as uuidv4 } from 'uuid';
 import { Player, PlayerStats, PlayerPreferences, HeatmapData, Dart } from '../types/index';
 import { useTenant } from './TenantContext';
+import { useAuth } from './AuthContext';
 import { createEmptyHeatmapData, updateHeatmapData } from '../utils/heatmap';
+import { api } from '../services/api';
 
 interface PlayerContextType {
   players: Player[];
   currentPlayer: Player | null;
-  addPlayer: (name: string, avatar?: string) => Player;
-  updatePlayer: (id: string, updates: Partial<Player>) => void;
-  deletePlayer: (id: string) => void;
+  loading: boolean;
+  addPlayer: (name: string, avatar?: string) => Promise<Player>;
+  updatePlayer: (id: string, updates: Partial<Player>) => Promise<void>;
+  deletePlayer: (id: string) => Promise<void>;
   setCurrentPlayer: (player: Player | null) => void;
   getPlayer: (id: string) => Player | undefined;
   getPlayerHeatmap: (playerId: string) => HeatmapData;
@@ -55,50 +58,56 @@ const reviveDates = (player: Player): Player => {
 
 export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { storage } = useTenant();
+  const { user } = useAuth();
   
-  const [players, setPlayers] = useState<Player[]>(() => {
-    if (!storage) return [];
-    const saved = storage.get<any[]>('players', []);
-    return saved.map(reviveDates);
-  });
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
+  const [loading, setLoading] = useState(true);
   
-  const [currentPlayer, setCurrentPlayer] = useState<Player | null>(() => {
-    if (!storage) return null;
-    const saved = storage.get<any>('currentPlayer', null);
-    return saved ? reviveDates(saved) : null;
-  });
-  
-  // Reload players when tenant changes
+  // Load players from API when user is authenticated
   useEffect(() => {
-    if (storage) {
-      const saved = storage.get<any[]>('players', []);
-      setPlayers(saved.map(reviveDates));
-      
-      const savedCurrent = storage.get<any>('currentPlayer', null);
-      setCurrentPlayer(savedCurrent ? reviveDates(savedCurrent) : null);
-    } else {
-      setPlayers([]);
-      setCurrentPlayer(null);
-    }
-  }, [storage]);
+    const loadPlayers = async () => {
+      if (!user) {
+        setPlayers([]);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const response = await api.players.getAll();
+        const loadedPlayers = response.players.map(reviveDates);
+        setPlayers(loadedPlayers);
+        
+        // Restore current player from localStorage (UI state only)
+        if (storage) {
+          const savedCurrentId = storage.get<string>('currentPlayerId', '');
+          const current = loadedPlayers.find((p: Player) => p.id === savedCurrentId);
+          setCurrentPlayer(current || null);
+        }
+      } catch (error) {
+        console.error('Failed to load players:', error);
+        setPlayers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPlayers();
+  }, [user, storage]);
   
-  useEffect(() => {
-    if (storage) {
-      storage.set('players', players);
-    }
-  }, [players, storage]);
-  
+  // Save current player ID to localStorage (UI state only)
   useEffect(() => {
     if (storage) {
       if (currentPlayer) {
-        storage.set('currentPlayer', currentPlayer);
+        storage.set('currentPlayerId', currentPlayer.id);
       } else {
-        storage.remove('currentPlayer');
+        storage.remove('currentPlayerId');
       }
     }
   }, [currentPlayer, storage]);
   
-  const addPlayer = (name: string, avatar?: string): Player => {
+  const addPlayer = async (name: string, avatar?: string): Promise<Player> => {
     const newPlayer: Player = {
       id: uuidv4(),
       name,
@@ -108,25 +117,46 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       preferences: createDefaultPreferences(),
     };
     
-    setPlayers(prev => [...prev, newPlayer]);
-    return newPlayer;
-  };
-  
-  const updatePlayer = (id: string, updates: Partial<Player>) => {
-    setPlayers(prev => prev.map(player => 
-      player.id === id ? { ...player, ...updates } : player
-    ));
-    
-    if (currentPlayer?.id === id) {
-      setCurrentPlayer({ ...currentPlayer, ...updates });
+    try {
+      const response = await api.players.create(newPlayer);
+      const createdPlayer = reviveDates(response.player);
+      setPlayers(prev => [...prev, createdPlayer]);
+      return createdPlayer;
+    } catch (error) {
+      console.error('Failed to create player:', error);
+      throw error;
     }
   };
   
-  const deletePlayer = (id: string) => {
-    setPlayers(prev => prev.filter(player => player.id !== id));
-    
-    if (currentPlayer?.id === id) {
-      setCurrentPlayer(null);
+  const updatePlayer = async (id: string, updates: Partial<Player>) => {
+    try {
+      await api.players.update(id, updates);
+      
+      setPlayers(prev => prev.map(player => 
+        player.id === id ? { ...player, ...updates } : player
+      ));
+      
+      if (currentPlayer?.id === id) {
+        setCurrentPlayer({ ...currentPlayer, ...updates });
+      }
+    } catch (error) {
+      console.error('Failed to update player:', error);
+      throw error;
+    }
+  };
+  
+  const deletePlayer = async (id: string) => {
+    try {
+      await api.players.delete(id);
+      
+      setPlayers(prev => prev.filter(player => player.id !== id));
+      
+      if (currentPlayer?.id === id) {
+        setCurrentPlayer(null);
+      }
+    } catch (error) {
+      console.error('Failed to delete player:', error);
+      throw error;
     }
   };
   
@@ -165,6 +195,7 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     <PlayerContext.Provider value={{
       players,
       currentPlayer,
+      loading,
       addPlayer,
       updatePlayer,
       deletePlayer,

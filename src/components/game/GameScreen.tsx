@@ -158,17 +158,24 @@ const GameScreen: React.FC = () => {
     }
   }, [state.currentMatch]);
   
-  const handleStartGame = () => {
+  const handleStartGame = async () => {
     // Play a start sound to unlock audio system
     audioSystem.playSound('/sounds/effects/get_ready.mp3', true);
     
+    let finalPlayers = selectedPlayers;
+    
     if (selectedPlayers.length < 2) {
       // Add a guest player if only one selected
-      const guestPlayer = addPlayer(`Guest ${Date.now() % 1000}`, '👤');
-      setSelectedPlayers([...selectedPlayers, guestPlayer]);
+      try {
+        const guestPlayer = await addPlayer(`Guest ${Date.now() % 1000}`, '👤');
+        finalPlayers = [...selectedPlayers, guestPlayer];
+        setSelectedPlayers(finalPlayers);
+      } catch (error) {
+        console.error('Failed to create guest player:', error);
+        alert('Fehler beim Erstellen eines Gastspielers');
+        return;
+      }
     }
-    
-    const finalPlayers = selectedPlayers.length >= 2 ? selectedPlayers : [...selectedPlayers, addPlayer('Guest', '👤')];
     
     // Save last players for quick select
     saveLastPlayers(finalPlayers.map(p => p.id));
@@ -393,13 +400,18 @@ const GameScreen: React.FC = () => {
                         type="text"
                         value={newPlayerName}
                         onChange={(e) => setNewPlayerName(e.target.value)}
-                        onKeyPress={(e) => {
+                        onKeyPress={async (e) => {
                           if (e.key === 'Enter' && newPlayerName.trim()) {
-                            const newPlayer = addPlayer(newPlayerName.trim(), newPlayerAvatar);
-                            setSelectedPlayers([...selectedPlayers, newPlayer]);
-                            setNewPlayerName('');
-                            setNewPlayerAvatar('🎯');
-                            setShowPlayerNameInput(false);
+                            try {
+                              const newPlayer = await addPlayer(newPlayerName.trim(), newPlayerAvatar);
+                              setSelectedPlayers([...selectedPlayers, newPlayer]);
+                              setNewPlayerName('');
+                              setNewPlayerAvatar('🎯');
+                              setShowPlayerNameInput(false);
+                            } catch (error) {
+                              console.error('Failed to add player:', error);
+                              alert('Fehler beim Erstellen des Spielers');
+                            }
                           }
                         }}
                         placeholder="Player name..."
@@ -408,13 +420,18 @@ const GameScreen: React.FC = () => {
                       />
                       <div className="flex gap-2">
                         <button
-                          onClick={() => {
+                          onClick={async () => {
                             if (newPlayerName.trim()) {
-                              const newPlayer = addPlayer(newPlayerName.trim(), newPlayerAvatar);
-                              setSelectedPlayers([...selectedPlayers, newPlayer]);
-                              setNewPlayerName('');
-                              setNewPlayerAvatar('🎯');
-                              setShowPlayerNameInput(false);
+                              try {
+                                const newPlayer = await addPlayer(newPlayerName.trim(), newPlayerAvatar);
+                                setSelectedPlayers([...selectedPlayers, newPlayer]);
+                                setNewPlayerName('');
+                                setNewPlayerAvatar('🎯');
+                                setShowPlayerNameInput(false);
+                              } catch (error) {
+                                console.error('Failed to add player:', error);
+                                alert('Fehler beim Erstellen des Spielers');
+                              }
                             }
                           }}
                           disabled={!newPlayerName.trim()}

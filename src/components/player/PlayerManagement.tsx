@@ -11,19 +11,29 @@ const PlayerManagement: React.FC = () => {
   const [editingPlayer, setEditingPlayer] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   
-  const handleAddPlayer = () => {
+  const handleAddPlayer = async () => {
     if (newPlayerName.trim()) {
-      addPlayer(newPlayerName.trim());
-      setNewPlayerName('');
-      setShowAddPlayer(false);
+      try {
+        await addPlayer(newPlayerName.trim());
+        setNewPlayerName('');
+        setShowAddPlayer(false);
+      } catch (error) {
+        console.error('Failed to add player:', error);
+        alert('Fehler beim Erstellen des Spielers');
+      }
     }
   };
   
-  const handleEditPlayer = (id: string) => {
+  const handleEditPlayer = async (id: string) => {
     if (editName.trim()) {
-      updatePlayer(id, { name: editName.trim() });
-      setEditingPlayer(null);
-      setEditName('');
+      try {
+        await updatePlayer(id, { name: editName.trim() });
+        setEditingPlayer(null);
+        setEditName('');
+      } catch (error) {
+        console.error('Failed to update player:', error);
+        alert('Fehler beim Aktualisieren des Spielers');
+      }
     }
   };
   
@@ -143,9 +153,14 @@ const PlayerManagement: React.FC = () => {
                       <Edit2 size={18} />
                     </button>
                     <button
-                      onClick={() => {
+                      onClick={async () => {
                         if (confirm(`Delete player "${player.name}"?`)) {
-                          deletePlayer(player.id);
+                          try {
+                            await deletePlayer(player.id);
+                          } catch (error) {
+                            console.error('Failed to delete player:', error);
+                            alert('Fehler beim Löschen des Spielers');
+                          }
                         }
                       }}
                       className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
