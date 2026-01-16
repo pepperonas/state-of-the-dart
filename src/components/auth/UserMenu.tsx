@@ -106,9 +106,9 @@ const UserMenu: React.FC = () => {
 
               <button
                 onClick={handleLogout}
-                className="w-full px-4 py-2 text-left flex items-center gap-2 text-white bg-red-600 hover:bg-red-700 transition-colors font-semibold"
+                className="w-full mx-2 mb-2 px-4 py-3 flex items-center justify-center gap-3 text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 rounded-lg font-bold text-sm shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
               >
-                <LogOut size={18} />
+                <LogOut size={20} className="flex-shrink-0" />
                 Abmelden
               </button>
             </div>
