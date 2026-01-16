@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Activity, TrendingUp, TrendingDown, Minus, Download, Users } from 'lucide-react';
 import { usePlayer } from '../../context/PlayerContext';
@@ -9,10 +9,15 @@ import {
   AreaChart, Area, ComposedChart
 } from 'recharts';
 import MatchHistory from './MatchHistory';
-import { calculateImprovement, exportMatchHistoryCSV } from '../../utils/exportImport';
+import { 
+  calculateImprovement, 
+  exportMatchHistoryCSV,
+  exportMatchHistoryExcel,
+  exportMatchHistoryPDF 
+} from '../../utils/exportImport';
 import { Match } from '../../types';
 import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
-import { Flame } from 'lucide-react';
+import { Flame, FileSpreadsheet, FileText } from 'lucide-react';
 
 const StatsOverview: React.FC = () => {
   const navigate = useNavigate();
@@ -21,6 +26,8 @@ const StatsOverview: React.FC = () => {
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
   const [selectedTab, setSelectedTab] = useState<'overview' | 'progress' | 'history' | 'compare' | 'heatmap'>('overview');
   const [comparePlayerIds, setComparePlayerIds] = useState<string[]>([]);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
   
   // Load matches from storage
   const matches: Match[] = useMemo(() => {
@@ -34,6 +41,20 @@ const StatsOverview: React.FC = () => {
       setSelectedPlayerId(players[0].id);
     }
   }, [players, selectedPlayerId]);
+  
+  // Close export menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
+        setShowExportMenu(false);
+      }
+    };
+    
+    if (showExportMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showExportMenu]);
   
   const selectedPlayer = players.find(p => p.id === selectedPlayerId);
   
@@ -160,6 +181,19 @@ const StatsOverview: React.FC = () => {
   const handleExportCSV = () => {
     if (!selectedPlayer) return;
     exportMatchHistoryCSV(playerMatches, selectedPlayer.name);
+    setShowExportMenu(false);
+  };
+  
+  const handleExportExcel = () => {
+    if (!selectedPlayer) return;
+    exportMatchHistoryExcel(playerMatches, selectedPlayer.name);
+    setShowExportMenu(false);
+  };
+  
+  const handleExportPDF = () => {
+    if (!selectedPlayer) return;
+    exportMatchHistoryPDF(playerMatches, selectedPlayer.name);
+    setShowExportMenu(false);
   };
   
   if (players.length === 0) {
@@ -207,13 +241,41 @@ const StatsOverview: React.FC = () => {
             Back
           </button>
           
-          <button
-            onClick={handleExportCSV}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all font-semibold"
-          >
-            <Download size={18} />
-            Export CSV
-          </button>
+          <div ref={exportMenuRef} className="relative">
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all font-semibold"
+            >
+              <Download size={18} />
+              Export
+            </button>
+            
+            {showExportMenu && (
+              <div className="absolute right-0 mt-2 w-48 glass-card rounded-lg shadow-xl z-50 overflow-hidden">
+                <button
+                  onClick={handleExportCSV}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors text-left"
+                >
+                  <FileText size={18} />
+                  <span>CSV Export</span>
+                </button>
+                <button
+                  onClick={handleExportExcel}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors text-left"
+                >
+                  <FileSpreadsheet size={18} />
+                  <span>Excel Export</span>
+                </button>
+                <button
+                  onClick={handleExportPDF}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors text-left"
+                >
+                  <FileText size={18} />
+                  <span>PDF Export</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Player Selector */}

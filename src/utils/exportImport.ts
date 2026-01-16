@@ -2,6 +2,9 @@
 
 import { TenantStorage } from './storage';
 import { ExportData } from '../types';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 /**
  * Export all data for the current tenant to a JSON file
@@ -181,6 +184,208 @@ export const exportMatchHistoryCSV = (matches: any[], playerName: string): void 
   } catch (error) {
     console.error('❌ CSV export failed:', error);
     throw new Error('Failed to export match history');
+  }
+};
+
+/**
+ * Export match history to Excel
+ */
+export const exportMatchHistoryExcel = (matches: any[], playerName: string): void => {
+  try {
+    // Prepare data
+    const headers = [
+      'Date',
+      'Player',
+      'Opponent',
+      'Result',
+      'Score',
+      'Average',
+      'Highest Score',
+      '180s',
+      '140+',
+      '100+',
+      'Checkout %',
+      'Legs Won',
+      'Legs Lost'
+    ];
+    
+    const rows = matches.map(match => {
+      const player = match.players.find((p: any) => p.name === playerName);
+      const opponent = match.players.find((p: any) => p.name !== playerName);
+      
+      return [
+        new Date(match.startedAt).toLocaleDateString(),
+        player?.name || '-',
+        opponent?.name || '-',
+        match.winner === player?.playerId ? 'Win' : 'Loss',
+        `${player?.legsWon || 0} - ${opponent?.legsWon || 0}`,
+        parseFloat(player?.matchAverage.toFixed(2) || '0'),
+        player?.matchHighestScore || 0,
+        player?.match180s || 0,
+        player?.match140Plus || 0,
+        player?.match100Plus || 0,
+        player?.checkoutAttempts > 0 
+          ? parseFloat(((player?.checkoutsHit / player?.checkoutAttempts) * 100).toFixed(1))
+          : 0,
+        player?.legsWon || 0,
+        opponent?.legsWon || 0,
+      ];
+    });
+    
+    // Create worksheet
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    
+    // Set column widths
+    ws['!cols'] = [
+      { wch: 12 }, // Date
+      { wch: 15 }, // Player
+      { wch: 15 }, // Opponent
+      { wch: 8 },  // Result
+      { wch: 10 }, // Score
+      { wch: 10 }, // Average
+      { wch: 14 }, // Highest Score
+      { wch: 8 },  // 180s
+      { wch: 8 },  // 140+
+      { wch: 8 },  // 100+
+      { wch: 12 }, // Checkout %
+      { wch: 10 }, // Legs Won
+      { wch: 10 }, // Legs Lost
+    ];
+    
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Match History');
+    
+    // Add summary sheet
+    const totalMatches = matches.length;
+    const wins = matches.filter(m => {
+      const player = m.players.find((p: any) => p.name === playerName);
+      return m.winner === player?.playerId;
+    }).length;
+    const losses = totalMatches - wins;
+    const winRate = totalMatches > 0 ? ((wins / totalMatches) * 100).toFixed(1) : '0';
+    
+    const avgAverage = matches.length > 0
+      ? (matches.reduce((sum, m) => {
+          const player = m.players.find((p: any) => p.name === playerName);
+          return sum + (player?.matchAverage || 0);
+        }, 0) / matches.length).toFixed(2)
+      : '0.00';
+    
+    const total180s = matches.reduce((sum, m) => {
+      const player = m.players.find((p: any) => p.name === playerName);
+      return sum + (player?.match180s || 0);
+    }, 0);
+    
+    const summaryData = [
+      ['Player Summary', ''],
+      ['Player Name', playerName],
+      ['Total Matches', totalMatches],
+      ['Wins', wins],
+      ['Losses', losses],
+      ['Win Rate', `${winRate}%`],
+      ['Average (Avg)', avgAverage],
+      ['Total 180s', total180s],
+      ['Export Date', new Date().toLocaleDateString()],
+    ];
+    
+    const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+    wsSummary['!cols'] = [{ wch: 20 }, { wch: 15 }];
+    XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
+    
+    // Download
+    XLSX.writeFile(wb, `match-history-${playerName}-${new Date().toISOString().split('T')[0]}.xlsx`);
+    
+    console.log('✅ Match history exported as Excel');
+  } catch (error) {
+    console.error('❌ Excel export failed:', error);
+    throw new Error('Failed to export match history to Excel');
+  }
+};
+
+/**
+ * Export match history to PDF
+ */
+export const exportMatchHistoryPDF = (matches: any[], playerName: string): void => {
+  try {
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(20);
+    doc.text('Match History Report', 14, 20);
+    
+    // Add player info
+    doc.setFontSize(12);
+    doc.text(`Player: ${playerName}`, 14, 30);
+    doc.text(`Export Date: ${new Date().toLocaleDateString()}`, 14, 37);
+    doc.text(`Total Matches: ${matches.length}`, 14, 44);
+    
+    // Calculate summary stats
+    const wins = matches.filter(m => {
+      const player = m.players.find((p: any) => p.name === playerName);
+      return m.winner === player?.playerId;
+    }).length;
+    const winRate = matches.length > 0 ? ((wins / matches.length) * 100).toFixed(1) : '0';
+    
+    doc.text(`Win Rate: ${winRate}%`, 14, 51);
+    
+    // Prepare table data
+    const tableData = matches.map(match => {
+      const player = match.players.find((p: any) => p.name === playerName);
+      const opponent = match.players.find((p: any) => p.name !== playerName);
+      
+      return [
+        new Date(match.startedAt).toLocaleDateString(),
+        opponent?.name || '-',
+        match.winner === player?.playerId ? 'W' : 'L',
+        `${player?.legsWon || 0}-${opponent?.legsWon || 0}`,
+        player?.matchAverage.toFixed(1) || '0',
+        player?.match180s || '0',
+        player?.checkoutAttempts > 0 
+          ? ((player?.checkoutsHit / player?.checkoutAttempts) * 100).toFixed(0) + '%'
+          : '0%',
+      ];
+    });
+    
+    // Add table
+    autoTable(doc, {
+      startY: 60,
+      head: [['Date', 'Opponent', 'W/L', 'Score', 'Avg', '180s', 'CO%']],
+      body: tableData,
+      theme: 'striped',
+      headStyles: { fillColor: [59, 130, 246] }, // Primary blue
+      styles: { fontSize: 9 },
+      columnStyles: {
+        0: { cellWidth: 25 },
+        1: { cellWidth: 40 },
+        2: { cellWidth: 15, halign: 'center' },
+        3: { cellWidth: 20, halign: 'center' },
+        4: { cellWidth: 20, halign: 'right' },
+        5: { cellWidth: 20, halign: 'center' },
+        6: { cellWidth: 20, halign: 'right' },
+      },
+    });
+    
+    // Add footer
+    const pageCount = (doc as any).internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.text(
+        `Page ${i} of ${pageCount} | State of the Dart`,
+        doc.internal.pageSize.getWidth() / 2,
+        doc.internal.pageSize.getHeight() - 10,
+        { align: 'center' }
+      );
+    }
+    
+    // Save
+    doc.save(`match-history-${playerName}-${new Date().toISOString().split('T')[0]}.pdf`);
+    
+    console.log('✅ Match history exported as PDF');
+  } catch (error) {
+    console.error('❌ PDF export failed:', error);
+    throw new Error('Failed to export match history to PDF');
   }
 };
 
