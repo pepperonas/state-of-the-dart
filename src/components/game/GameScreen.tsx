@@ -597,6 +597,16 @@ const GameScreen: React.FC = () => {
     );
   }
   
+  // Show spinner wheel if determining starting player
+  if (showSpinner && pendingGameStart) {
+    return (
+      <SpinnerWheel
+        players={pendingGameStart.players}
+        onComplete={handleSpinnerComplete}
+      />
+    );
+  }
+
   if (!state.currentMatch) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -912,14 +922,7 @@ const GameScreen: React.FC = () => {
         </div>
       )}
 
-      {/* Spinner Wheel for determining starting player */}
-      {showSpinner && pendingGameStart && (
-        <SpinnerWheel
-          players={pendingGameStart.players}
-          onComplete={handleSpinnerComplete}
-        />
-      )}
-    </div>
+          </div>
   );
 };
 

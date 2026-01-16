@@ -284,11 +284,18 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
           };
           updatedMatch.legs.push(newLeg);
           updatedMatch.currentLegIndex = updatedMatch.legs.length - 1;
-          
-          // Announce leg win and new leg starting
+
+          // Announce which leg was won (e.g. "Leg 1", "Leg 2", etc.)
+          const legNumber = currentPlayer.legsWon;
           setTimeout(() => {
-            audioSystem.announceScore(0); // or a specific "new leg" sound
-          }, 2000);
+            // Play "leg" then the number
+            audioSystem.playSound('/sounds/texts/leg.mp3', true);
+            setTimeout(() => {
+              if (legNumber >= 1 && legNumber <= 30) {
+                audioSystem.playSound(`/sounds/texts/${legNumber}.mp3`, false);
+              }
+            }, 600);
+          }, 1500);
           
           // Reset to first player for new leg
           return {
