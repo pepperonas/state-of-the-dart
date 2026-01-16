@@ -331,8 +331,10 @@ export interface AppState {
   settings: AppSettings;
 }
 
+export type AppTheme = 'modern' | 'steampunk' | 'dark'; // 'dark' is deprecated, maps to 'modern'
+
 export interface AppSettings {
-  theme: 'light' | 'dark' | 'auto';
+  theme: AppTheme;
   language: 'de' | 'en';
   soundVolume: number; // Deprecated: kept for backward compatibility
   callerVolume?: number; // Volume for caller sounds (scores, checkouts)

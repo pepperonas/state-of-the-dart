@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Moon, Sun, Volume2, Bell, Globe, LogOut, User, Play, Download, Upload, Smartphone } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, Volume2, Bell, Globe, LogOut, User, Play, Download, Upload, Smartphone, Palette, Check, Sparkles } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import { useTenant } from '../context/TenantContext';
 import audioSystem from '../utils/audio';
@@ -187,27 +187,70 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               </div>
             )}
             
-            {/* Theme */}
+            {/* Theme Selection */}
             <div className="pb-6 border-b border-dark-700">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
-                {darkMode ? <Moon size={20} /> : <Sun size={20} />}
-                Appearance
+                <Palette size={20} />
+                Theme / Aussehen
               </h3>
               
-              <div className="flex items-center justify-between">
-                <span className="text-dark-300">Dark Mode</span>
+              <div className="space-y-3">
+                {/* Modern Theme */}
                 <button
-                  onClick={() => setDarkMode(!darkMode)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    darkMode ? 'bg-success-500' : 'bg-dark-600'
+                  onClick={() => updateSettings({ theme: 'modern' })}
+                  className={`w-full p-4 rounded-lg border-2 transition-all ${
+                    settings.theme === 'modern' 
+                      ? 'border-primary-500 bg-primary-500/10' 
+                      : 'border-dark-700 bg-dark-800 hover:border-dark-600'
                   }`}
                 >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      darkMode ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-gray-900 to-gray-800 border border-primary-500/30 flex items-center justify-center">
+                      <Moon size={24} className="text-primary-400" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <p className="text-white font-semibold">Modern Minimalist</p>
+                      <p className="text-sm text-dark-300">Clean, dark & professional</p>
+                    </div>
+                    {settings.theme === 'modern' && (
+                      <div className="w-6 h-6 rounded-full bg-primary-500 flex items-center justify-center">
+                        <Check size={16} className="text-white" />
+                      </div>
+                    )}
+                  </div>
                 </button>
+
+                {/* Steampunk Theme */}
+                <button
+                  onClick={() => updateSettings({ theme: 'steampunk' })}
+                  className={`w-full p-4 rounded-lg border-2 transition-all ${
+                    settings.theme === 'steampunk' 
+                      ? 'border-amber-600 bg-amber-600/10' 
+                      : 'border-dark-700 bg-dark-800 hover:border-dark-600'
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-lg sp-bronze-gradient border border-amber-700/50 flex items-center justify-center relative overflow-hidden">
+                      <span className="text-2xl">⚙️</span>
+                    </div>
+                    <div className="flex-1 text-left">
+                      <p className="text-white font-semibold">Victorian Steampunk</p>
+                      <p className="text-sm text-dark-300">Bronze, brass & gears</p>
+                    </div>
+                    {settings.theme === 'steampunk' && (
+                      <div className="w-6 h-6 rounded-full bg-amber-600 flex items-center justify-center">
+                        <Check size={16} className="text-white" />
+                      </div>
+                    )}
+                  </div>
+                </button>
+                
+                <div className="mt-3 p-3 bg-primary-500/10 rounded-lg border border-primary-500/30">
+                  <p className="text-xs text-primary-300 flex items-center gap-2">
+                    <Sparkles size={14} />
+                    Das Theme wird sofort auf alle Seiten angewendet
+                  </p>
+                </div>
               </div>
             </div>
             

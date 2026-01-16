@@ -9,6 +9,7 @@ import { AchievementProvider } from './context/AchievementContext';
 import MainMenu from './components/MainMenu';
 import AchievementNotification from './components/achievements/AchievementNotification';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import ThemeManager from './components/ThemeManager';
 import './index.css';
 
 // Auth components (not lazy - need immediate load)
@@ -99,6 +100,7 @@ function AppContent() {
       <AuthProvider>
         <TenantProvider>
           <SettingsProvider>
+            <ThemeManager />
             <PlayerProvider>
               <AchievementProvider>
                 <GameProvider>

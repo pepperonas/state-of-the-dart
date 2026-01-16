@@ -9,7 +9,7 @@ interface SettingsContextType {
 }
 
 const defaultSettings: AppSettings = {
-  theme: 'auto',
+  theme: 'modern',
   language: 'en',
   soundVolume: 70,
   callerVolume: 70,
@@ -22,6 +22,13 @@ const defaultSettings: AppSettings = {
   showDartboardHelper: true,
 };
 
+// Normalize legacy theme values
+const normalizeTheme = (theme: any): 'modern' | 'steampunk' => {
+  if (theme === 'steampunk') return 'steampunk';
+  // Map 'dark', 'auto', 'light' to 'modern'
+  return 'modern';
+};
+
 const SettingsContext = createContext<SettingsContextType | null>(null);
 
 export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -30,14 +37,20 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
   const [settings, setSettings] = useState<AppSettings>(() => {
     if (!storage) return defaultSettings;
     const saved = storage.get<Partial<AppSettings>>('settings', {});
-    return { ...defaultSettings, ...saved };
+    const normalized = { ...defaultSettings, ...saved };
+    // Normalize theme
+    normalized.theme = normalizeTheme(normalized.theme);
+    return normalized;
   });
   
   // Reload settings when tenant changes
   useEffect(() => {
     if (storage) {
       const saved = storage.get<Partial<AppSettings>>('settings', {});
-      setSettings({ ...defaultSettings, ...saved });
+      const normalized = { ...defaultSettings, ...saved };
+      // Normalize theme
+      normalized.theme = normalizeTheme(normalized.theme);
+      setSettings(normalized);
     } else {
       setSettings(defaultSettings);
     }
