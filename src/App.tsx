@@ -1,12 +1,11 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import { TenantProvider, useTenant } from './context/TenantContext';
+import { TenantProvider } from './context/TenantContext';
 import { GameProvider } from './context/GameContext';
 import { PlayerProvider } from './context/PlayerContext';
 import { SettingsProvider } from './context/SettingsContext';
 import { AchievementProvider } from './context/AchievementContext';
-import TenantSelector from './components/TenantSelector';
 import MainMenu from './components/MainMenu';
 import AchievementNotification from './components/achievements/AchievementNotification';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -58,6 +57,25 @@ function AppContent() {
     if (saved !== null) return saved === 'true';
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
+
+  // Clear old tenant data on first load with new auth system
+  useEffect(() => {
+    const hasAuthSystem = localStorage.getItem('auth_token');
+    const hasOldTenantData = localStorage.getItem('currentTenant');
+    
+    // If no auth token but has old tenant data, clear it
+    if (!hasAuthSystem && hasOldTenantData) {
+      console.log('🔄 Migrating to new authentication system...');
+      // Keep only essential data
+      const darkModeSetting = localStorage.getItem('darkMode');
+      // Clear everything else
+      localStorage.clear();
+      // Restore dark mode
+      if (darkModeSetting) {
+        localStorage.setItem('darkMode', darkModeSetting);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (darkMode) {
