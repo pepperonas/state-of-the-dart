@@ -447,24 +447,38 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [state, dispatch] = useReducer(gameReducer, initialState);
   
+  // Helper: Transform match for API (maps frontend format to API format)
+  const transformMatchForApi = (match: Match) => ({
+    id: match.id,
+    gameType: match.type, // API expects 'gameType', frontend uses 'type'
+    status: match.status,
+    players: match.players,
+    settings: match.settings,
+    startedAt: match.startedAt ? new Date(match.startedAt).getTime() : Date.now(),
+    completedAt: match.completedAt ? new Date(match.completedAt).getTime() : undefined,
+    winner: match.winner,
+    legs: match.legs,
+  });
+
   // Load match from storage when tenant changes
   // Save game state to API with debouncing (during active game)
   useEffect(() => {
     if (state.currentMatch && state.currentMatch.status === 'in-progress') {
       const saveTimer = setTimeout(async () => {
+        const apiMatch = transformMatchForApi(state.currentMatch!);
         try {
           // Try updating existing match
-          await api.matches.update(state.currentMatch!.id, state.currentMatch);
+          await api.matches.update(state.currentMatch!.id, apiMatch);
         } catch (error) {
           // If update fails, try creating it
           try {
-            await api.matches.create(state.currentMatch);
+            await api.matches.create(apiMatch);
           } catch (createError) {
             console.error('Failed to save match:', createError);
           }
         }
       }, 2000); // Debounce: Save every 2 seconds
-      
+
       return () => clearTimeout(saveTimer);
     }
   }, [state.currentMatch]);
@@ -478,7 +492,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     // Save completed match to database
     if (shouldSaveMatch) {
-      api.matches.create(state.currentMatch!)
+      const apiMatch = transformMatchForApi(state.currentMatch!);
+      api.matches.create(apiMatch)
         .then(() => console.log('✅ Match saved to database'))
         .catch((err: Error) => console.error('❌ Failed to save match:', err));
     }
