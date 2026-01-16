@@ -179,6 +179,7 @@ router.post('/login', async (req, res) => {
                 email: user.email,
                 name: user.name,
                 avatar: user.avatar,
+                emailVerified: user.email_verified === 1,
                 isAdmin: user.is_admin === 1,
                 subscriptionStatus: user.subscription_status,
                 trialEndsAt: user.trial_ends_at,

@@ -39,7 +39,6 @@ router.get('/', auth_1.authenticateTenant, (req, res) => {
 router.put('/', auth_1.authenticateTenant, (req, res) => {
     const db = (0, database_1.getDatabase)();
     const settings = req.body;
-    console.log('PUT /settings - tenantId:', req.tenantId);
     try {
         // Upsert settings
         const stmt = db.prepare(`
