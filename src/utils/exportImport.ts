@@ -140,11 +140,12 @@ export const exportMatchHistoryCSV = (matches: any[], playerName: string): void 
     
     // CSV Rows
     const rows = matches.map(match => {
-      const player = match.players.find((p: any) => p.name === playerName);
-      const opponent = match.players.find((p: any) => p.name !== playerName);
+      const players = match.players || [];
+      const player = players.find((p: any) => p.name === playerName);
+      const opponent = players.find((p: any) => p.name !== playerName);
       
       return [
-        new Date(match.startedAt).toLocaleDateString(),
+        new Date(match.startedAt || 0).toLocaleDateString(),
         player?.name || '-',
         opponent?.name || '-',
         match.winner === player?.playerId ? 'Win' : 'Loss',
@@ -210,16 +211,17 @@ export const exportMatchHistoryExcel = (matches: any[], playerName: string): voi
     ];
     
     const rows = matches.map(match => {
-      const player = match.players.find((p: any) => p.name === playerName);
-      const opponent = match.players.find((p: any) => p.name !== playerName);
+      const players = match.players || [];
+      const player = players.find((p: any) => p.name === playerName);
+      const opponent = players.find((p: any) => p.name !== playerName);
       
       return [
-        new Date(match.startedAt).toLocaleDateString(),
+        new Date(match.startedAt || 0).toLocaleDateString(),
         player?.name || '-',
         opponent?.name || '-',
         match.winner === player?.playerId ? 'Win' : 'Loss',
         `${player?.legsWon || 0} - ${opponent?.legsWon || 0}`,
-        parseFloat(player?.matchAverage.toFixed(2) || '0'),
+        parseFloat((player?.matchAverage || 0).toFixed(2)),
         player?.matchHighestScore || 0,
         player?.match180s || 0,
         player?.match140Plus || 0,
@@ -259,7 +261,8 @@ export const exportMatchHistoryExcel = (matches: any[], playerName: string): voi
     // Add summary sheet
     const totalMatches = matches.length;
     const wins = matches.filter(m => {
-      const player = m.players.find((p: any) => p.name === playerName);
+      const players = m.players || [];
+      const player = players.find((p: any) => p.name === playerName);
       return m.winner === player?.playerId;
     }).length;
     const losses = totalMatches - wins;
@@ -267,13 +270,15 @@ export const exportMatchHistoryExcel = (matches: any[], playerName: string): voi
     
     const avgAverage = matches.length > 0
       ? (matches.reduce((sum, m) => {
-          const player = m.players.find((p: any) => p.name === playerName);
+          const players = m.players || [];
+          const player = players.find((p: any) => p.name === playerName);
           return sum + (player?.matchAverage || 0);
         }, 0) / matches.length).toFixed(2)
       : '0.00';
     
     const total180s = matches.reduce((sum, m) => {
-      const player = m.players.find((p: any) => p.name === playerName);
+      const players = m.players || [];
+      const player = players.find((p: any) => p.name === playerName);
       return sum + (player?.match180s || 0);
     }, 0);
     
@@ -322,7 +327,8 @@ export const exportMatchHistoryPDF = (matches: any[], playerName: string): void 
     
     // Calculate summary stats
     const wins = matches.filter(m => {
-      const player = m.players.find((p: any) => p.name === playerName);
+      const players = m.players || [];
+      const player = players.find((p: any) => p.name === playerName);
       return m.winner === player?.playerId;
     }).length;
     const winRate = matches.length > 0 ? ((wins / matches.length) * 100).toFixed(1) : '0';
@@ -331,15 +337,16 @@ export const exportMatchHistoryPDF = (matches: any[], playerName: string): void 
     
     // Prepare table data
     const tableData = matches.map(match => {
-      const player = match.players.find((p: any) => p.name === playerName);
-      const opponent = match.players.find((p: any) => p.name !== playerName);
+      const players = match.players || [];
+      const player = players.find((p: any) => p.name === playerName);
+      const opponent = players.find((p: any) => p.name !== playerName);
       
       return [
-        new Date(match.startedAt).toLocaleDateString(),
+        new Date(match.startedAt || 0).toLocaleDateString(),
         opponent?.name || '-',
         match.winner === player?.playerId ? 'W' : 'L',
         `${player?.legsWon || 0}-${opponent?.legsWon || 0}`,
-        player?.matchAverage.toFixed(1) || '0',
+        (player?.matchAverage || 0).toFixed(1),
         player?.match180s || '0',
         player?.checkoutAttempts > 0 
           ? ((player?.checkoutsHit / player?.checkoutAttempts) * 100).toFixed(0) + '%'
@@ -434,32 +441,40 @@ export const calculateImprovement = (matches: any[]): ImprovementMetrics => {
   const recentMatches = sortedMatches.slice(-10);
   const historicMatches = sortedMatches.slice(0, -10);
   
-  const recentAvg = recentMatches.reduce((sum, m) => {
-    const player = m.players[0]; // Assuming first player
-    return sum + (player.matchAverage || 0);
-  }, 0) / recentMatches.length;
+  const recentAvg = recentMatches.length > 0
+    ? recentMatches.reduce((sum, m) => {
+        const players = m.players || [];
+        const player = players[0];
+        return sum + (player?.matchAverage || 0);
+      }, 0) / recentMatches.length
+    : 0;
   
   const historicAvg = historicMatches.length > 0
     ? historicMatches.reduce((sum, m) => {
-        const player = m.players[0];
-        return sum + (player.matchAverage || 0);
+        const players = m.players || [];
+        const player = players[0];
+        return sum + (player?.matchAverage || 0);
       }, 0) / historicMatches.length
     : recentAvg;
   
   const averageImprovement = recentAvg - historicAvg;
   
   // Calculate checkout improvement
-  const recentCheckout = recentMatches.reduce((sum, m) => {
-    const player = m.players[0];
-    return sum + (player.checkoutAttempts > 0 
-      ? (player.checkoutsHit / player.checkoutAttempts) 
-      : 0);
-  }, 0) / recentMatches.length;
+  const recentCheckout = recentMatches.length > 0
+    ? recentMatches.reduce((sum, m) => {
+        const players = m.players || [];
+        const player = players[0];
+        return sum + (player && player.checkoutAttempts > 0 
+          ? (player.checkoutsHit / player.checkoutAttempts) 
+          : 0);
+      }, 0) / recentMatches.length
+    : 0;
   
   const historicCheckout = historicMatches.length > 0
     ? historicMatches.reduce((sum, m) => {
-        const player = m.players[0];
-        return sum + (player.checkoutAttempts > 0 
+        const players = m.players || [];
+        const player = players[0];
+        return sum + (player && player.checkoutAttempts > 0 
           ? (player.checkoutsHit / player.checkoutAttempts) 
           : 0);
       }, 0) / historicMatches.length
@@ -478,7 +493,11 @@ export const calculateImprovement = (matches: any[]): ImprovementMetrics => {
   
   for (let i = 0; i <= sortedMatches.length - 5; i++) {
     const window = sortedMatches.slice(i, i + 5);
-    const windowAvg = window.reduce((sum, m) => sum + m.players[0].matchAverage, 0) / 5;
+    const windowAvg = window.reduce((sum, m) => {
+      const players = m.players || [];
+      const player = players[0];
+      return sum + (player?.matchAverage || 0);
+    }, 0) / 5;
     
     if (windowAvg > bestPeriod.average) {
       bestPeriod = {

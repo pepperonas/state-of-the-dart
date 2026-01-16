@@ -1,206 +1,134 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/),
+und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
-## [0.0.5] - 2026-01-16
+## [0.1.0] - 2026-01-16
 
-### 🔥 L.A. Style Heatmap Revolution
+### ✨ Hinzugefügt
 
-Complete redesign of the dart throw heatmap with professional geographic visualization style.
+#### Multi-Format Export System
+- **CSV Export** - Text-basiertes Format für Excel/Google Sheets
+  - Alle Match-Details in komma-separiertem Format
+  - Kompatibel mit allen Tabellenkalkulations-Programmen
+- **Excel Export (.xlsx)** - Native Excel-Dateien
+  - Match History Sheet mit allen Details
+  - Summary Sheet mit aggregierten Statistiken (Wins, Losses, Win Rate, Average, Total 180s)
+  - Automatische Spaltenbreiten-Anpassung
+  - Professionelles Layout
+- **PDF Export** - Professionelle Reports
+  - Header mit Player-Info und Export-Datum
+  - Formatierte Tabellen mit allen Match-Daten
+  - Automatische Paginierung mit Seitenzahlen
+  - "State of the Dart" Branding im Footer
+- **Modernes Export-Dropdown** - UI-Verbesserungen
+  - Dropdown-Menü statt einzelnem Button
+  - Spezifische Icons für jedes Format (FileText, FileSpreadsheet)
+  - Click-Outside zum Schließen
+  - Smooth Hover-Effekte
 
-### Added
+#### Database-First Architecture
+- **Vollständige Migration** von localStorage zu SQLite-Datenbank
+  - Alle Matches werden direkt aus der API geladen (`api.matches.getAll()`)
+  - Training Sessions aus API (`api.training.getAll()`)
+  - Settings aus API (`api.settings.get()`)
+  - Achievements aus API (`api.achievements.getByPlayer()`)
+- **Batch-Endpoints** für bessere Performance
+  - `/api/players/heatmaps/batch` - Lädt alle Heatmaps in einem Request
+  - Reduziert API-Calls von N auf 1
+- **Konsistente Datenquelle** - Alle Komponenten nutzen jetzt die Datenbank als Single Source of Truth
+  - StatsOverview: Matches aus API
+  - Dashboard: Matches aus API
+  - TrainingStats: Sessions aus API
+  - TrainingScreen: Speichert Sessions via API
 
-#### 🎨 Professional Dartboard Design
-- **Regulation Colors** - Red (#e30613) and Green (#00a651) for Double/Triple rings
-- **Classic Look** - Black (#000000) and White (#f4f1e8) for Singles
-- **Silver Wire Rings** - 6 concentric wire rings (#c0c0c0) like real dartboards
-- **Segment Dividers** - Professional wire lines between all segments
-- **Bold Numbers** - White numbers with text shadow outside the board
-- **Perfect Proportions** - Regulation dartboard dimensions and spacing
+#### Dummy-Player: King Lui
+- **Elite-Spieler** mit extremem Wurfbild
+  - Name: King Lui (KL)
+  - 38 Spiele (32 Wins, 84% Winrate)
+  - Average: 85.7 (Best: 92.5)
+  - 48x 180s
+  - Checkout %: 72.3%
+  - Highest Checkout: nur 14 (D7!)
+- **Extremes Wurfbild** - NUR zwei Felder!
+  - T20: 440 Darts (80%) - Hauptfeld
+  - D7: 110 Darts (20%) - Checkout-Feld
+  - Andere: 0 Darts (0%) - NICHTS!
+- **Einzigartige Heatmap** - Nur zwei massive Hot Spots
+  - T20: Extreme RED HOT ZONE (oben)
+  - D7: HOT ZONE (unten rechts)
+  - Rest: EISKALT (0%)
 
-#### 🌊 Smooth Blur Heatmap (L.A. Style)
-- **Gaussian Blur** - 20px blur for smooth color transitions
-- **6-Step Gradient** - Blue → Cyan → Green → Yellow → Orange → Red
-- **Point Cloud Rendering** - Each dart creates a radial gradient
-- **Screen Blend Mode** - Smooth overlay on dartboard (75% opacity)
-- **Dartboard Visible** - Background board at 90% opacity
-- **No Hard Edges** - Smooth transitions between all color zones
+### 🐛 Behoben
 
-#### 📊 Enhanced Stats Display
-- **Accuracy Metrics** - Miss Rate, Triple Rate, Double Rate
-- **Favorite Zone** - Floating badge showing most-hit field
-- **Top 5 Hotspots** - Ranked list with progress bars and percentages
-- **Total Darts** - Count of all recorded throws
-- **Color Legend** - Beautiful gradient bar with cold/hot endpoints
+#### Null-Safety Fixes
+- **StatsOverview.tsx** - Umfassende Null-Prüfungen
+  - `match.players` kann jetzt `undefined` sein
+  - Fallback auf `match.winner` wenn players fehlt
+  - Null-Prüfungen für `match.legs` und `match.startedAt`
+- **exportImport.ts** - Sichere Export-Funktionen
+  - CSV Export: Null-Prüfungen für `match.players`
+  - Excel Export: Null-Prüfungen in allen reduce-Funktionen
+  - PDF Export: Null-Prüfungen für Match-Daten
+  - `calculateImprovement`: Robuste Berechnungen auch bei unvollständigen Daten
+- **Alle Array-Zugriffe** mit `|| []` abgesichert
+- **Optional Chaining** (`?.`) für nested properties
+- **Fallback-Werte** für fehlende Daten
 
-#### 🔍 Integration
-- **Player Profile** - Large heatmap (500px) in player profile view
-- **Statistics Tab** - Huge heatmap (600px) in dedicated tab
-- **4 Stat Cards** - Total Darts, Segments Hit, Precision, 180s
-- **Empty State** - Professional explanation when no data available
+#### Browser Caching
+- **Dynamische Module** - Verbesserte Cache-Handling
+  - Fresh Builds für neue Chunk-Hashes
+  - Service Worker Updates
+  - Nginx Cache-Headers optimiert
 
-### Changed
-- **Heatmap Component** - Completely rewritten using Canvas API instead of SVG
-- **Color Remapping** - Advanced algorithm for smooth color distribution
-- **Dartboard Opacity** - Increased from 80% to 90% for better visibility
-- **Heatmap Opacity** - Reduced from 85% to 75% for better board visibility
+#### Heatmap Loading
+- **Debug-Logs** hinzugefügt für Troubleshooting
+  - Console-Logs für Heatmap-Loading
+  - Player-spezifische Logs
+  - Batch-Endpoint Logs
 
-### Fixed
-- **Player Profile Data** - Fixed player stats loading from database instead of localStorage
-- **Personal Bests** - Correctly mapped from player.stats API response
-- **Radar Chart** - Using player.stats directly with proper normalization
-- **TypeScript Errors** - All type mismatches resolved
+### 🔧 Geändert
 
-### Technical
-- **Canvas Rendering** - Efficient 2-layer canvas rendering (dartboard + heatmap)
-- **Blur Filter** - Applied via ctx.filter for performance
-- **Color Mapping** - ImageData pixel manipulation for smooth gradients
-- **Performance** - Smooth 60fps with useMemo optimizations
+#### API-Integration
+- **Alle Komponenten** nutzen jetzt API-Endpoints statt localStorage
+  - StatsOverview: `api.matches.getAll()`
+  - Dashboard: `api.matches.getAll()`
+  - TrainingStats: `api.training.getAll()`
+  - TrainingScreen: `api.training.create()`
+- **Error Handling** verbessert in allen API-Calls
+- **Loading States** für bessere UX
 
-## [1.0.0] - 2026-01-15
+#### Code-Qualität
+- **TypeScript** - Erweiterte Typen für bessere Typsicherheit
+- **Error Boundaries** - Verbesserte Fehlerbehandlung
+- **Console Logs** - Debug-Logs für Entwicklung
 
-### 🎉 **Major Release - Production Ready!**
+### 📚 Dokumentation
 
-This is the first production-ready release of State of the Dart with complete authentication, admin system, and cloud synchronization.
+- **README.md** aktualisiert mit neuen Features
+- **CHANGELOG.md** erstellt für detaillierte Versionshistorie
+- **ARCHITECTURE.md** dokumentiert Database-First Policy
+- **DATABASE_FIRST_MIGRATION.md** dokumentiert Migrations-Status
 
-### Added
+### 🔄 Dependencies
 
-#### 👑 Admin System
-- **Admin Panel** - Complete user management dashboard
-- **User Management** - View, edit, and delete users
-- **Subscription Control** - Grant or revoke lifetime access
-- **Admin Rights** - Make other users administrators
-- **Statistics Dashboard** - Overview of all users and subscriptions
-- **Filter & Search** - Filter users by subscription status
-- **Real-time Updates** - Changes reflected immediately
-
-#### 👥 Authentication & User Management
-- **Email Registration** - Register with email and password
-- **Email Verification** - Verify email address before login
-- **Secure Authentication** - JWT-based authentication with bcrypt
-- **Google OAuth** - Quick sign-in with Google account
-- **30-Day Trial** - Free trial period for all new users
-- **Password Reset** - Forgot password functionality
-- **Profile Management** - Update name, avatar, email
-- **Account Deletion** - Delete account with all data
-
-#### 💳 Subscription & Payment
-- **Stripe Integration** - Secure payment processing
-- **Monthly Subscription** - Recurring monthly payment
-- **Lifetime Access** - One-time payment for lifetime access
-- **Customer Portal** - Manage subscriptions via Stripe
-- **Trial Tracking** - Display remaining trial days
-- **Subscription Status** - Real-time subscription status
-
-#### ☁️ Cloud Synchronization
-- **Automatic Sync** - Sync data to cloud automatically
-- **Multi-Device Support** - Access data from any device
-- **Conflict Resolution** - Smart conflict resolution
-- **Sync Status** - Visual sync status indicator
-- **Manual Sync** - Trigger sync manually
-
-#### 🎯 Dart Heatmap
-- **Visual Analysis** - See where you hit most often
-- **Color Coding** - Red = frequent, Blue = rare
-- **Per-Player Tracking** - Individual heatmaps for each player
-- **Dartboard Overlay** - Overlay on realistic dartboard
-
-#### 📊 Training Statistics
-- **Detailed Charts** - Performance charts for all training modes
-- **Hit Rate Analysis** - Track accuracy over time
-- **Score Distribution** - See score patterns
-- **Progress Tracking** - Monitor improvement
-- **Session History** - View all training sessions
-
-#### 🌐 Global Features
-- **Global Leaderboard** - Compete with players worldwide
-- **Activity Dashboard** - See recent activity and stats
-- **Match Sharing** - Share matches with others
-- **Social Features** - Connect with other players
-
-#### 🔧 Backend Infrastructure
-- **Express.js API** - RESTful API with Express
-- **SQLite Database** - Lightweight, fast database
-- **Database Migrations** - Automatic schema updates
-- **Admin Scripts** - `create:admin`, `seed:demo`
-- **Type-Safe API** - Full TypeScript support
-- **Error Handling** - Comprehensive error handling
-- **Rate Limiting** - Prevent abuse
-- **CORS Support** - Secure cross-origin requests
-
-#### 📚 Documentation
-- **ADMIN_SYSTEM.md** - Complete admin guide
-- **AUTHENTICATION.md** - Authentication documentation
-- **DEPLOYMENT_GUIDE.md** - VPS deployment guide
-- **server/SETUP.md** - Backend setup instructions
-- **server/README.md** - API documentation
-- **Updated README** - Both German and English versions
-
-### Changed
-- **Version** - Bumped from 0.0.1 to 1.0.0
-- **README** - Added authentication and admin system sections
-- **Package.json** - Updated version number
-- **TypeScript Config** - Disabled unused variable warnings for build
-- **Build Process** - Improved build performance
-
-### Fixed
-- **TypeScript Errors** - Fixed strict mode type errors
-- **AdminPanel Export** - Added default export
-- **API Headers** - Fixed header type definitions
-- **Dashboard Types** - Fixed match winner type error
-- **Sync Service** - Fixed getAll method type error
-- **Build Errors** - Resolved all build-time errors
-
-### Security
-- **Password Hashing** - bcrypt with 12 rounds
-- **JWT Tokens** - Secure token-based authentication
-- **Email Verification** - Prevent fake accounts
-- **Rate Limiting** - Prevent brute-force attacks
-- **CORS Configuration** - Secure cross-origin requests
-- **Helmet.js** - Security headers
-- **Input Validation** - Validate all user inputs
-- **.gitignore** - Exclude sensitive files (database, .env)
-
-### Performance
-- **Code Splitting** - Lazy load admin panel
-- **Bundle Size** - 79.21 kB (gzip)
-- **PWA Caching** - 1248 cached entries
-- **Database Indexing** - Optimized queries
-- **API Response Time** - < 100ms average
-
-### Migration Notes
-- **Existing Users** - Need to register accounts to use cloud features
-- **Local Data** - Can be synced to cloud after registration
-- **Admin Account** - Created via `npm run create:admin`
-- **Demo Data** - Generated via `npm run seed:demo`
-
-### Known Issues
-- **Recap Music Files** - Some files too large for PWA precache (working as intended)
-- **Training Stats** - Some unused variables (no impact on functionality)
-
-### Contributors
-- **Martin Pfeffer** - Project Owner
-- **AI Assistant** - Development Support
+- **xlsx** (^0.18.5) - Excel-Generierung
+- **jspdf** (^2.5.1) - PDF-Generierung
+- **jspdf-autotable** (^3.8.2) - PDF-Tabellen
 
 ---
 
-## [0.0.1] - 2025-12-XX
+## [0.0.5] - 2025-12-XX
 
-### Initial Release
-- Basic X01 game modes
-- Player management
-- Statistics tracking
-- Achievements system
-- Training modes
-- PWA support
-- Dark mode
-- Audio system
-- Charts and visualizations
+### ✨ Hinzugefügt
+- L.A. Style Heatmap mit Smooth Blur-Effekten
+- Professionelles Dartboard-Design in Heatmap
+- Top 5 Hotspots mit Progress-Bars
+- Accuracy Stats (Miss Rate, Triple Rate, Double Rate)
 
 ---
 
-[1.0.0]: https://github.com/pepperonas/state-of-the-dart/compare/v0.0.1...v1.0.0
-[0.0.1]: https://github.com/pepperonas/state-of-the-dart/releases/tag/v0.0.1
+[0.1.0]: https://github.com/pepperonas/state-of-the-dart/releases/tag/v0.1.0
+[0.0.5]: https://github.com/pepperonas/state-of-the-dart/releases/tag/v0.0.5

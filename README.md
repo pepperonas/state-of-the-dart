@@ -9,7 +9,7 @@
 **Professionelles Dart-Zählsystem** - Eine funktionsreiche, webbasierte Dart-Scoring-Anwendung mit Multi-User-Support, professionellem Statistik-Tracking und Live-Deployment.
 
 [![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green)](https://stateofthedart.com)
-![Version](https://img.shields.io/badge/Version-0.0.5-blue)
+![Version](https://img.shields.io/badge/Version-0.1.0-blue)
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
 ![React](https://img.shields.io/badge/React-19.2-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)
@@ -61,7 +61,11 @@
 - **Match-Historie** - Vollständiges Tracking aller gespielten Spiele
 - **Trendanalyse** - Verbesserungs-Metriken und Performance-Trends
 - **Persönliche Bestleistungen** - Tracke höchste Checkouts, beste Averages, 9-Darter
-- **Export/Import** - JSON für vollständige Datensicherung, CSV für Match-Historie
+- **Multi-Format Export (NEU in v0.1.0)** - Exportiere Statistiken in 3 Formaten:
+  - **CSV Export** - Text-basiert, kompatibel mit Excel/Google Sheets
+  - **Excel Export (.xlsx)** - Native Excel-Dateien mit Summary-Sheet
+  - **PDF Export** - Professionelle Reports mit formatierten Tabellen
+- **Export/Import** - JSON für vollständige Datensicherung
 - **Automatische Synchronisation** - Stats werden automatisch nach jedem Match aktualisiert
 
 ### 🏆 Achievements & Gamification
@@ -527,9 +531,43 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 
 ---
 
+## 📝 Changelog
+
+### v0.1.0 (Januar 2026) - Database-First & Multi-Format Export
+
+#### ✨ Neue Features
+- **Multi-Format Export** - Exportiere Statistiken in CSV, Excel (.xlsx) und PDF
+  - CSV: Text-basiert, Excel/Google Sheets kompatibel
+  - Excel: Native .xlsx mit Summary-Sheet und formatierten Spalten
+  - PDF: Professionelle Reports mit Tabellen und Paginierung
+- **Database-First Architecture** - Vollständige Migration von localStorage zu SQLite
+  - Alle Daten (Matches, Training Sessions, Settings, Achievements) werden direkt aus der Datenbank geladen
+  - Verbesserte Performance durch Batch-Endpoints
+  - Konsistente Datenquelle für alle Komponenten
+
+#### 🐛 Bug Fixes
+- **Null-Safety Fixes** - Umfassende Null-Prüfungen für `match.players` in allen Komponenten
+  - StatsOverview: Null-Prüfungen für Matches ohne players-Array
+  - Export-Funktionen: Sichere Handhabung fehlender Daten
+  - calculateImprovement: Robuste Berechnungen auch bei unvollständigen Daten
+- **Heatmap Loading** - Debug-Logs für Heatmap-Daten-Loading hinzugefügt
+- **Browser Caching** - Verbesserte Cache-Handling für dynamische Module
+
+#### 🔧 Technische Verbesserungen
+- **API-Endpoints** - Batch-Endpoints für effizientes Laden mehrerer Heatmaps
+- **Error Handling** - Verbesserte Fehlerbehandlung in allen Export-Funktionen
+- **Type Safety** - Erweiterte TypeScript-Typen für bessere Typsicherheit
+
+#### 📊 Dummy-Player
+- **King Lui** - Elite-Spieler mit extremem T20/D7 Wurfbild (80% T20, 20% D7)
+  - Einzigartige Heatmap mit nur zwei Hot Spots
+  - 84% Winrate, 85.7 Average, 48x 180s
+
+---
+
 <div align="center">
   <p>Made with ❤️ and 🎯 by Martin Pfeffer</p>
-  <p>© 2026 celox.io | Version 0.0.1</p>
+  <p>© 2026 celox.io | Version 0.1.0</p>
   <p>
     <a href="https://stateofthedart.com">🌐 Live Demo</a> •
     <a href="https://github.com/pepperonas/state-of-the-dart">📦 GitHub</a> •
