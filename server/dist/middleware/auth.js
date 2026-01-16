@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.optionalAuth = exports.authenticateToken = exports.authenticateTenant = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const config_1 = require("../config");
+const database_1 = require("../database");
 const authenticateTenant = (req, res, next) => {
     const token = req.headers.authorization?.replace('Bearer ', '');
     if (!token) {
@@ -13,8 +14,29 @@ const authenticateTenant = (req, res, next) => {
     }
     try {
         const decoded = jsonwebtoken_1.default.verify(token, config_1.config.jwtSecret);
-        req.tenantId = decoded.tenantId;
-        req.playerId = decoded.playerId;
+        // Check if token has tenantId (old system) or userId (new system)
+        if (decoded.tenantId) {
+            // Old system - tenant directly in token
+            req.tenantId = decoded.tenantId;
+            req.playerId = decoded.playerId;
+        }
+        else if (decoded.userId) {
+            // New system - get tenant from user_id
+            const db = (0, database_1.getDatabase)();
+            const tenant = db.prepare('SELECT id FROM tenants WHERE user_id = ?').get(decoded.userId);
+            if (!tenant) {
+                return res.status(404).json({ error: 'No tenant found for user' });
+            }
+            req.tenantId = tenant.id;
+            req.user = {
+                id: decoded.userId,
+                email: decoded.email,
+                subscriptionStatus: decoded.subscriptionStatus,
+            };
+        }
+        else {
+            return res.status(401).json({ error: 'Invalid token format' });
+        }
         next();
     }
     catch (error) {
