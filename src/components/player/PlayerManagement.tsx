@@ -5,7 +5,7 @@ import { usePlayer } from '../../context/PlayerContext';
 
 const PlayerManagement: React.FC = () => {
   const navigate = useNavigate();
-  const { players, addPlayer, deletePlayer, updatePlayer } = usePlayer();
+  const { players, loading, addPlayer, deletePlayer, updatePlayer } = usePlayer();
   const [showAddPlayer, setShowAddPlayer] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
   const [editingPlayer, setEditingPlayer] = useState<string | null>(null);
@@ -91,8 +91,22 @@ const PlayerManagement: React.FC = () => {
             </div>
           )}
           
+          {/* Debug Info */}
+          <div className="mb-4 p-3 bg-blue-500/20 border border-blue-500 rounded-lg">
+            <p className="text-white text-sm">
+              <strong>Debug:</strong> Loading: {loading ? 'Yes' : 'No'} | 
+              Players Count: {players.length} | 
+              Players Array: {JSON.stringify(players.map(p => p.name))}
+            </p>
+          </div>
+          
           <div className="space-y-3">
-            {players.length === 0 ? (
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-500 mx-auto mb-4"></div>
+                <p className="text-white text-lg font-semibold">Loading players...</p>
+              </div>
+            ) : players.length === 0 ? (
               <div className="text-center py-12">
                 <User size={64} className="mx-auto text-dark-600 mb-4" />
                 <p className="text-white text-lg font-semibold">No players yet</p>
