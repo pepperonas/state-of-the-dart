@@ -6,6 +6,7 @@ import { getCheckoutSuggestion } from '../data/checkoutTable';
 import audioSystem from '../utils/audio';
 import { useTenant } from './TenantContext';
 import { usePlayer } from './PlayerContext';
+import { api } from '../services/api';
 
 interface GameState {
   currentMatch: Match | null;
@@ -447,22 +448,26 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [state, dispatch] = useReducer(gameReducer, initialState);
   
   // Load match from storage when tenant changes
+  // Save game state to API with debouncing (during active game)
   useEffect(() => {
-    if (storage) {
-      const saved = storage.get<any>('currentMatch', null);
-      if (saved) {
-        const revivedMatch = reviveMatchDates(saved);
-        dispatch({ type: 'LOAD_MATCH', payload: revivedMatch });
-      }
+    if (state.currentMatch && state.currentMatch.status === 'in-progress') {
+      const saveTimer = setTimeout(async () => {
+        try {
+          // Try updating existing match
+          await api.matches.update(state.currentMatch!.id, state.currentMatch);
+        } catch (error) {
+          // If update fails, try creating it
+          try {
+            await api.matches.create(state.currentMatch);
+          } catch (createError) {
+            console.error('Failed to save match:', createError);
+          }
+        }
+      }, 2000); // Debounce: Save every 2 seconds
+      
+      return () => clearTimeout(saveTimer);
     }
-  }, [storage]);
-  
-  // Save game state to localStorage with debouncing
-  useEffect(() => {
-    if (state.currentMatch && storage) {
-      storage.setDebounced('currentMatch', state.currentMatch, 500);
-    }
-  }, [state.currentMatch, storage]);
+  }, [state.currentMatch]);
   
   // Sync player statistics to PlayerContext (called during and after match)
   const syncPlayerStats = (liveUpdate: boolean = false) => {
@@ -471,16 +476,11 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Only save to match history if completed
     const shouldSaveMatch = state.currentMatch.status === 'completed' && !liveUpdate;
     
-    // Save completed match to matches history (only on completion)
+    // Save completed match to database
     if (shouldSaveMatch) {
-      const matches = storage.get<Match[]>('matches', []);
-      const matchExists = matches.some(m => m.id === state.currentMatch!.id);
-      
-      if (!matchExists) {
-        matches.push(state.currentMatch);
-        storage.set('matches', matches);
-        console.log('✅ Match saved to history');
-      }
+      api.matches.create(state.currentMatch!)
+        .then(() => console.log('✅ Match saved to database'))
+        .catch((err: Error) => console.error('❌ Failed to save match:', err));
     }
     
     state.currentMatch.players.forEach((matchPlayer) => {

@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { AppSettings } from '../types/index';
-import { useTenant } from './TenantContext';
 import { useAuth } from './AuthContext';
 import { api } from '../services/api';
 import i18n from '../i18n/config';
@@ -26,7 +25,6 @@ const defaultSettings: AppSettings = {
   showDartboardHelper: true,
 };
 
-// Normalize legacy theme values
 const normalizeTheme = (theme: any): 'modern' | 'steampunk' => {
   if (theme === 'steampunk') return 'steampunk';
   return 'modern';
@@ -35,28 +33,24 @@ const normalizeTheme = (theme: any): 'modern' | 'steampunk' => {
 const SettingsContext = createContext<SettingsContextType | null>(null);
 
 export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { storage } = useTenant();
   const { user } = useAuth();
   
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
   const [loading, setLoading] = useState(true);
   
-  // Load settings from API when user is authenticated
+  // Load settings from API (Database only!)
   useEffect(() => {
     const loadSettings = async () => {
       if (!user) {
-        // Not logged in → use default settings
         setSettings(defaultSettings);
+        i18n.changeLanguage(defaultSettings.language);
         setLoading(false);
         return;
       }
 
       try {
         setLoading(true);
-        
-        // Try to load from API
         const response = await api.settings.get();
-        console.log('🔧 SettingsContext: Loaded from API:', response);
         
         const loadedSettings: AppSettings = {
           theme: normalizeTheme(response.theme || 'modern'),
@@ -73,101 +67,61 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         };
         
         setSettings(loadedSettings);
-        
-        // Cache in localStorage for offline access
-        if (storage) {
-          storage.set('settings-cache', loadedSettings);
-        }
-        
-        // Sync language with i18n
         i18n.changeLanguage(loadedSettings.language);
       } catch (error) {
-        console.error('❌ Failed to load settings from API:', error);
-        
-        // Fallback: try localStorage cache
-        if (storage) {
-          const cached = storage.get<Partial<AppSettings>>('settings-cache', {});
-          if (cached && Object.keys(cached).length > 0) {
-            console.log('📦 Using cached settings (offline)');
-            const mergedSettings = { ...defaultSettings, ...cached };
-            setSettings(mergedSettings);
-            i18n.changeLanguage(mergedSettings.language);
-          } else {
-            setSettings(defaultSettings);
-            i18n.changeLanguage(defaultSettings.language);
-          }
-        } else {
-          setSettings(defaultSettings);
-          i18n.changeLanguage(defaultSettings.language);
-        }
+        console.error('Failed to load settings:', error);
+        setSettings(defaultSettings);
+        i18n.changeLanguage(defaultSettings.language);
       } finally {
         setLoading(false);
       }
     };
 
     loadSettings();
-  }, [user, storage]);
+  }, [user]);
 
-  // Sync language changes with i18n
   useEffect(() => {
     i18n.changeLanguage(settings.language);
   }, [settings.language]);
   
   const updateSettings = async (updates: Partial<AppSettings>) => {
-    // Optimistic UI Update
+    if (!user) return;
+    
     const previousSettings = settings;
     const newSettings = { ...settings, ...updates };
     setSettings(newSettings);
     
-    // Update localStorage cache immediately
-    if (storage) {
-      storage.set('settings-cache', newSettings);
-    }
-    
-    // Sync to API
-    if (user) {
-      try {
-        await api.settings.update({
-          theme: newSettings.theme,
-          language: newSettings.language,
-          show_checkout_suggestions: newSettings.showCheckoutHints,
-          auto_next_player: newSettings.autoNextPlayer,
-          enable_achievements_hints: newSettings.showDartboardHelper,
-        });
-        console.log('✅ Settings synced to API');
-      } catch (error) {
-        console.error('❌ Failed to sync settings to API:', error);
-        // Rollback on error
-        setSettings(previousSettings);
-        throw error;
-      }
+    try {
+      await api.settings.update({
+        theme: newSettings.theme,
+        language: newSettings.language,
+        show_checkout_suggestions: newSettings.showCheckoutHints,
+        auto_next_player: newSettings.autoNextPlayer,
+        enable_achievements_hints: newSettings.showDartboardHelper,
+      });
+    } catch (error) {
+      console.error('Failed to update settings:', error);
+      setSettings(previousSettings);
+      throw error;
     }
   };
   
   const resetSettings = async () => {
-    // Reset to default
+    if (!user) return;
+    
     setSettings(defaultSettings);
     
-    // Update localStorage cache
-    if (storage) {
-      storage.set('settings-cache', defaultSettings);
-    }
-    
-    // Sync to API
-    if (user) {
-      try {
-        await api.settings.update({
-          theme: defaultSettings.theme,
-          language: defaultSettings.language,
-          show_checkout_suggestions: defaultSettings.showCheckoutHints,
-          auto_next_player: defaultSettings.autoNextPlayer,
-          enable_achievements_hints: defaultSettings.showDartboardHelper,
-        });
-        console.log('✅ Settings reset synced to API');
-      } catch (error) {
-        console.error('❌ Failed to sync settings reset to API:', error);
-        throw error;
-      }
+    try {
+      await api.settings.update({
+        theme: defaultSettings.theme,
+        language: defaultSettings.language,
+        show_checkout_suggestions: defaultSettings.showCheckoutHints,
+        auto_next_player: defaultSettings.autoNextPlayer,
+        enable_achievements_hints: defaultSettings.showDartboardHelper,
+      });
+    } catch (error) {
+      console.error('Failed to reset settings:', error);
+      throw error;
     }
   };
   

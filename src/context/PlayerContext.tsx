@@ -76,45 +76,31 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       try {
         setLoading(true);
         const response = await api.players.getAll();
-        console.log('🔍 PlayerContext: API Response:', response);
-        console.log('🔍 PlayerContext: Players count:', response.players?.length);
-        if (response.players?.[0]) {
-          console.log('🔍 PlayerContext: First player:', response.players[0]);
-          console.log('🔍 PlayerContext: First player stats:', response.players[0].stats);
-        }
         const loadedPlayers = response.players.map(reviveDates);
-        console.log('🔍 PlayerContext: Loaded players:', loadedPlayers);
-        setPlayers(loadedPlayers);
         
-        // Load heatmap data for each player and cache in localStorage
-        if (storage) {
-          for (const player of loadedPlayers) {
+        // Load heatmap data for each player (store in memory only, no localStorage)
+        const playersWithHeatmaps = await Promise.all(
+          loadedPlayers.map(async (player: Player) => {
             try {
               const heatmapResponse = await api.players.getHeatmap(player.id);
-              console.log(`🗺️ Loaded heatmap for ${player.name}:`, heatmapResponse);
               
               if (heatmapResponse && heatmapResponse.total_darts > 0) {
-                // Store in localStorage for offline access
                 const heatmapData = {
                   playerId: player.id,
                   segments: heatmapResponse.segments,
                   totalDarts: heatmapResponse.total_darts,
                   lastUpdated: new Date(heatmapResponse.last_updated || Date.now())
                 };
-                storage.set(`heatmap-${player.id}`, heatmapData);
+                return { ...player, heatmapData };
               }
             } catch (error) {
-              console.error(`❌ Failed to load heatmap for ${player.name}:`, error);
+              console.error(`Failed to load heatmap for ${player.name}:`, error);
             }
-          }
-        }
+            return player;
+          })
+        );
         
-        // Restore current player from localStorage (UI state only)
-        if (storage) {
-          const savedCurrentId = storage.get<string>('currentPlayerId', '');
-          const current = loadedPlayers.find((p: Player) => p.id === savedCurrentId);
-          setCurrentPlayer(current || null);
-        }
+        setPlayers(playersWithHeatmaps);
       } catch (error) {
         console.error('❌ Failed to load players:', error);
         setPlayers([]);
@@ -124,18 +110,7 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     };
 
     loadPlayers();
-  }, [user, storage]);
-  
-  // Save current player ID to localStorage (UI state only)
-  useEffect(() => {
-    if (storage) {
-      if (currentPlayer) {
-        storage.set('currentPlayerId', currentPlayer.id);
-      } else {
-        storage.remove('currentPlayerId');
-      }
-    }
-  }, [currentPlayer, storage]);
+  }, [user]);
   
   const addPlayer = async (name: string, avatar?: string): Promise<Player> => {
     const newPlayer: Player = {
@@ -195,44 +170,37 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   };
   
   const getPlayerHeatmap = (playerId: string): HeatmapData => {
-    if (!storage) return createEmptyHeatmapData(playerId);
-    
-    // Try to load from localStorage first (for offline support)
-    const key = `heatmap-${playerId}`;
-    const saved = storage.get<any>(key, null);
-    
-    if (saved) {
-      // Revive Date objects
-      return {
-        ...saved,
-        lastUpdated: new Date(saved.lastUpdated)
-      };
+    // Heatmap data is loaded via useEffect and stored in player object
+    // This function returns from memory, not storage
+    const player = players.find(p => p.id === playerId);
+    if (player && (player as any).heatmapData) {
+      return (player as any).heatmapData;
     }
-    
-    // Fallback: try to load from API (will be handled by separate useEffect)
     return createEmptyHeatmapData(playerId);
   };
   
-  const updatePlayerHeatmap = (playerId: string, newDarts: Dart[]) => {
-    if (!storage) return;
+  const updatePlayerHeatmap = async (playerId: string, newDarts: Dart[]) => {
+    if (!user) return;
     
     const currentHeatmap = getPlayerHeatmap(playerId);
     const updatedHeatmap = updateHeatmapData(currentHeatmap, newDarts);
     
-    const key = `heatmap-${playerId}`;
-    storage.set(key, updatedHeatmap);
+    // Update in memory immediately
+    setPlayers(prev => prev.map(p => 
+      p.id === playerId ? { ...p, heatmapData: updatedHeatmap } : p
+    ));
     
-    // Sync to API in background
-    if (user) {
+    // Sync to API (Database)
+    try {
       const apiData = {
         segments: updatedHeatmap.segments,
         total_darts: updatedHeatmap.totalDarts,
         last_updated: updatedHeatmap.lastUpdated.toISOString()
       };
       
-      api.players.updateHeatmap(playerId, apiData)
-        .then(() => console.log('✅ Heatmap synced to API'))
-        .catch(err => console.error('❌ Failed to sync heatmap to API:', err));
+      await api.players.updateHeatmap(playerId, apiData);
+    } catch (err) {
+      console.error('Failed to sync heatmap:', err);
     }
   };
   
