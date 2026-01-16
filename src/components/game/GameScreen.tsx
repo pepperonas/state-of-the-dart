@@ -46,6 +46,32 @@ const GameScreen: React.FC = () => {
     audioSystem.setEffectsVolume(settings.effectsVolume ?? settings.soundVolume);
   }, [settings.soundVolume, settings.callerVolume, settings.effectsVolume]);
 
+  // Announce "You require X" when player's turn STARTS and they can checkout
+  useEffect(() => {
+    if (!state.currentMatch || state.currentMatch.status !== 'in-progress') return;
+
+    const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
+    if (!currentLeg || currentLeg.winner) return;
+
+    const currentPlayer = state.currentMatch.players[state.currentPlayerIndex];
+    if (!currentPlayer) return;
+
+    // Calculate remaining score for current player
+    const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
+    const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
+    const startScore = state.currentMatch.settings.startScore || 501;
+    const remaining = startScore - totalScored;
+
+    // Announce "You require X" only if player can checkout (2-170)
+    if (remaining >= 2 && remaining <= 170) {
+      // Small delay to ensure turn transition is complete
+      const timer = setTimeout(() => {
+        audioSystem.announceRemaining(remaining, true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [state.currentPlayerIndex, state.currentMatch?.currentLegIndex]);
+
   // Track processed matches to avoid duplicate achievement checks
   const [processedMatchIds, setProcessedMatchIds] = useState<Set<string>>(new Set());
   
@@ -265,23 +291,10 @@ const GameScreen: React.FC = () => {
     }
     
     dispatch({ type: 'CONFIRM_THROW' });
-    
-    // Announce remaining score after the throw (with delay for score announcement)
-    if (currentPlayer && currentLeg) {
-      const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
-      const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
-      const startScore = state.currentMatch?.settings.startScore || 501;
-      const remaining = startScore - totalScored;
-      const newRemaining = remaining - currentScore;
-      
-      // Only announce if in checkout range and not bust/checkout
-      if (newRemaining > 0 && newRemaining <= 170) {
-        setTimeout(() => {
-          audioSystem.announceRemaining(newRemaining, true);
-        }, 1500); // Delay to let score announcement finish
-      }
-    }
-    
+
+    // Note: "You require X" is now announced when the player's turn STARTS (not after throwing)
+    // This is handled in handleNextPlayer()
+
     if (settings.autoNextPlayer) {
       setTimeout(() => {
         dispatch({ type: 'NEXT_PLAYER' });
