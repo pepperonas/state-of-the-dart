@@ -93,10 +93,14 @@ STRIPE_PRICE_ID_LIFETIME=price_xxx_lifetime
 2. **Create Credentials → OAuth client ID**
 3. Application type: **Web application**
 4. Name: **"State of the Dart Web"**
-5. **Authorized redirect URIs**: Füge hinzu:
+5. **Authorized JavaScript origins**: Füge hinzu:
+   - Development: `http://localhost:5173`
+   - Production: `https://stateofthedart.com`
+   - Production API: `https://api.stateofthedart.com`
+6. **Authorized redirect URIs**: Füge hinzu:
    - Development: `http://localhost:3001/api/auth/google/callback`
-   - Production: `https://your-domain.com/api/auth/google/callback`
-6. Erstellen → Kopiere:
+   - Production: `https://api.stateofthedart.com/api/auth/google/callback`
+7. Erstellen → Kopiere:
    - **Client ID**
    - **Client Secret**
 
@@ -110,7 +114,7 @@ GOOGLE_CALLBACK_URL=http://localhost:3001/api/auth/google/callback
 
 **Production:**
 ```env
-GOOGLE_CALLBACK_URL=https://your-domain.com/api/auth/google/callback
+GOOGLE_CALLBACK_URL=https://api.stateofthedart.com/api/auth/google/callback
 ```
 
 ---
@@ -234,7 +238,12 @@ STRIPE_SECRET_KEY=sk_live_your_live_key
 STRIPE_PUBLISHABLE_KEY=pk_live_your_live_key
 
 # Google OAuth Production Callback
-GOOGLE_CALLBACK_URL=https://api.your-domain.com/api/auth/google/callback
+GOOGLE_CALLBACK_URL=https://api.stateofthedart.com/api/auth/google/callback
+
+# App & API URLs
+APP_URL=https://stateofthedart.com
+API_URL=https://api.stateofthedart.com
+CORS_ORIGINS=https://stateofthedart.com,https://api.stateofthedart.com
 
 # Strong secrets generieren!
 JWT_SECRET=$(openssl rand -base64 32)
