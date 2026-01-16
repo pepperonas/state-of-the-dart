@@ -104,13 +104,15 @@ const UserMenu: React.FC = () => {
 
               <div className="border-t border-dark-600 my-2" />
 
-              <button
-                onClick={handleLogout}
-                className="w-full mx-2 mb-2 px-4 py-3 flex items-center justify-center gap-3 text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 rounded-lg font-bold text-sm shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
-              >
-                <LogOut size={20} className="flex-shrink-0" />
-                Abmelden
-              </button>
+              <div className="px-2 pb-2">
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-4 py-3 flex items-center justify-center gap-3 text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 rounded-xl font-bold text-sm shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-200"
+                >
+                  <LogOut size={20} className="flex-shrink-0" />
+                  Abmelden
+                </button>
+              </div>
             </div>
           </div>
         </>
