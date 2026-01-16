@@ -159,6 +159,52 @@
   </head>
   <body>
     <div id="root"></div>
+    
+    <!-- Force unregister old service workers BEFORE loading React -->
+    <script>
+      (async function() {
+        // Check if we have auth token
+        const hasAuth = localStorage.getItem('auth_token');
+        const hasMigrated = localStorage.getItem('sw_migration_v3');
+        
+        if (!hasMigrated) {
+          console.log('🔥 Forcing service worker cleanup...');
+          
+          // Unregister ALL service workers
+          if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (const registration of registrations) {
+              await registration.unregister();
+              console.log('✅ Service worker unregistered');
+            }
+          }
+          
+          // Clear ALL caches
+          if ('caches' in window) {
+            const cacheNames = await caches.keys();
+            for (const cacheName of cacheNames) {
+              await caches.delete(cacheName);
+              console.log('✅ Cache deleted:', cacheName);
+            }
+          }
+          
+          // Clear old tenant data
+          localStorage.removeItem('tenants');
+          localStorage.removeItem('currentTenant');
+          
+          // Mark migration done
+          localStorage.setItem('sw_migration_v3', 'true');
+          
+          // If no auth, redirect to login
+          if (!hasAuth) {
+            console.log('🔐 No auth, redirecting to login...');
+            window.location.href = '/login';
+            throw new Error('Redirecting...'); // Stop execution
+          }
+        }
+      })();
+    </script>
+    
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -8,6 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: false, // Disable auto-registration
       includeAssets: ['favicon.svg', 'favicon-32x32.svg', 'sounds/**/*.mp3'],
       manifest: {
         name: 'State of the Dart',
