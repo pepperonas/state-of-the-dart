@@ -46,33 +46,52 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
         11: 180, 14: 198, 9: 216, 12: 234, 5: 252
       };
       
-      Object.entries(segments).forEach(([segmentKey, count]: [string, any]) => {
-        // Parse segment key: "3x20" or "2x7" format
+      Object.entries(segments).forEach(([segmentKey, data]: [string, any]) => {
+        // Check if data has x/y coordinate arrays (new format with actual positions)
+        if (data && typeof data === 'object' && Array.isArray(data.x) && Array.isArray(data.y)) {
+          // Use existing x/y coordinates directly
+          const hitCount = data.x.length;
+          for (let i = 0; i < hitCount; i++) {
+            // x/y are normalized coordinates (-1 to 1), convert to canvas coordinates
+            const x = center + data.x[i] * (size * 0.45);
+            const y = center + data.y[i] * (size * 0.45);
+
+            points.push({
+              x,
+              y,
+              intensity: hitCount / maxCount
+            });
+          }
+          return;
+        }
+
+        // Simple count format - generate points based on segment/multiplier
+        // Parse segment key - supports multiple formats
         let multiplier: number;
         let segment: number;
-        
+
         if (segmentKey.includes('x')) {
-          // Format: "3x20" or "2x7"
+          // Format: "3x20" (multiplier x segment)
           const parts = segmentKey.split('x');
           multiplier = parseInt(parts[0]);
           segment = parseInt(parts[1]);
         } else if (segmentKey.includes('-')) {
-          // Format: "3-20" or "2-7"
+          // Format: "20-3" (segment-multiplier) - standard format
           const parts = segmentKey.split('-');
-          multiplier = parseInt(parts[0]);
-          segment = parseInt(parts[1]);
+          segment = parseInt(parts[0]);
+          multiplier = parseInt(parts[1]);
         } else {
           console.warn('Unknown segment format:', segmentKey);
           return;
         }
-        
-        const hitCount = typeof count === 'number' ? count : (count?.count || 0);
+
+        const hitCount = typeof data === 'number' ? data : 0;
         if (hitCount === 0) return;
-        
+
         // Get angle for this segment
         const baseAngle = segmentAngles[segment] || 0;
         const angleRad = (baseAngle * Math.PI) / 180;
-        
+
         // Determine radius based on multiplier
         let baseRadius: number;
         if (multiplier === 3) {
@@ -82,19 +101,19 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
         } else {
           baseRadius = singleRadius; // Single area
         }
-        
+
         // Generate points for each hit with small variations
         for (let i = 0; i < hitCount; i++) {
           // Add small random variation (±2° angle, ±2% radius)
           const angleVariation = (Math.random() - 0.5) * 4; // ±2 degrees
           const radiusVariation = (Math.random() - 0.5) * (baseRadius * 0.02); // ±2% radius
-          
+
           const finalAngle = angleRad + (angleVariation * Math.PI / 180);
           const finalRadius = baseRadius + radiusVariation;
-          
+
           const x = center + Math.cos(finalAngle) * finalRadius;
           const y = center + Math.sin(finalAngle) * finalRadius;
-          
+
           points.push({
             x,
             y,
@@ -258,8 +277,9 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
     
     // Draw heatmap points with radial gradients
     dartPoints.forEach(point => {
-      const x = center + point.x * scale;
-      const y = center + point.y * scale;
+      // Points already have absolute canvas coordinates
+      const x = point.x;
+      const y = point.y;
       const radius = size * 0.08; // Blur radius
       
       const gradient = tempCtx.createRadialGradient(x, y, 0, x, y, radius);
@@ -351,8 +371,23 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
       const segmentCounts: { segment: number; multiplier: number; count: number }[] = [];
       
       Object.entries(segments).forEach(([key, data]: [string, any]) => {
-        const [segment, multiplier] = key.split('-').map(Number);
-        const count = data.x?.length || 0;
+        let segment: number;
+        let multiplier: number;
+
+        if (key.includes('x')) {
+          // Format: "3x20" (multiplier x segment)
+          const parts = key.split('x');
+          multiplier = parseInt(parts[0]);
+          segment = parseInt(parts[1]);
+        } else {
+          // Format: "20-3" (segment-multiplier) - standard format
+          const parts = key.split('-');
+          segment = parseInt(parts[0]);
+          multiplier = parseInt(parts[1]);
+        }
+
+        // Support both simple count and object with x/y/count
+        const count = typeof data === 'number' ? data : (data?.count || data?.x?.length || 0);
         segmentCounts.push({ segment, multiplier, count });
       });
       

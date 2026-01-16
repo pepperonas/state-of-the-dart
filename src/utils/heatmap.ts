@@ -57,12 +57,15 @@ export const calculateSegmentHeat = (heatmapData: HeatmapData): SegmentHeat[] =>
   
   const heats: SegmentHeat[] = [];
   
-  Object.entries(segments).forEach(([key, count]) => {
+  Object.entries(segments).forEach(([key, data]) => {
+    // Support both simple count (number) and object with x/y/count
+    const count = typeof data === 'number' ? data : ((data as any)?.count || (data as any)?.x?.length || 0);
+
     const [segmentStr, multiplierStr] = key.split('-');
     const segment = parseInt(segmentStr);
     const multiplier = parseInt(multiplierStr);
     const percentage = (count / totalDarts) * 100;
-    
+
     heats.push({
       segment,
       multiplier,
@@ -158,11 +161,15 @@ export const calculateAccuracyStats = (heatmapData: HeatmapData) => {
   let maxTripleCount = 0;
   let maxTripleKey = '';
   
-  Object.entries(segments).forEach(([key, count]) => {
+  Object.entries(segments).forEach(([key, data]) => {
+    // Support both simple count (number) and object with x/y/count
+    const count = typeof data === 'number' ? data : ((data as any)?.count || (data as any)?.x?.length || 0);
+
+    // Parse key format: "20-3" (segment-multiplier)
     const [segmentStr, multiplierStr] = key.split('-');
     const segment = parseInt(segmentStr);
     const multiplier = parseInt(multiplierStr);
-    
+
     if (segment === 0) {
       misses += count;
     } else if (segment === 25) {
@@ -183,7 +190,7 @@ export const calculateAccuracyStats = (heatmapData: HeatmapData) => {
           maxTripleKey = key;
         }
       }
-      
+
       if (count > maxSegmentCount) {
         maxSegmentCount = count;
         maxSegmentKey = key;

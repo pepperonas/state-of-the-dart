@@ -443,8 +443,8 @@ const reviveMatchDates = (match: any): Match => {
 
 export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { storage } = useTenant();
-  const { updatePlayer, players } = usePlayer();
-  
+  const { updatePlayer, players, updatePlayerHeatmap } = usePlayer();
+
   const [state, dispatch] = useReducer(gameReducer, initialState);
   
   // Load match from storage when tenant changes
@@ -577,7 +577,30 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       syncPlayerStats(true); // Live update
     }
   }, [state.currentMatch?.legs]);
-  
+
+  // Track last processed throw to avoid duplicate heatmap updates
+  const lastProcessedThrowIdRef = React.useRef<string | null>(null);
+
+  // Update heatmap data when throws are confirmed
+  useEffect(() => {
+    if (!state.currentMatch || state.currentMatch.status !== 'in-progress') return;
+
+    const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
+    if (!currentLeg || currentLeg.throws.length === 0) return;
+
+    // Get the last throw and update heatmap for that player
+    const lastThrow = currentLeg.throws[currentLeg.throws.length - 1];
+
+    // Skip if we already processed this throw
+    if (!lastThrow || lastThrow.id === lastProcessedThrowIdRef.current) return;
+
+    if (lastThrow.darts && lastThrow.darts.length > 0) {
+      console.log('🎯 Updating heatmap for player:', lastThrow.playerId, 'with darts:', lastThrow.darts);
+      updatePlayerHeatmap(lastThrow.playerId, lastThrow.darts);
+      lastProcessedThrowIdRef.current = lastThrow.id;
+    }
+  }, [state.currentMatch?.legs, updatePlayerHeatmap]);
+
   return (
     <GameContext.Provider value={{ state, dispatch, syncPlayerStats }}>
       {children}
