@@ -935,52 +935,26 @@ const PlayerComparisonView: React.FC<{
     }
   };
 
-  // Calculate stats for compared players
+  // Calculate stats for compared players - USE PLAYER STATS instead of match data
   const comparisonData = useMemo(() => {
     return comparePlayerIds.map(playerId => {
       const player = players.find(p => p.id === playerId);
-      if (!player) return null;
+      if (!player || !player.stats) return null;
 
-      const playerMatches = matches.filter(match => 
-        match.players.some(p => p.playerId === playerId)
-      );
-
-      const totalGames = playerMatches.length;
-      const wins = playerMatches.filter(m => m.winner === playerId).length;
-      const winRate = totalGames > 0 ? (wins / totalGames) * 100 : 0;
-
-      // Calculate averages from match data
-      const matchData = playerMatches.map(match => {
-        const playerData = match.players.find(p => p.playerId === playerId);
-        return playerData;
-      }).filter((p): p is NonNullable<typeof p> => p !== null && p !== undefined);
-
-      const avgScore = matchData.length > 0
-        ? matchData.reduce((sum, p) => sum + (p.matchAverage || 0), 0) / matchData.length
-        : 0;
-
-      const total180s = matchData.reduce((sum, p) => sum + (p.match180s || 0), 0);
-      
-      const totalCheckoutAttempts = matchData.reduce((sum, p) => sum + (p.checkoutAttempts || 0), 0);
-      const totalCheckoutsHit = matchData.reduce((sum, p) => sum + (p.checkoutsHit || 0), 0);
-      const checkoutRate = totalCheckoutAttempts > 0
-        ? (totalCheckoutsHit / totalCheckoutAttempts) * 100
-        : 0;
-
-      const highestScore = matchData.reduce((max, p) => Math.max(max, p.matchHighestScore || 0), 0);
+      const stats = player.stats;
 
       return {
         player,
-        totalGames,
-        wins,
-        winRate,
-        avgScore,
-        total180s,
-        checkoutRate,
-        highestScore,
+        totalGames: stats.gamesPlayed || 0,
+        wins: stats.gamesWon || 0,
+        winRate: stats.gamesPlayed > 0 ? (stats.gamesWon / stats.gamesPlayed) * 100 : 0,
+        avgScore: stats.averageOverall || 0,
+        total180s: stats.total180s || 0,
+        checkoutRate: stats.checkoutPercentage || 0,
+        highestScore: stats.highestCheckout || 0,
       };
     }).filter(Boolean);
-  }, [comparePlayerIds, players, matches]);
+  }, [comparePlayerIds, players]);
 
   // Prepare radar chart data
   const radarData = useMemo(() => {
@@ -1000,7 +974,8 @@ const PlayerComparisonView: React.FC<{
         let value = 0;
         switch (cat.category) {
           case 'Average':
-            value = Math.min((data!.avgScore / 100) * 100, 100);
+            // Normalize to 0-100 (max average = 80)
+            value = Math.min((data!.avgScore / 80) * 100, 100);
             break;
           case 'Win Rate':
             value = data!.winRate;
@@ -1009,9 +984,11 @@ const PlayerComparisonView: React.FC<{
             value = data!.checkoutRate;
             break;
           case '180s':
-            value = Math.min(data!.total180s, 20);
+            // Normalize to 0-100 (max = 20 180s)
+            value = Math.min((data!.total180s / 20) * 100, 100);
             break;
           case 'Consistency':
+            // Normalize to 0-100 (max = 50 games)
             value = data!.totalGames > 0 ? Math.min((data!.totalGames / 50) * 100, 100) : 0;
             break;
         }
