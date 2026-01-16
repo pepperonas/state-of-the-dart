@@ -169,7 +169,9 @@ router.put('/:id', auth_1.authenticateTenant, (req, res) => {
             }
             // Update/Insert legs if provided
             if (legs && Array.isArray(legs)) {
-                for (const leg of legs) {
+                for (let legIndex = 0; legIndex < legs.length; legIndex++) {
+                    const leg = legs[legIndex];
+                    const legNumber = leg.legNumber ?? legIndex + 1; // Use legNumber if provided, otherwise use index+1
                     const existingLeg = db.prepare('SELECT id FROM legs WHERE id = ?').get(leg.id);
                     if (existingLeg) {
                         // Update leg
@@ -194,7 +196,7 @@ router.put('/:id', auth_1.authenticateTenant, (req, res) => {
                         db.prepare(`
               INSERT INTO legs (id, match_id, leg_number, winner, started_at, completed_at)
               VALUES (?, ?, ?, ?, ?, ?)
-            `).run(leg.id, id, leg.legNumber, leg.winner, leg.startedAt, leg.completedAt);
+            `).run(leg.id, id, legNumber, leg.winner, leg.startedAt, leg.completedAt);
                         // Insert throws
                         if (leg.throws && Array.isArray(leg.throws)) {
                             const insertThrow = db.prepare(`

@@ -138,11 +138,33 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
     // Calculate random winner and rotation
     const winnerIndex = Math.floor(Math.random() * players.length);
 
-    // Calculate final rotation to land on winner
-    // The pointer is at the top (0 degrees), so we need to position the winner segment there
-    const winnerSegmentCenter = winnerIndex * segmentAngle + segmentAngle / 2;
-    const spins = 5 + Math.random() * 3; // 5-8 full rotations
-    const finalRotation = spins * 360 + (360 - winnerSegmentCenter);
+    // How the wheel is drawn:
+    // - Segment 0 starts at -90° (canvas coordinates) which is at the TOP of the wheel
+    // - Segments go clockwise: segment 0 at top, segment 1 to the right, etc.
+    //
+    // The pointer is at the TOP of the wheel, pointing DOWN into the wheel.
+    // CSS rotation is clockwise (positive degrees rotate clockwise).
+    //
+    // Initially (rotation=0°), segment 0's center is at the top under the pointer.
+    // To land on segment N, we need to rotate the wheel so that segment N is at the top.
+    //
+    // Segment N's center is at angle: N * segmentAngle (from segment 0's center)
+    // To bring segment N to the top, we rotate BACKWARDS (counter to where it currently is)
+    // But since we want dramatic clockwise spinning, we do full rotations PLUS the offset to land correctly.
+    //
+    // After rotating by X degrees clockwise, the segment at position (360 - X) mod 360 is at top.
+    // So to land on segment N (at position N * segmentAngle), we need:
+    // (360 - X) mod 360 = N * segmentAngle + segmentAngle/2
+    // X = 360 - (N * segmentAngle + segmentAngle/2)
+
+    const segmentCenter = winnerIndex * segmentAngle + segmentAngle / 2;
+    const baseRotation = 360 - segmentCenter; // This brings segment N to top
+    const spins = 5 + Math.random() * 3; // 5-8 full rotations for drama
+    const finalRotation = Math.floor(spins) * 360 + baseRotation;
+
+    console.log(`🎰 Spinner: players=${players.map(p=>p.name).join(', ')}`);
+    console.log(`🎰 Spinner: winnerIndex=${winnerIndex}, player=${players[winnerIndex]?.name}`);
+    console.log(`🎰 Spinner: segmentAngle=${segmentAngle}°, segmentCenter=${segmentCenter}°, baseRotation=${baseRotation}°, finalRotation=${finalRotation.toFixed(1)}°`);
 
     setRotation(finalRotation);
 
@@ -154,7 +176,6 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
 
       // Play winner announcement after a short delay
       setTimeout(() => {
-        // Could add a winner sound here
         audioSystem.playSound('/sounds/effects/accepted_invite.mp3', true);
       }, 300);
 

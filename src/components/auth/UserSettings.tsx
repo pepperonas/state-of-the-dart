@@ -9,6 +9,29 @@ import api from '../../services/api';
 
 const AVATAR_EMOJIS = ['👤', '🎯', '🎲', '🎮', '🏆', '⚡', '🔥', '💎', '🎪', '🎭', '🎨', '🎸', '🎹', '🎺', '🎻', '🥁', '🎤', '🎧', '🎬', '🎯', '🏹', '⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏉', '🥏', '🎱', '🏓', '🏸', '🏒', '🏑', '🥍', '🏏', '🥊', '🥋', '🥅', '⛳', '⛸️', '🎿', '🛷', '🏂'];
 
+// Helper to check if avatar is a URL (from Google OAuth)
+const isAvatarUrl = (avatar: string) => avatar?.startsWith('http');
+
+// Helper to render avatar (emoji or image)
+const renderAvatar = (avatarValue: string, size: 'sm' | 'md' | 'lg' = 'md') => {
+  const imageSizeClasses = {
+    sm: 'w-8 h-8',
+    md: 'w-12 h-12',
+    lg: 'w-16 h-16',
+  };
+
+  if (isAvatarUrl(avatarValue)) {
+    return (
+      <img
+        src={avatarValue}
+        alt="Avatar"
+        className={`${imageSizeClasses[size]} rounded-full object-cover`}
+      />
+    );
+  }
+  return <span>{avatarValue || '👤'}</span>;
+};
+
 const UserSettings: React.FC = () => {
   const navigate = useNavigate();
   const { user, refreshUser, logout } = useAuth();
@@ -160,12 +183,18 @@ const UserSettings: React.FC = () => {
                 <div className="flex items-center gap-4">
                   <button
                     type="button"
-                    onClick={() => setShowAvatarPicker(!showAvatarPicker)}
-                    className="w-16 h-16 text-4xl bg-dark-800 border border-dark-600 rounded-lg hover:bg-dark-700 transition-colors"
+                    onClick={() => !isAvatarUrl(avatar) && setShowAvatarPicker(!showAvatarPicker)}
+                    className={`w-16 h-16 text-4xl bg-dark-800 border border-dark-600 rounded-lg transition-colors flex items-center justify-center ${
+                      isAvatarUrl(avatar) ? 'cursor-default' : 'hover:bg-dark-700'
+                    }`}
                   >
-                    {avatar}
+                    {renderAvatar(avatar, 'md')}
                   </button>
-                  <span className="text-dark-400 text-sm">Klicke um Avatar zu ändern</span>
+                  <span className="text-dark-400 text-sm">
+                    {isAvatarUrl(avatar)
+                      ? 'Google Avatar (kann nicht geändert werden)'
+                      : 'Klicke um Avatar zu ändern'}
+                  </span>
                 </div>
 
                 {showAvatarPicker && (

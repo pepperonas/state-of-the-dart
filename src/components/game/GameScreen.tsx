@@ -187,10 +187,11 @@ const GameScreen: React.FC = () => {
   });
   
   useEffect(() => {
-    if (!state.currentMatch && showSetup === false) {
+    // Show setup if no match or if match is paused/completed
+    if ((!state.currentMatch || state.currentMatch.status === 'paused' || state.currentMatch.status === 'completed') && showSetup === false) {
       setShowSetup(true);
     }
-  }, [state.currentMatch]);
+  }, [state.currentMatch, state.currentMatch?.status]);
   
   const handleStartGame = async () => {
     // Play a start sound to unlock audio system
@@ -226,11 +227,16 @@ const GameScreen: React.FC = () => {
   const handleSpinnerComplete = (startingPlayerIndex: number) => {
     if (!pendingGameStart) return;
 
+    const spinnerWinner = pendingGameStart.players[startingPlayerIndex];
+    console.log(`🎯 Spinner winner: ${spinnerWinner?.name} (index ${startingPlayerIndex})`);
+
     // Reorder players so the winner goes first
     const reorderedPlayers = [
       ...pendingGameStart.players.slice(startingPlayerIndex),
       ...pendingGameStart.players.slice(0, startingPlayerIndex),
     ];
+
+    console.log(`🎮 Game starting with player order: ${reorderedPlayers.map(p => p.name).join(' → ')}`);
 
     dispatch({
       type: 'START_MATCH',
@@ -382,9 +388,14 @@ const GameScreen: React.FC = () => {
   };
 
   const confirmBackToMenu = () => {
+    // First pause the match (this saves it)
     dispatch({ type: 'PAUSE_MATCH' });
     setShowBackConfirm(false);
-    navigate('/');
+
+    // Navigate with a small delay to ensure state updates complete
+    setTimeout(() => {
+      navigate('/', { replace: true });
+    }, 100);
   };
 
   const handleEndMatch = () => {
@@ -402,11 +413,17 @@ const GameScreen: React.FC = () => {
       <div className="min-h-screen p-4 md:p-8 gradient-mesh">
         <div className="max-w-4xl mx-auto">
           <button
-            onClick={() => navigate('/')}
-            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('🔙 Back to Menu clicked from Setup');
+              window.location.href = '/';
+            }}
+            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all cursor-pointer"
+            style={{ pointerEvents: 'auto', position: 'relative', zIndex: 100 }}
           >
             <ArrowLeft size={20} />
-            Back to Menu
+            Zurück zum Menü
           </button>
           
           <div className="glass-card rounded-xl shadow-lg p-6 md:p-8">

@@ -190,19 +190,63 @@ router.post('/', authenticateTenant, (req: AuthRequest, res: Response) => {
 // Update player
 router.put('/:id', authenticateTenant, (req: AuthRequest, res: Response) => {
   const { id } = req.params;
-  const { name, avatar } = req.body;
+  const { name, avatar, stats } = req.body;
 
   const db = getDatabase();
 
   try {
     // Verify ownership
-    const player = db.prepare('SELECT * FROM players WHERE id = ? AND tenant_id = ?').get(id, req.tenantId);
+    const player = db.prepare('SELECT * FROM players WHERE id = ? AND tenant_id = ?').get(id, req.tenantId) as any;
     if (!player) {
       return res.status(404).json({ error: 'Player not found' });
     }
 
-    // Update player
-    db.prepare('UPDATE players SET name = ?, avatar = ? WHERE id = ?').run(name, avatar, id);
+    // Only update name/avatar if provided (use existing values otherwise)
+    const updatedName = name !== undefined ? name : player.name;
+    const updatedAvatar = avatar !== undefined ? avatar : player.avatar;
+
+    // Update player basic info
+    db.prepare('UPDATE players SET name = ?, avatar = ? WHERE id = ?').run(updatedName, updatedAvatar, id);
+
+    // Update stats if provided
+    if (stats) {
+      db.prepare(`
+        UPDATE player_stats SET
+          games_played = ?,
+          games_won = ?,
+          total_legs_played = ?,
+          total_legs_won = ?,
+          highest_checkout = ?,
+          total_180s = ?,
+          total_171_plus = ?,
+          total_140_plus = ?,
+          total_100_plus = ?,
+          total_60_plus = ?,
+          best_average = ?,
+          average_overall = ?,
+          checkout_percentage = ?,
+          best_leg = ?,
+          nine_dart_finishes = ?
+        WHERE player_id = ?
+      `).run(
+        stats.gamesPlayed ?? 0,
+        stats.gamesWon ?? 0,
+        stats.totalLegsPlayed ?? 0,
+        stats.totalLegsWon ?? 0,
+        stats.highestCheckout ?? 0,
+        stats.total180s ?? 0,
+        stats.total171Plus ?? 0,
+        stats.total140Plus ?? 0,
+        stats.total100Plus ?? 0,
+        stats.total60Plus ?? 0,
+        stats.bestAverage ?? 0,
+        stats.averageOverall ?? 0,
+        stats.checkoutPercentage ?? 0,
+        stats.bestLeg ?? 999,
+        stats.nineDartFinishes ?? 0,
+        id
+      );
+    }
 
     const updatedPlayer = db.prepare(`
       SELECT p.*, ps.*

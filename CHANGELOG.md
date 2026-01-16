@@ -5,6 +5,35 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/),
 und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
+## [0.1.1] - 2026-01-16
+
+### ✨ Hinzugefügt
+
+#### Spinner-Rad für Startspieler-Ermittlung
+- **Glücksrad** vor jedem Match zur zufälligen Auswahl des Startspielers
+  - Animiertes Rad mit allen Spielern und Avataren
+  - Spannende Drehanimation mit Audio-Feedback
+  - Audio-Ansagen: "Time to spin the wheel", "Who gets lucky today", etc.
+  - Gewinner wird visuell angezeigt und startet das Match
+
+### 🐛 Behoben
+
+#### Navigation "Zurück zum Menü"
+- **Backend Player-Update Fix** - NOT NULL Constraint Fehler behoben wenn nur Stats aktualisiert werden
+- **Backend Match-Update Fix** - `leg_number` wird jetzt automatisch aus dem Index generiert
+- **Frontend Navigation Fix** - "Zurück zum Menü" funktioniert jetzt zuverlässig aus allen Screens
+  - Setup-Screen: Direkter Redirect zum Hauptmenü
+  - Laufendes Spiel: Pausieren und zum Menü navigieren
+  - Pausiertes Spiel: Automatischer Redirect zum Setup
+
+#### Avatar-Anzeige in Account-Einstellungen
+- **Google OAuth Avatars** werden jetzt als Bild angezeigt statt als URL-Text
+- Avatar-Picker wird für URL-Avatars deaktiviert (nicht änderbar)
+
+#### Fehlerbehandlung verbessert
+- Stats-Updates blockieren nicht mehr die UI bei Fehlern
+- Match-Speicherung mit robuster Create/Update Logik
+
 ## [0.1.0] - 2026-01-16
 
 ### ✨ Hinzugefügt

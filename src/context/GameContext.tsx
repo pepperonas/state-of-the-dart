@@ -467,28 +467,75 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     legs: match.legs,
   });
 
-  // Load match from storage when tenant changes
+  // Track if match has been created in DB
+  const matchCreatedRef = React.useRef<string | null>(null);
+
   // Save game state to API with debouncing (during active game)
   useEffect(() => {
     if (state.currentMatch && state.currentMatch.status === 'in-progress') {
+      const matchId = state.currentMatch.id;
       const saveTimer = setTimeout(async () => {
         const apiMatch = transformMatchForApi(state.currentMatch!);
+
         try {
-          // Try updating existing match
-          await api.matches.update(state.currentMatch!.id, apiMatch);
-        } catch (error) {
-          // If update fails, try creating it
-          try {
-            await api.matches.create(apiMatch);
-          } catch (createError) {
-            console.error('Failed to save match:', createError);
+          // If we haven't created this match yet, create it first
+          if (matchCreatedRef.current !== matchId) {
+            try {
+              await api.matches.create(apiMatch);
+              matchCreatedRef.current = matchId;
+              console.log('✅ Match created in DB:', matchId);
+            } catch (createError: any) {
+              // If it already exists, mark as created and continue
+              if (createError?.response?.status === 409) {
+                matchCreatedRef.current = matchId;
+              } else {
+                console.warn('Match create failed:', createError);
+              }
+            }
+          } else {
+            // Match exists, update it
+            await api.matches.update(matchId, apiMatch);
           }
+        } catch (error) {
+          // Silently fail - don't block the game
+          console.warn('Match save failed:', error);
         }
-      }, 2000); // Debounce: Save every 2 seconds
+      }, 1000); // Debounce: Save every 1 second
 
       return () => clearTimeout(saveTimer);
     }
   }, [state.currentMatch]);
+
+  // Reset match created ref when match ID changes
+  useEffect(() => {
+    if (!state.currentMatch) {
+      matchCreatedRef.current = null;
+    }
+  }, [state.currentMatch?.id]);
+
+  // Save match when paused (before navigating away)
+  useEffect(() => {
+    if (state.currentMatch?.status === 'paused') {
+      const apiMatch = transformMatchForApi(state.currentMatch);
+      const matchId = state.currentMatch.id;
+
+      // Try to save immediately when paused
+      (async () => {
+        try {
+          if (matchCreatedRef.current !== matchId) {
+            await api.matches.create(apiMatch);
+            matchCreatedRef.current = matchId;
+          } else {
+            await api.matches.update(matchId, apiMatch);
+          }
+          console.log('✅ Paused match saved');
+        } catch (err) {
+          console.warn('Failed to save paused match:', err);
+          // Don't throw - allow navigation to continue
+        }
+      })();
+    }
+  }, [state.currentMatch?.status]);
   
   // Sync player statistics to PlayerContext (called during and after match)
   const syncPlayerStats = (liveUpdate: boolean = false) => {
@@ -528,6 +575,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         
         const highestCheckoutThisMatch = Math.max(0, ...checkoutsFromLegs);
         
+        // Fire and forget - don't block on live updates
         updatePlayer(matchPlayer.playerId, {
           stats: {
             ...player.stats,
@@ -535,7 +583,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             bestAverage: Math.max(player.stats.bestAverage, matchPlayer.matchAverage),
             highestCheckout: Math.max(player.stats.highestCheckout, highestCheckoutThisMatch),
           },
-        });
+        }).catch(err => console.warn('Live stats update failed:', err));
         return; // Skip the rest for live updates
       }
       
@@ -555,7 +603,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         ...checkoutsFromLegs
       );
       
-      // Update player stats
+      // Update player stats - fire and forget to not block UI
       updatePlayer(matchPlayer.playerId, {
         stats: {
           ...player.stats,
@@ -582,7 +630,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             matchPlayer.checkoutsHit
           ),
         },
-      });
+      }).catch(err => console.warn('Final stats update failed:', err));
     });
   };
   
