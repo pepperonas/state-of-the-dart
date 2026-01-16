@@ -134,13 +134,6 @@ const MainMenu: React.FC = () => {
             <div className="flex items-center gap-3">
               <SyncStatus />
               <UserMenu />
-              <button
-                onClick={() => setCurrentTenant(null)}
-                className="flex items-center gap-2 px-4 py-2 glass-card hover:glass-card-hover rounded-lg text-white border border-white/10 transition-all"
-              >
-                <LogOut size={20} />
-                <span className="hidden sm:inline">Profil wechseln</span>
-              </button>
             </div>
           </div>
           

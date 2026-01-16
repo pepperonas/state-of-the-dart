@@ -447,18 +447,6 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 </div>
               </div>
               
-              <button
-                onClick={() => {
-                  if (confirm('Möchtest du dich wirklich abmelden? Das aktuelle Spiel wird gespeichert.')) {
-                    setCurrentTenant(null);
-                    navigate('/');
-                  }
-                }}
-                className="w-full py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition-all"
-              >
-                <LogOut size={20} />
-                Profil wechseln
-              </button>
             </div>
           </div>
         </div>
