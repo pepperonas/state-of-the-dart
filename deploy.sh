@@ -45,7 +45,8 @@ cd server
 npm run build
 cd ..
 
-# Nur dist und package files syncen (ohne node_modules und data)
+# WICHTIG: Nur dist syncen, NIEMALS .env überschreiben!
+# Die .env auf dem VPS enthält Production-Secrets und muss manuell gepflegt werden
 rsync -avz \
   --exclude='node_modules' \
   --exclude='data' \
@@ -53,9 +54,12 @@ rsync -avz \
   --exclude='src' \
   --exclude='scripts' \
   --exclude='.env' \
+  --exclude='env.example' \
   server/dist/ ${VPS_USER}@${VPS_IP}:${BACKEND_PATH}/dist/
 
 rsync -avz server/package*.json ${VPS_USER}@${VPS_IP}:${BACKEND_PATH}/
+
+echo "   ⚠️  HINWEIS: .env wird NICHT deployed (Production-Secrets!)"
 
 echo "   Backend deployed"
 
