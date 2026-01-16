@@ -61,19 +61,27 @@ function AppContent() {
   // Clear old tenant data on first load with new auth system
   useEffect(() => {
     const hasAuthSystem = localStorage.getItem('auth_token');
-    const hasOldTenantData = localStorage.getItem('currentTenant');
+    const hasOldTenantData = localStorage.getItem('currentTenant') || localStorage.getItem('tenants');
+    const migrationDone = localStorage.getItem('auth_migration_done');
     
-    // If no auth token but has old tenant data, clear it
-    if (!hasAuthSystem && hasOldTenantData) {
+    // If migration not done and old data exists, clear it
+    if (!migrationDone && hasOldTenantData) {
       console.log('🔄 Migrating to new authentication system...');
       // Keep only essential data
       const darkModeSetting = localStorage.getItem('darkMode');
-      // Clear everything else
+      // Clear everything
       localStorage.clear();
       // Restore dark mode
       if (darkModeSetting) {
         localStorage.setItem('darkMode', darkModeSetting);
       }
+      // Mark migration as done
+      localStorage.setItem('auth_migration_done', 'true');
+      // Force reload to clear any cached state
+      window.location.href = '/login';
+    } else if (!hasAuthSystem && !migrationDone) {
+      // No auth and no old data - mark migration as done and go to login
+      localStorage.setItem('auth_migration_done', 'true');
     }
   }, []);
 
