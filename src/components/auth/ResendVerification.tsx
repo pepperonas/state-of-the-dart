@@ -75,9 +75,13 @@ const ResendVerification: React.FC = () => {
           </p>
 
           {error && (
-            <div className="mb-4 p-4 bg-error-500/10 border border-error-500/30 rounded-lg flex items-center gap-2 text-error-400">
-              <AlertCircle size={20} />
-              <span>{error}</span>
+            <div className={`mb-4 p-4 rounded-lg flex items-center gap-3 ${
+              error.includes('already verified') 
+                ? 'bg-primary-500/20 border-2 border-primary-500 text-white shadow-lg shadow-primary-500/20'
+                : 'bg-red-500/20 border-2 border-red-500 text-white shadow-lg shadow-red-500/20'
+            }`}>
+              <AlertCircle size={24} className={error.includes('already verified') ? 'text-primary-400 flex-shrink-0' : 'text-red-400 flex-shrink-0'} />
+              <span className="font-semibold text-base">{error}</span>
             </div>
           )}
 
