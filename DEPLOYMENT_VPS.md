@@ -241,6 +241,9 @@ ssh root@69.62.121.168 "systemctl reload nginx"
   - Troubleshooting-Anleitung hinzugefügt
 - **Login emailVerified Bug gefixt:**
   - Login-Response enthält jetzt `emailVerified` Feld
+- **Multi-Tenant Bug gefixt:**
+  - User mit mehreren Tenants bekamen falschen Tenant (ohne Daten)
+  - Query verwendet jetzt `ORDER BY last_active DESC` für zuletzt aktiven Tenant
 
 ### 2026-01-16
 - Backend-Pfad konsolidiert auf `/var/www/stateofthedart-backend`

@@ -36,13 +36,13 @@ export const authenticateTenant = (req: AuthRequest, res: Response, next: NextFu
       req.tenantId = decoded.tenantId;
       req.playerId = decoded.playerId;
     } else if (decoded.userId) {
-      // New system - get tenant from user_id
-      const tenant = db.prepare('SELECT id FROM tenants WHERE user_id = ?').get(decoded.userId) as any;
-      
+      // New system - get tenant from user_id (most recently active)
+      const tenant = db.prepare('SELECT id FROM tenants WHERE user_id = ? ORDER BY last_active DESC LIMIT 1').get(decoded.userId) as any;
+
       if (!tenant) {
         return res.status(404).json({ error: 'No tenant found for user' });
       }
-      
+
       req.tenantId = tenant.id;
       req.user = {
         id: decoded.userId,
