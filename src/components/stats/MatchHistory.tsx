@@ -23,28 +23,36 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
   // Prepare round-by-round data for chart
   const prepareRoundData = (match: Match) => {
     const allThrows: Throw[] = [];
-    
+    const legs = match.legs || [];
+    const players = match.players || [];
+
+    // Return empty if no data
+    if (legs.length === 0 || players.length === 0) {
+      return [];
+    }
+
     // Collect all throws from all legs
-    match.legs.forEach(leg => {
-      allThrows.push(...leg.throws);
+    legs.forEach(leg => {
+      const throws = leg.throws || [];
+      allThrows.push(...throws);
     });
-    
+
     // Sort by timestamp
-    const sortedThrows = allThrows.sort((a, b) => 
+    const sortedThrows = allThrows.sort((a, b) =>
       new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     );
-    
+
     // Group by player and round (3 darts = 1 round)
     const playerRounds: Record<string, { round: number; score: number }[]> = {};
-    
-    match.players.forEach(player => {
+
+    players.forEach(player => {
       const playerThrows = sortedThrows.filter(t => t.playerId === player.playerId);
       const rounds: { round: number; score: number }[] = [];
-      
+
       for (let i = 0; i < playerThrows.length; i += 1) {
         const roundNumber = Math.floor(i / 3) + 1;
-        const throwScore = playerThrows[i].score;
-        
+        const throwScore = playerThrows[i].score ?? 0;
+
         // Check if this round already exists
         const existingRound = rounds.find(r => r.round === roundNumber);
         if (existingRound) {
@@ -53,25 +61,26 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
           rounds.push({ round: roundNumber, score: throwScore });
         }
       }
-      
+
       playerRounds[player.playerId] = rounds;
     });
-    
+
     // Merge data for chart
-    const maxRounds = Math.max(...Object.values(playerRounds).map(r => r.length));
+    const roundCounts = Object.values(playerRounds).map(r => r.length);
+    const maxRounds = roundCounts.length > 0 ? Math.max(...roundCounts) : 0;
     const chartData = [];
-    
+
     for (let i = 1; i <= maxRounds; i++) {
       const dataPoint: any = { round: i };
-      
-      match.players.forEach(player => {
+
+      players.forEach(player => {
         const roundData = playerRounds[player.playerId]?.find(r => r.round === i);
         dataPoint[player.name] = roundData?.score || 0;
       });
-      
+
       chartData.push(dataPoint);
     }
-    
+
     return chartData;
   };
   
@@ -84,12 +93,14 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
         </div>
       ) : (
         sortedMatches.map((match) => {
-          const player = match.players.find(p => p.playerId === playerId);
-          const opponent = match.players.find(p => p.playerId !== playerId);
+          const matchPlayers = match.players || [];
+          const player = matchPlayers.find(p => p.playerId === playerId);
+          const opponent = matchPlayers.find(p => p.playerId !== playerId);
           const isWin = match.winner === playerId;
           const isExpanded = expandedMatch === match.id;
-          
-          if (!player || !opponent) return null;
+
+          // Skip matches without player data - they can't be displayed properly
+          if (matchPlayers.length === 0 || !player) return null;
           
           return (
             <div 
@@ -118,15 +129,15 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                   {/* Match Info */}
                   <div className="flex-1 text-left">
                     <div className="font-bold text-gray-800 dark:text-white">
-                      {player.name} vs {opponent.name}
+                      {player.name} vs {opponent?.name || 'Unbekannt'}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-3">
                       <span className="flex items-center gap-1">
                         <Calendar size={14} />
                         {new Date(match.startedAt).toLocaleDateString('de-DE')}
                       </span>
-                      <span>Score: {player.legsWon} - {opponent.legsWon}</span>
-                      <span>Avg: {player.matchAverage.toFixed(2)}</span>
+                      <span>Score: {player.legsWon} - {opponent?.legsWon ?? 0}</span>
+                      <span>Avg: {(player.matchAverage ?? 0).toFixed(2)}</span>
                     </div>
                   </div>
                   
@@ -189,7 +200,7 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                             wrapperStyle={{ paddingTop: '20px' }}
                             iconType="line"
                           />
-                          {match.players.map((p, index) => (
+                          {matchPlayers.map((p, index) => (
                             <Line
                               key={p.playerId}
                               type="monotone"
@@ -206,50 +217,52 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                     </div>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className={`grid ${opponent ? 'md:grid-cols-2' : 'md:grid-cols-1'} gap-6`}>
                     {/* Player Stats */}
                     <div>
                       <h4 className="font-bold text-gray-800 dark:text-white mb-3">
                         {player.name}
                       </h4>
                       <div className="grid grid-cols-2 gap-3">
-                        <StatBox label="Average" value={player.matchAverage.toFixed(2)} />
-                        <StatBox label="Highest Score" value={player.matchHighestScore} />
-                        <StatBox label="180s" value={player.match180s} />
-                        <StatBox label="140+" value={player.match140Plus} />
-                        <StatBox label="100+" value={player.match100Plus} />
-                        <StatBox 
-                          label="Checkout %" 
+                        <StatBox label="Average" value={(player.matchAverage ?? 0).toFixed(2)} />
+                        <StatBox label="Highest Score" value={player.matchHighestScore ?? 0} />
+                        <StatBox label="180s" value={player.match180s ?? 0} />
+                        <StatBox label="140+" value={player.match140Plus ?? 0} />
+                        <StatBox label="100+" value={player.match100Plus ?? 0} />
+                        <StatBox
+                          label="Checkout %"
                           value={
-                            player.checkoutAttempts > 0
-                              ? `${((player.checkoutsHit / player.checkoutAttempts) * 100).toFixed(1)}%`
+                            (player.checkoutAttempts ?? 0) > 0
+                              ? `${(((player.checkoutsHit ?? 0) / player.checkoutAttempts) * 100).toFixed(1)}%`
                               : '0%'
-                          } 
+                          }
                         />
                       </div>
                     </div>
-                    
-                    {/* Opponent Stats */}
-                    <div>
-                      <h4 className="font-bold text-gray-800 dark:text-white mb-3">
-                        {opponent.name}
-                      </h4>
-                      <div className="grid grid-cols-2 gap-3">
-                        <StatBox label="Average" value={opponent.matchAverage.toFixed(2)} />
-                        <StatBox label="Highest Score" value={opponent.matchHighestScore} />
-                        <StatBox label="180s" value={opponent.match180s} />
-                        <StatBox label="140+" value={opponent.match140Plus} />
-                        <StatBox label="100+" value={opponent.match100Plus} />
-                        <StatBox 
-                          label="Checkout %" 
-                          value={
-                            opponent.checkoutAttempts > 0
-                              ? `${((opponent.checkoutsHit / opponent.checkoutAttempts) * 100).toFixed(1)}%`
-                              : '0%'
-                          } 
-                        />
+
+                    {/* Opponent Stats - only show if opponent exists */}
+                    {opponent && (
+                      <div>
+                        <h4 className="font-bold text-gray-800 dark:text-white mb-3">
+                          {opponent.name}
+                        </h4>
+                        <div className="grid grid-cols-2 gap-3">
+                          <StatBox label="Average" value={(opponent.matchAverage ?? 0).toFixed(2)} />
+                          <StatBox label="Highest Score" value={opponent.matchHighestScore ?? 0} />
+                          <StatBox label="180s" value={opponent.match180s ?? 0} />
+                          <StatBox label="140+" value={opponent.match140Plus ?? 0} />
+                          <StatBox label="100+" value={opponent.match100Plus ?? 0} />
+                          <StatBox
+                            label="Checkout %"
+                            value={
+                              (opponent.checkoutAttempts ?? 0) > 0
+                                ? `${(((opponent.checkoutsHit ?? 0) / opponent.checkoutAttempts) * 100).toFixed(1)}%`
+                                : '0%'
+                            }
+                          />
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                   
                   {/* Leg-by-Leg Breakdown */}

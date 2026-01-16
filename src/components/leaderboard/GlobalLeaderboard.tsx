@@ -190,7 +190,15 @@ const GlobalLeaderboard: React.FC = () => {
                           {entry.playerName}
                         </p>
                         <p className="text-sm text-dark-400 truncate flex items-center gap-1">
-                          <span className="text-xl">{entry.userAvatar}</span>
+                          {entry.userAvatar?.startsWith('http') ? (
+                            <img
+                              src={entry.userAvatar}
+                              alt={entry.userName}
+                              className="w-5 h-5 rounded-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-xl">{entry.userAvatar}</span>
+                          )}
                           {entry.userName}
                         </p>
                       </div>

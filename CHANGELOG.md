@@ -5,6 +5,35 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/),
 und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
+## [0.1.3] - 2026-01-17
+
+### ✨ Hinzugefügt
+
+#### Stats Tab Persistence
+- **URL-basierte Tab-Navigation** - Stats-Tab bleibt bei Refresh erhalten
+  - URL enthält jetzt Tab-Parameter: `/stats?tab=history`
+  - Browser-Navigation (Zurück/Vorwärts) funktioniert mit Tabs
+  - Direktlinks zu spezifischen Tabs möglich
+
+### 🐛 Behoben
+
+#### Stats-Verlauf weißer Bildschirm
+- **MatchHistory Null-Safety** - Robuste Fehlerbehandlung für fehlende Match-Daten
+  - `match.players` Array wird jetzt sicher gehandhabt
+  - Opponent kann optional sein (für unvollständige Daten)
+  - Alle numerischen Werte mit Fallback-Werten abgesichert
+  - `prepareRoundData` gibt leeres Array zurück bei fehlenden Daten
+
+#### Leaderboard Avatar-URLs
+- **Google OAuth Avatars** werden jetzt als Bilder angezeigt statt als URL-Text
+  - URLs die mit `http` beginnen werden als `<img>` gerendert
+  - Emoji-Avatare bleiben als Text
+
+#### Backend TypeScript Fixes
+- **Middleware Typen** - Express-kompatible Middleware-Signaturen
+  - `authenticateToken`, `authenticateTenant`, `optionalAuth` nutzen jetzt `Request` mit Cast
+  - Behebt TypeScript-Kompilierungsfehler
+
 ## [0.1.2] - 2026-01-17
 
 ### ✨ Hinzugefügt

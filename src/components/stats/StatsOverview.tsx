@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Activity, TrendingUp, TrendingDown, Minus, Download, Users } from 'lucide-react';
 import { usePlayer } from '../../context/PlayerContext';
 import { useTenant } from '../../context/TenantContext';
@@ -20,17 +20,29 @@ import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
 import { Flame, FileSpreadsheet, FileText } from 'lucide-react';
 import { api } from '../../services/api';
 
+const VALID_TABS = ['overview', 'progress', 'history', 'compare', 'heatmap'] as const;
+type TabType = typeof VALID_TABS[number];
+
 const StatsOverview: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { players, getPlayerHeatmap } = usePlayer();
   const { storage } = useTenant();
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
-  const [selectedTab, setSelectedTab] = useState<'overview' | 'progress' | 'history' | 'compare' | 'heatmap'>('overview');
   const [comparePlayerIds, setComparePlayerIds] = useState<string[]>([]);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const exportMenuRef = useRef<HTMLDivElement>(null);
   const [matches, setMatches] = useState<Match[]>([]);
   const [loadingMatches, setLoadingMatches] = useState(true);
+
+  // Get tab from URL or default to 'overview'
+  const tabParam = searchParams.get('tab');
+  const selectedTab: TabType = VALID_TABS.includes(tabParam as TabType) ? (tabParam as TabType) : 'overview';
+
+  // Update tab and URL
+  const setSelectedTab = (tab: TabType) => {
+    setSearchParams({ tab });
+  };
   
   // Load matches from API (Database-First!)
   useEffect(() => {

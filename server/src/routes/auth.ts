@@ -329,7 +329,7 @@ router.post('/reset-password', async (req: Request, res: Response) => {
  */
 import { authenticateToken } from '../middleware/auth';
 
-router.get('/me', authenticateToken, async (req: AuthRequest, res: Response) => {
+router.get('/me', authenticateToken, async (req: Request, res: Response) => {
   const token = req.headers.authorization?.replace('Bearer ', '');
 
   if (!token) {
@@ -412,9 +412,10 @@ router.post('/resend-verification', async (req: Request, res: Response) => {
 /**
  * Update user profile (name, avatar)
  */
-router.patch('/profile', authenticateToken, async (req: AuthRequest, res: Response) => {
+router.patch('/profile', authenticateToken, async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
   const { name, avatar } = req.body;
-  const userId = req.user?.id;
+  const userId = authReq.user?.id;
 
   if (!userId) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -458,9 +459,10 @@ router.patch('/profile', authenticateToken, async (req: AuthRequest, res: Respon
 /**
  * Update user email (requires re-verification)
  */
-router.patch('/email', authenticateToken, async (req: AuthRequest, res: Response) => {
+router.patch('/email', authenticateToken, async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
   const { newEmail, password } = req.body;
-  const userId = req.user?.id;
+  const userId = authReq.user?.id;
 
   if (!userId) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -525,9 +527,10 @@ router.patch('/email', authenticateToken, async (req: AuthRequest, res: Response
 /**
  * Delete user account (requires password confirmation)
  */
-router.delete('/account', authenticateToken, async (req: AuthRequest, res: Response) => {
+router.delete('/account', authenticateToken, async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
   const { password } = req.body;
-  const userId = req.user?.id;
+  const userId = authReq.user?.id;
 
   if (!userId) {
     return res.status(401).json({ error: 'Unauthorized' });
