@@ -14,15 +14,19 @@ const authenticateTenant = (req, res, next) => {
     }
     try {
         const decoded = jsonwebtoken_1.default.verify(token, config_1.config.jwtSecret);
+        const db = (0, database_1.getDatabase)();
         // Check if token has tenantId (old system) or userId (new system)
         if (decoded.tenantId) {
-            // Old system - tenant directly in token
+            // Old system - tenant directly in token, verify it still exists
+            const tenant = db.prepare('SELECT id FROM tenants WHERE id = ?').get(decoded.tenantId);
+            if (!tenant) {
+                return res.status(404).json({ error: 'Tenant no longer exists' });
+            }
             req.tenantId = decoded.tenantId;
             req.playerId = decoded.playerId;
         }
         else if (decoded.userId) {
             // New system - get tenant from user_id
-            const db = (0, database_1.getDatabase)();
             const tenant = db.prepare('SELECT id FROM tenants WHERE user_id = ?').get(decoded.userId);
             if (!tenant) {
                 return res.status(404).json({ error: 'No tenant found for user' });

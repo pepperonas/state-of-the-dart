@@ -12,23 +12,24 @@ const ThemeManager: React.FC = () => {
   useEffect(() => {
     const root = document.documentElement;
     const body = document.body;
-    
+
     // Remove all theme classes
-    root.classList.remove('modern', 'steampunk', 'dark');
-    body.classList.remove('modern', 'steampunk', 'dark');
-    
-    // Apply current theme class
-    const theme = settings.theme === 'dark' ? 'modern' : settings.theme; // Map legacy 'dark' to 'modern'
+    root.classList.remove('modern', 'steampunk', 'cyberpunk', 'dark');
+    body.classList.remove('modern', 'steampunk', 'cyberpunk', 'dark');
+
+    // Map theme names (steampunk class is now cyberpunk styling)
+    const theme = settings.theme === 'dark' ? 'modern' : settings.theme;
     root.classList.add(theme);
     body.classList.add(theme);
-    
+
     // Apply theme-specific font family
     if (theme === 'steampunk') {
-      body.style.fontFamily = "'Crimson Text', serif";
+      // Cyberpunk fonts
+      body.style.fontFamily = "'Rajdhani', sans-serif";
     } else {
       body.style.fontFamily = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
     }
-    
+
     console.log(`🎨 Theme applied: ${theme}`);
   }, [settings.theme]);
 

@@ -2,8 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Steampunk Font - Victorian Era Typography */
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+/* Cyberpunk Font - Futuristic Typography */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap');
 
 /* Performance: Critical CSS inlining */
 * {
@@ -23,16 +23,6 @@
   border-width: 0;
 }
 
-.sr-only:focus,
-.sr-only:active {
-  position: static;
-  width: auto;
-  height: auto;
-  overflow: visible;
-  clip: auto;
-  white-space: normal;
-}
-
 /* Smooth scrolling with reduced motion support */
 @media (prefers-reduced-motion: no-preference) {
   html {
@@ -40,107 +30,18 @@
   }
 }
 
-/* Font display optimization */
-@font-face {
-  font-display: swap;
-}
-
-/* Will-change for animated elements */
-.animate-spin,
-.animate-bounce,
-.animate-pulse {
-  will-change: transform;
-}
-
 @layer base {
   :root {
     --background: 0 0% 100%;
     --foreground: 224 71.4% 4.1%;
-    --card: 0 0% 100%;
-    --card-foreground: 224 71.4% 4.1%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 71.4% 4.1%;
     --primary: 142 72% 29%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 220 14.3% 95.9%;
-    --secondary-foreground: 220.9 39.3% 11%;
-    --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
-    --accent: 220 14.3% 95.9%;
-    --accent-foreground: 220.9 39.3% 11%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 224 71.4% 4.1%;
     --radius: 0.5rem;
   }
 
   .dark {
     --background: 224 71.4% 4.1%;
     --foreground: 210 20% 98%;
-    --card: 224 71.4% 4.1%;
-    --card-foreground: 210 20% 98%;
-    --popover: 224 71.4% 4.1%;
-    --popover-foreground: 210 20% 98%;
     --primary: 142 72% 29%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 64.9%;
-    --accent: 215 27.9% 16.9%;
-    --accent-foreground: 210 20% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --ring: 216 12.2% 83.9%;
-  }
-
-  /* 🎩⚙️ STEAMPUNK THEME - Victorian Era Aesthetics */
-  .steampunk {
-    /* Background - Aged Paper & Wood */
-    --sp-bg-primary: #1a1410;
-    --sp-bg-secondary: #2d2317;
-    --sp-bg-tertiary: #3d3025;
-    --sp-paper: #d4c5a9;
-    --sp-parchment: #f4e4c1;
-    
-    /* Metals - Bronze, Copper, Brass, Iron */
-    --sp-bronze: #cd7f32;
-    --sp-bronze-light: #e8a865;
-    --sp-bronze-dark: #8b5a2b;
-    --sp-copper: #b87333;
-    --sp-copper-light: #d4956a;
-    --sp-brass: #b5a642;
-    --sp-brass-light: #d4c96a;
-    --sp-iron: #4a4a4a;
-    --sp-rust: #b7410e;
-    
-    /* Accent Colors */
-    --sp-gold: #ffd700;
-    --sp-gold-dark: #b8860b;
-    --sp-steam: #e8e8e8;
-    --sp-coal: #252525;
-    --sp-leather: #8b4513;
-    
-    /* Typography */
-    --sp-text-primary: #f4e4c1;
-    --sp-text-secondary: #d4c5a9;
-    --sp-text-accent: #ffd700;
-    --sp-text-muted: #8b7355;
-    
-    /* Effects */
-    --sp-glow: rgba(255, 215, 0, 0.3);
-    --sp-shadow: rgba(0, 0, 0, 0.6);
-    --sp-rivet: radial-gradient(circle, #8b7355 0%, #4a4a4a 50%, #2d2317 100%);
-  }
-}
-
-@layer base {
-  body {
-    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
@@ -148,372 +49,45 @@
   .dart-shadow {
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
   }
-  
-  .dart-glow {
-    box-shadow: 0 0 20px rgba(0, 166, 81, 0.5);
-  }
-  
-  .text-shadow {
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  }
-  
-  .glass {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-  
-  .glass-dark {
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
+
   .glass-card {
     background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 
-      0 4px 24px rgba(0, 0, 0, 0.1),
-      0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
   }
-  
+
   .glass-card-hover {
     background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.15),
-      0 2px 4px rgba(0, 0, 0, 0.2);
   }
-  
-  .glass-card-gold {
-    background: linear-gradient(
-      135deg,
-      rgba(168, 85, 247, 0.08),
-      rgba(14, 165, 233, 0.08)
-    );
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(168, 85, 247, 0.2);
-    box-shadow: 
-      0 8px 32px rgba(168, 85, 247, 0.2),
-      0 2px 4px rgba(0, 0, 0, 0.2);
-  }
-  
-  .neon-primary {
-    color: #0ea5e9;
-    text-shadow: 0 0 20px rgba(14, 165, 233, 0.5);
-  }
-  
-  .neon-success {
-    color: #22c55e;
-    text-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
-  }
-  
-  /* Modern minimal background */
-  .minimal-bg {
-    background: linear-gradient(
-      180deg,
-      #0a0a0a 0%,
-      #171717 100%
-    );
-  }
-  
+
   .gradient-mesh {
     background:
       radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.05) 0px, transparent 50%),
       radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.05) 0px, transparent 50%),
       #0a0a0a;
   }
-  
+
   .card-hover-effect {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  
+
   .card-hover-effect:hover {
     transform: translateY(-2px);
-    box-shadow: 
-      0 12px 40px rgba(0, 0, 0, 0.2),
-      0 4px 8px rgba(0, 0, 0, 0.2);
   }
 
-  /* Mobile Touch Targets - min 44x44px for accessibility */
   .touch-target {
     min-width: 44px;
     min-height: 44px;
   }
 
-  /* Performance optimizations */
-  .gpu-accelerated {
-    transform: translateZ(0);
-    will-change: transform;
-  }
-
-  /* Reduce motion for accessibility */
   @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
+    *, *::before, *::after {
       animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
-  }
-
-  /* 🎩⚙️ STEAMPUNK UTILITIES */
-  
-  /* Victorian Typography */
-  .sp-font-heading {
-    font-family: 'Cinzel', serif;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-  }
-  
-  .sp-font-body {
-    font-family: 'Crimson Text', serif;
-    line-height: 1.7;
-  }
-  
-  /* Metal Textures & Gradients */
-  .sp-bronze-gradient {
-    background: linear-gradient(145deg, #e8a865 0%, #cd7f32 50%, #8b5a2b 100%);
-  }
-  
-  .sp-copper-gradient {
-    background: linear-gradient(145deg, #d4956a 0%, #b87333 50%, #8b4513 100%);
-  }
-  
-  .sp-brass-gradient {
-    background: linear-gradient(145deg, #d4c96a 0%, #b5a642 50%, #8b7355 100%);
-  }
-  
-  .sp-gold-gradient {
-    background: linear-gradient(145deg, #ffd700 0%, #daa520 50%, #b8860b 100%);
-  }
-  
-  /* Metallic 3D Button Effect */
-  .sp-button {
-    position: relative;
-    background: linear-gradient(145deg, #cd7f32 0%, #8b5a2b 100%);
-    border: 3px solid #4a4a4a;
-    box-shadow: 
-      inset 0 2px 0 rgba(232, 168, 101, 0.4),
-      inset 0 -2px 0 rgba(0, 0, 0, 0.5),
-      0 4px 8px rgba(0, 0, 0, 0.6),
-      0 0 0 1px #8b5a2b;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
-    transition: all 0.2s ease;
-  }
-  
-  .sp-button:hover {
-    background: linear-gradient(145deg, #e8a865 0%, #cd7f32 100%);
-    box-shadow: 
-      inset 0 2px 0 rgba(232, 168, 101, 0.6),
-      inset 0 -2px 0 rgba(0, 0, 0, 0.5),
-      0 6px 12px rgba(0, 0, 0, 0.7),
-      0 0 20px rgba(205, 127, 50, 0.3);
-  }
-  
-  .sp-button:active {
-    transform: translateY(2px);
-    box-shadow: 
-      inset 0 2px 4px rgba(0, 0, 0, 0.6),
-      0 2px 4px rgba(0, 0, 0, 0.4);
-  }
-  
-  /* Riveted Metal Panel */
-  .sp-panel {
-    background: linear-gradient(135deg, #2d2317 0%, #1a1410 100%);
-    border: 2px solid #4a4a4a;
-    box-shadow: 
-      inset 0 2px 0 rgba(139, 115, 85, 0.2),
-      inset 0 -2px 0 rgba(0, 0, 0, 0.5),
-      0 4px 12px rgba(0, 0, 0, 0.7);
-    position: relative;
-  }
-  
-  /* Rivet Decoration */
-  .sp-rivets::before,
-  .sp-rivets::after {
-    content: '';
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, #8b7355 0%, #4a4a4a 50%, #2d2317 100%);
-    box-shadow: 
-      inset 0 -2px 2px rgba(0, 0, 0, 0.6),
-      0 1px 2px rgba(255, 255, 255, 0.1);
-  }
-  
-  .sp-rivets::before {
-    top: 8px;
-    left: 8px;
-  }
-  
-  .sp-rivets::after {
-    top: 8px;
-    right: 8px;
-  }
-  
-  /* Aged Paper/Parchment Background */
-  .sp-paper-bg {
-    background: linear-gradient(
-      135deg,
-      #f4e4c1 0%,
-      #d4c5a9 50%,
-      #c4b59f 100%
-    );
-    background-image: 
-      linear-gradient(135deg, #f4e4c1 0%, #d4c5a9 50%, #c4b59f 100%),
-      url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
-    box-shadow: 
-      inset 0 0 30px rgba(139, 115, 85, 0.3),
-      0 2px 8px rgba(0, 0, 0, 0.4);
-  }
-  
-  /* Brass Frame/Border */
-  .sp-brass-frame {
-    border: 4px solid;
-    border-image: linear-gradient(145deg, #d4c96a 0%, #b5a642 50%, #8b7355 100%) 1;
-    box-shadow: 
-      inset 0 0 0 2px #8b7355,
-      inset 0 2px 4px rgba(0, 0, 0, 0.4),
-      0 4px 8px rgba(0, 0, 0, 0.5);
-  }
-  
-  /* Gear/Cog Decoration */
-  .sp-gear {
-    position: relative;
-    animation: sp-rotate 20s linear infinite;
-  }
-  
-  @keyframes sp-rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-  
-  /* Steam/Smoke Effect */
-  .sp-steam {
-    background: radial-gradient(ellipse at center, rgba(232, 232, 232, 0.3) 0%, transparent 70%);
-    filter: blur(8px);
-    animation: sp-steam-rise 4s ease-in-out infinite;
-  }
-  
-  @keyframes sp-steam-rise {
-    0%, 100% { transform: translateY(0) scale(1); opacity: 0.3; }
-    50% { transform: translateY(-20px) scale(1.2); opacity: 0.1; }
-  }
-  
-  /* Embossed Text */
-  .sp-text-embossed {
-    color: #8b7355;
-    text-shadow: 
-      -1px -1px 0 rgba(0, 0, 0, 0.5),
-      1px 1px 0 rgba(244, 228, 193, 0.3);
-  }
-  
-  /* Gold Text with Glow */
-  .sp-text-gold {
-    color: #ffd700;
-    text-shadow: 
-      0 0 10px rgba(255, 215, 0, 0.5),
-      0 0 20px rgba(255, 215, 0, 0.3),
-      0 2px 4px rgba(0, 0, 0, 0.8);
-  }
-  
-  /* Steampunk Card */
-  .sp-card {
-    background: linear-gradient(145deg, #2d2317 0%, #1a1410 100%);
-    border: 3px solid #4a4a4a;
-    border-radius: 12px;
-    box-shadow: 
-      inset 0 2px 0 rgba(139, 115, 85, 0.2),
-      inset 0 -2px 0 rgba(0, 0, 0, 0.5),
-      0 8px 16px rgba(0, 0, 0, 0.7),
-      0 0 0 1px #2d2317;
-    position: relative;
-  }
-  
-  .sp-card::before,
-  .sp-card::after {
-    content: '';
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, #8b7355 0%, #4a4a4a 50%, #2d2317 100%);
-    box-shadow: 
-      inset 0 -2px 3px rgba(0, 0, 0, 0.7),
-      0 1px 2px rgba(255, 255, 255, 0.1);
-    z-index: 10;
-  }
-  
-  .sp-card::before {
-    top: 12px;
-    left: 12px;
-  }
-  
-  .sp-card::after {
-    bottom: 12px;
-    right: 12px;
-  }
-  
-  /* Steampunk Gradient Background */
-  .sp-gradient-bg {
-    background: 
-      radial-gradient(ellipse at top left, rgba(205, 127, 50, 0.15) 0%, transparent 50%),
-      radial-gradient(ellipse at bottom right, rgba(139, 90, 43, 0.15) 0%, transparent 50%),
-      linear-gradient(180deg, #1a1410 0%, #0d0a08 100%);
-  }
-  
-  /* Leather Texture */
-  .sp-leather {
-    background: linear-gradient(145deg, #8b4513 0%, #654321 100%);
-    background-image: 
-      linear-gradient(145deg, #8b4513 0%, #654321 100%),
-      url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='leather'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' /%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23leather)' opacity='0.15'/%3E%3C/svg%3E");
-    box-shadow: 
-      inset 0 2px 4px rgba(0, 0, 0, 0.5),
-      0 2px 8px rgba(0, 0, 0, 0.4);
-  }
-  
-  /* Ornate Divider */
-  .sp-divider {
-    height: 2px;
-    background: linear-gradient(90deg, 
-      transparent 0%,
-      #8b7355 20%,
-      #b5a642 50%,
-      #8b7355 80%,
-      transparent 100%
-    );
-    box-shadow: 0 1px 2px rgba(255, 215, 0, 0.2);
-  }
-  
-  /* Input Field */
-  .sp-input {
-    background: linear-gradient(145deg, #d4c5a9 0%, #f4e4c1 100%);
-    border: 2px solid #8b7355;
-    box-shadow: 
-      inset 0 2px 4px rgba(0, 0, 0, 0.2),
-      0 1px 0 rgba(244, 228, 193, 0.5);
-    color: #2d2317;
-    font-family: 'Crimson Text', serif;
-  }
-  
-  .sp-input:focus {
-    border-color: #b5a642;
-    box-shadow: 
-      inset 0 2px 4px rgba(0, 0, 0, 0.2),
-      0 0 0 3px rgba(181, 166, 66, 0.3),
-      0 1px 0 rgba(244, 228, 193, 0.5);
-    outline: none;
   }
 }
 
@@ -527,1384 +101,521 @@
   background: rgba(23, 23, 23, 0.5);
 }
 
-.steampunk ::-webkit-scrollbar-track {
-  background: var(--sp-bg-secondary);
-}
-
 ::-webkit-scrollbar-thumb {
   background: rgba(115, 115, 115, 0.5);
   border-radius: 4px;
-}
-
-.steampunk ::-webkit-scrollbar-thumb {
-  background: var(--sp-bronze);
-  border: 1px solid var(--sp-iron);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(115, 115, 115, 0.8);
 }
 
-.steampunk ::-webkit-scrollbar-thumb:hover {
-  background: var(--sp-bronze-light);
-}
-
 /* ============================================================
-   🎩⚙️ STEAMPUNK THEME - AAA GAME QUALITY 
+   CYBERPUNK THEME - Neon Nights & Digital Dreams
    ============================================================ */
 
 .steampunk {
-  font-family: 'Georgia', 'Crimson Text', serif;
-  font-size: 16px; /* Base font size increased for better readability */
-  letter-spacing: 0.025em;
+  /* Base Colors */
+  --cp-bg-dark: #0a0a0f;
+  --cp-bg-medium: #12121a;
+  --cp-bg-light: #1a1a25;
+  --cp-bg-card: #15151f;
+
+  /* Neon Colors */
+  --cp-neon-yellow: #f0e130;
+  --cp-neon-yellow-glow: rgba(240, 225, 48, 0.6);
+  --cp-neon-cyan: #00f0ff;
+  --cp-neon-cyan-glow: rgba(0, 240, 255, 0.5);
+  --cp-neon-pink: #ff00aa;
+  --cp-neon-pink-glow: rgba(255, 0, 170, 0.5);
+  --cp-neon-orange: #ff6b00;
+
+  /* Text Colors */
+  --cp-text-primary: #f0e130;
+  --cp-text-secondary: #b8b8c0;
+  --cp-text-muted: #6a6a75;
+
+  /* Border */
+  --cp-border: #2a2a35;
+  --cp-border-highlight: #f0e130;
+
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.02em;
 }
 
-/* Override gradient-mesh background - Rich Victorian atmosphere */
+/* ============================================================
+   BACKGROUND - Dark with subtle grid
+   ============================================================ */
+
 .steampunk .gradient-mesh {
-  background: 
-    /* Subtle brass light rays */
-    radial-gradient(ellipse 80% 50% at 30% 20%, rgba(218, 165, 32, 0.12) 0%, transparent 50%),
-    radial-gradient(ellipse 70% 40% at 70% 80%, rgba(184, 134, 11, 0.08) 0%, transparent 50%),
-    /* Rich leather texture base */
-    linear-gradient(180deg, 
-      #1a1410 0%,    /* Dark leather top */
-      #2d2317 25%,   /* Mid brown */
-      #0d0a08 100%   /* Very dark base */
-    );
-  position: relative;
+  background:
+    linear-gradient(180deg, #0a0a0f 0%, #12121a 100%);
+  background-image:
+    linear-gradient(rgba(240, 225, 48, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(240, 225, 48, 0.03) 1px, transparent 1px),
+    linear-gradient(180deg, #0a0a0f 0%, #12121a 100%);
+  background-size: 50px 50px, 50px 50px, 100% 100%;
 }
 
-/* Override glass-card - Premium embossed panels */
+/* ============================================================
+   CARDS - Clean panels with neon accents
+   ============================================================ */
+
 .steampunk .glass-card {
-  background: 
-    /* Leather texture with subtle grain */
-    linear-gradient(145deg, 
-      rgba(60, 47, 30, 0.95) 0%,
-      rgba(45, 35, 23, 0.98) 50%,
-      rgba(30, 23, 15, 1) 100%
-    );
-  border: 3px solid transparent;
-  border-image: linear-gradient(
-    135deg,
-    #8B7355 0%,     /* Brass highlight */
-    #5a4a3a 25%,    /* Bronze */
-    #3a3027 50%,    /* Dark */
-    #5a4a3a 75%,    /* Bronze */
-    #8B7355 100%    /* Brass highlight */
-  ) 1;
+  background: linear-gradient(135deg, #15151f 0%, #12121a 100%);
+  border: 2px solid #2a2a35;
+  border-radius: 4px;
   backdrop-filter: none;
-  box-shadow: 
-    /* Inner highlight */
-    inset 0 3px 6px rgba(139, 115, 85, 0.3),
-    inset 0 -3px 6px rgba(0, 0, 0, 0.6),
-    /* Outer depth */
-    0 10px 30px rgba(0, 0, 0, 0.8),
-    0 0 0 1px rgba(139, 115, 85, 0.2),
-    /* Ambient brass glow */
-    0 0 40px rgba(184, 134, 11, 0.1);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(240, 225, 48, 0.1);
   position: relative;
 }
 
-/* Add rivets/bolts decoration */
 .steampunk .glass-card::before {
   content: '';
   position: absolute;
-  top: 8px;
-  left: 8px;
-  width: 8px;
-  height: 8px;
-  background: radial-gradient(circle, #b8860b, #6b5839);
-  border-radius: 50%;
-  box-shadow: 
-    0 1px 2px rgba(0, 0, 0, 0.8),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, #f0e130 50%, transparent 100%);
+  opacity: 0.8;
 }
 
 .steampunk .glass-card::after {
-  content: '';
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 8px;
-  height: 8px;
-  background: radial-gradient(circle, #b8860b, #6b5839);
-  border-radius: 50%;
-  box-shadow: 
-    0 1px 2px rgba(0, 0, 0, 0.8),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  display: none;
 }
 
 .steampunk .glass-card:hover,
 .steampunk .glass-card-hover {
-  box-shadow: 
-    inset 0 3px 6px rgba(139, 115, 85, 0.4),
-    inset 0 -3px 6px rgba(0, 0, 0, 0.6),
-    0 12px 40px rgba(0, 0, 0, 0.9),
-    0 0 0 1px rgba(139, 115, 85, 0.4),
-    0 0 60px rgba(218, 165, 32, 0.25);
-  transform: translateY(-2px);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-color: #f0e130;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.6),
+    0 0 30px rgba(240, 225, 48, 0.15),
+    inset 0 1px 0 rgba(240, 225, 48, 0.2);
 }
 
 /* ============================================================
-   TEXT TYPOGRAPHY - AAA GAME QUALITY
+   TYPOGRAPHY - Clean and readable
    ============================================================ */
 
-/* Main headings - Large, readable, embossed */
-.steampunk h1, 
+.steampunk h1,
 .steampunk h2 {
-  font-size: 2.5rem !important; /* 40px */
-  font-weight: 700 !important;
-  letter-spacing: 0.05em !important;
-  color: #f4e4c1 !important;
-  text-shadow: 
-    0 2px 4px rgba(0, 0, 0, 0.9),
-    0 0 20px rgba(218, 165, 32, 0.4),
-    1px 1px 0 rgba(139, 115, 85, 0.5);
-  margin-bottom: 1.5rem !important;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 1.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f0e130;
+  text-shadow: 0 0 20px rgba(240, 225, 48, 0.5);
+  margin-bottom: 1.5rem;
 }
 
 .steampunk h3 {
-  font-size: 1.75rem !important; /* 28px */
-  font-weight: 600 !important;
-  letter-spacing: 0.05em !important;
-  color: #e8d4b0 !important;
-  text-shadow: 
-    0 2px 3px rgba(0, 0, 0, 0.8),
-    0 0 15px rgba(218, 165, 32, 0.3);
-  margin-bottom: 1.25rem !important;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 600;
+  font-size: 1.125rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #f0e130;
+  text-shadow: 0 0 10px rgba(240, 225, 48, 0.3);
+  margin-bottom: 1rem;
 }
 
-/* Section headings with icons - Larger for better visibility */
-.steampunk h3 svg,
-.steampunk h2 svg {
-  width: 32px !important;
-  height: 32px !important;
-  margin-right: 16px !important;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
-}
-
-/* Body text - Readable size */
 .steampunk .text-white,
 .steampunk p {
-  color: #f4e4c1 !important;
-  font-size: 1.125rem !important; /* 18px */
-  line-height: 1.75 !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  color: #e8e8f0;
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
-/* Secondary text - Still readable */
 .steampunk .text-dark-300,
 .steampunk .text-dark-400 {
-  color: #c5b597 !important;
-  font-size: 1rem !important; /* 16px */
-  line-height: 1.6 !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  color: #9898a5;
+  font-size: 0.9375rem;
 }
 
-/* Small text - Not too small */
-.steampunk .text-xs,
 .steampunk .text-sm {
-  font-size: 0.9375rem !important; /* 15px - NO SMALLER */
-  line-height: 1.5 !important;
-  color: #b8a68f !important;
+  font-size: 0.875rem;
+  color: #7878850;
 }
 
-/* Accent/Primary colors - Gold with glow */
+.steampunk .text-xs {
+  font-size: 0.8125rem;
+  color: #686875;
+}
+
 .steampunk .text-primary-400,
 .steampunk .text-primary-500 {
-  color: #daa520 !important;
-  font-size: 1.125rem !important;
-  font-weight: 600 !important;
-  text-shadow: 
-    0 0 15px rgba(218, 165, 32, 0.5),
-    0 2px 4px rgba(0, 0, 0, 0.8);
-}
-
-/* Labels - Clear and readable */
-.steampunk label {
-  font-size: 1.125rem !important; /* 18px */
-  font-weight: 600 !important;
-  color: #e8d4b0 !important;
-  letter-spacing: 0.025em !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
-  margin-bottom: 0.75rem !important;
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  color: #f0e130;
+  text-shadow: 0 0 8px rgba(240, 225, 48, 0.4);
 }
 
 /* ============================================================
-   BUTTONS - AAA GAME QUALITY
+   BUTTONS - Neon glow effect
    ============================================================ */
 
-.steampunk button:not(.sp-button-skip) {
-  /* Premium bronze gradient */
-  background: 
-    linear-gradient(145deg, 
-      #cd7f32 0%,    /* Bright bronze */
-      #b8860b 50%,   /* Dark gold */
-      #8b6914 100%   /* Dark bronze */
-    );
-  border: 3px solid transparent;
-  border-image: linear-gradient(
-    135deg,
-    #daa520 0%,     /* Gold highlight */
-    #5a4a3a 50%,    /* Dark center */
-    #daa520 100%    /* Gold highlight */
-  ) 1;
-  padding: 1rem 2rem !important; /* Much larger padding */
-  font-size: 1.125rem !important; /* 18px */
-  font-weight: 700 !important;
-  letter-spacing: 0.05em !important;
-  color: #1a1410 !important;
+.steampunk button {
+  background: linear-gradient(180deg, #1e1e28 0%, #15151f 100%);
+  border: 2px solid #f0e130;
+  border-radius: 4px;
+  padding: 0.75rem 1.5rem;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  box-shadow: 
-    /* Inner bevel */
-    inset 0 3px 6px rgba(232, 168, 101, 0.5),
-    inset 0 -3px 6px rgba(0, 0, 0, 0.6),
-    /* Outer depth */
-    0 6px 16px rgba(0, 0, 0, 0.8),
-    /* Brass glow */
-    0 0 20px rgba(184, 134, 11, 0.3);
-  text-shadow: 
-    0 1px 0 rgba(255, 255, 255, 0.3),
-    0 2px 4px rgba(0, 0, 0, 0.8);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  min-height: 56px !important; /* Minimum height for touch targets */
+  color: #f0e130;
+  box-shadow:
+    0 0 15px rgba(240, 225, 48, 0.2),
+    inset 0 1px 0 rgba(240, 225, 48, 0.1);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
-/* Button icon spacing - NO OVERLAP */
-.steampunk button:not(.sp-button-skip) svg {
-  width: 24px !important;
-  height: 24px !important;
-  margin-right: 12px !important;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
+.steampunk button:hover {
+  background: linear-gradient(180deg, #f0e130 0%, #d4c520 100%);
+  color: #0a0a0f;
+  box-shadow:
+    0 0 30px rgba(240, 225, 48, 0.5),
+    0 0 60px rgba(240, 225, 48, 0.2);
+  transform: translateY(-1px);
 }
 
-.steampunk button:not(.sp-button-skip):hover {
-  background: 
-    linear-gradient(145deg, 
-      #e8a865 0%,    /* Lighter bronze */
-      #daa520 50%,   /* Bright gold */
-      #b8860b 100%   /* Rich gold */
-    );
-  box-shadow: 
-    inset 0 3px 6px rgba(232, 168, 101, 0.7),
-    inset 0 -3px 6px rgba(0, 0, 0, 0.6),
-    0 8px 24px rgba(0, 0, 0, 0.9),
-    0 0 40px rgba(218, 165, 32, 0.6);
-  transform: translateY(-3px) scale(1.02);
+.steampunk button:active {
+  transform: translateY(1px);
+  box-shadow: 0 0 10px rgba(240, 225, 48, 0.3);
 }
 
-.steampunk button:not(.sp-button-skip):active {
-  transform: translateY(0) scale(0.98);
-  box-shadow: 
-    inset 0 3px 8px rgba(0, 0, 0, 0.8),
-    inset 0 -2px 4px rgba(232, 168, 101, 0.3),
-    0 4px 12px rgba(0, 0, 0, 0.7);
+/* Button with icons */
+.steampunk button svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
 }
 
-/* Button text alignment - proper gap */
-.steampunk button:not(.sp-button-skip) {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 12px !important;
+/* Success/Green buttons */
+.steampunk .bg-success-500,
+.steampunk .bg-green-500,
+.steampunk button[class*="bg-success"],
+.steampunk button[class*="bg-green"] {
+  background: linear-gradient(180deg, #1e2818 0%, #152010 100%);
+  border-color: #00ff88;
+  color: #00ff88;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+}
+
+.steampunk button[class*="bg-success"]:hover,
+.steampunk button[class*="bg-green"]:hover {
+  background: linear-gradient(180deg, #00ff88 0%, #00cc6a 100%);
+  color: #0a0a0f;
+  box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+}
+
+/* Primary buttons */
+.steampunk .bg-primary-500,
+.steampunk .bg-primary-600,
+.steampunk button[class*="bg-primary"] {
+  background: linear-gradient(180deg, #1a1a28 0%, #12121a 100%);
+  border-color: #00f0ff;
+  color: #00f0ff;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+}
+
+.steampunk button[class*="bg-primary"]:hover {
+  background: linear-gradient(180deg, #00f0ff 0%, #00c8d4 100%);
+  color: #0a0a0f;
+  box-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
 }
 
 /* ============================================================
-   INPUTS & FORMS - AAA GAME QUALITY
+   INPUTS - Clean with neon focus
    ============================================================ */
 
 .steampunk input:not([type="range"]),
 .steampunk textarea,
 .steampunk select {
-  /* Parchment paper texture */
-  background: 
-    linear-gradient(145deg, 
-      #f4e4c1 0%,    /* Light parchment */
-      #e8d4b0 50%,   /* Mid tone */
-      #d4c5a9 100%   /* Darker edge */
-    );
-  border: 3px solid transparent;
-  border-image: linear-gradient(
-    135deg,
-    #8b6914 0%,
-    #5a4a3a 50%,
-    #8b6914 100%
-  ) 1;
-  color: #2d2317 !important;
-  font-size: 1.125rem !important; /* 18px */
-  font-weight: 600 !important;
-  padding: 1rem 1.5rem !important; /* Much larger padding */
-  min-height: 56px !important;
-  letter-spacing: 0.025em !important;
-  box-shadow: 
-    /* Inner depth */
-    inset 0 3px 8px rgba(0, 0, 0, 0.4),
-    inset 0 -1px 2px rgba(255, 255, 255, 0.3),
-    /* Outer shadow */
-    0 4px 12px rgba(0, 0, 0, 0.5);
-  transition: all 0.25s ease;
+  background: #0a0a0f;
+  border: 2px solid #2a2a35;
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #e8e8f0;
+  transition: all 0.2s ease;
 }
 
 .steampunk input:not([type="range"]):focus,
 .steampunk textarea:focus,
 .steampunk select:focus {
   outline: none;
-  border-image: linear-gradient(
-    135deg,
-    #daa520 0%,
-    #b8860b 50%,
-    #daa520 100%
-  ) 1;
-  box-shadow: 
-    inset 0 3px 8px rgba(0, 0, 0, 0.5),
-    inset 0 -1px 2px rgba(255, 255, 255, 0.4),
-    0 6px 16px rgba(0, 0, 0, 0.6),
-    0 0 30px rgba(218, 165, 32, 0.4);
-  transform: translateY(-2px);
+  border-color: #f0e130;
+  box-shadow: 0 0 20px rgba(240, 225, 48, 0.2);
 }
 
 .steampunk input::placeholder {
-  color: #8b7355 !important;
-  font-size: 1rem !important;
-  font-style: italic;
+  color: #4a4a55;
 }
 
-/* Range sliders - Premium brass rail */
+/* Range Sliders */
 .steampunk input[type="range"] {
-  height: 12px !important;
-  background: 
-    linear-gradient(180deg, 
-      #3a3027 0%,
-      #2d2317 50%,
-      #1a1410 100%
-    );
-  border: 2px solid #5a4a3a;
-  border-radius: 8px;
-  box-shadow: 
-    inset 0 2px 6px rgba(0, 0, 0, 0.8),
-    inset 0 -1px 2px rgba(139, 115, 85, 0.3),
-    0 2px 6px rgba(0, 0, 0, 0.6);
+  height: 8px;
+  background: #1a1a25;
+  border: 1px solid #2a2a35;
+  border-radius: 4px;
+  -webkit-appearance: none;
 }
 
 .steampunk input[type="range"]::-webkit-slider-thumb {
-  width: 28px !important;
-  height: 28px !important;
-  background: radial-gradient(circle, #daa520, #b8860b, #8b6914);
-  border: 3px solid #5a4a3a;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #f0e130;
+  border: 2px solid #0a0a0f;
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 
-    inset 0 2px 3px rgba(255, 255, 255, 0.4),
-    inset 0 -2px 3px rgba(0, 0, 0, 0.6),
-    0 4px 12px rgba(0, 0, 0, 0.8),
-    0 0 20px rgba(218, 165, 32, 0.4);
+  box-shadow: 0 0 15px rgba(240, 225, 48, 0.5);
   transition: all 0.2s ease;
 }
 
 .steampunk input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
-  box-shadow: 
-    inset 0 2px 3px rgba(255, 255, 255, 0.5),
-    inset 0 -2px 3px rgba(0, 0, 0, 0.6),
-    0 6px 16px rgba(0, 0, 0, 0.9),
-    0 0 30px rgba(218, 165, 32, 0.6);
-}
-
-.steampunk input::placeholder {
-  color: var(--sp-text-muted);
-}
-
-.steampunk input:focus,
-.steampunk textarea:focus,
-.steampunk select:focus {
-  border-color: var(--sp-brass);
-  box-shadow: 
-    inset 0 2px 4px rgba(0, 0, 0, 0.2),
-    0 0 0 3px rgba(181, 166, 66, 0.3),
-    0 1px 0 rgba(244, 228, 193, 0.5);
-  outline: none;
-}
-
-/* Override primary colors */
-.steampunk .bg-primary-500,
-.steampunk .bg-primary-600,
-.steampunk .bg-primary-700 {
-  background: var(--sp-bronze-gradient) !important;
-}
-
-.steampunk .border-primary-500 {
-  border-color: var(--sp-bronze) !important;
-}
-
-/* Override headings */
-.steampunk h1,
-.steampunk h2,
-.steampunk h3,
-.steampunk h4 {
-  font-family: 'Cinzel', serif;
-  color: var(--sp-text-accent);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-  letter-spacing: 0.05em;
-}
-
-/* Add rivets to cards */
-.steampunk .glass-card::before,
-.steampunk .glass-card::after {
-  content: '';
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #8b7355 0%, #4a4a4a 50%, #2d2317 100%);
-  box-shadow: 
-    inset 0 -2px 3px rgba(0, 0, 0, 0.7),
-    0 1px 2px rgba(255, 255, 255, 0.1);
-  z-index: 1;
-}
-
-.steampunk .glass-card::before {
-  top: 12px;
-  left: 12px;
-}
-
-.steampunk .glass-card::after {
-  bottom: 12px;
-  right: 12px;
-}
-
-/* Override borders */
-.steampunk .border-dark-600,
-.steampunk .border-dark-700 {
-  border-color: var(--sp-iron) !important;
+  transform: scale(1.2);
+  box-shadow: 0 0 25px rgba(240, 225, 48, 0.7);
 }
 
 /* ============================================================
-   SPACING & LAYOUT - AAA GAME QUALITY
+   TOGGLE SWITCHES - Neon style
    ============================================================ */
 
-/* Section spacing - More breathing room */
-.steampunk .space-y-6 > * + * {
-  margin-top: 2rem !important; /* Increased from 1.5rem */
+.steampunk button[class*="h-6"][class*="w-11"] {
+  background: #1a1a25;
+  border: 2px solid #2a2a35;
+  padding: 0;
+  min-height: auto;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-.steampunk .space-y-4 > * + * {
-  margin-top: 1.5rem !important; /* Increased from 1rem */
+.steampunk button[class*="h-6"][class*="w-11"][class*="bg-success"] {
+  background: #0a1a10;
+  border-color: #00ff88;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.5),
+    0 0 15px rgba(0, 255, 136, 0.3);
 }
 
-/* Flex gaps - Prevent icon overlap */
-.steampunk .flex.gap-2 {
-  gap: 1rem !important; /* Increased from 0.5rem */
+.steampunk button[class*="h-6"][class*="w-11"] span {
+  background: #f0e130;
+  box-shadow: 0 0 10px rgba(240, 225, 48, 0.5);
 }
 
-.steampunk .flex.gap-3 {
-  gap: 1.25rem !important; /* Increased from 0.75rem */
-}
+/* ============================================================
+   SECTION BORDERS - Clean dividers
+   ============================================================ */
 
-.steampunk .flex.gap-4 {
-  gap: 1.5rem !important; /* Increased from 1rem */
-}
-
-/* Grid gaps */
-.steampunk .gap-4 {
-  gap: 1.5rem !important;
-}
-
-/* Padding improvements */
-.steampunk .p-4 {
-  padding: 1.5rem !important;
-}
-
-.steampunk .p-6 {
-  padding: 2rem !important;
-}
-
-.steampunk .px-4 {
-  padding-left: 1.5rem !important;
-  padding-right: 1.5rem !important;
-}
-
-.steampunk .py-3 {
-  padding-top: 1rem !important;
-  padding-bottom: 1rem !important;
-}
-
-/* Border improvements */
 .steampunk .border-b {
-  border-bottom: 3px solid #5a4a3a !important;
-  margin-bottom: 2rem !important;
-  padding-bottom: 2rem !important;
+  border-color: #2a2a35;
 }
 
-/* Theme selection buttons - Special styling */
-.steampunk button[class*="border-amber-600"],
-.steampunk button[class*="border-primary-500"] {
-  border-width: 4px !important;
-  padding: 1.5rem !important;
-  min-height: 80px !important;
-}
-
-.steampunk button[class*="border-amber-600"] .flex,
-.steampunk button[class*="border-primary-500"] .flex {
-  gap: 1.5rem !important;
-}
-
-/* Icon containers in theme buttons */
-.steampunk button .w-12 {
-  width: 64px !important;
-  height: 64px !important;
-}
-
-.steampunk button .w-12 svg {
-  width: 36px !important;
-  height: 36px !important;
-}
-
-/* Override error/success colors */
-.steampunk .bg-red-500 {
-  background: var(--sp-rust) !important;
-}
-
-.steampunk .text-red-400 {
-  color: #ff6b6b !important;
-  font-size: 1.125rem !important;
-}
-
-.steampunk .bg-success-500,
-.steampunk .bg-green-500 {
-  background: var(--sp-brass) !important;
+.steampunk .border-dark-700 {
+  border-color: #2a2a35;
 }
 
 /* ============================================================
-   UNIVERSAL MENU ITEMS - AAA GAME QUALITY
+   LABELS - Clear hierarchy
    ============================================================ */
 
-/* ALL menu item containers */
-.steampunk .grid > button,
-.steampunk .grid > div > button,
-.steampunk [class*="grid"] button {
-  padding: 1.75rem !important;
-  min-height: 120px !important;
-}
-
-/* ALL menu item text */
-.steampunk .grid button h3,
-.steampunk .grid button p,
-.steampunk button h3,
-.steampunk button p:not(.text-xs) {
-  font-size: 1.25rem !important; /* 20px */
-  font-weight: 700 !important;
-  line-height: 1.4 !important;
-  color: #1a1410 !important;
-}
-
-.steampunk button p.text-sm {
-  font-size: 1rem !important; /* 16px */
-  font-weight: 600 !important;
-}
-
-/* ALL menu icons - NO OVERLAP */
-.steampunk button svg:not([class*="w-6"]):not([class*="w-8"]) {
-  width: 40px !important;
-  height: 40px !important;
-  min-width: 40px !important;
-  min-height: 40px !important;
-  flex-shrink: 0 !important;
-}
-
-/* Icon + Text containers - proper spacing */
-.steampunk button > div.flex {
-  gap: 1.5rem !important;
-  align-items: center !important;
-}
-
-/* ALL flex containers with icons */
-.steampunk .flex.items-center svg {
-  flex-shrink: 0 !important;
-  margin-right: 0.75rem !important;
-}
-
-/* ============================================================
-   DASHBOARD & STATS - AAA GAME QUALITY  
-   ============================================================ */
-
-/* Dashboard cards */
-.steampunk .glass-card h2,
-.steampunk .glass-card h3 {
-  display: flex !important;
-  align-items: center !important;
-  gap: 1rem !important;
-}
-
-/* Stats numbers */
-.steampunk .text-3xl,
-.steampunk .text-4xl,
-.steampunk .text-5xl {
-  font-size: 3rem !important; /* 48px */
-  line-height: 1.2 !important;
-}
-
-.steampunk .text-2xl {
-  font-size: 2rem !important; /* 32px */
-}
-
-.steampunk .text-xl {
-  font-size: 1.5rem !important; /* 24px */
-}
-
-.steampunk .text-lg {
-  font-size: 1.25rem !important; /* 20px */
-}
-
-/* ============================================================
-   TABLE IMPROVEMENTS - AAA GAME QUALITY
-   ============================================================ */
-
-.steampunk table th,
-.steampunk table td {
-  padding: 1.25rem 1.5rem !important;
-  font-size: 1.125rem !important;
-}
-
-.steampunk table th {
-  font-size: 1.25rem !important;
-}
-
-/* ============================================================
-   BADGE & TAG IMPROVEMENTS
-   ============================================================ */
-
-.steampunk span[class*="px-"],
-.steampunk span[class*="py-"] {
-  padding: 0.625rem 1.25rem !important;
-  font-size: 1rem !important;
-  font-weight: 700 !important;
-}
-
-/* ============================================================
-   MODAL & DIALOG IMPROVEMENTS
-   ============================================================ */
-
-.steampunk [role="dialog"] h2,
-.steampunk [role="dialog"] h3 {
-  font-size: 2rem !important;
-  margin-bottom: 1.5rem !important;
-}
-
-.steampunk [role="dialog"] p {
-  font-size: 1.125rem !important;
-  line-height: 1.75 !important;
-}
-
-/* ============================================================
-   DECORATIVE ELEMENTS
-   ============================================================ */
-
-@keyframes sp-rotate-slow {
-  from { transform: translateX(-50%) rotate(0deg); }
-  to { transform: translateX(-50%) rotate(360deg); }
-}
-
-/* ============================================================
-   ADMIN PANEL STEAMPUNK THEME
-   ============================================================ */
-
-/* Admin Panel Header */
-.steampunk .gradient-text {
-  background: linear-gradient(135deg, var(--sp-brass), var(--sp-copper), var(--sp-gold));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  font-family: 'Georgia', serif;
-  letter-spacing: 0.05em;
-}
-
-/* Admin Stats Cards */
-.steampunk .glass-card {
-  background: linear-gradient(135deg, var(--sp-aged-paper), var(--sp-leather));
-  border: 2px solid var(--sp-brass);
-  box-shadow: 
-    inset 0 1px 1px rgba(255, 255, 255, 0.1),
-    0 4px 12px rgba(0, 0, 0, 0.6),
-    0 0 20px rgba(184, 134, 11, 0.3);
-}
-
-/* Table Styling */
-.steampunk table thead {
-  background: linear-gradient(180deg, var(--sp-iron), var(--sp-brass));
-  border-bottom: 3px solid var(--sp-gold);
-}
-
-.steampunk table th {
-  color: var(--sp-aged-paper) !important;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 700;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-}
-
-.steampunk table tbody tr {
-  border-color: var(--sp-brass) !important;
-  background: linear-gradient(90deg, 
-    rgba(60, 47, 30, 0.3), 
-    rgba(80, 60, 40, 0.2), 
-    rgba(60, 47, 30, 0.3)
-  );
-  transition: all 0.3s ease;
-}
-
-.steampunk table tbody tr:hover {
-  background: linear-gradient(90deg, 
-    rgba(100, 80, 50, 0.4), 
-    rgba(120, 90, 60, 0.3), 
-    rgba(100, 80, 50, 0.4)
-  ) !important;
-  transform: translateX(4px);
-  box-shadow: -4px 0 12px rgba(184, 134, 11, 0.4);
-}
-
-.steampunk table td {
-  color: var(--sp-aged-paper) !important;
-}
-
-/* Filter Buttons */
-.steampunk button[class*="bg-dark-700"] {
-  background: linear-gradient(135deg, var(--sp-iron), #2a2a2a) !important;
-  border: 2px solid var(--sp-brass);
-  color: var(--sp-gold) !important;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-  box-shadow: 
-    inset 0 1px 2px rgba(255, 255, 255, 0.1),
-    0 2px 6px rgba(0, 0, 0, 0.6);
-  transition: all 0.3s ease;
-}
-
-.steampunk button[class*="bg-dark-700"]:hover {
-  background: linear-gradient(135deg, var(--sp-brass), var(--sp-copper)) !important;
-  transform: translateY(-2px);
-  box-shadow: 
-    inset 0 1px 2px rgba(255, 255, 255, 0.2),
-    0 4px 12px rgba(184, 134, 11, 0.5);
-}
-
-/* Active Filter Button */
-.steampunk button[class*="bg-primary-600"],
-.steampunk button[class*="bg-amber-600"],
-.steampunk button[class*="bg-green-600"],
-.steampunk button[class*="bg-blue-600"],
-.steampunk button[class*="bg-red-600"] {
-  background: linear-gradient(135deg, var(--sp-gold), var(--sp-brass)) !important;
-  border: 2px solid var(--sp-copper);
-  color: #1a1a1a !important;
-  font-weight: 700;
-  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.3);
-  box-shadow: 
-    inset 0 1px 2px rgba(255, 255, 255, 0.3),
-    0 4px 12px rgba(218, 165, 32, 0.6),
-    0 0 20px rgba(218, 165, 32, 0.4);
-}
-
-/* Action Buttons in Table */
-.steampunk button[class*="bg-amber-"] {
-  background: linear-gradient(135deg, var(--sp-gold), var(--sp-copper)) !important;
-  border: 1px solid var(--sp-brass);
-  box-shadow: 0 2px 6px rgba(218, 165, 32, 0.4);
-}
-
-.steampunk button[class*="bg-red-"],
-.steampunk button[class*="bg-rose-"] {
-  background: linear-gradient(135deg, var(--sp-rust), #8b4513) !important;
-  border: 1px solid var(--sp-copper);
-  box-shadow: 0 2px 6px rgba(139, 69, 19, 0.4);
-}
-
-.steampunk button[class*="bg-purple-"] {
-  background: linear-gradient(135deg, #6b4984, #4a3261) !important;
-  border: 1px solid var(--sp-brass);
-  box-shadow: 0 2px 6px rgba(107, 73, 132, 0.4);
-}
-
-.steampunk button[class*="bg-gray-"] {
-  background: linear-gradient(135deg, var(--sp-iron), #444) !important;
-  border: 1px solid var(--sp-brass);
-  box-shadow: 0 2px 6px rgba(68, 68, 68, 0.4);
-}
-
-/* Status Badges */
-.steampunk span[class*="bg-gradient-to-r"] {
-  border: 1px solid rgba(0, 0, 0, 0.3);
-  box-shadow: 
-    inset 0 1px 1px rgba(255, 255, 255, 0.2),
-    0 2px 4px rgba(0, 0, 0, 0.4);
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
-}
-
-/* Loading Spinner */
-.steampunk .animate-spin {
-  border-color: var(--sp-brass) !important;
-  border-top-color: var(--sp-gold) !important;
-}
-
-/* Secondary Button (Back to Menu) */
-.steampunk .btn-secondary {
-  background: linear-gradient(135deg, var(--sp-iron), #2a2a2a) !important;
-  border: 2px solid var(--sp-brass);
-  color: var(--sp-gold) !important;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
+.steampunk label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1rem;
   font-weight: 600;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-  box-shadow: 
-    inset 0 1px 2px rgba(255, 255, 255, 0.1),
-    0 4px 12px rgba(0, 0, 0, 0.6);
-  transition: all 0.3s ease;
+  color: #b8b8c0;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.steampunk .btn-secondary:hover {
-  background: linear-gradient(135deg, var(--sp-brass), var(--sp-copper)) !important;
-  transform: translateY(-2px);
-  box-shadow: 
-    inset 0 1px 2px rgba(255, 255, 255, 0.2),
-    0 6px 16px rgba(184, 134, 11, 0.5);
-}
-
-/* Avatar Circle */
-.steampunk .rounded-full[class*="bg-gradient-to-br"] {
-  background: linear-gradient(135deg, var(--sp-brass), var(--sp-copper)) !important;
-  border: 2px solid var(--sp-gold);
-  box-shadow: 
-    inset 0 1px 2px rgba(255, 255, 255, 0.3),
-    0 2px 8px rgba(218, 165, 32, 0.5);
+.steampunk label span {
+  color: #f0e130;
+  font-weight: 700;
 }
 
 /* ============================================================
-   NAVIGATION & BACK BUTTONS - AAA GAME QUALITY
+   INFO BOXES - Subtle glow
    ============================================================ */
 
-.steampunk button[class*="mb-"] svg:first-child,
-.steampunk a[class*="mb-"] svg:first-child {
-  width: 24px !important;
-  height: 24px !important;
-  margin-right: 12px !important;
-}
-
-/* Back button text */
-.steampunk button:has(svg) > span,
-.steampunk a:has(svg) > span {
-  font-size: 1.125rem !important;
-  font-weight: 600 !important;
-}
-
-/* ============================================================
-   LIST ITEMS - AAA GAME QUALITY
-   ============================================================ */
-
-.steampunk li {
-  font-size: 1.125rem !important;
-  line-height: 1.75 !important;
-  margin-bottom: 0.75rem !important;
-}
-
-/* ============================================================
-   PROGRESS BARS & SLIDERS - ALREADY DONE ABOVE
-   ============================================================ */
-
-/* ============================================================
-   DROPDOWN & SELECT IMPROVEMENTS
-   ============================================================ */
-
-.steampunk select option {
-  font-size: 1rem !important;
-  padding: 0.75rem !important;
-  background: #f4e4c1 !important;
-  color: #2d2317 !important;
-}
-
-/* ============================================================
-   CHECKBOX & RADIO IMPROVEMENTS  
-   ============================================================ */
-
-.steampunk input[type="checkbox"],
-.steampunk input[type="radio"] {
-  width: 28px !important;
-  height: 28px !important;
-  min-width: 28px !important;
-  min-height: 28px !important;
-}
-
-.steampunk input[type="checkbox"] + label,
-.steampunk input[type="radio"] + label {
-  font-size: 1.125rem !important;
-  margin-left: 1rem !important;
-}
-
-/* ============================================================
-   TOGGLE SWITCHES - AAA GAME QUALITY
-   ============================================================ */
-
-.steampunk button[role="switch"] {
-  min-width: 64px !important;
-  height: 36px !important;
-}
-
-.steampunk button[role="switch"] > span {
-  width: 28px !important;
-  height: 28px !important;
-}
-
-/* ============================================================
-   CARD GRID IMPROVEMENTS
-   ============================================================ */
-
-.steampunk .grid-cols-2 > *,
-.steampunk .grid-cols-3 > *,
-.steampunk .grid-cols-4 > * {
-  min-height: 140px !important;
-  padding: 1.5rem !important;
-}
-
-/* Grid item icons */
-.steampunk .grid > * svg {
-  width: 48px !important;
-  height: 48px !important;
-  margin-bottom: 1rem !important;
-}
-
-/* Grid item text */
-.steampunk .grid > * p,
-.steampunk .grid > * h3,
-.steampunk .grid > * h4 {
-  font-size: 1.125rem !important;
-  line-height: 1.5 !important;
-}
-
-/* ============================================================
-   USER MENU & PROFILE - AAA GAME QUALITY
-   ============================================================ */
-
-.steampunk [class*="UserMenu"] button {
-  min-height: 64px !important;
-  padding: 0.75rem 1.25rem !important;
-}
-
-.steampunk [class*="UserMenu"] span {
-  font-size: 1.125rem !important;
-}
-
-.steampunk [class*="UserMenu"] svg {
-  width: 28px !important;
-  height: 28px !important;
-}
-
-/* ============================================================
-   ACHIEVEMENT & NOTIFICATION - AAA GAME QUALITY
-   ============================================================ */
-
-.steampunk [class*="Achievement"] {
-  padding: 1.5rem !important;
-  min-height: 100px !important;
-}
-
-.steampunk [class*="Achievement"] h3,
-.steampunk [class*="Achievement"] h4 {
-  font-size: 1.5rem !important;
-}
-
-.steampunk [class*="Achievement"] p {
-  font-size: 1.125rem !important;
-}
-
-.steampunk [class*="Achievement"] svg {
-  width: 48px !important;
-  height: 48px !important;
-}
-
-/* ============================================================
-   GAME SCREEN HUD - AAA GAME QUALITY
-   ============================================================ */
-
-/* Player scores */
-.steampunk [class*="PlayerScore"] {
-  padding: 1.5rem !important;
-}
-
-.steampunk [class*="PlayerScore"] .text-4xl,
-.steampunk [class*="PlayerScore"] .text-5xl,
-.steampunk [class*="PlayerScore"] .text-6xl {
-  font-size: 4rem !important; /* 64px for scores */
-  font-weight: 800 !important;
-}
-
-.steampunk [class*="PlayerScore"] .text-lg,
-.steampunk [class*="PlayerScore"] .text-xl {
-  font-size: 1.5rem !important; /* 24px for player names */
-}
-
-/* Score input */
-.steampunk [class*="ScoreInput"] button {
-  min-width: 80px !important;
-  min-height: 80px !important;
-  font-size: 1.5rem !important;
-  font-weight: 700 !important;
-}
-
-.steampunk [class*="ScoreInput"] input {
-  font-size: 2rem !important;
-  font-weight: 700 !important;
-  text-align: center !important;
-}
-
-/* Dartboard display */
-.steampunk [class*="Dartboard"] text {
-  font-size: 18px !important;
-  font-weight: 700 !important;
-}
-
-/* ============================================================
-   TRAINING SCREEN - AAA GAME QUALITY
-   ============================================================ */
-
-.steampunk [class*="Training"] h2 {
-  font-size: 2.5rem !important;
-}
-
-.steampunk [class*="Training"] h3 {
-  font-size: 2rem !important;
-}
-
-.steampunk [class*="Training"] button {
-  min-height: 100px !important;
-  font-size: 1.5rem !important;
-}
-
-/* ============================================================
-   STATS & CHARTS - AAA GAME QUALITY
-   ============================================================ */
-
-/* Chart labels */
-.steampunk [class*="recharts"] text {
-  font-size: 16px !important;
-  fill: #e8d4b0 !important;
-  font-weight: 600 !important;
-}
-
-/* Legend text */
-.steampunk .recharts-legend-item-text {
-  font-size: 18px !important;
-  color: #e8d4b0 !important;
-}
-
-/* Tooltip */
-.steampunk .recharts-tooltip-label {
-  font-size: 18px !important;
-  font-weight: 700 !important;
-  color: #2d2317 !important;
-}
-
-.steampunk .recharts-tooltip-item {
-  font-size: 16px !important;
-  color: #2d2317 !important;
-}
-
-/* ============================================================
-   LEADERBOARD - AAA GAME QUALITY
-   ============================================================ */
-
-.steampunk [class*="Leaderboard"] .text-2xl {
-  font-size: 2.5rem !important;
-}
-
-.steampunk [class*="Leaderboard"] td {
-  font-size: 1.25rem !important;
-  padding: 1.5rem !important;
-}
-
-.steampunk [class*="Leaderboard"] th {
-  font-size: 1.5rem !important;
-  padding: 1.25rem !important;
-}
-
-/* Rank badges */
-.steampunk [class*="Leaderboard"] .text-3xl,
-.steampunk [class*="Leaderboard"] .text-4xl {
-  font-size: 2.5rem !important;
-}
-
-/* ============================================================
-   PLAYER PROFILE - AAA GAME QUALITY
-   ============================================================ */
-
-.steampunk [class*="PlayerProfile"] h1 {
-  font-size: 3rem !important;
-}
-
-.steampunk [class*="PlayerProfile"] .text-6xl,
-.steampunk [class*="PlayerProfile"] .text-8xl {
-  font-size: 6rem !important; /* Avatar emoji */
-}
-
-/* Personal bests cards */
-.steampunk [class*="PlayerProfile"] .grid .text-2xl {
-  font-size: 2.5rem !important;
-  font-weight: 800 !important;
-}
-
-/* ============================================================
-   SETTINGS SPECIFIC - EXTRA IMPROVEMENTS
-   ============================================================ */
-
-/* Volume percentage display */
-.steampunk [class*="Settings"] label span:last-child {
-  font-size: 1.25rem !important;
-  font-weight: 700 !important;
-  color: #daa520 !important;
-}
-
-/* Info boxes */
 .steampunk [class*="bg-primary-500/10"],
-.steampunk [class*="bg-blue-500/10"],
-.steampunk [class*="bg-yellow-500/10"] {
-  padding: 1.25rem !important;
-  border-width: 3px !important;
+.steampunk [class*="border-primary-500"] {
+  background: rgba(240, 225, 48, 0.05);
+  border-color: rgba(240, 225, 48, 0.3);
 }
 
 .steampunk [class*="bg-primary-500/10"] p,
-.steampunk [class*="bg-blue-500/10"] p,
-.steampunk [class*="bg-yellow-500/10"] p {
-  font-size: 1.125rem !important;
-  line-height: 1.6 !important;
+.steampunk .text-primary-300 {
+  color: #f0e130;
 }
 
 /* ============================================================
-   TOURNAMENT - AAA GAME QUALITY
+   SELECT DROPDOWN
    ============================================================ */
 
-.steampunk [class*="Tournament"] button {
-  min-height: 100px !important;
+.steampunk select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23f0e130'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1.25rem;
+  padding-right: 2.5rem;
+  cursor: pointer;
 }
 
-.steampunk [class*="Tournament"] h3 {
-  font-size: 2rem !important;
+.steampunk select option {
+  background: #12121a;
+  color: #e8e8f0;
+  padding: 0.5rem;
 }
 
 /* ============================================================
-   MODAL & CONFIRMATION DIALOGS - AAA GAME QUALITY
+   THEME SELECTION BUTTONS - Special styling
    ============================================================ */
 
-/* Modal backdrop */
-.steampunk .fixed.inset-0[class*="bg-black"] {
-  background: rgba(10, 5, 0, 0.9) !important;
-  backdrop-filter: blur(8px);
-  z-index: 9999 !important;
+.steampunk button[class*="border-amber"],
+.steampunk button[class*="border-primary-500"] {
+  border-width: 2px;
 }
 
-/* Modal content */
-.steampunk .fixed.inset-0 > div.glass-card,
-.steampunk .fixed.inset-0 .glass-card {
-  background: linear-gradient(145deg, #2d2317 0%, #1a1410 100%) !important;
-  border: 4px solid #daa520 !important;
-  box-shadow: 
-    inset 0 4px 8px rgba(139, 115, 85, 0.4),
-    inset 0 -4px 8px rgba(0, 0, 0, 0.6),
-    0 20px 60px rgba(0, 0, 0, 0.9),
-    0 0 80px rgba(218, 165, 32, 0.5) !important;
-  max-width: 600px !important;
-  padding: 2.5rem !important;
-  position: relative;
-  z-index: 10000 !important;
+.steampunk button[class*="border-amber-600"] {
+  border-color: #f0e130;
+  background: rgba(240, 225, 48, 0.1);
 }
 
-/* Modal headings */
-.steampunk .fixed.inset-0 h3 {
-  font-size: 2rem !important;
-  color: #f4e4c1 !important;
-  text-shadow: 
-    0 2px 4px rgba(0, 0, 0, 0.9),
-    0 0 20px rgba(218, 165, 32, 0.4) !important;
-  margin-bottom: 1.5rem !important;
-}
-
-/* Modal text */
-.steampunk .fixed.inset-0 p {
-  font-size: 1.25rem !important;
-  line-height: 1.75 !important;
-  color: #e8d4b0 !important;
-  margin-bottom: 2rem !important;
-}
-
-/* Modal buttons */
-.steampunk .fixed.inset-0 button {
-  min-height: 64px !important;
-  font-size: 1.25rem !important;
-  font-weight: 700 !important;
-  padding: 1rem 2rem !important;
-  border-radius: 12px !important;
-  transition: all 0.25s ease !important;
-}
-
-/* Cancel/Abbrechen button */
-.steampunk .fixed.inset-0 button[class*="bg-dark"] {
-  background: linear-gradient(145deg, #3a3027, #2d2317) !important;
-  border: 3px solid #5a4a3a !important;
-  color: #e8d4b0 !important;
-  box-shadow: 
-    inset 0 2px 4px rgba(139, 115, 85, 0.3),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.6),
-    0 4px 12px rgba(0, 0, 0, 0.8) !important;
-}
-
-.steampunk .fixed.inset-0 button[class*="bg-dark"]:hover {
-  background: linear-gradient(145deg, #5a4a3a, #3a3027) !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 
-    inset 0 2px 4px rgba(139, 115, 85, 0.4),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.6),
-    0 6px 16px rgba(0, 0, 0, 0.9) !important;
-}
-
-/* Confirm/Action buttons */
-.steampunk .fixed.inset-0 button[class*="bg-primary"],
-.steampunk .fixed.inset-0 button[class*="bg-red"] {
-  background: linear-gradient(145deg, #cd7f32, #b8860b) !important;
-  border: 3px solid #daa520 !important;
-  color: #1a1410 !important;
-  box-shadow: 
-    inset 0 3px 6px rgba(232, 168, 101, 0.5),
-    inset 0 -3px 6px rgba(0, 0, 0, 0.6),
-    0 6px 16px rgba(0, 0, 0, 0.8),
-    0 0 30px rgba(218, 165, 32, 0.4) !important;
-  text-shadow: 
-    0 1px 0 rgba(255, 255, 255, 0.3),
-    0 2px 4px rgba(0, 0, 0, 0.8) !important;
-}
-
-.steampunk .fixed.inset-0 button[class*="bg-primary"]:hover,
-.steampunk .fixed.inset-0 button[class*="bg-red"]:hover {
-  background: linear-gradient(145deg, #e8a865, #daa520) !important;
-  transform: translateY(-3px) scale(1.02) !important;
-  box-shadow: 
-    inset 0 3px 6px rgba(232, 168, 101, 0.7),
-    inset 0 -3px 6px rgba(0, 0, 0, 0.6),
-    0 8px 24px rgba(0, 0, 0, 0.9),
-    0 0 50px rgba(218, 165, 32, 0.6) !important;
-}
-
-/* Red button specific (for dangerous actions) */
-.steampunk .fixed.inset-0 button[class*="bg-red"] {
-  background: linear-gradient(145deg, #8b4513, #6b3410) !important;
-  border-color: #cd7f32 !important;
-  color: #f4e4c1 !important;
-}
-
-.steampunk .fixed.inset-0 button[class*="bg-red"]:hover {
-  background: linear-gradient(145deg, #a0522d, #8b4513) !important;
-  box-shadow: 
-    inset 0 3px 6px rgba(160, 82, 45, 0.5),
-    inset 0 -3px 6px rgba(0, 0, 0, 0.6),
-    0 8px 24px rgba(0, 0, 0, 0.9),
-    0 0 50px rgba(205, 127, 50, 0.4) !important;
-}
-
-/* Modal button container */
-.steampunk .fixed.inset-0 .flex.gap-3 {
-  gap: 1.5rem !important;
-  margin-top: 2rem !important;
+/* Theme icon containers */
+.steampunk button .w-12 {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ============================================================
-   GAME CONTROL BUTTONS - AAA GAME QUALITY
+   PROFILE SECTION
    ============================================================ */
 
-/* Pause/Resume button */
-.steampunk button[title*="Pausieren"],
-.steampunk button[title*="Fortsetzen"] {
-  background: linear-gradient(145deg, #4a4a4a, #2a2a2a) !important;
-  border: 3px solid #8b7355 !important;
-  min-width: 56px !important;
-  min-height: 56px !important;
-}
-
-.steampunk button[title*="Pausieren"]:hover,
-.steampunk button[title*="Fortsetzen"]:hover {
-  background: linear-gradient(145deg, #6a6a6a, #4a4a4a) !important;
-  border-color: #b8860b !important;
-  box-shadow: 
-    inset 0 2px 4px rgba(139, 115, 85, 0.3),
-    0 6px 16px rgba(0, 0, 0, 0.9),
-    0 0 30px rgba(184, 134, 11, 0.4) !important;
-}
-
-/* End Match button */
-.steampunk button[title*="Match beenden"] {
-  background: linear-gradient(145deg, #8b4513, #6b3410) !important;
-  border: 3px solid #cd7f32 !important;
-  min-width: 56px !important;
-  min-height: 56px !important;
-}
-
-.steampunk button[title*="Match beenden"]:hover {
-  background: linear-gradient(145deg, #a0522d, #8b4513) !important;
-  border-color: #daa520 !important;
-  box-shadow: 
-    inset 0 2px 4px rgba(160, 82, 45, 0.4),
-    0 6px 16px rgba(0, 0, 0, 0.9),
-    0 0 30px rgba(205, 127, 50, 0.4) !important;
-}
-
-/* Undo button */
-.steampunk button[title*="rückgängig"] {
-  background: linear-gradient(145deg, #5a4a3a, #3a3027) !important;
-  border: 3px solid #8b7355 !important;
-  min-width: 56px !important;
-  min-height: 56px !important;
-}
-
-.steampunk button[title*="rückgängig"]:hover {
-  background: linear-gradient(145deg, #7a6a5a, #5a4a3a) !important;
-  border-color: #b8860b !important;
+.steampunk .bg-gray-50,
+.steampunk .bg-gray-700,
+.steampunk .dark\\:bg-gray-700 {
+  background: #15151f;
+  border: 1px solid #2a2a35;
 }
 
 /* ============================================================
-   RESPONSIVE - ENSURE MOBILE IS ALSO AAA
+   DATA MANAGEMENT BUTTONS
+   ============================================================ */
+
+.steampunk button[class*="from-primary"] {
+  background: linear-gradient(180deg, #1a1a28 0%, #12121a 100%);
+  border: 2px solid #00f0ff;
+  color: #00f0ff;
+}
+
+.steampunk button[class*="from-primary"]:hover {
+  background: #00f0ff;
+  color: #0a0a0f;
+}
+
+/* ============================================================
+   WARNING/INFO BOXES
+   ============================================================ */
+
+.steampunk .bg-yellow-50,
+.steampunk .dark\\:bg-yellow-900\\/20,
+.steampunk [class*="bg-yellow-900"] {
+  background: rgba(240, 225, 48, 0.1);
+  border-color: rgba(240, 225, 48, 0.3);
+}
+
+.steampunk .text-yellow-800,
+.steampunk .dark\\:text-yellow-300,
+.steampunk [class*="text-yellow"] {
+  color: #f0e130;
+}
+
+/* ============================================================
+   ICONS - Consistent sizing
+   ============================================================ */
+
+.steampunk h3 svg {
+  width: 20px;
+  height: 20px;
+  color: #f0e130;
+}
+
+.steampunk .flex.items-center svg {
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   SCROLLBAR - Cyberpunk style
+   ============================================================ */
+
+.steampunk ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.steampunk ::-webkit-scrollbar-track {
+  background: #0a0a0f;
+}
+
+.steampunk ::-webkit-scrollbar-thumb {
+  background: #f0e130;
+  border-radius: 3px;
+}
+
+.steampunk ::-webkit-scrollbar-thumb:hover {
+  background: #ffef50;
+  box-shadow: 0 0 10px rgba(240, 225, 48, 0.5);
+}
+
+/* ============================================================
+   RESPONSIVE ADJUSTMENTS
    ============================================================ */
 
 @media (max-width: 768px) {
-  .steampunk h1 {
-    font-size: 2rem !important;
-  }
-  
+  .steampunk h1,
   .steampunk h2 {
-    font-size: 1.75rem !important;
+    font-size: 1.5rem;
   }
-  
+
   .steampunk h3 {
-    font-size: 1.5rem !important;
+    font-size: 1rem;
   }
-  
+
   .steampunk button {
-    min-height: 64px !important;
-    font-size: 1rem !important;
+    padding: 0.625rem 1rem;
+    font-size: 0.9375rem;
   }
-  
-  .steampunk input:not([type="range"]) {
-    font-size: 1rem !important;
+}
+
+/* ============================================================
+   ANIMATIONS - Subtle neon pulse
+   ============================================================ */
+
+@keyframes neon-pulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(240, 225, 48, 0.3);
   }
-  
-  .steampunk .fixed.inset-0 .glass-card {
-    padding: 1.5rem !important;
-    margin: 1rem !important;
+  50% {
+    box-shadow: 0 0 25px rgba(240, 225, 48, 0.5);
   }
-  
-  .steampunk .fixed.inset-0 h3 {
-    font-size: 1.5rem !important;
-  }
-  
-  .steampunk .fixed.inset-0 p {
-    font-size: 1rem !important;
-  }
+}
+
+.steampunk .glass-card::before {
+  animation: neon-pulse 3s ease-in-out infinite;
 }

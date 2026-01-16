@@ -50,6 +50,18 @@ export const initDatabase = (): Database.Database => {
     console.log(`✅ Seeded ${defaultAchievements.length} default achievements`);
   }
 
+  // Schedule periodic WAL checkpoint to prevent corruption
+  // Runs every 5 minutes to ensure WAL data is written to main DB
+  setInterval(() => {
+    if (db) {
+      try {
+        db.pragma('wal_checkpoint(PASSIVE)');
+      } catch (err) {
+        console.error('WAL checkpoint failed:', err);
+      }
+    }
+  }, 5 * 60 * 1000);
+
   console.log('✅ Database initialized successfully');
   return db;
 };
@@ -63,6 +75,12 @@ export const getDatabase = (): Database.Database => {
 
 export const closeDatabase = (): void => {
   if (db) {
+    // Final checkpoint before closing to ensure all WAL data is written
+    try {
+      db.pragma('wal_checkpoint(TRUNCATE)');
+    } catch (err) {
+      console.error('Final WAL checkpoint failed:', err);
+    }
     db.close();
     db = null;
     console.log('✅ Database connection closed');

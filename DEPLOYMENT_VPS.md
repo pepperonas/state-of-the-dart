@@ -171,6 +171,39 @@ ssh root@69.62.121.168 "netstat -tlnp | grep 3002"
 ssh root@69.62.121.168 "sqlite3 /var/www/stateofthedart-backend/data/state-of-the-dart.db \"UPDATE tenants SET user_id = '<neue_user_id>' WHERE id = '<tenant_id>'\""
 ```
 
+### SQLite WAL-Korruption (Foreign Key Constraint Failed)
+
+**Symptom:** `FOREIGN KEY constraint failed` bei Settings, obwohl Tenant existiert.
+
+**Ursache:** SQLite WAL-Datei ist korrupt - Daten in WAL wurden nicht in Hauptdatei geschrieben.
+
+**Diagnose:**
+```bash
+# Prüfe ob WAL-Checkpoint funktioniert
+ssh root@69.62.121.168 "sqlite3 /var/www/stateofthedart-backend/data/state-of-the-dart.db 'PRAGMA wal_checkpoint(FULL)'"
+# Wenn "database disk image is malformed" → WAL ist korrupt
+
+# Prüfe Integrität
+ssh root@69.62.121.168 "sqlite3 /var/www/stateofthedart-backend/data/state-of-the-dart.db 'PRAGMA integrity_check'"
+```
+
+**Fix:**
+```bash
+# 1. Backend stoppen
+ssh root@69.62.121.168 "pm2 stop stateofthedart-backend"
+
+# 2. Korrupte WAL-Dateien löschen
+ssh root@69.62.121.168 "rm -f /var/www/stateofthedart-backend/data/state-of-the-dart.db-shm /var/www/stateofthedart-backend/data/state-of-the-dart.db-wal"
+
+# 3. Lokale (intakte) DB hochladen
+scp server/data/state-of-the-dart.db root@69.62.121.168:/var/www/stateofthedart-backend/data/
+
+# 4. Backend neu starten
+ssh root@69.62.121.168 "pm2 restart stateofthedart-backend"
+```
+
+**Prävention:** Der Server führt jetzt alle 5 Minuten automatisch `PRAGMA wal_checkpoint(PASSIVE)` aus und vor dem Shutdown `PRAGMA wal_checkpoint(TRUNCATE)`.
+
 ---
 
 ## Nginx Konfiguration
@@ -192,6 +225,22 @@ ssh root@69.62.121.168 "systemctl reload nginx"
 ---
 
 ## Changelog
+
+### 2026-01-16 (Abend)
+- **Cyberpunk Theme komplett neu erstellt:**
+  - CSS von ~1900 Zeilen auf ~620 Zeilen reduziert
+  - Keine `!important` Overrides mehr
+  - Neon-Gelb (#f0e130) als Hauptakzentfarbe
+  - Cyan (#00f0ff) für Primary-Buttons
+  - Subtiles Neon-Grid im Hintergrund
+  - Moderne Fonts: Orbitron (Headlines), Rajdhani (Body)
+  - Konsistente Größenverhältnisse
+- **SQLite WAL-Korruption gefixt:**
+  - Automatischer WAL-Checkpoint alle 5 Minuten
+  - Finaler Checkpoint beim Shutdown
+  - Troubleshooting-Anleitung hinzugefügt
+- **Login emailVerified Bug gefixt:**
+  - Login-Response enthält jetzt `emailVerified` Feld
 
 ### 2026-01-16
 - Backend-Pfad konsolidiert auf `/var/www/stateofthedart-backend`

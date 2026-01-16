@@ -222,26 +222,26 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                   </div>
                 </button>
 
-                {/* Steampunk Theme */}
+                {/* Cyberpunk Theme */}
                 <button
                   onClick={() => updateSettings({ theme: 'steampunk' })}
                   className={`w-full p-4 rounded-lg border-2 transition-all ${
-                    settings.theme === 'steampunk' 
-                      ? 'border-amber-600 bg-amber-600/10' 
+                    settings.theme === 'steampunk'
+                      ? 'border-yellow-400 bg-yellow-400/10'
                       : 'border-dark-700 bg-dark-800 hover:border-dark-600'
                   }`}
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg sp-bronze-gradient border border-amber-700/50 flex items-center justify-center relative overflow-hidden">
-                      <span className="text-2xl">⚙️</span>
+                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-yellow-400 to-yellow-600 border border-yellow-500/50 flex items-center justify-center relative overflow-hidden">
+                      <span className="text-2xl">⚡</span>
                     </div>
                     <div className="flex-1 text-left">
-                      <p className="text-white font-semibold">Victorian Steampunk</p>
-                      <p className="text-sm text-dark-300">Bronze, brass & gears</p>
+                      <p className="text-white font-semibold">Cyberpunk Neon</p>
+                      <p className="text-sm text-dark-300">Neon yellow & dark</p>
                     </div>
                     {settings.theme === 'steampunk' && (
-                      <div className="w-6 h-6 rounded-full bg-amber-600 flex items-center justify-center">
-                        <Check size={16} className="text-white" />
+                      <div className="w-6 h-6 rounded-full bg-yellow-400 flex items-center justify-center">
+                        <Check size={16} className="text-black" />
                       </div>
                     )}
                   </div>

@@ -24,15 +24,19 @@ export const authenticateTenant = (req: AuthRequest, res: Response, next: NextFu
 
   try {
     const decoded = jwt.verify(token, config.jwtSecret) as any;
-    
+    const db = getDatabase();
+
     // Check if token has tenantId (old system) or userId (new system)
     if (decoded.tenantId) {
-      // Old system - tenant directly in token
+      // Old system - tenant directly in token, verify it still exists
+      const tenant = db.prepare('SELECT id FROM tenants WHERE id = ?').get(decoded.tenantId) as any;
+      if (!tenant) {
+        return res.status(404).json({ error: 'Tenant no longer exists' });
+      }
       req.tenantId = decoded.tenantId;
       req.playerId = decoded.playerId;
     } else if (decoded.userId) {
       // New system - get tenant from user_id
-      const db = getDatabase();
       const tenant = db.prepare('SELECT id FROM tenants WHERE user_id = ?').get(decoded.userId) as any;
       
       if (!tenant) {
