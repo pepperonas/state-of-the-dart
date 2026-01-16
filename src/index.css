@@ -1693,6 +1693,183 @@
 }
 
 /* ============================================================
+   MODAL & CONFIRMATION DIALOGS - AAA GAME QUALITY
+   ============================================================ */
+
+/* Modal backdrop */
+.steampunk .fixed.inset-0[class*="bg-black"] {
+  background: rgba(10, 5, 0, 0.9) !important;
+  backdrop-filter: blur(8px);
+  z-index: 9999 !important;
+}
+
+/* Modal content */
+.steampunk .fixed.inset-0 > div.glass-card,
+.steampunk .fixed.inset-0 .glass-card {
+  background: linear-gradient(145deg, #2d2317 0%, #1a1410 100%) !important;
+  border: 4px solid #daa520 !important;
+  box-shadow: 
+    inset 0 4px 8px rgba(139, 115, 85, 0.4),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.6),
+    0 20px 60px rgba(0, 0, 0, 0.9),
+    0 0 80px rgba(218, 165, 32, 0.5) !important;
+  max-width: 600px !important;
+  padding: 2.5rem !important;
+  position: relative;
+  z-index: 10000 !important;
+}
+
+/* Modal headings */
+.steampunk .fixed.inset-0 h3 {
+  font-size: 2rem !important;
+  color: #f4e4c1 !important;
+  text-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.9),
+    0 0 20px rgba(218, 165, 32, 0.4) !important;
+  margin-bottom: 1.5rem !important;
+}
+
+/* Modal text */
+.steampunk .fixed.inset-0 p {
+  font-size: 1.25rem !important;
+  line-height: 1.75 !important;
+  color: #e8d4b0 !important;
+  margin-bottom: 2rem !important;
+}
+
+/* Modal buttons */
+.steampunk .fixed.inset-0 button {
+  min-height: 64px !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  padding: 1rem 2rem !important;
+  border-radius: 12px !important;
+  transition: all 0.25s ease !important;
+}
+
+/* Cancel/Abbrechen button */
+.steampunk .fixed.inset-0 button[class*="bg-dark"] {
+  background: linear-gradient(145deg, #3a3027, #2d2317) !important;
+  border: 3px solid #5a4a3a !important;
+  color: #e8d4b0 !important;
+  box-shadow: 
+    inset 0 2px 4px rgba(139, 115, 85, 0.3),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.6),
+    0 4px 12px rgba(0, 0, 0, 0.8) !important;
+}
+
+.steampunk .fixed.inset-0 button[class*="bg-dark"]:hover {
+  background: linear-gradient(145deg, #5a4a3a, #3a3027) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 
+    inset 0 2px 4px rgba(139, 115, 85, 0.4),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.6),
+    0 6px 16px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Confirm/Action buttons */
+.steampunk .fixed.inset-0 button[class*="bg-primary"],
+.steampunk .fixed.inset-0 button[class*="bg-red"] {
+  background: linear-gradient(145deg, #cd7f32, #b8860b) !important;
+  border: 3px solid #daa520 !important;
+  color: #1a1410 !important;
+  box-shadow: 
+    inset 0 3px 6px rgba(232, 168, 101, 0.5),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.6),
+    0 6px 16px rgba(0, 0, 0, 0.8),
+    0 0 30px rgba(218, 165, 32, 0.4) !important;
+  text-shadow: 
+    0 1px 0 rgba(255, 255, 255, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.8) !important;
+}
+
+.steampunk .fixed.inset-0 button[class*="bg-primary"]:hover,
+.steampunk .fixed.inset-0 button[class*="bg-red"]:hover {
+  background: linear-gradient(145deg, #e8a865, #daa520) !important;
+  transform: translateY(-3px) scale(1.02) !important;
+  box-shadow: 
+    inset 0 3px 6px rgba(232, 168, 101, 0.7),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.6),
+    0 8px 24px rgba(0, 0, 0, 0.9),
+    0 0 50px rgba(218, 165, 32, 0.6) !important;
+}
+
+/* Red button specific (for dangerous actions) */
+.steampunk .fixed.inset-0 button[class*="bg-red"] {
+  background: linear-gradient(145deg, #8b4513, #6b3410) !important;
+  border-color: #cd7f32 !important;
+  color: #f4e4c1 !important;
+}
+
+.steampunk .fixed.inset-0 button[class*="bg-red"]:hover {
+  background: linear-gradient(145deg, #a0522d, #8b4513) !important;
+  box-shadow: 
+    inset 0 3px 6px rgba(160, 82, 45, 0.5),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.6),
+    0 8px 24px rgba(0, 0, 0, 0.9),
+    0 0 50px rgba(205, 127, 50, 0.4) !important;
+}
+
+/* Modal button container */
+.steampunk .fixed.inset-0 .flex.gap-3 {
+  gap: 1.5rem !important;
+  margin-top: 2rem !important;
+}
+
+/* ============================================================
+   GAME CONTROL BUTTONS - AAA GAME QUALITY
+   ============================================================ */
+
+/* Pause/Resume button */
+.steampunk button[title*="Pausieren"],
+.steampunk button[title*="Fortsetzen"] {
+  background: linear-gradient(145deg, #4a4a4a, #2a2a2a) !important;
+  border: 3px solid #8b7355 !important;
+  min-width: 56px !important;
+  min-height: 56px !important;
+}
+
+.steampunk button[title*="Pausieren"]:hover,
+.steampunk button[title*="Fortsetzen"]:hover {
+  background: linear-gradient(145deg, #6a6a6a, #4a4a4a) !important;
+  border-color: #b8860b !important;
+  box-shadow: 
+    inset 0 2px 4px rgba(139, 115, 85, 0.3),
+    0 6px 16px rgba(0, 0, 0, 0.9),
+    0 0 30px rgba(184, 134, 11, 0.4) !important;
+}
+
+/* End Match button */
+.steampunk button[title*="Match beenden"] {
+  background: linear-gradient(145deg, #8b4513, #6b3410) !important;
+  border: 3px solid #cd7f32 !important;
+  min-width: 56px !important;
+  min-height: 56px !important;
+}
+
+.steampunk button[title*="Match beenden"]:hover {
+  background: linear-gradient(145deg, #a0522d, #8b4513) !important;
+  border-color: #daa520 !important;
+  box-shadow: 
+    inset 0 2px 4px rgba(160, 82, 45, 0.4),
+    0 6px 16px rgba(0, 0, 0, 0.9),
+    0 0 30px rgba(205, 127, 50, 0.4) !important;
+}
+
+/* Undo button */
+.steampunk button[title*="rückgängig"] {
+  background: linear-gradient(145deg, #5a4a3a, #3a3027) !important;
+  border: 3px solid #8b7355 !important;
+  min-width: 56px !important;
+  min-height: 56px !important;
+}
+
+.steampunk button[title*="rückgängig"]:hover {
+  background: linear-gradient(145deg, #7a6a5a, #5a4a3a) !important;
+  border-color: #b8860b !important;
+}
+
+/* ============================================================
    RESPONSIVE - ENSURE MOBILE IS ALSO AAA
    ============================================================ */
 
@@ -1715,6 +1892,19 @@
   }
   
   .steampunk input:not([type="range"]) {
+    font-size: 1rem !important;
+  }
+  
+  .steampunk .fixed.inset-0 .glass-card {
+    padding: 1.5rem !important;
+    margin: 1rem !important;
+  }
+  
+  .steampunk .fixed.inset-0 h3 {
+    font-size: 1.5rem !important;
+  }
+  
+  .steampunk .fixed.inset-0 p {
     font-size: 1rem !important;
   }
 }
