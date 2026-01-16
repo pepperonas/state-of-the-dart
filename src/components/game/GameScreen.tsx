@@ -87,6 +87,58 @@ const GameScreen: React.FC = () => {
   const [showBackConfirm, setShowBackConfirm] = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
 
+  // Leg won animation state
+  const [legWonAnimation, setLegWonAnimation] = useState<{
+    show: boolean;
+    winnerName: string;
+    winnerAvatar: string;
+    legNumber: number;
+    legsWon: number;
+    legsTotal: number;
+  } | null>(null);
+  const lastLegIndexRef = React.useRef<number>(0);
+
+  // Detect leg win and show animation
+  useEffect(() => {
+    if (!state.currentMatch || state.currentMatch.status !== 'in-progress') return;
+
+    const currentLegIndex = state.currentMatch.currentLegIndex;
+    const legs = state.currentMatch.legs;
+
+    // Check if we moved to a new leg (meaning previous leg was won)
+    // currentLegIndex is now pointing to the NEW leg, so the completed leg is at currentLegIndex - 1
+    if (currentLegIndex > lastLegIndexRef.current && legs.length > 1) {
+      const completedLegIndex = currentLegIndex - 1;
+      const completedLeg = legs[completedLegIndex];
+
+      if (completedLeg?.winner) {
+        const winnerPlayer = state.currentMatch.players.find(p => p.playerId === completedLeg.winner);
+        const winnerInfo = players.find(p => p.id === completedLeg.winner);
+
+        if (winnerPlayer && winnerInfo) {
+          setLegWonAnimation({
+            show: true,
+            winnerName: winnerInfo.name,
+            winnerAvatar: winnerInfo.avatar || '🎯',
+            legNumber: completedLegIndex + 1, // Convert to 1-indexed for display (Leg 1, Leg 2, etc.)
+            legsWon: winnerPlayer.legsWon,
+            legsTotal: state.currentMatch.settings.legsToWin || 3,
+          });
+
+          // Hide animation after 3 seconds
+          const timer = setTimeout(() => {
+            setLegWonAnimation(null);
+          }, 3000);
+
+          // Cleanup on unmount
+          return () => clearTimeout(timer);
+        }
+      }
+    }
+
+    lastLegIndexRef.current = currentLegIndex;
+  }, [state.currentMatch?.currentLegIndex, state.currentMatch?.legs, players]);
+
   // Check achievements when match is completed (only once per match)
   useEffect(() => {
     if (state.currentMatch?.status === 'completed' && state.currentMatch.winner && state.currentMatch.id) {
@@ -885,6 +937,75 @@ const GameScreen: React.FC = () => {
             setDismissedHints(prev => new Set(prev).add(achievementId));
           }}
         />
+      )}
+
+      {/* Leg Won Animation Overlay */}
+      {legWonAnimation?.show && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-fade-in">
+          <div className="text-center animate-scale-in">
+            {/* Confetti burst effect */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              <div className="animate-confetti-burst">
+                {[...Array(20)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="absolute w-3 h-3 rounded-full"
+                    style={{
+                      left: '50%',
+                      top: '50%',
+                      backgroundColor: ['#f59e0b', '#22c55e', '#3b82f6', '#ef4444', '#8b5cf6'][i % 5],
+                      transform: `rotate(${i * 18}deg) translateY(-${100 + Math.random() * 100}px)`,
+                      animation: `confetti-fall 1s ease-out ${i * 0.05}s forwards`,
+                      opacity: 0,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Winner Avatar */}
+            <div className="text-8xl mb-4 animate-bounce-in">
+              {legWonAnimation.winnerAvatar}
+            </div>
+
+            {/* LEG text with glow */}
+            <div className="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 animate-pulse mb-2"
+                 style={{ textShadow: '0 0 40px rgba(245, 158, 11, 0.5)' }}>
+              LEG {legWonAnimation.legNumber}
+            </div>
+
+            {/* Winner name */}
+            <div className="text-3xl md:text-4xl font-bold text-white mb-4">
+              {legWonAnimation.winnerName}
+            </div>
+
+            {/* Score indicator */}
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="flex gap-2">
+                {[...Array(legWonAnimation.legsTotal)].map((_, i) => (
+                  <div
+                    key={i}
+                    className={`w-4 h-4 rounded-full transition-all ${
+                      i < legWonAnimation.legsWon
+                        ? 'bg-gradient-to-r from-yellow-400 to-amber-500 shadow-lg shadow-amber-500/50'
+                        : 'bg-dark-600'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Progress text */}
+            <div className="text-xl text-gray-400">
+              {legWonAnimation.legsWon} / {legWonAnimation.legsTotal} Legs
+            </div>
+
+            {/* Next leg indicator */}
+            <div className="mt-6 text-lg text-primary-400 animate-pulse">
+              Nächstes Leg startet...
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Back to Menu Confirmation Dialog */}

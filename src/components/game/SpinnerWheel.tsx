@@ -34,6 +34,16 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const hasStarted = useRef(false);
 
+  // Store players at spin start to prevent race conditions
+  const playersAtSpinRef = useRef<Player[]>(players);
+
+  // Validate players array
+  if (!players || players.length === 0) {
+    console.error('SpinnerWheel: No players provided');
+    onComplete(0);
+    return null;
+  }
+
   const segmentAngle = 360 / players.length;
 
   // Draw the wheel
@@ -128,6 +138,9 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
   const startSpin = () => {
     if (isSpinning) return;
 
+    // Store current players to prevent race conditions
+    playersAtSpinRef.current = [...players];
+
     setIsSpinning(true);
     setWinner(null);
     setShowResult(false);
@@ -135,8 +148,9 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
     // Play spinner sound
     audioSystem.playSound('/sounds/games/bullseye-summit/spinner.mp3', false);
 
-    // Calculate random winner and rotation
-    const winnerIndex = Math.floor(Math.random() * players.length);
+    // Calculate random winner and rotation using stored players
+    const currentPlayers = playersAtSpinRef.current;
+    const winnerIndex = Math.floor(Math.random() * currentPlayers.length);
 
     // How the wheel is drawn:
     // - Segment 0 starts at -90° (canvas coordinates) which is at the TOP of the wheel
@@ -170,8 +184,9 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
 
     // Show result after spin completes
     setTimeout(() => {
+      const storedPlayers = playersAtSpinRef.current;
       setIsSpinning(false);
-      setWinner(players[winnerIndex]);
+      setWinner(storedPlayers[winnerIndex]);
       setShowResult(true);
 
       // Play winner announcement after a short delay

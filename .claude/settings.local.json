@@ -22,7 +22,10 @@
       "Bash(./deploy.sh:*)",
       "Bash(sqlite3:*)",
       "Bash(npx ts-node:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run test:run:*)"
     ],
     "deny": [],
     "ask": []

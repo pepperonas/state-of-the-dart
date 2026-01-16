@@ -469,12 +469,20 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Track if match has been created in DB
   const matchCreatedRef = React.useRef<string | null>(null);
+  // Track if a create/update operation is in progress to prevent race conditions
+  const matchSavingRef = React.useRef<boolean>(false);
 
   // Save game state to API with debouncing (during active game)
   useEffect(() => {
     if (state.currentMatch && state.currentMatch.status === 'in-progress') {
       const matchId = state.currentMatch.id;
       const saveTimer = setTimeout(async () => {
+        // Prevent concurrent save operations
+        if (matchSavingRef.current) {
+          return;
+        }
+
+        matchSavingRef.current = true;
         const apiMatch = transformMatchForApi(state.currentMatch!);
 
         try {
@@ -499,6 +507,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (error) {
           // Silently fail - don't block the game
           console.warn('Match save failed:', error);
+        } finally {
+          matchSavingRef.current = false;
         }
       }, 1000); // Debounce: Save every 1 second
 
