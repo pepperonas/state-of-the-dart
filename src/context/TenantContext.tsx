@@ -31,82 +31,24 @@ const reviveTenantDates = (tenant: any): Tenant => {
 };
 
 export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [tenants, setTenants] = useState<Tenant[]>(() => {
-    const saved = safeGetItem<any[]>('tenants', []);
-    return saved.map(reviveTenantDates);
-  });
-  
-  const [currentTenant, setCurrentTenantState] = useState<Tenant | null>(() => {
-    const saved = safeGetItem<any>('currentTenant', null);
-    return saved ? reviveTenantDates(saved) : null;
-  });
-  
-  const [storage, setStorage] = useState<TenantStorage | null>(
-    currentTenant ? new TenantStorage(currentTenant.id) : null
-  );
-  
-  // Save tenants to localStorage
-  useEffect(() => {
-    safeSetItem('tenants', tenants);
-  }, [tenants]);
-  
-  // Save current tenant and create storage
-  useEffect(() => {
-    if (currentTenant) {
-      safeSetItem('currentTenant', currentTenant);
-      setStorage(new TenantStorage(currentTenant.id));
-      
-      // Update last active
-      setTenants(prev => prev.map(t => 
-        t.id === currentTenant.id 
-          ? { ...t, lastActive: new Date() }
-          : t
-      ));
-    } else {
-      safeSetItem('currentTenant', null);
-      setStorage(null);
-    }
-  }, [currentTenant]);
-  
-  const setCurrentTenant = (tenant: Tenant | null) => {
-    setCurrentTenantState(tenant);
+  // Create a default tenant for authenticated users
+  const defaultTenant: Tenant = {
+    id: 'default',
+    name: 'Default',
+    avatar: '👤',
+    createdAt: new Date(),
+    lastActive: new Date(),
   };
   
-  const addTenant = (name: string, avatar?: string): Tenant => {
-    const newTenant: Tenant = {
-      id: uuidv4(),
-      name,
-      avatar: avatar || name.charAt(0).toUpperCase(),
-      createdAt: new Date(),
-      lastActive: new Date(),
-    };
-    
-    setTenants(prev => [...prev, newTenant]);
-    return newTenant;
-  };
+  const [tenants] = useState<Tenant[]>([defaultTenant]);
+  const [currentTenant] = useState<Tenant | null>(defaultTenant);
+  const [storage] = useState<TenantStorage | null>(new TenantStorage('default'));
   
-  const deleteTenant = (id: string) => {
-    // Don't delete if it's the current tenant
-    if (currentTenant?.id === id) {
-      setCurrentTenant(null);
-    }
-    
-    setTenants(prev => prev.filter(t => t.id !== id));
-    
-    // Clear tenant data from storage
-    const tenantStorage = new TenantStorage(id);
-    tenantStorage.clear();
-  };
-  
-  const updateTenant = (id: string, updates: Partial<Tenant>) => {
-    setTenants(prev => prev.map(t => 
-      t.id === id ? { ...t, ...updates } : t
-    ));
-    
-    if (currentTenant?.id === id) {
-      setCurrentTenant({ ...currentTenant, ...updates });
-    }
-  };
+  // Dummy functions for compatibility
+  const setCurrentTenant = () => {};
+  const addTenant = () => defaultTenant;
+  const deleteTenant = () => {};
+  const updateTenant = () => {};
   
   return (
     <TenantContext.Provider value={{
