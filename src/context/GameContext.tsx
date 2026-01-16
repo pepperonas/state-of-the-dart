@@ -273,6 +273,30 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
           } else {
             audioSystem.announceCheckout(currentThrowScore, 'match');
           }
+        } else {
+          // Leg won but match not over - start new leg
+          const newLegId = uuidv4();
+          const newLeg = {
+            id: newLegId,
+            throws: [],
+            startedAt: new Date(),
+          };
+          updatedMatch.legs.push(newLeg);
+          updatedMatch.currentLegIndex = updatedMatch.legs.length - 1;
+          
+          // Announce leg win and new leg starting
+          setTimeout(() => {
+            audioSystem.announceScore(0); // or a specific "new leg" sound
+          }, 2000);
+          
+          // Reset to first player for new leg
+          return {
+            ...state,
+            currentMatch: updatedMatch,
+            currentThrow: [],
+            checkoutSuggestion: null,
+            currentPlayerIndex: 0,
+          };
         }
       }
       
@@ -287,11 +311,17 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
     case 'NEXT_PLAYER': {
       if (!state.currentMatch) return state;
       
-      const nextIndex = (state.currentPlayerIndex + 1) % state.currentMatch.players.length;
+      // Check if current leg is completed - if so, start from player 0 in new leg
+      const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
+      let nextIndex = (state.currentPlayerIndex + 1) % state.currentMatch.players.length;
+      
+      // If current leg just completed and new leg started, reset to first player
+      if (currentLeg.winner && state.currentPlayerIndex === state.currentMatch.players.length - 1) {
+        nextIndex = 0;
+      }
       
       // Calculate checkout suggestion for next player
       const nextPlayer = state.currentMatch.players[nextIndex];
-      const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
       const playerThrows = currentLeg.throws.filter(t => t.playerId === nextPlayer.playerId);
       const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
       const startScore = state.currentMatch.settings.startScore || 501;
