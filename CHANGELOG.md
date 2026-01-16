@@ -5,6 +5,61 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.5] - 2026-01-16
+
+### 🔥 L.A. Style Heatmap Revolution
+
+Complete redesign of the dart throw heatmap with professional geographic visualization style.
+
+### Added
+
+#### 🎨 Professional Dartboard Design
+- **Regulation Colors** - Red (#e30613) and Green (#00a651) for Double/Triple rings
+- **Classic Look** - Black (#000000) and White (#f4f1e8) for Singles
+- **Silver Wire Rings** - 6 concentric wire rings (#c0c0c0) like real dartboards
+- **Segment Dividers** - Professional wire lines between all segments
+- **Bold Numbers** - White numbers with text shadow outside the board
+- **Perfect Proportions** - Regulation dartboard dimensions and spacing
+
+#### 🌊 Smooth Blur Heatmap (L.A. Style)
+- **Gaussian Blur** - 20px blur for smooth color transitions
+- **6-Step Gradient** - Blue → Cyan → Green → Yellow → Orange → Red
+- **Point Cloud Rendering** - Each dart creates a radial gradient
+- **Screen Blend Mode** - Smooth overlay on dartboard (75% opacity)
+- **Dartboard Visible** - Background board at 90% opacity
+- **No Hard Edges** - Smooth transitions between all color zones
+
+#### 📊 Enhanced Stats Display
+- **Accuracy Metrics** - Miss Rate, Triple Rate, Double Rate
+- **Favorite Zone** - Floating badge showing most-hit field
+- **Top 5 Hotspots** - Ranked list with progress bars and percentages
+- **Total Darts** - Count of all recorded throws
+- **Color Legend** - Beautiful gradient bar with cold/hot endpoints
+
+#### 🔍 Integration
+- **Player Profile** - Large heatmap (500px) in player profile view
+- **Statistics Tab** - Huge heatmap (600px) in dedicated tab
+- **4 Stat Cards** - Total Darts, Segments Hit, Precision, 180s
+- **Empty State** - Professional explanation when no data available
+
+### Changed
+- **Heatmap Component** - Completely rewritten using Canvas API instead of SVG
+- **Color Remapping** - Advanced algorithm for smooth color distribution
+- **Dartboard Opacity** - Increased from 80% to 90% for better visibility
+- **Heatmap Opacity** - Reduced from 85% to 75% for better board visibility
+
+### Fixed
+- **Player Profile Data** - Fixed player stats loading from database instead of localStorage
+- **Personal Bests** - Correctly mapped from player.stats API response
+- **Radar Chart** - Using player.stats directly with proper normalization
+- **TypeScript Errors** - All type mismatches resolved
+
+### Technical
+- **Canvas Rendering** - Efficient 2-layer canvas rendering (dartboard + heatmap)
+- **Blur Filter** - Applied via ctx.filter for performance
+- **Color Mapping** - ImageData pixel manipulation for smooth gradients
+- **Performance** - Smooth 60fps with useMemo optimizations
+
 ## [1.0.0] - 2026-01-15
 
 ### 🎉 **Major Release - Production Ready!**

@@ -9,7 +9,7 @@
 **Professionelles Dart-Zählsystem** - Eine funktionsreiche, webbasierte Dart-Scoring-Anwendung mit Multi-User-Support, professionellem Statistik-Tracking und Live-Deployment.
 
 [![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green)](https://stateofthedart.com)
-![Version](https://img.shields.io/badge/Version-0.0.2-blue)
+![Version](https://img.shields.io/badge/Version-0.0.5-blue)
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
 ![React](https://img.shields.io/badge/React-19.2-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)
@@ -81,7 +81,16 @@
   - **Skill-Radar** - 5-dimensionale Skill-Visualisierung
   - **Karriere-Zeitachse** - Vom ersten bis zum letzten Spiel mit allen Stats
   - **Achievement-Showcase** - Zeige freigeschaltete Achievements
-  - **🎯 Dart-Heatmap** - Visualisierung der Trefferbereiche (Rot = häufig, Blau = selten)
+  - **🔥 L.A. Style Heatmap (NEU in v0.0.5)** - Professionelle Wurf-Visualisierung:
+    - Smooth Blur-Effekte (20px Gaussian Blur)
+    - 6-stufiger Farbverlauf (Blau → Cyan → Grün → Gelb → Orange → Rot)
+    - Professionelles Dartboard-Design (Rot/Grün/Schwarz/Weiß)
+    - Silberne Wire-Ringe wie bei echten Dartboards
+    - Regulation Dartboard-Farben und Proportionen
+    - Screen Blend Mode für smooth Overlay
+    - Dartboard sichtbar im Hintergrund (90% Opacity)
+    - Top 5 Hotspots mit Progress-Bars
+    - Accuracy Stats (Miss Rate, Triple Rate, Double Rate, Lieblings-Feld)
 - **Bestenlisten-Rankings** - Wettbewerbs-Rankings in 7 Kategorien:
   - Bester Average, Meiste Siege, Win-Rate, Meiste 180s, Checkout-Rate, Achievements, Gesamtpunkte
   - Top 3 bekommen spezielle Medaillen (🏆 Gold, 🥈 Silber, 🥉 Bronze)
