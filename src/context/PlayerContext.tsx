@@ -78,29 +78,33 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         const response = await api.players.getAll();
         const loadedPlayers = response.players.map(reviveDates);
         
-        // Load heatmap data for each player (store in memory only, no localStorage)
-        const playersWithHeatmaps = await Promise.all(
-          loadedPlayers.map(async (player: Player) => {
-            try {
-              const heatmapResponse = await api.players.getHeatmap(player.id);
-              
-              if (heatmapResponse && heatmapResponse.total_darts > 0) {
-                const heatmapData = {
+        // Load all heatmaps in one batch request (much faster!)
+        try {
+          const heatmapsResponse = await api.players.getHeatmapsBatch();
+          const heatmaps = heatmapsResponse.heatmaps;
+          
+          // Merge heatmaps with players
+          const playersWithHeatmaps = loadedPlayers.map((player: Player) => {
+            const heatmapData = heatmaps[player.id];
+            if (heatmapData && heatmapData.total_darts > 0) {
+              return {
+                ...player,
+                heatmapData: {
                   playerId: player.id,
-                  segments: heatmapResponse.segments,
-                  totalDarts: heatmapResponse.total_darts,
-                  lastUpdated: new Date(heatmapResponse.last_updated || Date.now())
-                };
-                return { ...player, heatmapData };
-              }
-            } catch (error) {
-              console.error(`Failed to load heatmap for ${player.name}:`, error);
+                  segments: heatmapData.segments,
+                  totalDarts: heatmapData.total_darts,
+                  lastUpdated: new Date(heatmapData.last_updated || Date.now())
+                }
+              };
             }
             return player;
-          })
-        );
-        
-        setPlayers(playersWithHeatmaps);
+          });
+          
+          setPlayers(playersWithHeatmaps);
+        } catch (error) {
+          console.error('Failed to load heatmaps:', error);
+          setPlayers(loadedPlayers);
+        }
       } catch (error) {
         console.error('❌ Failed to load players:', error);
         setPlayers([]);

@@ -154,6 +154,8 @@ export const api = {
     // Heatmap
     getHeatmap: (id: string) => apiClient(`/api/players/${id}/heatmap`),
     
+    getHeatmapsBatch: () => apiClient('/api/players/heatmaps/batch'),
+    
     updateHeatmap: (id: string, heatmapData: any) =>
       apiClient(`/api/players/${id}/heatmap`, {
         method: 'POST',
