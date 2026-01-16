@@ -91,6 +91,13 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     const newSettings = { ...settings, ...updates };
     setSettings(newSettings);
     
+    // Immediately change language if language is updated
+    if (updates.language && updates.language !== settings.language) {
+      console.log('🌍 Changing language from', settings.language, 'to', updates.language);
+      await i18n.changeLanguage(updates.language);
+      console.log('✅ Language changed to', i18n.language);
+    }
+    
     try {
       await api.settings.update({
         theme: newSettings.theme,
@@ -99,9 +106,14 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         auto_next_player: newSettings.autoNextPlayer,
         enable_achievements_hints: newSettings.showDartboardHelper,
       });
+      console.log('✅ Settings saved to API');
     } catch (error) {
       console.error('Failed to update settings:', error);
       setSettings(previousSettings);
+      // Rollback language change
+      if (updates.language) {
+        await i18n.changeLanguage(previousSettings.language);
+      }
       throw error;
     }
   };

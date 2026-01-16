@@ -1,6 +1,5 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
 
 import translationDE from './locales/de.json';
 import translationEN from './locales/en.json';
@@ -15,18 +14,17 @@ const resources = {
 };
 
 i18n
-  .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources,
     fallbackLng: 'de',
-    lng: 'de', // Default language
+    lng: 'de', // Default language (will be overridden by SettingsContext)
     interpolation: {
       escapeValue: false // React already does escaping
     },
-    detection: {
-      order: ['localStorage', 'navigator'],
-      caches: ['localStorage']
+    // Don't use language detector - we control it via Settings
+    react: {
+      useSuspense: false
     }
   });
 
