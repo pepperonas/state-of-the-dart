@@ -100,6 +100,16 @@ npm start
 - `POST /api/achievements/player/:playerId/unlock` - Unlock achievement
 - `PUT /api/achievements/player/:playerId/progress` - Update progress
 
+### Leaderboard
+
+- `GET /api/leaderboard` - Get global leaderboard
+
+### Admin (requires admin privileges)
+
+- `GET /api/admin/users` - Get all users
+- `PATCH /api/admin/users/:id` - Update user (subscription, admin status)
+- `DELETE /api/admin/users/:id` - Delete user
+
 ## 🔐 Authentication
 
 All authenticated endpoints require a JWT token in the `Authorization` header:

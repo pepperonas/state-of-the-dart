@@ -23,9 +23,9 @@
 # Nur Frontend
 npm run build && rsync -avz --delete dist/ root@69.62.121.168:/var/www/stateofthedart/
 
-# Nur Backend
+# Nur Backend (WICHTIG: data/ NICHT überschreiben!)
 cd server && npm run build && cd ..
-rsync -avz --exclude='node_modules' --exclude='data' --exclude='.env' server/dist/ root@69.62.121.168:/var/www/stateofthedart-backend/dist/
+rsync -avz --exclude='node_modules' --exclude='data/' --exclude='.env' server/ root@69.62.121.168:/var/www/stateofthedart-backend/
 ssh root@69.62.121.168 "pm2 restart stateofthedart-backend"
 ```
 
@@ -122,6 +122,11 @@ ssh root@69.62.121.168 "grep -E 'GOOGLE_CALLBACK|APP_URL|PORT' /var/www/stateoft
 ---
 
 ## Changelog
+
+### 2026-01-17
+- Admin-Status wird bei jedem Google OAuth Login geprüft
+- Match History zeigt jetzt Spielverlauf an (API lädt match_players)
+- rsync excludiert `data/` um VPS-Datenbank nicht zu überschreiben
 
 ### 2026-01-16
 - Cyberpunk Theme neu erstellt (620 statt 1900 Zeilen CSS)

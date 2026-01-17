@@ -472,5 +472,5 @@ window.addEventListener('online', async () => {
 
 ---
 
-**Letzte Aktualisierung**: 2026-01-16
-**Version**: 0.1.0 (Database-First Migration abgeschlossen)
+**Letzte Aktualisierung**: 2026-01-17
+**Version**: 0.1.6
