@@ -134,16 +134,32 @@ app.get('/api/auth/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })
 );
 
-app.get('/api/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: `${config.appUrl}/login?error=google_auth_failed` }),
-  (req, res) => {
+app.get('/api/auth/google/callback', (req, res, next) => {
+  console.log('Google callback hit, config.appUrl:', config.appUrl);
+  console.log('Google callback failure redirect:', `${config.appUrl}/login?error=google_auth_failed`);
+
+  passport.authenticate('google', {
+    failureRedirect: `${config.appUrl}/login?error=google_auth_failed`,
+    failureMessage: true
+  })(req, res, (err: any) => {
+    if (err) {
+      console.error('Passport authenticate error:', err);
+      return res.redirect(`${config.appUrl}/login?error=auth_error`);
+    }
+
+    if (!req.user) {
+      console.error('No user after Google auth');
+      return res.redirect(`${config.appUrl}/login?error=no_user`);
+    }
+
     // Successful authentication
     const user = req.user as any;
-    
+    console.log('Google auth successful for user:', user.email);
+
     // Generate JWT
     const jwt = require('jsonwebtoken');
     const token = jwt.sign(
-      { 
+      {
         userId: user.id,
         email: user.email,
         subscriptionStatus: user.subscription_status,
@@ -152,11 +168,15 @@ app.get('/api/auth/google/callback',
       config.jwtSecret,
       { expiresIn: config.jwtExpiresIn }
     );
-    
+
+    // Log the redirect URL for debugging
+    const redirectUrl = `${config.appUrl}/auth/callback?token=${token}`;
+    console.log('Google OAuth redirect URL:', redirectUrl);
+
     // Redirect to app with token
-    res.redirect(`${config.appUrl}/auth/callback?token=${token}`);
-  }
-);
+    res.redirect(redirectUrl);
+  });
+});
 
 // 404 handler
 app.use((req: Request, res: Response) => {

@@ -26,11 +26,47 @@ router.get('/', authenticateTenant, (req: AuthRequest, res: Response) => {
 
     const matches = db.prepare(query).all(...params);
 
-    // Parse JSON fields
-    const parsedMatches = matches.map((match: any) => ({
-      ...match,
-      settings: JSON.parse(match.settings),
-    }));
+    // Get players for each match and parse JSON fields
+    const parsedMatches = matches.map((match: any) => {
+      // Get match players
+      const matchPlayers = db.prepare(`
+        SELECT
+          mp.*,
+          p.name,
+          p.avatar
+        FROM match_players mp
+        LEFT JOIN players p ON mp.player_id = p.id
+        WHERE mp.match_id = ?
+      `).all(match.id);
+
+      // Transform snake_case to camelCase for players
+      const players = matchPlayers.map((mp: any) => ({
+        id: mp.id,
+        playerId: mp.player_id,
+        name: mp.name || 'Unknown',
+        avatar: mp.avatar || '🎯',
+        matchAverage: mp.match_average || 0,
+        first9Average: mp.first9_average || 0,
+        matchHighestScore: mp.highest_score || 0,
+        highestScore: mp.highest_score || 0,
+        checkoutsHit: mp.checkouts_hit || 0,
+        checkoutAttempts: mp.checkout_attempts || 0,
+        match180s: mp.match_180s || 0,
+        match171Plus: mp.match_171_plus || 0,
+        match140Plus: mp.match_140_plus || 0,
+        match100Plus: mp.match_100_plus || 0,
+        match60Plus: mp.match_60_plus || 0,
+        dartsThrown: mp.darts_thrown || 0,
+        legsWon: mp.legs_won || 0,
+        setsWon: mp.sets_won || 0,
+      }));
+
+      return {
+        ...match,
+        settings: JSON.parse(match.settings),
+        players,
+      };
+    });
 
     res.json(parsedMatches);
   } catch (error) {

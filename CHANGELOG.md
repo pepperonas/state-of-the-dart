@@ -5,6 +5,19 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/),
 und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
+## [0.1.6] - 2026-01-17
+
+### 🐛 Behoben
+
+#### Match History zeigt jetzt Verlauf an
+- **API `/api/matches` lädt jetzt Spieler-Daten mit** - Frontend benötigt `match.players` Array
+  - Match-Players werden mit JOIN aus `match_players` und `players` Tabellen geladen
+  - Konvertierung von snake_case zu camelCase für Frontend-Kompatibilität
+  - Spielernamen und Avatare werden aus `players` Tabelle geholt
+  - Stats wie matchAverage, match180s, legsWon etc. werden korrekt zurückgegeben
+
+---
+
 ## [0.1.5] - 2026-01-17
 
 ### ✨ Hinzugefügt

@@ -67,9 +67,9 @@ const MainMenu: React.FC = () => {
       gradient: 'from-amber-600 to-amber-700',
     },
     {
-      title: t('menu.leaderboard'),
+      title: t('menu.global_leaderboard'),
       icon: Trophy,
-      description: t('menu.leaderboard'),
+      description: t('menu.global_leaderboard'),
       onClick: () => navigate('/global-leaderboard'),
       gradient: 'from-primary-600 to-accent-600',
     },
