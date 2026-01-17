@@ -40,22 +40,33 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
   switch (action.type) {
     case 'LOAD_MATCH': {
       const match = action.payload;
-      const currentPlayer = match.players[state.currentPlayerIndex];
       const currentLeg = match.legs[match.currentLegIndex];
+
+      // Calculate which player's turn it is based on throw count
+      // In darts, players alternate throws, so we count throws to determine current player
+      const throwsInLeg = currentLeg.throws.length;
+      const numPlayers = match.players.length;
+
+      // Each player throws once per "round", so current player = throwsInLeg % numPlayers
+      const currentPlayerIndex = throwsInLeg % numPlayers;
+
+      const currentPlayer = match.players[currentPlayerIndex];
       const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
       const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
       const startScore = match.settings.startScore || 501;
       const remaining = startScore - totalScored;
-      
+
       let checkoutSuggestion = null;
       if (remaining <= 170 && remaining > 1) {
         checkoutSuggestion = getCheckoutSuggestion(remaining, 3);
       }
-      
+
+      console.log('🔄 LOAD_MATCH: throws in leg:', throwsInLeg, 'current player index:', currentPlayerIndex);
+
       return {
         ...state,
         currentMatch: match,
-        currentPlayerIndex: 0,
+        currentPlayerIndex,
         currentThrow: [],
         checkoutSuggestion,
       };
@@ -479,11 +490,49 @@ const reviveMatchDates = (match: any): Match => {
   };
 };
 
+const ACTIVE_MATCH_KEY = 'state-of-the-dart-active-match';
+
 export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { storage } = useTenant();
   const { updatePlayer, players, updatePlayerHeatmap } = usePlayer();
 
   const [state, dispatch] = useReducer(gameReducer, initialState);
+
+  // Restore active match from localStorage on mount
+  useEffect(() => {
+    const savedMatch = localStorage.getItem(ACTIVE_MATCH_KEY);
+    if (savedMatch && !state.currentMatch) {
+      try {
+        const parsed = JSON.parse(savedMatch);
+        // Only restore if match is still in progress or paused
+        if (parsed.status === 'in-progress' || parsed.status === 'paused') {
+          const restoredMatch = reviveMatchDates(parsed);
+          console.log('🔄 Restoring active match from localStorage:', restoredMatch.id);
+          dispatch({ type: 'LOAD_MATCH', payload: restoredMatch });
+        } else {
+          // Match was completed, clear it
+          localStorage.removeItem(ACTIVE_MATCH_KEY);
+        }
+      } catch (err) {
+        console.warn('Failed to restore match from localStorage:', err);
+        localStorage.removeItem(ACTIVE_MATCH_KEY);
+      }
+    }
+  }, []); // Only run once on mount
+
+  // Save active match to localStorage whenever it changes
+  useEffect(() => {
+    if (state.currentMatch) {
+      if (state.currentMatch.status === 'in-progress' || state.currentMatch.status === 'paused') {
+        localStorage.setItem(ACTIVE_MATCH_KEY, JSON.stringify(state.currentMatch));
+      } else if (state.currentMatch.status === 'completed') {
+        // Match completed, remove from localStorage
+        localStorage.removeItem(ACTIVE_MATCH_KEY);
+      }
+    } else {
+      localStorage.removeItem(ACTIVE_MATCH_KEY);
+    }
+  }, [state.currentMatch]);
   
   // Helper: Transform match for API (maps frontend format to API format)
   const transformMatchForApi = (match: Match) => ({

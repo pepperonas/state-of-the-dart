@@ -90,7 +90,7 @@ const Pricing: React.FC = () => {
 
             <div className="mb-6">
               <div className="flex items-baseline gap-2">
-                <span className="text-5xl font-bold text-white">9,99€</span>
+                <span className="text-5xl font-bold text-white">4,99€</span>
                 <span className="text-dark-400">/Monat</span>
               </div>
             </div>
@@ -139,10 +139,10 @@ const Pricing: React.FC = () => {
 
             <div className="mb-6">
               <div className="flex items-baseline gap-2">
-                <span className="text-5xl font-bold text-white">99,00€</span>
+                <span className="text-5xl font-bold text-white">29,99€</span>
               </div>
               <p className="text-sm text-amber-400 mt-1">
-                Spare über 50% vs. 12 Monate
+                Spare über 50% vs. 6 Monate
               </p>
             </div>
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Users, Crown, Zap, Clock, XCircle, Shield, Trash2, UserMinus, UserPlus } from 'lucide-react';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
@@ -142,10 +143,10 @@ const AdminPanel: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center gradient-mesh">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-primary-500 mx-auto mb-4"></div>
-          <p className="text-dark-300">Loading admin panel...</p>
+          <p className="text-dark-300">Lade Admin Panel...</p>
         </div>
       </div>
     );
@@ -153,71 +154,121 @@ const AdminPanel: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center gradient-mesh">
         <div className="glass-card p-8 text-center">
-          <p className="text-red-400 text-xl mb-4">❌ {error}</p>
-          <button onClick={loadData} className="btn-primary">Retry</button>
+          <p className="text-error-400 text-xl mb-4">{error}</p>
+          <button onClick={loadData} className="px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl font-semibold transition-all">
+            Erneut versuchen
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen p-4 md:p-8 gradient-mesh">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
           <button
             onClick={() => navigate('/')}
-            className="btn-secondary mb-4"
+            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:bg-dark-700/50 transition-all"
           >
-            ← Back to Menu
+            <ArrowLeft size={20} />
+            Zurück
           </button>
-          <h1 className="text-4xl font-bold gradient-text mb-2">👑 Admin Panel</h1>
-          <p className="text-dark-300">Manage users and subscriptions</p>
-        </div>
+
+          <div className="flex items-center gap-4 mb-2">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 shadow-lg">
+              <Shield size={32} className="text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-white">Admin Panel</h1>
+              <p className="text-dark-300">Benutzer & Abonnements verwalten</p>
+            </div>
+          </div>
+        </motion.div>
 
         {/* Stats */}
         {stats && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-            <div className="glass-card p-6 text-center">
-              <p className="text-3xl font-bold gradient-text mb-1">{stats.totalUsers}</p>
-              <p className="text-dark-300">Total Users</p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8"
+          >
+            <div className="glass-card p-4 md:p-6 rounded-xl border border-white/5">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 rounded-lg bg-primary-500/20">
+                  <Users size={20} className="text-primary-400" />
+                </div>
+                <p className="text-2xl md:text-3xl font-bold text-white">{stats.totalUsers}</p>
+              </div>
+              <p className="text-dark-400 text-sm">Gesamt</p>
             </div>
-            <div className="glass-card p-6 text-center">
-              <p className="text-3xl font-bold text-green-400 mb-1">{stats.activeSubscriptions}</p>
-              <p className="text-dark-300">Active Subs</p>
+            <div className="glass-card p-4 md:p-6 rounded-xl border border-white/5">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 rounded-lg bg-success-500/20">
+                  <Zap size={20} className="text-success-400" />
+                </div>
+                <p className="text-2xl md:text-3xl font-bold text-success-400">{stats.activeSubscriptions}</p>
+              </div>
+              <p className="text-dark-400 text-sm">Aktive Abos</p>
             </div>
-            <div className="glass-card p-6 text-center">
-              <p className="text-3xl font-bold text-amber-400 mb-1">{stats.lifetimeSubscriptions}</p>
-              <p className="text-dark-300">Lifetime</p>
+            <div className="glass-card p-4 md:p-6 rounded-xl border border-white/5">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 rounded-lg bg-amber-500/20">
+                  <Crown size={20} className="text-amber-400" />
+                </div>
+                <p className="text-2xl md:text-3xl font-bold text-amber-400">{stats.lifetimeSubscriptions}</p>
+              </div>
+              <p className="text-dark-400 text-sm">Lifetime</p>
             </div>
-            <div className="glass-card p-6 text-center">
-              <p className="text-3xl font-bold text-blue-400 mb-1">{stats.trialUsers}</p>
-              <p className="text-dark-300">Trial</p>
+            <div className="glass-card p-4 md:p-6 rounded-xl border border-white/5">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 rounded-lg bg-blue-500/20">
+                  <Clock size={20} className="text-blue-400" />
+                </div>
+                <p className="text-2xl md:text-3xl font-bold text-blue-400">{stats.trialUsers}</p>
+              </div>
+              <p className="text-dark-400 text-sm">Trial</p>
             </div>
-            <div className="glass-card p-6 text-center">
-              <p className="text-3xl font-bold text-red-400 mb-1">{stats.expiredUsers}</p>
-              <p className="text-dark-300">Expired</p>
+            <div className="glass-card p-4 md:p-6 rounded-xl border border-white/5 col-span-2 sm:col-span-1">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 rounded-lg bg-error-500/20">
+                  <XCircle size={20} className="text-error-400" />
+                </div>
+                <p className="text-2xl md:text-3xl font-bold text-error-400">{stats.expiredUsers}</p>
+              </div>
+              <p className="text-dark-400 text-sm">Abgelaufen</p>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Filters */}
-        <div className="glass-card p-4 mb-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="glass-card p-4 mb-6 rounded-xl border border-white/5"
+        >
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setFilter('all')}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                filter === 'all' ? 'bg-primary-600 text-white' : 'bg-dark-700 text-dark-200 hover:bg-dark-600'
+                filter === 'all' ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg' : 'bg-dark-700/50 text-dark-200 hover:bg-dark-600/50'
               }`}
             >
-              All
+              Alle
             </button>
             <button
               onClick={() => setFilter('lifetime')}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                filter === 'lifetime' ? 'bg-amber-600 text-white' : 'bg-dark-700 text-dark-200 hover:bg-dark-600'
+                filter === 'lifetime' ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg' : 'bg-dark-700/50 text-dark-200 hover:bg-dark-600/50'
               }`}
             >
               Lifetime
@@ -225,15 +276,15 @@ const AdminPanel: React.FC = () => {
             <button
               onClick={() => setFilter('active')}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                filter === 'active' ? 'bg-green-600 text-white' : 'bg-dark-700 text-dark-200 hover:bg-dark-600'
+                filter === 'active' ? 'bg-gradient-to-r from-success-500 to-success-600 text-white shadow-lg' : 'bg-dark-700/50 text-dark-200 hover:bg-dark-600/50'
               }`}
             >
-              Active
+              Aktiv
             </button>
             <button
               onClick={() => setFilter('trial')}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                filter === 'trial' ? 'bg-blue-600 text-white' : 'bg-dark-700 text-dark-200 hover:bg-dark-600'
+                filter === 'trial' ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg' : 'bg-dark-700/50 text-dark-200 hover:bg-dark-600/50'
               }`}
             >
               Trial
@@ -241,59 +292,82 @@ const AdminPanel: React.FC = () => {
             <button
               onClick={() => setFilter('expired')}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                filter === 'expired' ? 'bg-red-600 text-white' : 'bg-dark-700 text-dark-200 hover:bg-dark-600'
+                filter === 'expired' ? 'bg-gradient-to-r from-error-500 to-error-600 text-white shadow-lg' : 'bg-dark-700/50 text-dark-200 hover:bg-dark-600/50'
               }`}
             >
-              Expired
+              Abgelaufen
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Users Table */}
-        <div className="glass-card overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="glass-card overflow-hidden rounded-xl border border-white/5"
+        >
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-dark-800/50">
+              <thead className="bg-dark-800/80">
                 <tr className="text-left">
-                  <th className="px-6 py-4 font-semibold text-dark-200">User</th>
-                  <th className="px-6 py-4 font-semibold text-dark-200">Status</th>
-                  <th className="px-6 py-4 font-semibold text-dark-200">Plan</th>
-                  <th className="px-6 py-4 font-semibold text-dark-200">Created</th>
-                  <th className="px-6 py-4 font-semibold text-dark-200">Actions</th>
+                  <th className="px-6 py-4 font-semibold text-dark-300 text-sm uppercase tracking-wide">Benutzer</th>
+                  <th className="px-6 py-4 font-semibold text-dark-300 text-sm uppercase tracking-wide">Status</th>
+                  <th className="px-6 py-4 font-semibold text-dark-300 text-sm uppercase tracking-wide hidden md:table-cell">Plan</th>
+                  <th className="px-6 py-4 font-semibold text-dark-300 text-sm uppercase tracking-wide hidden lg:table-cell">Erstellt</th>
+                  <th className="px-6 py-4 font-semibold text-dark-300 text-sm uppercase tracking-wide">Aktionen</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredUsers.map((u, index) => (
                   <motion.tr
                     key={u.id}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="border-t border-dark-700 hover:bg-dark-800/30"
+                    transition={{ delay: 0.3 + index * 0.03 }}
+                    className="border-t border-dark-700/50 hover:bg-dark-800/30 transition-colors"
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-xl">
-                          {u.avatar}
+                        {u.avatar?.startsWith('http') ? (
+                          <img
+                            src={u.avatar}
+                            alt={u.name}
+                            className="w-10 h-10 rounded-full object-cover ring-2 ring-white/10"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                              (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                            }}
+                          />
+                        ) : null}
+                        <div className={`w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-xl font-bold text-white ${u.avatar?.startsWith('http') ? 'hidden' : ''}`}>
+                          {u.avatar?.startsWith('http') ? u.name.charAt(0).toUpperCase() : u.avatar}
                         </div>
                         <div>
                           <p className="font-semibold text-white flex items-center gap-2">
                             {u.name}
-                            {u.is_admin === 1 && <span className="text-amber-400 text-xs">👑 ADMIN</span>}
+                            {u.is_admin === 1 && (
+                              <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs rounded-full font-medium flex items-center gap-1">
+                                <Crown size={10} /> Admin
+                              </span>
+                            )}
                           </p>
-                          <p className="text-sm text-dark-300">{u.email}</p>
+                          <p className="text-sm text-dark-400">{u.email}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${getStatusBadgeClass(u.subscription_status)}`}>
-                        {u.subscription_status}
+                      <span className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase ${getStatusBadgeClass(u.subscription_status)}`}>
+                        {u.subscription_status === 'lifetime' ? 'Lifetime' :
+                         u.subscription_status === 'active' ? 'Aktiv' :
+                         u.subscription_status === 'trial' ? 'Trial' :
+                         u.subscription_status === 'expired' ? 'Abgelaufen' : u.subscription_status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-dark-200">
+                    <td className="px-6 py-4 text-dark-300 hidden md:table-cell">
                       {u.subscription_plan || '-'}
                     </td>
-                    <td className="px-6 py-4 text-dark-200">
+                    <td className="px-6 py-4 text-dark-300 hidden lg:table-cell">
                       {formatDate(u.created_at)}
                     </td>
                     <td className="px-6 py-4">
@@ -301,39 +375,41 @@ const AdminPanel: React.FC = () => {
                         {u.subscription_status !== 'lifetime' && (
                           <button
                             onClick={() => handleGrantLifetime(u.id)}
-                            className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white text-xs rounded-lg transition-colors"
-                            title="Grant Lifetime"
+                            className="p-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 rounded-lg transition-colors"
+                            title="Lifetime gewähren"
                           >
-                            🌟 Lifetime
+                            <Crown size={16} />
                           </button>
                         )}
                         {u.subscription_status !== 'expired' && (
                           <button
                             onClick={() => handleRevokeAccess(u.id)}
-                            className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg transition-colors"
-                            title="Revoke Access"
+                            className="p-2 bg-error-500/20 hover:bg-error-500/30 text-error-400 rounded-lg transition-colors"
+                            title="Zugang entziehen"
                           >
-                            ❌ Revoke
+                            <XCircle size={16} />
                           </button>
                         )}
                         {u.id !== user?.id && (
                           <button
                             onClick={() => handleToggleAdmin(u.id, u.is_admin === 1)}
-                            className={`px-3 py-1 text-white text-xs rounded-lg transition-colors ${
-                              u.is_admin === 1 ? 'bg-gray-600 hover:bg-gray-700' : 'bg-purple-600 hover:bg-purple-700'
+                            className={`p-2 rounded-lg transition-colors ${
+                              u.is_admin === 1
+                                ? 'bg-dark-600/50 hover:bg-dark-600 text-dark-300'
+                                : 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-400'
                             }`}
-                            title={u.is_admin === 1 ? 'Remove Admin' : 'Make Admin'}
+                            title={u.is_admin === 1 ? 'Admin entfernen' : 'Zum Admin machen'}
                           >
-                            {u.is_admin === 1 ? '👤 Remove Admin' : '👑 Make Admin'}
+                            {u.is_admin === 1 ? <UserMinus size={16} /> : <UserPlus size={16} />}
                           </button>
                         )}
                         {u.id !== user?.id && (
                           <button
                             onClick={() => handleDeleteUser(u.id)}
-                            className="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white text-xs rounded-lg transition-colors"
-                            title="Delete User"
+                            className="p-2 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 rounded-lg transition-colors"
+                            title="Benutzer löschen"
                           >
-                            🗑️ Delete
+                            <Trash2 size={16} />
                           </button>
                         )}
                       </div>
@@ -343,12 +419,16 @@ const AdminPanel: React.FC = () => {
               </tbody>
             </table>
           </div>
-        </div>
+        </motion.div>
 
         {filteredUsers.length === 0 && (
-          <div className="text-center py-12 text-dark-300">
-            No users found with filter: {filter}
-          </div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-12 text-dark-400"
+          >
+            Keine Benutzer mit Filter "{filter}" gefunden
+          </motion.div>
         )}
       </div>
     </div>

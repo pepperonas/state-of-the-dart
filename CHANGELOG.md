@@ -5,6 +5,36 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/),
 und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
+## [0.1.5] - 2026-01-17
+
+### ✨ Hinzugefügt
+
+#### Match-Persistenz bei Page Refresh
+- **localStorage-Speicherung für aktive Matches** - Spiel wird bei Seiten-Refresh wiederhergestellt
+  - Aktive Matches werden unter `state-of-the-dart-active-match` gespeichert
+  - Korrekter Spielerindex wird aus Throws berechnet
+  - Abgeschlossene Matches werden automatisch entfernt
+
+#### Admin Panel nur für Admin
+- **Admin-Dashboard exklusiv für `martinpaush@gmail.com`**
+  - `is_admin` Flag in Datenbank wird geprüft
+  - Neues Theme passend zur restlichen App (gradient-mesh, glass-cards)
+  - Deutsche Übersetzungen
+  - Lucide Icons statt Emojis für Actions
+  - Avatar-Support für Google-Profile-Bilder
+
+### 🐛 Behoben
+
+#### Dashboard Datumsanzeige
+- **"undefined - -" in letzten Aktivitäten** - API gibt snake_case Felder zurück
+  - `game_type` und `completed_at` werden jetzt korrekt ausgelesen
+  - Fallback auf camelCase für Kompatibilität
+
+#### Admin Panel Avatar
+- **Google-Avatar URL wurde als Text angezeigt**
+  - URLs werden jetzt als `<img>` gerendert
+  - Fallback auf Initialen bei Ladefehler
+
 ## [0.1.4] - 2026-01-17
 
 ### ✨ Hinzugefügt

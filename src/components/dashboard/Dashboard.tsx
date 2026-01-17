@@ -106,12 +106,15 @@ const Dashboard: React.FC = () => {
         .slice(-5)
         .reverse()
         .forEach((match: any) => {
+          // API returns snake_case fields
+          const gameType = match.game_type || match.gameType || '501';
+          const completedAt = match.completed_at || match.completedAt;
           recentActivities.push({
             id: match.id,
             type: 'match',
             title: match.winner ? 'Spiel gewonnen!' : 'Spiel beendet',
-            description: `${match.gameType} - ${formatDate(match.completedAt)}`,
-            timestamp: match.completedAt,
+            description: `${gameType} - ${formatDate(completedAt)}`,
+            timestamp: completedAt,
             icon: match.winner ? '🏆' : '🎯',
           });
         });
