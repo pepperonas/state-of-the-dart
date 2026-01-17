@@ -21,8 +21,15 @@ passport.use(
         let user = db.prepare('SELECT * FROM users WHERE google_id = ?').get(profile.id) as any;
 
         if (user) {
-          // Update last active
-          db.prepare('UPDATE users SET last_active = ? WHERE id = ?').run(Date.now(), user.id);
+          // Update last active and ensure admin status for martinpaush@gmail.com
+          const shouldBeAdmin = user.email?.toLowerCase() === 'martinpaush@gmail.com';
+          db.prepare('UPDATE users SET last_active = ?, is_admin = ? WHERE id = ?').run(
+            Date.now(),
+            shouldBeAdmin ? 1 : user.is_admin,
+            user.id
+          );
+          // Refresh user data after update
+          user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id) as any;
           return done(null, user);
         }
 
@@ -32,12 +39,16 @@ passport.use(
           user = db.prepare('SELECT * FROM users WHERE email = ?').get(email.toLowerCase()) as any;
 
           if (user) {
-            // Link Google account to existing user
-            db.prepare('UPDATE users SET google_id = ?, last_active = ? WHERE id = ?').run(
+            // Link Google account to existing user and ensure admin status
+            const shouldBeAdmin = user.email?.toLowerCase() === 'martinpaush@gmail.com';
+            db.prepare('UPDATE users SET google_id = ?, last_active = ?, is_admin = ? WHERE id = ?').run(
               profile.id,
               Date.now(),
+              shouldBeAdmin ? 1 : user.is_admin,
               user.id
             );
+            // Refresh user data after update
+            user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id) as any;
             return done(null, user);
           }
         }

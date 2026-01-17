@@ -9,6 +9,12 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### 🐛 Behoben
 
+#### Admin-Status wird bei jedem Login geprüft
+- **Google OAuth aktualisiert `is_admin` bei Login** - `martinpaush@gmail.com` erhält automatisch Admin-Rechte
+  - Bei existierenden Usern wird Admin-Status bei jedem Login geprüft
+  - Bei Account-Linking (Email zu Google) wird Admin-Status aktualisiert
+  - User-Daten werden nach Update refreshed
+
 #### Match History zeigt jetzt Verlauf an
 - **API `/api/matches` lädt jetzt Spieler-Daten mit** - Frontend benötigt `match.players` Array
   - Match-Players werden mit JOIN aus `match_players` und `players` Tabellen geladen

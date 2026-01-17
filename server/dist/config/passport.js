@@ -20,8 +20,11 @@ passport_1.default.use(new passport_google_oauth20_1.Strategy({
         // Check if user exists with Google ID
         let user = db.prepare('SELECT * FROM users WHERE google_id = ?').get(profile.id);
         if (user) {
-            // Update last active
-            db.prepare('UPDATE users SET last_active = ? WHERE id = ?').run(Date.now(), user.id);
+            // Update last active and ensure admin status for martinpaush@gmail.com
+            const shouldBeAdmin = user.email?.toLowerCase() === 'martinpaush@gmail.com';
+            db.prepare('UPDATE users SET last_active = ?, is_admin = ? WHERE id = ?').run(Date.now(), shouldBeAdmin ? 1 : user.is_admin, user.id);
+            // Refresh user data after update
+            user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
             return done(null, user);
         }
         // Check if user exists with same email
@@ -29,8 +32,11 @@ passport_1.default.use(new passport_google_oauth20_1.Strategy({
         if (email) {
             user = db.prepare('SELECT * FROM users WHERE email = ?').get(email.toLowerCase());
             if (user) {
-                // Link Google account to existing user
-                db.prepare('UPDATE users SET google_id = ?, last_active = ? WHERE id = ?').run(profile.id, Date.now(), user.id);
+                // Link Google account to existing user and ensure admin status
+                const shouldBeAdmin = user.email?.toLowerCase() === 'martinpaush@gmail.com';
+                db.prepare('UPDATE users SET google_id = ?, last_active = ?, is_admin = ? WHERE id = ?').run(profile.id, Date.now(), shouldBeAdmin ? 1 : user.is_admin, user.id);
+                // Refresh user data after update
+                user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
                 return done(null, user);
             }
         }
