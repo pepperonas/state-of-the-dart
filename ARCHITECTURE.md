@@ -473,4 +473,4 @@ window.addEventListener('online', async () => {
 ---
 
 **Letzte Aktualisierung**: 2026-01-17
-**Version**: 0.1.6
+**Version**: 0.1.7

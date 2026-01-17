@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
+import {
   Trophy, Target, Award, TrendingUp, Flame, Calendar,
-  ArrowRight, Loader, Play, Users, Dumbbell, ArrowLeft
+  ArrowRight, Loader, Play, Users, Dumbbell, ArrowLeft, Crown, Clock
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTenant } from '../../context/TenantContext';
@@ -192,6 +192,34 @@ const Dashboard: React.FC = () => {
             )}
           </p>
         </div>
+
+        {/* Trial Banner */}
+        {user?.subscriptionStatus === 'trial' && trialDaysLeft > 0 && (
+          <div className="mb-8 glass-card p-4 rounded-xl bg-gradient-to-r from-primary-900/30 to-accent-900/30 border border-primary-500/30">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-primary-500/20 flex items-center justify-center">
+                  <Clock size={24} className="text-primary-400" />
+                </div>
+                <div>
+                  <p className="font-bold text-white">
+                    Premium-Trial: Noch {trialDaysLeft} {trialDaysLeft === 1 ? 'Tag' : 'Tage'}
+                  </p>
+                  <p className="text-sm text-dark-300">
+                    Genieße alle Premium-Features während deiner Testphase
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate('/pricing')}
+                className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105"
+              >
+                <Crown size={20} />
+                Jetzt upgraden
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">

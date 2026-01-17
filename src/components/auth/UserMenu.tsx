@@ -67,6 +67,28 @@ const UserMenu: React.FC = () => {
               <p className="text-sm text-dark-400 truncate">{user.email}</p>
             </div>
 
+            {/* Trial/Subscription Banner */}
+            {user.subscriptionStatus === 'trial' && trialDaysLeft > 0 && (
+              <div className="px-3 py-3 bg-gradient-to-r from-primary-900/50 to-accent-900/50 border-b border-dark-600">
+                <div className="flex items-center gap-2 mb-2">
+                  <Clock size={16} className="text-primary-400" />
+                  <span className="text-sm font-medium text-white">
+                    Noch {trialDaysLeft} {trialDaysLeft === 1 ? 'Tag' : 'Tage'} Premium-Trial
+                  </span>
+                </div>
+                <button
+                  onClick={() => {
+                    navigate('/pricing');
+                    setIsOpen(false);
+                  }}
+                  className="w-full py-2 px-3 bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2"
+                >
+                  <Crown size={16} />
+                  Jetzt upgraden
+                </button>
+              </div>
+            )}
+
             {/* Menu Items */}
             <div className="py-2">
               <button
@@ -99,7 +121,7 @@ const UserMenu: React.FC = () => {
                 className="w-full px-4 py-2 text-left flex items-center gap-2 text-white hover:bg-dark-800 transition-colors"
               >
                 <CreditCard size={18} />
-                {hasActiveSubscription ? 'Abo verwalten' : 'Upgrade'}
+                {user.subscriptionStatus === 'lifetime' ? 'Lifetime-Lizenz' : hasActiveSubscription ? 'Abo verwalten' : 'Upgrade'}
               </button>
 
               <div className="border-t border-dark-600 my-2" />

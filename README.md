@@ -9,7 +9,7 @@
 **Professionelles Dart-Zählsystem** - Eine funktionsreiche, webbasierte Dart-Scoring-Anwendung mit Multi-User-Support, professionellem Statistik-Tracking und Live-Deployment.
 
 [![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green)](https://stateofthedart.com)
-![Version](https://img.shields.io/badge/Version-0.1.6-blue)
+![Version](https://img.shields.io/badge/Version-0.1.7-blue)
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
 ![React](https://img.shields.io/badge/React-19.2-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)
@@ -456,7 +456,7 @@ Siehe [DEPLOYMENT_VPS.md](DEPLOYMENT_VPS.md) für Details.
 
 ## 🔢 Versionierung
 
-- **Aktuell**: v0.1.6
+- **Aktuell**: v0.1.7
 - **Schema**: MAJOR.MINOR.PATCH
 - **Auto-Increment**: `npm run version:bump`
 
@@ -561,7 +561,7 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 
 <div align="center">
   <p>Made with ❤️ and 🎯 by Martin Pfeffer</p>
-  <p>© 2026 celox.io | Version 0.1.6</p>
+  <p>© 2026 celox.io | Version 0.1.7</p>
   <p>
     <a href="https://stateofthedart.com">🌐 Live Demo</a> •
     <a href="https://github.com/pepperonas/state-of-the-dart">📦 GitHub</a> •
