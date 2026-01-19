@@ -1,219 +1,215 @@
-# State of the Dart - Backend API
+# State of the Dart - Backend
 
-RESTful API server for State of the Dart darts tracking application.
+Express + TypeScript + SQLite Backend mit JWT Auth, Stripe Payments und Google OAuth.
 
-## 🚀 Features
+## Features
 
-- **SQLite Database** - Fast, reliable, self-contained
-- **JWT Authentication** - Secure tenant-based auth
-- **RESTful API** - Clean, consistent endpoints
-- **TypeScript** - Type-safe development
-- **Rate Limiting** - Protection against abuse
-- **CORS** - Configurable cross-origin requests
+- SQLite mit better-sqlite3 (synchron, schnell)
+- JWT Authentication + Google OAuth
+- Stripe Subscription & Lifetime Payments
+- Multi-Tenant Architektur
+- Rate Limiting, CORS, Helmet Security
 
-## 📋 Requirements
+## Requirements
 
-- Node.js 18+ (with npm)
+- Node.js 18+
 - SQLite3
 
-## 🛠️ Installation
+## Installation
 
 ```bash
-cd server
 npm install
-```
-
-## ⚙️ Configuration
-
-Copy `env.example` to `.env` and configure:
-
-```bash
-cp env.example .env
-```
-
-Edit `.env`:
-
-```env
-PORT=3002
-NODE_ENV=development
-DATABASE_PATH=./data/state-of-the-dart.db
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-CORS_ORIGINS=http://localhost:5173,http://localhost:3000
-```
-
-## 🏃 Running
-
-### Development
-
-```bash
-npm run dev
-```
-
-### Production
-
-```bash
+cp .env.example .env  # Anpassen!
 npm run build
 npm start
 ```
 
-## 📚 API Endpoints
+## Konfiguration
 
-### Authentication
-
-- `POST /api/tenants/auth` - Register/Login with tenant
-- `GET /api/tenants` - Get all tenants
-- `GET /api/tenants/:id` - Get tenant by ID
-- `DELETE /api/tenants/:id` - Delete tenant
-
-### Players
-
-- `GET /api/players` - Get all players for tenant
-- `GET /api/players/:id` - Get player by ID
-- `POST /api/players` - Create new player
-- `PUT /api/players/:id` - Update player
-- `DELETE /api/players/:id` - Delete player
-- `GET /api/players/:id/heatmap` - Get player heatmap data
-- `POST /api/players/:id/heatmap` - Update player heatmap
-- `GET /api/players/:id/personal-bests` - Get personal bests
-- `POST /api/players/:id/personal-bests` - Update personal bests
-
-### Matches
-
-- `GET /api/matches` - Get all matches
-- `GET /api/matches/:id` - Get match with full details
-- `POST /api/matches` - Create new match
-- `PUT /api/matches/:id` - Update match
-- `DELETE /api/matches/:id` - Delete match
-
-### Training
-
-- `GET /api/training` - Get all training sessions
-- `GET /api/training/:id` - Get session with results
-- `POST /api/training` - Create new session
-- `PUT /api/training/:id` - Update session
-- `DELETE /api/training/:id` - Delete session
-
-### Achievements
-
-- `GET /api/achievements` - Get all achievements
-- `GET /api/achievements/player/:playerId` - Get player achievements
-- `POST /api/achievements/player/:playerId/unlock` - Unlock achievement
-- `PUT /api/achievements/player/:playerId/progress` - Update progress
-
-### Leaderboard
-
-- `GET /api/leaderboard` - Get global leaderboard
-
-### Admin (requires admin privileges)
-
-- `GET /api/admin/users` - Get all users
-- `PATCH /api/admin/users/:id` - Update user (subscription, admin status)
-- `DELETE /api/admin/users/:id` - Delete user
-
-## 🔐 Authentication
-
-All authenticated endpoints require a JWT token in the `Authorization` header:
-
-```
-Authorization: Bearer <token>
-```
-
-Get a token by calling `POST /api/tenants/auth` with:
-
-```json
-{
-  "tenantId": "unique-tenant-id",
-  "name": "Tenant Name",
-  "avatar": "👤"
-}
-```
-
-## 📊 Database Schema
-
-The database automatically initializes with the following tables:
-
-- `tenants` - Tenant/profile management
-- `players` - Player data
-- `player_stats` - Player statistics
-- `matches` - Match records
-- `match_players` - Player performance per match
-- `legs` - Leg data
-- `throws` - Individual throws
-- `heatmap_data` - Dart throw heatmaps
-- `training_sessions` - Training session records
-- `training_results` - Training session results
-- `achievements` - Achievement definitions
-- `player_achievements` - Unlocked achievements
-- `personal_bests` - Player personal best records
-
-## 🚢 Deployment
-
-### VPS Deployment with PM2
-
-1. **Install PM2 globally:**
-   ```bash
-   npm install -g pm2
-   ```
-
-2. **Build the project:**
-   ```bash
-   npm run build
-   ```
-
-3. **Start with PM2:**
-   ```bash
-   pm2 start dist/index.js --name "stateofthedart-backend"
-   ```
-
-4. **Save PM2 configuration:**
-   ```bash
-   pm2 save
-   pm2 startup
-   ```
-
-5. **Configure Nginx as reverse proxy** (see DEPLOYMENT_VPS.md)
-
-### Environment Variables (Production)
+### Environment Variables
 
 ```env
+# Server
 PORT=3002
 NODE_ENV=production
-DATABASE_URL=./data/state-of-the-dart.db
-JWT_SECRET=<generate-secure-random-string>
-CORS_ORIGINS=https://stateofthedart.com,https://api.stateofthedart.com
-APP_URL=https://stateofthedart.com
-API_URL=https://api.stateofthedart.com
-GOOGLE_CALLBACK_URL=https://api.stateofthedart.com/api/auth/google/callback
+FRONTEND_URL=https://stateofthedart.com
+
+# Database
+DATABASE_PATH=./data/state-of-the-dart.db
+
+# Auth
+JWT_SECRET=<random-64-chars>
+JWT_EXPIRES_IN=7d
+BCRYPT_ROUNDS=12
+
+# Stripe
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_PRICE_MONTHLY=price_...
+STRIPE_PRICE_LIFETIME=price_...
+
+# Google OAuth
+GOOGLE_CLIENT_ID=...googleusercontent.com
+GOOGLE_CLIENT_SECRET=GOCSPX-...
+
+# SMTP
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=noreply@example.com
+SMTP_PASS=password
+SMTP_FROM=State of the Dart <noreply@example.com>
 ```
 
-## 📝 Development
+### Stripe Setup
 
-### Type Checking
+1. **Account**: https://dashboard.stripe.com
+2. **API Keys**: Developers > API Keys
+3. **Products erstellen**:
+   - Monthly: 9.99 EUR/Monat (recurring)
+   - Lifetime: 99.00 EUR (one_time)
+4. **Webhook**: Developers > Webhooks > Add endpoint
+   - URL: `https://api.stateofthedart.com/api/payment/webhook`
+   - Events: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_failed`, `invoice.payment_succeeded`
+
+### Google OAuth Setup
+
+1. **Google Cloud Console**: https://console.cloud.google.com
+2. **OAuth Consent Screen**: APIs & Services > OAuth consent screen
+3. **OAuth Client ID**: APIs & Services > Credentials > Create OAuth client ID
+   - Application type: Web application
+   - Authorized redirect URIs: `https://api.stateofthedart.com/api/auth/google/callback`
+4. **Client ID & Secret** in `.env` eintragen
+
+## API Endpoints
+
+### Auth (`/api/auth`)
+| Method | Endpoint | Beschreibung |
+|--------|----------|--------------|
+| POST | `/register` | Registrierung |
+| POST | `/login` | Login |
+| GET | `/verify-email/:token` | Email verifizieren |
+| POST | `/forgot-password` | Passwort-Reset anfordern |
+| POST | `/reset-password` | Neues Passwort setzen |
+| GET | `/me` | Aktueller User |
+| GET | `/google` | Google OAuth Start |
+| GET | `/google/callback` | Google OAuth Callback |
+
+### Payment (`/api/payment`)
+| Method | Endpoint | Beschreibung |
+|--------|----------|--------------|
+| POST | `/create-checkout` | Stripe Checkout erstellen |
+| POST | `/create-portal` | Stripe Portal (Abo verwalten) |
+| POST | `/webhook` | Stripe Webhook |
+| GET | `/status` | Subscription Status |
+
+### Tenants (`/api/tenants`)
+| Method | Endpoint | Beschreibung |
+|--------|----------|--------------|
+| GET | `/` | Alle Profile |
+| POST | `/` | Profil erstellen |
+| PUT | `/:id` | Profil aktualisieren |
+| DELETE | `/:id` | Profil löschen |
+
+### Players (`/api/players`)
+| Method | Endpoint | Beschreibung |
+|--------|----------|--------------|
+| GET | `/` | Alle Spieler (mit Stats) |
+| POST | `/` | Spieler erstellen |
+| PUT | `/:id` | Spieler aktualisieren |
+| DELETE | `/:id` | Spieler löschen |
+| GET | `/:id/stats` | Detaillierte Statistiken |
+| PUT | `/:id/stats` | Stats aktualisieren |
+| GET | `/:id/personal-bests` | Personal Bests |
+| PUT | `/:id/personal-bests` | Personal Bests aktualisieren |
+| GET | `/:id/heatmap` | Heatmap-Daten |
+
+### Matches (`/api/matches`)
+| Method | Endpoint | Beschreibung |
+|--------|----------|--------------|
+| GET | `/` | Match-Historie |
+| POST | `/` | Match speichern |
+| GET | `/:id` | Match-Details |
+| DELETE | `/:id` | Match löschen |
+| GET | `/player/:playerId/heatmap` | Spieler-Heatmap |
+
+### Training (`/api/training`)
+| Method | Endpoint | Beschreibung |
+|--------|----------|--------------|
+| GET | `/sessions` | Alle Sessions |
+| POST | `/sessions` | Session speichern |
+| GET | `/sessions/:id` | Session-Details |
+| DELETE | `/sessions/:id` | Session löschen |
+| GET | `/stats/:playerId` | Trainings-Statistiken |
+
+### Achievements (`/api/achievements`)
+| Method | Endpoint | Beschreibung |
+|--------|----------|--------------|
+| GET | `/:playerId` | Spieler-Achievements |
+| POST | `/sync` | Achievements synchronisieren |
+| GET | `/all/:playerId` | Alle mit Status |
+| POST | `/unlock` | Achievement freischalten |
+
+### Admin (`/api/admin`)
+| Method | Endpoint | Beschreibung |
+|--------|----------|--------------|
+| GET | `/users` | Alle User |
+| PUT | `/users/:id` | User aktualisieren |
+| DELETE | `/users/:id` | User löschen |
+
+## Datenbank Schema
+
+13 Tabellen: `tenants`, `players`, `player_stats`, `matches`, `match_players`, `legs`, `throws`, `heatmap_data`, `training_sessions`, `training_results`, `achievements`, `player_achievements`, `personal_bests`
+
+Schema: `src/database/schema.ts`
+
+## Deployment (PM2)
 
 ```bash
-npx tsc --noEmit
-```
-
-### Building
-
-```bash
+# Build & Start
 npm run build
-```
+pm2 start dist/index.js --name stateofthedart-backend
 
-## 🐛 Debugging
-
-Enable detailed logging in development:
-
-```env
-NODE_ENV=development
-```
-
-View PM2 logs:
-
-```bash
+# Logs & Monitoring
 pm2 logs stateofthedart-backend
+pm2 monit
+
+# Restart/Reload
+pm2 restart stateofthedart-backend
+pm2 reload stateofthedart-backend  # Zero-downtime
 ```
 
-## 📄 License
+## Testing
 
-MIT
+### Auth testen
+```bash
+# Registrieren
+curl -X POST http://localhost:3002/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"Test123!"}'
+
+# Login
+curl -X POST http://localhost:3002/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"Test123!"}'
+```
+
+### Stripe Test-Karten
+- **Erfolg**: 4242 4242 4242 4242
+- **Abgelehnt**: 4000 0000 0000 0002
+- **3D Secure**: 4000 0025 0000 3155
+
+## Security Checklist
+
+- [ ] JWT_SECRET ist lang und zufällig (min. 64 Zeichen)
+- [ ] HTTPS in Produktion
+- [ ] Stripe Webhook Secret korrekt
+- [ ] CORS auf Frontend-Domain beschränkt
+- [ ] Rate Limiting aktiv (100 req/15min)
+- [ ] Sensitive Daten nicht in Logs
+
+## Troubleshooting
+
+**Stripe Webhook 400**: Webhook Secret prüfen, Raw Body Parser aktiv?
+**Google OAuth Fehler**: Redirect URI exakt konfiguriert?
+**JWT Fehler**: Token abgelaufen oder Secret geändert?
+**SMTP Fehler**: Port 587 (TLS) oder 465 (SSL), Credentials prüfen

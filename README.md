@@ -191,7 +191,7 @@ npm start
 
 Der Backend-Server läuft auf `http://localhost:3002`
 
-📚 **Vollständige Setup-Anleitung**: Siehe [DEPLOYMENT_VPS.md](DEPLOYMENT_VPS.md) und [server/SETUP.md](server/SETUP.md)
+📚 **Vollständige Setup-Anleitung**: Siehe [DEPLOYMENT_VPS.md](DEPLOYMENT_VPS.md) und [server/README.md](server/README.md)
 
 ### Build für Produktion
 
