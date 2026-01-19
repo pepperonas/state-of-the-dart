@@ -20,9 +20,10 @@ passport_1.default.use(new passport_google_oauth20_1.Strategy({
         // Check if user exists with Google ID
         let user = db.prepare('SELECT * FROM users WHERE google_id = ?').get(profile.id);
         if (user) {
-            // Update last active and ensure admin status for martinpaush@gmail.com
-            const shouldBeAdmin = user.email?.toLowerCase() === 'martinpaush@gmail.com';
-            db.prepare('UPDATE users SET last_active = ?, is_admin = ? WHERE id = ?').run(Date.now(), shouldBeAdmin ? 1 : user.is_admin, user.id);
+            // Update last active and ensure admin status + lifetime subscription for admin emails
+            const adminEmails = ['martinpaush@gmail.com', 'martin.pfeffer@celox.io'];
+            const shouldBeAdmin = adminEmails.includes(user.email?.toLowerCase());
+            db.prepare('UPDATE users SET last_active = ?, is_admin = ?, subscription_status = ? WHERE id = ?').run(Date.now(), shouldBeAdmin ? 1 : user.is_admin, shouldBeAdmin ? 'lifetime' : user.subscription_status, user.id);
             // Refresh user data after update
             user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
             return done(null, user);
@@ -32,9 +33,10 @@ passport_1.default.use(new passport_google_oauth20_1.Strategy({
         if (email) {
             user = db.prepare('SELECT * FROM users WHERE email = ?').get(email.toLowerCase());
             if (user) {
-                // Link Google account to existing user and ensure admin status
-                const shouldBeAdmin = user.email?.toLowerCase() === 'martinpaush@gmail.com';
-                db.prepare('UPDATE users SET google_id = ?, last_active = ?, is_admin = ? WHERE id = ?').run(profile.id, Date.now(), shouldBeAdmin ? 1 : user.is_admin, user.id);
+                // Link Google account to existing user and ensure admin status + lifetime subscription
+                const adminEmails = ['martinpaush@gmail.com', 'martin.pfeffer@celox.io'];
+                const shouldBeAdmin = adminEmails.includes(user.email?.toLowerCase());
+                db.prepare('UPDATE users SET google_id = ?, last_active = ?, is_admin = ?, subscription_status = ? WHERE id = ?').run(profile.id, Date.now(), shouldBeAdmin ? 1 : user.is_admin, shouldBeAdmin ? 'lifetime' : user.subscription_status, user.id);
                 // Refresh user data after update
                 user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
                 return done(null, user);
@@ -47,7 +49,8 @@ passport_1.default.use(new passport_google_oauth20_1.Strategy({
         const trialEndsAt = Date.now() + config_1.config.trialPeriodDays * 24 * 60 * 60 * 1000;
         // Check if user should be admin
         const userEmail = email?.toLowerCase() || `${profile.id}@google.oauth`;
-        const isAdmin = userEmail === 'martinpaush@gmail.com';
+        const adminEmails = ['martinpaush@gmail.com', 'martin.pfeffer@celox.io'];
+        const isAdmin = adminEmails.includes(userEmail);
         const subscriptionStatus = isAdmin ? 'lifetime' : 'trial';
         db.prepare(`
           INSERT INTO users (

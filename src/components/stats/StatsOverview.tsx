@@ -689,18 +689,20 @@ const StatsOverview: React.FC = () => {
                         <ResponsiveContainer width="100%" height={300}>
                           <LineChart data={progressData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
-                            <XAxis 
-                              dataKey="date" 
-                              stroke="#737373" 
+                            <XAxis
+                              dataKey="date"
+                              stroke="#a3a3a3"
                               style={{ fontSize: '12px' }}
+                              tick={{ fill: '#a3a3a3' }}
                             />
-                            <YAxis 
-                              stroke="#737373" 
+                            <YAxis
+                              stroke="#a3a3a3"
                               style={{ fontSize: '12px' }}
+                              tick={{ fill: '#a3a3a3' }}
                             />
-                            <Tooltip 
-                              contentStyle={{ 
-                                backgroundColor: '#0a0a0a', 
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: '#0a0a0a',
                                 border: '1px solid #404040',
                                 borderRadius: '8px',
                                 padding: '12px'
@@ -708,14 +710,15 @@ const StatsOverview: React.FC = () => {
                               labelStyle={{ color: '#fff', fontWeight: 'bold' }}
                               itemStyle={{ color: '#0ea5e9' }}
                             />
-                            <Legend 
+                            <Legend
                               wrapperStyle={{ paddingTop: '20px' }}
                               iconType="line"
+                              formatter={(value) => <span style={{ color: '#fff' }}>{value}</span>}
                             />
-                            <Line 
-                              type="monotone" 
-                              dataKey="average" 
-                              stroke="#0ea5e9" 
+                            <Line
+                              type="monotone"
+                              dataKey="average"
+                              stroke="#0ea5e9"
                               strokeWidth={3}
                               dot={{ fill: '#0ea5e9', r: 4 }}
                               activeDot={{ r: 6 }}
@@ -733,19 +736,21 @@ const StatsOverview: React.FC = () => {
                         <ResponsiveContainer width="100%" height={300}>
                           <LineChart data={progressData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
-                            <XAxis 
-                              dataKey="date" 
-                              stroke="#737373"
+                            <XAxis
+                              dataKey="date"
+                              stroke="#a3a3a3"
                               style={{ fontSize: '12px' }}
+                              tick={{ fill: '#a3a3a3' }}
                             />
-                            <YAxis 
-                              stroke="#737373"
+                            <YAxis
+                              stroke="#a3a3a3"
                               style={{ fontSize: '12px' }}
                               domain={[0, 100]}
+                              tick={{ fill: '#a3a3a3' }}
                             />
-                            <Tooltip 
-                              contentStyle={{ 
-                                backgroundColor: '#0a0a0a', 
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: '#0a0a0a',
                                 border: '1px solid #404040',
                                 borderRadius: '8px',
                                 padding: '12px'
@@ -754,14 +759,15 @@ const StatsOverview: React.FC = () => {
                               itemStyle={{ color: '#22c55e' }}
                               formatter={(value: number) => [`${value.toFixed(1)}%`, 'Checkout %']}
                             />
-                            <Legend 
+                            <Legend
                               wrapperStyle={{ paddingTop: '20px' }}
                               iconType="line"
+                              formatter={(value) => <span style={{ color: '#fff' }}>{value}</span>}
                             />
-                            <Line 
-                              type="monotone" 
-                              dataKey="checkoutPercent" 
-                              stroke="#22c55e" 
+                            <Line
+                              type="monotone"
+                              dataKey="checkoutPercent"
+                              stroke="#22c55e"
                               strokeWidth={3}
                               dot={{ fill: '#22c55e', r: 4 }}
                               activeDot={{ r: 6 }}
@@ -779,43 +785,47 @@ const StatsOverview: React.FC = () => {
                         <ResponsiveContainer width="100%" height={300}>
                           <BarChart data={progressData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
-                            <XAxis 
-                              dataKey="date" 
-                              stroke="#737373"
+                            <XAxis
+                              dataKey="date"
+                              stroke="#a3a3a3"
                               style={{ fontSize: '12px' }}
+                              tick={{ fill: '#a3a3a3' }}
                             />
-                            <YAxis 
-                              stroke="#737373"
+                            <YAxis
+                              stroke="#a3a3a3"
                               style={{ fontSize: '12px' }}
+                              tick={{ fill: '#a3a3a3' }}
                             />
-                            <Tooltip 
-                              contentStyle={{ 
-                                backgroundColor: '#0a0a0a', 
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: '#0a0a0a',
                                 border: '1px solid #404040',
                                 borderRadius: '8px',
                                 padding: '12px'
                               }}
                               labelStyle={{ color: '#fff', fontWeight: 'bold' }}
+                              itemStyle={{ color: '#fff' }}
                               cursor={{ fill: 'rgba(255, 255, 255, 0.1)' }}
                             />
-                            <Legend 
+                            <Legend
                               wrapperStyle={{ paddingTop: '20px' }}
+                              formatter={(value) => <span style={{ color: '#fff' }}>{value}</span>}
                             />
-                            <Bar 
-                              dataKey="score180s" 
-                              fill="#a855f7" 
+                            <Bar
+                              dataKey="score180s"
+                              fill="#a855f7"
                               name="180s"
                               radius={[8, 8, 0, 0]}
                             />
-                            <Bar 
-                              dataKey="score140" 
-                              fill="#0ea5e9" 
+                            <Bar
+                              dataKey="score140"
+                              fill="#0ea5e9"
                               name="140+"
                               radius={[8, 8, 0, 0]}
                             />
-                            <Bar 
-                              dataKey="score100" 
-                              fill="#22c55e" 
+                            <Bar
+                              dataKey="score100"
+                              fill="#22c55e"
                               name="100+"
                               radius={[8, 8, 0, 0]}
                             />
@@ -831,26 +841,30 @@ const StatsOverview: React.FC = () => {
                         <ResponsiveContainer width="100%" height={300}>
                           <AreaChart data={progressData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
-                            <XAxis 
-                              dataKey="date" 
-                              stroke="#737373"
+                            <XAxis
+                              dataKey="date"
+                              stroke="#a3a3a3"
                               style={{ fontSize: '12px' }}
+                              tick={{ fill: '#a3a3a3' }}
                             />
-                            <YAxis 
-                              stroke="#737373"
+                            <YAxis
+                              stroke="#a3a3a3"
                               style={{ fontSize: '12px' }}
+                              tick={{ fill: '#a3a3a3' }}
                             />
-                            <Tooltip 
-                              contentStyle={{ 
-                                backgroundColor: '#0a0a0a', 
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: '#0a0a0a',
                                 border: '1px solid #404040',
                                 borderRadius: '8px',
                                 padding: '12px'
                               }}
                               labelStyle={{ color: '#fff', fontWeight: 'bold' }}
+                              itemStyle={{ color: '#fff' }}
                             />
-                            <Legend 
-                              wrapperStyle={{ paddingTop: '20px' }}
+                            <Legend
+                              wrapperStyle={{ paddingTop: '20px', color: '#fff' }}
+                              formatter={(value) => <span style={{ color: '#fff' }}>{value}</span>}
                             />
                             <Area
                               type="monotone"
@@ -882,30 +896,34 @@ const StatsOverview: React.FC = () => {
                         <ResponsiveContainer width="100%" height={300}>
                           <ComposedChart data={progressData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
-                            <XAxis 
-                              dataKey="date" 
-                              stroke="#737373"
+                            <XAxis
+                              dataKey="date"
+                              stroke="#a3a3a3"
                               style={{ fontSize: '12px' }}
+                              tick={{ fill: '#a3a3a3' }}
                             />
-                            <YAxis 
-                              stroke="#737373"
+                            <YAxis
+                              stroke="#a3a3a3"
                               style={{ fontSize: '12px' }}
                               domain={[0, 180]}
+                              tick={{ fill: '#a3a3a3' }}
                             />
-                            <Tooltip 
-                              contentStyle={{ 
-                                backgroundColor: '#0a0a0a', 
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: '#0a0a0a',
                                 border: '1px solid #404040',
                                 borderRadius: '8px',
                                 padding: '12px'
                               }}
                               labelStyle={{ color: '#fff', fontWeight: 'bold' }}
+                              itemStyle={{ color: '#fff' }}
                             />
-                            <Legend 
-                              wrapperStyle={{ paddingTop: '20px' }}
+                            <Legend
+                              wrapperStyle={{ paddingTop: '20px', color: '#fff' }}
+                              formatter={(value) => <span style={{ color: '#fff' }}>{value}</span>}
                             />
-                            <Bar 
-                              dataKey="highestScore" 
+                            <Bar
+                              dataKey="highestScore"
                               fill="url(#colorGradient)"
                               name="Höchster Score"
                               radius={[8, 8, 0, 0]}

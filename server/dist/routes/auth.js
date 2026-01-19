@@ -44,7 +44,8 @@ router.post('/register', async (req, res) => {
         // Calculate trial end date
         const trialEndsAt = Date.now() + config_1.config.trialPeriodDays * 24 * 60 * 60 * 1000;
         // Check if user should be admin
-        const isAdmin = email.toLowerCase() === 'martinpaush@gmail.com';
+        const adminEmails = ['martinpaush@gmail.com', 'martin.pfeffer@celox.io'];
+        const isAdmin = adminEmails.includes(email.toLowerCase());
         const subscriptionStatus = isAdmin ? 'lifetime' : 'trial';
         // Create user
         const userId = (0, uuid_1.v4)();

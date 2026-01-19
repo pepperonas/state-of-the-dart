@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, Pause, Play, X } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Pause, Play, X, Bot } from 'lucide-react';
 import Confetti from 'react-confetti';
 import { useGame } from '../../context/GameContext';
 import { usePlayer } from '../../context/PlayerContext';
@@ -18,6 +18,7 @@ import { Dart, Player, GameType, MatchSettings } from '../../types/index';
 import { calculateThrowScore } from '../../utils/scoring';
 import { PersonalBests, createEmptyPersonalBests, updatePersonalBests } from '../../types/personalBests';
 import audioSystem from '../../utils/audio';
+import { createAdaptiveBotPlayer, getAdaptiveBotConfigs, generateBotTurn, AdaptiveBotCategory } from '../../utils/botLogic';
 
 const GameScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -46,32 +47,6 @@ const GameScreen: React.FC = () => {
     audioSystem.setCallerVolume(settings.callerVolume ?? settings.soundVolume);
     audioSystem.setEffectsVolume(settings.effectsVolume ?? settings.soundVolume);
   }, [settings.soundVolume, settings.callerVolume, settings.effectsVolume]);
-
-  // Announce "You require X" when player's turn STARTS and they can checkout
-  useEffect(() => {
-    if (!state.currentMatch || state.currentMatch.status !== 'in-progress') return;
-
-    const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
-    if (!currentLeg || currentLeg.winner) return;
-
-    const currentPlayer = state.currentMatch.players[state.currentPlayerIndex];
-    if (!currentPlayer) return;
-
-    // Calculate remaining score for current player
-    const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
-    const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
-    const startScore = state.currentMatch.settings.startScore || 501;
-    const remaining = startScore - totalScored;
-
-    // Announce "You require X" only if player can checkout (2-170)
-    if (remaining >= 2 && remaining <= 170) {
-      // Small delay to ensure turn transition is complete
-      const timer = setTimeout(() => {
-        audioSystem.announceRemaining(remaining, true);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [state.currentPlayerIndex, state.currentMatch?.currentLegIndex]);
 
   // Track processed matches to avoid duplicate achievement checks
   const [processedMatchIds, setProcessedMatchIds] = useState<Set<string>>(new Set());
@@ -125,10 +100,10 @@ const GameScreen: React.FC = () => {
             legsTotal: state.currentMatch.settings.legsToWin || 3,
           });
 
-          // Hide animation after 3 seconds
+          // Hide animation after 5 seconds
           const timer = setTimeout(() => {
             setLegWonAnimation(null);
-          }, 3000);
+          }, 5000);
 
           // Cleanup on unmount
           return () => clearTimeout(timer);
@@ -210,6 +185,7 @@ const GameScreen: React.FC = () => {
   const [showPlayerNameInput, setShowPlayerNameInput] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
   const [newPlayerAvatar, setNewPlayerAvatar] = useState('🎯');
+  const [showBotSelector, setShowBotSelector] = useState(false);
   
   // Load last players from storage
   const getLastPlayers = (): string[] => {
@@ -237,7 +213,114 @@ const GameScreen: React.FC = () => {
     doubleOut: false,
     doubleIn: false,
   });
-  
+  const [isBotPlaying, setIsBotPlaying] = useState(false);
+
+  // Announce "You require X" when player's turn STARTS and they can checkout
+  useEffect(() => {
+    if (!state.currentMatch || state.currentMatch.status !== 'in-progress') return;
+
+    const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
+    if (!currentLeg || currentLeg.winner) return;
+
+    const currentPlayer = state.currentMatch.players[state.currentPlayerIndex];
+    if (!currentPlayer) return;
+
+    // Skip announcement for bots
+    const playerInfo = selectedPlayers.find(p => p.id === currentPlayer.playerId);
+    if (playerInfo?.isBot) return;
+
+    // Calculate remaining score for current player
+    const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
+    const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
+    const startScore = state.currentMatch.settings.startScore || 501;
+    const remaining = startScore - totalScored;
+
+    // Announce "You require X" only if player can checkout (2-170)
+    if (remaining >= 2 && remaining <= 170) {
+      // Small delay to ensure turn transition is complete
+      const timer = setTimeout(() => {
+        audioSystem.announceRemaining(remaining, true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [state.currentPlayerIndex, state.currentMatch?.currentLegIndex, selectedPlayers]);
+
+  // Bot auto-play: When it's a bot's turn, automatically generate and play throws
+  useEffect(() => {
+    if (!state.currentMatch || state.currentMatch.status !== 'in-progress') return;
+    if (isBotPlaying) return; // Prevent multiple concurrent bot plays
+
+    const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
+    if (!currentLeg || currentLeg.winner) return;
+
+    const currentMatchPlayer = state.currentMatch.players[state.currentPlayerIndex];
+    if (!currentMatchPlayer) return;
+
+    // Find the full player info to check if it's a bot
+    const playerInfo = selectedPlayers.find(p => p.id === currentMatchPlayer.playerId);
+    if (!playerInfo?.isBot || !playerInfo.botLevel) return;
+
+    // Calculate remaining score
+    const playerThrows = currentLeg.throws.filter(t => t.playerId === currentMatchPlayer.playerId);
+    const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
+    const startScore = state.currentMatch.settings.startScore || 501;
+    const remaining = startScore - totalScored;
+
+    if (remaining <= 0) return;
+
+    setIsBotPlaying(true);
+
+    // Generate bot turn with delay for visual effect
+    const botTurn = generateBotTurn(playerInfo.botLevel, remaining);
+    let dartIndex = 0;
+
+    const playNextDart = () => {
+      if (dartIndex >= botTurn.length) {
+        // All darts thrown, confirm and move to next player
+        setTimeout(() => {
+          dispatch({ type: 'CONFIRM_THROW' });
+          setTimeout(() => {
+            dispatch({ type: 'NEXT_PLAYER' });
+            setIsBotPlaying(false);
+          }, 800);
+        }, 400);
+        return;
+      }
+
+      const dart = botTurn[dartIndex];
+      dispatch({ type: 'ADD_DART', payload: dart });
+
+      // Play dart sound
+      audioSystem.playSound('/sounds/OMNI/pop.mp3', false);
+
+      dartIndex++;
+
+      // Check if checkout happened (remaining = 0 with double)
+      const newRemaining = remaining - botTurn.slice(0, dartIndex).reduce((sum, d) => sum + d.score, 0);
+      if (newRemaining === 0 && dart.multiplier === 2) {
+        // Checkout! Stop throwing more darts
+        setTimeout(() => {
+          dispatch({ type: 'CONFIRM_THROW' });
+          setTimeout(() => {
+            dispatch({ type: 'NEXT_PLAYER' });
+            setIsBotPlaying(false);
+          }, 800);
+        }, 400);
+        return;
+      }
+
+      // Continue with next dart after delay
+      setTimeout(playNextDart, 600);
+    };
+
+    // Start bot turn after a short delay
+    const startDelay = setTimeout(() => {
+      playNextDart();
+    }, 1000);
+
+    return () => clearTimeout(startDelay);
+  }, [state.currentPlayerIndex, state.currentMatch?.currentLegIndex, state.currentMatch?.status, selectedPlayers, isBotPlaying, dispatch]);
+
   useEffect(() => {
     // Show setup if no match or if match is paused/completed
     if ((!state.currentMatch || state.currentMatch.status === 'paused' || state.currentMatch.status === 'completed') && showSetup === false) {
@@ -495,6 +578,7 @@ const GameScreen: React.FC = () => {
                 )}
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {/* Show registered players */}
                 {players.map((player) => (
                   <button
                     key={player.id}
@@ -515,14 +599,80 @@ const GameScreen: React.FC = () => {
                     <div className="text-sm font-medium text-white">{player.name}</div>
                   </button>
                 ))}
-                {!showPlayerNameInput ? (
+                {/* Show selected bots */}
+                {selectedPlayers.filter(p => p.isBot).map((bot) => (
                   <button
-                    onClick={() => setShowPlayerNameInput(true)}
-                    className="p-3 rounded-lg border-2 border-dashed border-dark-700 hover:border-dark-600 transition-all"
+                    key={bot.id}
+                    onClick={() => setSelectedPlayers(selectedPlayers.filter(p => p.id !== bot.id))}
+                    className="p-3 rounded-lg border-2 border-primary-500 bg-primary-500/20 shadow-lg relative group"
+                    title="Klicken zum Entfernen"
                   >
-                    <div className="text-2xl mb-1">➕</div>
-                    <div className="text-sm font-medium text-white">Add Player</div>
+                    <div className="absolute top-1 right-1 text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <X size={14} />
+                    </div>
+                    <div className="text-2xl mb-1">{bot.avatar}</div>
+                    <div className="text-sm font-medium text-primary-300">{bot.name}</div>
                   </button>
+                ))}
+                {!showPlayerNameInput && !showBotSelector ? (
+                  <>
+                    <button
+                      onClick={() => setShowPlayerNameInput(true)}
+                      className="p-3 rounded-lg border-2 border-dashed border-dark-700 hover:border-dark-600 transition-all"
+                    >
+                      <div className="text-2xl mb-1">➕</div>
+                      <div className="text-sm font-medium text-white">Add Player</div>
+                    </button>
+                    <button
+                      onClick={() => setShowBotSelector(true)}
+                      className="p-3 rounded-lg border-2 border-dashed border-primary-700 hover:border-primary-500 transition-all bg-primary-900/20"
+                    >
+                      <div className="text-2xl mb-1">🤖</div>
+                      <div className="text-sm font-medium text-primary-400">Add Bot</div>
+                    </button>
+                  </>
+                ) : showBotSelector ? (
+                  <div className="p-4 rounded-lg border-2 border-primary-500 bg-primary-500/20 col-span-2 md:col-span-3">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-white font-medium flex items-center gap-2">
+                          <Bot size={18} className="text-primary-400" />
+                          Bot-Gegner wählen
+                        </span>
+                        <button
+                          onClick={() => setShowBotSelector(false)}
+                          className="text-gray-400 hover:text-white"
+                        >
+                          <X size={18} />
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-400">
+                        Die Schwierigkeit passt sich automatisch an dein Können an
+                      </p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {getAdaptiveBotConfigs().map((config) => (
+                          <button
+                            key={config.category}
+                            onClick={() => {
+                              // Get stats from selected human players
+                              const humanStats = selectedPlayers
+                                .filter(p => !p.isBot)
+                                .map(p => p.stats);
+                              const existingBots = selectedPlayers.filter(p => p.isBot).length;
+                              const bot = createAdaptiveBotPlayer(config.category, humanStats, existingBots);
+                              setSelectedPlayers([...selectedPlayers, bot]);
+                              setShowBotSelector(false);
+                            }}
+                            className="p-3 rounded-lg bg-dark-700 hover:bg-dark-600 border-2 border-transparent hover:border-primary-500 transition-all text-center"
+                          >
+                            <div className="text-3xl mb-2">{config.icon}</div>
+                            <div className="text-sm font-semibold text-white">{config.nameDE}</div>
+                            <div className="text-xs text-gray-400 mt-1">{config.descriptionDE}</div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 ) : (
                   <div className="p-3 rounded-lg border-2 border-success-500 bg-success-500/20">
                     <div className="space-y-2">

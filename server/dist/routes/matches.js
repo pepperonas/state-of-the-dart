@@ -108,7 +108,7 @@ router.get('/:id', auth_1.authenticateTenant, (req, res) => {
         res.status(500).json({ error: 'Failed to fetch match' });
     }
 });
-// Create match
+// Create match (upsert - creates or updates if exists)
 router.post('/', auth_1.authenticateTenant, (req, res) => {
     const { id, gameType, status, players, settings, startedAt } = req.body;
     if (!id || !gameType || !players || !settings) {
@@ -116,7 +116,34 @@ router.post('/', auth_1.authenticateTenant, (req, res) => {
     }
     const db = (0, database_1.getDatabase)();
     try {
-        // Start transaction
+        // Check if match already exists
+        const existingMatch = db.prepare('SELECT id FROM matches WHERE id = ? AND tenant_id = ?').get(id, req.tenantId);
+        if (existingMatch) {
+            // Match exists - update it instead
+            const updateMatch = db.transaction(() => {
+                // Update match
+                db.prepare(`
+          UPDATE matches SET game_type = ?, status = ?, settings = ?
+          WHERE id = ? AND tenant_id = ?
+        `).run(gameType, status || 'setup', JSON.stringify(settings), id, req.tenantId);
+                // Update match players (delete and re-insert)
+                db.prepare('DELETE FROM match_players WHERE match_id = ?').run(id);
+                const insertPlayer = db.prepare(`
+          INSERT INTO match_players (
+            id, match_id, player_id, match_average, first9_average,
+            highest_score, checkouts_hit, checkout_attempts,
+            match_180s, match_171_plus, match_140_plus, match_100_plus, match_60_plus,
+            darts_thrown, legs_won, sets_won
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+                for (const player of players) {
+                    insertPlayer.run(player.id || `${id}-${player.playerId}`, id, player.playerId, player.matchAverage || 0, player.first9Average || 0, player.highestScore || 0, player.checkoutsHit || 0, player.checkoutAttempts || 0, player.match180s || 0, player.match171Plus || 0, player.match140Plus || 0, player.match100Plus || 0, player.match60Plus || 0, player.dartsThrown || 0, player.legsWon || 0, player.setsWon || 0);
+                }
+            });
+            updateMatch();
+            return res.status(200).json({ id, message: 'Match updated successfully' });
+        }
+        // Start transaction for new match
         const createMatch = db.transaction(() => {
             // Insert match
             db.prepare(`
