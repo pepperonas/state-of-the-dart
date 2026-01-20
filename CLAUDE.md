@@ -33,6 +33,17 @@ npm run seed:demo    # Generate demo data
 
 ## Architecture
 
+### Database-First Policy
+**Critical**: All data is stored in SQLite via API - localStorage is only a cache for offline support.
+
+```
+PRIMARY SOURCE:   SQLite Database (via API)
+CACHE LAYER:      localStorage (Offline-Support)
+UI STATE:         React Context (Volatile)
+```
+
+Write operations MUST go through API. Read operations should use API first, fallback to cache when offline.
+
 ### Frontend State Management
 Uses React Context API with a provider hierarchy in `App.tsx`:
 ```
@@ -54,8 +65,8 @@ Heavy components are lazy-loaded in `App.tsx`. Auth components load immediately,
 Express routes in `server/src/routes/`:
 - `/api/auth` - Login, register, email verification, Google OAuth
 - `/api/tenants` - Profile management
-- `/api/players` - Player CRUD
-- `/api/matches` - Match history and heatmaps
+- `/api/players` - Player CRUD, stats, heatmaps
+- `/api/matches` - Match history
 - `/api/training` - Training session storage
 - `/api/achievements` - Achievement sync
 - `/api/payment` - Stripe integration
@@ -69,6 +80,47 @@ Database uses SQLite with schema in `server/src/database/schema.ts`.
 - Audio system: `src/utils/audio.ts` (professional dart caller with 400+ sound files)
 - Heatmap generation: `src/utils/heatmap.ts`
 - Export formats: `src/utils/exportImport.ts` (CSV, XLSX, PDF, JSON)
+- **Bot system**: `src/utils/botAI.ts` (AI opponents with 10 difficulty levels)
+
+### Bot System (AI Opponents)
+
+**Database Schema:**
+- `players` table has `is_bot` (INTEGER) and `bot_level` (INTEGER 1-10) columns
+- Bot players are stored in database like regular players
+- Migration runs automatically on server start
+
+**TypeScript Interfaces:**
+```typescript
+// src/types/index.ts
+interface Player {
+  isBot?: boolean;
+  botLevel?: number;  // 1-10
+}
+
+interface MatchPlayer {
+  isBot?: boolean;
+  botLevel?: number;
+}
+```
+
+**Bot Generation:**
+- `src/utils/botAI.ts` - `generateBotTurn()` creates realistic dart throws
+- Difficulty levels: 1 (Neuling) → 5 (Stammspieler) → 10 (Weltklasse)
+- Higher levels = better accuracy, smarter checkout attempts
+
+**Auto-Play Logic in GameScreen.tsx:**
+- useEffect triggers when `currentMatchPlayer.isBot === true`
+- Uses `useRef` for `isBotPlaying` flag (NOT useState - prevents re-render loops)
+- Bot dispatches ADD_DART → CONFIRM_THROW → NEXT_PLAYER
+- **CRITICAL**: Auto-confirm useEffects MUST skip bots to prevent double NEXT_PLAYER dispatches
+  - Auto-confirm after 3rd dart: checks `if (currentPlayer?.isBot) return`
+  - Auto-checkout: checks `if (currentPlayer.isBot) return`
+- `isBotPlayingRef.current = false` MUST be set BEFORE `dispatch({ type: 'NEXT_PLAYER' })`
+
+**Common Pitfalls:**
+1. ❌ Using useState for isBotPlaying causes re-render loops
+2. ❌ Auto-confirm running for bots causes double NEXT_PLAYER → player gets skipped
+3. ❌ Setting isBotPlaying to false AFTER dispatch causes race conditions
 
 ### Type Definitions
 - Core types: `src/types/index.ts` (Match, Player, Dart, Throw, GameSettings)
@@ -90,6 +142,7 @@ npm test -- src/tests/utils/scoring.test.ts
 - Audio files cached for 30 days, fonts for 1 year
 - Production builds drop console.log via terser
 - Manual chunk splitting for react-vendor, charts, utils, icons
+- See `ARCHITECTURE.md` for detailed data flow diagrams
 
 ## Deployment
 
@@ -100,4 +153,4 @@ npm test -- src/tests/utils/scoring.test.ts
 - **PM2 Process**: `stateofthedart-backend`
 - **URLs**: `stateofthedart.com` / `api.stateofthedart.com`
 
-Siehe `DEPLOYMENT_VPS.md` für Details.
+See `DEPLOYMENT_VPS.md` for details.

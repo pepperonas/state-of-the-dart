@@ -22,6 +22,8 @@ router.get('/', authenticateTenant, (req: AuthRequest, res: Response) => {
       id: row.id,
       name: row.name,
       avatar: row.avatar,
+      isBot: row.is_bot === 1,
+      botLevel: row.bot_level,
       createdAt: row.created_at,
       stats: {
         gamesPlayed: row.games_played || 0,
@@ -80,6 +82,8 @@ router.get('/:id', authenticateTenant, (req: AuthRequest, res: Response) => {
       id: row.id,
       name: row.name,
       avatar: row.avatar,
+      isBot: row.is_bot === 1,
+      botLevel: row.bot_level,
       createdAt: row.created_at,
       stats: {
         gamesPlayed: row.games_played || 0,
@@ -118,7 +122,7 @@ router.get('/:id', authenticateTenant, (req: AuthRequest, res: Response) => {
 
 // Create player
 router.post('/', authenticateTenant, (req: AuthRequest, res: Response) => {
-  const { id, name, avatar } = req.body;
+  const { id, name, avatar, isBot, botLevel } = req.body;
 
   if (!id || !name) {
     return res.status(400).json({ error: 'id and name are required' });
@@ -129,9 +133,17 @@ router.post('/', authenticateTenant, (req: AuthRequest, res: Response) => {
   try {
     // Insert player
     db.prepare(`
-      INSERT INTO players (id, tenant_id, name, avatar, created_at)
-      VALUES (?, ?, ?, ?, ?)
-    `).run(id, req.tenantId, name, avatar || name.charAt(0).toUpperCase(), Date.now());
+      INSERT INTO players (id, tenant_id, name, avatar, is_bot, bot_level, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      id,
+      req.tenantId,
+      name,
+      avatar || name.charAt(0).toUpperCase(),
+      isBot ? 1 : 0,
+      botLevel || null,
+      Date.now()
+    );
 
     // Initialize stats
     db.prepare(`
@@ -151,6 +163,8 @@ router.post('/', authenticateTenant, (req: AuthRequest, res: Response) => {
       id: row.id,
       name: row.name,
       avatar: row.avatar,
+      isBot: row.is_bot === 1,
+      botLevel: row.bot_level,
       createdAt: row.created_at,
       stats: {
         gamesPlayed: row.games_played || 0,

@@ -106,6 +106,8 @@ export interface MatchPlayer {
   match60Plus: number;
   checkoutAttempts: number;
   checkoutsHit: number;
+  isBot?: boolean;
+  botLevel?: number;
 }
 
 export interface Set {

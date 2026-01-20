@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, Pause, Play, X, Bot } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Pause, Play, X, Bot, ChevronDown, ChevronUp } from 'lucide-react';
 import Confetti from 'react-confetti';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useGame } from '../../context/GameContext';
 import { usePlayer } from '../../context/PlayerContext';
 import { useSettings } from '../../context/SettingsContext';
@@ -73,7 +74,7 @@ const GameScreen: React.FC = () => {
   } | null>(null);
   const lastLegIndexRef = React.useRef<number>(0);
 
-  // Detect leg win and show animation
+  // Detect leg win and show animation (ONLY when leg changes, not on every player turn)
   useEffect(() => {
     if (!state.currentMatch || state.currentMatch.status !== 'in-progress') return;
 
@@ -88,13 +89,18 @@ const GameScreen: React.FC = () => {
 
       if (completedLeg?.winner) {
         const winnerPlayer = state.currentMatch.players.find(p => p.playerId === completedLeg.winner);
-        const winnerInfo = players.find(p => p.id === completedLeg.winner);
 
-        if (winnerPlayer && winnerInfo) {
+        if (winnerPlayer) {
+          console.log('🏆 Leg won animation triggered:', {
+            legNumber: completedLegIndex + 1,
+            winner: winnerPlayer.name,
+            legsWon: winnerPlayer.legsWon,
+          });
+
           setLegWonAnimation({
             show: true,
-            winnerName: winnerInfo.name,
-            winnerAvatar: winnerInfo.avatar || '🎯',
+            winnerName: winnerPlayer.name,
+            winnerAvatar: '🎯', // Use default avatar from match player data
             legNumber: completedLegIndex + 1, // Convert to 1-indexed for display (Leg 1, Leg 2, etc.)
             legsWon: winnerPlayer.legsWon,
             legsTotal: state.currentMatch.settings.legsToWin || 3,
@@ -112,7 +118,7 @@ const GameScreen: React.FC = () => {
     }
 
     lastLegIndexRef.current = currentLegIndex;
-  }, [state.currentMatch?.currentLegIndex, state.currentMatch?.legs, players]);
+  }, [state.currentMatch?.currentLegIndex]);
 
   // Check achievements when match is completed (only once per match)
   useEffect(() => {
@@ -186,6 +192,8 @@ const GameScreen: React.FC = () => {
   const [newPlayerName, setNewPlayerName] = useState('');
   const [newPlayerAvatar, setNewPlayerAvatar] = useState('🎯');
   const [showBotSelector, setShowBotSelector] = useState(false);
+  const [showThrowHistory, setShowThrowHistory] = useState(false);
+  const [showThrowChart, setShowThrowChart] = useState(false);
   
   // Load last players from storage
   const getLastPlayers = (): string[] => {
@@ -213,7 +221,7 @@ const GameScreen: React.FC = () => {
     doubleOut: false,
     doubleIn: false,
   });
-  const [isBotPlaying, setIsBotPlaying] = useState(false);
+  const isBotPlayingRef = useRef(false);
 
   // Announce "You require X" when player's turn STARTS and they can checkout
   useEffect(() => {
@@ -247,8 +255,22 @@ const GameScreen: React.FC = () => {
 
   // Bot auto-play: When it's a bot's turn, automatically generate and play throws
   useEffect(() => {
-    if (!state.currentMatch || state.currentMatch.status !== 'in-progress') return;
-    if (isBotPlaying) return; // Prevent multiple concurrent bot plays
+    console.log('🤖 Bot auto-play check:', {
+      hasMatch: !!state.currentMatch,
+      status: state.currentMatch?.status,
+      isBotPlaying: isBotPlayingRef.current,
+      currentPlayerIndex: state.currentPlayerIndex,
+      currentLegIndex: state.currentMatch?.currentLegIndex,
+    });
+
+    if (!state.currentMatch || state.currentMatch.status !== 'in-progress') {
+      console.log('🚫 No match or not in progress');
+      return;
+    }
+    if (isBotPlayingRef.current) {
+      console.log('🚫 Bot already playing');
+      return; // Prevent multiple concurrent bot plays
+    }
 
     const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
     if (!currentLeg || currentLeg.winner) return;
@@ -256,9 +278,14 @@ const GameScreen: React.FC = () => {
     const currentMatchPlayer = state.currentMatch.players[state.currentPlayerIndex];
     if (!currentMatchPlayer) return;
 
-    // Find the full player info to check if it's a bot
-    const playerInfo = selectedPlayers.find(p => p.id === currentMatchPlayer.playerId);
-    if (!playerInfo?.isBot || !playerInfo.botLevel) return;
+    console.log('🤖 Current player:', {
+      name: currentMatchPlayer.name,
+      isBot: currentMatchPlayer.isBot,
+      botLevel: currentMatchPlayer.botLevel,
+    });
+
+    // Check if current player is a bot using match player data
+    if (!currentMatchPlayer.isBot || !currentMatchPlayer.botLevel) return;
 
     // Calculate remaining score
     const playerThrows = currentLeg.throws.filter(t => t.playerId === currentMatchPlayer.playerId);
@@ -268,10 +295,17 @@ const GameScreen: React.FC = () => {
 
     if (remaining <= 0) return;
 
-    setIsBotPlaying(true);
+    console.log('🎯 Bot is playing!', {
+      botName: currentMatchPlayer.name,
+      botLevel: currentMatchPlayer.botLevel,
+      remaining,
+    });
+
+    isBotPlayingRef.current = true;
 
     // Generate bot turn with delay for visual effect
-    const botTurn = generateBotTurn(playerInfo.botLevel, remaining);
+    const botTurn = generateBotTurn(currentMatchPlayer.botLevel, remaining);
+    console.log('🎲 Bot turn generated:', botTurn);
     let dartIndex = 0;
 
     const playNextDart = () => {
@@ -280,14 +314,15 @@ const GameScreen: React.FC = () => {
         setTimeout(() => {
           dispatch({ type: 'CONFIRM_THROW' });
           setTimeout(() => {
+            isBotPlayingRef.current = false; // Set to false BEFORE dispatch
             dispatch({ type: 'NEXT_PLAYER' });
-            setIsBotPlaying(false);
           }, 800);
         }, 400);
         return;
       }
 
       const dart = botTurn[dartIndex];
+      console.log(`🎯 Throwing dart ${dartIndex + 1}:`, dart);
       dispatch({ type: 'ADD_DART', payload: dart });
 
       // Play dart sound
@@ -295,15 +330,19 @@ const GameScreen: React.FC = () => {
 
       dartIndex++;
 
-      // Check if checkout happened (remaining = 0 with double)
+      // Check if checkout happened
       const newRemaining = remaining - botTurn.slice(0, dartIndex).reduce((sum, d) => sum + d.score, 0);
-      if (newRemaining === 0 && dart.multiplier === 2) {
+      const requireDouble = state.currentMatch?.settings.doubleOut ?? true;
+      const isValidCheckout = newRemaining === 0 && (!requireDouble || dart.multiplier === 2);
+
+      if (isValidCheckout) {
         // Checkout! Stop throwing more darts
+        console.log('🎉 Bot checked out!');
         setTimeout(() => {
           dispatch({ type: 'CONFIRM_THROW' });
           setTimeout(() => {
+            isBotPlayingRef.current = false; // Set to false BEFORE dispatch
             dispatch({ type: 'NEXT_PLAYER' });
-            setIsBotPlaying(false);
           }, 800);
         }, 400);
         return;
@@ -318,8 +357,11 @@ const GameScreen: React.FC = () => {
       playNextDart();
     }, 1000);
 
-    return () => clearTimeout(startDelay);
-  }, [state.currentPlayerIndex, state.currentMatch?.currentLegIndex, state.currentMatch?.status, selectedPlayers, isBotPlaying, dispatch]);
+    return () => {
+      console.log('🧹 Cleaning up bot auto-play effect');
+      clearTimeout(startDelay);
+    };
+  }, [state.currentPlayerIndex, state.currentMatch?.currentLegIndex, state.currentMatch?.status, dispatch]);
 
   useEffect(() => {
     // Show setup if no match or if match is paused/completed
@@ -392,9 +434,16 @@ const GameScreen: React.FC = () => {
     audioSystem.playSound('/sounds/OMNI/pop.mp3', false);
   };
   
-  // Auto-confirm after 3rd dart
+  // Auto-confirm after 3rd dart (skip for bots - they handle their own confirm/next)
   useEffect(() => {
     if (state.currentThrow.length === 3) {
+      // Skip auto-confirm for bots
+      const currentPlayer = state.currentMatch?.players[state.currentPlayerIndex];
+      if (currentPlayer?.isBot) {
+        console.log('⏭️ Skipping auto-confirm for bot');
+        return;
+      }
+
       // Auto-confirm after a short delay to show the 3rd dart
       const timer = setTimeout(() => {
         handleConfirmThrow();
@@ -410,6 +459,11 @@ const GameScreen: React.FC = () => {
     const currentPlayer = state.currentMatch.players[state.currentPlayerIndex];
     const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
     if (!currentPlayer || !currentLeg || currentLeg.winner) return;
+
+    // Skip auto-checkout for bots - they handle their own confirm/next
+    if (currentPlayer.isBot) {
+      return;
+    }
 
     // Calculate remaining score
     const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
@@ -433,6 +487,44 @@ const GameScreen: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [state.currentThrow]);
+
+  // Auto-confirm on bust (when player goes below 0 or to 1)
+  useEffect(() => {
+    if (!state.currentMatch || state.currentThrow.length === 0) return;
+
+    const currentPlayer = state.currentMatch.players[state.currentPlayerIndex];
+    const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
+    if (!currentPlayer || !currentLeg || currentLeg.winner) return;
+
+    // Skip auto-bust for bots - they handle their own confirm/next
+    if (currentPlayer.isBot) {
+      return;
+    }
+
+    // Calculate remaining score
+    const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
+    const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
+    const startScore = state.currentMatch.settings.startScore || 501;
+    const remaining = startScore - totalScored;
+    const currentScore = calculateThrowScore(state.currentThrow);
+    const newRemaining = remaining - currentScore;
+
+    // Check if this is a bust
+    const requiresDouble = state.currentMatch.settings.doubleOut || false;
+    const lastDart = state.currentThrow[state.currentThrow.length - 1];
+    const isBust = newRemaining < 0 ||
+                   newRemaining === 1 ||
+                   (newRemaining === 0 && requiresDouble && lastDart?.multiplier !== 2);
+
+    if (isBust) {
+      console.log('💥 Auto-confirming bust:', { remaining, currentScore, newRemaining });
+      // Auto-confirm bust after short delay
+      const timer = setTimeout(() => {
+        handleConfirmThrow();
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [state.currentThrow]);
   
   const handleConfirmThrow = () => {
     const currentScore = calculateThrowScore(state.currentThrow);
@@ -448,19 +540,23 @@ const GameScreen: React.FC = () => {
       const startScore = state.currentMatch?.settings.startScore || 501;
       const remaining = startScore - totalScored;
       const newRemaining = remaining - currentScore;
-      
-      // Don't announce score if it's a checkout (will be announced by GameContext)
-      const isCheckout = newRemaining === 0 && state.currentThrow.length > 0;
-      
-      // Don't announce score if it's a bust (will be announced by GameContext)
+
+      // Check for checkout and bust
       const requiresDouble = state.currentMatch?.settings.doubleOut || false;
       const lastDart = state.currentThrow[state.currentThrow.length - 1];
-      const willBust = newRemaining < 0 || 
-                       newRemaining === 1 || 
+
+      // Don't announce score if it's a valid checkout (will be announced by GameContext)
+      const isValidCheckout = newRemaining === 0 &&
+                              state.currentThrow.length > 0 &&
+                              (!requiresDouble || lastDart?.multiplier === 2);
+
+      // Don't announce score if it's a bust (will be announced by GameContext)
+      const willBust = newRemaining < 0 ||
+                       newRemaining === 1 ||
                        (newRemaining === 0 && requiresDouble && lastDart?.multiplier !== 2);
-      
+
       // Only announce score if not checkout or bust
-      if (!isCheckout && !willBust) {
+      if (!isValidCheckout && !willBust) {
         if (currentScore === 180) {
           setShowConfetti(true);
           audioSystem.announceScore(180);
@@ -469,10 +565,15 @@ const GameScreen: React.FC = () => {
           // Always announce the score (0-180)
           audioSystem.announceScore(currentScore);
         }
-      } else if (currentScore === 180) {
+      } else if (isValidCheckout) {
+        console.log('🎯 Valid checkout - skipping score announcement, GameContext will announce');
         // Still show confetti for 180s even if it's a checkout
-        setShowConfetti(true);
-        setTimeout(() => setShowConfetti(false), 3000);
+        if (currentScore === 180) {
+          setShowConfetti(true);
+          setTimeout(() => setShowConfetti(false), 3000);
+        }
+      } else if (willBust) {
+        console.log('💥 Bust - skipping score announcement, GameContext will announce');
       }
       
       // Update heatmap for this player with the current darts
@@ -480,12 +581,15 @@ const GameScreen: React.FC = () => {
         updatePlayerHeatmap(currentPlayer.playerId, state.currentThrow);
       }
     } else {
-      // Fallback: just announce the score
+      // Fallback: just announce the score (but avoid if it might be a checkout/bust)
+      // This fallback should rarely be hit, but better safe than sorry
+      console.log('⚠️ Fallback score announcement - no currentPlayer/currentLeg');
       if (currentScore === 180) {
         setShowConfetti(true);
         audioSystem.announceScore(180);
         setTimeout(() => setShowConfetti(false), 3000);
-      } else {
+      } else if (currentScore > 0) {
+        // Only announce if score > 0 (avoid announcing checkout scores)
         audioSystem.announceScore(currentScore);
       }
     }
@@ -653,14 +757,22 @@ const GameScreen: React.FC = () => {
                         {getAdaptiveBotConfigs().map((config) => (
                           <button
                             key={config.category}
-                            onClick={() => {
+                            onClick={async () => {
                               // Get stats from selected human players
                               const humanStats = selectedPlayers
                                 .filter(p => !p.isBot)
                                 .map(p => p.stats);
                               const existingBots = selectedPlayers.filter(p => p.isBot).length;
                               const bot = createAdaptiveBotPlayer(config.category, humanStats, existingBots);
-                              setSelectedPlayers([...selectedPlayers, bot]);
+
+                              // Save bot to database with its existing ID
+                              try {
+                                const createdBot = await addPlayer(bot.name, bot.avatar || '🤖', bot.isBot, bot.botLevel, bot.id);
+                                setSelectedPlayers([...selectedPlayers, createdBot]);
+                              } catch (error) {
+                                console.error('Failed to create bot player:', error);
+                              }
+
                               setShowBotSelector(false);
                             }}
                             className="p-3 rounded-lg bg-dark-700 hover:bg-dark-600 border-2 border-transparent hover:border-primary-500 transition-all text-center"
@@ -1076,6 +1188,250 @@ const GameScreen: React.FC = () => {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Throw History - Collapsable */}
+        <div className="mt-6">
+          <button
+            onClick={() => setShowThrowHistory(!showThrowHistory)}
+            className="w-full glass-card rounded-xl p-4 flex items-center justify-between hover:glass-card-hover transition-all"
+          >
+            <h3 className="text-lg font-bold text-white">Wurf-Verlauf</h3>
+            {showThrowHistory ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+          </button>
+
+          {showThrowHistory && (
+            <div className="glass-card rounded-xl p-6 mt-2 animate-fade-in">
+              {state.currentMatch.players.map((player) => {
+                const playerThrows = currentLeg.throws.filter(t => t.playerId === player.playerId);
+
+                return (
+                  <div key={player.playerId} className="mb-6 last:mb-0">
+                    <h4 className="text-white font-bold mb-3 flex items-center gap-2">
+                      <span>{player.name}</span>
+                      <span className="text-sm text-gray-400">
+                        ({playerThrows.length} {playerThrows.length === 1 ? 'Wurf' : 'Würfe'})
+                      </span>
+                    </h4>
+
+                    {playerThrows.length === 0 ? (
+                      <p className="text-gray-400 text-sm italic">Noch keine Würfe</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {playerThrows.map((throwData, index) => (
+                          <div
+                            key={throwData.id}
+                            className="bg-dark-800/50 rounded-lg p-3 border border-dark-600"
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-gray-400 text-sm">
+                                Wurf #{index + 1}
+                              </span>
+                              <div className="flex items-center gap-3">
+                                {throwData.isBust && (
+                                  <span className="text-red-400 text-xs font-bold bg-red-500/20 px-2 py-1 rounded">
+                                    BUST
+                                  </span>
+                                )}
+                                <span className={`font-bold text-lg ${
+                                  throwData.isBust
+                                    ? 'text-red-400 line-through'
+                                    : throwData.score >= 140
+                                      ? 'text-orange-400'
+                                      : throwData.score >= 100
+                                        ? 'text-blue-400'
+                                        : 'text-white'
+                                }`}>
+                                  {throwData.score}
+                                </span>
+                                <span className="text-gray-400 text-sm">
+                                  → {throwData.remaining}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex gap-2">
+                              {throwData.darts.map((dart, dartIndex) => (
+                                <div
+                                  key={dartIndex}
+                                  className={`flex-1 text-center py-2 rounded ${
+                                    dart.multiplier === 3
+                                      ? 'bg-green-500/20 text-green-400'
+                                      : dart.multiplier === 2
+                                        ? 'bg-red-500/20 text-red-400'
+                                        : dart.score === 0
+                                          ? 'bg-gray-700/50 text-gray-500'
+                                          : 'bg-blue-500/20 text-blue-400'
+                                  }`}
+                                >
+                                  <span className="text-xs font-semibold">
+                                    {dart.score === 0
+                                      ? 'Miss'
+                                      : dart.multiplier === 3
+                                        ? `T${dart.segment}`
+                                        : dart.multiplier === 2
+                                          ? `D${dart.segment}`
+                                          : dart.segment
+                                    }
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Throw Chart - Collapsable */}
+        <div className="mt-6">
+          <button
+            onClick={() => setShowThrowChart(!showThrowChart)}
+            className="w-full glass-card rounded-xl p-4 flex items-center justify-between hover:glass-card-hover transition-all"
+          >
+            <h3 className="text-lg font-bold text-white">Wurf-Statistik (Chart)</h3>
+            {showThrowChart ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+          </button>
+
+          {showThrowChart && (
+            <div className="glass-card rounded-xl p-6 mt-2 animate-fade-in">
+              {/* Score Chart */}
+              <div className="mb-8">
+                <h4 className="text-white font-bold mb-4">Geworfene Punkte pro Aufnahme</h4>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={(() => {
+                    // Build chart data
+                    const maxThrows = Math.max(
+                      ...state.currentMatch.players.map(p =>
+                        currentLeg.throws.filter(t => t.playerId === p.playerId).length
+                      )
+                    );
+
+                    const chartData = [];
+                    for (let i = 0; i < maxThrows; i++) {
+                      const dataPoint: any = { throwNumber: i + 1 };
+
+                      state.currentMatch.players.forEach(player => {
+                        const playerThrows = currentLeg.throws.filter(t => t.playerId === player.playerId);
+                        const throwData = playerThrows[i];
+                        dataPoint[player.name] = throwData ? throwData.score : null;
+                      });
+
+                      chartData.push(dataPoint);
+                    }
+
+                    return chartData;
+                  })()}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                    <XAxis
+                      dataKey="throwNumber"
+                      stroke="#9ca3af"
+                      label={{ value: 'Aufnahme', position: 'insideBottom', offset: -5, fill: '#9ca3af' }}
+                    />
+                    <YAxis
+                      stroke="#9ca3af"
+                      label={{ value: 'Punkte', angle: -90, position: 'insideLeft', fill: '#9ca3af' }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#1f2937',
+                        border: '1px solid #374151',
+                        borderRadius: '8px',
+                        color: '#fff'
+                      }}
+                    />
+                    <Legend />
+                    {state.currentMatch.players.map((player, index) => {
+                      const colors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'];
+                      return (
+                        <Line
+                          key={player.playerId}
+                          type="monotone"
+                          dataKey={player.name}
+                          stroke={colors[index % colors.length]}
+                          strokeWidth={2}
+                          dot={{ r: 4 }}
+                          activeDot={{ r: 6 }}
+                          connectNulls
+                        />
+                      );
+                    })}
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Remaining Chart */}
+              <div>
+                <h4 className="text-white font-bold mb-4">Verbleibende Punkte</h4>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={(() => {
+                    // Build remaining chart data
+                    const maxThrows = Math.max(
+                      ...state.currentMatch.players.map(p =>
+                        currentLeg.throws.filter(t => t.playerId === p.playerId).length
+                      )
+                    );
+
+                    const chartData = [];
+                    for (let i = 0; i < maxThrows; i++) {
+                      const dataPoint: any = { throwNumber: i + 1 };
+
+                      state.currentMatch.players.forEach(player => {
+                        const playerThrows = currentLeg.throws.filter(t => t.playerId === player.playerId);
+                        const throwData = playerThrows[i];
+                        dataPoint[player.name] = throwData ? throwData.remaining : null;
+                      });
+
+                      chartData.push(dataPoint);
+                    }
+
+                    return chartData;
+                  })()}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                    <XAxis
+                      dataKey="throwNumber"
+                      stroke="#9ca3af"
+                      label={{ value: 'Aufnahme', position: 'insideBottom', offset: -5, fill: '#9ca3af' }}
+                    />
+                    <YAxis
+                      stroke="#9ca3af"
+                      label={{ value: 'Verbleibend', angle: -90, position: 'insideLeft', fill: '#9ca3af' }}
+                      reversed
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#1f2937',
+                        border: '1px solid #374151',
+                        borderRadius: '8px',
+                        color: '#fff'
+                      }}
+                    />
+                    <Legend />
+                    {state.currentMatch.players.map((player, index) => {
+                      const colors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'];
+                      return (
+                        <Line
+                          key={player.playerId}
+                          type="monotone"
+                          dataKey={player.name}
+                          stroke={colors[index % colors.length]}
+                          strokeWidth={2}
+                          dot={{ r: 4 }}
+                          activeDot={{ r: 6 }}
+                          connectNulls
+                        />
+                      );
+                    })}
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

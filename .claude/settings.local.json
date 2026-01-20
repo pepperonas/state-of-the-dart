@@ -29,7 +29,14 @@
       "Bash(VITE_API_URL=https://api.stateofthedart.com npm run build:*)",
       "Bash(find:*)",
       "Bash(/bin/bash -c 'cd /Users/martin/Desktop/yt/py_transcript/sounds && find . -name \"\"*.txt\"\" | while read file; do dest=\"\"/Users/martin/cursor/state-of-the-dart/public/sounds/${file#./}\"\"; destdir=$(dirname \"\"$dest\"\"); mkdir -p \"\"$destdir\"\"; cp \"\"$file\"\" \"\"$dest\"\"; done')",
-      "Bash(while read src)"
+      "Bash(while read src)",
+      "Bash(claude:*)",
+      "Bash(git fetch:*)",
+      "Bash(git pull:*)",
+      "Bash(npm i:*)",
+      "Bash(grep:*)",
+      "Bash(bash:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []

@@ -57,8 +57,9 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       const remaining = startScore - totalScored;
 
       let checkoutSuggestion = null;
-      if (remaining <= 170 && remaining > 1) {
-        checkoutSuggestion = getCheckoutSuggestion(remaining, 3);
+      const requireDouble = match.settings.doubleOut ?? true;
+      if (remaining <= 170 && remaining >= 1) {
+        checkoutSuggestion = getCheckoutSuggestion(remaining, 3, requireDouble);
       }
 
       console.log('🔄 LOAD_MATCH: throws in leg:', throwsInLeg, 'current player index:', currentPlayerIndex);
@@ -81,21 +82,30 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         id: matchId,
         type: gameType,
         settings,
-        players: players.map(p => ({
-          playerId: p.id,
-          name: p.name,
-          setsWon: 0,
-          legsWon: 0,
-          matchAverage: 0,
-          matchHighestScore: 0,
-          match180s: 0,
-          match171Plus: 0,
-          match140Plus: 0,
-          match100Plus: 0,
-          match60Plus: 0,
-          checkoutAttempts: 0,
-          checkoutsHit: 0,
-        })),
+        players: players.map(p => {
+          console.log('🎮 Creating match player:', {
+            name: p.name,
+            isBot: p.isBot,
+            botLevel: p.botLevel,
+          });
+          return {
+            playerId: p.id,
+            name: p.name,
+            setsWon: 0,
+            legsWon: 0,
+            matchAverage: 0,
+            matchHighestScore: 0,
+            match180s: 0,
+            match171Plus: 0,
+            match140Plus: 0,
+            match100Plus: 0,
+            match60Plus: 0,
+            checkoutAttempts: 0,
+            checkoutsHit: 0,
+            isBot: p.isBot,
+            botLevel: p.botLevel,
+          };
+        }),
         legs: [{
           id: legId,
           throws: [],
@@ -132,8 +142,9 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       
       // Update checkout suggestion
       let checkoutSuggestion = null;
-      if (remaining <= 170 && remaining > 1) {
-        checkoutSuggestion = getCheckoutSuggestion(remaining, 3 - newThrow.length);
+      const requireDouble = state.currentMatch.settings.doubleOut ?? true;
+      if (remaining <= 170 && remaining >= 1) {
+        checkoutSuggestion = getCheckoutSuggestion(remaining, 3 - newThrow.length, requireDouble);
       }
       
       return {
@@ -158,12 +169,13 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       const currentThrowScore = calculateThrowScore(newThrow);
       const startScore = state.currentMatch.settings.startScore || 501;
       const remaining = startScore - totalScored - currentThrowScore;
-      
+
       let checkoutSuggestion = null;
-      if (remaining <= 170 && remaining > 1) {
-        checkoutSuggestion = getCheckoutSuggestion(remaining, 3 - newThrow.length);
+      const requireDouble = state.currentMatch.settings.doubleOut ?? true;
+      if (remaining <= 170 && remaining >= 1) {
+        checkoutSuggestion = getCheckoutSuggestion(remaining, 3 - newThrow.length, requireDouble);
       }
-      
+
       return {
         ...state,
         currentThrow: newThrow,
@@ -183,8 +195,9 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       const remaining = startScore - totalScored;
       
       let checkoutSuggestion = null;
-      if (remaining <= 170 && remaining > 1) {
-        checkoutSuggestion = getCheckoutSuggestion(remaining, 3);
+      const requireDouble = state.currentMatch?.settings.doubleOut ?? true;
+      if (remaining <= 170 && remaining >= 1) {
+        checkoutSuggestion = getCheckoutSuggestion(remaining, 3, requireDouble);
       }
       
       return {
@@ -237,8 +250,8 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         updatedLeg.winner = currentPlayer.playerId;
         updatedLeg.completedAt = new Date();
         legWon = true;
-        // Announce checkout
-        audioSystem.announceCheckout(currentThrowScore, 'leg');
+        // Don't announce leg checkout here - will be announced later
+        // (either as 'leg' if match continues, or 'match' if match is won)
       } else if (bustOccurred) {
         // Announce bust
         audioSystem.announceBust();
@@ -287,6 +300,10 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
           }
         } else {
           // Leg won but match not over - start new leg
+
+          // Announce leg checkout
+          audioSystem.announceCheckout(currentThrowScore, 'leg');
+
           const newLegId = uuidv4();
           const newLeg = {
             id: newLegId,
@@ -329,28 +346,37 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
     
     case 'NEXT_PLAYER': {
       if (!state.currentMatch) return state;
-      
+
       // Check if current leg is completed - if so, start from player 0 in new leg
       const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
       let nextIndex = (state.currentPlayerIndex + 1) % state.currentMatch.players.length;
-      
+
+      console.log('➡️ NEXT_PLAYER:', {
+        from: state.currentPlayerIndex,
+        to: nextIndex,
+        playerName: state.currentMatch.players[nextIndex].name,
+        legWinner: currentLeg.winner,
+      });
+
       // If current leg just completed and new leg started, reset to first player
       if (currentLeg.winner && state.currentPlayerIndex === state.currentMatch.players.length - 1) {
         nextIndex = 0;
+        console.log('🔄 Leg completed, resetting to player 0');
       }
-      
+
       // Calculate checkout suggestion for next player
       const nextPlayer = state.currentMatch.players[nextIndex];
       const playerThrows = currentLeg.throws.filter(t => t.playerId === nextPlayer.playerId);
       const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
       const startScore = state.currentMatch.settings.startScore || 501;
       const remaining = startScore - totalScored;
-      
+
       let checkoutSuggestion = null;
-      if (remaining <= 170 && remaining > 1) {
-        checkoutSuggestion = getCheckoutSuggestion(remaining, 3);
+      const requireDouble = state.currentMatch?.settings.doubleOut ?? true;
+      if (remaining <= 170 && remaining >= 1) {
+        checkoutSuggestion = getCheckoutSuggestion(remaining, 3, requireDouble);
       }
-      
+
       return {
         ...state,
         currentPlayerIndex: nextIndex,

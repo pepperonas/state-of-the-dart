@@ -24,6 +24,22 @@ const initDatabase = () => {
     db.pragma('foreign_keys = ON'); // Enable foreign key constraints
     // Execute schema
     db.exec(schema_1.schema);
+    // Migration: Add bot columns to players table if they don't exist
+    try {
+        const tableInfo = db.pragma('table_info(players)');
+        const hasBotColumn = tableInfo.some(col => col.name === 'is_bot');
+        if (!hasBotColumn) {
+            console.log('🔧 Migrating players table: Adding bot columns...');
+            db.exec(`
+        ALTER TABLE players ADD COLUMN is_bot INTEGER DEFAULT 0;
+        ALTER TABLE players ADD COLUMN bot_level INTEGER;
+      `);
+            console.log('✅ Bot columns added to players table');
+        }
+    }
+    catch (error) {
+        console.error('Migration error:', error);
+    }
     // Seed default achievements if empty
     const achievementCount = db.prepare('SELECT COUNT(*) as count FROM achievements').get();
     if (achievementCount.count === 0) {

@@ -165,8 +165,56 @@ export const checkoutTable: CheckoutTable = {
   2: [{ score: 2, darts: ['D1'], preferred: true }],
 };
 
-export const getCheckoutSuggestion = (score: number, dartsRemaining: number = 3): string[] | null => {
-  if (score > 170 || score < 2 || score === 169 || score === 168 || score === 166 || score === 165 || score === 163 || score === 162 || score === 159) {
+export const getCheckoutSuggestion = (score: number, dartsRemaining: number = 3, requireDouble: boolean = true): string[] | null => {
+  if (score > 170 || score < 1) {
+    return null;
+  }
+
+  // If double-out is not required, provide simple suggestions
+  if (!requireDouble) {
+    const suggestions: string[] = [];
+    let remaining = score;
+
+    // Try to finish in as few darts as possible
+    while (remaining > 0 && suggestions.length < dartsRemaining) {
+      if (remaining >= 60) {
+        // Go for T20
+        suggestions.push('T20');
+        remaining -= 60;
+      } else if (remaining >= 57) {
+        // Go for T19
+        suggestions.push('T19');
+        remaining -= 57;
+      } else if (remaining >= 20 && remaining % 3 === 0) {
+        // Go for triple if it divides evenly
+        const segment = remaining / 3;
+        if (segment >= 1 && segment <= 20) {
+          suggestions.push(`T${segment}`);
+          remaining = 0;
+        } else {
+          suggestions.push('T20');
+          remaining -= 60;
+        }
+      } else if (remaining >= 40) {
+        // Go for D20
+        suggestions.push('D20');
+        remaining -= 40;
+      } else if (remaining >= 20) {
+        // Single 20
+        suggestions.push('S20');
+        remaining -= 20;
+      } else {
+        // Single to finish
+        suggestions.push(`S${remaining}`);
+        remaining = 0;
+      }
+    }
+
+    return suggestions.length > 0 && remaining === 0 ? suggestions : null;
+  }
+
+  // Use the double-out checkout table
+  if (score === 169 || score === 168 || score === 166 || score === 165 || score === 163 || score === 162 || score === 159) {
     return null;
   }
 
@@ -174,7 +222,7 @@ export const getCheckoutSuggestion = (score: number, dartsRemaining: number = 3)
   if (!routes || routes.length === 0) return null;
 
   const preferredRoute = routes.find(r => r.preferred) || routes[0];
-  
+
   if (dartsRemaining < preferredRoute.darts.length) {
     return null;
   }

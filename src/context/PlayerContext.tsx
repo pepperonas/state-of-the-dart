@@ -10,7 +10,7 @@ interface PlayerContextType {
   players: Player[];
   currentPlayer: Player | null;
   loading: boolean;
-  addPlayer: (name: string, avatar?: string) => Promise<Player>;
+  addPlayer: (name: string, avatar?: string, isBot?: boolean, botLevel?: number, customId?: string) => Promise<Player>;
   updatePlayer: (id: string, updates: Partial<Player>) => Promise<void>;
   deletePlayer: (id: string) => Promise<void>;
   setCurrentPlayer: (player: Player | null) => void;
@@ -120,14 +120,16 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     loadPlayers();
   }, [user]);
   
-  const addPlayer = async (name: string, avatar?: string): Promise<Player> => {
+  const addPlayer = async (name: string, avatar?: string, isBot?: boolean, botLevel?: number, customId?: string): Promise<Player> => {
     const newPlayer: Player = {
-      id: uuidv4(),
+      id: customId || uuidv4(),
       name,
       avatar: avatar || name.charAt(0).toUpperCase(),
       createdAt: new Date(),
       stats: createDefaultStats(),
       preferences: createDefaultPreferences(),
+      isBot,
+      botLevel,
     };
     
     try {

@@ -51,6 +51,8 @@ CREATE TABLE IF NOT EXISTS players (
   tenant_id TEXT NOT NULL,
   name TEXT NOT NULL,
   avatar TEXT,
+  is_bot INTEGER DEFAULT 0,
+  bot_level INTEGER,
   created_at INTEGER NOT NULL,
   FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
 );

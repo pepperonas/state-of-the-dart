@@ -23,6 +23,8 @@ router.get('/', auth_1.authenticateTenant, (req, res) => {
             id: row.id,
             name: row.name,
             avatar: row.avatar,
+            isBot: row.is_bot === 1,
+            botLevel: row.bot_level,
             createdAt: row.created_at,
             stats: {
                 gamesPlayed: row.games_played || 0,
@@ -77,6 +79,8 @@ router.get('/:id', auth_1.authenticateTenant, (req, res) => {
             id: row.id,
             name: row.name,
             avatar: row.avatar,
+            isBot: row.is_bot === 1,
+            botLevel: row.bot_level,
             createdAt: row.created_at,
             stats: {
                 gamesPlayed: row.games_played || 0,
@@ -114,7 +118,7 @@ router.get('/:id', auth_1.authenticateTenant, (req, res) => {
 });
 // Create player
 router.post('/', auth_1.authenticateTenant, (req, res) => {
-    const { id, name, avatar } = req.body;
+    const { id, name, avatar, isBot, botLevel } = req.body;
     if (!id || !name) {
         return res.status(400).json({ error: 'id and name are required' });
     }
@@ -122,9 +126,9 @@ router.post('/', auth_1.authenticateTenant, (req, res) => {
     try {
         // Insert player
         db.prepare(`
-      INSERT INTO players (id, tenant_id, name, avatar, created_at)
-      VALUES (?, ?, ?, ?, ?)
-    `).run(id, req.tenantId, name, avatar || name.charAt(0).toUpperCase(), Date.now());
+      INSERT INTO players (id, tenant_id, name, avatar, is_bot, bot_level, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(id, req.tenantId, name, avatar || name.charAt(0).toUpperCase(), isBot ? 1 : 0, botLevel || null, Date.now());
         // Initialize stats
         db.prepare(`
       INSERT INTO player_stats (player_id)
@@ -141,6 +145,8 @@ router.post('/', auth_1.authenticateTenant, (req, res) => {
             id: row.id,
             name: row.name,
             avatar: row.avatar,
+            isBot: row.is_bot === 1,
+            botLevel: row.bot_level,
             createdAt: row.created_at,
             stats: {
                 gamesPlayed: row.games_played || 0,

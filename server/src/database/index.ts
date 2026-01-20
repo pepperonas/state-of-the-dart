@@ -23,6 +23,23 @@ export const initDatabase = (): Database.Database => {
   // Execute schema
   db.exec(schema);
 
+  // Migration: Add bot columns to players table if they don't exist
+  try {
+    const tableInfo = db.pragma('table_info(players)') as any[];
+    const hasBotColumn = tableInfo.some(col => col.name === 'is_bot');
+
+    if (!hasBotColumn) {
+      console.log('🔧 Migrating players table: Adding bot columns...');
+      db.exec(`
+        ALTER TABLE players ADD COLUMN is_bot INTEGER DEFAULT 0;
+        ALTER TABLE players ADD COLUMN bot_level INTEGER;
+      `);
+      console.log('✅ Bot columns added to players table');
+    }
+  } catch (error) {
+    console.error('Migration error:', error);
+  }
+
   // Seed default achievements if empty
   const achievementCount = db.prepare('SELECT COUNT(*) as count FROM achievements').get() as { count: number };
   if (achievementCount.count === 0) {
