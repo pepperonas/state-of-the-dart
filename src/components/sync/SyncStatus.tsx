@@ -42,12 +42,8 @@ const SyncStatus: React.FC = () => {
     );
   }
 
-  return (
-    <div className="flex items-center gap-2 text-dark-400 text-sm">
-      <Cloud size={16} />
-      <span className="hidden sm:inline">Nicht synchronisiert</span>
-    </div>
-  );
+  // Don't show anything if there's no sync yet
+  return null;
 };
 
 export default SyncStatus;

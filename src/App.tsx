@@ -26,21 +26,44 @@ import UserSettings from './components/auth/UserSettings';
 import Pricing from './components/payment/Pricing';
 import PaymentSuccess from './components/payment/PaymentSuccess';
 
+// Lazy load helper with auto-reload on chunk load failure
+const lazyWithRetry = (componentImport: () => Promise<any>) =>
+  lazy(async () => {
+    const pageHasAlreadyBeenForceRefreshed = JSON.parse(
+      window.sessionStorage.getItem('page-has-been-force-refreshed') || 'false'
+    );
+
+    try {
+      const component = await componentImport();
+      window.sessionStorage.setItem('page-has-been-force-refreshed', 'false');
+      return component;
+    } catch (error) {
+      if (!pageHasAlreadyBeenForceRefreshed) {
+        // Assuming that the user is not on the latest version of the application.
+        // Let's refresh the page immediately to get the latest version.
+        window.sessionStorage.setItem('page-has-been-force-refreshed', 'true');
+        window.location.reload();
+      }
+      // If we already tried refreshing, throw the error
+      throw error;
+    }
+  });
+
 // Lazy load heavy components
-const GameScreen = lazy(() => import('./components/game/GameScreen'));
-const PlayerManagement = lazy(() => import('./components/player/PlayerManagement'));
-const PlayerProfile = lazy(() => import('./components/player/PlayerProfile'));
-const StatsOverview = lazy(() => import('./components/stats/StatsOverview'));
-const TrainingMenu = lazy(() => import('./components/training/TrainingMenu'));
-const TrainingScreen = lazy(() => import('./components/training/TrainingScreen'));
-const TrainingStats = lazy(() => import('./components/training/TrainingStats'));
-const TournamentMenu = lazy(() => import('./components/tournament/TournamentMenu'));
-const Settings = lazy(() => import('./components/Settings'));
-const AchievementsScreen = lazy(() => import('./components/achievements/AchievementsScreen'));
-const Leaderboard = lazy(() => import('./components/leaderboard/Leaderboard'));
-const GlobalLeaderboard = lazy(() => import('./components/leaderboard/GlobalLeaderboard'));
-const Dashboard = lazy(() => import('./components/dashboard/Dashboard'));
-const AdminPanel = lazy(() => import('./components/admin/AdminPanel'));
+const GameScreen = lazyWithRetry(() => import('./components/game/GameScreen'));
+const PlayerManagement = lazyWithRetry(() => import('./components/player/PlayerManagement'));
+const PlayerProfile = lazyWithRetry(() => import('./components/player/PlayerProfile'));
+const StatsOverview = lazyWithRetry(() => import('./components/stats/StatsOverview'));
+const TrainingMenu = lazyWithRetry(() => import('./components/training/TrainingMenu'));
+const TrainingScreen = lazyWithRetry(() => import('./components/training/TrainingScreen'));
+const TrainingStats = lazyWithRetry(() => import('./components/training/TrainingStats'));
+const TournamentMenu = lazyWithRetry(() => import('./components/tournament/TournamentMenu'));
+const Settings = lazyWithRetry(() => import('./components/Settings'));
+const AchievementsScreen = lazyWithRetry(() => import('./components/achievements/AchievementsScreen'));
+const Leaderboard = lazyWithRetry(() => import('./components/leaderboard/Leaderboard'));
+const GlobalLeaderboard = lazyWithRetry(() => import('./components/leaderboard/GlobalLeaderboard'));
+const Dashboard = lazyWithRetry(() => import('./components/dashboard/Dashboard'));
+const AdminPanel = lazyWithRetry(() => import('./components/admin/AdminPanel'));
 
 // Loading component
 const LoadingScreen = () => (
