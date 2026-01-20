@@ -568,9 +568,9 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
 
               <button
                 onClick={() => setShowBugReportModal(true)}
-                className="w-full mt-3 py-3 bg-gradient-to-r from-warning-500 to-orange-600 hover:from-warning-600 hover:to-orange-700 text-white rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+                className="w-full mt-3 py-3 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white rounded-lg font-bold transition-all flex items-center justify-center gap-2 shadow-lg"
               >
-                <AlertCircle size={20} />
+                <AlertCircle size={20} className="drop-shadow" />
                 Neuen Bug melden
               </button>
             </div>
