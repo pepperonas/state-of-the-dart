@@ -71,6 +71,7 @@ Express routes in `server/src/routes/`:
 - `/api/achievements` - Achievement sync
 - `/api/payment` - Stripe integration
 - `/api/admin` - User management (admin only)
+- `/api/bug-reports` - Bug report tracking and management
 
 Database uses SQLite with schema in `server/src/database/schema.ts`.
 
@@ -80,6 +81,7 @@ Database uses SQLite with schema in `server/src/database/schema.ts`.
 - Audio system: `src/utils/audio.ts` (professional dart caller with 400+ sound files)
 - Heatmap generation: `src/utils/heatmap.ts`
 - Export formats: `src/utils/exportImport.ts` (CSV, XLSX, PDF, JSON)
+- Screenshot capture: `src/utils/screenshot.ts` (html2canvas with modal exclusion)
 - **Bot system**: `src/utils/botAI.ts` (AI opponents with 10 difficulty levels)
 
 ### Bot System (AI Opponents)
@@ -122,8 +124,123 @@ interface MatchPlayer {
 2. ❌ Auto-confirm running for bots causes double NEXT_PLAYER → player gets skipped
 3. ❌ Setting isBotPlaying to false AFTER dispatch causes race conditions
 
+### Bug Report System
+
+**Overview:**
+Comprehensive bug tracking system allowing users to report issues with automatic screenshot capture and browser diagnostics.
+
+**Database Schema:**
+```sql
+-- server/src/database/schema.ts
+CREATE TABLE bug_reports (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  severity TEXT CHECK(severity IN ('low', 'medium', 'high', 'critical')),
+  category TEXT CHECK(category IN ('gameplay', 'ui', 'audio', 'performance', 'auth', 'data', 'other')),
+  status TEXT DEFAULT 'open' CHECK(status IN ('open', 'in_progress', 'resolved', 'closed')),
+  screenshot_url TEXT,
+  browser_info TEXT,  -- JSON: userAgent, screenResolution, viewport
+  route TEXT,
+  admin_notes TEXT,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  resolved_at INTEGER
+);
+```
+
+**TypeScript Interfaces:**
+```typescript
+// src/types/index.ts
+export type BugReportSeverity = 'low' | 'medium' | 'high' | 'critical';
+export type BugReportCategory = 'gameplay' | 'ui' | 'audio' | 'performance' | 'auth' | 'data' | 'other';
+export type BugReportStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
+
+export interface BugReport {
+  id: string;
+  userId: string;
+  userName?: string;
+  userEmail?: string;
+  title: string;
+  description: string;
+  severity: BugReportSeverity;
+  category: BugReportCategory;
+  status: BugReportStatus;
+  screenshotUrl?: string;
+  browserInfo?: {
+    userAgent: string;
+    screenResolution: string;
+    viewport: string;
+  };
+  route?: string;
+  adminNotes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  resolvedAt?: Date;
+}
+```
+
+**Components:**
+- `src/components/bugReport/BugReportModal.tsx` - Bug report submission form
+  - Screenshot capture with html2canvas (auto-hides modals z-index >= 50)
+  - Browser diagnostics auto-capture
+  - Success animation after submit
+
+- `src/components/game/GameScreen.tsx:1061-1067` - Bug report button
+  - AlertTriangle icon, positioned left of Undo button
+  - Opens BugReportModal with current route tracking
+
+- `src/components/Settings.tsx:503-571` - User's bug reports section
+  - List of own reports with status badges
+  - Severity and category indicators
+  - "Neuen Bug melden" button
+
+- `src/components/admin/AdminPanel.tsx:486-811` - Admin management
+  - Stats cards: Total, Open, In Progress, Resolved
+  - Filters: Status + Severity
+  - Full bug reports table with actions
+  - Details modal:
+    - Screenshot viewer
+    - Browser info display
+    - Editable admin notes (onBlur save)
+    - Status update buttons
+    - Delete functionality
+
+**API Endpoints:**
+```typescript
+// src/services/api.ts
+api.bugReports.getAll(filters?: { status?, severity? })  // Admin: all, User: own
+api.bugReports.create(data)                               // Anyone authenticated
+api.bugReports.getById(id)                                // Owner or admin
+api.bugReports.updateStatus(id, status)                   // Admin only
+api.bugReports.updateNotes(id, notes)                     // Admin only
+api.bugReports.delete(id)                                 // Admin only
+```
+
+**Utilities:**
+- `src/utils/screenshot.ts` - Screenshot capture with html2canvas
+  - `captureScreenshot()` - Returns base64 PNG, excludes z-50+ elements
+  - `getBrowserInfo()` - Auto-captures userAgent, screen, viewport
+
+**Status Workflow:**
+```
+open → in_progress → resolved → closed
+  ↑                     ↓
+  └─────────────────────┘ (can reopen)
+```
+
+**Permissions:**
+- **Users**: Create reports, view own reports only
+- **Admins**: View all reports, update status, add notes, delete reports
+
+**Common Pitfalls:**
+1. ❌ Screenshot includes modal → Use z-index >= 50 for modals (auto-excluded)
+2. ❌ Missing route tracking → Always pass `window.location.pathname` to modal
+3. ❌ Admin notes not saving → Use onBlur event, not onChange
+
 ### Type Definitions
-- Core types: `src/types/index.ts` (Match, Player, Dart, Throw, GameSettings)
+- Core types: `src/types/index.ts` (Match, Player, Dart, Throw, GameSettings, BugReport)
 - Achievements: `src/types/achievements.ts`
 - Personal bests: `src/types/personalBests.ts`
 
