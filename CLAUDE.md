@@ -75,6 +75,13 @@ Express routes in `server/src/routes/`:
 
 Database uses SQLite with schema in `server/src/database/schema.ts`.
 
+**Master Admin Account:**
+- Email: `martinpaush@gmail.com`
+- This account is automatically granted admin rights on every database initialization
+- Implementation: `server/src/database/index.ts` (ensureAdminRights check)
+- **Never** remove admin rights from this account
+- This ensures system access even if other admin accounts are compromised
+
 ### Key Business Logic
 - Scoring logic: `src/utils/scoring.ts` (calculateThrowScore, isBust, calculateAverage)
 - Checkout suggestions: `src/data/checkoutTable.ts`

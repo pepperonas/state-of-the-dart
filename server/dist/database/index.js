@@ -55,6 +55,18 @@ const initDatabase = () => {
         seedAchievements();
         console.log(`✅ Seeded ${schema_1.defaultAchievements.length} default achievements`);
     }
+    // Ensure martinpaush@gmail.com always has admin rights
+    try {
+        const masterAdmin = 'martinpaush@gmail.com';
+        const user = db.prepare('SELECT id, is_admin FROM users WHERE email = ?').get(masterAdmin);
+        if (user && user.is_admin !== 1) {
+            db.prepare('UPDATE users SET is_admin = 1 WHERE email = ?').run(masterAdmin);
+            console.log('✅ Master admin rights ensured for martinpaush@gmail.com');
+        }
+    }
+    catch (error) {
+        console.error('Master admin check error:', error);
+    }
     // Schedule periodic WAL checkpoint to prevent corruption
     // Runs every 5 minutes to ensure WAL data is written to main DB
     setInterval(() => {
