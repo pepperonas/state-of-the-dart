@@ -264,6 +264,30 @@ CREATE TABLE IF NOT EXISTS user_settings (
   updated_at INTEGER NOT NULL,
   FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
 );
+
+-- Bug Reports
+CREATE TABLE IF NOT EXISTS bug_reports (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  severity TEXT NOT NULL CHECK(severity IN ('low', 'medium', 'high', 'critical')),
+  category TEXT NOT NULL CHECK(category IN ('gameplay', 'ui', 'audio', 'performance', 'auth', 'data', 'other')),
+  status TEXT NOT NULL DEFAULT 'open' CHECK(status IN ('open', 'in_progress', 'resolved', 'closed')),
+  screenshot_url TEXT,
+  browser_info TEXT,
+  route TEXT,
+  admin_notes TEXT,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  resolved_at INTEGER,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_bug_reports_user ON bug_reports(user_id);
+CREATE INDEX IF NOT EXISTS idx_bug_reports_status ON bug_reports(status);
+CREATE INDEX IF NOT EXISTS idx_bug_reports_severity ON bug_reports(severity);
+CREATE INDEX IF NOT EXISTS idx_bug_reports_created_at ON bug_reports(created_at);
 `;
 // Default achievements to seed
 exports.defaultAchievements = [

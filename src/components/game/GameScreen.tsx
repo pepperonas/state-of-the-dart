@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, Pause, Play, X, Bot, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Pause, Play, X, Bot, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
 import Confetti from 'react-confetti';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useGame } from '../../context/GameContext';
@@ -15,6 +15,7 @@ import PlayerScore from './PlayerScore';
 import CheckoutSuggestion from '../dartboard/CheckoutSuggestion';
 import AchievementHint from '../achievements/AchievementHint';
 import SpinnerWheel from './SpinnerWheel';
+import BugReportModal from '../bugReport/BugReportModal';
 import { Dart, Player, GameType, MatchSettings } from '../../types/index';
 import { calculateThrowScore } from '../../utils/scoring';
 import { PersonalBests, createEmptyPersonalBests, updatePersonalBests } from '../../types/personalBests';
@@ -194,7 +195,8 @@ const GameScreen: React.FC = () => {
   const [showBotSelector, setShowBotSelector] = useState(false);
   const [showThrowHistory, setShowThrowHistory] = useState(false);
   const [showThrowChart, setShowThrowChart] = useState(false);
-  
+  const [showBugReportModal, setShowBugReportModal] = useState(false);
+
   // Load last players from storage
   const getLastPlayers = (): string[] => {
     if (!storage) return [];
@@ -1063,7 +1065,15 @@ const GameScreen: React.FC = () => {
             >
               <RotateCcw size={20} />
             </button>
-            
+
+            <button
+              onClick={() => setShowBugReportModal(true)}
+              className="glass-card p-3 rounded-lg hover:glass-card-hover text-white transition-all"
+              title="Bug melden"
+            >
+              <AlertTriangle size={20} />
+            </button>
+
             <button
               onClick={() => {
                 if (state.currentMatch?.status === 'paused') {
@@ -1564,6 +1574,14 @@ const GameScreen: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Bug Report Modal */}
+      {showBugReportModal && (
+        <BugReportModal
+          onClose={() => setShowBugReportModal(false)}
+          currentRoute={window.location.pathname}
+        />
       )}
 
           </div>

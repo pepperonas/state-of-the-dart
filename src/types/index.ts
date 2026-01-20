@@ -368,3 +368,31 @@ export interface ExportData {
   achievements: Achievement[];
   settings: AppSettings;
 }
+
+// Bug Reports
+export type BugReportSeverity = 'low' | 'medium' | 'high' | 'critical';
+export type BugReportCategory = 'gameplay' | 'ui' | 'audio' | 'performance' | 'auth' | 'data' | 'other';
+export type BugReportStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
+
+export interface BugReport {
+  id: string;
+  userId: string;
+  userName?: string;
+  userEmail?: string;
+  title: string;
+  description: string;
+  severity: BugReportSeverity;
+  category: BugReportCategory;
+  status: BugReportStatus;
+  screenshotUrl?: string;
+  browserInfo?: {
+    userAgent: string;
+    screenResolution: string;
+    viewport: string;
+  };
+  route?: string;
+  adminNotes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  resolvedAt?: Date;
+}

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, Crown, Zap, Clock, XCircle, Shield, Trash2, UserMinus, UserPlus } from 'lucide-react';
+import { ArrowLeft, Users, Crown, Zap, Clock, XCircle, Shield, Trash2, UserMinus, UserPlus, AlertCircle, Eye, Edit, CheckCircle } from 'lucide-react';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import type { BugReport } from '../../types';
 
 interface AdminUser {
   id: string;
@@ -39,12 +40,20 @@ const AdminPanel: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>('all');
 
+  // Bug Reports
+  const [bugReports, setBugReports] = useState<BugReport[]>([]);
+  const [bugFilter, setBugFilter] = useState<string>('all');
+  const [bugSeverityFilter, setBugSeverityFilter] = useState<string>('all');
+  const [selectedBugReport, setSelectedBugReport] = useState<BugReport | null>(null);
+  const [bugLoading, setBugLoading] = useState(false);
+
   useEffect(() => {
     if (!user?.isAdmin) {
       navigate('/');
       return;
     }
     loadData();
+    loadBugReports();
   }, [user, navigate]);
 
   const loadData = async () => {
@@ -61,6 +70,49 @@ const AdminPanel: React.FC = () => {
       setError(err.message || 'Failed to load admin data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadBugReports = async () => {
+    setBugLoading(true);
+    try {
+      const reports = await api.bugReports.getAll();
+      setBugReports(reports);
+    } catch (err: any) {
+      console.error('Failed to load bug reports:', err);
+    } finally {
+      setBugLoading(false);
+    }
+  };
+
+  const handleUpdateBugStatus = async (reportId: string, newStatus: string) => {
+    try {
+      await api.bugReports.updateStatus(reportId, newStatus);
+      await loadBugReports();
+      setSelectedBugReport(null);
+    } catch (err: any) {
+      alert('Failed to update status: ' + err.message);
+    }
+  };
+
+  const handleUpdateBugNotes = async (reportId: string, notes: string) => {
+    try {
+      await api.bugReports.updateNotes(reportId, notes);
+      await loadBugReports();
+    } catch (err: any) {
+      alert('Failed to update notes: ' + err.message);
+    }
+  };
+
+  const handleDeleteBugReport = async (reportId: string) => {
+    if (!confirm('Are you sure you want to delete this bug report?')) return;
+
+    try {
+      await api.bugReports.delete(reportId);
+      await loadBugReports();
+      setSelectedBugReport(null);
+    } catch (err: any) {
+      alert('Failed to delete bug report: ' + err.message);
     }
   };
 
@@ -429,6 +481,333 @@ const AdminPanel: React.FC = () => {
           >
             Keine Benutzer mit Filter "{filter}" gefunden
           </motion.div>
+        )}
+
+        {/* Bug Reports Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="glass-card rounded-2xl p-6 mt-8"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <AlertCircle className="text-warning-400" size={28} />
+            <h2 className="text-2xl font-bold text-white">Bug Reports</h2>
+          </div>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-500/20 rounded-lg">
+                  <AlertCircle className="text-blue-400" size={20} />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-white">{bugReports.length}</p>
+                  <p className="text-sm text-dark-300">Total Reports</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-500/20 rounded-lg">
+                  <XCircle className="text-red-400" size={20} />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-white">{bugReports.filter(r => r.status === 'open').length}</p>
+                  <p className="text-sm text-dark-300">Open</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-500/20 rounded-lg">
+                  <Edit className="text-blue-400" size={20} />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-white">{bugReports.filter(r => r.status === 'in_progress').length}</p>
+                  <p className="text-sm text-dark-300">In Progress</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-500/20 rounded-lg">
+                  <CheckCircle className="text-green-400" size={20} />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-white">{bugReports.filter(r => r.status === 'resolved').length}</p>
+                  <p className="text-sm text-dark-300">Resolved</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Filters */}
+          <div className="flex gap-4 mb-6">
+            <div>
+              <label className="block text-sm font-semibold text-dark-300 mb-2">Status</label>
+              <select
+                value={bugFilter}
+                onChange={(e) => setBugFilter(e.target.value)}
+                className="px-4 py-2 bg-dark-800/50 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-warning-500"
+              >
+                <option value="all">All</option>
+                <option value="open">Open</option>
+                <option value="in_progress">In Progress</option>
+                <option value="resolved">Resolved</option>
+                <option value="closed">Closed</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-dark-300 mb-2">Severity</label>
+              <select
+                value={bugSeverityFilter}
+                onChange={(e) => setBugSeverityFilter(e.target.value)}
+                className="px-4 py-2 bg-dark-800/50 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-warning-500"
+              >
+                <option value="all">All</option>
+                <option value="critical">Critical</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Bug Reports Table */}
+          {bugLoading ? (
+            <div className="text-center py-12 text-dark-400">
+              Loading bug reports...
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-dark-700">
+                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">Title</th>
+                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">Reporter</th>
+                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">Severity</th>
+                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">Status</th>
+                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">Category</th>
+                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">Date</th>
+                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {bugReports
+                    .filter(r => bugFilter === 'all' || r.status === bugFilter)
+                    .filter(r => bugSeverityFilter === 'all' || r.severity === bugSeverityFilter)
+                    .map((report) => (
+                      <motion.tr
+                        key={report.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="border-b border-dark-700/50 hover:bg-dark-700/30 transition-colors"
+                      >
+                        <td className="py-3 px-4 text-white font-medium">{report.title}</td>
+                        <td className="py-3 px-4">
+                          <div className="text-sm">
+                            <p className="text-white">{report.userName}</p>
+                            <p className="text-dark-400 text-xs">{report.userEmail}</p>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                            report.severity === 'critical' ? 'bg-red-600/20 text-red-400' :
+                            report.severity === 'high' ? 'bg-orange-600/20 text-orange-400' :
+                            report.severity === 'medium' ? 'bg-yellow-600/20 text-yellow-400' :
+                            'bg-blue-600/20 text-blue-400'
+                          }`}>
+                            {report.severity.toUpperCase()}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                            report.status === 'open' ? 'bg-red-500/20 text-red-400' :
+                            report.status === 'in_progress' ? 'bg-blue-500/20 text-blue-400' :
+                            report.status === 'resolved' ? 'bg-green-500/20 text-green-400' :
+                            'bg-gray-700 text-gray-300'
+                          }`}>
+                            {report.status.replace('_', ' ').toUpperCase()}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-dark-300 capitalize">{report.category}</td>
+                        <td className="py-3 px-4 text-dark-400 text-sm">
+                          {new Date(report.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setSelectedBugReport(report)}
+                              className="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors"
+                              title="View Details"
+                            >
+                              <Eye size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteBugReport(report.id)}
+                              className="p-2 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 rounded-lg transition-colors"
+                              title="Delete"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </motion.tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Bug Report Details Modal */}
+        {selectedBugReport && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div className="glass-card rounded-2xl p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-white">Bug Report Details</h3>
+                <button
+                  onClick={() => setSelectedBugReport(null)}
+                  className="p-2 hover:bg-dark-700/50 rounded-lg transition-colors"
+                >
+                  <XCircle size={24} className="text-gray-400" />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                {/* Title & Status */}
+                <div>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h4 className="text-xl font-bold text-white mb-2">{selectedBugReport.title}</h4>
+                      <p className="text-dark-400 text-sm">
+                        Reported by {selectedBugReport.userName} ({selectedBugReport.userEmail})
+                      </p>
+                      <p className="text-dark-400 text-sm">
+                        {new Date(selectedBugReport.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <span className={`px-3 py-1 rounded font-semibold text-sm ${
+                        selectedBugReport.severity === 'critical' ? 'bg-red-600/20 text-red-400' :
+                        selectedBugReport.severity === 'high' ? 'bg-orange-600/20 text-orange-400' :
+                        selectedBugReport.severity === 'medium' ? 'bg-yellow-600/20 text-yellow-400' :
+                        'bg-blue-600/20 text-blue-400'
+                      }`}>
+                        {selectedBugReport.severity.toUpperCase()}
+                      </span>
+                      <span className="px-3 py-1 rounded font-semibold text-sm bg-dark-700 text-dark-300 capitalize">
+                        {selectedBugReport.category}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">Description</label>
+                  <p className="text-white bg-dark-800/50 rounded-lg p-4 border border-dark-700 whitespace-pre-wrap">
+                    {selectedBugReport.description}
+                  </p>
+                </div>
+
+                {/* Screenshot */}
+                {selectedBugReport.screenshotUrl && (
+                  <div>
+                    <label className="block text-sm font-semibold text-dark-300 mb-2">Screenshot</label>
+                    <img
+                      src={selectedBugReport.screenshotUrl}
+                      alt="Bug screenshot"
+                      className="w-full rounded-lg border border-dark-700"
+                    />
+                  </div>
+                )}
+
+                {/* Browser Info */}
+                {selectedBugReport.browserInfo && (
+                  <div>
+                    <label className="block text-sm font-semibold text-dark-300 mb-2">Browser Info</label>
+                    <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700 text-sm">
+                      <p className="text-dark-400 mb-1"><span className="text-white font-medium">User Agent:</span> {selectedBugReport.browserInfo.userAgent}</p>
+                      <p className="text-dark-400 mb-1"><span className="text-white font-medium">Screen:</span> {selectedBugReport.browserInfo.screenResolution}</p>
+                      <p className="text-dark-400"><span className="text-white font-medium">Viewport:</span> {selectedBugReport.browserInfo.viewport}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Route */}
+                {selectedBugReport.route && (
+                  <div>
+                    <label className="block text-sm font-semibold text-dark-300 mb-2">Route</label>
+                    <p className="text-white bg-dark-800/50 rounded-lg p-3 border border-dark-700 font-mono text-sm">
+                      {selectedBugReport.route}
+                    </p>
+                  </div>
+                )}
+
+                {/* Admin Notes */}
+                <div>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">Admin Notes</label>
+                  <textarea
+                    defaultValue={selectedBugReport.adminNotes || ''}
+                    onBlur={(e) => handleUpdateBugNotes(selectedBugReport.id, e.target.value)}
+                    className="w-full px-4 py-3 bg-dark-800/50 border border-dark-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-warning-500 resize-none"
+                    rows={4}
+                    placeholder="Add notes for internal tracking..."
+                  />
+                </div>
+
+                {/* Status Update */}
+                <div>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">Update Status</label>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleUpdateBugStatus(selectedBugReport.id, 'open')}
+                      className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-colors ${
+                        selectedBugReport.status === 'open'
+                          ? 'bg-red-500/30 text-red-400 border border-red-500'
+                          : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
+                      }`}
+                    >
+                      Open
+                    </button>
+                    <button
+                      onClick={() => handleUpdateBugStatus(selectedBugReport.id, 'in_progress')}
+                      className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-colors ${
+                        selectedBugReport.status === 'in_progress'
+                          ? 'bg-blue-500/30 text-blue-400 border border-blue-500'
+                          : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
+                      }`}
+                    >
+                      In Progress
+                    </button>
+                    <button
+                      onClick={() => handleUpdateBugStatus(selectedBugReport.id, 'resolved')}
+                      className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-colors ${
+                        selectedBugReport.status === 'resolved'
+                          ? 'bg-green-500/30 text-green-400 border border-green-500'
+                          : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
+                      }`}
+                    >
+                      Resolved
+                    </button>
+                    <button
+                      onClick={() => handleUpdateBugStatus(selectedBugReport.id, 'closed')}
+                      className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-colors ${
+                        selectedBugReport.status === 'closed'
+                          ? 'bg-gray-700/50 text-gray-300 border border-gray-600'
+                          : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
+                      }`}
+                    >
+                      Closed
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

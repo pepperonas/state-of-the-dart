@@ -266,37 +266,82 @@ export const api = {
   // Admin
   admin: {
     getUsers: () => apiClient('/api/admin/users'),
-    
+
     getStats: () => apiClient('/api/admin/stats'),
-    
+
     updateSubscription: (userId: string, data: { subscriptionStatus: string; subscriptionPlan?: string; subscriptionEndsAt?: number }) =>
       apiClient(`/api/admin/users/${userId}/subscription`, {
         method: 'PATCH',
         body: JSON.stringify(data),
       }),
-    
+
     grantLifetime: (userId: string) =>
       apiClient(`/api/admin/users/${userId}/grant-lifetime`, {
         method: 'POST',
       }),
-    
+
     revokeAccess: (userId: string) =>
       apiClient(`/api/admin/users/${userId}/revoke`, {
         method: 'POST',
       }),
-    
+
     deleteUser: (userId: string) =>
       apiClient(`/api/admin/users/${userId}`, {
         method: 'DELETE',
       }),
-    
+
     makeAdmin: (userId: string) =>
       apiClient(`/api/admin/users/${userId}/make-admin`, {
         method: 'POST',
       }),
-    
+
     removeAdmin: (userId: string) =>
       apiClient(`/api/admin/users/${userId}/admin`, {
+        method: 'DELETE',
+      }),
+  },
+
+  // Bug Reports
+  bugReports: {
+    getAll: (filters?: { status?: string; severity?: string }) => {
+      const params = new URLSearchParams();
+      if (filters?.status) params.append('status', filters.status);
+      if (filters?.severity) params.append('severity', filters.severity);
+      const queryString = params.toString();
+      return apiClient(`/api/bug-reports${queryString ? `?${queryString}` : ''}`);
+    },
+
+    getMyReports: () => apiClient('/api/bug-reports'),
+
+    create: (data: {
+      title: string;
+      description: string;
+      severity: string;
+      category: string;
+      screenshotUrl?: string;
+      browserInfo?: any;
+      route?: string;
+    }) => apiClient('/api/bug-reports', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+    getById: (id: string) => apiClient(`/api/bug-reports/${id}`),
+
+    updateStatus: (id: string, status: string) =>
+      apiClient(`/api/bug-reports/${id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      }),
+
+    updateNotes: (id: string, notes: string) =>
+      apiClient(`/api/bug-reports/${id}/notes`, {
+        method: 'PATCH',
+        body: JSON.stringify({ notes }),
+      }),
+
+    delete: (id: string) =>
+      apiClient(`/api/bug-reports/${id}`, {
         method: 'DELETE',
       }),
   },
