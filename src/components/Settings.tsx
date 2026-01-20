@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Moon, Sun, Volume2, Bell, Globe, LogOut, User, Play, Download, Upload, Smartphone, Palette, Check, Sparkles, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, Volume2, Bell, Globe, LogOut, User, Play, Download, Upload, Smartphone, Palette, Check, Sparkles, AlertCircle, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useSettings } from '../context/SettingsContext';
 import { useTenant } from '../context/TenantContext';
@@ -38,6 +38,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
   const [bugReports, setBugReports] = useState<BugReport[]>([]);
   const [showBugReportModal, setShowBugReportModal] = useState(false);
   const [isLoadingReports, setIsLoadingReports] = useState(false);
+  const [selectedBugReport, setSelectedBugReport] = useState<BugReport | null>(null);
 
   // Load bug reports
   useEffect(() => {
@@ -520,7 +521,11 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               ) : (
                 <div className="space-y-3 mb-4">
                   {bugReports.map(report => (
-                    <div key={report.id} className="bg-dark-800/50 rounded-lg p-4 border border-dark-700">
+                    <div
+                      key={report.id}
+                      onClick={() => setSelectedBugReport(report)}
+                      className="bg-dark-800/50 rounded-lg p-4 border border-dark-700 cursor-pointer hover:border-warning-500 transition-colors"
+                    >
                       <div className="flex items-start justify-between mb-2">
                         <h4 className="font-semibold text-white">{report.title}</h4>
                         <span className={`px-2 py-1 text-xs rounded-full font-semibold uppercase ${
@@ -595,6 +600,165 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
           </div>
         </div>
       </div>
+
+      {/* Bug Report Detail Modal */}
+      {selectedBugReport && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="glass-card rounded-2xl p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <AlertCircle className="text-warning-400" size={28} />
+                <h2 className="text-2xl font-bold text-white">Bug Report Details</h2>
+              </div>
+              <button
+                onClick={() => setSelectedBugReport(null)}
+                className="p-2 hover:bg-dark-700/50 rounded-lg transition-colors"
+              >
+                <X size={24} className="text-gray-400" />
+              </button>
+            </div>
+
+            <div className="space-y-5">
+              {/* Title */}
+              <div>
+                <label className="block text-sm font-semibold text-dark-300 mb-2">Titel</label>
+                <p className="text-white text-lg font-semibold">{selectedBugReport.title}</p>
+              </div>
+
+              {/* Status and Severity */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">Status</label>
+                  <span className={`inline-block px-3 py-1.5 text-sm rounded-full font-semibold uppercase ${
+                    selectedBugReport.status === 'open' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                    selectedBugReport.status === 'in_progress' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                    selectedBugReport.status === 'resolved' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                    'bg-gray-700 text-gray-300'
+                  }`}>
+                    {selectedBugReport.status === 'in_progress' ? 'In Bearbeitung' :
+                     selectedBugReport.status === 'resolved' ? 'Gelöst' :
+                     selectedBugReport.status === 'closed' ? 'Geschlossen' : 'Offen'}
+                  </span>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">Schweregrad</label>
+                  <span className={`inline-block px-3 py-1.5 text-sm rounded font-semibold ${
+                    selectedBugReport.severity === 'critical' ? 'bg-red-600/20 text-red-400' :
+                    selectedBugReport.severity === 'high' ? 'bg-orange-600/20 text-orange-400' :
+                    selectedBugReport.severity === 'medium' ? 'bg-yellow-600/20 text-yellow-400' :
+                    'bg-blue-600/20 text-blue-400'
+                  }`}>
+                    {selectedBugReport.severity === 'critical' ? 'Kritisch' :
+                     selectedBugReport.severity === 'high' ? 'Hoch' :
+                     selectedBugReport.severity === 'medium' ? 'Mittel' : 'Niedrig'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Category and Date */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">Kategorie</label>
+                  <p className="text-white capitalize">
+                    {selectedBugReport.category === 'gameplay' ? 'Gameplay' :
+                     selectedBugReport.category === 'ui' ? 'Benutzeroberfläche' :
+                     selectedBugReport.category === 'audio' ? 'Audio' :
+                     selectedBugReport.category === 'performance' ? 'Performance' :
+                     selectedBugReport.category === 'auth' ? 'Authentifizierung' :
+                     selectedBugReport.category === 'data' ? 'Daten' : 'Sonstiges'}
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">Gemeldet am</label>
+                  <p className="text-white">
+                    {new Date(selectedBugReport.createdAt).toLocaleString('de-DE', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-semibold text-dark-300 mb-2">Beschreibung</label>
+                <p className="text-white bg-dark-800/50 rounded-lg p-4 border border-dark-700 whitespace-pre-wrap">
+                  {selectedBugReport.description}
+                </p>
+              </div>
+
+              {/* Screenshot */}
+              {selectedBugReport.screenshotUrl && (
+                <div>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">Screenshot</label>
+                  <div className="relative group">
+                    <img
+                      src={selectedBugReport.screenshotUrl}
+                      alt="Bug screenshot"
+                      className="w-full rounded-lg border border-dark-700 cursor-pointer hover:border-warning-500 transition-colors"
+                      onClick={() => window.open(selectedBugReport.screenshotUrl, '_blank')}
+                    />
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <a
+                        href={selectedBugReport.screenshotUrl}
+                        download={`bug-report-${selectedBugReport.id}.png`}
+                        className="px-3 py-1 bg-dark-900/90 hover:bg-dark-800 text-white text-sm rounded-lg transition-colors"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Download
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Browser Info */}
+              {selectedBugReport.browserInfo && (
+                <div>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">Browser-Informationen</label>
+                  <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700 text-sm">
+                    <p className="text-dark-400 mb-1">
+                      <span className="text-white font-medium">User Agent:</span> {selectedBugReport.browserInfo.userAgent}
+                    </p>
+                    <p className="text-dark-400 mb-1">
+                      <span className="text-white font-medium">Bildschirm:</span> {selectedBugReport.browserInfo.screenResolution}
+                    </p>
+                    <p className="text-dark-400">
+                      <span className="text-white font-medium">Viewport:</span> {selectedBugReport.browserInfo.viewport}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Admin Notes */}
+              {selectedBugReport.adminNotes && (
+                <div>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">Admin-Notizen</label>
+                  <p className="text-white bg-blue-500/10 rounded-lg p-4 border border-blue-500/30 whitespace-pre-wrap">
+                    {selectedBugReport.adminNotes}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Close Button */}
+            <div className="mt-6">
+              <button
+                onClick={() => setSelectedBugReport(null)}
+                className="w-full py-3 px-4 bg-dark-700 hover:bg-dark-600 rounded-lg text-white font-semibold transition-colors"
+              >
+                Schließen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bug Report Modal */}
       {showBugReportModal && (
