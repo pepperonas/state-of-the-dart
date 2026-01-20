@@ -82,12 +82,9 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         try {
           const heatmapsResponse = await api.players.getHeatmapsBatch();
           const heatmaps = heatmapsResponse.heatmaps;
-          console.log('🗺️ Heatmaps loaded:', Object.keys(heatmaps).length);
-          
           // Merge heatmaps with players
           const playersWithHeatmaps = loadedPlayers.map((player: Player) => {
             const heatmapData = heatmaps[player.id];
-            console.log(`📍 Player ${player.name}:`, heatmapData ? `${heatmapData.total_darts} darts` : 'no heatmap');
             
             if (heatmapData && heatmapData.total_darts > 0) {
               return {
@@ -102,8 +99,7 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
             }
             return player;
           });
-          
-          console.log('✅ Players with heatmaps:', playersWithHeatmaps.filter((p: any) => p.heatmapData).length);
+
           setPlayers(playersWithHeatmaps);
         } catch (error) {
           console.error('Failed to load heatmaps:', error);

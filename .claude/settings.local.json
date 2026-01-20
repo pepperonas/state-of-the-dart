@@ -37,7 +37,8 @@
       "Bash(grep:*)",
       "Bash(bash:*)",
       "Bash(git checkout:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "mcp__plugin_serena_serena__search_for_pattern"
     ],
     "deny": [],
     "ask": []
