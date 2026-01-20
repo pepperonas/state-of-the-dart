@@ -189,7 +189,13 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   
   const updatePlayerHeatmap = async (playerId: string, newDarts: Dart[]) => {
     if (!user) return;
-    
+
+    // Skip heatmap updates for bots (their throws are simulated, not real)
+    const player = players.find(p => p.id === playerId);
+    if (player?.isBot) {
+      return;
+    }
+
     const currentHeatmap = getPlayerHeatmap(playerId);
     const updatedHeatmap = updateHeatmapData(currentHeatmap, newDarts);
     
