@@ -36,7 +36,8 @@
       "Bash(npm i:*)",
       "Bash(grep:*)",
       "Bash(bash:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []

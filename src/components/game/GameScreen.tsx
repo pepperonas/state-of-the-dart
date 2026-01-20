@@ -1059,19 +1059,19 @@ const GameScreen: React.FC = () => {
           
           <div className="flex gap-2">
             <button
-              onClick={handleUndoThrow}
-              className="glass-card p-3 rounded-lg hover:glass-card-hover text-white transition-all"
-              title="Letzten Wurf rückgängig machen"
-            >
-              <RotateCcw size={20} />
-            </button>
-
-            <button
               onClick={() => setShowBugReportModal(true)}
               className="glass-card p-3 rounded-lg hover:glass-card-hover text-white transition-all"
               title="Bug melden"
             >
               <AlertTriangle size={20} />
+            </button>
+
+            <button
+              onClick={handleUndoThrow}
+              className="glass-card p-3 rounded-lg hover:glass-card-hover text-white transition-all"
+              title="Letzten Wurf rückgängig machen"
+            >
+              <RotateCcw size={20} />
             </button>
 
             <button
