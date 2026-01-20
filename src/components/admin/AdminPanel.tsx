@@ -717,11 +717,24 @@ const AdminPanel: React.FC = () => {
                 {selectedBugReport.screenshotUrl && (
                   <div>
                     <label className="block text-sm font-semibold text-dark-300 mb-2">Screenshot</label>
-                    <img
-                      src={selectedBugReport.screenshotUrl}
-                      alt="Bug screenshot"
-                      className="w-full rounded-lg border border-dark-700"
-                    />
+                    <div className="relative group">
+                      <img
+                        src={selectedBugReport.screenshotUrl}
+                        alt="Bug screenshot"
+                        className="w-full rounded-lg border border-dark-700 cursor-pointer hover:border-warning-500 transition-colors"
+                        onClick={() => window.open(selectedBugReport.screenshotUrl, '_blank')}
+                      />
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <a
+                          href={selectedBugReport.screenshotUrl}
+                          download={`bug-report-${selectedBugReport.id}.png`}
+                          className="px-3 py-1 bg-dark-900/90 hover:bg-dark-800 text-white text-sm rounded-lg transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Download
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 )}
 
