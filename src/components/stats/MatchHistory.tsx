@@ -76,7 +76,8 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
 
       players.forEach(player => {
         const roundData = playerRounds[player.playerId]?.find(r => r.round === i);
-        dataPoint[player.name] = roundData?.score || 0;
+        // Use playerId as key to avoid issues with special characters in names
+        dataPoint[player.playerId] = roundData?.score || 0;
       });
 
       chartData.push(dataPoint);
@@ -205,7 +206,7 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                             <Line
                               key={p.playerId}
                               type="monotone"
-                              dataKey={p.name}
+                              dataKey={p.playerId}
                               stroke={index === 0 ? '#0ea5e9' : '#a855f7'}
                               strokeWidth={3}
                               dot={{ fill: index === 0 ? '#0ea5e9' : '#a855f7', r: 5 }}
