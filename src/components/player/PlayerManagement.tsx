@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Edit2, Trash2, User, Eye, Crown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { usePlayer } from '../../context/PlayerContext';
 import { api } from '../../services/api';
 
 const PlayerManagement: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { players, loading, addPlayer, deletePlayer, updatePlayer } = usePlayer();
   const [showAddPlayer, setShowAddPlayer] = useState(false);
@@ -75,13 +77,13 @@ const PlayerManagement: React.FC = () => {
         
         <div className="glass-card rounded-xl shadow-lg p-6 md:p-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-3xl font-bold text-white">Players</h2>
+            <h2 className="text-3xl font-bold text-white">{t('players.title')}</h2>
             <button
               onClick={() => setShowAddPlayer(true)}
               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white rounded-lg font-semibold transition-all"
             >
               <Plus size={20} />
-              Add Player
+              {t('players.add_player')}
             </button>
           </div>
           
@@ -93,7 +95,7 @@ const PlayerManagement: React.FC = () => {
                   value={newPlayerName}
                   onChange={(e) => setNewPlayerName(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleAddPlayer()}
-                  placeholder="Enter player name"
+                  placeholder={t('players.enter_player_name')}
                   className="flex-1 px-3 py-2 rounded-lg border border-dark-700 bg-dark-800 text-white placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
                   autoFocus
                 />
@@ -101,7 +103,7 @@ const PlayerManagement: React.FC = () => {
                   onClick={handleAddPlayer}
                   className="px-4 py-2 bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white rounded-lg font-semibold transition-all"
                 >
-                  Add
+                  {t('players.add')}
                 </button>
                 <button
                   onClick={() => {
@@ -110,7 +112,7 @@ const PlayerManagement: React.FC = () => {
                   }}
                   className="px-4 py-2 bg-dark-700 hover:bg-dark-600 text-white rounded-lg font-semibold transition-all"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
               </div>
             </div>
@@ -120,14 +122,14 @@ const PlayerManagement: React.FC = () => {
             {loading ? (
               <div className="text-center py-12">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-500 mx-auto mb-4"></div>
-                <p className="text-white text-lg font-semibold">Loading players...</p>
+                <p className="text-white text-lg font-semibold">{t('players.loading_players')}</p>
               </div>
             ) : players.length === 0 ? (
               <div className="text-center py-12">
                 <User size={64} className="mx-auto text-dark-600 mb-4" />
-                <p className="text-white text-lg font-semibold">No players yet</p>
+                <p className="text-white text-lg font-semibold">{t('players.no_players_yet')}</p>
                 <p className="text-sm text-dark-400 mt-2">
-                  Add your first player to get started
+                  {t('players.add_first_player')}
                 </p>
               </div>
             ) : (
@@ -163,7 +165,7 @@ const PlayerManagement: React.FC = () => {
                           )}
                         </h3>
                         <p className="text-sm text-gray-600 dark:text-gray-300">
-                          Games: {player.stats.gamesPlayed} | Avg: {player.stats.averageOverall.toFixed(2)}
+                          {t('players.games')}: {player.stats.gamesPlayed} | {t('players.avg')}: {player.stats.averageOverall.toFixed(2)}
                         </p>
                       </div>
                     )}
@@ -173,7 +175,7 @@ const PlayerManagement: React.FC = () => {
                     <button
                       onClick={() => navigate(`/players/${player.id}`)}
                       className="p-2 text-primary-400 hover:bg-primary-500/20 rounded-lg transition-colors"
-                      title="View Profile"
+                      title={t('players.view_profile')}
                     >
                       <Eye size={18} />
                     </button>
@@ -192,13 +194,13 @@ const PlayerManagement: React.FC = () => {
                         setEditName(player.name);
                       }}
                       className="p-2 text-accent-400 hover:bg-accent-500/20 rounded-lg transition-colors"
-                      title="Edit Name"
+                      title={t('players.edit_name')}
                     >
                       <Edit2 size={18} />
                     </button>
                     <button
                       onClick={async () => {
-                        if (confirm(`Delete player "${player.name}"?`)) {
+                        if (confirm(`${t('players.delete_confirm')} "${player.name}"?`)) {
                           try {
                             await deletePlayer(player.id);
                           } catch (error) {
@@ -208,7 +210,7 @@ const PlayerManagement: React.FC = () => {
                         }
                       }}
                       className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
-                      title="Delete Player"
+                      title={t('players.delete_player')}
                     >
                       <Trash2 size={18} />
                     </button>
