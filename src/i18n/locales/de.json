@@ -97,6 +97,7 @@
   },
   "game": {
     "game": "Spiel",
+    "game_setup": "Spiel-Einstellungen",
     "match": "Match",
     "leg": "Leg",
     "set": "Set",
@@ -117,7 +118,17 @@
     "pause": "Pause",
     "resume": "Fortsetzen",
     "end_match": "Match beenden",
-    "confirm_end": "Match wirklich beenden?"
+    "confirm_end": "Match wirklich beenden?",
+    "select_players": "Spieler auswählen",
+    "recent_players": "Letzte Spieler",
+    "add_player": "Spieler hinzufügen",
+    "add_bot": "Bot hinzufügen",
+    "starting_score": "Startpunkte",
+    "legs_to_win": "Legs zum Sieg",
+    "first_to": "Erster bis",
+    "double_out": "Double Out",
+    "double_in": "Double In",
+    "start_game": "Spiel starten"
   },
   "stats": {
     "statistics": "Statistiken",

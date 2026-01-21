@@ -689,18 +689,18 @@ const GameScreen: React.FC = () => {
           </button>
           
           <div className="glass-card rounded-xl shadow-lg p-6 md:p-8">
-            <h2 className="text-3xl font-bold mb-6 text-white">Game Setup</h2>
+            <h2 className="text-3xl font-bold mb-6 text-white">{t('game.game_setup')}</h2>
             
             <div className="mb-6">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-semibold text-white">Select Players</h3>
+                <h3 className="text-lg font-semibold text-white">{t('game.select_players')}</h3>
                 {getLastPlayers().length > 0 && (
                   <button
                     onClick={loadLastPlayers}
                     className="px-3 py-1.5 text-sm bg-primary-500/20 hover:bg-primary-500/30 text-primary-400 rounded-lg border border-primary-500/30 transition-all font-medium flex items-center gap-2"
                   >
                     <RotateCcw size={14} />
-                    Letzte Spieler
+                    {t('game.recent_players')}
                   </button>
                 )}
               </div>
@@ -748,14 +748,14 @@ const GameScreen: React.FC = () => {
                       className="p-3 rounded-lg border-2 border-dashed border-dark-700 hover:border-dark-600 transition-all"
                     >
                       <div className="text-2xl mb-1">➕</div>
-                      <div className="text-sm font-medium text-white">Add Player</div>
+                      <div className="text-sm font-medium text-white">{t('game.add_player')}</div>
                     </button>
                     <button
                       onClick={() => setShowBotSelector(true)}
                       className="p-3 rounded-lg border-2 border-dashed border-primary-700 hover:border-primary-500 transition-all bg-primary-900/20"
                     >
                       <div className="text-2xl mb-1">🤖</div>
-                      <div className="text-sm font-medium text-primary-400">Add Bot</div>
+                      <div className="text-sm font-medium text-primary-400">{t('game.add_bot')}</div>
                     </button>
                   </>
                 ) : showBotSelector ? (
@@ -885,7 +885,7 @@ const GameScreen: React.FC = () => {
             <div className="grid md:grid-cols-2 gap-6 mb-6">
               <div>
                 <label className="block text-sm font-medium mb-2 text-white">
-                  Starting Score
+                  {t('game.starting_score')}
                 </label>
                 <select
                   value={gameSettings.startScore}
@@ -898,20 +898,20 @@ const GameScreen: React.FC = () => {
                   <option value={1001}>1001</option>
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium mb-2 text-white">
-                  Legs to Win
+                  {t('game.legs_to_win')}
                 </label>
                 <select
                   value={gameSettings.legsToWin}
                   onChange={(e) => setGameSettings({ ...gameSettings, legsToWin: parseInt(e.target.value) })}
                   className="w-full p-2 rounded-lg border border-gray-300/30 bg-white/10 backdrop-blur-sm text-white"
                 >
-                  <option value={1}>First to 1</option>
-                  <option value={2}>First to 2</option>
-                  <option value={3}>First to 3</option>
-                  <option value={5}>First to 5</option>
+                  <option value={1}>{t('game.first_to')} 1</option>
+                  <option value={2}>{t('game.first_to')} 2</option>
+                  <option value={3}>{t('game.first_to')} 3</option>
+                  <option value={5}>{t('game.first_to')} 5</option>
                 </select>
               </div>
             </div>
@@ -924,9 +924,9 @@ const GameScreen: React.FC = () => {
                   onChange={(e) => setGameSettings({ ...gameSettings, doubleOut: e.target.checked })}
                   className="w-4 h-4"
                 />
-                <span className="text-gray-200">Double Out</span>
+                <span className="text-gray-200">{t('game.double_out')}</span>
               </label>
-              
+
               <label className="flex items-center gap-3">
                 <input
                   type="checkbox"
@@ -934,16 +934,16 @@ const GameScreen: React.FC = () => {
                   onChange={(e) => setGameSettings({ ...gameSettings, doubleIn: e.target.checked })}
                   className="w-4 h-4"
                 />
-                <span className="text-gray-200">Double In</span>
+                <span className="text-gray-200">{t('game.double_in')}</span>
               </label>
             </div>
-            
+
             <button
               onClick={handleStartGame}
               disabled={selectedPlayers.length === 0}
               className="w-full py-3 px-6 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
             >
-              Start Game
+              {t('game.start_game')}
             </button>
           </div>
         </div>

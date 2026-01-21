@@ -97,6 +97,7 @@
   },
   "game": {
     "game": "Game",
+    "game_setup": "Game Setup",
     "match": "Match",
     "leg": "Leg",
     "set": "Set",
@@ -117,7 +118,17 @@
     "pause": "Pause",
     "resume": "Resume",
     "end_match": "End Match",
-    "confirm_end": "Really end match?"
+    "confirm_end": "Really end match?",
+    "select_players": "Select Players",
+    "recent_players": "Recent Players",
+    "add_player": "Add Player",
+    "add_bot": "Add Bot",
+    "starting_score": "Starting Score",
+    "legs_to_win": "Legs to Win",
+    "first_to": "First to",
+    "double_out": "Double Out",
+    "double_in": "Double In",
+    "start_game": "Start Game"
   },
   "stats": {
     "statistics": "Statistics",
