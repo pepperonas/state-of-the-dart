@@ -195,9 +195,9 @@ const TrainingScreen: React.FC = () => {
 
   const getTrainingTitle = () => {
     switch (mode) {
-      case 'doubles': return 'Doubles Practice';
-      case 'triples': return 'Triples Practice';
-      case 'around-the-clock': return 'Around the Clock';
+      case 'doubles': return 'Doppel Training';
+      case 'triples': return 'Tripel Training';
+      case 'around-the-clock': return 'Rund um die Uhr';
       case 'checkout-121': return 'Checkout Training';
       case 'bobs-27': return "Bob's 27";
       case 'score-training': return 'Score Training';
@@ -208,17 +208,17 @@ const TrainingScreen: React.FC = () => {
   const getTrainingDescription = () => {
     switch (mode) {
       case 'doubles':
-        return `Hit Double ${trainingState.currentTarget} | Progress: ${trainingState.currentTarget - 1}/20`;
+        return `Triff Doppel ${trainingState.currentTarget} | Fortschritt: ${trainingState.currentTarget - 1}/20`;
       case 'triples':
-        return `Hit Triple ${trainingState.currentTarget} | Progress: ${20 - trainingState.currentTarget}/20`;
+        return `Triff Tripel ${trainingState.currentTarget} | Fortschritt: ${20 - trainingState.currentTarget}/20`;
       case 'around-the-clock':
         return `Triff ${trainingState.currentTarget} (jedes Segment) | Fortschritt: ${trainingState.currentTarget - 1}/20`;
       case 'checkout-121':
-        return `Checkout ${trainingState.score} remaining`;
+        return `Checkout ${trainingState.score} verbleibend`;
       case 'bobs-27':
-        return `Score: ${trainingState.score} | Target: ${trainingState.currentTarget}`;
+        return `Punkte: ${trainingState.score} | Ziel: ${trainingState.currentTarget}`;
       case 'score-training':
-        return `Score ${trainingState.currentTarget}+ in 3 darts`;
+        return `Erziele ${trainingState.currentTarget}+ in 3 Darts`;
       default:
         return '';
     }
@@ -232,11 +232,11 @@ const TrainingScreen: React.FC = () => {
         return `Versuch ${trainingState.attempts} / ${trainingState.totalRounds}`;
       case 'bobs-27':
       case 'score-training':
-        return `Round ${trainingState.round} / ${trainingState.totalRounds}`;
+        return `Runde ${trainingState.round} / ${trainingState.totalRounds}`;
       case 'checkout-121':
-        return `Attempt ${trainingState.attempts} / ${trainingState.totalRounds}`;
+        return `Versuch ${trainingState.attempts} / ${trainingState.totalRounds}`;
       default:
-        return `Round ${trainingState.round} / ${trainingState.totalRounds}`;
+        return `Runde ${trainingState.round} / ${trainingState.totalRounds}`;
     }
   };
 
@@ -613,35 +613,35 @@ const TrainingScreen: React.FC = () => {
             {trainingState.completed && (
               <div className="glass-card-gold p-6 border-2 border-primary-500">
                 <h3 className="text-3xl font-bold text-white mb-4 text-center">
-                  Training Complete! 🎯
+                  Training Abgeschlossen! 🎯
                 </h3>
                 <div className="grid grid-cols-3 gap-4 mb-4">
                   <div className="text-center glass-card p-3">
                     <p className="text-2xl font-bold text-white">{trainingState.score}</p>
-                    <p className="text-xs text-dark-400">Final Score</p>
+                    <p className="text-xs text-dark-400">Endpunktzahl</p>
                   </div>
                   <div className="text-center glass-card p-3">
                     <p className="text-2xl font-bold text-success-400">{trainingState.hits}</p>
-                    <p className="text-xs text-dark-400">Hits</p>
+                    <p className="text-xs text-dark-400">Treffer</p>
                   </div>
                   <div className="text-center glass-card p-3">
                     <p className="text-2xl font-bold text-primary-400">{accuracy}%</p>
-                    <p className="text-xs text-dark-400">Accuracy</p>
+                    <p className="text-xs text-dark-400">Genauigkeit</p>
                   </div>
                 </div>
                 <div className="text-sm text-dark-300 mb-4 text-center">
-                  {trainingState.hits} hits in {trainingState.attempts} attempts
+                  {trainingState.hits} Treffer in {trainingState.attempts} Versuchen
                   {mode === 'doubles' && trainingState.currentTarget === 20 && trainingState.hits === 20 && (
-                    <p className="text-success-400 font-bold mt-2">🏆 Perfect! All doubles hit!</p>
+                    <p className="text-success-400 font-bold mt-2">🏆 Perfekt! Alle Doppel getroffen!</p>
                   )}
                   {mode === 'triples' && trainingState.currentTarget === 1 && trainingState.hits === 20 && (
-                    <p className="text-success-400 font-bold mt-2">🏆 Perfect! All triples hit!</p>
+                    <p className="text-success-400 font-bold mt-2">🏆 Perfekt! Alle Tripel getroffen!</p>
                   )}
                   {mode === 'around-the-clock' && trainingState.currentTarget === 20 && trainingState.hits === 20 && (
-                    <p className="text-success-400 font-bold mt-2">🏆 Perfect! Full circuit completed!</p>
+                    <p className="text-success-400 font-bold mt-2">🏆 Perfekt! Voller Rundgang abgeschlossen!</p>
                   )}
                   {mode === 'checkout-121' && trainingState.score === 0 && (
-                    <p className="text-success-400 font-bold mt-2">🏆 Checkout successful!</p>
+                    <p className="text-success-400 font-bold mt-2">🏆 Checkout erfolgreich!</p>
                   )}
                 </div>
                 <div className="flex gap-2">
@@ -649,7 +649,7 @@ const TrainingScreen: React.FC = () => {
                     onClick={handleRestart}
                     className="flex-1 py-3 bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white rounded-lg font-bold transition-all"
                   >
-                    Try Again
+                    Nochmal versuchen
                   </button>
                   <button
                     onClick={() => navigate('/training')}
@@ -667,16 +667,16 @@ const TrainingScreen: React.FC = () => {
               <div className="text-sm text-dark-300 space-y-1">
                 {mode === 'doubles' && (
                   <>
-                    <p>• Hit all doubles from D1 to D20</p>
-                    <p>• Click the double ring on the dartboard</p>
-                    <p>• Progress to the next double on each hit</p>
+                    <p>• Triff alle Doppel von D1 bis D20</p>
+                    <p>• Klicke auf den Doppelring auf der Dartscheibe</p>
+                    <p>• Fahre mit dem nächsten Doppel bei jedem Treffer fort</p>
                   </>
                 )}
                 {mode === 'triples' && (
                   <>
-                    <p>• Hit all triples from T20 to T1</p>
-                    <p>• Click the triple ring on the dartboard</p>
-                    <p>• Progress to the next triple on each hit</p>
+                    <p>• Triff alle Tripel von T20 bis T1</p>
+                    <p>• Klicke auf den Tripelring auf der Dartscheibe</p>
+                    <p>• Fahre mit dem nächsten Tripel bei jedem Treffer fort</p>
                   </>
                 )}
                 {mode === 'around-the-clock' && (
@@ -688,24 +688,24 @@ const TrainingScreen: React.FC = () => {
                 )}
                 {mode === 'checkout-121' && (
                   <>
-                    <p>• Checkout the remaining score</p>
-                    <p>• Must finish on a double</p>
-                    <p>• Practice common checkout combinations</p>
+                    <p>• Checke die verbleibenden Punkte aus</p>
+                    <p>• Muss auf einem Doppel beendet werden</p>
+                    <p>• Übe gängige Checkout-Kombinationen</p>
                   </>
                 )}
                 {mode === 'bobs-27' && (
                   <>
-                    <p>• Start with 27 points</p>
-                    <p>• Hit the target number: +3 points</p>
-                    <p>• Miss the target: -3 points</p>
-                    <p>• Don't let your score reach 0!</p>
+                    <p>• Starte mit 27 Punkten</p>
+                    <p>• Triff die Zielzahl: +3 Punkte</p>
+                    <p>• Verfehle das Ziel: -3 Punkte</p>
+                    <p>• Lass deine Punkte nicht auf 0 fallen!</p>
                   </>
                 )}
                 {mode === 'score-training' && (
                   <>
-                    <p>• Try to score 60+ per throw</p>
-                    <p>• Aim for high-scoring segments</p>
-                    <p>• Build consistency and power</p>
+                    <p>• Versuche 60+ Punkte pro Wurf zu erzielen</p>
+                    <p>• Ziele auf hohe Punktesegmente</p>
+                    <p>• Baue Konstanz und Kraft auf</p>
                   </>
                 )}
               </div>
