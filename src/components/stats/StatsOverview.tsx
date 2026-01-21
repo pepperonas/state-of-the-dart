@@ -45,13 +45,16 @@ const StatsOverview: React.FC = () => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [loadingMatches, setLoadingMatches] = useState(true);
 
-  // Get tab from URL or default to 'overview'
+  // Get tab from URL or localStorage or default to 'overview'
   const tabParam = searchParams.get('tab');
-  const selectedTab: TabType = VALID_TABS.includes(tabParam as TabType) ? (tabParam as TabType) : 'overview';
+  const savedTab = localStorage.getItem('stats_selected_tab');
+  const initialTab = tabParam || (savedTab && VALID_TABS.includes(savedTab as TabType) ? savedTab : 'overview');
+  const selectedTab: TabType = VALID_TABS.includes(initialTab as TabType) ? (initialTab as TabType) : 'overview';
 
-  // Update tab and URL
+  // Update tab, URL and localStorage
   const setSelectedTab = (tab: TabType) => {
     setSearchParams({ tab });
+    localStorage.setItem('stats_selected_tab', tab);
   };
   
   // Load matches from API (Database-First!)
