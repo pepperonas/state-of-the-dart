@@ -10,7 +10,7 @@ import { toDateOrNow, formatDateTime, formatDateShort } from '../../utils/dateUt
 
 const TrainingStats: React.FC = () => {
   const navigate = useNavigate();
-  const { currentPlayer } = usePlayer();
+  const { currentPlayer, setCurrentPlayer, players } = usePlayer();
   const { storage } = useTenant();
   
   const [selectedType, setSelectedType] = useState<TrainingType | 'all'>('all');
@@ -144,15 +144,49 @@ const TrainingStats: React.FC = () => {
     return (
       <div className="min-h-screen p-4 md:p-8 gradient-mesh">
         <div className="max-w-6xl mx-auto">
-          <div className="glass-card p-8 text-center">
-            <h2 className="text-2xl font-bold text-white mb-2">Kein Spieler ausgewählt</h2>
-            <p className="text-dark-400 mb-4">Bitte wähle einen Spieler aus, um Trainingsstatistiken anzuzeigen.</p>
-            <button
-              onClick={() => navigate('/players')}
-              className="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-semibold transition-all"
-            >
-              Spieler auswählen
-            </button>
+          {/* Back Button */}
+          <button
+            onClick={() => navigate('/training')}
+            className="mb-6 flex items-center gap-2 text-white hover:text-primary-400 transition-colors group"
+          >
+            <ArrowLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
+            <span className="font-medium">Zurück</span>
+          </button>
+
+          <div className="glass-card p-8">
+            <h2 className="text-2xl font-bold text-white mb-4 text-center">Training Statistiken</h2>
+            <p className="text-dark-400 mb-6 text-center">Bitte wähle einen Spieler aus, um Trainingsstatistiken anzuzeigen.</p>
+
+            {players.length === 0 ? (
+              <div className="text-center">
+                <p className="text-dark-400 mb-4">Noch keine Spieler vorhanden.</p>
+                <button
+                  onClick={() => navigate('/players')}
+                  className="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-semibold transition-all"
+                >
+                  Spieler erstellen
+                </button>
+              </div>
+            ) : (
+              <div className="max-w-md mx-auto">
+                <label className="block text-white font-medium mb-2">Spieler auswählen:</label>
+                <select
+                  onChange={(e) => {
+                    const player = players.find(p => p.id === e.target.value);
+                    setCurrentPlayer(player || null);
+                  }}
+                  className="w-full px-4 py-3 bg-dark-800 text-white rounded-lg border border-dark-600 focus:border-primary-500 outline-none text-lg"
+                  defaultValue=""
+                >
+                  <option value="" disabled>Wähle einen Spieler...</option>
+                  {players.map(player => (
+                    <option key={player.id} value={player.id}>
+                      {player.avatar} {player.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -181,6 +215,25 @@ const TrainingStats: React.FC = () => {
         {/* Filters */}
         <div className="glass-card p-4 mb-6">
           <div className="flex flex-wrap gap-4 items-center">
+            {/* Player Selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-white font-medium">Spieler:</span>
+              <select
+                value={currentPlayer?.id || ''}
+                onChange={(e) => {
+                  const player = players.find(p => p.id === e.target.value);
+                  setCurrentPlayer(player || null);
+                }}
+                className="px-4 py-2 bg-dark-800 text-white rounded-lg border border-dark-600 focus:border-primary-500 outline-none"
+              >
+                {players.map(player => (
+                  <option key={player.id} value={player.id}>
+                    {player.avatar} {player.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div className="flex items-center gap-2">
               <Filter size={20} className="text-primary-400" />
               <span className="text-white font-medium">Filter:</span>
