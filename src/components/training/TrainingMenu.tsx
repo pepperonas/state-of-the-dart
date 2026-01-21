@@ -1,50 +1,52 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Target, Crosshair, Clock, TrendingUp, Award, Zap, BarChart } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const TrainingMenu: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  
+
   const trainingModes = [
     {
-      title: 'Doubles Practice',
+      title: t('training.doubles_practice'),
       icon: Target,
-      description: 'Focus on hitting doubles',
+      description: t('training.doubles_practice_desc'),
       gradient: 'from-primary-500 to-primary-600',
       mode: 'doubles',
     },
     {
-      title: 'Triples Practice',
+      title: t('training.triples_practice'),
       icon: Crosshair,
-      description: 'Master the triple ring',
+      description: t('training.triples_practice_desc'),
       gradient: 'from-accent-500 to-accent-600',
       mode: 'triples',
     },
     {
-      title: 'Around the Clock',
+      title: t('training.around_the_clock'),
       icon: Clock,
-      description: 'Hit every number in sequence',
+      description: t('training.around_the_clock_desc'),
       gradient: 'from-success-500 to-success-600',
       mode: 'around-the-clock',
     },
     {
-      title: 'Checkout Training',
+      title: t('training.checkout_training'),
       icon: Award,
-      description: 'Practice finishing combinations',
+      description: t('training.checkout_training_desc'),
       gradient: 'from-accent-600 to-accent-700',
       mode: 'checkout-121',
     },
     {
-      title: "Bob's 27",
+      title: t('training.bobs_27'),
       icon: TrendingUp,
-      description: 'Classic pressure training',
+      description: t('training.bobs_27_desc'),
       gradient: 'from-primary-600 to-accent-600',
       mode: 'bobs-27',
     },
     {
-      title: 'Score Training',
+      title: t('training.score_training'),
       icon: Zap,
-      description: 'Improve your scoring power',
+      description: t('training.score_training_desc'),
       gradient: 'from-success-600 to-success-700',
       mode: 'score-training',
     },
@@ -71,8 +73,8 @@ const TrainingMenu: React.FC = () => {
         </div>
         
         <div className="glass-card rounded-xl shadow-lg p-6 md:p-8">
-          <h2 className="text-3xl font-bold mb-6 text-white">Training Modes</h2>
-          
+          <h2 className="text-3xl font-bold mb-6 text-white">{t('training.training_modes')}</h2>
+
           <div className="grid md:grid-cols-2 gap-4">
             {trainingModes.map((mode) => {
               const Icon = mode.icon;
@@ -93,14 +95,14 @@ const TrainingMenu: React.FC = () => {
               );
             })}
           </div>
-          
+
           <div className="mt-8 p-4 bg-success-500/10 rounded-lg border border-success-500/30">
-            <h3 className="font-semibold mb-2 text-white">Training Benefits</h3>
+            <h3 className="font-semibold mb-2 text-white">{t('training.benefits_title')}</h3>
             <ul className="space-y-1 text-sm text-dark-300">
-              <li>• Track your progress over time</li>
-              <li>• Improve specific areas of your game</li>
-              <li>• Compare your scores with personal bests</li>
-              <li>• Build consistency and confidence</li>
+              <li>• {t('training.benefit_1')}</li>
+              <li>• {t('training.benefit_2')}</li>
+              <li>• {t('training.benefit_3')}</li>
+              <li>• {t('training.benefit_4')}</li>
             </ul>
           </div>
         </div>

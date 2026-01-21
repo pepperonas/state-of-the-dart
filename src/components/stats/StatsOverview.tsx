@@ -770,6 +770,7 @@ const StatsOverview: React.FC = () => {
                               stroke="#a3a3a3"
                               style={{ fontSize: '12px' }}
                               tick={{ fill: '#a3a3a3' }}
+                              tickFormatter={(value) => value.toFixed(1)}
                             />
                             <Tooltip
                               contentStyle={{
@@ -780,6 +781,7 @@ const StatsOverview: React.FC = () => {
                               }}
                               labelStyle={{ color: '#fff', fontWeight: 'bold' }}
                               itemStyle={{ color: '#0ea5e9' }}
+                              formatter={(value: number) => value.toFixed(1)}
                             />
                             <Legend
                               wrapperStyle={{ paddingTop: '20px' }}
