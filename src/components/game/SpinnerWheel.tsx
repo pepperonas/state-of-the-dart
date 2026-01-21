@@ -37,17 +37,12 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
   // Store players at spin start to prevent race conditions
   const playersAtSpinRef = useRef<Player[]>(players);
 
-  // Validate players array
-  if (!players || players.length === 0) {
-    console.error('SpinnerWheel: No players provided');
-    onComplete(0);
-    return null;
-  }
-
-  const segmentAngle = 360 / players.length;
+  const segmentAngle = 360 / (players?.length || 1);
 
   // Draw the wheel
   useEffect(() => {
+    if (!players || players.length === 0) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -122,6 +117,7 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
 
   // Auto-start spin after component mounts
   useEffect(() => {
+    if (!players || players.length === 0) return;
     if (!hasStarted.current) {
       hasStarted.current = true;
       // Play intro sound
@@ -134,6 +130,13 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
       }, 1500);
     }
   }, []);
+
+  // Validate players array - check AFTER all hooks
+  if (!players || players.length === 0) {
+    console.error('SpinnerWheel: No players provided');
+    onComplete(0);
+    return null;
+  }
 
   const startSpin = () => {
     if (isSpinning) return;

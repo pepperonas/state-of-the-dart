@@ -240,22 +240,13 @@ const TrainingScreen: React.FC = () => {
 
   const handleDartHit = (dart: Dart) => {
     if (trainingState.completed || currentThrow.length >= 3) return;
-    
+
     setCurrentThrow(prev => [...prev, dart]);
     audioSystem.playSound('/sounds/OMNI/pop.mp3');
   };
-  
-  // Auto-confirm after 3rd dart in training mode
-  useEffect(() => {
-    if (currentThrow.length === 3 && !trainingState.completed) {
-      const timer = setTimeout(() => {
-        handleConfirmThrow();
-      }, 600);
-      return () => clearTimeout(timer);
-    }
-  }, [currentThrow.length, trainingState.completed]);
 
-  const handleConfirmThrow = () => {
+  // Define handleConfirmThrow with useCallback BEFORE useEffect that uses it
+  const handleConfirmThrow = React.useCallback(() => {
     if (currentThrow.length === 0) return;
 
     const throwScore = currentThrow.reduce((sum, dart) => sum + dart.score, 0);
@@ -466,7 +457,17 @@ const TrainingScreen: React.FC = () => {
 
     setTrainingState(newState);
     setCurrentThrow([]);
-  };
+  }, [currentThrow, trainingState, mode, sessionRef, currentPlayer, updatePlayerHeatmap, saveSession]);
+
+  // Auto-confirm after 3rd dart in training mode
+  useEffect(() => {
+    if (currentThrow.length === 3 && !trainingState.completed) {
+      const timer = setTimeout(() => {
+        handleConfirmThrow();
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [currentThrow.length, trainingState.completed, handleConfirmThrow]);
 
   const handleClearThrow = () => {
     setCurrentThrow([]);

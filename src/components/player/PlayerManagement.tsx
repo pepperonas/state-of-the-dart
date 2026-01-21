@@ -162,7 +162,7 @@ const PlayerManagement: React.FC = () => {
                             </span>
                           )}
                         </h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
                           Games: {player.stats.gamesPlayed} | Avg: {player.stats.averageOverall.toFixed(2)}
                         </p>
                       </div>

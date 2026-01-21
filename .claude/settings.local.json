@@ -39,7 +39,14 @@
       "Bash(git checkout:*)",
       "Bash(ls:*)",
       "mcp__plugin_serena_serena__search_for_pattern",
-      "mcp__plugin_serena_serena__replace_content"
+      "mcp__plugin_serena_serena__replace_content",
+      "Bash(ping:*)",
+      "Bash(for port in 2222 22222 2022)",
+      "Bash(do)",
+      "Bash(echo:*)",
+      "Bash(nc -z -w 2 69.62.121.168 $port)",
+      "Bash(done)",
+      "Bash(pkill -f \"nc -z -w 2 69.62.121.168\")"
     ],
     "deny": [],
     "ask": []

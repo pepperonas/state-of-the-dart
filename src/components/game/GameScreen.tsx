@@ -224,6 +224,7 @@ const GameScreen: React.FC = () => {
     doubleIn: false,
   });
   const isBotPlayingRef = useRef(false);
+  const botTimersRef = useRef<NodeJS.Timeout[]>([]);
 
   // Announce "You require X" when player's turn STARTS and they can checkout
   useEffect(() => {
@@ -304,6 +305,7 @@ const GameScreen: React.FC = () => {
     });
 
     isBotPlayingRef.current = true;
+    let isCancelled = false; // Cancellation flag for cleanup
 
     // Generate bot turn with delay for visual effect
     const botTurn = generateBotTurn(currentMatchPlayer.botLevel, remaining);
@@ -311,15 +313,21 @@ const GameScreen: React.FC = () => {
     let dartIndex = 0;
 
     const playNextDart = () => {
+      if (isCancelled) return; // Stop if cancelled
+
       if (dartIndex >= botTurn.length) {
         // All darts thrown, confirm and move to next player
-        setTimeout(() => {
+        const timer1 = setTimeout(() => {
+          if (isCancelled) return;
           dispatch({ type: 'CONFIRM_THROW' });
-          setTimeout(() => {
+          const timer2 = setTimeout(() => {
+            if (isCancelled) return;
             isBotPlayingRef.current = false; // Set to false BEFORE dispatch
             dispatch({ type: 'NEXT_PLAYER' });
           }, 800);
+          botTimersRef.current.push(timer2);
         }, 400);
+        botTimersRef.current.push(timer1);
         return;
       }
 
@@ -340,28 +348,38 @@ const GameScreen: React.FC = () => {
       if (isValidCheckout) {
         // Checkout! Stop throwing more darts
         console.log('🎉 Bot checked out!');
-        setTimeout(() => {
+        const timer1 = setTimeout(() => {
+          if (isCancelled) return;
           dispatch({ type: 'CONFIRM_THROW' });
-          setTimeout(() => {
+          const timer2 = setTimeout(() => {
+            if (isCancelled) return;
             isBotPlayingRef.current = false; // Set to false BEFORE dispatch
             dispatch({ type: 'NEXT_PLAYER' });
           }, 800);
+          botTimersRef.current.push(timer2);
         }, 400);
+        botTimersRef.current.push(timer1);
         return;
       }
 
       // Continue with next dart after delay
-      setTimeout(playNextDart, 600);
+      const timer = setTimeout(playNextDart, 600);
+      botTimersRef.current.push(timer);
     };
 
     // Start bot turn after a short delay
     const startDelay = setTimeout(() => {
-      playNextDart();
+      if (!isCancelled) playNextDart();
     }, 1000);
+    botTimersRef.current.push(startDelay);
 
     return () => {
       console.log('🧹 Cleaning up bot auto-play effect');
-      clearTimeout(startDelay);
+      isCancelled = true; // Cancel all pending operations
+      // Clear all timers
+      botTimersRef.current.forEach(timer => clearTimeout(timer));
+      botTimersRef.current = [];
+      isBotPlayingRef.current = false;
     };
   }, [state.currentPlayerIndex, state.currentMatch?.currentLegIndex, state.currentMatch?.status, dispatch]);
 
@@ -435,7 +453,88 @@ const GameScreen: React.FC = () => {
     // Play a subtle click sound for dart hit feedback
     audioSystem.playSound('/sounds/OMNI/pop.mp3', false);
   };
-  
+
+  // Define handleConfirmThrow with useCallback BEFORE useEffects that use it
+  const handleConfirmThrow = React.useCallback(() => {
+    const currentScore = calculateThrowScore(state.currentThrow);
+
+    // Check if this will be a checkout or bust BEFORE confirming
+    // so we can skip the score announcement if it's going to be a special sound
+    const currentPlayer = state.currentMatch?.players[state.currentPlayerIndex];
+    const currentLeg = state.currentMatch?.legs[state.currentMatch.currentLegIndex];
+
+    if (currentPlayer && currentLeg) {
+      const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
+      const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
+      const startScore = state.currentMatch?.settings.startScore || 501;
+      const remaining = startScore - totalScored;
+      const newRemaining = remaining - currentScore;
+
+      // Check for checkout and bust
+      const requiresDouble = state.currentMatch?.settings.doubleOut || false;
+      const lastDart = state.currentThrow[state.currentThrow.length - 1];
+
+      // Don't announce score if it's a valid checkout (will be announced by GameContext)
+      const isValidCheckout = newRemaining === 0 &&
+                              state.currentThrow.length > 0 &&
+                              (!requiresDouble || lastDart?.multiplier === 2);
+
+      // Don't announce score if it's a bust (will be announced by GameContext)
+      const willBust = newRemaining < 0 ||
+                       newRemaining === 1 ||
+                       (newRemaining === 0 && requiresDouble && lastDart?.multiplier !== 2);
+
+      // Only announce score if not checkout or bust
+      if (!isValidCheckout && !willBust) {
+        if (currentScore === 180) {
+          setShowConfetti(true);
+          audioSystem.announceScore(180);
+          setTimeout(() => setShowConfetti(false), 3000);
+        } else {
+          // Always announce the score (0-180)
+          audioSystem.announceScore(currentScore);
+        }
+      } else if (isValidCheckout) {
+        console.log('🎯 Valid checkout - skipping score announcement, GameContext will announce');
+        // Still show confetti for 180s even if it's a checkout
+        if (currentScore === 180) {
+          setShowConfetti(true);
+          setTimeout(() => setShowConfetti(false), 3000);
+        }
+      } else if (willBust) {
+        console.log('💥 Bust - skipping score announcement, GameContext will announce');
+      }
+
+      // Update heatmap for this player with the current darts
+      if (state.currentThrow.length > 0) {
+        updatePlayerHeatmap(currentPlayer.playerId, state.currentThrow);
+      }
+    } else {
+      // Fallback: just announce the score (but avoid if it might be a checkout/bust)
+      // This fallback should rarely be hit, but better safe than sorry
+      console.log('⚠️ Fallback score announcement - no currentPlayer/currentLeg');
+      if (currentScore === 180) {
+        setShowConfetti(true);
+        audioSystem.announceScore(180);
+        setTimeout(() => setShowConfetti(false), 3000);
+      } else if (currentScore > 0) {
+        // Only announce if score > 0 (avoid announcing checkout scores)
+        audioSystem.announceScore(currentScore);
+      }
+    }
+
+    dispatch({ type: 'CONFIRM_THROW' });
+
+    // Note: "You require X" is now announced when the player's turn STARTS (not after throwing)
+    // This is handled in handleNextPlayer()
+
+    if (settings.autoNextPlayer) {
+      setTimeout(() => {
+        dispatch({ type: 'NEXT_PLAYER' });
+      }, 1000);
+    }
+  }, [state.currentThrow, state.currentPlayerIndex, state.currentMatch, settings.autoNextPlayer, dispatch, updatePlayerHeatmap]);
+
   // Auto-confirm after 3rd dart (skip for bots - they handle their own confirm/next)
   useEffect(() => {
     if (state.currentThrow.length === 3) {
@@ -527,87 +626,7 @@ const GameScreen: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [state.currentThrow]);
-  
-  const handleConfirmThrow = () => {
-    const currentScore = calculateThrowScore(state.currentThrow);
-    
-    // Check if this will be a checkout or bust BEFORE confirming
-    // so we can skip the score announcement if it's going to be a special sound
-    const currentPlayer = state.currentMatch?.players[state.currentPlayerIndex];
-    const currentLeg = state.currentMatch?.legs[state.currentMatch.currentLegIndex];
-    
-    if (currentPlayer && currentLeg) {
-      const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
-      const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
-      const startScore = state.currentMatch?.settings.startScore || 501;
-      const remaining = startScore - totalScored;
-      const newRemaining = remaining - currentScore;
 
-      // Check for checkout and bust
-      const requiresDouble = state.currentMatch?.settings.doubleOut || false;
-      const lastDart = state.currentThrow[state.currentThrow.length - 1];
-
-      // Don't announce score if it's a valid checkout (will be announced by GameContext)
-      const isValidCheckout = newRemaining === 0 &&
-                              state.currentThrow.length > 0 &&
-                              (!requiresDouble || lastDart?.multiplier === 2);
-
-      // Don't announce score if it's a bust (will be announced by GameContext)
-      const willBust = newRemaining < 0 ||
-                       newRemaining === 1 ||
-                       (newRemaining === 0 && requiresDouble && lastDart?.multiplier !== 2);
-
-      // Only announce score if not checkout or bust
-      if (!isValidCheckout && !willBust) {
-        if (currentScore === 180) {
-          setShowConfetti(true);
-          audioSystem.announceScore(180);
-          setTimeout(() => setShowConfetti(false), 3000);
-        } else {
-          // Always announce the score (0-180)
-          audioSystem.announceScore(currentScore);
-        }
-      } else if (isValidCheckout) {
-        console.log('🎯 Valid checkout - skipping score announcement, GameContext will announce');
-        // Still show confetti for 180s even if it's a checkout
-        if (currentScore === 180) {
-          setShowConfetti(true);
-          setTimeout(() => setShowConfetti(false), 3000);
-        }
-      } else if (willBust) {
-        console.log('💥 Bust - skipping score announcement, GameContext will announce');
-      }
-      
-      // Update heatmap for this player with the current darts
-      if (state.currentThrow.length > 0) {
-        updatePlayerHeatmap(currentPlayer.playerId, state.currentThrow);
-      }
-    } else {
-      // Fallback: just announce the score (but avoid if it might be a checkout/bust)
-      // This fallback should rarely be hit, but better safe than sorry
-      console.log('⚠️ Fallback score announcement - no currentPlayer/currentLeg');
-      if (currentScore === 180) {
-        setShowConfetti(true);
-        audioSystem.announceScore(180);
-        setTimeout(() => setShowConfetti(false), 3000);
-      } else if (currentScore > 0) {
-        // Only announce if score > 0 (avoid announcing checkout scores)
-        audioSystem.announceScore(currentScore);
-      }
-    }
-    
-    dispatch({ type: 'CONFIRM_THROW' });
-
-    // Note: "You require X" is now announced when the player's turn STARTS (not after throwing)
-    // This is handled in handleNextPlayer()
-
-    if (settings.autoNextPlayer) {
-      setTimeout(() => {
-        dispatch({ type: 'NEXT_PLAYER' });
-      }, 1000);
-    }
-  };
-  
   const handleUndoThrow = () => {
     dispatch({ type: 'UNDO_THROW' });
   };
