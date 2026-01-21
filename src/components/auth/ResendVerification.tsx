@@ -64,7 +64,7 @@ const ResendVerification: React.FC = () => {
         <div className="glass-card p-8 rounded-2xl shadow-2xl">
           <Link
             to="/login"
-            className="flex items-center gap-2 text-primary-400 hover:text-primary-300 mb-6 transition-colors"
+            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all inline-flex w-fit"
           >
             <ArrowLeft size={20} />
             Zurück zum Login
