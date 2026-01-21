@@ -23,6 +23,8 @@ export interface PlayerStats {
   bestAverage: number;
   averageOverall: number;
   checkoutPercentage: number;
+  totalCheckoutAttempts: number; // Track total attempts for accurate percentage
+  totalCheckoutHits: number; // Track total hits for accurate percentage
   checkoutsByDouble: Record<string, { attempts: number; hits: number }>;
   scoreDistribution: Record<string, number>;
   bestLeg: number; // fewest darts

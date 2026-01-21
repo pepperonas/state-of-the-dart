@@ -173,25 +173,28 @@ export const api = {
 
   // Matches
   matches: {
-    getAll: () => apiClient('/api/matches'),
-    
-    getById: (id: string) => apiClient(`/api/matches/${id}`),
-    
-    create: (match: any) =>
+    getAll: (options?: RequestInit) => apiClient('/api/matches', options),
+
+    getById: (id: string, options?: RequestInit) => apiClient(`/api/matches/${id}`, options),
+
+    create: (match: any, options?: RequestInit) =>
       apiClient('/api/matches', {
         method: 'POST',
         body: JSON.stringify(match),
+        ...options,
       }),
-    
-    update: (id: string, match: any) =>
+
+    update: (id: string, match: any, options?: RequestInit) =>
       apiClient(`/api/matches/${id}`, {
         method: 'PUT',
         body: JSON.stringify(match),
+        ...options,
       }),
-    
-    delete: (id: string) =>
+
+    delete: (id: string, options?: RequestInit) =>
       apiClient(`/api/matches/${id}`, {
         method: 'DELETE',
+        ...options,
       }),
   },
 

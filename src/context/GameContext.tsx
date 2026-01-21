@@ -570,6 +570,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     if (state.currentMatch && state.currentMatch.status === 'in-progress') {
       const matchId = state.currentMatch.id;
+      const abortController = new AbortController();
+
       const saveTimer = setTimeout(async () => {
         // Prevent concurrent save operations
         if (matchSavingRef.current) {
@@ -583,10 +585,12 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           // If we haven't created this match yet, create it first
           if (matchCreatedRef.current !== matchId) {
             try {
-              await api.matches.create(apiMatch);
+              await api.matches.create(apiMatch, { signal: abortController.signal });
               matchCreatedRef.current = matchId;
               console.log('✅ Match created in DB:', matchId);
             } catch (createError: any) {
+              // If aborted, exit silently
+              if (createError.name === 'AbortError') return;
               // If it already exists, mark as created and continue
               if (createError?.response?.status === 409) {
                 matchCreatedRef.current = matchId;
@@ -596,9 +600,11 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             }
           } else {
             // Match exists, update it
-            await api.matches.update(matchId, apiMatch);
+            await api.matches.update(matchId, apiMatch, { signal: abortController.signal });
           }
-        } catch (error) {
+        } catch (error: any) {
+          // If aborted, exit silently
+          if (error.name === 'AbortError') return;
           // Silently fail - don't block the game
           console.warn('Match save failed:', error);
         } finally {
@@ -606,7 +612,10 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
       }, 1000); // Debounce: Save every 1 second
 
-      return () => clearTimeout(saveTimer);
+      return () => {
+        clearTimeout(saveTimer);
+        abortController.abort(); // Cancel any in-flight API calls
+      };
     }
   }, [state.currentMatch]);
 
@@ -708,6 +717,13 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       );
       
       // Update player stats - fire and forget to not block UI
+      const checkoutStats = calculateCheckoutPercentage(
+        player.stats.totalCheckoutAttempts || 0,
+        player.stats.totalCheckoutHits || 0,
+        matchPlayer.checkoutAttempts,
+        matchPlayer.checkoutsHit
+      );
+
       updatePlayer(matchPlayer.playerId, {
         stats: {
           ...player.stats,
@@ -727,12 +743,9 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             player.stats.gamesPlayed,
             matchPlayer.matchAverage
           ),
-          checkoutPercentage: calculateCheckoutPercentage(
-            player.stats.checkoutPercentage,
-            player.stats.gamesPlayed,
-            matchPlayer.checkoutAttempts,
-            matchPlayer.checkoutsHit
-          ),
+          checkoutPercentage: checkoutStats.percentage,
+          totalCheckoutAttempts: checkoutStats.totalAttempts,
+          totalCheckoutHits: checkoutStats.totalHits,
         },
       }).catch(err => console.warn('Final stats update failed:', err));
     });
@@ -746,11 +759,14 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [state.currentMatch?.status]);
   
   // Live sync during game (every throw)
+  // Use specific dependencies to avoid unnecessary re-renders
+  const currentLegThrowsCount = state.currentMatch?.legs[state.currentMatch.currentLegIndex]?.throws.length ?? 0;
+
   useEffect(() => {
     if (state.currentMatch && state.currentMatch.status === 'in-progress') {
       syncPlayerStats(true); // Live update
     }
-  }, [state.currentMatch?.legs]);
+  }, [currentLegThrowsCount, state.currentMatch?.currentLegIndex]);
 
   // Track last processed throw to avoid duplicate heatmap updates
   const lastProcessedThrowIdRef = React.useRef<string | null>(null);
@@ -794,24 +810,19 @@ const calculateOverallAverage = (
 
 // Helper function to calculate checkout percentage
 const calculateCheckoutPercentage = (
-  currentPercentage: number,
-  gamesPlayed: number,
+  currentTotalAttempts: number,
+  currentTotalHits: number,
   newAttempts: number,
   newHits: number
-): number => {
-  if (gamesPlayed === 0 && newAttempts === 0) return 0;
-  
-  // Reconstruct total attempts and hits from current percentage
-  const totalAttempts = gamesPlayed > 0 
-    ? Math.round((currentPercentage / 100) * gamesPlayed * 10) // Estimate
-    : 0;
-  
-  const totalHits = Math.round((totalAttempts * currentPercentage) / 100);
-  
-  const updatedAttempts = totalAttempts + newAttempts;
-  const updatedHits = totalHits + newHits;
-  
-  return updatedAttempts > 0 ? (updatedHits / updatedAttempts) * 100 : 0;
+): { percentage: number; totalAttempts: number; totalHits: number } => {
+  const updatedAttempts = currentTotalAttempts + newAttempts;
+  const updatedHits = currentTotalHits + newHits;
+
+  return {
+    percentage: updatedAttempts > 0 ? (updatedHits / updatedAttempts) * 100 : 0,
+    totalAttempts: updatedAttempts,
+    totalHits: updatedHits,
+  };
 };
 
 export const useGame = (): GameContextValue => {

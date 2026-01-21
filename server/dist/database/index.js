@@ -53,6 +53,22 @@ const initDatabase = () => {
     catch (error) {
         console.error('Migration error:', error);
     }
+    // Migration: Add checkout tracking columns to player_stats if they don't exist
+    try {
+        const statsTableInfo = db.pragma('table_info(player_stats)');
+        const hasCheckoutAttemptsColumn = statsTableInfo.some(col => col.name === 'total_checkout_attempts');
+        if (!hasCheckoutAttemptsColumn) {
+            console.log('🔧 Migrating player_stats table: Adding checkout tracking columns...');
+            db.exec(`
+        ALTER TABLE player_stats ADD COLUMN total_checkout_attempts INTEGER DEFAULT 0;
+        ALTER TABLE player_stats ADD COLUMN total_checkout_hits INTEGER DEFAULT 0;
+      `);
+            console.log('✅ Checkout tracking columns added to player_stats table');
+        }
+    }
+    catch (error) {
+        console.error('Migration error:', error);
+    }
     // Seed default achievements if empty
     const achievementCount = db.prepare('SELECT COUNT(*) as count FROM achievements').get();
     if (achievementCount.count === 0) {

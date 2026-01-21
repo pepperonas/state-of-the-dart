@@ -35,6 +35,8 @@ const createDefaultStats = (): PlayerStats => ({
   bestAverage: 0,
   averageOverall: 0,
   checkoutPercentage: 0,
+  totalCheckoutAttempts: 0,
+  totalCheckoutHits: 0,
   checkoutsByDouble: {},
   scoreDistribution: {},
   bestLeg: 999,

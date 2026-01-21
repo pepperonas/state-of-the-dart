@@ -73,6 +73,8 @@ CREATE TABLE IF NOT EXISTS player_stats (
   best_average REAL DEFAULT 0,
   average_overall REAL DEFAULT 0,
   checkout_percentage REAL DEFAULT 0,
+  total_checkout_attempts INTEGER DEFAULT 0,
+  total_checkout_hits INTEGER DEFAULT 0,
   best_leg INTEGER DEFAULT 999,
   nine_dart_finishes INTEGER DEFAULT 0,
   FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE

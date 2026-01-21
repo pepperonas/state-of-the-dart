@@ -40,6 +40,8 @@ router.get('/', auth_1.authenticateTenant, (req, res) => {
                 bestAverage: row.best_average || 0,
                 averageOverall: row.average_overall || 0,
                 checkoutPercentage: row.checkout_percentage || 0,
+                totalCheckoutAttempts: row.total_checkout_attempts || 0,
+                totalCheckoutHits: row.total_checkout_hits || 0,
                 checkoutsByDouble: {},
                 scoreDistribution: {},
                 bestLeg: row.best_leg || 999,
@@ -96,6 +98,8 @@ router.get('/:id', auth_1.authenticateTenant, (req, res) => {
                 bestAverage: row.best_average || 0,
                 averageOverall: row.average_overall || 0,
                 checkoutPercentage: row.checkout_percentage || 0,
+                totalCheckoutAttempts: row.total_checkout_attempts || 0,
+                totalCheckoutHits: row.total_checkout_hits || 0,
                 checkoutsByDouble: {},
                 scoreDistribution: {},
                 bestLeg: row.best_leg || 999,
@@ -162,6 +166,8 @@ router.post('/', auth_1.authenticateTenant, (req, res) => {
                 bestAverage: row.best_average || 0,
                 averageOverall: row.average_overall || 0,
                 checkoutPercentage: row.checkout_percentage || 0,
+                totalCheckoutAttempts: row.total_checkout_attempts || 0,
+                totalCheckoutHits: row.total_checkout_hits || 0,
                 checkoutsByDouble: {},
                 scoreDistribution: {},
                 bestLeg: row.best_leg || 999,
@@ -215,10 +221,12 @@ router.put('/:id', auth_1.authenticateTenant, (req, res) => {
           best_average = ?,
           average_overall = ?,
           checkout_percentage = ?,
+          total_checkout_attempts = ?,
+          total_checkout_hits = ?,
           best_leg = ?,
           nine_dart_finishes = ?
         WHERE player_id = ?
-      `).run(stats.gamesPlayed ?? 0, stats.gamesWon ?? 0, stats.totalLegsPlayed ?? 0, stats.totalLegsWon ?? 0, stats.highestCheckout ?? 0, stats.total180s ?? 0, stats.total171Plus ?? 0, stats.total140Plus ?? 0, stats.total100Plus ?? 0, stats.total60Plus ?? 0, stats.bestAverage ?? 0, stats.averageOverall ?? 0, stats.checkoutPercentage ?? 0, stats.bestLeg ?? 999, stats.nineDartFinishes ?? 0, id);
+      `).run(stats.gamesPlayed ?? 0, stats.gamesWon ?? 0, stats.totalLegsPlayed ?? 0, stats.totalLegsWon ?? 0, stats.highestCheckout ?? 0, stats.total180s ?? 0, stats.total171Plus ?? 0, stats.total140Plus ?? 0, stats.total100Plus ?? 0, stats.total60Plus ?? 0, stats.bestAverage ?? 0, stats.averageOverall ?? 0, stats.checkoutPercentage ?? 0, stats.totalCheckoutAttempts ?? 0, stats.totalCheckoutHits ?? 0, stats.bestLeg ?? 999, stats.nineDartFinishes ?? 0, id);
         }
         const updatedPlayer = db.prepare(`
       SELECT p.*, ps.*
