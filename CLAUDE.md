@@ -246,6 +246,91 @@ open → in_progress → resolved → closed
 2. ❌ Missing route tracking → Always pass `window.location.pathname` to modal
 3. ❌ Admin notes not saving → Use onBlur event, not onChange
 
+### Theme System
+
+**Available Themes:**
+- `'modern'` - Modern Minimalist (dark theme, default)
+- `'modern-light'` - Modern Minimalist Light (bright theme)
+
+**Type Definition:**
+```typescript
+// src/types/index.ts
+export type AppTheme = 'modern' | 'modern-light';
+```
+
+**Implementation:**
+- `src/components/ThemeManager.tsx` - Applies theme class to document root
+- `src/context/SettingsContext.tsx` - Theme persistence via API
+- `src/index.css` - Theme-specific CSS classes
+
+**Theme Structure:**
+```css
+.modern { /* Dark theme styles */ }
+.modern-light { /* Light theme styles */ }
+```
+
+**Legacy Themes:**
+- `'steampunk'` (removed) - Auto-mapped to `'modern'`
+- `'dark'` (deprecated) - Auto-mapped to `'modern'`
+
+**Theme Selection UI:**
+`src/components/Settings.tsx:220-274` - Theme selector with preview cards
+
+### Main Player Feature
+
+**Purpose:** Allows users to designate a "Main Player" whose stats are displayed on the Dashboard.
+
+**Database Schema:**
+```sql
+-- server/src/database/schema.ts
+ALTER TABLE users ADD COLUMN main_player_id TEXT;
+```
+
+**Backend Endpoints:**
+```typescript
+// server/src/routes/auth.ts
+GET  /api/auth/main-player    // Get current main player ID
+PUT  /api/auth/main-player    // Set main player ID (requires playerId in body)
+```
+
+**Frontend Implementation:**
+- `src/components/player/PlayerManagement.tsx` - Crown button to set main player
+- `src/components/dashboard/Dashboard.tsx` - Filters stats by main player
+  - Stats (wins, average, 180s) show only main player's data
+  - "Letzte Aktivitäten" shows ALL matches (not filtered)
+  - Crown icon indicates which player is set as main
+
+**API Client:**
+```typescript
+// src/services/api.ts
+api.auth.getMainPlayer()           // Returns { mainPlayerId: string | null }
+api.auth.setMainPlayer(playerId)   // Sets main player
+```
+
+**UI Indicators:**
+- Crown icon (🏆) next to main player name in PlayerManagement
+- Crown icon with player name in Dashboard header
+- "Als Haupt-Profil setzen" button for non-main players
+
+### Dashboard Features
+
+**Recent Activities:**
+- Shows last 5 completed matches from ALL players (not filtered by main player)
+- Displays date + time using `formatDateTime()`: "10.01.2026, 14:30"
+- Click match to open `MatchDetailModal` with full match details
+
+**Statistics Display:**
+- Filtered by main player if one is set
+- Shows: Total Matches, Wins, Win Rate, Streak, Average, 180s
+- Streak calculation based on consecutive wins
+
+**Match Detail Modal:**
+`src/components/dashboard/MatchDetailModal.tsx`
+- Round-by-round chart (Recharts LineChart)
+- Player statistics (average, highest score, 180s, checkout %)
+- Leg-by-leg breakdown with winner badges
+- Full match metadata (date, game type, winner)
+
 ### Type Definitions
 - Core types: `src/types/index.ts` (Match, Player, Dart, Throw, GameSettings, BugReport)
 - Achievements: `src/types/achievements.ts`
