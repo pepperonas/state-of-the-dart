@@ -1,3 +1,18 @@
+import type {
+  TenantCreateRequest,
+  TenantUpdateRequest,
+  PlayerCreateRequest,
+  PlayerUpdateRequest,
+  MatchCreateRequest,
+  MatchUpdateRequest,
+  TrainingSessionCreateRequest,
+  TrainingSessionUpdateRequest,
+  AchievementProgressUpdateRequest,
+  SettingsUpdateRequest,
+  SettingUpdateRequest,
+  BugReportCreateRequest,
+} from '../types/api';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 // Get auth token from localStorage
@@ -118,13 +133,13 @@ export const api = {
   tenants: {
     getAll: () => apiClient('/api/tenants'),
     
-    create: (tenant: any) =>
+    create: (tenant: TenantCreateRequest) =>
       apiClient('/api/tenants', {
         method: 'POST',
         body: JSON.stringify(tenant),
       }),
-    
-    update: (id: string, tenant: any) =>
+
+    update: (id: string, tenant: TenantUpdateRequest) =>
       apiClient(`/api/tenants/${id}`, {
         method: 'PUT',
         body: JSON.stringify(tenant),
@@ -142,13 +157,13 @@ export const api = {
     
     getById: (id: string) => apiClient(`/api/players/${id}`),
     
-    create: (player: any) =>
+    create: (player: PlayerCreateRequest) =>
       apiClient('/api/players', {
         method: 'POST',
         body: JSON.stringify(player),
       }),
-    
-    update: (id: string, player: any) =>
+
+    update: (id: string, player: PlayerUpdateRequest) =>
       apiClient(`/api/players/${id}`, {
         method: 'PUT',
         body: JSON.stringify(player),
@@ -164,7 +179,7 @@ export const api = {
     
     getHeatmapsBatch: () => apiClient('/api/players/heatmaps/batch'),
     
-    updateHeatmap: (id: string, heatmapData: any) =>
+    updateHeatmap: (id: string, heatmapData: unknown) =>
       apiClient(`/api/players/${id}/heatmap`, {
         method: 'POST',
         body: JSON.stringify(heatmapData),
@@ -177,14 +192,14 @@ export const api = {
 
     getById: (id: string, options?: RequestInit) => apiClient(`/api/matches/${id}`, options),
 
-    create: (match: any, options?: RequestInit) =>
+    create: (match: MatchCreateRequest, options?: RequestInit) =>
       apiClient('/api/matches', {
         method: 'POST',
         body: JSON.stringify(match),
         ...options,
       }),
 
-    update: (id: string, match: any, options?: RequestInit) =>
+    update: (id: string, match: MatchUpdateRequest, options?: RequestInit) =>
       apiClient(`/api/matches/${id}`, {
         method: 'PUT',
         body: JSON.stringify(match),
@@ -204,13 +219,13 @@ export const api = {
     
     getById: (id: string) => apiClient(`/api/training/${id}`),
     
-    create: (session: any) =>
+    create: (session: TrainingSessionCreateRequest) =>
       apiClient('/api/training', {
         method: 'POST',
         body: JSON.stringify(session),
       }),
-    
-    update: (id: string, session: any) =>
+
+    update: (id: string, session: TrainingSessionUpdateRequest) =>
       apiClient(`/api/training/${id}`, {
         method: 'PUT',
         body: JSON.stringify(session),
@@ -234,7 +249,7 @@ export const api = {
         body: JSON.stringify({ achievementId }),
       }),
     
-    updateProgress: (playerId: string, achievements: any) =>
+    updateProgress: (playerId: string, achievements: AchievementProgressUpdateRequest['achievements']) =>
       apiClient(`/api/achievements/player/${playerId}/progress`, {
         method: 'PUT',
         body: JSON.stringify({ achievements }),

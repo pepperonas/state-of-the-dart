@@ -5,6 +5,7 @@ import { useTenant } from './TenantContext';
 import { useAuth } from './AuthContext';
 import { createEmptyHeatmapData, updateHeatmapData } from '../utils/heatmap';
 import { api } from '../services/api';
+import logger from '../utils/logger';
 
 interface PlayerContextType {
   players: Player[];
@@ -104,11 +105,11 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
           setPlayers(playersWithHeatmaps);
         } catch (error) {
-          console.error('Failed to load heatmaps:', error);
+          logger.error('Failed to load heatmaps:', error);
           setPlayers(loadedPlayers);
         }
       } catch (error) {
-        console.error('❌ Failed to load players:', error);
+        logger.error('Failed to load players:', error);
         setPlayers([]);
       } finally {
         setLoading(false);
@@ -136,7 +137,7 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       setPlayers(prev => [...prev, createdPlayer]);
       return createdPlayer;
     } catch (error) {
-      console.error('Failed to create player:', error);
+      logger.error('Failed to create player:', error);
       throw error;
     }
   };
@@ -153,7 +154,7 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         setCurrentPlayer({ ...currentPlayer, ...updates });
       }
     } catch (error) {
-      console.error('Failed to update player:', error);
+      logger.error('Failed to update player:', error);
       throw error;
     }
   };
@@ -168,7 +169,7 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         setCurrentPlayer(null);
       }
     } catch (error) {
-      console.error('Failed to delete player:', error);
+      logger.error('Failed to delete player:', error);
       throw error;
     }
   };
@@ -216,7 +217,7 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       
       await api.players.updateHeatmap(playerId, apiData);
     } catch (err) {
-      console.error('Failed to sync heatmap:', err);
+      logger.error('Failed to sync heatmap:', err);
     }
   };
   

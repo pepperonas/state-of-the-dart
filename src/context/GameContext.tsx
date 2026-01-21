@@ -7,6 +7,7 @@ import audioSystem from '../utils/audio';
 import { useTenant } from './TenantContext';
 import { usePlayer } from './PlayerContext';
 import { api } from '../services/api';
+import logger from '../utils/logger';
 
 interface GameState {
   currentMatch: Match | null;
@@ -62,7 +63,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         checkoutSuggestion = getCheckoutSuggestion(remaining, 3, requireDouble);
       }
 
-      console.log('🔄 LOAD_MATCH: throws in leg:', throwsInLeg, 'current player index:', currentPlayerIndex);
+      logger.apiEvent('LOAD_MATCH: throws in leg:', throwsInLeg, 'current player index:', currentPlayerIndex);
 
       return {
         ...state,
@@ -83,7 +84,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         type: gameType,
         settings,
         players: players.map(p => {
-          console.log('🎮 Creating match player:', {
+          logger.debug('Creating match player:', {
             name: p.name,
             isBot: p.isBot,
             botLevel: p.botLevel,
@@ -339,7 +340,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
       let nextIndex = (state.currentPlayerIndex + 1) % state.currentMatch.players.length;
 
-      console.log('➡️ NEXT_PLAYER:', {
+      logger.debug('NEXT_PLAYER:', {
         from: state.currentPlayerIndex,
         to: nextIndex,
         playerName: state.currentMatch.players[nextIndex].name,
@@ -349,7 +350,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       // If current leg just completed and new leg started, reset to first player
       if (currentLeg.winner && state.currentPlayerIndex === state.currentMatch.players.length - 1) {
         nextIndex = 0;
-        console.log('🔄 Leg completed, resetting to player 0');
+        logger.debug('Leg completed, resetting to player 0');
       }
 
       // Calculate checkout suggestion for next player
@@ -521,14 +522,14 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // Only restore if match is still in progress or paused
         if (parsed.status === 'in-progress' || parsed.status === 'paused') {
           const restoredMatch = reviveMatchDates(parsed);
-          console.log('🔄 Restoring active match from localStorage:', restoredMatch.id);
+          logger.apiEvent('Restoring active match from localStorage:', restoredMatch.id);
           dispatch({ type: 'LOAD_MATCH', payload: restoredMatch });
         } else {
           // Match was completed, clear it
           localStorage.removeItem(ACTIVE_MATCH_KEY);
         }
       } catch (err) {
-        console.warn('Failed to restore match from localStorage:', err);
+        logger.warn('Failed to restore match from localStorage:', err);
         localStorage.removeItem(ACTIVE_MATCH_KEY);
       }
     }
@@ -587,7 +588,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             try {
               await api.matches.create(apiMatch, { signal: abortController.signal });
               matchCreatedRef.current = matchId;
-              console.log('✅ Match created in DB:', matchId);
+              logger.success('Match created in DB:', matchId);
             } catch (createError: any) {
               // If aborted, exit silently
               if (createError.name === 'AbortError') return;
@@ -595,7 +596,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               if (createError?.response?.status === 409) {
                 matchCreatedRef.current = matchId;
               } else {
-                console.warn('Match create failed:', createError);
+                logger.warn('Match create failed:', createError);
               }
             }
           } else {
@@ -606,7 +607,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           // If aborted, exit silently
           if (error.name === 'AbortError') return;
           // Silently fail - don't block the game
-          console.warn('Match save failed:', error);
+          logger.warn('Match save failed:', error);
         } finally {
           matchSavingRef.current = false;
         }
@@ -641,9 +642,9 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           } else {
             await api.matches.update(matchId, apiMatch);
           }
-          console.log('✅ Paused match saved');
+          logger.success('Paused match saved');
         } catch (err) {
-          console.warn('Failed to save paused match:', err);
+          logger.warn('Failed to save paused match:', err);
           // Don't throw - allow navigation to continue
         }
       })();
@@ -661,8 +662,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (shouldSaveMatch) {
       const apiMatch = transformMatchForApi(state.currentMatch!);
       api.matches.create(apiMatch)
-        .then(() => console.log('✅ Match saved to database'))
-        .catch((err: Error) => console.error('❌ Failed to save match:', err));
+        .then(() => logger.success('Match saved to database'))
+        .catch((err: Error) => logger.error('Failed to save match:', err));
     }
     
     state.currentMatch.players.forEach((matchPlayer) => {
@@ -696,7 +697,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             bestAverage: Math.max(player.stats.bestAverage, matchPlayer.matchAverage),
             highestCheckout: Math.max(player.stats.highestCheckout, highestCheckoutThisMatch),
           },
-        }).catch(err => console.warn('Live stats update failed:', err));
+        }).catch(err => logger.warn('Live stats update failed:', err));
         return; // Skip the rest for live updates
       }
       
@@ -747,7 +748,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           totalCheckoutAttempts: checkoutStats.totalAttempts,
           totalCheckoutHits: checkoutStats.totalHits,
         },
-      }).catch(err => console.warn('Final stats update failed:', err));
+      }).catch(err => logger.warn('Final stats update failed:', err));
     });
   };
   
@@ -785,7 +786,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!lastThrow || lastThrow.id === lastProcessedThrowIdRef.current) return;
 
     if (lastThrow.darts && lastThrow.darts.length > 0) {
-      console.log('🎯 Updating heatmap for player:', lastThrow.playerId, 'with darts:', lastThrow.darts);
+      logger.gameEvent('Updating heatmap for player:', lastThrow.playerId, 'with darts:', lastThrow.darts);
       updatePlayerHeatmap(lastThrow.playerId, lastThrow.darts);
       lastProcessedThrowIdRef.current = lastThrow.id;
     }

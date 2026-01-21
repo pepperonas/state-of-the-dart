@@ -104,7 +104,7 @@ class SyncService {
         if (key.startsWith('achievements_')) {
           const playerId = key.replace('achievements_', '');
           try {
-            await api.achievements.updateProgress(playerId, value);
+            await api.achievements.updateProgress(playerId, value as Record<string, { progress: number; completed: boolean }>);
           } catch (err) {
             console.warn('Achievements sync error:', err);
           }

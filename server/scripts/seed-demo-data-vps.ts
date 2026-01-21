@@ -150,7 +150,7 @@ function polarToCartesian(angle: number, radius: number): { x: number; y: number
 }
 
 function getSegmentFromAngle(angle: number): number {
-  let normalizedAngle = ((angle % 360) + 360) % 360;
+  const normalizedAngle = ((angle % 360) + 360) % 360;
   const segmentIndex = Math.floor(((normalizedAngle + 9) % 360) / 18);
   return SEGMENTS[segmentIndex];
 }
@@ -195,7 +195,7 @@ function generateThrow(profile: PlayerProfile, targetType: 'T20' | 'T19' | 'BULL
   const radiusVariance = gaussianRandom(0, (1 - accuracy) * 0.25);
 
   const actualAngle = targetAngle + angleVariance;
-  let actualRadius = Math.max(0, Math.min(1.05, targetRadius + radiusVariance));
+  const actualRadius = Math.max(0, Math.min(1.05, targetRadius + radiusVariance));
 
   const { x, y } = polarToCartesian(actualAngle, actualRadius);
 
