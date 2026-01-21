@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Match, Throw } from '../../types';
 import { X, Calendar, TrendingUp } from 'lucide-react';
 import { formatDateTime, getTimestampForSort } from '../../utils/dateUtils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import logger from '../../utils/logger';
 
 interface MatchDetailModalProps {
   match: Match;
@@ -12,13 +13,20 @@ interface MatchDetailModalProps {
 const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) => {
   const matchPlayers = match.players || [];
 
+  // Filter players who actually played (have throws)
+  const getPlayersWithThrows = (match: Match) => {
+    const allThrows = match.legs?.flatMap(leg => leg.throws || []) || [];
+    const playerIdsWithThrows = new Set(allThrows.map(t => t.playerId));
+    return (match.players || []).filter(p => playerIdsWithThrows.has(p.playerId));
+  };
+
   // Prepare round-by-round data for chart
   const prepareRoundData = (match: Match) => {
     const allThrows: Throw[] = [];
     const legs = match.legs || [];
-    const players = match.players || [];
+    const players = getPlayersWithThrows(match);
 
-    console.log('🔍 MatchDetailModal - Debug:', {
+    logger.debug('🔍 MatchDetailModal - Debug:', {
       totalLegs: legs.length,
       totalPlayers: players.length,
       matchId: match.id,
@@ -27,21 +35,21 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
     });
 
     if (legs.length === 0 || players.length === 0) {
-      console.warn('⚠️ No legs or players found for chart');
+      logger.warn('⚠️ No legs or players found for chart');
       return [];
     }
 
     legs.forEach((leg, index) => {
       const throws = leg.throws || [];
-      console.log(`📊 Leg ${index + 1}: ${throws.length} throws`, throws.map(t => ({ playerId: t.playerId, score: t.score })));
+      logger.debug(`📊 Leg ${index + 1}: ${throws.length} throws`, throws.map(t => ({ playerId: t.playerId, score: t.score })));
       allThrows.push(...throws);
     });
 
-    console.log(`📈 Total throws collected: ${allThrows.length}`);
-    console.log(`🎯 Unique player IDs in throws:`, [...new Set(allThrows.map(t => t.playerId))]);
+    logger.debug(`📈 Total throws collected: ${allThrows.length}`);
+    logger.debug(`🎯 Unique player IDs in throws:`, [...new Set(allThrows.map(t => t.playerId))]);
 
     if (allThrows.length === 0) {
-      console.warn('⚠️ No throws found in any leg');
+      logger.warn('⚠️ No throws found in any leg');
       return [];
     }
 
@@ -53,9 +61,16 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
 
     players.forEach(player => {
       const playerThrows = sortedThrows.filter(t => t.playerId === player.playerId);
+
+      // Skip players with no throws (they weren't in this specific match)
+      if (playerThrows.length === 0) {
+        logger.warn(`⚠️ Skipping ${player.name} - no throws in this match`);
+        return;
+      }
+
       const rounds: { round: number; score: number }[] = [];
 
-      console.log(`👤 Player ${player.name} (ID: ${player.playerId}): ${playerThrows.length} throws`,
+      logger.debug(`👤 Player ${player.name} (ID: ${player.playerId}): ${playerThrows.length} throws`,
         playerThrows.slice(0, 5).map(t => ({ score: t.score, visitNumber: t.visitNumber })));
 
       // Each Throw already contains 3 darts (one complete round)
@@ -67,19 +82,13 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
       }
 
       playerRounds[player.playerId] = rounds;
-
-      // Debug: Log if player has no throws
-      if (playerThrows.length === 0) {
-        console.warn(`⚠️ No throws found for player ${player.name} (ID: ${player.playerId})`);
-        console.log('Available throw player IDs:', [...new Set(sortedThrows.map(t => t.playerId))]);
-      }
     });
 
     const roundCounts = Object.values(playerRounds).map(r => r.length);
     const maxRounds = roundCounts.length > 0 ? Math.max(...roundCounts) : 0;
     const chartData = [];
 
-    console.log(`📊 Max rounds: ${maxRounds}`);
+    logger.debug(`📊 Max rounds: ${maxRounds}`);
 
     for (let i = 1; i <= maxRounds; i++) {
       const dataPoint: any = { round: i };
@@ -92,11 +101,12 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
       chartData.push(dataPoint);
     }
 
-    console.log('✅ Chart data prepared:', chartData.length, 'data points');
+    logger.debug('✅ Chart data prepared:', chartData.length, 'data points');
     return chartData;
   };
 
   const chartData = prepareRoundData(match);
+  const playersWithThrows = useMemo(() => getPlayersWithThrows(match), [match]);
 
   return (
     <div
@@ -128,7 +138,7 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
 
         {/* Players */}
         <div className="mb-6 flex items-center justify-center gap-8">
-          {matchPlayers.map((player, index) => (
+          {playersWithThrows.map((player, index) => (
             <React.Fragment key={player.playerId}>
               <div className="text-center">
                 <div className={`text-4xl font-bold ${match.winner === player.playerId ? 'text-success-400' : 'text-red-500'}`}>
@@ -142,6 +152,15 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
             </React.Fragment>
           ))}
         </div>
+
+        {/* Warning if some players were filtered out */}
+        {matchPlayers.length > playersWithThrows.length && (
+          <div className="mb-4 p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+            <p className="text-sm text-orange-300">
+              ℹ️ Hinweis: {matchPlayers.length - playersWithThrows.length} Spieler ohne Würfe in diesem Match werden nicht angezeigt.
+            </p>
+          </div>
+        )}
 
         {/* Round-by-Round Chart */}
         <div className="glass-card p-6 rounded-xl mb-6">
@@ -180,7 +199,7 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
                     wrapperStyle={{ paddingTop: '20px' }}
                     iconType="line"
                   />
-                  {matchPlayers.map((p, index) => (
+                  {playersWithThrows.map((p, index) => (
                     <Line
                       key={p.playerId}
                       type="monotone"
@@ -209,8 +228,8 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
         </div>
 
         {/* Player Stats */}
-        <div className={`grid ${matchPlayers.length > 1 ? 'md:grid-cols-2' : 'md:grid-cols-1'} gap-6 mb-6`}>
-          {matchPlayers.map((player) => (
+        <div className={`grid ${playersWithThrows.length > 1 ? 'md:grid-cols-2' : 'md:grid-cols-1'} gap-6 mb-6`}>
+          {playersWithThrows.map((player) => (
             <div key={player.playerId}>
               <h4 className="font-bold text-gray-800 dark:text-white mb-3">
                 {player.name}
@@ -245,12 +264,12 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
                 <div
                   key={leg.id}
                   className={`px-3 py-1 rounded text-sm ${
-                    leg.winner === matchPlayers[0]?.playerId
+                    leg.winner === playersWithThrows[0]?.playerId
                       ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
                       : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
                   }`}
                 >
-                  Leg {index + 1}: {matchPlayers.find(p => p.playerId === leg.winner)?.name || 'Unbekannt'}
+                  Leg {index + 1}: {playersWithThrows.find(p => p.playerId === leg.winner)?.name || 'Unbekannt'}
                 </div>
               ))}
             </div>
