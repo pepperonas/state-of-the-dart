@@ -4,6 +4,7 @@ import {
   Trophy, Target, Award, TrendingUp, Flame, Calendar,
   ArrowRight, Loader, Play, Users, Dumbbell, ArrowLeft, Crown, Clock
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useTenant } from '../../context/TenantContext';
 import { usePlayer } from '../../context/PlayerContext';
@@ -31,6 +32,7 @@ interface QuickStats {
 }
 
 const Dashboard: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, trialDaysLeft, hasActiveSubscription } = useAuth();
   const { storage } = useTenant();
@@ -236,7 +238,7 @@ const Dashboard: React.FC = () => {
           className="mb-6 flex items-center gap-2 text-white hover:text-primary-400 transition-colors group"
         >
           <ArrowLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
-          <span className="font-medium">Zurück</span>
+          <span className="font-medium">{t('common.back')}</span>
         </button>
 
         {/* Header */}
