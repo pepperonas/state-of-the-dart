@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Trophy, TrendingUp, Target, Zap, Award, Medal, Crown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { usePlayer } from '../../context/PlayerContext';
 import { useAchievements } from '../../context/AchievementContext';
 import { useTenant } from '../../context/TenantContext';
@@ -16,6 +17,7 @@ type LeaderboardCategory =
   | 'totalPoints';
 
 const Leaderboard: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { players } = usePlayer();
   const { getAllPlayerProgress } = useAchievements();
@@ -148,7 +150,7 @@ const Leaderboard: React.FC = () => {
           className="mb-6 flex items-center gap-2 text-white hover:text-primary-400 transition-colors"
         >
           <ArrowLeft size={24} />
-          <span>Zurück</span>
+          <span>{t('common.back')}</span>
         </button>
 
         <div className="glass-card p-6 md:p-8">

@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, BarChart, TrendingUp, Target, Calendar, Filter, Trophy } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { TrainingSession, TrainingType } from '../../types';
 import { usePlayer } from '../../context/PlayerContext';
 import { useTenant } from '../../context/TenantContext';
@@ -9,6 +10,7 @@ import { api } from '../../services/api';
 import { toDateOrNow, formatDateTime, formatDateShort } from '../../utils/dateUtils';
 
 const TrainingStats: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { currentPlayer, setCurrentPlayer, players } = usePlayer();
   const { storage } = useTenant();
@@ -150,7 +152,7 @@ const TrainingStats: React.FC = () => {
             className="mb-6 flex items-center gap-2 text-white hover:text-primary-400 transition-colors group"
           >
             <ArrowLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">Zurück</span>
+            <span className="font-medium">{t('common.back')}</span>
           </button>
 
           <div className="glass-card p-8">
@@ -203,7 +205,7 @@ const TrainingStats: React.FC = () => {
             className="flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
           >
             <ArrowLeft size={20} />
-            Zurück
+            {t('common.back')}
           </button>
           <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2">
             <BarChart size={32} />

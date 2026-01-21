@@ -1,8 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Trophy, Users, Calendar, Star, Construction } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const TournamentMenu: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const tournamentTypes = [
@@ -40,7 +42,7 @@ const TournamentMenu: React.FC = () => {
           className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:bg-dark-700/50 transition-all"
         >
           <ArrowLeft size={20} />
-          Zurück
+          {t('common.back')}
         </button>
 
         <div className="glass-card rounded-xl shadow-lg p-6 md:p-8 border border-white/5">

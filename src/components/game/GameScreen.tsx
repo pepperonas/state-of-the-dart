@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, RotateCcw, Pause, Play, X, Bot, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import Confetti from 'react-confetti';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useGame } from '../../context/GameContext';
@@ -23,6 +24,7 @@ import audioSystem from '../../utils/audio';
 import { createAdaptiveBotPlayer, getAdaptiveBotConfigs, generateBotTurn, AdaptiveBotCategory } from '../../utils/botLogic';
 
 const GameScreen: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { state, dispatch } = useGame();
   const { players, addPlayer, updatePlayerHeatmap } = usePlayer();
@@ -683,7 +685,7 @@ const GameScreen: React.FC = () => {
             style={{ pointerEvents: 'auto', position: 'relative', zIndex: 100 }}
           >
             <ArrowLeft size={20} />
-            Zurück
+            {t('common.back')}
           </button>
           
           <div className="glass-card rounded-xl shadow-lg p-6 md:p-8">
@@ -968,7 +970,7 @@ const GameScreen: React.FC = () => {
             onClick={() => navigate('/')}
             className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
           >
-            Zurück
+            {t('common.back')}
           </button>
         </div>
       </div>
@@ -1073,7 +1075,7 @@ const GameScreen: React.FC = () => {
             className="flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
           >
             <ArrowLeft size={20} />
-            Zurück
+            {t('common.back')}
           </button>
           
           <div className="flex gap-2">

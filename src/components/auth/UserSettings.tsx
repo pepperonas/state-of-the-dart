@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  User, Mail, Trash2, Save, AlertCircle, Loader, 
-  CheckCircle, ArrowLeft, Lock, CreditCard 
+import {
+  User, Mail, Trash2, Save, AlertCircle, Loader,
+  CheckCircle, ArrowLeft, Lock, CreditCard
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 
@@ -33,6 +34,7 @@ const renderAvatar = (avatarValue: string, size: 'sm' | 'md' | 'lg' = 'md') => {
 };
 
 const UserSettings: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, refreshUser, logout } = useAuth();
   
@@ -146,7 +148,7 @@ const UserSettings: React.FC = () => {
           className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
         >
           <ArrowLeft size={20} />
-          Zurück
+          {t('common.back')}
         </button>
 
         <h1 className="text-4xl font-bold text-white mb-8">Account Einstellungen</h1>

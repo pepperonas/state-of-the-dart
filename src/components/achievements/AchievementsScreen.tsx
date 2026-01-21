@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Trophy, Lock, Star, Award, Filter } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAchievements } from '../../context/AchievementContext';
 import { usePlayer } from '../../context/PlayerContext';
 import {
@@ -14,6 +15,7 @@ import {
 import { formatDate } from '../../utils/dateUtils';
 
 const AchievementsScreen: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { players } = usePlayer();
   const {
@@ -182,7 +184,7 @@ const AchievementsScreen: React.FC = () => {
             className="mb-6 flex items-center gap-2 text-white hover:text-primary-400 transition-colors"
           >
             <ArrowLeft size={24} />
-            <span>Zurück</span>
+            <span>{t('common.back')}</span>
           </button>
 
           <div className="glass-card p-8 text-center">
@@ -206,7 +208,7 @@ const AchievementsScreen: React.FC = () => {
           className="mb-6 flex items-center gap-2 text-white hover:text-primary-400 transition-colors"
         >
           <ArrowLeft size={24} />
-          <span>Zurück</span>
+          <span>{t('common.back')}</span>
         </button>
 
         <div className="glass-card p-6 mb-6">

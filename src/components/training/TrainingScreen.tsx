@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Check, X, BarChart } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
 import { Dart, TrainingType, TrainingSession, TrainingResult } from '../../types';
 import Dartboard from '../dartboard/Dartboard';
@@ -22,6 +23,7 @@ interface TrainingState {
 }
 
 const TrainingScreen: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { mode } = useParams<{ mode: TrainingType }>();
   const { settings } = useSettings();
@@ -653,7 +655,7 @@ const TrainingScreen: React.FC = () => {
                     onClick={() => navigate('/training')}
                     className="flex-1 py-3 bg-gradient-to-r from-dark-600 to-dark-700 hover:from-dark-700 hover:to-dark-800 text-white rounded-lg font-bold transition-all"
                   >
-                    Zurück
+                    {t('common.back')}
                   </button>
                 </div>
               </div>

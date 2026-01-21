@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Trophy, Target, TrendingUp, Award, Calendar, Zap, Star, Flame } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { usePlayer } from '../../context/PlayerContext';
 import { useAchievements } from '../../context/AchievementContext';
 import { useTenant } from '../../context/TenantContext';
@@ -11,6 +12,7 @@ import { calculateAccuracyStats } from '../../utils/heatmap';
 import { formatDate } from '../../utils/dateUtils';
 
 const PlayerProfile: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { playerId } = useParams<{ playerId: string }>();
   const { players, getPlayerHeatmap } = usePlayer();
@@ -146,7 +148,7 @@ const PlayerProfile: React.FC = () => {
             className="mb-6 flex items-center gap-2 text-white hover:text-primary-400 transition-colors"
           >
             <ArrowLeft size={24} />
-            <span>Zurück</span>
+            <span>{t('common.back')}</span>
           </button>
           <div className="glass-card p-8 text-center">
             <h2 className="text-2xl font-bold text-white mb-2">Spieler nicht gefunden</h2>
@@ -169,7 +171,7 @@ const PlayerProfile: React.FC = () => {
           className="mb-6 flex items-center gap-2 text-white hover:text-primary-400 transition-colors"
         >
           <ArrowLeft size={24} />
-          <span>Zurück</span>
+          <span>{t('common.back')}</span>
         </button>
 
         {/* Player Info Card */}

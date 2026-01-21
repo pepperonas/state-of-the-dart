@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Activity, TrendingUp, TrendingDown, Minus, Download, Users } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { usePlayer } from '../../context/PlayerContext';
 import { useTenant } from '../../context/TenantContext';
 import { 
@@ -26,6 +27,7 @@ type TabType = typeof VALID_TABS[number];
 type TimeInterval = 'daily' | 'weekly' | 'monthly' | 'yearly';
 
 const StatsOverview: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { players, getPlayerHeatmap } = usePlayer();
@@ -298,7 +300,7 @@ const StatsOverview: React.FC = () => {
             className="mb-6 flex items-center gap-2 text-white hover:text-primary-400 transition-colors group"
           >
             <ArrowLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">Zurück</span>
+            <span className="font-medium">{t('common.back')}</span>
           </button>
           
           <div className="glass-card rounded-xl shadow-lg p-12">
@@ -331,7 +333,7 @@ const StatsOverview: React.FC = () => {
             className="flex items-center gap-2 text-white hover:text-primary-400 transition-colors group"
           >
             <ArrowLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">Zurück</span>
+            <span className="font-medium">{t('common.back')}</span>
           </button>
           
           <div ref={exportMenuRef} className="relative">
