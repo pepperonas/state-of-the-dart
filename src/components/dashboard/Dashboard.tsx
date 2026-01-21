@@ -236,7 +236,7 @@ const Dashboard: React.FC = () => {
           className="mb-6 flex items-center gap-2 text-white hover:text-primary-400 transition-colors group"
         >
           <ArrowLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
-          <span className="font-medium">Zurück zum Hauptmenü</span>
+          <span className="font-medium">Zurück</span>
         </button>
 
         {/* Header */}
