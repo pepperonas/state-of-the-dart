@@ -113,7 +113,10 @@ ssh root@69.62.121.168 "grep -E 'GOOGLE_CALLBACK|APP_URL|PORT' /var/www/stateoft
 
 | Bug | Ursache | Fix | Datei |
 |-----|---------|-----|-------|
+| Rate Limiter 500 Error | `trust proxy: true` rejected | `validate.trustProxy: false` | `server/src/index.ts:66` |
 | OAuth localhost redirect | `GOOGLE_CALLBACK_URL` fehlt/falsch | VPS .env korrigieren | `.env` |
+| Frontend 403 Error | Backend-Dist deployed | Richtiges `dist/` deployen | Deployment |
+| PORT Conflict (EADDRINUSE) | `.env` PORT=3001 | PORT=3002 setzen | `.env` |
 | Spieler fehlen | Multi-Tenant Query ohne Sortierung | `ORDER BY last_active DESC` | `auth.ts:40` |
 | WAL-Korruption | Checkpoint nicht ausgeführt | Auto-Checkpoint alle 5 Min | `database/index.ts` |
 | "Email nicht verifiziert" | `emailVerified` fehlt in Response | Feld hinzugefügt | `routes/auth.ts` |
@@ -122,6 +125,15 @@ ssh root@69.62.121.168 "grep -E 'GOOGLE_CALLBACK|APP_URL|PORT' /var/www/stateoft
 ---
 
 ## Changelog
+
+### 2026-01-21
+- **Rate Limiter Fix**: `express-rate-limit` Kompatibilität (`validate.trustProxy: false`)
+- **Google OAuth Fix**: `.env` URLs korrigiert (APP_URL, GOOGLE_CALLBACK_URL)
+- **NODE_ENV**: Production Mode aktiviert
+- **SMTP Fix**: Variable Name korrigiert (`SMTP_PASS` → `SMTP_PASSWORD`)
+- **Modal UX**: Click-Outside schließt MatchDetailModal
+- **Frontend Deployment**: Korrektes Dist deployed (war Backend-Dist)
+- **Berechtigungen**: `www-data:www-data` für Frontend
 
 ### 2026-01-17
 - Admin-Status wird bei jedem Google OAuth Login geprüft
