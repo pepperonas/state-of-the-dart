@@ -30,9 +30,9 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
       return [];
     }
 
-    legs.forEach(leg => {
+    legs.forEach((leg, index) => {
       const throws = leg.throws || [];
-      console.log(`📊 Leg ${leg.legNumber}: ${throws.length} throws`);
+      console.log(`📊 Leg ${index + 1}: ${throws.length} throws`);
       allThrows.push(...throws);
     });
 

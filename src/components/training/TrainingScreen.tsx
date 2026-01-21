@@ -681,9 +681,9 @@ const TrainingScreen: React.FC = () => {
                 )}
                 {mode === 'around-the-clock' && (
                   <>
-                    <p>• Hit all numbers from 1 to 20 in order</p>
-                    <p>• Any segment (single, double, triple) counts</p>
-                    <p>• Complete the circuit as fast as possible</p>
+                    <p>• Triff alle Zahlen von 1 bis 20 in Reihenfolge</p>
+                    <p>• Jedes Segment (Single, Double, Triple) zählt</p>
+                    <p>• Schließe den Rundgang so schnell wie möglich ab</p>
                   </>
                 )}
                 {mode === 'checkout-121' && (
