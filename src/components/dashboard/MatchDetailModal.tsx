@@ -22,7 +22,8 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
       totalLegs: legs.length,
       totalPlayers: players.length,
       matchId: match.id,
-      legs: legs.map(l => ({ id: l.id, throwsCount: (l.throws || []).length }))
+      legs: legs.map(l => ({ id: l.id, throwsCount: (l.throws || []).length })),
+      players: players.map(p => ({ name: p.name, playerId: p.playerId }))
     });
 
     if (legs.length === 0 || players.length === 0) {
@@ -32,11 +33,12 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
 
     legs.forEach((leg, index) => {
       const throws = leg.throws || [];
-      console.log(`📊 Leg ${index + 1}: ${throws.length} throws`);
+      console.log(`📊 Leg ${index + 1}: ${throws.length} throws`, throws.map(t => ({ playerId: t.playerId, score: t.score })));
       allThrows.push(...throws);
     });
 
     console.log(`📈 Total throws collected: ${allThrows.length}`);
+    console.log(`🎯 Unique player IDs in throws:`, [...new Set(allThrows.map(t => t.playerId))]);
 
     if (allThrows.length === 0) {
       console.warn('⚠️ No throws found in any leg');
@@ -53,7 +55,8 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
       const playerThrows = sortedThrows.filter(t => t.playerId === player.playerId);
       const rounds: { round: number; score: number }[] = [];
 
-      console.log(`👤 Player ${player.name}: ${playerThrows.length} throws`);
+      console.log(`👤 Player ${player.name} (ID: ${player.playerId}): ${playerThrows.length} throws`,
+        playerThrows.slice(0, 5).map(t => ({ score: t.score, visitNumber: t.visitNumber })));
 
       // Each Throw already contains 3 darts (one complete round)
       for (let i = 0; i < playerThrows.length; i += 1) {
@@ -64,6 +67,12 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
       }
 
       playerRounds[player.playerId] = rounds;
+
+      // Debug: Log if player has no throws
+      if (playerThrows.length === 0) {
+        console.warn(`⚠️ No throws found for player ${player.name} (ID: ${player.playerId})`);
+        console.log('Available throw player IDs:', [...new Set(sortedThrows.map(t => t.playerId))]);
+      }
     });
 
     const roundCounts = Object.values(playerRounds).map(r => r.length);
@@ -90,8 +99,14 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
   const chartData = prepareRoundData(match);
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-start justify-center z-50 p-4 pt-16 overflow-y-auto">
-      <div className="glass-card rounded-2xl p-6 max-w-6xl w-full mb-8">
+    <div
+      className="fixed inset-0 bg-black/70 flex items-start justify-center z-50 p-4 pt-16 overflow-y-auto"
+      onClick={onClose}
+    >
+      <div
+        className="glass-card rounded-2xl p-6 max-w-6xl w-full mb-8"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>

@@ -66,6 +66,9 @@ const limiter = (0, express_rate_limit_1.default)({
     message: 'Too many requests from this IP, please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
+    validate: {
+        trustProxy: false, // Disable trust proxy validation (we're behind Nginx)
+    },
     skip: (req) => {
         // Skip rate limiting for auth routes (Google OAuth makes multiple redirects)
         return req.path.startsWith('/api/auth/');
