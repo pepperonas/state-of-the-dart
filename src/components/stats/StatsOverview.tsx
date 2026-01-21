@@ -297,10 +297,10 @@ const StatsOverview: React.FC = () => {
         <div className="max-w-6xl mx-auto">
           <button
             onClick={() => navigate('/')}
-            className="mb-6 flex items-center gap-2 text-white hover:text-primary-400 transition-colors group"
+            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
           >
-            <ArrowLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">{t('common.back')}</span>
+            <ArrowLeft size={20} />
+            {t('common.back')}
           </button>
           
           <div className="glass-card rounded-xl shadow-lg p-12">
@@ -330,10 +330,10 @@ const StatsOverview: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={() => navigate('/')}
-            className="flex items-center gap-2 text-white hover:text-primary-400 transition-colors group"
+            className="flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
           >
-            <ArrowLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">{t('common.back')}</span>
+            <ArrowLeft size={20} />
+            {t('common.back')}
           </button>
           
           <div ref={exportMenuRef} className="relative">

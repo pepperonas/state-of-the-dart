@@ -681,8 +681,7 @@ const GameScreen: React.FC = () => {
               console.log('🔙 Back to Menu clicked from Setup');
               window.location.href = '/';
             }}
-            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all cursor-pointer"
-            style={{ pointerEvents: 'auto', position: 'relative', zIndex: 100 }}
+            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
           >
             <ArrowLeft size={20} />
             {t('common.back')}

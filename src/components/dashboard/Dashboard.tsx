@@ -235,10 +235,10 @@ const Dashboard: React.FC = () => {
         {/* Back Button */}
         <button
           onClick={() => navigate('/')}
-          className="mb-6 flex items-center gap-2 text-white hover:text-primary-400 transition-colors group"
+          className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
         >
-          <ArrowLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
-          <span className="font-medium">{t('common.back')}</span>
+          <ArrowLeft size={20} />
+          {t('common.back')}
         </button>
 
         {/* Header */}

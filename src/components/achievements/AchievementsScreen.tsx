@@ -181,10 +181,10 @@ const AchievementsScreen: React.FC = () => {
         <div className="max-w-6xl mx-auto">
           <button
             onClick={() => navigate('/')}
-            className="mb-6 flex items-center gap-2 text-white hover:text-primary-400 transition-colors"
+            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
           >
-            <ArrowLeft size={24} />
-            <span>{t('common.back')}</span>
+            <ArrowLeft size={20} />
+            {t('common.back')}
           </button>
 
           <div className="glass-card p-8 text-center">
@@ -205,10 +205,10 @@ const AchievementsScreen: React.FC = () => {
         {/* Header */}
         <button
           onClick={() => navigate('/')}
-          className="mb-6 flex items-center gap-2 text-white hover:text-primary-400 transition-colors"
+          className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
         >
-          <ArrowLeft size={24} />
-          <span>{t('common.back')}</span>
+          <ArrowLeft size={20} />
+          {t('common.back')}
         </button>
 
         <div className="glass-card p-6 mb-6">

@@ -230,7 +230,7 @@ const AdminPanel: React.FC = () => {
         >
           <button
             onClick={() => navigate('/')}
-            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:bg-dark-700/50 transition-all"
+            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
           >
             <ArrowLeft size={20} />
             {t('common.back')}
