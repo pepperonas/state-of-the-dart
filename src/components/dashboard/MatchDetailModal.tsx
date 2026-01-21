@@ -97,15 +97,17 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
         {/* Players */}
         <div className="mb-6 flex items-center justify-center gap-8">
           {matchPlayers.map((player, index) => (
-            <div key={player.playerId} className="text-center">
-              <div className={`text-4xl font-bold ${match.winner === player.playerId ? 'text-success-400' : 'text-red-500'}`}>
-                {player.legsWon ?? 0}
+            <React.Fragment key={player.playerId}>
+              <div className="text-center">
+                <div className={`text-4xl font-bold ${match.winner === player.playerId ? 'text-success-400' : 'text-red-500'}`}>
+                  {player.legsWon ?? 0}
+                </div>
+                <div className="text-white font-semibold mt-1">{player.name}</div>
               </div>
-              <div className="text-white font-semibold mt-1">{player.name}</div>
               {index === 0 && matchPlayers.length > 1 && (
-                <div className="text-dark-500 text-sm mt-2">vs</div>
+                <div className="text-dark-400 text-2xl font-bold self-center">vs</div>
               )}
-            </div>
+            </React.Fragment>
           ))}
         </div>
 
