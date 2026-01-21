@@ -506,7 +506,7 @@ const TrainingScreen: React.FC = () => {
             onClick={handleRestart}
             className="px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg font-semibold transition-all"
           >
-            Restart
+            Neustart
           </button>
         </div>
 
