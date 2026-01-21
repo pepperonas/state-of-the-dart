@@ -1,7 +1,7 @@
 import React from 'react';
 import { Match, Throw } from '../../types';
 import { X, Calendar, TrendingUp } from 'lucide-react';
-import { formatDate, getTimestampForSort } from '../../utils/dateUtils';
+import { formatDateTime, getTimestampForSort } from '../../utils/dateUtils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface MatchDetailModalProps {
@@ -37,16 +37,12 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
       const playerThrows = sortedThrows.filter(t => t.playerId === player.playerId);
       const rounds: { round: number; score: number }[] = [];
 
+      // Each Throw already contains 3 darts (one complete round)
       for (let i = 0; i < playerThrows.length; i += 1) {
-        const roundNumber = Math.floor(i / 3) + 1;
+        const roundNumber = i + 1; // Each throw is already one round
         const throwScore = playerThrows[i].score ?? 0;
 
-        const existingRound = rounds.find(r => r.round === roundNumber);
-        if (existingRound) {
-          existingRound.score += throwScore;
-        } else {
-          rounds.push({ round: roundNumber, score: throwScore });
-        }
+        rounds.push({ round: roundNumber, score: throwScore });
       }
 
       playerRounds[player.playerId] = rounds;
@@ -83,7 +79,7 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
             </h2>
             <p className="text-sm text-dark-400 flex items-center gap-2 mt-1">
               <Calendar size={14} />
-              {formatDate(match.startedAt)}
+              {formatDateTime(match.startedAt)}
             </p>
           </div>
           <button
