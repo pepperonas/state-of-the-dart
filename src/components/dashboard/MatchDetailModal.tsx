@@ -18,14 +18,30 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
     const legs = match.legs || [];
     const players = match.players || [];
 
+    console.log('🔍 MatchDetailModal - Debug:', {
+      totalLegs: legs.length,
+      totalPlayers: players.length,
+      matchId: match.id,
+      legs: legs.map(l => ({ id: l.id, throwsCount: (l.throws || []).length }))
+    });
+
     if (legs.length === 0 || players.length === 0) {
+      console.warn('⚠️ No legs or players found for chart');
       return [];
     }
 
     legs.forEach(leg => {
       const throws = leg.throws || [];
+      console.log(`📊 Leg ${leg.legNumber}: ${throws.length} throws`);
       allThrows.push(...throws);
     });
+
+    console.log(`📈 Total throws collected: ${allThrows.length}`);
+
+    if (allThrows.length === 0) {
+      console.warn('⚠️ No throws found in any leg');
+      return [];
+    }
 
     const sortedThrows = allThrows.sort((a, b) =>
       getTimestampForSort(a.timestamp) - getTimestampForSort(b.timestamp)
@@ -36,6 +52,8 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
     players.forEach(player => {
       const playerThrows = sortedThrows.filter(t => t.playerId === player.playerId);
       const rounds: { round: number; score: number }[] = [];
+
+      console.log(`👤 Player ${player.name}: ${playerThrows.length} throws`);
 
       // Each Throw already contains 3 darts (one complete round)
       for (let i = 0; i < playerThrows.length; i += 1) {
@@ -52,6 +70,8 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
     const maxRounds = roundCounts.length > 0 ? Math.max(...roundCounts) : 0;
     const chartData = [];
 
+    console.log(`📊 Max rounds: ${maxRounds}`);
+
     for (let i = 1; i <= maxRounds; i++) {
       const dataPoint: any = { round: i };
 
@@ -63,6 +83,7 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
       chartData.push(dataPoint);
     }
 
+    console.log('✅ Chart data prepared:', chartData.length, 'data points');
     return chartData;
   };
 
@@ -108,12 +129,12 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
         </div>
 
         {/* Round-by-Round Chart */}
-        {chartData.length > 0 && (
-          <div className="glass-card p-6 rounded-xl mb-6">
-            <h4 className="font-bold text-white mb-4 flex items-center gap-2">
-              <TrendingUp size={20} className="text-primary-400" />
-              Runden-Verlauf
-            </h4>
+        <div className="glass-card p-6 rounded-xl mb-6">
+          <h4 className="font-bold text-white mb-4 flex items-center gap-2">
+            <TrendingUp size={20} className="text-primary-400" />
+            Runden-Verlauf
+          </h4>
+          {chartData.length > 0 ? (
             <div className="bg-dark-900 rounded-lg p-4">
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={chartData}>
@@ -159,8 +180,18 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
                 </LineChart>
               </ResponsiveContainer>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="bg-dark-900 rounded-lg p-8 text-center">
+              <div className="text-dark-500 mb-3">
+                <TrendingUp size={48} className="mx-auto opacity-30" />
+              </div>
+              <p className="text-dark-400 font-medium">Keine Runden-Daten verfügbar</p>
+              <p className="text-dark-500 text-sm mt-2">
+                Dieses Match wurde möglicherweise vor dem Tracking-Update gespielt
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* Player Stats */}
         <div className={`grid ${matchPlayers.length > 1 ? 'md:grid-cols-2' : 'md:grid-cols-1'} gap-6 mb-6`}>
