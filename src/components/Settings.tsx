@@ -167,7 +167,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               <div className="pb-6 border-b border-dark-700">
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
                   <Smartphone size={20} />
-                  Progressive Web App
+                  {t('settings.pwa_title')}
                 </h3>
                 
                 {isInstalled ? (
@@ -177,7 +177,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                         <Smartphone size={20} className="text-white" />
                       </div>
                       <div>
-                        <p className="text-white font-semibold">App installiert! ✅</p>
+                        <p className="text-white font-semibold">{t('settings.app_installed')} ✅</p>
                         <p className="text-dark-300 text-sm">Die App läuft als eigenständige Anwendung.</p>
                       </div>
                     </div>
@@ -189,25 +189,25 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                       className="w-full py-4 bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white rounded-lg font-bold text-lg flex items-center justify-center gap-3 transition-all shadow-lg hover:shadow-xl"
                     >
                       <Smartphone size={24} />
-                      App installieren
+                      {t('settings.install_app')}
                     </button>
-                    
+
                     <div className="mt-3 p-3 bg-primary-500/10 border border-primary-500/30 rounded-lg">
                       <p className="text-sm text-dark-300">
-                        📱 <strong className="text-white">Vorteile:</strong>
+                        📱 <strong className="text-white">{t('settings.pwa_benefits')}</strong>
                       </p>
                       <ul className="text-sm text-dark-300 mt-2 space-y-1 ml-4 list-disc">
-                        <li>Offline-Funktionalität</li>
-                        <li>Schnellerer Zugriff vom Homescreen</li>
-                        <li>Native App-Erfahrung</li>
-                        <li>Keine Browser-Leiste</li>
+                        <li>{t('settings.pwa_benefit_offline')}</li>
+                        <li>{t('settings.pwa_benefit_homescreen')}</li>
+                        <li>{t('settings.pwa_benefit_native')}</li>
+                        <li>{t('settings.pwa_benefit_no_browser')}</li>
                       </ul>
                     </div>
-                    
+
                     <div className="mt-3 p-3 bg-dark-800 rounded-lg">
                       <p className="text-xs text-dark-400">
-                        💡 <strong>iOS:</strong> Nutze "Zum Home-Bildschirm" im Safari-Menü<br/>
-                        💡 <strong>Android:</strong> Klicke auf "App installieren" oben
+                        💡 <strong>iOS:</strong> {t('settings.pwa_ios_tip')}<br/>
+                        💡 <strong>Android:</strong> {t('settings.pwa_android_tip')}
                       </p>
                     </div>
                   </>
@@ -219,7 +219,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
             <div className="pb-6 border-b border-dark-700">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
                 <Palette size={20} />
-                Theme / Aussehen
+                {t('settings.theme')}
               </h3>
               
               <div className="space-y-3">
@@ -237,8 +237,8 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                       <Moon size={24} className="text-primary-400" />
                     </div>
                     <div className="flex-1 text-left">
-                      <p className="text-white font-semibold">Modern Minimalist</p>
-                      <p className="text-sm text-dark-300">Clean, dark & professional</p>
+                      <p className="text-white font-semibold">{t('settings.modern_minimalist')}</p>
+                      <p className="text-sm text-dark-300">{t('settings.modern_desc')}</p>
                     </div>
                     {settings.theme === 'modern' && (
                       <div className="w-6 h-6 rounded-full bg-primary-500 flex items-center justify-center">
@@ -262,8 +262,8 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                       <Sun size={24} className="text-primary-600" />
                     </div>
                     <div className="flex-1 text-left">
-                      <p className="text-white font-semibold">Modern Minimalist Light</p>
-                      <p className="text-sm text-dark-300">Clean, bright & professional</p>
+                      <p className="text-white font-semibold">{t('settings.modern_light')}</p>
+                      <p className="text-sm text-dark-300">{t('settings.modern_light_desc')}</p>
                     </div>
                     {settings.theme === 'modern-light' && (
                       <div className="w-6 h-6 rounded-full bg-primary-400 flex items-center justify-center">
@@ -276,7 +276,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 <div className="mt-3 p-3 bg-primary-500/10 rounded-lg border border-primary-500/30">
                   <p className="text-xs text-primary-300 flex items-center gap-2">
                     <Sparkles size={14} />
-                    Das Theme wird sofort auf alle Seiten angewendet
+                    {t('settings.theme_instant')}
                   </p>
                 </div>
               </div>
@@ -286,14 +286,14 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
             <div className="pb-6 border-b border-dark-700">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
                 <Volume2 size={20} />
-                Sound
+                {t('settings.sound')}
               </h3>
-              
+
               <div className="space-y-4">
                 {/* Caller Volume */}
                 <div>
                   <label className="flex items-center justify-between mb-2">
-                    <span className="text-dark-300">Caller Volume (Scores)</span>
+                    <span className="text-dark-300">{t('settings.caller_volume')}</span>
                     <span className="text-sm text-dark-400">{settings.callerVolume ?? settings.soundVolume}%</span>
                   </label>
                   <input
@@ -313,7 +313,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 {/* Effects Volume */}
                 <div>
                   <label className="flex items-center justify-between mb-2">
-                    <span className="text-dark-300">Effects Volume (UI)</span>
+                    <span className="text-dark-300">{t('settings.effects_volume')}</span>
                     <span className="text-sm text-dark-400">{settings.effectsVolume ?? settings.soundVolume}%</span>
                   </label>
                   <input
@@ -337,19 +337,19 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                     className="py-2 px-4 bg-success-500 hover:bg-success-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition-all"
                   >
                     <Play size={18} />
-                    Caller Test
+                    {t('settings.test_caller')}
                   </button>
                   <button
                     onClick={() => audioSystem.playSound('/sounds/OMNI/pop-success.mp3')}
                     className="py-2 px-4 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition-all"
                   >
                     <Play size={18} />
-                    Effect Test
+                    {t('settings.test_effect')}
                   </button>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
-                  <span className="text-dark-300">Vibration</span>
+                  <span className="text-dark-300">{t('settings.vibration')}</span>
                   <button
                     onClick={() => updateSettings({ vibrationEnabled: !settings.vibrationEnabled })}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
@@ -370,12 +370,12 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
             <div className="pb-6 border-b border-dark-700">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
                 <Bell size={20} />
-                Game
+                {t('settings.game_settings')}
               </h3>
-              
+
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-dark-300">Show Checkout Hints</span>
+                  <span className="text-dark-300">{t('settings.show_checkout_hints')}</span>
                   <button
                     onClick={() => updateSettings({ showCheckoutHints: !settings.showCheckoutHints })}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
@@ -391,7 +391,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <span className="text-dark-300">Auto Next Player</span>
+                  <span className="text-dark-300">{t('settings.auto_next_player')}</span>
                   <button
                     onClick={() => updateSettings({ autoNextPlayer: !settings.autoNextPlayer })}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
@@ -405,9 +405,9 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                     />
                   </button>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
-                  <span className="text-dark-300">Show Stats During Game</span>
+                  <span className="text-dark-300">{t('settings.show_stats_during_game')}</span>
                   <button
                     onClick={() => updateSettings({ showStatsDuringGame: !settings.showStatsDuringGame })}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
@@ -421,9 +421,9 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                     />
                   </button>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
-                  <span className="text-dark-300">Show Dartboard Helper</span>
+                  <span className="text-dark-300">{t('settings.show_dartboard_helper')}</span>
                   <button
                     onClick={() => updateSettings({ showDartboardHelper: !settings.showDartboardHelper })}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
@@ -465,26 +465,26 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
             <div className="pb-6 border-b border-dark-700">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
                 <Download size={20} />
-                Datenverwaltung
+                {t('settings.data_management')}
               </h3>
-              
+
               <div className="space-y-3">
                 <button
                   onClick={handleExport}
                   className="w-full py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition-all"
                 >
                   <Download size={20} />
-                  Alle Daten exportieren (JSON)
+                  {t('settings.export')} (JSON)
                 </button>
-                
+
                 <button
                   onClick={handleImportClick}
                   className="w-full py-3 bg-success-500 hover:bg-success-600 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition-all"
                 >
                   <Upload size={20} />
-                  Daten importieren (JSON)
+                  {t('settings.import')} (JSON)
                 </button>
-                
+
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -492,10 +492,10 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                   onChange={handleImportFile}
                   className="hidden"
                 />
-                
+
                 <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
                   <p className="text-sm text-yellow-800 dark:text-yellow-300">
-                    ℹ️ Exportiert werden: Spieler, Matches, Einstellungen, Statistiken, Training-Sessions
+                    ℹ️ {t('settings.export_info')}
                   </p>
                 </div>
               </div>
@@ -505,17 +505,17 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
             <div className="pb-6 border-b border-dark-700">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
                 <AlertCircle size={20} />
-                Meine Bug Reports
+                {t('settings.bug_reports')}
               </h3>
 
               {isLoadingReports ? (
                 <div className="text-center py-8 text-gray-400">
-                  Lade Bug Reports...
+                  {t('settings.loading_reports')}
                 </div>
               ) : bugReports.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-gray-400 mb-4">
-                    Du hast noch keine Bug Reports eingereicht.
+                    {t('settings.no_bug_reports')}
                   </p>
                 </div>
               ) : (
@@ -571,7 +571,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 className="w-full mt-3 py-3 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white rounded-lg font-bold transition-all flex items-center justify-center gap-2 shadow-lg"
               >
                 <AlertCircle size={20} className="drop-shadow" />
-                Neuen Bug melden
+                {t('settings.report_new_bug')}
               </button>
             </div>
 
@@ -579,7 +579,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
             <div>
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
                 <User size={20} />
-                Profil
+                {t('settings.profile')}
               </h3>
               
               <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
@@ -629,7 +629,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               {/* Status and Severity */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-dark-300 mb-2">Status</label>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">{t('settings.status')}</label>
                   <span className={`inline-block px-3 py-1.5 text-sm rounded-full font-semibold uppercase ${
                     selectedBugReport.status === 'open' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
                     selectedBugReport.status === 'in_progress' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
@@ -643,7 +643,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-dark-300 mb-2">Schweregrad</label>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">{t('settings.severity')}</label>
                   <span className={`inline-block px-3 py-1.5 text-sm rounded font-semibold ${
                     selectedBugReport.severity === 'critical' ? 'bg-red-600/20 text-red-400' :
                     selectedBugReport.severity === 'high' ? 'bg-orange-600/20 text-orange-400' :
@@ -660,7 +660,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               {/* Category and Date */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-dark-300 mb-2">Kategorie</label>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">{t('settings.category')}</label>
                   <p className="text-white capitalize">
                     {selectedBugReport.category === 'gameplay' ? 'Gameplay' :
                      selectedBugReport.category === 'ui' ? 'Benutzeroberfläche' :
@@ -672,7 +672,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-dark-300 mb-2">Gemeldet am</label>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">{t('settings.created_at')}</label>
                   <p className="text-white">
                     {new Date(selectedBugReport.createdAt).toLocaleString('de-DE', {
                       day: '2-digit',
@@ -753,7 +753,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 onClick={() => setSelectedBugReport(null)}
                 className="w-full py-3 px-4 bg-dark-700 hover:bg-dark-600 rounded-lg text-white font-semibold transition-colors"
               >
-                Schließen
+                {t('common.close')}
               </button>
             </div>
           </div>
