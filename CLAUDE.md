@@ -331,6 +331,105 @@ api.auth.setMainPlayer(playerId)   // Sets main player
 - Leg-by-leg breakdown with winner badges
 - Full match metadata (date, game type, winner)
 
+### Internationalization (i18n)
+
+**Overview:**
+Complete multi-language support with react-i18next, currently supporting German (de) and English (en).
+
+**Implementation:**
+- `src/i18n/config.ts` - i18n configuration, language detection, fallback logic
+- `src/i18n/locales/de.json` - German translations
+- `src/i18n/locales/en.json` - English translations
+
+**Language Structure:**
+```json
+{
+  "common": { "back": "Zurück", "save": "Speichern", ... },
+  "auth": { "login": "Anmelden", "register": "Registrieren", ... },
+  "menu": { "main_title": "Hauptmenü", "dashboard_desc": "Übersicht & Statistiken", ... },
+  "players": { "title": "Spieler", "add_player": "Spieler hinzufügen", ... },
+  "game": { "game_setup": "Spiel-Einstellungen", "select_players": "Spieler auswählen", ... },
+  "stats": { "statistics": "Statistiken", "overview": "Übersicht", ... },
+  "training": { "training_modes": "Trainingsmodi", ... },
+  "settings": { "theme": "Theme / Aussehen", "pwa_title": "Progressive Web App", ... },
+  "achievements": { "unlocked": "Freigeschaltet", ... },
+  "subscription": { "trial": "Testphase", ... }
+}
+```
+
+**Usage in Components:**
+```typescript
+import { useTranslation } from 'react-i18next';
+
+const MyComponent = () => {
+  const { t } = useTranslation();
+
+  return (
+    <div>
+      <h1>{t('menu.main_title')}</h1>
+      <button>{t('common.save')}</button>
+    </div>
+  );
+};
+```
+
+**Language Switching:**
+- `src/components/Settings.tsx` - Language selector dropdown
+- Settings synced to database via API
+- Language changes apply instantly across entire app
+
+**Translation Coverage:**
+- ✅ All navigation and back buttons
+- ✅ Game setup (player selection, game settings, start game)
+- ✅ Training modes and descriptions
+- ✅ Settings page (PWA, themes, sounds, data management)
+- ✅ Player management
+- ✅ Statistics and achievements
+- ✅ Bug report system
+- ✅ Main menu with descriptions
+
+**Important Notes:**
+- Always use `t('namespace.key')` for all user-facing text
+- Never hardcode German or English text directly in components
+- Add new translations to both de.json and en.json simultaneously
+- Keep translation keys organized by feature/section
+
+### UI/UX Standards
+
+**Back Button Styling:**
+All back buttons across the application use consistent glass-card design:
+
+```tsx
+<button
+  onClick={() => navigate('/')}
+  className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
+>
+  <ArrowLeft size={20} />
+  {t('common.back')}
+</button>
+```
+
+**Standard Button Properties:**
+- `mb-6` - Consistent bottom margin
+- `flex items-center gap-2` - Icon and text alignment
+- `glass-card` - Glassmorphism background effect
+- `px-4 py-2` - Standard padding for button appearance
+- `rounded-lg` - Rounded corners
+- `text-white` - White text color
+- `hover:glass-card-hover` - Hover state animation
+- `transition-all` - Smooth transitions
+- Icon size: `<ArrowLeft size={20} />` (standardized at 20)
+
+**Applied to 18+ Components:**
+All pages including Dashboard, Settings, Game, Training, Stats, Players, Achievements, Leaderboards, Admin Panel, Auth pages, etc.
+
+**Benefits:**
+- Consistent user experience across all pages
+- Professional appearance with glassmorphism effect
+- Clear visual hierarchy
+- Accessible and recognizable navigation
+- Uniform hover interactions
+
 ### Type Definitions
 - Core types: `src/types/index.ts` (Match, Player, Dart, Throw, GameSettings, BugReport)
 - Achievements: `src/types/achievements.ts`
