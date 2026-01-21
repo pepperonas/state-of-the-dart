@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Edit2, Trash2, User, Eye, Crown } from 'lucide-react';
+import { ArrowLeft, Plus, Edit2, Trash2, User, Eye, Crown, BarChart3 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { usePlayer } from '../../context/PlayerContext';
 import { api } from '../../services/api';
@@ -178,6 +178,17 @@ const PlayerManagement: React.FC = () => {
                       title={t('players.view_profile')}
                     >
                       <Eye size={18} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        // Set player as selected and navigate to stats
+                        localStorage.setItem('stats_selected_player_id', player.id);
+                        navigate('/stats');
+                      }}
+                      className="p-2 text-green-400 hover:bg-green-500/20 rounded-lg transition-colors"
+                      title="Statistiken anzeigen"
+                    >
+                      <BarChart3 size={18} />
                     </button>
                     {mainPlayerId !== player.id && (
                       <button
