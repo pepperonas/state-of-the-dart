@@ -24,7 +24,7 @@ export const exportTenantData = (tenantId: string, tenantName: string): void => 
       trainingSessions: storage.get('trainingSessions', []),
       achievements: storage.get('achievements', []),
       settings: storage.get('settings', {
-        theme: 'dark',
+        theme: 'modern',
         language: 'de',
         soundVolume: 0.7,
         showCheckoutHints: true,

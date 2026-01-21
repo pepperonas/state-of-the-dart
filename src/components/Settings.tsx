@@ -248,26 +248,26 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                   </div>
                 </button>
 
-                {/* Cyberpunk Theme */}
+                {/* Modern Light Theme */}
                 <button
-                  onClick={() => updateSettings({ theme: 'steampunk' })}
+                  onClick={() => updateSettings({ theme: 'modern-light' })}
                   className={`w-full p-4 rounded-lg border-2 transition-all ${
-                    settings.theme === 'steampunk'
-                      ? 'border-yellow-400 bg-yellow-400/10'
+                    settings.theme === 'modern-light'
+                      ? 'border-primary-400 bg-primary-400/10'
                       : 'border-dark-700 bg-dark-800 hover:border-dark-600'
                   }`}
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-yellow-400 to-yellow-600 border border-yellow-500/50 flex items-center justify-center relative overflow-hidden">
-                      <span className="text-2xl">⚡</span>
+                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-gray-100 to-gray-300 border border-primary-400/30 flex items-center justify-center">
+                      <Sun size={24} className="text-primary-600" />
                     </div>
                     <div className="flex-1 text-left">
-                      <p className="text-white font-semibold">Cyberpunk Neon</p>
-                      <p className="text-sm text-dark-300">Neon yellow & dark</p>
+                      <p className="text-white font-semibold">Modern Minimalist Light</p>
+                      <p className="text-sm text-dark-300">Clean, bright & professional</p>
                     </div>
-                    {settings.theme === 'steampunk' && (
-                      <div className="w-6 h-6 rounded-full bg-yellow-400 flex items-center justify-center">
-                        <Check size={16} className="text-black" />
+                    {settings.theme === 'modern-light' && (
+                      <div className="w-6 h-6 rounded-full bg-primary-400 flex items-center justify-center">
+                        <Check size={16} className="text-white" />
                       </div>
                     )}
                   </div>

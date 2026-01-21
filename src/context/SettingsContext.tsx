@@ -25,8 +25,10 @@ const defaultSettings: AppSettings = {
   showDartboardHelper: true,
 };
 
-const normalizeTheme = (theme: any): 'modern' | 'steampunk' => {
-  if (theme === 'steampunk') return 'steampunk';
+const normalizeTheme = (theme: any): 'modern' | 'modern-light' => {
+  // Map old steampunk theme to modern
+  if (theme === 'steampunk' || theme === 'dark') return 'modern';
+  if (theme === 'modern-light') return 'modern-light';
   return 'modern';
 };
 

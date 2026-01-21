@@ -333,7 +333,7 @@ export interface AppState {
   settings: AppSettings;
 }
 
-export type AppTheme = 'modern' | 'steampunk' | 'dark'; // 'dark' is deprecated, maps to 'modern'
+export type AppTheme = 'modern' | 'modern-light';
 
 export interface AppSettings {
   theme: AppTheme;

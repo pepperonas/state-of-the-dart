@@ -2,9 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Cyberpunk Font - Futuristic Typography */
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap');
-
 /* Performance: Critical CSS inlining */
 * {
   -webkit-tap-highlight-color: transparent;
@@ -111,497 +108,179 @@
 }
 
 /* ============================================================
-   CYBERPUNK THEME - Neon Nights & Digital Dreams
+   MODERN LIGHT THEME - Clean & Professional
    ============================================================ */
 
-.steampunk {
+.modern-light {
   /* Base Colors */
-  --cp-bg-dark: #0a0a0f;
-  --cp-bg-medium: #12121a;
-  --cp-bg-light: #1a1a25;
-  --cp-bg-card: #15151f;
-
-  /* Neon Colors */
-  --cp-neon-yellow: #f0e130;
-  --cp-neon-yellow-glow: rgba(240, 225, 48, 0.6);
-  --cp-neon-cyan: #00f0ff;
-  --cp-neon-cyan-glow: rgba(0, 240, 255, 0.5);
-  --cp-neon-pink: #ff00aa;
-  --cp-neon-pink-glow: rgba(255, 0, 170, 0.5);
-  --cp-neon-orange: #ff6b00;
+  --ml-bg-primary: #ffffff;
+  --ml-bg-secondary: #f8f9fa;
+  --ml-bg-card: #ffffff;
+  --ml-bg-hover: #f1f3f5;
 
   /* Text Colors */
-  --cp-text-primary: #f0e130;
-  --cp-text-secondary: #b8b8c0;
-  --cp-text-muted: #6a6a75;
+  --ml-text-primary: #1a1a1a;
+  --ml-text-secondary: #6b7280;
+  --ml-text-muted: #9ca3af;
+
+  /* Accent Colors */
+  --ml-primary: #3b82f6;
+  --ml-primary-hover: #2563eb;
+  --ml-success: #10b981;
+  --ml-success-hover: #059669;
 
   /* Border */
-  --cp-border: #2a2a35;
-  --cp-border-highlight: #f0e130;
+  --ml-border: #e5e7eb;
+  --ml-border-hover: #d1d5db;
 
-  font-family: 'Rajdhani', sans-serif;
-  font-weight: 500;
-  letter-spacing: 0.02em;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 400;
 }
 
 /* ============================================================
-   BACKGROUND - Dark with subtle grid
+   BACKGROUND - Light & Clean
    ============================================================ */
 
-.steampunk .gradient-mesh {
-  background:
-    linear-gradient(180deg, #0a0a0f 0%, #12121a 100%);
-  background-image:
-    linear-gradient(rgba(240, 225, 48, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(240, 225, 48, 0.03) 1px, transparent 1px),
-    linear-gradient(180deg, #0a0a0f 0%, #12121a 100%);
-  background-size: 50px 50px, 50px 50px, 100% 100%;
+.modern-light .gradient-mesh {
+  background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
 }
 
 /* ============================================================
-   CARDS - Clean panels with neon accents
+   CARDS - Subtle shadows
    ============================================================ */
 
-.steampunk .glass-card {
-  background: linear-gradient(135deg, #15151f 0%, #12121a 100%);
-  border: 2px solid #2a2a35;
-  border-radius: 4px;
+.modern-light .glass-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
   backdrop-filter: none;
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(240, 225, 48, 0.1);
-  position: relative;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.steampunk .glass-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent 0%, #f0e130 50%, transparent 100%);
-  opacity: 0.8;
-}
-
-.steampunk .glass-card::after {
-  display: none;
-}
-
-.steampunk .glass-card:hover,
-.steampunk .glass-card-hover {
-  border-color: #f0e130;
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.6),
-    0 0 30px rgba(240, 225, 48, 0.15),
-    inset 0 1px 0 rgba(240, 225, 48, 0.2);
+.modern-light .glass-card:hover,
+.modern-light .glass-card-hover {
+  border-color: #d1d5db;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* ============================================================
-   TYPOGRAPHY - Clean and readable
+   TYPOGRAPHY - Clear & Readable
    ============================================================ */
 
-.steampunk h1,
-.steampunk h2 {
-  font-family: 'Orbitron', sans-serif;
-  font-weight: 700;
-  font-size: 1.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #f0e130;
-  text-shadow: 0 0 20px rgba(240, 225, 48, 0.5);
-  margin-bottom: 1.5rem;
+.modern-light h1,
+.modern-light h2,
+.modern-light h3 {
+  color: #1a1a1a;
 }
 
-.steampunk h3 {
-  font-family: 'Orbitron', sans-serif;
-  font-weight: 600;
-  font-size: 1.125rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: #f0e130;
-  text-shadow: 0 0 10px rgba(240, 225, 48, 0.3);
-  margin-bottom: 1rem;
+.modern-light .text-white,
+.modern-light p {
+  color: #1a1a1a;
 }
 
-.steampunk .text-white,
-.steampunk p {
-  color: #e8e8f0;
-  font-size: 1rem;
-  line-height: 1.6;
+.modern-light .text-dark-300,
+.modern-light .text-dark-400 {
+  color: #6b7280;
 }
 
-.steampunk .text-dark-300,
-.steampunk .text-dark-400 {
-  color: #9898a5;
-  font-size: 0.9375rem;
-}
-
-.steampunk .text-sm {
-  font-size: 0.875rem;
-  color: #7878850;
-}
-
-.steampunk .text-xs {
-  font-size: 0.8125rem;
-  color: #686875;
-}
-
-.steampunk .text-primary-400,
-.steampunk .text-primary-500 {
-  color: #f0e130;
-  text-shadow: 0 0 8px rgba(240, 225, 48, 0.4);
+.modern-light .text-primary-400,
+.modern-light .text-primary-500 {
+  color: #3b82f6;
 }
 
 /* ============================================================
-   BUTTONS - Neon glow effect
+   BUTTONS - Clean with primary colors
    ============================================================ */
 
-.steampunk button {
-  background: linear-gradient(180deg, #1e1e28 0%, #15151f 100%);
-  border: 2px solid #f0e130;
-  border-radius: 4px;
-  padding: 0.75rem 1.5rem;
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: #f0e130;
-  box-shadow:
-    0 0 15px rgba(240, 225, 48, 0.2),
-    inset 0 1px 0 rgba(240, 225, 48, 0.1);
+.modern-light button {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #1a1a1a;
   transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
 }
 
-.steampunk button:hover {
-  background: linear-gradient(180deg, #f0e130 0%, #d4c520 100%);
-  color: #0a0a0f;
-  box-shadow:
-    0 0 30px rgba(240, 225, 48, 0.5),
-    0 0 60px rgba(240, 225, 48, 0.2);
-  transform: translateY(-1px);
+.modern-light button:hover {
+  background: #f8f9fa;
+  border-color: #d1d5db;
 }
 
-.steampunk button:active {
-  transform: translateY(1px);
-  box-shadow: 0 0 10px rgba(240, 225, 48, 0.3);
+/* Success buttons */
+.modern-light button[class*="bg-success"],
+.modern-light button[class*="bg-green"] {
+  background: #10b981;
+  border-color: #10b981;
+  color: #ffffff;
 }
 
-/* Button with icons */
-.steampunk button svg {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-}
-
-/* Success/Green buttons */
-.steampunk .bg-success-500,
-.steampunk .bg-green-500,
-.steampunk button[class*="bg-success"],
-.steampunk button[class*="bg-green"] {
-  background: linear-gradient(180deg, #1e2818 0%, #152010 100%);
-  border-color: #00ff88;
-  color: #00ff88;
-  box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
-}
-
-.steampunk button[class*="bg-success"]:hover,
-.steampunk button[class*="bg-green"]:hover {
-  background: linear-gradient(180deg, #00ff88 0%, #00cc6a 100%);
-  color: #0a0a0f;
-  box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+.modern-light button[class*="bg-success"]:hover,
+.modern-light button[class*="bg-green"]:hover {
+  background: #059669;
+  border-color: #059669;
 }
 
 /* Primary buttons */
-.steampunk .bg-primary-500,
-.steampunk .bg-primary-600,
-.steampunk button[class*="bg-primary"] {
-  background: linear-gradient(180deg, #1a1a28 0%, #12121a 100%);
-  border-color: #00f0ff;
-  color: #00f0ff;
-  box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+.modern-light button[class*="bg-primary"] {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #ffffff;
 }
 
-.steampunk button[class*="bg-primary"]:hover {
-  background: linear-gradient(180deg, #00f0ff 0%, #00c8d4 100%);
-  color: #0a0a0f;
-  box-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
+.modern-light button[class*="bg-primary"]:hover {
+  background: #2563eb;
+  border-color: #2563eb;
 }
 
 /* ============================================================
-   INPUTS - Clean with neon focus
+   INPUTS - Light backgrounds
    ============================================================ */
 
-.steampunk input:not([type="range"]),
-.steampunk textarea,
-.steampunk select {
-  background: #0a0a0f;
-  border: 2px solid #2a2a35;
-  border-radius: 4px;
-  padding: 0.75rem 1rem;
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #e8e8f0;
-  transition: all 0.2s ease;
+.modern-light input:not([type="range"]),
+.modern-light textarea,
+.modern-light select {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #1a1a1a;
 }
 
-.steampunk input:not([type="range"]):focus,
-.steampunk textarea:focus,
-.steampunk select:focus {
+.modern-light input:not([type="range"]):focus,
+.modern-light textarea:focus,
+.modern-light select:focus {
   outline: none;
-  border-color: #f0e130;
-  box-shadow: 0 0 20px rgba(240, 225, 48, 0.2);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.steampunk input::placeholder {
-  color: #4a4a55;
-}
-
-/* Range Sliders */
-.steampunk input[type="range"] {
-  height: 8px;
-  background: #1a1a25;
-  border: 1px solid #2a2a35;
-  border-radius: 4px;
-  -webkit-appearance: none;
-}
-
-.steampunk input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 20px;
-  height: 20px;
-  background: #f0e130;
-  border: 2px solid #0a0a0f;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 0 15px rgba(240, 225, 48, 0.5);
-  transition: all 0.2s ease;
-}
-
-.steampunk input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
-  box-shadow: 0 0 25px rgba(240, 225, 48, 0.7);
+.modern-light input::placeholder {
+  color: #9ca3af;
 }
 
 /* ============================================================
-   TOGGLE SWITCHES - Neon style
+   SECTION BORDERS
    ============================================================ */
 
-.steampunk button[class*="h-6"][class*="w-11"] {
-  background: #1a1a25;
-  border: 2px solid #2a2a35;
-  padding: 0;
-  min-height: auto;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.steampunk button[class*="h-6"][class*="w-11"][class*="bg-success"] {
-  background: #0a1a10;
-  border-color: #00ff88;
-  box-shadow:
-    inset 0 2px 4px rgba(0, 0, 0, 0.5),
-    0 0 15px rgba(0, 255, 136, 0.3);
-}
-
-.steampunk button[class*="h-6"][class*="w-11"] span {
-  background: #f0e130;
-  box-shadow: 0 0 10px rgba(240, 225, 48, 0.5);
+.modern-light .border-b,
+.modern-light .border-dark-700 {
+  border-color: #e5e7eb;
 }
 
 /* ============================================================
-   SECTION BORDERS - Clean dividers
+   BACKGROUNDS
    ============================================================ */
 
-.steampunk .border-b {
-  border-color: #2a2a35;
+.modern-light .bg-dark-800,
+.modern-light .bg-dark-900 {
+  background: #f8f9fa;
 }
 
-.steampunk .border-dark-700 {
-  border-color: #2a2a35;
+.modern-light .bg-gray-100 {
+  background: #f3f4f6;
 }
 
-/* ============================================================
-   LABELS - Clear hierarchy
-   ============================================================ */
-
-.steampunk label {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #b8b8c0;
-  letter-spacing: 0.02em;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.modern-light .bg-gray-700 {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
 }
 
-.steampunk label span {
-  color: #f0e130;
-  font-weight: 700;
-}
-
-/* ============================================================
-   INFO BOXES - Subtle glow
-   ============================================================ */
-
-.steampunk [class*="bg-primary-500/10"],
-.steampunk [class*="border-primary-500"] {
-  background: rgba(240, 225, 48, 0.05);
-  border-color: rgba(240, 225, 48, 0.3);
-}
-
-.steampunk [class*="bg-primary-500/10"] p,
-.steampunk .text-primary-300 {
-  color: #f0e130;
-}
-
-/* ============================================================
-   SELECT DROPDOWN
-   ============================================================ */
-
-.steampunk select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23f0e130'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 1.25rem;
-  padding-right: 2.5rem;
-  cursor: pointer;
-}
-
-.steampunk select option {
-  background: #12121a;
-  color: #e8e8f0;
-  padding: 0.5rem;
-}
-
-/* ============================================================
-   THEME SELECTION BUTTONS - Special styling
-   ============================================================ */
-
-.steampunk button[class*="border-amber"],
-.steampunk button[class*="border-primary-500"] {
-  border-width: 2px;
-}
-
-.steampunk button[class*="border-amber-600"] {
-  border-color: #f0e130;
-  background: rgba(240, 225, 48, 0.1);
-}
-
-/* Theme icon containers */
-.steampunk button .w-12 {
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ============================================================
-   PROFILE SECTION
-   ============================================================ */
-
-.steampunk .bg-gray-50,
-.steampunk .bg-gray-700,
-.steampunk .dark\\:bg-gray-700 {
-  background: #15151f;
-  border: 1px solid #2a2a35;
-}
-
-/* ============================================================
-   DATA MANAGEMENT BUTTONS
-   ============================================================ */
-
-.steampunk button[class*="from-primary"] {
-  background: linear-gradient(180deg, #1a1a28 0%, #12121a 100%);
-  border: 2px solid #00f0ff;
-  color: #00f0ff;
-}
-
-.steampunk button[class*="from-primary"]:hover {
-  background: #00f0ff;
-  color: #0a0a0f;
-}
-
-/* ============================================================
-   WARNING/INFO BOXES
-   ============================================================ */
-
-.steampunk .bg-yellow-50,
-.steampunk .dark\\:bg-yellow-900\\/20,
-.steampunk [class*="bg-yellow-900"] {
-  background: rgba(240, 225, 48, 0.1);
-  border-color: rgba(240, 225, 48, 0.3);
-}
-
-.steampunk .text-yellow-800,
-.steampunk .dark\\:text-yellow-300,
-.steampunk [class*="text-yellow"] {
-  color: #f0e130;
-}
-
-/* ============================================================
-   ICONS - Consistent sizing
-   ============================================================ */
-
-.steampunk h3 svg {
-  width: 20px;
-  height: 20px;
-  color: #f0e130;
-}
-
-.steampunk .flex.items-center svg {
-  flex-shrink: 0;
-}
-
-/* ============================================================
-   SCROLLBAR - Cyberpunk style
-   ============================================================ */
-
-.steampunk ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-.steampunk ::-webkit-scrollbar-track {
-  background: #0a0a0f;
-}
-
-.steampunk ::-webkit-scrollbar-thumb {
-  background: #f0e130;
-  border-radius: 3px;
-}
-
-.steampunk ::-webkit-scrollbar-thumb:hover {
-  background: #ffef50;
-  box-shadow: 0 0 10px rgba(240, 225, 48, 0.5);
-}
-
-/* ============================================================
-   RESPONSIVE ADJUSTMENTS
-   ============================================================ */
-
-@media (max-width: 768px) {
-  .steampunk h1,
-  .steampunk h2 {
-    font-size: 1.5rem;
-  }
-
-  .steampunk h3 {
-    font-size: 1rem;
-  }
-
-  .steampunk button {
-    padding: 0.625rem 1rem;
-    font-size: 0.9375rem;
-  }
-}
 
 /* ============================================================
    ANIMATIONS - Subtle neon pulse
