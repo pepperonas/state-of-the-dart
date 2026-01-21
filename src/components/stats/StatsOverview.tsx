@@ -23,6 +23,7 @@ import { formatDate, getTimestampForSort } from '../../utils/dateUtils';
 
 const VALID_TABS = ['overview', 'progress', 'history', 'compare', 'heatmap'] as const;
 type TabType = typeof VALID_TABS[number];
+type TimeInterval = 'daily' | 'weekly' | 'monthly' | 'yearly';
 
 const StatsOverview: React.FC = () => {
   const navigate = useNavigate();
@@ -32,6 +33,7 @@ const StatsOverview: React.FC = () => {
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
   const [comparePlayerIds, setComparePlayerIds] = useState<string[]>([]);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [timeInterval, setTimeInterval] = useState<TimeInterval>('monthly');
   const exportMenuRef = useRef<HTMLDivElement>(null);
   const [matches, setMatches] = useState<Match[]>([]);
   const [loadingMatches, setLoadingMatches] = useState(true);
@@ -192,38 +194,61 @@ const StatsOverview: React.FC = () => {
     ];
   }, [selectedPlayer]);
 
-  // Monthly performance data
-  const monthlyData = useMemo(() => {
-    const monthlyStats: Record<string, { games: number; avgSum: number; wins: number }> = {};
+  // Time series performance data (daily/weekly/monthly/yearly)
+  const timeSeriesData = useMemo(() => {
+    const getTimeKey = (timestamp: number): string => {
+      const date = new Date(timestamp);
+      switch (timeInterval) {
+        case 'daily':
+          return formatDate(timestamp, { year: 'numeric', month: 'short', day: 'numeric' });
+        case 'weekly': {
+          // Get ISO week number
+          const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+          const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
+          const weekNumber = Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+          return `${date.getFullYear()} W${weekNumber}`;
+        }
+        case 'monthly':
+          return formatDate(timestamp, { year: 'numeric', month: 'short' });
+        case 'yearly':
+          return date.getFullYear().toString();
+        default:
+          return formatDate(timestamp, { year: 'numeric', month: 'short' });
+      }
+    };
+
+    const timeStats: Record<string, { games: number; avgSum: number; wins: number; timestamp: number }> = {};
 
     playerMatches.forEach(match => {
-      // Skip matches without player data - FIX for empty charts
+      // Skip matches without player data
       const players = match.players || [];
       const player = players.find((p: any) => p.playerId === selectedPlayerId);
       
-      if (!player) return; // Skip if no player data found
+      if (!player) return;
       
-      const month = formatDate(match.startedAt, { year: 'numeric', month: 'short' });
-      if (!monthlyStats[month]) {
-        monthlyStats[month] = { games: 0, avgSum: 0, wins: 0 };
+      const matchTimestamp = getTimestampForSort(match.startedAt);
+      const timeKey = getTimeKey(matchTimestamp);
+      if (!timeStats[timeKey]) {
+        timeStats[timeKey] = { games: 0, avgSum: 0, wins: 0, timestamp: matchTimestamp };
       }
       
-      monthlyStats[month].games++;
-      monthlyStats[month].avgSum += player.matchAverage || 0;
+      timeStats[timeKey].games++;
+      timeStats[timeKey].avgSum += player.matchAverage || 0;
       if (match.winner === selectedPlayerId) {
-        monthlyStats[month].wins++;
+        timeStats[timeKey].wins++;
       }
     });
 
-    return Object.entries(monthlyStats)
-      .map(([month, stats]) => ({
-        month,
+    return Object.entries(timeStats)
+      .map(([period, stats]) => ({
+        period,
         average: stats.games > 0 ? stats.avgSum / stats.games : 0,
         games: stats.games,
         winRate: stats.games > 0 ? (stats.wins / stats.games) * 100 : 0,
+        timestamp: stats.timestamp,
       }))
-      .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
-  }, [playerMatches, selectedPlayerId]);
+      .sort((a, b) => a.timestamp - b.timestamp);
+  }, [playerMatches, selectedPlayerId, timeInterval]);
   
   const handleExportCSV = () => {
     if (!selectedPlayer) return;
@@ -604,21 +629,33 @@ const StatsOverview: React.FC = () => {
                     )}
 
                     {/* Monthly Performance */}
-                    {monthlyData.length > 0 && (
+                    {timeSeriesData.length > 0 && (
                       <div className="glass-card p-6">
-                        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                          <span className="text-2xl">📊</span>
-                          Monatliche Entwicklung
-                          {monthlyData.length === 1 && (
-                            <span className="text-sm text-amber-400 ml-2">(Nur 1 Monat - spiele mehr für Entwicklung!)</span>
-                          )}
-                        </h3>
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                            <span className="text-2xl">📊</span>
+                            Entwicklung im Zeitverlauf
+                            {timeSeriesData.length === 1 && (
+                              <span className="text-sm text-amber-400 ml-2">(Nur 1 Datenpunkt - spiele mehr für Entwicklung!)</span>
+                            )}
+                          </h3>
+                          <select
+                            value={timeInterval}
+                            onChange={(e) => setTimeInterval(e.target.value as TimeInterval)}
+                            className="px-4 py-2 bg-dark-800 text-white rounded-lg border border-dark-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+                          >
+                            <option value="daily">Täglich</option>
+                            <option value="weekly">Wöchentlich</option>
+                            <option value="monthly">Monatlich</option>
+                            <option value="yearly">Jährlich</option>
+                          </select>
+                        </div>
                         <div className="bg-dark-900 rounded-lg p-4">
                           <ResponsiveContainer width="100%" height={350}>
-                            <ComposedChart data={monthlyData}>
+                            <ComposedChart data={timeSeriesData}>
                               <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
                               <XAxis 
-                                dataKey="month" 
+                                dataKey="period" 
                                 stroke="#737373"
                                 style={{ fontSize: '12px' }}
                               />
@@ -655,7 +692,7 @@ const StatsOverview: React.FC = () => {
                                 fillOpacity={0.3}
                                 stroke="#0ea5e9"
                                 strokeWidth={2}
-                                dot={{ fill: '#0ea5e9', r: monthlyData.length <= 2 ? 8 : 4 }}
+                                dot={{ fill: '#0ea5e9', r: timeSeriesData.length <= 2 ? 8 : 4 }}
                                 name="Durchschnitt"
                               />
                               <Line
@@ -664,7 +701,7 @@ const StatsOverview: React.FC = () => {
                                 dataKey="winRate"
                                 stroke="#22c55e"
                                 strokeWidth={3}
-                                dot={{ fill: '#22c55e', r: monthlyData.length <= 2 ? 8 : 4 }}
+                                dot={{ fill: '#22c55e', r: timeSeriesData.length <= 2 ? 8 : 4 }}
                                 name="Win Rate %"
                               />
                             </ComposedChart>
