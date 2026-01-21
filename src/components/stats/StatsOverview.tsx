@@ -33,7 +33,12 @@ const StatsOverview: React.FC = () => {
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
   const [comparePlayerIds, setComparePlayerIds] = useState<string[]>([]);
   const [showExportMenu, setShowExportMenu] = useState(false);
-  const [timeInterval, setTimeInterval] = useState<TimeInterval>('monthly');
+  const [timeInterval, setTimeInterval] = useState<TimeInterval>(() => {
+    const saved = localStorage.getItem('stats_time_interval');
+    return (saved && ['daily', 'weekly', 'monthly', 'yearly'].includes(saved)) 
+      ? saved as TimeInterval 
+      : 'monthly';
+  });
   const exportMenuRef = useRef<HTMLDivElement>(null);
   const [matches, setMatches] = useState<Match[]>([]);
   const [loadingMatches, setLoadingMatches] = useState(true);
@@ -66,12 +71,28 @@ const StatsOverview: React.FC = () => {
     loadMatches();
   }, []);
   
-  // Select first player by default
+  // Load selected player from localStorage on mount
   React.useEffect(() => {
-    if (players.length > 0 && !selectedPlayerId) {
+    const savedPlayerId = localStorage.getItem('stats_selected_player_id');
+    if (savedPlayerId && players.some(p => p.id === savedPlayerId)) {
+      setSelectedPlayerId(savedPlayerId);
+    } else if (players.length > 0 && !selectedPlayerId) {
+      // Fallback to first player if no saved selection
       setSelectedPlayerId(players[0].id);
     }
-  }, [players, selectedPlayerId]);
+  }, [players]);
+
+  // Save selected player to localStorage when changed
+  React.useEffect(() => {
+    if (selectedPlayerId) {
+      localStorage.setItem('stats_selected_player_id', selectedPlayerId);
+    }
+  }, [selectedPlayerId]);
+
+  // Save time interval to localStorage when changed
+  React.useEffect(() => {
+    localStorage.setItem('stats_time_interval', timeInterval);
+  }, [timeInterval]);
   
   // Close export menu when clicking outside
   useEffect(() => {
