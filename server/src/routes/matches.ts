@@ -88,8 +88,42 @@ router.get('/:id', authenticateTenant, (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Match not found' });
     }
 
-    // Get match players
-    const players = db.prepare('SELECT * FROM match_players WHERE match_id = ?').all(id);
+    // Get match players with player info (JOIN with players table)
+    const matchPlayers = db.prepare(`
+      SELECT
+        mp.*,
+        p.name,
+        p.avatar,
+        p.is_bot,
+        p.bot_level
+      FROM match_players mp
+      LEFT JOIN players p ON mp.player_id = p.id
+      WHERE mp.match_id = ?
+    `).all(id);
+
+    // Transform snake_case to camelCase for players
+    const players = matchPlayers.map((mp: any) => ({
+      id: mp.id,
+      playerId: mp.player_id,
+      name: mp.name || 'Unknown',
+      avatar: mp.avatar || '🎯',
+      isBot: mp.is_bot === 1,
+      botLevel: mp.bot_level,
+      matchAverage: mp.match_average || 0,
+      first9Average: mp.first9_average || 0,
+      matchHighestScore: mp.highest_score || 0,
+      highestScore: mp.highest_score || 0,
+      checkoutsHit: mp.checkouts_hit || 0,
+      checkoutAttempts: mp.checkout_attempts || 0,
+      match180s: mp.match_180s || 0,
+      match171Plus: mp.match_171_plus || 0,
+      match140Plus: mp.match_140_plus || 0,
+      match100Plus: mp.match_100_plus || 0,
+      match60Plus: mp.match_60_plus || 0,
+      dartsThrown: mp.darts_thrown || 0,
+      legsWon: mp.legs_won || 0,
+      setsWon: mp.sets_won || 0,
+    }));
 
     // Get legs
     const legs = db.prepare('SELECT * FROM legs WHERE match_id = ? ORDER BY leg_number ASC').all(id);
@@ -98,16 +132,34 @@ router.get('/:id', authenticateTenant, (req: AuthRequest, res: Response) => {
     const legsWithThrows = legs.map((leg: any) => {
       const throws = db.prepare('SELECT * FROM throws WHERE leg_id = ? ORDER BY visit_number ASC').all(leg.id);
       return {
-        ...leg,
+        id: leg.id,
+        legNumber: leg.leg_number,
+        winner: leg.winner,
+        startedAt: leg.started_at,
+        completedAt: leg.completed_at,
         throws: throws.map((t: any) => ({
-          ...t,
+          id: t.id,
+          playerId: t.player_id,
           darts: JSON.parse(t.darts),
+          score: t.score,
+          remaining: t.remaining,
+          timestamp: t.timestamp,
+          isCheckoutAttempt: t.is_checkout_attempt === 1,
+          isBust: t.is_bust === 1,
+          visitNumber: t.visit_number,
+          runningAverage: t.running_average,
+          first9Average: t.first9_average,
         })),
       };
     });
 
     const fullMatch = {
-      ...match,
+      id: (match as any).id,
+      type: (match as any).game_type,
+      status: (match as any).status,
+      winner: (match as any).winner,
+      startedAt: (match as any).started_at,
+      completedAt: (match as any).completed_at,
       settings: JSON.parse((match as any).settings),
       players,
       legs: legsWithThrows,
