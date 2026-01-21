@@ -588,4 +588,72 @@ router.delete('/account', authenticateToken, async (req: Request, res: Response)
   }
 });
 
+/**
+ * Get current main player
+ */
+router.get('/main-player', authenticateToken, async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const userId = authReq.user?.id;
+
+  if (!userId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const db = getDatabase();
+
+  try {
+    const user = db.prepare('SELECT main_player_id FROM users WHERE id = ?').get(userId) as any;
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ mainPlayerId: user.main_player_id });
+  } catch (error) {
+    console.error('Get main player error:', error);
+    res.status(500).json({ error: 'Failed to get main player' });
+  }
+});
+
+/**
+ * Set main player
+ */
+router.put('/main-player', authenticateToken, async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
+  const { playerId } = req.body;
+  const userId = authReq.user?.id;
+
+  if (!userId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  if (!playerId) {
+    return res.status(400).json({ error: 'Player ID is required' });
+  }
+
+  const db = getDatabase();
+
+  try {
+    // Verify player belongs to user's tenant
+    const player = db.prepare(`
+      SELECT p.id
+      FROM players p
+      JOIN tenants t ON p.tenant_id = t.id
+      WHERE p.id = ? AND t.user_id = ?
+    `).get(playerId, userId);
+
+    if (!player) {
+      return res.status(404).json({ error: 'Player not found or does not belong to user' });
+    }
+
+    // Update main_player_id
+    db.prepare('UPDATE users SET main_player_id = ? WHERE id = ?').run(playerId, userId);
+
+    res.json({ message: 'Main player updated successfully', mainPlayerId: playerId });
+  } catch (error) {
+    console.error('Set main player error:', error);
+    res.status(500).json({ error: 'Failed to set main player' });
+  }
+});
+
 export default router;

@@ -40,6 +40,19 @@ const initDatabase = () => {
     catch (error) {
         console.error('Migration error:', error);
     }
+    // Migration: Add main_player_id to users table if it doesn't exist
+    try {
+        const userTableInfo = db.pragma('table_info(users)');
+        const hasMainPlayerColumn = userTableInfo.some(col => col.name === 'main_player_id');
+        if (!hasMainPlayerColumn) {
+            console.log('🔧 Migrating users table: Adding main_player_id column...');
+            db.exec(`ALTER TABLE users ADD COLUMN main_player_id TEXT;`);
+            console.log('✅ main_player_id column added to users table');
+        }
+    }
+    catch (error) {
+        console.error('Migration error:', error);
+    }
     // Seed default achievements if empty
     const achievementCount = db.prepare('SELECT COUNT(*) as count FROM achievements').get();
     if (achievementCount.count === 0) {

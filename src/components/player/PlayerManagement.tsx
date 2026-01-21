@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Edit2, Trash2, User, Eye } from 'lucide-react';
+import { ArrowLeft, Plus, Edit2, Trash2, User, Eye, Crown } from 'lucide-react';
 import { usePlayer } from '../../context/PlayerContext';
+import { api } from '../../services/api';
 
 const PlayerManagement: React.FC = () => {
   const navigate = useNavigate();
@@ -10,6 +11,20 @@ const PlayerManagement: React.FC = () => {
   const [newPlayerName, setNewPlayerName] = useState('');
   const [editingPlayer, setEditingPlayer] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
+  const [mainPlayerId, setMainPlayerId] = useState<string | null>(null);
+
+  // Load main player on mount
+  useEffect(() => {
+    const loadMainPlayer = async () => {
+      try {
+        const response = await api.auth.getMainPlayer();
+        setMainPlayerId(response.mainPlayerId);
+      } catch (error) {
+        console.error('Failed to load main player:', error);
+      }
+    };
+    loadMainPlayer();
+  }, []);
   
   const handleAddPlayer = async () => {
     if (newPlayerName.trim()) {
@@ -34,6 +49,16 @@ const PlayerManagement: React.FC = () => {
         console.error('Failed to update player:', error);
         alert('Fehler beim Aktualisieren des Spielers');
       }
+    }
+  };
+
+  const handleSetMainPlayer = async (playerId: string) => {
+    try {
+      await api.auth.setMainPlayer(playerId);
+      setMainPlayerId(playerId);
+    } catch (error) {
+      console.error('Failed to set main player:', error);
+      alert('Fehler beim Setzen des Haupt-Profils');
     }
   };
   
@@ -129,8 +154,13 @@ const PlayerManagement: React.FC = () => {
                       />
                     ) : (
                       <div>
-                        <h3 className="font-semibold text-gray-800 dark:text-white">
+                        <h3 className="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
                           {player.name}
+                          {mainPlayerId === player.id && (
+                            <span title="Haupt-Profil">
+                              <Crown size={18} className="text-amber-400" />
+                            </span>
+                          )}
                         </h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
                           Games: {player.stats.gamesPlayed} | Avg: {player.stats.averageOverall.toFixed(2)}
@@ -147,6 +177,15 @@ const PlayerManagement: React.FC = () => {
                     >
                       <Eye size={18} />
                     </button>
+                    {mainPlayerId !== player.id && (
+                      <button
+                        onClick={() => handleSetMainPlayer(player.id)}
+                        className="p-2 text-amber-400 hover:bg-amber-500/20 rounded-lg transition-colors"
+                        title="Als Haupt-Profil setzen"
+                      >
+                        <Crown size={18} />
+                      </button>
+                    )}
                     <button
                       onClick={() => {
                         setEditingPlayer(player.id);

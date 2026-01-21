@@ -104,6 +104,14 @@ export const api = {
         method: 'DELETE',
         body: JSON.stringify({ password }),
       }),
+
+    getMainPlayer: () => apiClient('/api/auth/main-player'),
+
+    setMainPlayer: (playerId: string) =>
+      apiClient('/api/auth/main-player', {
+        method: 'PUT',
+        body: JSON.stringify({ playerId }),
+      }),
   },
 
   // Tenants

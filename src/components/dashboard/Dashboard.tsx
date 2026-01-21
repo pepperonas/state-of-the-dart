@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTenant } from '../../context/TenantContext';
+import { usePlayer } from '../../context/PlayerContext';
 import { api } from '../../services/api';
 import { formatDate } from '../../utils/dateUtils';
 
@@ -31,9 +32,12 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user, trialDaysLeft, hasActiveSubscription } = useAuth();
   const { storage } = useTenant();
+  const { players } = usePlayer();
   
   const [loading, setLoading] = useState(true);
   const [activities, setActivities] = useState<RecentActivity[]>([]);
+  const [mainPlayerId, setMainPlayerId] = useState<string | null>(null);
+  const [mainPlayerLoaded, setMainPlayerLoaded] = useState(false);
   const [stats, setStats] = useState<QuickStats>({
     totalMatches: 0,
     totalWins: 0,
@@ -44,8 +48,24 @@ const Dashboard: React.FC = () => {
   });
 
   useEffect(() => {
-    loadDashboardData();
+    const loadMainPlayer = async () => {
+      try {
+        const response = await api.auth.getMainPlayer();
+        setMainPlayerId(response.mainPlayerId);
+      } catch (error) {
+        console.error('Failed to load main player:', error);
+      } finally {
+        setMainPlayerLoaded(true);
+      }
+    };
+    loadMainPlayer();
   }, []);
+
+  useEffect(() => {
+    if (mainPlayerLoaded) {
+      loadDashboardData();
+    }
+  }, [mainPlayerLoaded, mainPlayerId]);
 
   const loadDashboardData = async () => {
     setLoading(true);
@@ -53,9 +73,17 @@ const Dashboard: React.FC = () => {
     try {
       // Load matches from API (Database-First!)
       const matches = await api.matches.getAll();
-      const completedMatches = matches.filter((m: any) => m.status === 'completed');
+      let completedMatches = matches.filter((m: any) => m.status === 'completed');
       console.log('✅ Dashboard: Matches loaded from API:', matches.length);
-      
+
+      // Filter matches for main player if set
+      if (mainPlayerId) {
+        completedMatches = completedMatches.filter((m: any) =>
+          m.players?.some((p: any) => p.playerId === mainPlayerId)
+        );
+        console.log(`📊 Dashboard: Filtered to ${completedMatches.length} matches for main player`);
+      }
+
       // Calculate stats
       const totalMatches = completedMatches.length;
       let totalWins = 0;
@@ -64,28 +92,51 @@ const Dashboard: React.FC = () => {
       let totalThrows = 0;
 
       completedMatches.forEach((match: any) => {
-        if (match.winner) {
-          totalWins++;
+        // Count wins for main player or all matches if no main player
+        if (mainPlayerId) {
+          if (match.winner === mainPlayerId) {
+            totalWins++;
+          }
+          // Only count stats for the main player
+          const mainPlayer = match.players?.find((p: any) => p.playerId === mainPlayerId);
+          if (mainPlayer) {
+            total180s += mainPlayer.match180s || 0;
+            totalScore += (mainPlayer.matchAverage || 0) * (mainPlayer.dartsThrown || 0);
+            totalThrows += mainPlayer.dartsThrown || 0;
+          }
+        } else {
+          // Fallback: aggregate all players' stats
+          if (match.winner) {
+            totalWins++;
+          }
+          match.players?.forEach((player: any) => {
+            total180s += player.match180s || 0;
+            totalScore += (player.matchAverage || 0) * (player.dartsThrown || 0);
+            totalThrows += player.dartsThrown || 0;
+          });
         }
-        
-        match.players?.forEach((player: any) => {
-          total180s += player.match180s || 0;
-          totalScore += (player.matchAverage || 0) * (player.dartsThrown || 0);
-          totalThrows += player.dartsThrown || 0;
-        });
       });
 
       const winRate = totalMatches > 0 ? (totalWins / totalMatches) * 100 : 0;
       const averageScore = totalThrows > 0 ? totalScore / totalThrows : 0;
 
-      // Calculate streak (simplified)
+      // Calculate streak (simplified) for main player
       let currentStreak = 0;
       for (let i = completedMatches.length - 1; i >= 0; i--) {
         const match = completedMatches[i] as any;
-        if (match.winner) {
-          currentStreak++;
+        if (mainPlayerId) {
+          if (match.winner === mainPlayerId) {
+            currentStreak++;
+          } else {
+            break;
+          }
         } else {
-          break;
+          // Fallback
+          if (match.winner) {
+            currentStreak++;
+          } else {
+            break;
+          }
         }
       }
 
@@ -191,6 +242,12 @@ const Dashboard: React.FC = () => {
               </span>
             )}
           </p>
+          {mainPlayerId && (
+            <p className="text-sm text-dark-400 mt-1 flex items-center gap-1">
+              <Crown size={16} className="text-amber-400" />
+              Statistiken für: <strong className="text-white">{players.find(p => p.id === mainPlayerId)?.name || 'Unbekannt'}</strong>
+            </p>
+          )}
         </div>
 
         {/* Trial Banner */}

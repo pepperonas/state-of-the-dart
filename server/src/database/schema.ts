@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS users (
   subscription_ends_at INTEGER,
   stripe_customer_id TEXT,
   stripe_subscription_id TEXT,
+  main_player_id TEXT,
   created_at INTEGER NOT NULL,
   last_active INTEGER NOT NULL
 );
