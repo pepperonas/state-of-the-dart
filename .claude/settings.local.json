@@ -46,7 +46,11 @@
       "Bash(echo:*)",
       "Bash(nc -z -w 2 69.62.121.168 $port)",
       "Bash(done)",
-      "Bash(pkill -f \"nc -z -w 2 69.62.121.168\")"
+      "Bash(pkill -f \"nc -z -w 2 69.62.121.168\")",
+      "Bash(Avg\" Texte\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "mcp__plugin_serena_serena__activate_project",
+      "mcp__plugin_serena_serena__read_file",
+      "mcp__plugin_serena_serena__find_file"
     ],
     "deny": [],
     "ask": []

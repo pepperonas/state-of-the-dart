@@ -118,22 +118,27 @@ const StatsOverview: React.FC = () => {
       .map((match, index) => {
         const players = match.players || [];
         const player = players.find((p: any) => p.playerId === selectedPlayerId);
+        
+        // Skip matches without player data - FIX for empty/zero charts
+        if (!player) return null;
+        
         const legs = match.legs || [];
         return {
           match: `#${index + 1}`,
           date: formatDate(match.startedAt, { month: 'short', day: 'numeric' }),
-          average: player?.matchAverage || 0,
-          checkoutPercent: player && player.checkoutAttempts > 0
+          average: player.matchAverage || 0,
+          checkoutPercent: player.checkoutAttempts > 0
             ? (player.checkoutsHit / player.checkoutAttempts) * 100
             : 0,
-          score180s: player?.match180s || 0,
-          score140: player?.match140Plus || 0,
-          score100: player?.match100Plus || 0,
-          legsWon: player?.legsWon || 0,
-          legsLost: player ? (legs.length - (player.legsWon || 0)) : 0,
-          highestScore: player?.matchHighestScore || 0,
+          score180s: player.match180s || 0,
+          score140: player.match140Plus || 0,
+          score100: player.match100Plus || 0,
+          legsWon: player.legsWon || 0,
+          legsLost: legs.length - (player.legsWon || 0),
+          highestScore: player.matchHighestScore || 0,
         };
-      });
+      })
+      .filter(Boolean); // Remove null entries
   }, [playerMatches, selectedPlayerId]);
 
   // Score distribution data for pie chart
@@ -191,18 +196,21 @@ const StatsOverview: React.FC = () => {
     const monthlyStats: Record<string, { games: number; avgSum: number; wins: number }> = {};
 
     playerMatches.forEach(match => {
+      // Skip matches without player data - FIX for empty charts
+      const players = match.players || [];
+      const player = players.find((p: any) => p.playerId === selectedPlayerId);
+      
+      if (!player) return; // Skip if no player data found
+      
       const month = formatDate(match.startedAt, { year: 'numeric', month: 'short' });
       if (!monthlyStats[month]) {
         monthlyStats[month] = { games: 0, avgSum: 0, wins: 0 };
       }
-      const players = match.players || [];
-      const player = players.find((p: any) => p.playerId === selectedPlayerId);
-      if (player) {
-        monthlyStats[month].games++;
-        monthlyStats[month].avgSum += player.matchAverage || 0;
-        if (match.winner === selectedPlayerId) {
-          monthlyStats[month].wins++;
-        }
+      
+      monthlyStats[month].games++;
+      monthlyStats[month].avgSum += player.matchAverage || 0;
+      if (match.winner === selectedPlayerId) {
+        monthlyStats[month].wins++;
       }
     });
 
