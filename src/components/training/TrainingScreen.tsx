@@ -212,7 +212,7 @@ const TrainingScreen: React.FC = () => {
       case 'triples':
         return `Hit Triple ${trainingState.currentTarget} | Progress: ${20 - trainingState.currentTarget}/20`;
       case 'around-the-clock':
-        return `Hit ${trainingState.currentTarget} (any segment) | Progress: ${trainingState.currentTarget - 1}/20`;
+        return `Triff ${trainingState.currentTarget} (jedes Segment) | Fortschritt: ${trainingState.currentTarget - 1}/20`;
       case 'checkout-121':
         return `Checkout ${trainingState.score} remaining`;
       case 'bobs-27':
@@ -229,7 +229,7 @@ const TrainingScreen: React.FC = () => {
       case 'doubles':
       case 'triples':
       case 'around-the-clock':
-        return `Attempt ${trainingState.attempts} / ${trainingState.totalRounds}`;
+        return `Versuch ${trainingState.attempts} / ${trainingState.totalRounds}`;
       case 'bobs-27':
       case 'score-training':
         return `Round ${trainingState.round} / ${trainingState.totalRounds}`;
@@ -521,7 +521,7 @@ const TrainingScreen: React.FC = () => {
             </div>
             <div className="text-right">
               <p className="text-3xl font-bold text-success-400">{trainingState.score}</p>
-              <p className="text-sm text-dark-400">Score</p>
+              <p className="text-sm text-dark-400">Punkte</p>
             </div>
           </div>
         </div>
@@ -530,15 +530,15 @@ const TrainingScreen: React.FC = () => {
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="glass-card p-4 text-center">
             <p className="text-2xl font-bold text-white">{trainingState.attempts}</p>
-            <p className="text-sm text-dark-400">Attempts</p>
+            <p className="text-sm text-dark-400">Versuche</p>
           </div>
           <div className="glass-card p-4 text-center">
             <p className="text-2xl font-bold text-success-400">{trainingState.hits}</p>
-            <p className="text-sm text-dark-400">Hits</p>
+            <p className="text-sm text-dark-400">Treffer</p>
           </div>
           <div className="glass-card p-4 text-center">
             <p className="text-2xl font-bold text-primary-400">{accuracy}%</p>
-            <p className="text-sm text-dark-400">Accuracy</p>
+            <p className="text-sm text-dark-400">Genauigkeit</p>
           </div>
         </div>
 
@@ -557,7 +557,7 @@ const TrainingScreen: React.FC = () => {
               className="w-full py-3 bg-dark-800 hover:bg-dark-700 disabled:bg-dark-900 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-all border-2 border-dark-600 hover:border-dark-500 disabled:border-dark-800 flex items-center justify-center gap-2"
             >
               <X size={20} />
-              Miss / No Score
+              Verfehlt / Keine Punkte
             </button>
           </div>
 
@@ -565,7 +565,7 @@ const TrainingScreen: React.FC = () => {
           <div className="space-y-4">
             {/* Current Throw */}
             <div className="glass-card p-6">
-              <h3 className="text-lg font-bold text-white mb-4">Current Throw</h3>
+              <h3 className="text-lg font-bold text-white mb-4">Aktueller Wurf</h3>
               <div className="flex gap-2 mb-4">
                 {currentThrow.map((dart, index) => (
                   <div
@@ -590,14 +590,14 @@ const TrainingScreen: React.FC = () => {
                   className="flex-1 py-3 bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 disabled:from-dark-700 disabled:to-dark-700 disabled:cursor-not-allowed text-white rounded-lg font-bold flex items-center justify-center gap-2 transition-all"
                 >
                   <Check size={20} />
-                  Confirm
+                  Bestätigen
                 </button>
                 <button
                   onClick={handleRemoveDart}
                   disabled={currentThrow.length === 0 || trainingState.completed}
                   className="px-4 py-3 bg-dark-700 hover:bg-dark-600 disabled:bg-dark-800 disabled:cursor-not-allowed text-white rounded-lg transition-all"
                 >
-                  Undo
+                  Zurück
                 </button>
                 <button
                   onClick={handleClearThrow}
@@ -663,7 +663,7 @@ const TrainingScreen: React.FC = () => {
 
             {/* Instructions */}
             <div className="glass-card p-6">
-              <h3 className="text-lg font-bold text-white mb-2">Instructions</h3>
+              <h3 className="text-lg font-bold text-white mb-2">Anleitung</h3>
               <div className="text-sm text-dark-300 space-y-1">
                 {mode === 'doubles' && (
                   <>
