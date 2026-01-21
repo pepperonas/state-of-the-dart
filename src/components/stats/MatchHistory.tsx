@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Match, Throw } from '../../types';
-import { Calendar, Target, Award, ChevronDown, ChevronUp, TrendingUp } from 'lucide-react';
+import { Calendar, Target, Award, ChevronDown, ChevronUp, TrendingUp, Loader } from 'lucide-react';
 import { formatDate, getTimestampForSort } from '../../utils/dateUtils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { api } from '../../services/api';
 
 interface MatchHistoryProps {
   matches: Match[];
@@ -11,14 +12,35 @@ interface MatchHistoryProps {
 
 const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
   const [expandedMatch, setExpandedMatch] = useState<string | null>(null);
+  const [matchDetails, setMatchDetails] = useState<Record<string, Match>>({});
+  const [loadingDetails, setLoadingDetails] = useState<Record<string, boolean>>({});
   
   // Sort matches by date (newest first)
   const sortedMatches = [...matches].sort((a, b) =>
     getTimestampForSort(b.startedAt) - getTimestampForSort(a.startedAt)
   );
-  
-  const toggleMatch = (matchId: string) => {
-    setExpandedMatch(expandedMatch === matchId ? null : matchId);
+
+  // Load match details when expanding
+  const toggleMatch = async (matchId: string) => {
+    if (expandedMatch === matchId) {
+      setExpandedMatch(null);
+      return;
+    }
+
+    setExpandedMatch(matchId);
+
+    // Load details if not already loaded
+    if (!matchDetails[matchId] && !loadingDetails[matchId]) {
+      setLoadingDetails(prev => ({ ...prev, [matchId]: true }));
+      try {
+        const fullMatch = await api.matches.getById(matchId);
+        setMatchDetails(prev => ({ ...prev, [matchId]: fullMatch }));
+      } catch (error) {
+        console.error('Failed to load match details:', error);
+      } finally {
+        setLoadingDetails(prev => ({ ...prev, [matchId]: false }));
+      }
+    }
   };
 
   // Prepare round-by-round data for chart
@@ -172,9 +194,16 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                       <TrendingUp size={20} className="text-primary-400" />
                       Runden-Verlauf
                     </h4>
-                    <div className="bg-dark-900 rounded-lg p-4">
-                      <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={prepareRoundData(match)}>
+                    {loadingDetails[match.id] ? (
+                      <div className="bg-dark-900 rounded-lg p-12 text-center">
+                        <Loader className="mx-auto mb-4 text-primary-400 animate-spin" size={48} />
+                        <p className="text-dark-400 font-medium">Lade Match-Details...</p>
+                      </div>
+                    ) : matchDetails[match.id] ? (
+                      <div className="bg-dark-900 rounded-lg p-4">
+                        {prepareRoundData(matchDetails[match.id]).length > 0 ? (
+                          <ResponsiveContainer width="100%" height={300}>
+                            <LineChart data={prepareRoundData(matchDetails[match.id])}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
                           <XAxis 
                             dataKey="round" 
@@ -216,7 +245,22 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                           ))}
                         </LineChart>
                       </ResponsiveContainer>
-                    </div>
+                        ) : (
+                          <div className="bg-dark-900 rounded-lg p-8 text-center">
+                            <TrendingUp size={48} className="mx-auto mb-3 text-dark-600 opacity-30" />
+                            <p className="text-dark-400 font-medium">Keine Runden-Daten verfügbar</p>
+                            <p className="text-dark-500 text-sm mt-2">
+                              Dieses Match wurde möglicherweise vor dem Tracking-Update gespielt
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="bg-dark-900 rounded-lg p-8 text-center">
+                        <TrendingUp size={48} className="mx-auto mb-3 text-dark-600 opacity-30" />
+                        <p className="text-dark-400 font-medium">Keine Runden-Daten verfügbar</p>
+                      </div>
+                    )}
                   </div>
 
                   <div className={`grid ${opponent ? 'md:grid-cols-2' : 'md:grid-cols-1'} gap-6`}>
