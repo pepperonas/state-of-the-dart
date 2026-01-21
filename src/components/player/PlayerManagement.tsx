@@ -149,7 +149,7 @@ const PlayerManagement: React.FC = () => {
                           if (e.key === 'Enter') handleEditPlayer(player.id);
                         }}
                         onBlur={() => handleEditPlayer(player.id)}
-                        className="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+                        className="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                         autoFocus
                       />
                     ) : (
