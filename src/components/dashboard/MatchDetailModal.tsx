@@ -73,8 +73,8 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
   const chartData = prepareRoundData(match);
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="glass-card rounded-2xl p-6 max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="glass-card rounded-2xl p-6 max-w-6xl w-full my-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -98,7 +98,7 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
         <div className="mb-6 flex items-center justify-center gap-8">
           {matchPlayers.map((player, index) => (
             <div key={player.playerId} className="text-center">
-              <div className={`text-4xl font-bold ${match.winner === player.playerId ? 'text-success-400' : 'text-error-400'}`}>
+              <div className={`text-4xl font-bold ${match.winner === player.playerId ? 'text-success-400' : 'text-red-500'}`}>
                 {player.legsWon ?? 0}
               </div>
               <div className="text-white font-semibold mt-1">{player.name}</div>

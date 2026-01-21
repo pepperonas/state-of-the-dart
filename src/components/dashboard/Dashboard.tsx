@@ -188,11 +188,8 @@ const Dashboard: React.FC = () => {
     setLoadingMatch(true);
     try {
       // Load full match with legs and throws
-      const matches = await api.matches.getAll();
-      const match = matches.find((m: any) => m.id === matchId);
-      if (match) {
-        setSelectedMatch(match);
-      }
+      const match = await api.matches.getById(matchId);
+      setSelectedMatch(match);
     } catch (error) {
       console.error('Failed to load match:', error);
     } finally {
