@@ -20,9 +20,73 @@ const requireAdmin = (req: AuthRequest, res: Response, next: express.NextFunctio
   next();
 };
 
+
 // Apply authentication and admin check to all routes
 router.use(authenticateToken);
 router.use(requireAdmin);
+
+/**
+ * Fix matches with missing timestamps
+ */
+router.post('/fix-timestamps', (req: Request, res: Response) => {
+  const db = getDatabase();
+
+  try {
+    // Get all matches with NULL or 0 started_at
+    const matchesWithoutTimestamp = db.prepare(`
+      SELECT id, completed_at FROM matches WHERE started_at IS NULL OR started_at = 0
+    `).all() as Array<{ id: string; completed_at: number | null }>;
+
+    console.log(`Found ${matchesWithoutTimestamp.length} matches with missing timestamps`);
+
+    let fixed = 0;
+    let failed = 0;
+
+    for (const match of matchesWithoutTimestamp) {
+      try {
+        let timestamp: number | null = null;
+
+        // Try to get the earliest throw timestamp from this match's legs
+        const earliestThrow = db.prepare(`
+          SELECT MIN(t.timestamp) as earliest
+          FROM throws t
+          JOIN legs l ON t.leg_id = l.id
+          WHERE l.match_id = ? AND t.timestamp IS NOT NULL AND t.timestamp > 0
+        `).get(match.id) as { earliest: number | null };
+
+        if (earliestThrow?.earliest) {
+          timestamp = earliestThrow.earliest;
+          console.log(`Match ${match.id}: Using earliest throw timestamp ${timestamp}`);
+        } else if (match.completed_at) {
+          // Use completed_at minus 30 minutes as fallback
+          timestamp = match.completed_at - (30 * 60 * 1000);
+          console.log(`Match ${match.id}: Using completed_at minus 30min: ${timestamp}`);
+        } else {
+          // Last resort: use current time minus 30 days
+          timestamp = Date.now() - (30 * 24 * 60 * 60 * 1000);
+          console.log(`Match ${match.id}: Using fallback timestamp: ${timestamp}`);
+        }
+
+        // Update the match
+        db.prepare('UPDATE matches SET started_at = ? WHERE id = ?').run(timestamp, match.id);
+        fixed++;
+      } catch (err) {
+        console.error(`Failed to fix match ${match.id}:`, err);
+        failed++;
+      }
+    }
+
+    res.json({
+      message: 'Timestamp fix completed',
+      total: matchesWithoutTimestamp.length,
+      fixed,
+      failed,
+    });
+  } catch (error) {
+    console.error('Fix timestamps error:', error);
+    res.status(500).json({ error: 'Failed to fix timestamps' });
+  }
+});
 
 /**
  * Get all users

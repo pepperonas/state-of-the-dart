@@ -246,15 +246,22 @@ const StatsOverview: React.FC = () => {
       // Skip matches without player data
       const players = match.players || [];
       const player = players.find((p: any) => p.playerId === selectedPlayerId);
-      
+
       if (!player) return;
-      
+
       const matchTimestamp = getTimestampForSort(match.startedAt);
+
+      // Skip matches with invalid timestamps (0, null, undefined)
+      if (!matchTimestamp || matchTimestamp === 0) {
+        console.warn('⚠️ Match with invalid timestamp skipped:', match.id, match.startedAt);
+        return;
+      }
+
       const timeKey = getTimeKey(matchTimestamp);
       if (!timeStats[timeKey]) {
         timeStats[timeKey] = { games: 0, avgSum: 0, wins: 0, timestamp: matchTimestamp };
       }
-      
+
       timeStats[timeKey].games++;
       timeStats[timeKey].avgSum += player.matchAverage || 0;
       if (match.winner === selectedPlayerId) {
@@ -652,7 +659,7 @@ const StatsOverview: React.FC = () => {
                     )}
 
                     {/* Monthly Performance */}
-                    {timeSeriesData.length > 0 && (
+                    {playerMatches.length > 0 && (
                       <div className="glass-card p-6">
                         <div className="flex items-center justify-between mb-4">
                           <h3 className="text-xl font-bold text-white flex items-center gap-2">
@@ -660,6 +667,9 @@ const StatsOverview: React.FC = () => {
                             Entwicklung im Zeitverlauf
                             {timeSeriesData.length === 1 && (
                               <span className="text-sm text-amber-400 ml-2">(Nur 1 Datenpunkt - spiele mehr für Entwicklung!)</span>
+                            )}
+                            {timeSeriesData.length === 0 && playerMatches.length > 0 && (
+                              <span className="text-sm text-red-400 ml-2">(Keine gültigen Zeitstempel in Match-Daten)</span>
                             )}
                           </h3>
                           <select
@@ -673,63 +683,73 @@ const StatsOverview: React.FC = () => {
                             <option value="yearly">Jährlich</option>
                           </select>
                         </div>
-                        <div className="bg-dark-900 rounded-lg p-4">
-                          <ResponsiveContainer width="100%" height={350}>
-                            <ComposedChart data={timeSeriesData}>
-                              <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
-                              <XAxis 
-                                dataKey="period" 
-                                stroke="#737373"
-                                style={{ fontSize: '12px' }}
-                              />
-                              <YAxis 
-                                yAxisId="left"
-                                stroke="#737373"
-                                style={{ fontSize: '12px' }}
-                                label={{ value: 'Average', angle: -90, position: 'insideLeft', fill: '#a3a3a3' }}
-                              />
-                              <YAxis 
-                                yAxisId="right"
-                                orientation="right"
-                                stroke="#737373"
-                                style={{ fontSize: '12px' }}
-                                label={{ value: 'Win Rate %', angle: 90, position: 'insideRight', fill: '#a3a3a3' }}
-                              />
-                              <Tooltip 
-                                contentStyle={{ 
-                                  backgroundColor: '#0a0a0a', 
-                                  border: '1px solid #404040',
-                                  borderRadius: '8px',
-                                  padding: '12px'
-                                }}
-                                labelStyle={{ color: '#fff', fontWeight: 'bold' }}
-                              />
-                              <Legend 
-                                wrapperStyle={{ paddingTop: '20px' }}
-                              />
-                              <Area
-                                yAxisId="left"
-                                type="monotone"
-                                dataKey="average"
-                                fill="#0ea5e9"
-                                fillOpacity={0.3}
-                                stroke="#0ea5e9"
-                                strokeWidth={2}
-                                dot={{ fill: '#0ea5e9', r: timeSeriesData.length <= 2 ? 8 : 4 }}
-                                name="Durchschnitt"
-                              />
-                              <Line
-                                yAxisId="right"
-                                type="monotone"
-                                dataKey="winRate"
-                                stroke="#22c55e"
-                                strokeWidth={3}
-                                dot={{ fill: '#22c55e', r: timeSeriesData.length <= 2 ? 8 : 4 }}
-                                name="Win Rate %"
-                              />
-                            </ComposedChart>
-                          </ResponsiveContainer>
-                        </div>
+                        {timeSeriesData.length > 0 ? (
+                          <div className="bg-dark-900 rounded-lg p-4">
+                            <ResponsiveContainer width="100%" height={350}>
+                              <ComposedChart data={timeSeriesData}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
+                                <XAxis
+                                  dataKey="period"
+                                  stroke="#737373"
+                                  style={{ fontSize: '12px' }}
+                                />
+                                <YAxis
+                                  yAxisId="left"
+                                  stroke="#737373"
+                                  style={{ fontSize: '12px' }}
+                                  label={{ value: 'Average', angle: -90, position: 'insideLeft', fill: '#a3a3a3' }}
+                                />
+                                <YAxis
+                                  yAxisId="right"
+                                  orientation="right"
+                                  stroke="#737373"
+                                  style={{ fontSize: '12px' }}
+                                  label={{ value: 'Win Rate %', angle: 90, position: 'insideRight', fill: '#a3a3a3' }}
+                                />
+                                <Tooltip
+                                  contentStyle={{
+                                    backgroundColor: '#0a0a0a',
+                                    border: '1px solid #404040',
+                                    borderRadius: '8px',
+                                    padding: '12px'
+                                  }}
+                                  labelStyle={{ color: '#fff', fontWeight: 'bold' }}
+                                />
+                                <Legend
+                                  wrapperStyle={{ paddingTop: '20px' }}
+                                />
+                                <Area
+                                  yAxisId="left"
+                                  type="monotone"
+                                  dataKey="average"
+                                  fill="#0ea5e9"
+                                  fillOpacity={0.3}
+                                  stroke="#0ea5e9"
+                                  strokeWidth={2}
+                                  dot={{ fill: '#0ea5e9', r: timeSeriesData.length <= 2 ? 8 : 4 }}
+                                  name="Durchschnitt"
+                                />
+                                <Line
+                                  yAxisId="right"
+                                  type="monotone"
+                                  dataKey="winRate"
+                                  stroke="#22c55e"
+                                  strokeWidth={3}
+                                  dot={{ fill: '#22c55e', r: timeSeriesData.length <= 2 ? 8 : 4 }}
+                                  name="Win Rate %"
+                                />
+                              </ComposedChart>
+                            </ResponsiveContainer>
+                          </div>
+                        ) : (
+                          <div className="bg-dark-900 rounded-lg p-12 text-center">
+                            <Activity size={48} className="mx-auto mb-4 text-dark-600" />
+                            <p className="text-dark-400 text-lg font-semibold mb-2">Keine Zeitverlaufs-Daten verfügbar</p>
+                            <p className="text-dark-500 text-sm">
+                              Die Match-Daten haben keine gültigen Zeitstempel. Neue Matches werden korrekt erfasst.
+                            </p>
+                          </div>
+                        )}
                       </div>
                     )}
                   </>

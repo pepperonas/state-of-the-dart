@@ -75,6 +75,26 @@ Express routes in `server/src/routes/`:
 
 Database uses SQLite with schema in `server/src/database/schema.ts`.
 
+**API Response Format:**
+- Backend converts snake_case database fields to camelCase for API responses
+- Match endpoints (`/api/matches`) return:
+  - `startedAt` (not `started_at`)
+  - `completedAt` (not `completed_at`)
+  - `gameType` (not `game_type`)
+- This conversion happens in `server/src/routes/matches.ts`
+- Frontend expects camelCase for all API responses
+
+**Data Validation:**
+- Stats charts validate timestamps before processing (skip matches with timestamp 0 or null)
+- Implementation in `src/components/stats/StatsOverview.tsx:252-258`
+- Shows helpful fallback UI when no valid data available
+- Console warnings for debugging invalid timestamps
+
+**Admin Utilities:**
+- `/api/admin/fix-timestamps` - POST endpoint to repair matches with missing timestamps
+- Uses earliest throw timestamp or falls back to completed_at - 30min
+- Migration script available: `server/scripts/fix-match-timestamps.ts`
+
 **Master Admin Account:**
 - Email: `martinpaush@gmail.com`
 - This account is automatically granted admin rights on every database initialization

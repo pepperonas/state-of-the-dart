@@ -382,7 +382,7 @@ const PlayerProfile: React.FC = () => {
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
                   <div className="bg-dark-900 rounded-lg p-3 text-center">
                     <div className="text-sm text-dark-400 mb-1">Miss Rate</div>
-                    <div className="text-xl font-bold text-error-400">
+                    <div className="text-xl font-bold text-red-400">
                       {accuracyStats.missRate.toFixed(1)}%
                     </div>
                   </div>

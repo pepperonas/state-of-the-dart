@@ -52,7 +52,10 @@
       "mcp__plugin_serena_serena__read_file",
       "mcp__plugin_serena_serena__find_file",
       "Bash(for file in src/components/Settings.tsx src/components/achievements/AchievementsScreen.tsx src/components/admin/AdminPanel.tsx src/components/dashboard/Dashboard.tsx src/components/game/GameScreen.tsx src/components/leaderboard/GlobalLeaderboard.tsx src/components/leaderboard/Leaderboard.tsx src/components/payment/Pricing.tsx src/components/player/PlayerManagement.tsx src/components/player/PlayerProfile.tsx src/components/stats/StatsOverview.tsx src/components/tournament/TournamentMenu.tsx src/components/training/TrainingMenu.tsx src/components/training/TrainingScreen.tsx src/components/training/TrainingStats.tsx src/components/auth/UserSettings.tsx)",
-      "Bash(do echo \"=== $file ===\" grep -B 1 -A 1 \"ArrowLeft\" \"$file\")"
+      "Bash(do echo \"=== $file ===\" grep -B 1 -A 1 \"ArrowLeft\" \"$file\")",
+      "mcp__plugin_serena_serena__insert_before_symbol",
+      "mcp__plugin_serena_serena__insert_after_symbol",
+      "mcp__plugin_serena_serena__find_symbol"
     ],
     "deny": [],
     "ask": []

@@ -62,7 +62,12 @@ router.get('/', authenticateTenant, (req: AuthRequest, res: Response) => {
       }));
 
       return {
-        ...match,
+        id: match.id,
+        type: match.game_type,
+        status: match.status,
+        winner: match.winner,
+        startedAt: match.started_at,
+        completedAt: match.completed_at,
         settings: JSON.parse(match.settings),
         players,
       };

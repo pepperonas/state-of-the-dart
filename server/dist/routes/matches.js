@@ -58,7 +58,12 @@ router.get('/', auth_1.authenticateTenant, (req, res) => {
                 setsWon: mp.sets_won || 0,
             }));
             return {
-                ...match,
+                id: match.id,
+                type: match.game_type,
+                status: match.status,
+                winner: match.winner,
+                startedAt: match.started_at,
+                completedAt: match.completed_at,
                 settings: JSON.parse(match.settings),
                 players,
             };
