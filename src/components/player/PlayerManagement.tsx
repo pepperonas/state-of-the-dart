@@ -70,7 +70,7 @@ const PlayerManagement: React.FC = () => {
           className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
         >
           <ArrowLeft size={20} />
-          Back to Menu
+          Zurück
         </button>
         
         <div className="glass-card rounded-xl shadow-lg p-6 md:p-8">

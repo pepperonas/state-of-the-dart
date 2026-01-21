@@ -653,7 +653,7 @@ const TrainingScreen: React.FC = () => {
                     onClick={() => navigate('/training')}
                     className="flex-1 py-3 bg-gradient-to-r from-dark-600 to-dark-700 hover:from-dark-700 hover:to-dark-800 text-white rounded-lg font-bold transition-all"
                   >
-                    Back to Menu
+                    Zurück
                   </button>
                 </div>
               </div>

@@ -59,7 +59,7 @@ const TrainingMenu: React.FC = () => {
             className="flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
           >
             <ArrowLeft size={20} />
-            Back to Menu
+            Zurück
           </button>
           <button
             onClick={() => navigate('/training-stats')}
