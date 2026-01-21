@@ -381,12 +381,52 @@ const MyComponent = () => {
 **Translation Coverage:**
 - ✅ All navigation and back buttons
 - ✅ Game setup (player selection, game settings, start game)
-- ✅ Training modes and descriptions
+- ✅ Training modes (all 6 modes fully translated)
 - ✅ Settings page (PWA, themes, sounds, data management)
 - ✅ Player management
 - ✅ Statistics and achievements
 - ✅ Bug report system
 - ✅ Main menu with descriptions
+
+**Training Modes Translation:**
+All training modes in `src/components/training/TrainingScreen.tsx` are fully translated:
+
+1. **Doubles Training** (Doppel Training)
+   - Title: "Doppel Training"
+   - Description: "Triff Doppel {X} | Fortschritt: {X}/20"
+   - Instructions: "Triff alle Doppel von D1 bis D20", "Klicke auf den Doppelring", "Fahre mit dem nächsten Doppel fort"
+
+2. **Triples Training** (Tripel Training)
+   - Title: "Tripel Training"
+   - Description: "Triff Tripel {X} | Fortschritt: {X}/20"
+   - Instructions: "Triff alle Tripel von T20 bis T1", "Klicke auf den Tripelring", "Fahre mit dem nächsten Tripel fort"
+
+3. **Around the Clock** (Rund um die Uhr)
+   - Title: "Rund um die Uhr"
+   - Description: "Triff {X} (jedes Segment) | Fortschritt: {X}/20"
+   - Instructions: "Triff alle Zahlen von 1 bis 20 in Reihenfolge", "Jedes Segment (Single, Double, Triple) zählt", "Schließe den Rundgang so schnell wie möglich ab"
+
+4. **Checkout Training**
+   - Title: "Checkout Training"
+   - Description: "Checkout {X} verbleibend"
+   - Instructions: "Checke die verbleibenden Punkte aus", "Muss auf einem Doppel beendet werden", "Übe gängige Checkout-Kombinationen"
+
+5. **Bob's 27**
+   - Title: "Bob's 27"
+   - Description: "Punkte: {X} | Ziel: {Y}"
+   - Instructions: "Starte mit 27 Punkten", "Triff die Zielzahl: +3 Punkte", "Verfehle das Ziel: -3 Punkte", "Lass deine Punkte nicht auf 0 fallen!"
+
+6. **Score Training**
+   - Title: "Score Training"
+   - Description: "Erziele {X}+ in 3 Darts"
+   - Instructions: "Versuche 60+ Punkte pro Wurf zu erzielen", "Ziele auf hohe Punktesegmente", "Baue Konstanz und Kraft auf"
+
+**Common Training UI Elements:**
+- Stats: "Punkte", "Versuche", "Treffer", "Genauigkeit"
+- Buttons: "Verfehlt / Keine Punkte", "Bestätigen", "Zurück", "Neustart"
+- Sections: "Aktueller Wurf", "Anleitung"
+- Completion: "Training Abgeschlossen! 🎯", "{X} Treffer in {Y} Versuchen", "Nochmal versuchen"
+- Perfect messages: "Perfekt! Alle Doppel getroffen!", "Perfekt! Alle Tripel getroffen!", "Perfekt! Voller Rundgang abgeschlossen!", "Checkout erfolgreich!"
 
 **Important Notes:**
 - Always use `t('namespace.key')` for all user-facing text
