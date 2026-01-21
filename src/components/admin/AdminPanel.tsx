@@ -49,6 +49,14 @@ const AdminPanel: React.FC = () => {
   const [selectedBugReport, setSelectedBugReport] = useState<BugReport | null>(null);
   const [bugLoading, setBugLoading] = useState(false);
 
+  // Subscription Edit Modal
+  const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    subscriptionStatus: '',
+    subscriptionPlan: '',
+    subscriptionEndsAt: '',
+  });
+
   useEffect(() => {
     if (!user?.isAdmin) {
       navigate('/');
@@ -162,6 +170,31 @@ const AdminPanel: React.FC = () => {
         await api.admin.makeAdmin(userId);
       }
       loadData();
+    } catch (err: any) {
+      alert(`Error: ${err.message}`);
+    }
+  };
+
+  const handleOpenEditModal = (user: AdminUser) => {
+    setEditingUser(user);
+    setEditFormData({
+      subscriptionStatus: user.subscription_status,
+      subscriptionPlan: user.subscription_plan || '',
+      subscriptionEndsAt: user.subscription_ends_at ? new Date(user.subscription_ends_at).toISOString().slice(0, 16) : '',
+    });
+  };
+
+  const handleUpdateSubscription = async () => {
+    if (!editingUser) return;
+
+    try {
+      await api.admin.updateSubscription(editingUser.id, {
+        subscriptionStatus: editFormData.subscriptionStatus,
+        subscriptionPlan: editFormData.subscriptionPlan || undefined,
+        subscriptionEndsAt: editFormData.subscriptionEndsAt ? new Date(editFormData.subscriptionEndsAt).getTime() : undefined,
+      });
+      await loadData();
+      setEditingUser(null);
     } catch (err: any) {
       alert(`Error: ${err.message}`);
     }
@@ -426,6 +459,13 @@ const AdminPanel: React.FC = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => handleOpenEditModal(u)}
+                          className="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors"
+                          title="Abonnement bearbeiten"
+                        >
+                          <Edit size={16} />
+                        </button>
                         {u.subscription_status !== 'lifetime' && (
                           <button
                             onClick={() => handleGrantLifetime(u.id)}
@@ -663,6 +703,112 @@ const AdminPanel: React.FC = () => {
             </div>
           )}
         </motion.div>
+
+        {/* Subscription Edit Modal */}
+        {editingUser && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div className="glass-card rounded-2xl p-6 max-w-2xl w-full">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-white">Abonnement bearbeiten</h3>
+                <button
+                  onClick={() => setEditingUser(null)}
+                  className="p-2 hover:bg-dark-700/50 rounded-lg transition-colors"
+                >
+                  <XCircle size={24} className="text-gray-400" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {/* User Info */}
+                <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700">
+                  <div className="flex items-center gap-3 mb-2">
+                    {editingUser.avatar?.startsWith('http') ? (
+                      <img
+                        src={editingUser.avatar}
+                        alt={editingUser.name}
+                        className="w-12 h-12 rounded-full object-cover ring-2 ring-white/10"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-xl font-bold text-white">
+                        {editingUser.avatar || editingUser.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-semibold text-white">{editingUser.name}</p>
+                      <p className="text-sm text-dark-400">{editingUser.email}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Status */}
+                <div>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">
+                    Status *
+                  </label>
+                  <select
+                    value={editFormData.subscriptionStatus}
+                    onChange={(e) => setEditFormData({ ...editFormData, subscriptionStatus: e.target.value })}
+                    className="w-full px-4 py-3 bg-dark-800/50 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                  >
+                    <option value="expired">Abgelaufen (Expired)</option>
+                    <option value="trial">Testphase (Trial)</option>
+                    <option value="active">Aktiv (Active)</option>
+                    <option value="lifetime">Lifetime</option>
+                  </select>
+                </div>
+
+                {/* Plan */}
+                <div>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">
+                    Plan
+                  </label>
+                  <select
+                    value={editFormData.subscriptionPlan}
+                    onChange={(e) => setEditFormData({ ...editFormData, subscriptionPlan: e.target.value })}
+                    className="w-full px-4 py-3 bg-dark-800/50 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                  >
+                    <option value="">Kein Plan</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="annual">Annual</option>
+                    <option value="lifetime">Lifetime</option>
+                  </select>
+                </div>
+
+                {/* Ends At */}
+                <div>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">
+                    Ablaufdatum (optional)
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={editFormData.subscriptionEndsAt}
+                    onChange={(e) => setEditFormData({ ...editFormData, subscriptionEndsAt: e.target.value })}
+                    className="w-full px-4 py-3 bg-dark-800/50 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                  />
+                  <p className="text-xs text-dark-400 mt-1">
+                    Leer lassen für unbegrenzt (z.B. bei Lifetime)
+                  </p>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={() => setEditingUser(null)}
+                    className="flex-1 px-6 py-3 bg-dark-700 hover:bg-dark-600 text-white rounded-lg font-semibold transition-all"
+                  >
+                    Abbrechen
+                  </button>
+                  <button
+                    onClick={handleUpdateSubscription}
+                    className="flex-1 px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg font-semibold transition-all"
+                  >
+                    Speichern
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Bug Report Details Modal */}
         {selectedBugReport && (
