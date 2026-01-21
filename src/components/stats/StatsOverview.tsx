@@ -90,7 +90,7 @@ const StatsOverview: React.FC = () => {
   // Filter matches for selected player
   const playerMatches = useMemo(() => {
     if (!matches || matches.length === 0) return [];
-    return matches.filter(match => {
+    const filtered = matches.filter(match => {
       // Handle matches from API which might not have players array
       if (!match.players || !Array.isArray(match.players)) {
         // If no players array, check if winner matches selectedPlayerId
@@ -98,6 +98,7 @@ const StatsOverview: React.FC = () => {
       }
       return match.players.some((p: any) => p.playerId === selectedPlayerId);
     });
+    return filtered;
   }, [matches, selectedPlayerId]);
   
   // Get heatmap data for selected player
@@ -608,6 +609,9 @@ const StatsOverview: React.FC = () => {
                         <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                           <span className="text-2xl">📊</span>
                           Monatliche Entwicklung
+                          {monthlyData.length === 1 && (
+                            <span className="text-sm text-amber-400 ml-2">(Nur 1 Monat - spiele mehr für Entwicklung!)</span>
+                          )}
                         </h3>
                         <div className="bg-dark-900 rounded-lg p-4">
                           <ResponsiveContainer width="100%" height={350}>
@@ -651,6 +655,7 @@ const StatsOverview: React.FC = () => {
                                 fillOpacity={0.3}
                                 stroke="#0ea5e9"
                                 strokeWidth={2}
+                                dot={{ fill: '#0ea5e9', r: monthlyData.length <= 2 ? 8 : 4 }}
                                 name="Durchschnitt"
                               />
                               <Line
@@ -659,7 +664,7 @@ const StatsOverview: React.FC = () => {
                                 dataKey="winRate"
                                 stroke="#22c55e"
                                 strokeWidth={3}
-                                dot={{ fill: '#22c55e', r: 4 }}
+                                dot={{ fill: '#22c55e', r: monthlyData.length <= 2 ? 8 : 4 }}
                                 name="Win Rate %"
                               />
                             </ComposedChart>
