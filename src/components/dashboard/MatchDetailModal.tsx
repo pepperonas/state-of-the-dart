@@ -73,8 +73,8 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
   const chartData = prepareRoundData(match);
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="glass-card rounded-2xl p-6 max-w-6xl w-full my-8">
+    <div className="fixed inset-0 bg-black/70 flex items-start justify-center z-50 p-4 pt-16 overflow-y-auto">
+      <div className="glass-card rounded-2xl p-6 max-w-6xl w-full mb-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
