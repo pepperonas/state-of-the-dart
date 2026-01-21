@@ -8,7 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTenant } from '../../context/TenantContext';
 import { usePlayer } from '../../context/PlayerContext';
 import { api } from '../../services/api';
-import { formatDate } from '../../utils/dateUtils';
+import { formatDate, formatDateTime } from '../../utils/dateUtils';
 import { Match } from '../../types';
 import MatchDetailModal from './MatchDetailModal';
 
@@ -77,12 +77,13 @@ const Dashboard: React.FC = () => {
     try {
       // Load matches from API (Database-First!)
       const matches = await api.matches.getAll();
-      let completedMatches = matches.filter((m: any) => m.status === 'completed');
+      const allCompletedMatches = matches.filter((m: any) => m.status === 'completed');
       console.log('✅ Dashboard: Matches loaded from API:', matches.length);
 
-      // Filter matches for main player if set
+      // Filter matches for main player (for stats calculation only)
+      let completedMatches = allCompletedMatches;
       if (mainPlayerId) {
-        completedMatches = completedMatches.filter((m: any) =>
+        completedMatches = allCompletedMatches.filter((m: any) =>
           m.players?.some((p: any) => p.playerId === mainPlayerId)
         );
         console.log(`📊 Dashboard: Filtered to ${completedMatches.length} matches for main player`);
@@ -153,11 +154,11 @@ const Dashboard: React.FC = () => {
         total180s,
       });
 
-      // Load recent activities
+      // Load recent activities (use ALL matches, not filtered by main player)
       const recentActivities: RecentActivity[] = [];
 
       // Add recent matches (last 5)
-      completedMatches
+      allCompletedMatches
         .slice(-5)
         .reverse()
         .forEach((match: any) => {
@@ -168,7 +169,7 @@ const Dashboard: React.FC = () => {
             id: match.id,
             type: 'match',
             title: match.winner ? 'Spiel gewonnen!' : 'Spiel beendet',
-            description: `${gameType} - ${formatDate(completedAt)}`,
+            description: `${gameType} - ${formatDateTime(completedAt)}`,
             timestamp: completedAt,
             icon: match.winner ? '🏆' : '🎯',
           });
