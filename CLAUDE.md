@@ -504,6 +504,55 @@ Run a single test file:
 npm test -- src/tests/utils/scoring.test.ts
 ```
 
+## Logging System
+
+**Logger Implementation:**
+- `src/utils/logger.ts` - Centralized logging with environment-based levels
+- **Production**: Only errors are logged (performance optimization)
+- **Development**: All log levels enabled (debug, info, warn, error)
+
+**Special Methods:**
+- `logger.success()` - Success messages (✅)
+- `logger.gameEvent()` - Game-specific events (🎯)
+- `logger.botEvent()` - Bot AI events (🤖)
+- `logger.achievementEvent()` - Achievement unlocks (🏆)
+- `logger.apiEvent()` - API operations (🔄)
+
+**Usage:**
+```typescript
+import logger from '../utils/logger';
+
+logger.debug('Debug information');  // Development only
+logger.info('Info message');        // Development only
+logger.warn('Warning');             // Development only
+logger.error('Error occurred');     // Always logged
+logger.success('Operation completed');  // Development only
+```
+
+**Migration Status:**
+- ✅ GameContext.tsx - Fully migrated
+- ✅ PlayerContext.tsx - Fully migrated
+- 🔄 Other components - Use logger for new code
+
+## Type Safety
+
+**API Types:**
+- `src/types/api.ts` - Request/Response types for all API endpoints
+- Eliminates `any` types in favor of concrete interfaces
+- Better IDE autocomplete and compile-time error checking
+
+**Key Types:**
+- `TenantCreateRequest`, `TenantUpdateRequest`
+- `PlayerCreateRequest`, `PlayerUpdateRequest`
+- `MatchCreateRequest`, `MatchUpdateRequest`
+- `TrainingSessionCreateRequest`, `TrainingSessionUpdateRequest`
+- `SettingsUpdateRequest`, `BugReportCreateRequest`
+
+**Benefits:**
+- Type-safe API calls
+- Prevents runtime errors from incorrect data shapes
+- Self-documenting API contract
+
 ## Important Notes
 
 - PWA configuration in `vite.config.ts` with Workbox caching
