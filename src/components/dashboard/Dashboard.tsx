@@ -9,6 +9,8 @@ import { useTenant } from '../../context/TenantContext';
 import { usePlayer } from '../../context/PlayerContext';
 import { api } from '../../services/api';
 import { formatDate } from '../../utils/dateUtils';
+import { Match } from '../../types';
+import MatchDetailModal from './MatchDetailModal';
 
 interface RecentActivity {
   id: string;
@@ -38,6 +40,8 @@ const Dashboard: React.FC = () => {
   const [activities, setActivities] = useState<RecentActivity[]>([]);
   const [mainPlayerId, setMainPlayerId] = useState<string | null>(null);
   const [mainPlayerLoaded, setMainPlayerLoaded] = useState(false);
+  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+  const [loadingMatch, setLoadingMatch] = useState(false);
   const [stats, setStats] = useState<QuickStats>({
     totalMatches: 0,
     totalWins: 0,
@@ -177,6 +181,22 @@ const Dashboard: React.FC = () => {
       console.error('Failed to load dashboard data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleMatchClick = async (matchId: string) => {
+    setLoadingMatch(true);
+    try {
+      // Load full match with legs and throws
+      const matches = await api.matches.getAll();
+      const match = matches.find((m: any) => m.id === matchId);
+      if (match) {
+        setSelectedMatch(match);
+      }
+    } catch (error) {
+      console.error('Failed to load match:', error);
+    } finally {
+      setLoadingMatch(false);
     }
   };
 
@@ -340,7 +360,7 @@ const Dashboard: React.FC = () => {
                       className="flex items-center gap-4 p-4 bg-dark-800 rounded-lg hover:bg-dark-700 transition-all cursor-pointer"
                       onClick={() => {
                         if (activity.type === 'match') {
-                          navigate('/stats');
+                          handleMatchClick(activity.id);
                         }
                       }}
                     >
@@ -414,6 +434,21 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Match Detail Modal */}
+        {selectedMatch && (
+          <MatchDetailModal
+            match={selectedMatch}
+            onClose={() => setSelectedMatch(null)}
+          />
+        )}
+
+        {/* Loading Overlay for Match */}
+        {loadingMatch && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+            <Loader className="animate-spin text-primary-400" size={48} />
+          </div>
+        )}
       </div>
     </div>
   );
