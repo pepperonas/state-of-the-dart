@@ -5,6 +5,83 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/),
 und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
+## [0.1.8] - 2026-01-22
+
+### ✨ Hinzugefügt
+
+#### User Guide System
+- **Umfassende In-App Anleitung** - 10 Sektionen mit detaillierter Dokumentation
+  - Neue "Anleitung" Card im Hauptmenü mit BookOpen-Icon
+  - Vollständiges UserGuideModal mit Sidebar-Navigation
+  - **Sektionen:**
+    1. Übersicht - Hauptfunktionen und Vorteile
+    2. Quickstart - 4-Schritte-Anleitung für neue Nutzer
+    3. Spiel-Modi - 501, Cricket, Around the Clock, Bot-Gegner
+    4. Spieler - Spielerverwaltung, Haupt-Profil, Profile
+    5. Training - Alle 6 Trainingsmodi erklärt
+    6. Statistiken - Heatmap, Charts, Checkout-Stats, Export
+    7. Achievements - Kategorien, Beispiele, Benachrichtigungen
+    8. Einstellungen - Audio, Theme, Sprache, PWA-Installation
+    9. Admin - Benutzerverwaltung, Abos, Bug-Reports
+    10. Tipps & Tricks - Anfängertipps, Stats-Nutzung, Shortcuts
+  - Glass-card Styling mit responsivem Layout
+  - Click-outside zum Schließen
+  - Direkter Zugriff aus dem Hauptmenü
+
+#### Training Player Selection
+- **Spielerauswahl vor Training** - Wähle aus, welcher Spieler trainiert
+  - Player-Selection-Screen mit Avatar, Name und Average
+  - Nur echte Spieler können trainieren (Bots gefiltert)
+  - Training-Würfe werden automatisch in Heatmap des gewählten Spielers gespeichert
+  - Unterstützt alle 6 Trainingsmodi
+
+#### Database Backup System
+- **Automatisierte SQLite-Backups mit Rotation** - Verhindert VPS-Speicher-Überlastung
+  - `backup-db.sh` - Tägliche Backups um 3:00 Uhr via Cronjob
+  - 7-Tage-Retention (automatische Löschung alter Backups)
+  - VACUUM INTO für Kompression und Integrität
+  - Timestamped Filenames: `state-of-the-dart_YYYY-MM-DD_HH-MM-SS.db`
+  - `restore-db.sh` - Sicheres Restore mit Rollback-Funktion
+  - Detaillierte Dokumentation in `BACKUP.md`
+
+#### Admin Subscription Management
+- **Erweiterte Abo-Verwaltung** - Volle Kontrolle über User-Subscriptions
+  - Subscription Edit Modal mit Status-Dropdown (expired, trial, active, lifetime)
+  - Plan-Dropdown (monthly, annual, lifetime)
+  - Expiration Date Picker (datetime-local input)
+  - Manuelle Premium-Freischaltung für Accounts
+  - Ergänzt bestehende Quick-Actions (Grant Lifetime, Revoke Access)
+
+### 🐛 Behoben
+
+#### Dashboard Activities Display
+- **Intelligente Titel-Anzeige** - Letzte Aktivitäten zeigen korrekten Gewinner
+  - Zeigt ALLE Matches (nicht nur Main Player)
+  - Wenn Main Player gewonnen: "Spiel gewonnen!" 🏆
+  - Wenn anderer Spieler gewonnen: "{winnerName} gewonnen" 🏆
+  - Kein Gewinner: "Match gespielt" 🎯
+
+#### Audio Checkout Announcement
+- **"Game Shot" Ansage nach Checkout** - Fehlende Ankündigung ergänzt
+  - Sequentielle Wiedergabe: Score → 400ms Pause → "Game Shot"
+  - Async/await für saubere Audio-Abfolge
+  - Unterstützt Leg, Set und Match Finishes
+  - "Game Shot and the Match" für Match-Abschluss
+
+### 🔧 Geändert
+
+#### Dokumentation
+- **CLAUDE.md** - Vollständig aktualisiert mit allen neuen Features
+  - User Guide System Dokumentation
+  - Training Player Selection Details
+  - Database Backup System Anleitung
+  - Admin Subscription Management
+  - Dashboard Improvements
+  - Audio System Enhancements
+- **CHANGELOG.md** - Version 0.1.8 mit allen Änderungen
+
+---
+
 ## [0.1.7] - 2026-01-17
 
 ### ✨ Hinzugefügt

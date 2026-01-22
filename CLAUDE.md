@@ -337,6 +337,10 @@ api.auth.setMainPlayer(playerId)   // Sets main player
 **Recent Activities:**
 - Shows last 5 completed matches from ALL players (not filtered by main player)
 - Displays date + time using `formatDateTime()`: "10.01.2026, 14:30"
+- Intelligent title display based on winner:
+  - If main player won: "Spiel gewonnen!" 🏆
+  - If other player won: "{winnerName} gewonnen" 🏆
+  - If no winner: "Match gespielt" 🎯
 - Click match to open `MatchDetailModal` with full match details
 
 **Statistics Display:**
@@ -453,6 +457,209 @@ All training modes in `src/components/training/TrainingScreen.tsx` are fully tra
 - Never hardcode German or English text directly in components
 - Add new translations to both de.json and en.json simultaneously
 - Keep translation keys organized by feature/section
+
+### User Guide System
+
+**Overview:**
+Comprehensive in-app user guide accessible from the main menu, providing detailed documentation for all app features.
+
+**Component:**
+`src/components/guide/UserGuideModal.tsx` - Full-screen modal with 10 sections and sidebar navigation
+
+**Sections:**
+1. **Übersicht** (Overview) - Main features and benefits of the app
+2. **Quickstart** - 4-step guide for new users to get started
+3. **Spiel-Modi** (Game Modes) - 501, Cricket, Around the Clock, Bot opponents
+4. **Spieler** (Players) - Player management, main player feature, profiles
+5. **Training** - All 6 training modes with detailed explanations
+6. **Statistiken** (Statistics) - Heatmap, charts, checkout stats, export options
+7. **Achievements** - Achievement categories, examples, notifications
+8. **Einstellungen** (Settings) - Audio, themes, language, PWA installation
+9. **Admin** - User management, subscriptions, bug reports (admin only)
+10. **Tipps & Tricks** - Beginner tips, stats usage, keyboard shortcuts
+
+**UI Pattern:**
+- Fixed overlay with dark backdrop (`bg-black/70`)
+- Two-column layout: Sidebar navigation (left) + Content (right)
+- Glass-card styling throughout
+- Responsive design (stacks on mobile)
+- Close button (X) in top-right corner
+- Active section highlighting in sidebar
+
+**Integration:**
+- `src/components/MainMenu.tsx` - "Anleitung" card with BookOpen icon
+- Gradient: `from-blue-500 to-blue-600`
+- Opens modal on click with state management
+
+**Usage:**
+```typescript
+const [showGuideModal, setShowGuideModal] = useState(false);
+
+// In menu items:
+{
+  title: 'Anleitung',
+  icon: BookOpen,
+  description: 'Umfassende Anleitung zur App',
+  onClick: () => setShowGuideModal(true),
+  gradient: 'from-blue-500 to-blue-600',
+}
+
+// Render modal:
+{showGuideModal && (
+  <UserGuideModal onClose={() => setShowGuideModal(false)} />
+)}
+```
+
+**Benefits:**
+- Self-service help for users
+- Reduces support requests
+- Improves onboarding experience
+- Always available and up-to-date
+
+### Training System
+
+**Player Selection:**
+- Before starting any training mode, users must select which player is training
+- Only real players can train (bots are filtered out)
+- Training throws are automatically tracked in the selected player's heatmap
+- Implementation in `src/components/training/TrainingScreen.tsx`
+
+**Player Selection Screen:**
+```typescript
+const { players, currentPlayer, setCurrentPlayer, updatePlayerHeatmap } = usePlayer();
+const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(currentPlayer?.id || null);
+
+// Filter out bots
+const realPlayers = players.filter(p => !p.isBot);
+
+// Player selection UI shows:
+- Player avatar
+- Player name
+- Average score (if available)
+- "Training starten" button
+```
+
+**Heatmap Integration:**
+- Training throws are saved via `updatePlayerHeatmap(currentPlayer.id, currentThrow)`
+- Throws are automatically associated with the selected player
+- Heatmap data persists across sessions via API
+
+**Training Modes:**
+All 6 training modes support player selection:
+1. Doubles Training (D1-D20)
+2. Triples Training (T20-T1)
+3. Around the Clock (1-20)
+4. Checkout Training (various scores)
+5. Bob's 27 (point-based game)
+6. Score Training (60+ points)
+
+### Audio System Improvements
+
+**Checkout Announcements:**
+- Fixed missing "Game Shot" announcement after checkout scores
+- Implementation in `src/utils/audio.ts` - `announceCheckout()` method
+
+**Sequential Playback:**
+```typescript
+async announceCheckout(score: number, finishType: 'leg' | 'set' | 'match' = 'leg') {
+  // Clear queue for immediate playback
+  this.soundQueue = [];
+  this.isPlaying = false;
+
+  // 1. Play score (e.g., "Forty")
+  await this.playSoundImmediate(scorePath);
+
+  // 2. Wait 400ms
+  await new Promise(resolve => setTimeout(resolve, 400));
+
+  // 3. Play finish announcement ("Game Shot" or "Game Shot and the Match")
+  await this.playSoundImmediate(finishPath);
+}
+```
+
+**Announcement Types:**
+- **Leg finish**: Score + "Game Shot"
+- **Set finish**: Score + "Game Shot"
+- **Match finish**: Score + "Game Shot and the Match"
+
+### Admin Panel Features
+
+**Subscription Management:**
+- Full control over user subscriptions in Admin Panel
+- Edit modal with comprehensive subscription controls
+
+**Subscription Edit Modal:**
+- Status dropdown: `expired`, `trial`, `active`, `lifetime`
+- Plan dropdown: `monthly`, `annual`, `lifetime`
+- Expiration date picker (datetime-local input)
+- Updates via `api.admin.updateSubscription(userId, data)`
+
+**Implementation:**
+```typescript
+// src/components/admin/AdminPanel.tsx
+const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+const [editFormData, setEditFormData] = useState({
+  subscriptionStatus: '',
+  subscriptionPlan: '',
+  subscriptionEndsAt: '',
+});
+
+// Update handler
+const handleUpdateSubscription = async () => {
+  await api.admin.updateSubscription(editingUser.id, {
+    subscriptionStatus: editFormData.subscriptionStatus,
+    subscriptionPlan: editFormData.subscriptionPlan || undefined,
+    subscriptionEndsAt: editFormData.subscriptionEndsAt
+      ? new Date(editFormData.subscriptionEndsAt).getTime()
+      : undefined,
+  });
+};
+```
+
+**Existing Quick Actions:**
+- Grant Lifetime Access (sets status to `lifetime`)
+- Revoke Access (sets status to `expired`)
+
+### Database Backup System
+
+**Overview:**
+Automated SQLite backup system with rotation to prevent storage overflow on VPS.
+
+**Backup Script:**
+`backup-db.sh` - Daily automated backups with 7-day retention
+
+**Configuration:**
+```bash
+DB_PATH="/var/www/stateofthedart-backend/data/state-of-the-dart.db"
+BACKUP_DIR="/var/www/stateofthedart-backend/backups"
+RETENTION_DAYS=7  # Keeps only last 7 backups
+```
+
+**Features:**
+- Uses `VACUUM INTO` for compression and integrity
+- Automatic deletion of backups older than retention period
+- Timestamped filenames: `state-of-the-dart_YYYY-MM-DD_HH-MM-SS.db`
+- Estimated max storage: ~25MB (7 × ~3.5MB)
+
+**Cronjob:**
+```bash
+# Daily backups at 3:00 AM
+0 3 * * * /var/www/stateofthedart-backend/backup-db.sh >> /var/www/stateofthedart-backend/backup.log 2>&1
+```
+
+**Restore Script:**
+`restore-db.sh` - Safe database restoration with rollback capability
+
+**Restore Features:**
+- Lists available backups with sizes
+- Confirmation prompt before restore
+- Stops PM2 backend before restore
+- Creates safety backup of current database
+- Restarts PM2 after completion
+- Automatic rollback on failure
+
+**Documentation:**
+See `BACKUP.md` for detailed usage, troubleshooting, and advanced strategies (remote backups, S3 sync, monitoring).
 
 ### UI/UX Standards
 

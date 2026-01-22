@@ -9,7 +9,7 @@
 **Professionelles Dart-Zählsystem** - Eine funktionsreiche, webbasierte Dart-Scoring-Anwendung mit Multi-User-Support, professionellem Statistik-Tracking und Live-Deployment.
 
 [![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green)](https://stateofthedart.com)
-![Version](https://img.shields.io/badge/Version-0.1.7-blue)
+![Version](https://img.shields.io/badge/Version-0.1.8-blue)
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
 ![React](https://img.shields.io/badge/React-19.2-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)
@@ -41,6 +41,10 @@
 - **Multi-Player** - Unterstützung für 2+ Spieler mit eigenen Avataren und Namen
 - **Match fortsetzen** - Unterbrochene Spiele automatisch fortsetzen
 - **Trainingsmodi** - 6 Trainingsmodi inkl. Doubles/Triples-Training, Around the Clock und Bob's 27
+- **Training Player Selection (NEU in v0.1.8)** - Wähle vor jedem Training, welcher Spieler trainiert:
+  - Nur echte Spieler können trainieren (Bots gefiltert)
+  - Training-Würfe werden automatisch in Heatmap gespeichert
+  - Player-Selection-Screen mit Avatar, Name und Average
 - **Turniersystem** - Knockout, Round Robin, Liga und Swiss System (Coming Soon)
 
 ### 📊 Erweiterte Statistiken & Charts
@@ -104,6 +108,11 @@
 ### 👑 Admin-System
 - **User-Management** - Vollständige Verwaltung aller registrierten Benutzer
 - **Subscription-Kontrolle** - Gewähre oder widerrufe Lifetime-Access
+- **Erweiterte Abo-Verwaltung (NEU in v0.1.8)** - Volle Kontrolle über Subscriptions:
+  - Status-Dropdown (expired, trial, active, lifetime)
+  - Plan-Dropdown (monthly, annual, lifetime)
+  - Expiration Date Picker für individuelle Ablaufdaten
+  - Manuelle Premium-Freischaltung für einzelne Accounts
 - **Admin-Rechte** - Mache andere Benutzer zu Admins
 - **User-Statistiken** - Dashboard mit Gesamtübersicht
 - **Filter & Suche** - Filtere nach Subscription-Status (Trial, Active, Lifetime, Expired)
@@ -113,12 +122,42 @@
 ### 🔊 Professionelles Audio-System
 - **Score-Ansagen** - Professionelle Caller-Stimme für jeden Score (0-180)
 - **Checkout-Calls** - Spezielle Ansagen für Leg/Set/Match-Siege
+- **"Game Shot" Ansage (NEU in v0.1.8)** - Sequentielle Wiedergabe nach Checkout:
+  - Score-Ansage → 400ms Pause → "Game Shot"
+  - "Game Shot and the Match" für Match-Abschluss
+  - Async/await für saubere Audio-Abfolge
 - **Bust-Benachrichtigungen** - Klares Audio-Feedback für ungültige Würfe
 - **Separate Lautstärke** - Unabhängige Kontrolle für Caller und Effects
 - **400+ Audio-Dateien** - Vollständiges professionelles Dart-Calling-Erlebnis
 - **Lautstärkeregelung** - Separate Regler für Caller (Scores) und Effects (UI-Sounds)
 
+### 📖 User Guide & Dokumentation
+- **In-App Anleitung (NEU in v0.1.8)** - Umfassende Dokumentation direkt in der App:
+  - 10 detaillierte Sektionen mit Sidebar-Navigation
+  - Übersicht, Quickstart, Spiel-Modi, Spieler, Training
+  - Statistiken, Achievements, Einstellungen, Admin, Tipps
+  - Glass-card Styling mit responsivem Layout
+  - Direkter Zugriff aus dem Hauptmenü
+  - Click-outside zum Schließen
+
+### 💾 Database Backup System
+- **Automatisierte Backups (NEU in v0.1.8)** - Verhindert VPS-Speicher-Überlastung:
+  - Tägliche Backups um 3:00 Uhr via Cronjob
+  - 7-Tage-Retention (automatische Löschung alter Backups)
+  - VACUUM INTO für Kompression und Integrität
+  - Timestamped Filenames: `state-of-the-dart_YYYY-MM-DD_HH-MM-SS.db`
+- **Restore-Funktion** - Sichere Wiederherstellung mit Rollback:
+  - Automatischer PM2-Stop vor Restore
+  - Safety-Backup der aktuellen Datenbank
+  - Automatischer Rollback bei Fehlern
+  - Detaillierte Dokumentation in `BACKUP.md`
+
 ### 🎯 Verbesserungen & Training
+- **Dashboard Activities (NEU in v0.1.8)** - Intelligente Anzeige letzter Spiele:
+  - Zeigt ALLE Matches (nicht nur Main Player)
+  - Main Player gewonnen: "Spiel gewonnen!" 🏆
+  - Anderer Spieler gewonnen: "{winnerName} gewonnen" 🏆
+  - Kein Gewinner: "Match gespielt" 🎯
 - **Personal Bests Auto-Update** - Automatische Aktualisierung nach jedem Match
 - **Undo Last Throw** - Rückgängig-Button für versehentliche Eingaben
 - **Letzte Spieler Quick-Select** - Schnellauswahl der zuletzt verwendeten Spieler
