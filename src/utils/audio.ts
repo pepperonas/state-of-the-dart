@@ -220,15 +220,35 @@ class AudioSystem {
     this.playSound(soundPath, false);
   }
 
-  announceCheckout(score: number, finishType: 'leg' | 'set' | 'match' = 'leg') {
-    // Play checkout sound based on finish type - HIGH PRIORITY
-    const soundPath = finishType === 'leg' 
+  async announceCheckout(score: number, finishType: 'leg' | 'set' | 'match' = 'leg') {
+    // Clear queue and play checkout sequence
+    this.soundQueue = [];
+    this.isPlaying = false;
+    
+    // Play checkout sound based on finish type
+    const scorePath = finishType === 'leg' 
       ? `/sounds/gameshot/legs/${score}.mp3`
       : finishType === 'set'
       ? `/sounds/gameshot/sets/${score}.mp3`
       : `/sounds/gameshot/legs/${score}.mp3`; // Fallback to legs sound
     
-    this.playSound(soundPath, true); // Priority sound!
+    // Determine finish announcement
+    const finishPath = finishType === 'match'
+      ? '/sounds/texts/gameshotandthematch.mp3'
+      : finishType === 'set'
+      ? '/sounds/texts/gameshot.mp3'
+      : '/sounds/texts/gameshot.mp3';
+    
+    try {
+      // Play score first (e.g. "Forty", "One Hundred and Twenty")
+      await this.playSoundImmediate(scorePath);
+      // Small delay between sounds
+      await new Promise(resolve => setTimeout(resolve, 400));
+      // Then play "Game Shot" announcement
+      await this.playSoundImmediate(finishPath);
+    } catch (error) {
+      console.warn('Failed to play checkout announcement:', error);
+    }
   }
 
   announceBust() {
