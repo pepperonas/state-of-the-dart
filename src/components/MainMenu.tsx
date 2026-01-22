@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Target, Users, TrendingUp, Trophy, Award, Dumbbell, Settings, Play, LogOut, Medal, Shield } from 'lucide-react';
+import { Target, Users, TrendingUp, Trophy, Award, Dumbbell, Settings, Play, LogOut, Medal, Shield, BookOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTenant } from '../context/TenantContext';
 import { useAuth } from '../context/AuthContext';
 import UserMenu from './auth/UserMenu';
 import SyncStatus from './sync/SyncStatus';
+import UserGuideModal from './guide/UserGuideModal';
 import packageJson from '../../package.json';
 
 const MainMenu: React.FC = () => {
@@ -22,7 +23,9 @@ const MainMenu: React.FC = () => {
     }
     return false;
   }, [storage]);
-  
+
+  const [showGuideModal, setShowGuideModal] = useState(false);
+
   const menuItems = [
     {
       title: t('menu.dashboard'),
@@ -93,6 +96,13 @@ const MainMenu: React.FC = () => {
       description: t('menu.settings_desc'),
       onClick: () => navigate('/settings'),
       gradient: 'from-dark-600 to-dark-700',
+    },
+    {
+      title: 'Anleitung',
+      icon: BookOpen,
+      description: 'Umfassende Anleitung zur App',
+      onClick: () => setShowGuideModal(true),
+      gradient: 'from-blue-500 to-blue-600',
     },
   ];
 
@@ -192,6 +202,10 @@ const MainMenu: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {showGuideModal && (
+        <UserGuideModal onClose={() => setShowGuideModal(false)} />
+      )}
     </div>
   );
 };
