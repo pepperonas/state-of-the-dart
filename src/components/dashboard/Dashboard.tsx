@@ -167,13 +167,32 @@ const Dashboard: React.FC = () => {
           // API returns snake_case fields
           const gameType = match.game_type || match.gameType || '501';
           const completedAt = match.completed_at || match.completedAt;
+          
+          // Get winner player name
+          const winnerPlayer = match.players?.find((p: any) => p.playerId === match.winner);
+          const winnerName = winnerPlayer?.name || 'Unbekannt';
+          
+          // Determine title based on main player
+          let title = 'Match gespielt';
+          let icon = '🎯';
+          
+          if (match.winner) {
+            if (mainPlayerId && match.winner === mainPlayerId) {
+              title = 'Spiel gewonnen!';
+              icon = '🏆';
+            } else {
+              title = `${winnerName} gewonnen`;
+              icon = '🏆';
+            }
+          }
+          
           recentActivities.push({
             id: match.id,
             type: 'match',
-            title: match.winner ? 'Spiel gewonnen!' : 'Spiel beendet',
+            title,
             description: `${gameType} - ${formatDateTime(completedAt)}`,
             timestamp: completedAt,
-            icon: match.winner ? '🏆' : '🎯',
+            icon,
           });
         });
 
