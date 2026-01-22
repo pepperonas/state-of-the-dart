@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Check, X, BarChart } from 'lucide-react';
+import { ArrowLeft, Check, X, BarChart, ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
 import { Dart, TrainingType, TrainingSession, TrainingResult } from '../../types';
@@ -27,9 +27,10 @@ const TrainingScreen: React.FC = () => {
   const navigate = useNavigate();
   const { mode } = useParams<{ mode: TrainingType }>();
   const { settings } = useSettings();
-  const { currentPlayer, updatePlayerHeatmap } = usePlayer();
+  const { players, currentPlayer, setCurrentPlayer, updatePlayerHeatmap } = usePlayer();
   const { storage } = useTenant();
   
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(currentPlayer?.id || null);
   const [currentThrow, setCurrentThrow] = useState<Dart[]>([]);
   const [trainingState, setTrainingState] = useState<TrainingState>({
     currentTarget: 1,
@@ -488,6 +489,82 @@ const TrainingScreen: React.FC = () => {
   const accuracy = trainingState.attempts > 0 
     ? Math.round((trainingState.hits / trainingState.attempts) * 100) 
     : 0;
+
+  // Player Selection Screen
+  if (!selectedPlayerId || !currentPlayer) {
+    const realPlayers = players.filter(p => !p.isBot);
+    
+    return (
+      <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+        <div className="max-w-2xl mx-auto">
+          <button
+            onClick={() => navigate('/training')}
+            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
+          >
+            <ArrowLeft size={20} />
+            {t('common.back')}
+          </button>
+
+          <div className="glass-card rounded-2xl p-8">
+            <h2 className="text-3xl font-bold text-white mb-2">
+              Wer trainiert?
+            </h2>
+            <p className="text-dark-300 mb-6">
+              Wähle einen Spieler aus, um das Training zu starten. Deine Würfe werden in deiner Heatmap gespeichert.
+            </p>
+
+            {realPlayers.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-dark-400 mb-4">Noch keine Spieler vorhanden</p>
+                <button
+                  onClick={() => navigate('/players')}
+                  className="px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg font-semibold transition-all"
+                >
+                  Spieler erstellen
+                </button>
+              </div>
+            ) : (
+              <div className="grid gap-3">
+                {realPlayers.map((player) => (
+                  <button
+                    key={player.id}
+                    onClick={() => {
+                      setCurrentPlayer(player);
+                      setSelectedPlayerId(player.id);
+                    }}
+                    className="glass-card p-4 rounded-xl hover:glass-card-hover transition-all text-left group"
+                  >
+                    <div className="flex items-center gap-4">
+                      {player.avatar?.startsWith('http') ? (
+                        <img
+                          src={player.avatar}
+                          alt={player.name}
+                          className="w-16 h-16 rounded-full object-cover ring-2 ring-white/10 group-hover:ring-primary-400"
+                        />
+                      ) : (
+                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-2xl font-bold text-white ring-2 ring-white/10 group-hover:ring-primary-400">
+                          {player.avatar || player.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-white group-hover:text-primary-400 transition-colors">
+                          {player.name}
+                        </h3>
+                        <p className="text-sm text-dark-400">
+                          Average: {player.stats?.averageOverall?.toFixed(1) || '0.0'}
+                        </p>
+                      </div>
+                      <ArrowRight className="text-dark-500 group-hover:text-primary-400 transition-colors" size={24} />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-4 md:p-8 gradient-mesh">
