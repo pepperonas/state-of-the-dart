@@ -5,6 +5,22 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/),
 und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
+## [Unreleased]
+
+### 🐛 Behoben
+
+#### Achievement-Synchronisation
+- **Freigeschaltete Achievements gehen nicht mehr verloren** - API-Integration für Persistenz
+  - Achievements werden jetzt korrekt aus der API geladen
+  - On-demand Loading: Lädt pro Spieler beim ersten Zugriff
+  - Unlock-Sync: `unlockAchievement()` sendet sofort zur API
+  - Progress-Sync: `checkAchievement()` synchronisiert Fortschritt
+  - localStorage als Fallback für Offline-Support
+  - **Fix**: Vorher nur localStorage → Beim Reload verloren
+  - **Jetzt**: API als Source of Truth → Achievements bleiben erhalten
+
+---
+
 ## [0.1.8] - 2026-01-22
 
 ### ✨ Hinzugefügt

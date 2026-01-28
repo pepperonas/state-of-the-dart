@@ -697,6 +697,102 @@ All pages including Dashboard, Settings, Game, Training, Stats, Players, Achieve
 - Accessible and recognizable navigation
 - Uniform hover interactions
 
+### Achievement System
+
+**Overview:**
+Comprehensive achievement tracking with 20+ achievements across 6 categories, integrated with API for persistence.
+
+**Implementation:**
+- `src/context/AchievementContext.tsx` - Achievement state management and API sync
+- `src/types/achievements.ts` - Achievement definitions and types
+- `server/src/routes/achievements.ts` - Backend API endpoints
+
+**Architecture:**
+```
+Frontend (AchievementContext) ↔ API ↔ SQLite Database
+         ↓
+    localStorage (offline cache)
+```
+
+**Key Features:**
+
+1. **API-First with Offline Support:**
+   - Achievements load from API on first access per player
+   - `loadPlayerAchievementsFromAPI()` - On-demand loading
+   - localStorage cache for offline access
+   - Automatic background sync when online
+
+2. **Unlock Flow:**
+```typescript
+// When achievement is unlocked:
+unlockAchievement(playerId, achievementId, gameId?)
+  → Save to localStorage immediately
+  → Sync to API in background (await api.achievements.unlock())
+  → Show notification popup
+  → Update total points
+```
+
+3. **Progress Tracking:**
+```typescript
+// When checking achievement progress:
+checkAchievement(playerId, metric, value, gameId?)
+  → Check if should unlock (value >= target)
+  → If unlock: call unlockAchievement()
+  → If not: update progress percentage
+  → Sync progress to API (await api.achievements.updateProgress())
+```
+
+**Database Schema:**
+```sql
+-- server/src/database/schema.ts
+CREATE TABLE player_achievements (
+  id TEXT PRIMARY KEY,                    -- {playerId}-{achievementId}
+  player_id TEXT NOT NULL,
+  achievement_id TEXT NOT NULL,
+  unlocked_at INTEGER NOT NULL,           -- Unix timestamp
+  progress REAL,                          -- Progress percentage (0-100)
+  FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE,
+  UNIQUE(player_id, achievement_id)
+);
+```
+
+**API Endpoints:**
+```typescript
+// src/services/api.ts
+api.achievements.getByPlayer(playerId)              // Load player's achievements
+api.achievements.unlock(playerId, achievementId)    // Unlock achievement
+api.achievements.updateProgress(playerId, progress) // Update progress
+```
+
+**Backend Routes:**
+- `GET /api/achievements/player/:playerId` - Get all unlocked achievements for player
+- `POST /api/achievements/player/:playerId/unlock` - Unlock achievement (body: { achievementId })
+- `PUT /api/achievements/player/:playerId/progress` - Update progress (body: { achievements })
+
+**Components:**
+- `src/components/achievements/AchievementsScreen.tsx` - Achievement display UI
+  - Player selection dropdown
+  - Category filters (all, first_steps, scoring, checkout, training, consistency, special)
+  - Show unlocked/locked toggle
+  - Achievement cards with progress bars
+  - Completion percentage stats
+
+**Notification System:**
+- Achievement unlocked → 5-second popup notification
+- Shows achievement icon, name, description, points
+- Automatic dismiss after 5 seconds
+- `clearNotification()` for manual dismiss
+
+**Common Pitfalls:**
+1. ❌ Forgetting to await async functions → Achievements may not sync
+2. ❌ Not calling `getPlayerProgress()` before checking unlocked → May miss API-loaded achievements
+3. ❌ Assuming localStorage is source of truth → Always load from API first
+
+**Migration Notes:**
+- **v0.1.8**: Added API synchronization (previously localStorage-only)
+- Old localStorage-only achievements are preserved but won't be synced
+- New achievements automatically sync to API
+
 ### Type Definitions
 - Core types: `src/types/index.ts` (Match, Player, Dart, Throw, GameSettings, BugReport)
 - Achievements: `src/types/achievements.ts`
