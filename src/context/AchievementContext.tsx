@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useTenant } from './TenantContext';
 import { TenantStorage } from '../utils/storage';
+import { api } from '../services/api';
 import {
   Achievement,
   UnlockedAchievement,
@@ -9,6 +10,7 @@ import {
   ACHIEVEMENTS,
   getAchievementById,
 } from '../types/achievements';
+import logger from '../utils/logger';
 
 interface AchievementContextType {
   getPlayerProgress: (playerId: string) => PlayerAchievementProgress;
@@ -35,8 +37,9 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
   const [progressCache, setProgressCache] = useState<Record<string, PlayerAchievementProgress>>({});
 
   const STORAGE_KEY = 'achievements';
+  const [loadedPlayers, setLoadedPlayers] = useState<Set<string>>(new Set());
 
-  // Load all player progress from storage
+  // Load all player progress from localStorage on mount
   useEffect(() => {
     if (currentTenant) {
       const storage = new TenantStorage(currentTenant.id);
@@ -44,6 +47,61 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
       setProgressCache(saved);
     }
   }, [currentTenant]);
+
+  // Load player achievements from API
+  const loadPlayerAchievementsFromAPI = useCallback(async (playerId: string) => {
+    if (loadedPlayers.has(playerId)) {
+      return; // Already loaded
+    }
+
+    try {
+      logger.apiEvent(`Loading achievements for player ${playerId} from API...`);
+      const apiAchievements = await api.achievements.getByPlayer(playerId);
+
+      if (apiAchievements && Array.isArray(apiAchievements)) {
+        // Convert API format to PlayerAchievementProgress format
+        const unlockedAchievements: UnlockedAchievement[] = apiAchievements.map((a: any) => ({
+          achievementId: a.achievement_id || a.achievementId,
+          unlockedAt: new Date(a.unlocked_at || a.unlockedAt),
+          playerId: a.player_id || a.playerId || playerId,
+          gameId: a.game_id || a.gameId,
+        }));
+
+        const totalPoints = unlockedAchievements.reduce((sum, ua) => {
+          const achievement = getAchievementById(ua.achievementId);
+          return sum + (achievement?.points || 0);
+        }, 0);
+
+        const playerProgress: PlayerAchievementProgress = {
+          playerId,
+          unlockedAchievements,
+          progress: {},
+          totalPoints,
+        };
+
+        // Update cache
+        const newProgressCache = {
+          ...progressCache,
+          [playerId]: playerProgress,
+        };
+
+        setProgressCache(newProgressCache);
+
+        // Save to localStorage
+        if (currentTenant) {
+          const storage = new TenantStorage(currentTenant.id);
+          storage.set(STORAGE_KEY, newProgressCache);
+        }
+
+        // Mark as loaded
+        setLoadedPlayers(prev => new Set([...prev, playerId]));
+        logger.success(`Achievements loaded for player ${playerId}`);
+      }
+    } catch (error) {
+      logger.warn(`Failed to load achievements from API for player ${playerId}:`, error);
+      // Continue with localStorage data (offline mode)
+    }
+  }, [currentTenant, progressCache, loadedPlayers]);
 
   // Save progress to storage
   const saveProgress = useCallback((progress: Record<string, PlayerAchievementProgress>) => {
@@ -56,11 +114,16 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
 
   // Get player progress
   const getPlayerProgress = useCallback((playerId: string): PlayerAchievementProgress => {
+    // Trigger API load if not loaded yet (async, doesn't block)
+    if (!loadedPlayers.has(playerId)) {
+      loadPlayerAchievementsFromAPI(playerId);
+    }
+
     if (progressCache[playerId]) {
       return progressCache[playerId];
     }
 
-    // Initialize new player progress
+    // Initialize new player progress (will be replaced when API loads)
     const newProgress: PlayerAchievementProgress = {
       playerId,
       unlockedAchievements: [],
@@ -69,7 +132,7 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
     };
 
     return newProgress;
-  }, [progressCache]);
+  }, [progressCache, loadedPlayers, loadPlayerAchievementsFromAPI]);
 
   // Get all player progress
   const getAllPlayerProgress = useCallback((): Record<string, PlayerAchievementProgress> => {
@@ -98,10 +161,10 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
   }, [getUnlockedAchievements]);
 
   // Unlock an achievement
-  const unlockAchievement = useCallback((playerId: string, achievementId: string, gameId?: string) => {
+  const unlockAchievement = useCallback(async (playerId: string, achievementId: string, gameId?: string) => {
     const achievement = getAchievementById(achievementId);
     if (!achievement) {
-      console.warn(`Achievement ${achievementId} not found`);
+      logger.warn(`Achievement ${achievementId} not found`);
       return;
     }
 
@@ -130,7 +193,17 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
       [playerId]: updatedProgress,
     };
 
+    // Save to localStorage immediately
     saveProgress(newProgressCache);
+
+    // Sync to API in background
+    try {
+      await api.achievements.unlock(playerId, achievementId);
+      logger.achievementEvent(`Achievement synced to API: ${achievement.name}`);
+    } catch (error) {
+      logger.error('Failed to sync achievement to API:', error);
+      // Continue anyway - localStorage has the data
+    }
 
     // Show notification
     setNotification({
@@ -144,18 +217,20 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
       setNotification(null);
     }, 5000);
 
-    console.log(`🏆 Achievement unlocked: ${achievement.name} for player ${playerId}`);
+    logger.achievementEvent(`Achievement unlocked: ${achievement.name} for player ${playerId}`);
   }, [progressCache, getPlayerProgress, isAchievementUnlocked, saveProgress]);
 
   // Check achievements based on metrics
-  const checkAchievement = useCallback((playerId: string, metric: string, value: number, gameId?: string) => {
+  const checkAchievement = useCallback(async (playerId: string, metric: string, value: number, gameId?: string) => {
     // Find relevant achievements for this metric
     const relevantAchievements = ACHIEVEMENTS.filter(a => a.requirement.metric === metric);
+    let progressUpdated = false;
+    const progressUpdates: Record<string, any> = {};
 
-    relevantAchievements.forEach(achievement => {
+    for (const achievement of relevantAchievements) {
       // Skip if already unlocked
       if (isAchievementUnlocked(playerId, achievement.id)) {
-        return;
+        continue;
       }
 
       const { type, target } = achievement.requirement;
@@ -183,7 +258,7 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
       }
 
       if (shouldUnlock) {
-        unlockAchievement(playerId, achievement.id, gameId);
+        await unlockAchievement(playerId, achievement.id, gameId);
       } else {
         // Update progress
         const progress = getPlayerProgress(playerId);
@@ -205,8 +280,25 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
         };
 
         saveProgress(newProgressCache);
+        progressUpdated = true;
+        progressUpdates[achievement.id] = {
+          current: value,
+          target,
+          percentage: Math.min((value / target) * 100, 100),
+        };
       }
-    });
+    }
+
+    // Sync progress updates to API in background
+    if (progressUpdated && Object.keys(progressUpdates).length > 0) {
+      try {
+        await api.achievements.updateProgress(playerId, progressUpdates);
+        logger.debug('Achievement progress synced to API');
+      } catch (error) {
+        logger.error('Failed to sync achievement progress to API:', error);
+        // Continue anyway - localStorage has the data
+      }
+    }
   }, [progressCache, isAchievementUnlocked, unlockAchievement, getPlayerProgress, saveProgress]);
 
   // Clear notification
