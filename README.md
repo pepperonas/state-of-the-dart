@@ -73,7 +73,7 @@
 - **Automatische Synchronisation** - Stats werden automatisch nach jedem Match aktualisiert
 
 ### 🏆 Achievements & Gamification
-- **20 Achievements** - In 6 Kategorien (Erste Schritte, Scoring, Checkout, Training, Konsistenz, Spezial)
+- **145+ Achievements** - In 7 Kategorien (Erste Schritte, Scoring, Checkout, Training, Konsistenz, Spezial, Meisterschaft)
 - **Tier-System** - Bronze, Silber, Gold, Platin, Diamant
 - **Seltenheitsstufen** - Common, Rare, Epic, Legendary Achievements
 - **Fortschritts-Tracking** - Sieh deinen Fortschritt für gesperrte Achievements

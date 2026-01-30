@@ -9,6 +9,36 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### 🐛 Behoben
 
+#### Heatmap-Visualisierung
+- **Heatmap wird wieder korrekt angezeigt** - Koordinaten-Generierung aus Segment-Zählungen
+  - Problem: Komponente erwartete x/y-Koordinaten-Arrays, Datenbank speichert nur Segment-Zählungen
+  - Lösung: Automatische Koordinaten-Generierung aus Segment-Keys (z.B. `{"3x20":440}`)
+  - Unterstützt alle Formate: `"3x20"`, `"20-3"`, `"20x3"`
+  - Berechnet Winkel basierend auf Segment-Position (Segment 20 oben = -90°)
+  - Bestimmt Radius basierend auf Multiplier (Triple/Double/Single)
+  - Fügt kleine Zufallsvariationen hinzu (±2° Winkel, ±2% Radius) für Blur-Effekt
+  - Unterstützt auch vorhandene Koordinaten-Arrays (Backward-Compatible)
+  - **Fix**: Heatmap wurde nicht angezeigt, weil keine Koordinaten vorhanden waren
+  - **Jetzt**: Funktioniert für alle Spieler, auch mit Segment-Zählungen aus Datenbank
+
+#### Player Avatar Design
+- **Anfangsbuchstabe mit schöner Schrift** - Professionelles Avatar-Design
+  - Großer Anfangsbuchstabe des Namens in geschwungener Schrift
+  - Gradient-Hintergrund (Primary → Accent → Success)
+  - Text-Shadow und Glow-Effekte für bessere Lesbarkeit im dunklen Theme
+  - Emoji als kleiner Badge unten rechts
+  - Schrift: 'Brush Script MT', 'Lucida Handwriting', cursive
+  - **Verbesserung**: Avatar hebt sich jetzt deutlich vom Hintergrund ab
+
+#### Achievements-Anzahl
+- **Korrekte Achievements-Anzahl angezeigt** - Dynamische Anzahl statt hardcodiert
+  - Alle hardcodierten "20" durch `ACHIEVEMENTS.length` ersetzt
+  - PlayerProfile.tsx: 3 Stellen aktualisiert
+  - Leaderboard.tsx: 1 Stelle aktualisiert
+  - Aktuelle Anzahl: 145 Achievements (wird automatisch aktualisiert)
+  - **Fix**: Zeigte immer "20" statt der tatsächlichen Anzahl
+  - **Jetzt**: Zeigt korrekt alle verfügbaren Achievements
+
 #### Achievement-Synchronisation
 - **Freigeschaltete Achievements gehen nicht mehr verloren** - API-Integration für Persistenz
   - Achievements werden jetzt korrekt aus der API geladen
