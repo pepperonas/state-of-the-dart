@@ -7,6 +7,12 @@ interface SegmentData {
   count: number;
 }
 
+// Extended Dart type with optional coordinates
+interface DartWithCoords extends Dart {
+  x?: number;
+  y?: number;
+}
+
 /**
  * Updates heatmap data with new darts
  * Stores x/y coordinates for visual heatmap rendering
@@ -25,7 +31,7 @@ export const updateHeatmapData = (
       segments[key] = { x: [], y: [], count: value };
     } else if (value && typeof value === 'object') {
       // New format with x/y arrays
-      const data = value as any;
+      const data = value as SegmentData;
       segments[key] = {
         x: [...(data.x || [])],
         y: [...(data.y || [])],
@@ -54,7 +60,7 @@ export const updateHeatmapData = (
     }
 
     // Add coordinates if available
-    const dartWithCoords = dart as any;
+    const dartWithCoords = dart as DartWithCoords;
     if (typeof dartWithCoords.x === 'number' && typeof dartWithCoords.y === 'number') {
       segments[key].x.push(dartWithCoords.x);
       segments[key].y.push(dartWithCoords.y);
@@ -64,7 +70,7 @@ export const updateHeatmapData = (
 
   return {
     ...currentData,
-    segments: segments as any,
+    segments: segments as unknown as Record<string, number>,
     totalDarts: currentData.totalDarts + newDarts.length,
     lastUpdated: new Date()
   };
@@ -92,7 +98,8 @@ export const calculateSegmentHeat = (heatmapData: HeatmapData): SegmentHeat[] =>
   
   Object.entries(segments).forEach(([key, data]) => {
     // Support both simple count (number) and object with x/y/count
-    const count = typeof data === 'number' ? data : ((data as any)?.count || (data as any)?.x?.length || 0);
+    const segmentData = typeof data === 'number' ? null : (data as SegmentData);
+    const count = typeof data === 'number' ? data : (segmentData?.count || segmentData?.x?.length || 0);
 
     const [segmentStr, multiplierStr] = key.split('-');
     const segment = parseInt(segmentStr);
@@ -196,7 +203,8 @@ export const calculateAccuracyStats = (heatmapData: HeatmapData) => {
   
   Object.entries(segments).forEach(([key, data]) => {
     // Support both simple count (number) and object with x/y/count
-    const count = typeof data === 'number' ? data : ((data as any)?.count || (data as any)?.x?.length || 0);
+    const segmentData = typeof data === 'number' ? null : (data as SegmentData);
+    const count = typeof data === 'number' ? data : (segmentData?.count || segmentData?.x?.length || 0);
 
     // Parse key format: "20-3" (segment-multiplier)
     const [segmentStr, multiplierStr] = key.split('-');

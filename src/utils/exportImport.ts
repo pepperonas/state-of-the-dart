@@ -1,11 +1,11 @@
 // Export/Import utilities for all app data
 
 import { TenantStorage } from './storage';
-import { ExportData } from '../types';
+import { ExportData, Match, MatchPlayer } from '../types';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { formatDate, formatDateShort } from './dateUtils';
+import { formatDate } from './dateUtils';
 
 /**
  * Export all data for the current tenant to a JSON file
@@ -120,7 +120,7 @@ export const importTenantData = (file: File, tenantId: string): Promise<void> =>
 /**
  * Export match history as CSV for analysis in Excel/Google Sheets
  */
-export const exportMatchHistoryCSV = (matches: any[], playerName: string): void => {
+export const exportMatchHistoryCSV = (matches: Match[], playerName: string): void => {
   try {
     // CSV Header
     const headers = [
@@ -142,8 +142,8 @@ export const exportMatchHistoryCSV = (matches: any[], playerName: string): void 
     // CSV Rows
     const rows = matches.map(match => {
       const players = match.players || [];
-      const player = players.find((p: any) => p.name === playerName);
-      const opponent = players.find((p: any) => p.name !== playerName);
+      const player = players.find((p: MatchPlayer) => p.name === playerName);
+      const opponent = players.find((p: MatchPlayer) => p.name !== playerName);
 
       return [
         formatDate(match.startedAt),
@@ -156,8 +156,8 @@ export const exportMatchHistoryCSV = (matches: any[], playerName: string): void 
         player?.match180s || '0',
         player?.match140Plus || '0',
         player?.match100Plus || '0',
-        player?.checkoutAttempts > 0 
-          ? ((player?.checkoutsHit / player?.checkoutAttempts) * 100).toFixed(1) + '%'
+        (player?.checkoutAttempts ?? 0) > 0
+          ? (((player?.checkoutsHit ?? 0) / (player?.checkoutAttempts ?? 1)) * 100).toFixed(1) + '%'
           : '0%',
         '-', // Could calculate from throws
         '-', // Could calculate from first 9 darts
@@ -192,7 +192,7 @@ export const exportMatchHistoryCSV = (matches: any[], playerName: string): void 
 /**
  * Export match history to Excel
  */
-export const exportMatchHistoryExcel = (matches: any[], playerName: string): void => {
+export const exportMatchHistoryExcel = (matches: Match[], playerName: string): void => {
   try {
     // Prepare data
     const headers = [
@@ -213,8 +213,8 @@ export const exportMatchHistoryExcel = (matches: any[], playerName: string): voi
     
     const rows = matches.map(match => {
       const players = match.players || [];
-      const player = players.find((p: any) => p.name === playerName);
-      const opponent = players.find((p: any) => p.name !== playerName);
+      const player = players.find((p: MatchPlayer) => p.name === playerName);
+      const opponent = players.find((p: MatchPlayer) => p.name !== playerName);
 
       return [
         formatDate(match.startedAt),
@@ -227,8 +227,8 @@ export const exportMatchHistoryExcel = (matches: any[], playerName: string): voi
         player?.match180s || 0,
         player?.match140Plus || 0,
         player?.match100Plus || 0,
-        player?.checkoutAttempts > 0
-          ? parseFloat(((player?.checkoutsHit / player?.checkoutAttempts) * 100).toFixed(1))
+        (player?.checkoutAttempts ?? 0) > 0
+          ? parseFloat((((player?.checkoutsHit ?? 0) / (player?.checkoutAttempts ?? 1)) * 100).toFixed(1))
           : 0,
         player?.legsWon || 0,
         opponent?.legsWon || 0,
@@ -263,7 +263,7 @@ export const exportMatchHistoryExcel = (matches: any[], playerName: string): voi
     const totalMatches = matches.length;
     const wins = matches.filter(m => {
       const players = m.players || [];
-      const player = players.find((p: any) => p.name === playerName);
+      const player = players.find((p: MatchPlayer) => p.name === playerName);
       return m.winner === player?.playerId;
     }).length;
     const losses = totalMatches - wins;
@@ -272,14 +272,14 @@ export const exportMatchHistoryExcel = (matches: any[], playerName: string): voi
     const avgAverage = matches.length > 0
       ? (matches.reduce((sum, m) => {
           const players = m.players || [];
-          const player = players.find((p: any) => p.name === playerName);
+          const player = players.find((p: MatchPlayer) => p.name === playerName);
           return sum + (player?.matchAverage || 0);
         }, 0) / matches.length).toFixed(2)
       : '0.00';
     
     const total180s = matches.reduce((sum, m) => {
       const players = m.players || [];
-      const player = players.find((p: any) => p.name === playerName);
+      const player = players.find((p: MatchPlayer) => p.name === playerName);
       return sum + (player?.match180s || 0);
     }, 0);
     
@@ -312,7 +312,7 @@ export const exportMatchHistoryExcel = (matches: any[], playerName: string): voi
 /**
  * Export match history to PDF
  */
-export const exportMatchHistoryPDF = (matches: any[], playerName: string): void => {
+export const exportMatchHistoryPDF = (matches: Match[], playerName: string): void => {
   try {
     const doc = new jsPDF();
     
@@ -329,7 +329,7 @@ export const exportMatchHistoryPDF = (matches: any[], playerName: string): void 
     // Calculate summary stats
     const wins = matches.filter(m => {
       const players = m.players || [];
-      const player = players.find((p: any) => p.name === playerName);
+      const player = players.find((p: MatchPlayer) => p.name === playerName);
       return m.winner === player?.playerId;
     }).length;
     const winRate = matches.length > 0 ? ((wins / matches.length) * 100).toFixed(1) : '0';
@@ -339,8 +339,8 @@ export const exportMatchHistoryPDF = (matches: any[], playerName: string): void 
     // Prepare table data
     const tableData = matches.map(match => {
       const players = match.players || [];
-      const player = players.find((p: any) => p.name === playerName);
-      const opponent = players.find((p: any) => p.name !== playerName);
+      const player = players.find((p: MatchPlayer) => p.name === playerName);
+      const opponent = players.find((p: MatchPlayer) => p.name !== playerName);
 
       return [
         formatDate(match.startedAt),
@@ -349,8 +349,8 @@ export const exportMatchHistoryPDF = (matches: any[], playerName: string): void 
         `${player?.legsWon || 0}-${opponent?.legsWon || 0}`,
         (player?.matchAverage || 0).toFixed(1),
         player?.match180s || '0',
-        player?.checkoutAttempts > 0 
-          ? ((player?.checkoutsHit / player?.checkoutAttempts) * 100).toFixed(0) + '%'
+        (player?.checkoutAttempts ?? 0) > 0
+          ? (((player?.checkoutsHit ?? 0) / (player?.checkoutAttempts ?? 1)) * 100).toFixed(0) + '%'
           : '0%',
       ];
     });
@@ -375,7 +375,7 @@ export const exportMatchHistoryPDF = (matches: any[], playerName: string): void 
     });
     
     // Add footer
-    const pageCount = (doc as any).internal.getNumberOfPages();
+    const pageCount = (doc as typeof doc & { internal: { getNumberOfPages(): number } }).internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
       doc.setFontSize(8);
@@ -419,7 +419,7 @@ export interface ImprovementMetrics {
   };
 }
 
-export const calculateImprovement = (matches: any[]): ImprovementMetrics => {
+export const calculateImprovement = (matches: Match[]): ImprovementMetrics => {
   if (matches.length === 0) {
     return {
       averageImprovement: 0,

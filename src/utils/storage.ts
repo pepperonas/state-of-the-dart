@@ -26,7 +26,7 @@ export const safeGetItem = <T>(key: string, defaultValue: T): T => {
 /**
  * Safely set data to localStorage with error handling
  */
-export const safeSetItem = (key: string, value: any): boolean => {
+export const safeSetItem = (key: string, value: unknown): boolean => {
   try {
     localStorage.setItem(key, JSON.stringify(value));
     return true;
@@ -91,11 +91,11 @@ export const clearTenantData = (tenantId: string): boolean => {
 /**
  * Debounced localStorage setter
  */
-let debounceTimers: Record<string, ReturnType<typeof setTimeout>> = {};
+const debounceTimers: Record<string, ReturnType<typeof setTimeout>> = {};
 
 export const debouncedSetItem = (
-  key: string, 
-  value: any, 
+  key: string,
+  value: unknown,
   delay: number = 1000
 ): void => {
   // Clear existing timer for this key
@@ -132,7 +132,7 @@ export const isLocalStorageAvailable = (): boolean => {
     localStorage.setItem(test, test);
     localStorage.removeItem(test);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 };
@@ -155,11 +155,11 @@ export class TenantStorage {
     return safeGetItem(this.getKey(key), defaultValue);
   }
   
-  set(key: string, value: any): boolean {
+  set(key: string, value: unknown): boolean {
     return safeSetItem(this.getKey(key), value);
   }
-  
-  setDebounced(key: string, value: any, delay?: number): void {
+
+  setDebounced(key: string, value: unknown, delay?: number): void {
     debouncedSetItem(this.getKey(key), value, delay);
   }
   
