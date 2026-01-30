@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Trophy, Target } from 'lucide-react';
 import { MatchPlayer } from '../../types/index';
+import PlayerAvatar from '../player/PlayerAvatar';
+import { usePlayer } from '../../context/PlayerContext';
 
 interface PlayerScoreProps {
   player: MatchPlayer;
@@ -19,6 +21,13 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
   average,
   legsWon,
 }) => {
+  const { players } = usePlayer();
+  
+  // Get full player data to access avatar
+  const fullPlayer = useMemo(() => {
+    return players.find(p => p.id === player.playerId);
+  }, [players, player.playerId]);
+
   return (
     <motion.div
       animate={{
@@ -33,9 +42,12 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
       }`}
     >
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-bold text-white">
-          {player.name}
-        </h3>
+        <div className="flex items-center gap-3">
+          <PlayerAvatar avatar={fullPlayer?.avatar} name={player.name} size="md" />
+          <h3 className="text-lg font-bold text-white">
+            {player.name}
+          </h3>
+        </div>
         {isActive && (
           <Target className="text-green-500 animate-pulse" size={24} />
         )}

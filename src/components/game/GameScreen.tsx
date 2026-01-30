@@ -17,6 +17,7 @@ import CheckoutSuggestion from '../dartboard/CheckoutSuggestion';
 import AchievementHint from '../achievements/AchievementHint';
 import SpinnerWheel from './SpinnerWheel';
 import BugReportModal from '../bugReport/BugReportModal';
+import PlayerAvatar from '../player/PlayerAvatar';
 import { Dart, Player, GameType, MatchSettings } from '../../types/index';
 import { calculateThrowScore } from '../../utils/scoring';
 import { PersonalBests, createEmptyPersonalBests, updatePersonalBests } from '../../types/personalBests';
@@ -70,7 +71,8 @@ const GameScreen: React.FC = () => {
   const [legWonAnimation, setLegWonAnimation] = useState<{
     show: boolean;
     winnerName: string;
-    winnerAvatar: string;
+    winnerAvatar?: string;
+    winnerId?: string;
     legNumber: number;
     legsWon: number;
     legsTotal: number;
@@ -100,10 +102,14 @@ const GameScreen: React.FC = () => {
             legsWon: winnerPlayer.legsWon,
           });
 
+          // Get full player data to access avatar
+          const fullPlayer = players.find(p => p.id === winnerPlayer.playerId);
+
           setLegWonAnimation({
             show: true,
             winnerName: winnerPlayer.name,
-            winnerAvatar: '🎯', // Use default avatar from match player data
+            winnerAvatar: fullPlayer?.avatar,
+            winnerId: winnerPlayer.playerId,
             legNumber: completedLegIndex + 1, // Convert to 1-indexed for display (Leg 1, Leg 2, etc.)
             legsWon: winnerPlayer.legsWon,
             legsTotal: state.currentMatch.settings.legsToWin || 3,
@@ -721,7 +727,9 @@ const GameScreen: React.FC = () => {
                         : 'border-dark-700 hover:border-dark-600'
                     }`}
                   >
-                    <div className="text-2xl mb-1">{player.avatar}</div>
+                    <div className="flex justify-center mb-1">
+                      <PlayerAvatar avatar={player.avatar} name={player.name} size="sm" />
+                    </div>
                     <div className="text-sm font-medium text-white">{player.name}</div>
                   </button>
                 ))}
@@ -736,7 +744,9 @@ const GameScreen: React.FC = () => {
                     <div className="absolute top-1 right-1 text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity">
                       <X size={14} />
                     </div>
-                    <div className="text-2xl mb-1">{bot.avatar}</div>
+                    <div className="flex justify-center mb-1">
+                      <PlayerAvatar avatar={bot.avatar} name={bot.name} size="sm" />
+                    </div>
                     <div className="text-sm font-medium text-primary-300">{bot.name}</div>
                   </button>
                 ))}
@@ -1500,8 +1510,12 @@ const GameScreen: React.FC = () => {
             </div>
 
             {/* Winner Avatar */}
-            <div className="text-8xl mb-4 animate-bounce-in">
-              {legWonAnimation.winnerAvatar}
+            <div className="mb-4 animate-bounce-in flex justify-center">
+              <PlayerAvatar 
+                avatar={legWonAnimation.winnerAvatar} 
+                name={legWonAnimation.winnerName} 
+                size="xl" 
+              />
             </div>
 
             {/* LEG text with glow */}

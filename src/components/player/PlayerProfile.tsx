@@ -11,6 +11,7 @@ import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
 import { calculateAccuracyStats } from '../../utils/heatmap';
 import { formatDate } from '../../utils/dateUtils';
 import { ACHIEVEMENTS } from '../../types/achievements';
+import PlayerAvatar from './PlayerAvatar';
 
 const PlayerProfile: React.FC = () => {
   const { t } = useTranslation();
@@ -178,20 +179,7 @@ const PlayerProfile: React.FC = () => {
         {/* Player Info Card */}
         <div className="glass-card p-6 md:p-8 mb-6">
           <div className="flex items-start gap-6">
-            <div className="relative">
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-primary-500 via-accent-500 to-success-500 flex items-center justify-center shadow-2xl border-4 border-white/20">
-                <span className="text-4xl md:text-6xl font-bold text-white" style={{
-                  fontFamily: "'Brush Script MT', 'Lucida Handwriting', cursive, serif",
-                  textShadow: '2px 2px 4px rgba(0,0,0,0.5), 0 0 20px rgba(255,255,255,0.3)',
-                  letterSpacing: '0.05em'
-                }}>
-                  {player.name.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <div className="absolute -bottom-2 -right-2 w-8 h-8 md:w-10 md:h-10 bg-accent-500 rounded-full border-4 border-dark-900 flex items-center justify-center shadow-lg">
-                <span className="text-lg md:text-xl">{player.avatar}</span>
-              </div>
-            </div>
+            <PlayerAvatar avatar={player.avatar} name={player.name} size="xl" showBadge={true} />
             <div className="flex-1">
               <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">{player.name}</h1>
               <div className="flex flex-wrap gap-3 mb-4">

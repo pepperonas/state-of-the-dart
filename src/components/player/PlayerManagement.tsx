@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Edit2, Trash2, User, Eye, Crown, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Plus, Edit2, Trash2, User, Eye, Crown, BarChart3, Smile } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { usePlayer } from '../../context/PlayerContext';
 import { api } from '../../services/api';
+import PlayerAvatar from './PlayerAvatar';
+
+const COMMON_EMOJIS = ['🎯', '🏆', '👑', '🔥', '⭐', '💪', '🎪', '🦅', '🐉', '🦁', '🐺', '🦉', '🎮', '⚡', '💎', '🌟', '🎨', '🎭', '🎸', '🎺'];
 
 const PlayerManagement: React.FC = () => {
   const { t } = useTranslation();
@@ -11,8 +14,11 @@ const PlayerManagement: React.FC = () => {
   const { players, loading, addPlayer, deletePlayer, updatePlayer } = usePlayer();
   const [showAddPlayer, setShowAddPlayer] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
+  const [newPlayerAvatar, setNewPlayerAvatar] = useState<string | undefined>(undefined);
   const [editingPlayer, setEditingPlayer] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
+  const [editAvatar, setEditAvatar] = useState<string | undefined>(undefined);
+  const [editingAvatar, setEditingAvatar] = useState<string | null>(null);
   const [mainPlayerId, setMainPlayerId] = useState<string | null>(null);
 
   // Load main player on mount
@@ -31,8 +37,9 @@ const PlayerManagement: React.FC = () => {
   const handleAddPlayer = async () => {
     if (newPlayerName.trim()) {
       try {
-        await addPlayer(newPlayerName.trim());
+        await addPlayer(newPlayerName.trim(), newPlayerAvatar);
         setNewPlayerName('');
+        setNewPlayerAvatar(undefined);
         setShowAddPlayer(false);
       } catch (error) {
         console.error('Failed to add player:', error);
@@ -44,13 +51,24 @@ const PlayerManagement: React.FC = () => {
   const handleEditPlayer = async (id: string) => {
     if (editName.trim()) {
       try {
-        await updatePlayer(id, { name: editName.trim() });
+        await updatePlayer(id, { name: editName.trim(), avatar: editAvatar });
         setEditingPlayer(null);
         setEditName('');
+        setEditAvatar(undefined);
       } catch (error) {
         console.error('Failed to update player:', error);
         alert('Fehler beim Aktualisieren des Spielers');
       }
+    }
+  };
+
+  const handleUpdateAvatar = async (id: string, avatar: string | undefined) => {
+    try {
+      await updatePlayer(id, { avatar });
+      setEditingAvatar(null);
+    } catch (error) {
+      console.error('Failed to update avatar:', error);
+      alert('Fehler beim Aktualisieren des Avatars');
     }
   };
 
@@ -89,6 +107,34 @@ const PlayerManagement: React.FC = () => {
           
           {showAddPlayer && (
             <div className="mb-6 p-4 bg-dark-900/50 rounded-lg border border-dark-700">
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-white mb-2">
+                  Emoji auswählen (optional - lässt den Anfangsbuchstaben ersetzen)
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {COMMON_EMOJIS.map(emoji => (
+                    <button
+                      key={emoji}
+                      onClick={() => setNewPlayerAvatar(newPlayerAvatar === emoji ? undefined : emoji)}
+                      className={`text-2xl p-2 rounded-lg transition-all ${
+                        newPlayerAvatar === emoji
+                          ? 'bg-success-500 scale-110 shadow-lg'
+                          : 'bg-dark-800 hover:bg-dark-700 hover:scale-105'
+                      }`}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                  {newPlayerAvatar && (
+                    <button
+                      onClick={() => setNewPlayerAvatar(undefined)}
+                      className="text-sm px-3 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-all"
+                    >
+                      Entfernen
+                    </button>
+                  )}
+                </div>
+              </div>
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -109,6 +155,7 @@ const PlayerManagement: React.FC = () => {
                   onClick={() => {
                     setShowAddPlayer(false);
                     setNewPlayerName('');
+                    setNewPlayerAvatar(undefined);
                   }}
                   className="px-4 py-2 bg-dark-700 hover:bg-dark-600 text-white rounded-lg font-semibold transition-all"
                 >
@@ -138,10 +185,52 @@ const PlayerManagement: React.FC = () => {
                   key={player.id}
                   className="flex items-center justify-between p-4 bg-dark-900/50 border border-dark-700 rounded-lg hover:border-dark-600 transition-all"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center text-xl font-bold text-white shadow-lg">
-                      {player.avatar}
-                    </div>
+                  <div className="flex items-center gap-3 flex-1">
+                    {editingAvatar === player.id ? (
+                      <div className="flex flex-col gap-2">
+                        <div className="flex flex-wrap gap-2">
+                          {COMMON_EMOJIS.map(emoji => (
+                            <button
+                              key={emoji}
+                              onClick={() => handleUpdateAvatar(player.id, emoji)}
+                              className={`text-xl p-1.5 rounded transition-all ${
+                                player.avatar === emoji
+                                  ? 'bg-success-500 scale-110 shadow-lg'
+                                  : 'bg-dark-800 hover:bg-dark-700 hover:scale-105'
+                              }`}
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                          <button
+                            onClick={() => handleUpdateAvatar(player.id, undefined)}
+                            className="text-xs px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded transition-all"
+                          >
+                            Entfernen
+                          </button>
+                        </div>
+                        <button
+                          onClick={() => setEditingAvatar(null)}
+                          className="text-xs text-gray-400 hover:text-white"
+                        >
+                          Abbrechen
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setEditingAvatar(player.id);
+                          setEditAvatar(player.avatar);
+                        }}
+                        className="relative group"
+                        title="Emoji ändern"
+                      >
+                        <PlayerAvatar avatar={player.avatar} name={player.name} size="md" />
+                        <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Smile size={16} className="text-white" />
+                        </div>
+                      </button>
+                    )}
                     {editingPlayer === player.id ? (
                       <input
                         type="text"
@@ -155,7 +244,7 @@ const PlayerManagement: React.FC = () => {
                         autoFocus
                       />
                     ) : (
-                      <div>
+                      <div className="flex-1">
                         <h3 className="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
                           {player.name}
                           {mainPlayerId === player.id && (
@@ -203,6 +292,7 @@ const PlayerManagement: React.FC = () => {
                       onClick={() => {
                         setEditingPlayer(player.id);
                         setEditName(player.name);
+                        setEditAvatar(player.avatar);
                       }}
                       className="p-2 text-accent-400 hover:bg-accent-500/20 rounded-lg transition-colors"
                       title={t('players.edit_name')}
