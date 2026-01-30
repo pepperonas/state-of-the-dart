@@ -19,6 +19,46 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dartboardRef = useRef<HTMLCanvasElement>(null);
 
+  // Helper function to parse segment key and get angle/radius
+  const parseSegmentKey = (key: string): { segment: number; multiplier: number } | null => {
+    // Support formats: "3x20", "20-3", "20x3"
+    const match = key.match(/(\d+)[x-](\d+)/);
+    if (match) {
+      const [, first, second] = match;
+      // Check if first is multiplier (1-3) or segment (1-20)
+      if (parseInt(first) <= 3) {
+        return { multiplier: parseInt(first), segment: parseInt(second) };
+      } else {
+        return { segment: parseInt(first), multiplier: parseInt(second) };
+      }
+    }
+    return null;
+  };
+
+  // Helper function to get angle for a segment (segment 20 is at top = -90°)
+  const getSegmentAngle = (segment: number): number => {
+    const segmentIndex = SEGMENTS.indexOf(segment);
+    if (segmentIndex === -1) return 0;
+    // Segment 20 (index 0) should be at -90° (top)
+    const baseAngle = -90; // Top
+    const anglePerSegment = 360 / 20; // 18 degrees per segment
+    return baseAngle + (segmentIndex * anglePerSegment);
+  };
+
+  // Helper function to get radius based on multiplier
+  const getRadiusForMultiplier = (multiplier: number, baseRadius: number): number => {
+    // Triple ring: ~43-53% of radius
+    // Double ring: ~85-95% of radius
+    // Single: varies
+    // Bull: ~0-11% (outer), ~0-6% (inner)
+    switch (multiplier) {
+      case 3: return baseRadius * 0.48; // Middle of triple ring
+      case 2: return baseRadius * 0.90; // Middle of double ring
+      case 1: return baseRadius * 0.68; // Middle of single area
+      default: return baseRadius * 0.68;
+    }
+  };
+
   // Parse segments and create point cloud with proper intensity scaling
   const dartPoints = useMemo(() => {
     const points: { x: number; y: number; intensity: number }[] = [];
@@ -31,43 +71,87 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
         : heatmapData.segments;
 
       const center = size / 2;
-      const scale = size * 0.45; // Scale for normalized coordinates
+      const baseRadius = size * 0.45;
 
       // First pass: find max count per segment to normalize properly
       let maxSegmentCount = 0;
-      Object.values(segments).forEach((data: any) => {
-        if (data && typeof data === 'object' && Array.isArray(data.x)) {
-          maxSegmentCount = Math.max(maxSegmentCount, data.x.length);
+      Object.entries(segments).forEach(([key, data]: [string, any]) => {
+        let count = 0;
+        if (typeof data === 'number') {
+          count = data;
+        } else if (data && typeof data === 'object') {
+          if (Array.isArray(data.x)) {
+            count = data.x.length;
+          } else if (typeof data.count === 'number') {
+            count = data.count;
+          }
         }
+        maxSegmentCount = Math.max(maxSegmentCount, count);
       });
 
       // Use the top segment count for normalization (makes hot spots really hot)
       const normalizationFactor = maxSegmentCount > 0 ? maxSegmentCount : 1;
 
       Object.entries(segments).forEach(([segmentKey, data]: [string, any]) => {
-        // Check if data has x/y coordinate arrays (format with actual positions)
-        if (data && typeof data === 'object' && Array.isArray(data.x) && Array.isArray(data.y) && data.x.length > 0) {
-          // Use existing x/y coordinates directly
-          const hitCount = data.x.length;
-          // Intensity based on how this segment compares to the hottest segment
-          // This makes the contrast much more visible
-          const segmentIntensity = hitCount / normalizationFactor;
+        let hitCount = 0;
+        let hasCoordinates = false;
+        let coordinateArrays: { x: number[]; y: number[] } | null = null;
 
-          for (let i = 0; i < hitCount; i++) {
-            // x/y are normalized coordinates (-1 to 1), convert to canvas coordinates
-            const x = center + data.x[i] * scale;
-            const y = center + data.y[i] * scale;
-
-            points.push({
-              x,
-              y,
-              // Higher intensity for segments with more hits
-              intensity: segmentIntensity
-            });
+        // Determine hit count and check for existing coordinates
+        if (typeof data === 'number') {
+          hitCount = data;
+        } else if (data && typeof data === 'object') {
+          if (Array.isArray(data.x) && Array.isArray(data.y) && data.x.length > 0) {
+            // Has coordinate arrays
+            hitCount = data.x.length;
+            hasCoordinates = true;
+            coordinateArrays = { x: data.x, y: data.y };
+          } else if (typeof data.count === 'number') {
+            hitCount = data.count;
           }
         }
-        // Note: We only render points with actual coordinates
-        // Old count-only format is preserved but not visualized
+
+        if (hitCount === 0) return;
+
+        // Parse segment key to get segment and multiplier
+        const parsed = parseSegmentKey(segmentKey);
+        if (!parsed) {
+          console.warn(`⚠️ Could not parse segment key: ${segmentKey}`);
+          return;
+        }
+
+        const { segment, multiplier } = parsed;
+        const segmentIntensity = hitCount / normalizationFactor;
+
+        // Generate coordinates
+        if (hasCoordinates && coordinateArrays) {
+          // Use existing coordinates
+          for (let i = 0; i < hitCount; i++) {
+            const x = center + coordinateArrays.x[i] * baseRadius;
+            const y = center + coordinateArrays.y[i] * baseRadius;
+            points.push({ x, y, intensity: segmentIntensity });
+          }
+        } else {
+          // Generate coordinates from segment position
+          const angle = getSegmentAngle(segment);
+          const radius = getRadiusForMultiplier(multiplier, baseRadius);
+          const angleRad = (angle * Math.PI) / 180;
+
+          // Generate points with small random variations for blur effect
+          for (let i = 0; i < hitCount; i++) {
+            // Add small random variations (±2° angle, ±2% radius)
+            const angleVariation = (Math.random() - 0.5) * 4; // ±2 degrees
+            const radiusVariation = 1 + (Math.random() - 0.5) * 0.04; // ±2%
+            
+            const finalAngle = angleRad + (angleVariation * Math.PI / 180);
+            const finalRadius = radius * radiusVariation;
+
+            const x = center + Math.cos(finalAngle) * finalRadius;
+            const y = center + Math.sin(finalAngle) * finalRadius;
+
+            points.push({ x, y, intensity: segmentIntensity });
+          }
+        }
       });
 
       console.log(`🎯 Generated ${points.length} dart points from segments (max segment: ${maxSegmentCount})`);

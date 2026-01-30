@@ -6,6 +6,7 @@ import { usePlayer } from '../../context/PlayerContext';
 import { useAchievements } from '../../context/AchievementContext';
 import { useTenant } from '../../context/TenantContext';
 import { PersonalBests, createEmptyPersonalBests } from '../../types/personalBests';
+import { ACHIEVEMENTS } from '../../types/achievements';
 
 type LeaderboardCategory = 
   | 'average'
@@ -107,7 +108,7 @@ const Leaderboard: React.FC = () => {
       case 'checkoutRate':
         return `${player.checkoutRate.toFixed(1)}%`;
       case 'achievements':
-        return `${player.achievementsCount}/20`;
+        return `${player.achievementsCount}/${ACHIEVEMENTS.length}`;
       case 'totalPoints':
         return player.totalPoints.toString();
       default:

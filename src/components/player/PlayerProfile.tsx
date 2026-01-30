@@ -10,6 +10,7 @@ import { LineChart, Line, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRad
 import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
 import { calculateAccuracyStats } from '../../utils/heatmap';
 import { formatDate } from '../../utils/dateUtils';
+import { ACHIEVEMENTS } from '../../types/achievements';
 
 const PlayerProfile: React.FC = () => {
   const { t } = useTranslation();
@@ -123,7 +124,7 @@ const PlayerProfile: React.FC = () => {
       { skill: 'Checkout', value: stats.checkoutPercentage || 0, max: 100 },
       { skill: '180s', value: Math.min((stats.total180s / 20) * 100, 100), max: 100 },
       { skill: 'Consistency', value: stats.gamesPlayed > 0 ? (stats.gamesWon / stats.gamesPlayed) * 100 : 0, max: 100 },
-      { skill: 'Achievements', value: achievementProgress ? (achievementProgress.unlockedAchievements.length / 20) * 100 : 0, max: 100 },
+      { skill: 'Achievements', value: achievementProgress ? (achievementProgress.unlockedAchievements.length / ACHIEVEMENTS.length) * 100 : 0, max: 100 },
     ];
   }, [player, achievementProgress]);
 
@@ -177,7 +178,20 @@ const PlayerProfile: React.FC = () => {
         {/* Player Info Card */}
         <div className="glass-card p-6 md:p-8 mb-6">
           <div className="flex items-start gap-6">
-            <div className="text-6xl md:text-8xl">{player.avatar}</div>
+            <div className="relative">
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-primary-500 via-accent-500 to-success-500 flex items-center justify-center shadow-2xl border-4 border-white/20">
+                <span className="text-4xl md:text-6xl font-bold text-white" style={{
+                  fontFamily: "'Brush Script MT', 'Lucida Handwriting', cursive, serif",
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.5), 0 0 20px rgba(255,255,255,0.3)',
+                  letterSpacing: '0.05em'
+                }}>
+                  {player.name.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div className="absolute -bottom-2 -right-2 w-8 h-8 md:w-10 md:h-10 bg-accent-500 rounded-full border-4 border-dark-900 flex items-center justify-center shadow-lg">
+                <span className="text-lg md:text-xl">{player.avatar}</span>
+              </div>
+            </div>
             <div className="flex-1">
               <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">{player.name}</h1>
               <div className="flex flex-wrap gap-3 mb-4">
@@ -191,7 +205,7 @@ const PlayerProfile: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2 text-success-400">
                   <Award size={18} />
-                  <span className="font-semibold">{achievements.length}/20 Achievements</span>
+                  <span className="font-semibold">{achievements.length}/{ACHIEVEMENTS.length} Achievements</span>
                 </div>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -444,7 +458,7 @@ const PlayerProfile: React.FC = () => {
           <div className="glass-card p-6 mb-6">
             <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
               <Award className="text-amber-400" size={24} />
-              Neueste Achievements ({achievements.length}/20)
+              Neueste Achievements ({achievements.length}/{ACHIEVEMENTS.length})
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
               {achievements.slice(0, 10).map((achievement) => (
