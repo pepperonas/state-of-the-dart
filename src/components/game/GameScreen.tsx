@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, Pause, Play, X, Bot, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Pause, Play, X, Bot, ChevronDown, ChevronUp, AlertTriangle, Smile } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Confetti from 'react-confetti';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -18,6 +18,7 @@ import AchievementHint from '../achievements/AchievementHint';
 import SpinnerWheel from './SpinnerWheel';
 import BugReportModal from '../bugReport/BugReportModal';
 import PlayerAvatar from '../player/PlayerAvatar';
+import EmojiPicker from '../player/EmojiPicker';
 import { Dart, Player, GameType, MatchSettings } from '../../types/index';
 import { calculateThrowScore } from '../../utils/scoring';
 import { PersonalBests, createEmptyPersonalBests, updatePersonalBests } from '../../types/personalBests';
@@ -199,7 +200,8 @@ const GameScreen: React.FC = () => {
   const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
   const [showPlayerNameInput, setShowPlayerNameInput] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
-  const [newPlayerAvatar, setNewPlayerAvatar] = useState('🎯');
+  const [newPlayerAvatar, setNewPlayerAvatar] = useState<string | undefined>(undefined);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showBotSelector, setShowBotSelector] = useState(false);
   const [showThrowHistory, setShowThrowHistory] = useState(false);
   const [showThrowChart, setShowThrowChart] = useState(false);
@@ -820,16 +822,29 @@ const GameScreen: React.FC = () => {
                 ) : (
                   <div className="p-3 rounded-lg border-2 border-success-500 bg-success-500/20">
                     <div className="space-y-2">
-                      <div className="flex gap-2">
-                        {['🎯', '🏆', '👑', '🔥', '⭐', '💪', '🎪', '🦅'].map(emoji => (
-                          <button
-                            key={emoji}
-                            onClick={() => setNewPlayerAvatar(emoji)}
-                            className={`text-2xl p-1 rounded ${newPlayerAvatar === emoji ? 'bg-success-500 text-white' : 'hover:bg-dark-700'}`}
-                          >
-                            {emoji}
-                          </button>
-                        ))}
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1">
+                          {newPlayerAvatar ? (
+                            <div className="flex items-center gap-2">
+                              <span className="text-2xl">{newPlayerAvatar}</span>
+                              <button
+                                onClick={() => setNewPlayerAvatar(undefined)}
+                                className="text-xs px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded transition-all"
+                              >
+                                Entfernen
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="text-dark-400 text-sm">Kein Emoji ausgewählt</div>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => setShowEmojiPicker(true)}
+                          className="px-3 py-1.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-sm font-semibold transition-all flex items-center gap-2"
+                        >
+                          <Smile size={16} />
+                          Emoji
+                        </button>
                       </div>
                       <input
                         type="text"
@@ -841,7 +856,7 @@ const GameScreen: React.FC = () => {
                               const newPlayer = await addPlayer(newPlayerName.trim(), newPlayerAvatar);
                               setSelectedPlayers([...selectedPlayers, newPlayer]);
                               setNewPlayerName('');
-                              setNewPlayerAvatar('🎯');
+                              setNewPlayerAvatar(undefined);
                               setShowPlayerNameInput(false);
                             } catch (error) {
                               console.error('Failed to add player:', error);
@@ -861,7 +876,7 @@ const GameScreen: React.FC = () => {
                                 const newPlayer = await addPlayer(newPlayerName.trim(), newPlayerAvatar);
                                 setSelectedPlayers([...selectedPlayers, newPlayer]);
                                 setNewPlayerName('');
-                                setNewPlayerAvatar('🎯');
+                                setNewPlayerAvatar(undefined);
                                 setShowPlayerNameInput(false);
                               } catch (error) {
                                 console.error('Failed to add player:', error);
@@ -878,7 +893,7 @@ const GameScreen: React.FC = () => {
                           onClick={() => {
                             setShowPlayerNameInput(false);
                             setNewPlayerName('');
-                            setNewPlayerAvatar('🎯');
+                              setNewPlayerAvatar(undefined);
                           }}
                           className="flex-1 py-1 px-2 bg-dark-700 hover:bg-dark-600 text-white rounded text-sm transition-all"
                         >
@@ -1618,7 +1633,18 @@ const GameScreen: React.FC = () => {
         />
       )}
 
-          </div>
+      {/* Emoji Picker Modal */}
+      {showEmojiPicker && (
+        <EmojiPicker
+          onSelect={(emoji) => {
+            setNewPlayerAvatar(emoji || undefined);
+            setShowEmojiPicker(false);
+          }}
+          onClose={() => setShowEmojiPicker(false)}
+          currentEmoji={newPlayerAvatar}
+        />
+      )}
+    </div>
   );
 };
 

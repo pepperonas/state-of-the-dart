@@ -5,8 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { usePlayer } from '../../context/PlayerContext';
 import { api } from '../../services/api';
 import PlayerAvatar from './PlayerAvatar';
-
-const COMMON_EMOJIS = ['🎯', '🏆', '👑', '🔥', '⭐', '💪', '🎪', '🦅', '🐉', '🦁', '🐺', '🦉', '🎮', '⚡', '💎', '🌟', '🎨', '🎭', '🎸', '🎺'];
+import EmojiPicker from './EmojiPicker';
 
 const PlayerManagement: React.FC = () => {
   const { t } = useTranslation();
@@ -19,6 +18,7 @@ const PlayerManagement: React.FC = () => {
   const [editName, setEditName] = useState('');
   const [editAvatar, setEditAvatar] = useState<string | undefined>(undefined);
   const [editingAvatar, setEditingAvatar] = useState<string | null>(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null); // playerId or 'new'
   const [mainPlayerId, setMainPlayerId] = useState<string | null>(null);
 
   // Load main player on mount
@@ -66,9 +66,18 @@ const PlayerManagement: React.FC = () => {
     try {
       await updatePlayer(id, { avatar });
       setEditingAvatar(null);
+      setShowEmojiPicker(null);
     } catch (error) {
       console.error('Failed to update avatar:', error);
       alert('Fehler beim Aktualisieren des Avatars');
+    }
+  };
+
+  const handleEmojiSelect = (emoji: string) => {
+    if (showEmojiPicker === 'new') {
+      setNewPlayerAvatar(emoji || undefined);
+    } else if (showEmojiPicker) {
+      handleUpdateAvatar(showEmojiPicker, emoji || undefined);
     }
   };
 
@@ -111,28 +120,29 @@ const PlayerManagement: React.FC = () => {
                 <label className="block text-sm font-medium text-white mb-2">
                   Emoji auswählen (optional - lässt den Anfangsbuchstaben ersetzen)
                 </label>
-                <div className="flex flex-wrap gap-2">
-                  {COMMON_EMOJIS.map(emoji => (
-                    <button
-                      key={emoji}
-                      onClick={() => setNewPlayerAvatar(newPlayerAvatar === emoji ? undefined : emoji)}
-                      className={`text-2xl p-2 rounded-lg transition-all ${
-                        newPlayerAvatar === emoji
-                          ? 'bg-success-500 scale-110 shadow-lg'
-                          : 'bg-dark-800 hover:bg-dark-700 hover:scale-105'
-                      }`}
-                    >
-                      {emoji}
-                    </button>
-                  ))}
-                  {newPlayerAvatar && (
-                    <button
-                      onClick={() => setNewPlayerAvatar(undefined)}
-                      className="text-sm px-3 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-all"
-                    >
-                      Entfernen
-                    </button>
-                  )}
+                <div className="flex items-center gap-3">
+                  <div className="flex-1">
+                    {newPlayerAvatar ? (
+                      <div className="flex items-center gap-3">
+                        <div className="text-4xl">{newPlayerAvatar}</div>
+                        <button
+                          onClick={() => setNewPlayerAvatar(undefined)}
+                          className="text-sm px-3 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-all"
+                        >
+                          Entfernen
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="text-dark-400 text-sm">Kein Emoji ausgewählt</div>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setShowEmojiPicker('new')}
+                    className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-semibold transition-all flex items-center gap-2"
+                  >
+                    <Smile size={18} />
+                    Emoji wählen
+                  </button>
                 </div>
               </div>
               <div className="flex gap-2">
@@ -186,51 +196,16 @@ const PlayerManagement: React.FC = () => {
                   className="flex items-center justify-between p-4 bg-dark-900/50 border border-dark-700 rounded-lg hover:border-dark-600 transition-all"
                 >
                   <div className="flex items-center gap-3 flex-1">
-                    {editingAvatar === player.id ? (
-                      <div className="flex flex-col gap-2">
-                        <div className="flex flex-wrap gap-2">
-                          {COMMON_EMOJIS.map(emoji => (
-                            <button
-                              key={emoji}
-                              onClick={() => handleUpdateAvatar(player.id, emoji)}
-                              className={`text-xl p-1.5 rounded transition-all ${
-                                player.avatar === emoji
-                                  ? 'bg-success-500 scale-110 shadow-lg'
-                                  : 'bg-dark-800 hover:bg-dark-700 hover:scale-105'
-                              }`}
-                            >
-                              {emoji}
-                            </button>
-                          ))}
-                          <button
-                            onClick={() => handleUpdateAvatar(player.id, undefined)}
-                            className="text-xs px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded transition-all"
-                          >
-                            Entfernen
-                          </button>
-                        </div>
-                        <button
-                          onClick={() => setEditingAvatar(null)}
-                          className="text-xs text-gray-400 hover:text-white"
-                        >
-                          Abbrechen
-                        </button>
+                    <button
+                      onClick={() => setShowEmojiPicker(player.id)}
+                      className="relative group"
+                      title="Emoji ändern"
+                    >
+                      <PlayerAvatar avatar={player.avatar} name={player.name} size="md" />
+                      <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Smile size={16} className="text-white" />
                       </div>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setEditingAvatar(player.id);
-                          setEditAvatar(player.avatar);
-                        }}
-                        className="relative group"
-                        title="Emoji ändern"
-                      >
-                        <PlayerAvatar avatar={player.avatar} name={player.name} size="md" />
-                        <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <Smile size={16} className="text-white" />
-                        </div>
-                      </button>
-                    )}
+                    </button>
                     {editingPlayer === player.id ? (
                       <input
                         type="text"
@@ -322,6 +297,19 @@ const PlayerManagement: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Emoji Picker Modal */}
+      {showEmojiPicker && (
+        <EmojiPicker
+          onSelect={handleEmojiSelect}
+          onClose={() => setShowEmojiPicker(null)}
+          currentEmoji={
+            showEmojiPicker === 'new'
+              ? newPlayerAvatar
+              : players.find(p => p.id === showEmojiPicker)?.avatar
+          }
+        />
+      )}
     </div>
   );
 };
