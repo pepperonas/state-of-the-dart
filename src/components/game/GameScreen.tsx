@@ -443,11 +443,18 @@ const GameScreen: React.FC = () => {
   }, [state.currentPlayerIndex, state.currentMatch?.currentLegIndex, state.currentMatch?.status, dispatch]);
 
   useEffect(() => {
-    // Show setup if no match or if match is paused/completed
-    if ((!state.currentMatch || state.currentMatch.status === 'paused' || state.currentMatch.status === 'completed') && showSetup === false) {
+    // Auto-resume paused matches
+    if (state.currentMatch?.status === 'paused') {
+      dispatch({ type: 'RESUME_MATCH' });
+      setShowSetup(false);
+      return;
+    }
+    
+    // Show setup if no match or if match is completed
+    if ((!state.currentMatch || state.currentMatch.status === 'completed') && showSetup === false) {
       setShowSetup(true);
     }
-  }, [state.currentMatch, state.currentMatch?.status]);
+  }, [state.currentMatch, state.currentMatch?.status, dispatch]);
   
   const handleStartGame = async () => {
     // Play a start sound to unlock audio system
