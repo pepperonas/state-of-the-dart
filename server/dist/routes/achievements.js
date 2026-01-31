@@ -82,17 +82,26 @@ router.post('/player/:playerId/unlock', auth_1.authenticateTenant, (req, res) =>
 // Update achievement progress
 router.put('/player/:playerId/progress', auth_1.authenticateTenant, (req, res) => {
     const { playerId } = req.params;
-    const { achievementId, progress } = req.body;
-    if (!achievementId || progress === undefined) {
-        return res.status(400).json({ error: 'achievementId and progress are required' });
+    const { achievements } = req.body; // Frontend sends { achievements: { "achievement-id": { current, target, percentage } } }
+    if (!achievements || typeof achievements !== 'object') {
+        return res.status(400).json({ error: 'achievements object is required' });
     }
     const db = (0, database_1.getDatabase)();
     try {
-        // Upsert progress
-        db.prepare(`
-      INSERT OR REPLACE INTO player_achievements (id, player_id, achievement_id, unlocked_at, progress)
-      VALUES (?, ?, ?, ?, ?)
-    `).run(`${playerId}-${achievementId}`, playerId, achievementId, Date.now(), progress);
+        console.log(`[Achievements API] Updating progress for player ${playerId}:`, Object.keys(achievements).length, 'achievements');
+        // Process each achievement progress update
+        for (const [achievementId, progressData] of Object.entries(achievements)) {
+            const progress = progressData.percentage || progressData.progress || 0;
+            // Only update if not already unlocked (progress < 100)
+            if (progress < 100) {
+                db.prepare(`
+          INSERT OR REPLACE INTO player_achievements (id, player_id, achievement_id, unlocked_at, progress)
+          VALUES (?, ?, ?, ?, ?)
+        `).run(`${playerId}-${achievementId}`, playerId, achievementId, null, // unlocked_at is null for progress updates (not unlocked yet)
+                progress);
+                console.log(`[Achievements API] Updated progress for ${achievementId}: ${progress}%`);
+            }
+        }
         res.json({ message: 'Achievement progress updated successfully' });
     }
     catch (error) {
