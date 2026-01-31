@@ -197,7 +197,7 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
           <div>
             <h2 className="text-2xl font-bold text-white flex items-center gap-2">
               {(() => {
-                let gameType = match.type || 'x01';
+                let gameType: string = match.type || 'x01';
                 if (gameType === 'x01' && match.settings?.startScore) {
                   gameType = match.settings.startScore.toString();
                 }
