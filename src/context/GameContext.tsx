@@ -645,6 +645,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const matchCreatedRef = React.useRef<string | null>(null);
   // Track if a create/update operation is in progress to prevent race conditions
   const matchSavingRef = React.useRef<boolean>(false);
+  // Track last saved state to prevent unnecessary saves
+  const lastSavedStateRef = React.useRef<string>('');
 
   // Save game state to API with debouncing (during active game)
   // Save match to API with debouncing and dependency tracking
@@ -657,8 +659,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const abortController = new AbortController();
     let isMounted = true;
 
-    // Use a ref to track the last saved match state to prevent unnecessary saves
-    const lastSavedStateRef = useRef<string>('');
+    // Create a stable state string for comparison to prevent unnecessary saves
     const currentStateString = JSON.stringify({
       id: matchId,
       status: state.currentMatch.status,
