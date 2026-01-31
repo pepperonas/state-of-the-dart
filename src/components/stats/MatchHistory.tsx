@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Match, Throw } from '../../types';
-import { Calendar, Target, Award, ChevronDown, ChevronUp, TrendingUp, Loader } from 'lucide-react';
+import { Calendar, Target, Award, ChevronDown, ChevronUp, TrendingUp, Loader, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatDate, getTimestampForSort } from '../../utils/dateUtils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { api } from '../../services/api';
@@ -14,11 +14,50 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
   const [expandedMatch, setExpandedMatch] = useState<string | null>(null);
   const [matchDetails, setMatchDetails] = useState<Record<string, Match>>({});
   const [loadingDetails, setLoadingDetails] = useState<Record<string, boolean>>({});
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   
   // Sort matches by date (newest first)
-  const sortedMatches = [...matches].sort((a, b) =>
-    getTimestampForSort(b.startedAt) - getTimestampForSort(a.startedAt)
-  );
+  const sortedMatches = useMemo(() => {
+    return [...matches].sort((a, b) =>
+      getTimestampForSort(b.startedAt) - getTimestampForSort(a.startedAt)
+    );
+  }, [matches]);
+
+  // Filter matches by search query
+  const filteredMatches = useMemo(() => {
+    if (!searchQuery.trim()) return sortedMatches;
+    const query = searchQuery.toLowerCase();
+    return sortedMatches.filter(match => {
+      const matchPlayers = match.players || [];
+      const player = matchPlayers.find(p => p.playerId === playerId);
+      const opponent = matchPlayers.find(p => p.playerId !== playerId);
+      const dateStr = formatDate(match.startedAt).toLowerCase();
+      
+      return (
+        player?.name.toLowerCase().includes(query) ||
+        opponent?.name.toLowerCase().includes(query) ||
+        dateStr.includes(query) ||
+        match.type?.toLowerCase().includes(query)
+      );
+    });
+  }, [sortedMatches, searchQuery, playerId]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredMatches.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedMatches = filteredMatches.slice(startIndex, endIndex);
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
 
   // Load match details when expanding
   const toggleMatch = async (matchId: string) => {
@@ -121,13 +160,106 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
   
   return (
     <div className="space-y-3">
-      {sortedMatches.length === 0 ? (
+      {/* Search and Pagination Controls */}
+      {sortedMatches.length > 0 && (
+        <div className="mb-4 space-y-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400" size={20} />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Nach Gegner, Datum oder Spieltyp suchen..."
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-dark-700 bg-dark-800 text-white placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
+
+          {/* Items per page and pagination info */}
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-dark-400">Zeige:</span>
+              <select
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="px-3 py-1 rounded-lg border border-dark-700 bg-dark-800 text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+              <span className="text-sm text-dark-400">
+                von {filteredMatches.length} Match{filteredMatches.length !== 1 ? 'es' : ''}
+              </span>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="p-2 rounded-lg border border-dark-700 bg-dark-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-dark-700 transition-colors"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => handlePageChange(pageNum)}
+                        className={`px-3 py-1 rounded-lg text-sm font-semibold transition-colors ${
+                          currentPage === pageNum
+                            ? 'bg-primary-500 text-white'
+                            : 'bg-dark-800 text-white hover:bg-dark-700 border border-dark-700'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="p-2 rounded-lg border border-dark-700 bg-dark-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-dark-700 transition-colors"
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {filteredMatches.length === 0 ? (
         <div className="text-center py-8 text-gray-500 dark:text-gray-400">
           <Target size={48} className="mx-auto mb-2 opacity-50" />
-          <p>Noch keine Spiele gespielt</p>
+          <p>{searchQuery ? 'Keine Matches gefunden' : 'Noch keine Spiele gespielt'}</p>
+          {searchQuery && (
+            <p className="text-sm mt-2">Keine Matches gefunden für "{searchQuery}"</p>
+          )}
         </div>
       ) : (
-        sortedMatches.map((match) => {
+        paginatedMatches.map((match) => {
           const matchPlayers = match.players || [];
           const player = matchPlayers.find(p => p.playerId === playerId);
           const opponent = matchPlayers.find(p => p.playerId !== playerId);

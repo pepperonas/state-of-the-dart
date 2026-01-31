@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Edit2, Trash2, User, Eye, Crown, BarChart3, Smile } from 'lucide-react';
+import { ArrowLeft, Plus, Edit2, Trash2, User, Eye, Crown, BarChart3, Smile, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { usePlayer } from '../../context/PlayerContext';
 import { api } from '../../services/api';
@@ -20,6 +20,9 @@ const PlayerManagement: React.FC = () => {
   const [editingAvatar, setEditingAvatar] = useState<string | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null); // playerId or 'new'
   const [mainPlayerId, setMainPlayerId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Load main player on mount
   useEffect(() => {
@@ -89,6 +92,30 @@ const PlayerManagement: React.FC = () => {
       console.error('Failed to set main player:', error);
       alert('Fehler beim Setzen des Haupt-Profils');
     }
+  };
+
+  // Filter players by search query
+  const filteredPlayers = useMemo(() => {
+    if (!searchQuery.trim()) return players;
+    const query = searchQuery.toLowerCase();
+    return players.filter(player => 
+      player.name.toLowerCase().includes(query)
+    );
+  }, [players, searchQuery]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredPlayers.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedPlayers = filteredPlayers.slice(startIndex, endIndex);
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
   };
   
   return (
@@ -181,16 +208,21 @@ const PlayerManagement: React.FC = () => {
                 <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-500 mx-auto mb-4"></div>
                 <p className="text-white text-lg font-semibold">{t('players.loading_players')}</p>
               </div>
-            ) : players.length === 0 ? (
+            ) : filteredPlayers.length === 0 ? (
               <div className="text-center py-12">
                 <User size={64} className="mx-auto text-dark-600 mb-4" />
-                <p className="text-white text-lg font-semibold">{t('players.no_players_yet')}</p>
+                <p className="text-white text-lg font-semibold">
+                  {searchQuery ? 'Keine Spieler gefunden' : t('players.no_players_yet')}
+                </p>
                 <p className="text-sm text-dark-400 mt-2">
-                  {t('players.add_first_player')}
+                  {searchQuery 
+                    ? `Keine Spieler gefunden für "${searchQuery}"`
+                    : t('players.add_first_player')
+                  }
                 </p>
               </div>
             ) : (
-              players.map((player) => (
+              paginatedPlayers.map((player) => (
                 <div
                   key={player.id}
                   className="flex items-center justify-between p-4 bg-dark-900/50 border border-dark-700 rounded-lg hover:border-dark-600 transition-all"
