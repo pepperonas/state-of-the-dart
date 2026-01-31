@@ -95,16 +95,15 @@
   - **Karriere-Zeitachse** - Vom ersten bis zum letzten Spiel mit allen Stats
   - **Achievement-Showcase** - Zeige freigeschaltete Achievements
   - **Player Avatar System** - Professionelles Avatar-Design mit geschwungener Schrift oder Emoji
-  - **🔥 L.A. Style Heatmap (NEU in v0.0.5)** - Professionelle Wurf-Visualisierung:
-    - Smooth Blur-Effekte (20px Gaussian Blur)
-    - 6-stufiger Farbverlauf (Blau → Cyan → Grün → Gelb → Orange → Rot)
-    - Professionelles Dartboard-Design (Rot/Grün/Schwarz/Weiß)
-    - Silberne Wire-Ringe wie bei echten Dartboards
-    - Regulation Dartboard-Farben und Proportionen
-    - Screen Blend Mode für smooth Overlay
-    - Dartboard sichtbar im Hintergrund (90% Opacity)
+  - **🔥 Professionelle Heatmap (NEU in v0.1.11)** - Wissenschaftliche Wurf-Visualisierung:
+    - **Polarkoordinaten-Histogramm** - 1440 Zellen (20 Ringe × 72 Winkel) statt 82 Standard-Felder
+    - **Gaussian Blur (15px)** - Smooth Übergänge für professionellen Look
+    - **6-stufiger Farbverlauf** (Blau → Cyan → Grün → Gelb → Orange → Rot)
+    - **Cluster-Analyse** - Zeigt Schwerpunkt der Würfe mit Fadenkreuz
+    - **Streuungsradius** - Gestrichelter Kreis zeigt Präzision des Spielers
+    - **Statistik-Karten**: Cluster-Zentrum, Streuungsradius, Triple/Double/Bull-Rate
+    - Professionelles Dartboard-Design im Hintergrund
     - Top 5 Hotspots mit Progress-Bars
-    - Accuracy Stats (Miss Rate, Triple Rate, Double Rate, Lieblings-Feld)
 - **Bestenlisten-Rankings** - Wettbewerbs-Rankings in 7 Kategorien:
   - Bester Average, Meiste Siege, Win-Rate, Meiste 180s, Checkout-Rate, Achievements, Gesamtpunkte
   - Top 3 bekommen spezielle Medaillen (🏆 Gold, 🥈 Silber, 🥉 Bronze)
