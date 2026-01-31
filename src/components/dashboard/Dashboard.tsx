@@ -169,8 +169,8 @@ const Dashboard: React.FC = () => {
 
       // Add recent matches (last 5) - sorted by completedAt descending
       const sortedMatches = [...matchesForActivities].sort((a: any, b: any) => {
-        const aTime = a.completed_at || a.completedAt || 0;
-        const bTime = b.completed_at || b.completedAt || 0;
+        const aTime = a.completedAt || a.completed_at || 0;
+        const bTime = b.completedAt || b.completed_at || 0;
         return bTime - aTime;
       });
 
