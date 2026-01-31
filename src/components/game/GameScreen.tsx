@@ -19,7 +19,7 @@ import SpinnerWheel from './SpinnerWheel';
 import BugReportModal from '../bugReport/BugReportModal';
 import PlayerAvatar from '../player/PlayerAvatar';
 import EmojiPicker from '../player/EmojiPicker';
-import { Dart, Player, GameType, MatchSettings } from '../../types/index';
+import { Dart, Player, GameType, MatchSettings, Throw } from '../../types/index';
 import { calculateThrowScore } from '../../utils/scoring';
 import { PersonalBests, createEmptyPersonalBests, updatePersonalBests } from '../../types/personalBests';
 import audioSystem from '../../utils/audio';
@@ -206,6 +206,7 @@ const GameScreen: React.FC = () => {
   const [showThrowHistory, setShowThrowHistory] = useState(false);
   const [showThrowChart, setShowThrowChart] = useState(false);
   const [showBugReportModal, setShowBugReportModal] = useState(false);
+  const [undoPreviewThrows, setUndoPreviewThrows] = useState<Throw[] | null>(null);
 
   // Load last players from storage
   const getLastPlayers = (): string[] => {
@@ -638,7 +639,22 @@ const GameScreen: React.FC = () => {
   }, [state.currentThrow]);
 
   const handleUndoThrow = () => {
+    if (!state.currentMatch) return;
+    
+    const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
+    if (currentLeg.throws.length === 0) return;
+    
+    // Show preview of throws that will be removed
+    const lastThrow = currentLeg.throws[currentLeg.throws.length - 1];
+    const playerThrows = currentLeg.throws.filter(t => t.playerId === lastThrow.playerId);
+    setUndoPreviewThrows(playerThrows);
+    
     dispatch({ type: 'UNDO_THROW' });
+    
+    // Hide preview after 3 seconds
+    setTimeout(() => {
+      setUndoPreviewThrows(null);
+    }, 3000);
   };
   
   const handleRemoveDart = () => {
@@ -675,7 +691,11 @@ const GameScreen: React.FC = () => {
   const confirmEndMatch = () => {
     dispatch({ type: 'END_MATCH' });
     setShowEndConfirm(false);
-    navigate('/');
+    // Don't navigate immediately - allow undo
+  };
+  
+  const handleUndoEndMatch = () => {
+    dispatch({ type: 'UNDO_END_MATCH' });
   };
   
   if (showSetup) {
@@ -1605,7 +1625,7 @@ const GameScreen: React.FC = () => {
           <div className="glass-card rounded-2xl p-6 max-w-md w-full">
             <h3 className="text-xl font-bold text-white mb-4">❌ Match beenden?</h3>
             <p className="text-gray-300 mb-6">
-              Das Match wird als abgebrochen markiert und kann nicht fortgesetzt werden.
+              Das Match wird als abgebrochen markiert. Du kannst es später rückgängig machen.
             </p>
             <div className="flex gap-3">
               <button
@@ -1622,6 +1642,20 @@ const GameScreen: React.FC = () => {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Undo End Match Button - Show when match is completed */}
+      {state.currentMatch?.status === 'completed' && !state.currentMatch.winner && (
+        <div className="fixed bottom-4 right-4 z-40">
+          <button
+            onClick={handleUndoEndMatch}
+            className="glass-card p-4 rounded-xl hover:glass-card-hover text-white transition-all flex items-center gap-2 shadow-lg"
+            title="Match-Ende rückgängig machen"
+          >
+            <RotateCcw size={20} />
+            <span className="font-semibold">Rückgängig</span>
+          </button>
         </div>
       )}
 

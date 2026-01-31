@@ -56,26 +56,59 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
 
     try {
       logger.apiEvent(`Loading achievements for player ${playerId} from API...`);
+      
+      // Get current localStorage data first (to merge, not overwrite)
+      const currentProgress = progressCache[playerId];
+      const currentUnlockedIds = new Set(currentProgress?.unlockedAchievements.map(u => u.achievementId) || []);
+      
       const apiAchievements = await api.achievements.getByPlayer(playerId);
 
       if (apiAchievements && Array.isArray(apiAchievements)) {
         // Convert API format to PlayerAchievementProgress format
-        const unlockedAchievements: UnlockedAchievement[] = apiAchievements.map((a: any) => ({
+        const apiUnlockedAchievements: UnlockedAchievement[] = apiAchievements.map((a: any) => ({
           achievementId: a.achievement_id || a.achievementId,
           unlockedAt: new Date(a.unlocked_at || a.unlockedAt),
           playerId: a.player_id || a.playerId || playerId,
           gameId: a.game_id || a.gameId,
         }));
 
-        const totalPoints = unlockedAchievements.reduce((sum, ua) => {
+        // Merge API achievements with localStorage achievements (prefer newer unlock date)
+        const mergedAchievements: UnlockedAchievement[] = [...apiUnlockedAchievements];
+        
+        // Add localStorage achievements that are not in API
+        if (currentProgress?.unlockedAchievements) {
+          currentProgress.unlockedAchievements.forEach(localAchievement => {
+            const existsInAPI = apiUnlockedAchievements.some(
+              api => api.achievementId === localAchievement.achievementId
+            );
+            if (!existsInAPI) {
+              mergedAchievements.push(localAchievement);
+            } else {
+              // Use the newer unlock date
+              const apiAchievement = apiUnlockedAchievements.find(
+                api => api.achievementId === localAchievement.achievementId
+              );
+              if (apiAchievement && localAchievement.unlockedAt > apiAchievement.unlockedAt) {
+                const index = mergedAchievements.findIndex(
+                  a => a.achievementId === localAchievement.achievementId
+                );
+                if (index >= 0) {
+                  mergedAchievements[index] = localAchievement;
+                }
+              }
+            }
+          });
+        }
+
+        const totalPoints = mergedAchievements.reduce((sum, ua) => {
           const achievement = getAchievementById(ua.achievementId);
           return sum + (achievement?.points || 0);
         }, 0);
 
         const playerProgress: PlayerAchievementProgress = {
           playerId,
-          unlockedAchievements,
-          progress: {},
+          unlockedAchievements: mergedAchievements,
+          progress: currentProgress?.progress || {},
           totalPoints,
         };
 
@@ -95,7 +128,7 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
 
         // Mark as loaded
         setLoadedPlayers(prev => new Set([...prev, playerId]));
-        logger.success(`Achievements loaded for player ${playerId}`);
+        logger.success(`Achievements loaded for player ${playerId} (${mergedAchievements.length} unlocked)`);
       }
     } catch (error) {
       logger.warn(`Failed to load achievements from API for player ${playerId}:`, error);

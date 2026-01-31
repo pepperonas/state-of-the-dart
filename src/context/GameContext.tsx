@@ -26,6 +26,7 @@ type GameAction =
   | { type: 'UNDO_THROW' }
   | { type: 'NEXT_PLAYER' }
   | { type: 'END_MATCH' }
+  | { type: 'UNDO_END_MATCH' }
   | { type: 'PAUSE_MATCH' }
   | { type: 'RESUME_MATCH' }
   | { type: 'UPDATE_CHECKOUT_SUGGESTION' };
@@ -393,14 +394,78 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       const updatedMatch = { ...state.currentMatch };
       updatedMatch.legs[state.currentMatch.currentLegIndex] = updatedLeg;
       
+      // Recalculate all player statistics after undo
+      updatedMatch.players.forEach((player) => {
+        // Reset stats
+        player.match180s = 0;
+        player.match171Plus = 0;
+        player.match140Plus = 0;
+        player.match100Plus = 0;
+        player.match60Plus = 0;
+        player.matchHighestScore = 0;
+        player.checkoutsHit = 0;
+        player.checkoutAttempts = 0;
+        
+        // Recalculate from all throws
+        const allPlayerThrows = updatedMatch.legs.flatMap(l => 
+          l.throws.filter(t => t.playerId === player.playerId)
+        );
+        
+        allPlayerThrows.forEach(throwData => {
+          const throwScore = throwData.isBust ? 0 : throwData.score;
+          if (throwScore === 180) player.match180s++;
+          else if (throwScore >= 171) player.match171Plus++;
+          else if (throwScore >= 140) player.match140Plus++;
+          else if (throwScore >= 100) player.match100Plus++;
+          else if (throwScore >= 60) player.match60Plus++;
+          
+          if (throwScore > player.matchHighestScore) {
+            player.matchHighestScore = throwScore;
+          }
+        });
+        
+        // Recalculate average
+        player.matchAverage = calculateAverage(allPlayerThrows);
+        
+        // Recalculate legs won and checkouts
+        updatedMatch.legs.forEach(leg => {
+          if (leg.winner === player.playerId) {
+            player.legsWon++;
+            player.checkoutsHit++;
+          }
+          // Count checkout attempts (when remaining <= 170)
+          const playerThrowsInLeg = leg.throws.filter(t => t.playerId === player.playerId);
+          const totalScoredInLeg = playerThrowsInLeg.reduce((sum, t) => sum + t.score, 0);
+          const startScore = updatedMatch.settings.startScore || 501;
+          const remaining = startScore - totalScoredInLeg;
+          if (remaining <= 170 && remaining > 0) {
+            player.checkoutAttempts++;
+          }
+        });
+      });
+      
       // Find the player who threw last
       const playerIndex = state.currentMatch.players.findIndex(p => p.playerId === lastThrow.playerId);
+      
+      // Recalculate checkout suggestion for the player whose turn it is now
+      const currentPlayer = updatedMatch.players[playerIndex >= 0 ? playerIndex : state.currentPlayerIndex];
+      const playerThrows = updatedLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
+      const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
+      const startScore = updatedMatch.settings.startScore || 501;
+      const remaining = startScore - totalScored;
+      
+      let checkoutSuggestion = null;
+      const requireDouble = updatedMatch.settings.doubleOut ?? true;
+      if (remaining <= 170 && remaining >= 1) {
+        checkoutSuggestion = getCheckoutSuggestion(remaining, 3, requireDouble);
+      }
       
       return {
         ...state,
         currentMatch: updatedMatch,
         currentPlayerIndex: playerIndex >= 0 ? playerIndex : state.currentPlayerIndex,
         currentThrow: [],
+        checkoutSuggestion,
       };
     }
     
@@ -413,6 +478,20 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
           ...state.currentMatch,
           status: 'completed',
           completedAt: new Date(),
+        },
+      };
+    }
+    
+    case 'UNDO_END_MATCH': {
+      if (!state.currentMatch || state.currentMatch.status !== 'completed') return state;
+      
+      return {
+        ...state,
+        currentMatch: {
+          ...state.currentMatch,
+          status: 'in-progress',
+          completedAt: undefined,
+          winner: undefined,
         },
       };
     }
