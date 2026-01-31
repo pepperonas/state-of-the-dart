@@ -178,7 +178,11 @@ const Dashboard: React.FC = () => {
         .slice(0, 5)
         .forEach((match: any) => {
           // API returns 'type' field (from game_type in DB)
-          const gameType = match.type || match.game_type || match.gameType || '501';
+          // For x01 games, show the actual start score (301, 501, etc.) from settings
+          let gameType = match.type || match.game_type || match.gameType || '501';
+          if (gameType === 'x01' && match.settings?.startScore) {
+            gameType = match.settings.startScore.toString();
+          }
           const completedAt = match.completedAt || match.completed_at;
           
           // Get all player names in the match
