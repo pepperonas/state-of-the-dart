@@ -196,7 +196,13 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-              {match.type || 'X01'}
+              {(() => {
+                let gameType = match.type || 'x01';
+                if (gameType === 'x01' && match.settings?.startScore) {
+                  gameType = match.settings.startScore.toString();
+                }
+                return gameType;
+              })()}
             </h2>
             <p className="text-sm text-dark-400 flex items-center gap-2 mt-1">
               <Calendar size={14} />
