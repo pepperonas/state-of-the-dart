@@ -188,7 +188,14 @@ export const api = {
 
   // Matches
   matches: {
-    getAll: (options?: RequestInit) => apiClient('/api/matches', options),
+    getAll: (params?: { limit?: string; offset?: string; status?: string }, options?: RequestInit) => {
+      const queryParams = new URLSearchParams();
+      if (params?.limit) queryParams.append('limit', params.limit);
+      if (params?.offset) queryParams.append('offset', params.offset);
+      if (params?.status) queryParams.append('status', params.status);
+      const queryString = queryParams.toString();
+      return apiClient(`/api/matches${queryString ? `?${queryString}` : ''}`, options);
+    },
 
     getById: (id: string, options?: RequestInit) => apiClient(`/api/matches/${id}`, options),
 

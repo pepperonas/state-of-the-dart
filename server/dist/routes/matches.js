@@ -21,7 +21,13 @@ router.get('/', auth_1.authenticateTenant, (req, res) => {
             query += ` AND status = ?`;
             params.push(status);
         }
-        query += ` ORDER BY started_at DESC LIMIT ? OFFSET ?`;
+        // Order by completed_at DESC for completed matches, started_at DESC for others
+        query += ` ORDER BY 
+      CASE 
+        WHEN status = 'completed' AND completed_at IS NOT NULL THEN completed_at 
+        ELSE started_at 
+      END DESC 
+      LIMIT ? OFFSET ?`;
         params.push(parseInt(limit), parseInt(offset));
         const matches = db.prepare(query).all(...params);
         // Get players for each match and parse JSON fields

@@ -78,9 +78,10 @@ const Dashboard: React.FC = () => {
 
     try {
       // Load matches from API (Database-First!)
-      const matches = await api.matches.getAll();
+      // Request more matches to ensure we get all relevant ones
+      const matches = await api.matches.getAll({ limit: '200', offset: '0' });
       const allCompletedMatches = matches.filter((m: any) => m.status === 'completed');
-      console.log('✅ Dashboard: Matches loaded from API:', matches.length);
+      console.log('✅ Dashboard: Matches loaded from API:', matches.length, 'Completed:', allCompletedMatches.length);
 
       // Filter matches for main player (for stats calculation only)
       let completedMatches = allCompletedMatches;
@@ -156,20 +157,39 @@ const Dashboard: React.FC = () => {
         total180s,
       });
 
-      // Load recent activities (use ALL matches, not filtered by main player)
+      // Load recent activities (only matches where main player participated)
       const recentActivities: RecentActivity[] = [];
 
-      // Add recent matches (last 5)
-      allCompletedMatches
-        .slice(-5)
-        .reverse()
+      // Filter matches for main player (same as stats)
+      const matchesForActivities = mainPlayerId 
+        ? allCompletedMatches.filter((m: any) =>
+            m.players?.some((p: any) => p.playerId === mainPlayerId)
+          )
+        : allCompletedMatches;
+
+      // Add recent matches (last 5) - sorted by completedAt descending
+      const sortedMatches = [...matchesForActivities].sort((a: any, b: any) => {
+        const aTime = a.completed_at || a.completedAt || 0;
+        const bTime = b.completed_at || b.completedAt || 0;
+        return bTime - aTime;
+      });
+
+      sortedMatches
+        .slice(0, 5)
         .forEach((match: any) => {
           // API returns snake_case fields
           const gameType = match.game_type || match.gameType || '501';
           const completedAt = match.completed_at || match.completedAt;
           
+          // Get all player names in the match
+          const matchPlayers = match.players || [];
+          const playerNames = matchPlayers
+            .map((p: any) => p.name || 'Unbekannt')
+            .filter((name: string) => name !== 'Unbekannt')
+            .join(' vs ');
+          
           // Get winner player name
-          const winnerPlayer = match.players?.find((p: any) => p.playerId === match.winner);
+          const winnerPlayer = matchPlayers.find((p: any) => p.playerId === match.winner);
           const winnerName = winnerPlayer?.name || 'Unbekannt';
           
           // Determine title based on main player
@@ -180,17 +200,27 @@ const Dashboard: React.FC = () => {
             if (mainPlayerId && match.winner === mainPlayerId) {
               title = 'Spiel gewonnen!';
               icon = '🏆';
+            } else if (mainPlayerId) {
+              // Main player lost - show who won
+              title = `${winnerName} gewonnen`;
+              icon = '🏆';
             } else {
+              // No main player - show winner
               title = `${winnerName} gewonnen`;
               icon = '🏆';
             }
           }
           
+          // Description: Show game type and players
+          const description = playerNames 
+            ? `${gameType} - ${playerNames} - ${formatDateTime(completedAt)}`
+            : `${gameType} - ${formatDateTime(completedAt)}`;
+          
           recentActivities.push({
             id: match.id,
             type: 'match',
             title,
-            description: `${gameType} - ${formatDateTime(completedAt)}`,
+            description,
             timestamp: completedAt,
             icon,
           });

@@ -21,7 +21,13 @@ router.get('/', authenticateTenant, (req: AuthRequest, res: Response) => {
       params.push(status);
     }
 
-    query += ` ORDER BY started_at DESC LIMIT ? OFFSET ?`;
+    // Order by completed_at DESC for completed matches, started_at DESC for others
+    query += ` ORDER BY 
+      CASE 
+        WHEN status = 'completed' AND completed_at IS NOT NULL THEN completed_at 
+        ELSE started_at 
+      END DESC 
+      LIMIT ? OFFSET ?`;
     params.push(parseInt(limit as string), parseInt(offset as string));
 
     const matches = db.prepare(query).all(...params);
