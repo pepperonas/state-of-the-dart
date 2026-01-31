@@ -177,9 +177,9 @@ const Dashboard: React.FC = () => {
       sortedMatches
         .slice(0, 5)
         .forEach((match: any) => {
-          // API returns snake_case fields
-          const gameType = match.game_type || match.gameType || '501';
-          const completedAt = match.completed_at || match.completedAt;
+          // API returns 'type' field (from game_type in DB)
+          const gameType = match.type || match.game_type || match.gameType || '501';
+          const completedAt = match.completedAt || match.completed_at;
           
           // Get all player names in the match
           const matchPlayers = match.players || [];
