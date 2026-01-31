@@ -9,6 +9,19 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [0.1.9] - 2026-01-31
 
+### ✨ Hinzugefügt
+
+#### Klickbare Spieler-Listeneinträge
+- **Gesamter Listeneintrag führt zur Detailansicht** - Verbesserte UX
+  - Problem: Nur das Auge-Icon führte zur Detailansicht
+  - Lösung: Gesamter Listeneintrag ist jetzt klickbar (cursor-pointer)
+  - Klick auf Eintrag → navigiert zu `/players/{playerId}`
+  - Buttons haben `stopPropagation()` um Konflikte zu vermeiden
+  - Avatar-Button hat auch `stopPropagation()` für Emoji-Picker
+  - **Feature**: Bessere Benutzerfreundlichkeit, intuitivere Navigation
+
+## [0.1.9] - 2026-01-31
+
 ### 🐛 Behoben
 
 #### Achievement-Speicherung (HIGH Priority)

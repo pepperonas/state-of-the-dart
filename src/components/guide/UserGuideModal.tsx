@@ -56,7 +56,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
                 <li>• <strong>KI-Gegner:</strong> 10 Schwierigkeitsstufen für Solo-Training</li>
                 <li>• <strong>Detaillierte Statistiken:</strong> Heatmaps, Averages, Checkout-Rate</li>
                 <li>• <strong>Trainingsmodi:</strong> Doubles, Triples, Checkout-Training</li>
-                <li>• <strong>Achievements:</strong> Über 30 freischaltbare Erfolge</li>
+                <li>• <strong>Achievements:</strong> 145+ freischaltbare Erfolge in 7 Kategorien</li>
                 <li>• <strong>Multi-Tenant:</strong> Mehrere Profile (Familie, Verein, etc.)</li>
                 <li>• <strong>Audio-Caller:</strong> Professionelle Ansagen wie im TV</li>
               </ul>
@@ -219,7 +219,8 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
                 </p>
                 <ul className="text-dark-300 text-sm space-y-1">
                   <li>• Name eingeben</li>
-                  <li>• Avatar wählen (Emoji oder Bild-Upload)</li>
+                  <li>• <strong>Emoji wählen:</strong> WhatsApp-Style Emoji-Picker mit 8 Kategorien</li>
+                  <li>• Emoji ersetzt den Anfangsbuchstaben als Avatar</li>
                   <li>• Optional: Als Bot markieren mit Schwierigkeitslevel</li>
                 </ul>
               </div>
@@ -237,14 +238,18 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
               <div className="glass-card p-4 rounded-lg">
                 <h4 className="font-semibold text-white mb-2">Spieler-Profile</h4>
                 <p className="text-dark-300 text-sm mb-3">
-                  Klicke auf einen Spieler, um sein vollständiges Profil zu sehen:
+                  <strong>Klicke auf einen Spieler-Eintrag</strong> in der Liste, um sein vollständiges Profil zu sehen:
                 </p>
                 <ul className="text-dark-300 text-sm space-y-1">
                   <li>• <strong>Statistiken:</strong> Average, 180s, Checkout-Rate</li>
-                  <li>• <strong>Heatmap:</strong> Visuelle Darstellung aller Würfe</li>
+                  <li>• <strong>Heatmap:</strong> L.A. Style Heatmap mit smooth Blur-Effekten</li>
                   <li>• <strong>Match History:</strong> Alle gespielten Matches</li>
                   <li>• <strong>Personal Bests:</strong> Beste Leistungen</li>
+                  <li>• <strong>Avatar:</strong> Professionelles Design mit geschwungener Schrift oder Emoji</li>
                 </ul>
+                <p className="text-dark-300 text-sm mt-2">
+                  💡 <strong>Tipp:</strong> Der gesamte Listeneintrag ist klickbar - nicht nur das Auge-Icon!
+                </p>
               </div>
 
               <div className="glass-card p-4 rounded-lg bg-blue-500/10 border border-blue-500/30">
@@ -383,7 +388,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
             <h3 className="text-2xl font-bold text-white">Achievements & Erfolge 🏆</h3>
 
             <p className="text-dark-300">
-              Schalte über 30 Achievements frei, indem du bestimmte Meilensteine erreichst!
+              Schalte <strong>145+ Achievements</strong> frei, indem du bestimmte Meilensteine erreichst!
             </p>
 
             <div className="space-y-4">
@@ -574,10 +579,13 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
               </div>
 
               <div className="glass-card p-4 rounded-lg">
-                <h4 className="font-semibold text-white mb-2">⚡ Schnelle Eingabe</h4>
+                <h4 className="font-semibold text-white mb-2">⚡ Schnelle Eingabe & Undo</h4>
                 <ul className="text-dark-300 text-sm space-y-2">
                   <li>• Nach 3 Darts wird automatisch bestätigt (600ms Delay)</li>
-                  <li>• <strong>Undo-Button</strong> für Korrekturen</li>
+                  <li>• <strong>Undo-Button:</strong> Macht den letzten Wurf rückgängig</li>
+                  <li>• <strong>Undo Match-Ende:</strong> Versehentlich beendete Matches können fortgesetzt werden</li>
+                  <li>• <strong>Verlaufsanzeige:</strong> Beim Undo wird ein Preview-Panel mit entfernten Würfen angezeigt</li>
+                  <li>• <strong>Statistik-Neuberechnung:</strong> Alle Stats werden beim Undo korrekt aktualisiert</li>
                   <li>• Klicke <strong>"Verfehlt"</strong> für Fehlwürfe (0 Punkte)</li>
                 </ul>
               </div>

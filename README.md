@@ -74,6 +74,7 @@
 
 ### 🏆 Achievements & Gamification
 - **145+ Achievements** - In 7 Kategorien (Erste Schritte, Scoring, Checkout, Training, Konsistenz, Spezial, Meisterschaft)
+- **Achievement-Synchronisation** - Achievements werden automatisch in der Datenbank gespeichert und bleiben erhalten
 - **Tier-System** - Bronze, Silber, Gold, Platin, Diamant
 - **Seltenheitsstufen** - Common, Rare, Epic, Legendary Achievements
 - **Fortschritts-Tracking** - Sieh deinen Fortschritt für gesperrte Achievements
@@ -84,11 +85,13 @@
 
 ### 👤 Spielerprofile & Bestenliste
 - **Detaillierte Spielerprofile** - Individuelle Seiten für jeden Spieler mit:
+  - **Klickbare Spielerliste** - Gesamter Listeneintrag führt zur Detailansicht
   - **8 Persönliche Bestleistungen** - Höchster Score, bester Average, meiste 180s, höchstes Checkout, beste Checkout-Rate, kürzestes Leg, längste Siegesserie, meiste Legs gewonnen
   - **Performance-Charts** - Verfolge Verbesserungen über die letzten 10 Spiele
   - **Skill-Radar** - 5-dimensionale Skill-Visualisierung
   - **Karriere-Zeitachse** - Vom ersten bis zum letzten Spiel mit allen Stats
   - **Achievement-Showcase** - Zeige freigeschaltete Achievements
+  - **Player Avatar System** - Professionelles Avatar-Design mit geschwungener Schrift oder Emoji
   - **🔥 L.A. Style Heatmap (NEU in v0.0.5)** - Professionelle Wurf-Visualisierung:
     - Smooth Blur-Effekte (20px Gaussian Blur)
     - 6-stufiger Farbverlauf (Blau → Cyan → Grün → Gelb → Orange → Rot)
@@ -139,6 +142,7 @@
   - Glass-card Styling mit responsivem Layout
   - Direkter Zugriff aus dem Hauptmenü
   - Click-outside zum Schließen
+  - **Aktualisiert (v0.1.9):** Dokumentiert alle neuen Features (Emoji Picker, Undo-System, klickbare Spielerliste)
 
 ### 💾 Database Backup System
 - **Automatisierte Backups (NEU in v0.1.8)** - Verhindert VPS-Speicher-Überlastung:
@@ -159,7 +163,11 @@
   - Anderer Spieler gewonnen: "{winnerName} gewonnen" 🏆
   - Kein Gewinner: "Match gespielt" 🎯
 - **Personal Bests Auto-Update** - Automatische Aktualisierung nach jedem Match
-- **Undo Last Throw** - Rückgängig-Button für versehentliche Eingaben
+- **Undo-System (NEU in v0.1.9)** - Umfassendes Undo-System:
+  - **Undo Last Throw** - Rückgängig-Button für versehentliche Eingaben
+  - **Undo Match-Ende** - Versehentlich beendete Matches können fortgesetzt werden
+  - **Verlaufsanzeige** - Preview-Panel zeigt entfernte Würfe beim Undo
+  - **Statistik-Neuberechnung** - Alle Stats werden beim Undo korrekt aktualisiert
 - **Letzte Spieler Quick-Select** - Schnellauswahl der zuletzt verwendeten Spieler
 - **Achievement-Fortschritts-Hinweise** - Benachrichtigungen wenn du nahe an einem Achievement bist
 - **Sound-Mixing** - Separate Lautstärke für Caller vs. Effects
