@@ -87,13 +87,7 @@ function generateScattered(count: number): HeatmapSegment {
   return { x, y, count };
 }
 
-function mergeSegments(a: HeatmapSegment, b: HeatmapSegment): HeatmapSegment {
-  return {
-    x: [...a.x, ...b.x],
-    y: [...a.y, ...b.y],
-    count: a.count + b.count
-  };
-}
+// Removed unused function mergeSegments
 
 function generateMaxHeatmap(): Record<string, HeatmapSegment> {
   // Max: 80% T20, very tight cluster
