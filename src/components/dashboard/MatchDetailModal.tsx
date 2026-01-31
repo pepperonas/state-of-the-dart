@@ -32,13 +32,14 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
     }
 
     // Use calculateAverage from utils for consistency
+    const scores = playerThrows.map(t => t.score);
     const average = calculateAverage(playerThrows);
-    const highestScore = Math.max(...scores, 0);
-    const count180s = scores.filter(s => s === 180).length;
-    const count171Plus = scores.filter(s => s >= 171).length;
-    const count140Plus = scores.filter(s => s >= 140).length;
-    const count100Plus = scores.filter(s => s >= 100).length;
-    const count60Plus = scores.filter(s => s >= 60).length;
+    const highestScore = scores.length > 0 ? Math.max(...scores, 0) : 0;
+    const count180s = scores.filter((s: number) => s === 180).length;
+    const count171Plus = scores.filter((s: number) => s >= 171).length;
+    const count140Plus = scores.filter((s: number) => s >= 140).length;
+    const count100Plus = scores.filter((s: number) => s >= 100).length;
+    const count60Plus = scores.filter((s: number) => s >= 60).length;
     const checkoutsHit = playerThrows.filter(t => t.remaining === 0 && !t.isBust).length;
     const checkoutAttempts = playerThrows.filter(t => t.isCheckoutAttempt).length;
 
