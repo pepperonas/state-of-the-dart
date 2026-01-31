@@ -88,8 +88,8 @@ const Dartboard: React.FC<DartboardProps> = ({
       <circle cx={radius} cy={radius} r={radius * 0.85} fill="none" stroke="#c0c0c0" strokeWidth="1" />
       <circle cx={radius} cy={radius} r={radius * 0.53} fill="none" stroke="#c0c0c0" strokeWidth="1" />
       <circle cx={radius} cy={radius} r={radius * 0.43} fill="none" stroke="#c0c0c0" strokeWidth="1" />
-      <circle cx={radius} cy={radius} r={radius * 0.14} fill="none" stroke="#c0c0c0" strokeWidth="1" />
-      <circle cx={radius} cy={radius} r={radius * 0.045} fill="none" stroke="#c0c0c0" strokeWidth="1" />
+      <circle cx={radius} cy={radius} r={radius * 0.12} fill="none" stroke="#c0c0c0" strokeWidth="1" />
+      <circle cx={radius} cy={radius} r={radius * 0.055} fill="none" stroke="#c0c0c0" strokeWidth="1" />
       
       {/* Segments */}
       {numbers.map((number, index) => {
@@ -129,7 +129,7 @@ const Dartboard: React.FC<DartboardProps> = ({
             
             {/* Inner single */}
             <path
-              d={getSegmentPath(index, radius * 0.14, radius * 0.43)}
+              d={getSegmentPath(index, radius * 0.12, radius * 0.43)}
               fill={isHighlighted(number, 1) ? '#ffd700' : isEven ? '#000000' : '#f4f1e8'}
               stroke="#c0c0c0"
               strokeWidth="1"
@@ -154,11 +154,11 @@ const Dartboard: React.FC<DartboardProps> = ({
         );
       })}
       
-      {/* Outer bull (25 points) - larger green ring */}
+      {/* Outer bull (25 points) - green ring */}
       <circle
         cx={radius}
         cy={radius}
-        r={radius * 0.14}
+        r={radius * 0.12}
         fill={highlightedSegments.includes('OB') ? '#ffd700' : '#00a651'}
         stroke="#c0c0c0"
         strokeWidth="1"
@@ -166,11 +166,11 @@ const Dartboard: React.FC<DartboardProps> = ({
         className={interactive ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}
       />
       
-      {/* Inner bull (50 points) - smaller red center */}
+      {/* Inner bull (50 points) - red center */}
       <circle
         cx={radius}
         cy={radius}
-        r={radius * 0.045}
+        r={radius * 0.055}
         fill={highlightedSegments.includes('Bull') ? '#ffd700' : '#e30613'}
         stroke="#c0c0c0"
         strokeWidth="1"
