@@ -7,6 +7,61 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-01-31
+
+### ✨ Neue Features
+
+#### 🎯 Cricket-Modus
+- **Vollständiger Cricket-Spielmodus** implementiert
+  - Zahlen 15-20 und Bull müssen 3x getroffen werden
+  - Triple = 3 Marks, Double = 2 Marks, Single = 1 Mark
+  - Punkte sammeln nach dem Schließen (solange Gegner offen)
+  - Gewinner: Alle Zahlen geschlossen + meiste Punkte
+- **Cricket-Scoreboard** mit Mark-Anzeige (/, X, ⊗)
+- **Schnelle Eingabe** über dedizierte Cricket-Buttons
+- **Winner-Konfetti** bei Spielende
+
+#### 🏆 Turniersystem
+- **Knockout-Modus** (Single Elimination)
+  - 4-16 Spieler unterstützt
+  - Automatische Bracket-Generierung
+  - Gewinner rückt in nächste Runde vor
+- **Round Robin-Modus** (Jeder gegen jeden)
+  - 3-8 Spieler unterstützt
+  - Automatische Paarungsgenerierung
+  - Tabelle mit Siegen, Niederlagen, Leg-Differenz
+- **Live-Tabelle** mit Medaillen (🥇🥈🥉)
+- **Match-Scoring** direkt im Turnier
+- **Turniersieger-Anzeige** mit Konfetti
+
+#### 📴 Offline-First PWA
+- **IndexedDB-basierte Datenspeicherung** für Offline-Nutzung
+- **Pending Actions Queue** - Aktionen werden gespeichert und später synchronisiert
+- **Offline-Indicator** zeigt Verbindungsstatus
+- **NetworkFirst API-Caching** für Players, Matches, Settings
+- **Auto-Sync** beim Wiederherstellen der Verbindung
+- **Verbesserte Service Worker Konfiguration**
+  - NavigateFallback für Offline-Navigation
+  - Font-Caching (Google Fonts)
+  - Erweiterte Audio-Cache (500 Einträge)
+
+### 🔧 Verbesserungen
+- **Bull-Größen angepasst** für bessere Touch-Eingabe
+  - Inner Bull (50): 5.5% des Radius
+  - Outer Bull (25): 12% des Radius
+- **Pausierte Matches** werden korrekt gespeichert und können fortgesetzt werden
+- **Pausierte Match-Anzeige** im Hauptmenü mit Spielernamen
+- **Repository-Struktur** nach Industriestandard
+  - Issue Templates (Bug Report, Feature Request)
+  - Pull Request Template
+  - CONTRIBUTING.md
+  - CODE_OF_CONDUCT.md
+  - LICENSE (MIT)
+
+### 📦 Neue Abhängigkeiten
+- `canvas-confetti` - Konfetti-Animationen
+- `idb` - IndexedDB Wrapper für Offline-Sync
+
 ## [0.1.11] - 2026-01-31
 
 ### ✨ Hinzugefügt

@@ -1,7 +1,7 @@
 {
   "name": "state-of-the-dart",
   "private": true,
-  "version": "0.1.11",
+  "version": "0.2.0",
   "type": "module",
   "description": "Professional Dart Scoring System with Multi-User Support",
   "repository": {
@@ -23,11 +23,14 @@
     "version:show": "node -p \"require('./package.json').version\""
   },
   "dependencies": {
+    "@types/canvas-confetti": "^1.9.0",
     "@types/uuid": "^11.0.0",
+    "canvas-confetti": "^1.9.4",
     "framer-motion": "^12.26.2",
     "html2canvas": "^1.4.1",
     "i18next": "^25.7.4",
     "i18next-browser-languagedetector": "^8.2.0",
+    "idb": "^8.0.3",
     "jspdf": "^4.0.0",
     "jspdf-autotable": "^5.0.7",
     "react": "^19.2.0",

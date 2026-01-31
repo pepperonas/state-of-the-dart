@@ -34,7 +34,9 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,jpg,jpeg,mp3}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,jpg,jpeg,mp3,woff,woff2}'],
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api\//],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -51,13 +53,72 @@ export default defineConfig({
             }
           },
           {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-webfonts',
+              expiration: {
+                maxEntries: 30,
+                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
             urlPattern: /\.mp3$/,
             handler: 'CacheFirst',
             options: {
               cacheName: 'audio-cache',
               expiration: {
-                maxEntries: 300,
+                maxEntries: 500,
                 maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+              }
+            }
+          },
+          {
+            urlPattern: /\/api\/players/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-players-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 // 1 hour
+              },
+              networkTimeoutSeconds: 5,
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /\/api\/matches/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-matches-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 // 1 hour
+              },
+              networkTimeoutSeconds: 5,
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /\/api\/settings/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-settings-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 // 24 hours
+              },
+              networkTimeoutSeconds: 3,
+              cacheableResponse: {
+                statuses: [0, 200]
               }
             }
           }

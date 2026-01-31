@@ -8,6 +8,7 @@ import { SettingsProvider } from './context/SettingsContext';
 import { AchievementProvider } from './context/AchievementContext';
 import MainMenu from './components/MainMenu';
 import AchievementNotification from './components/achievements/AchievementNotification';
+import OfflineIndicator from './components/sync/OfflineIndicator';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import ThemeManager from './components/ThemeManager';
 import Footer from './components/Footer';
@@ -59,6 +60,7 @@ const TrainingMenu = lazyWithRetry(() => import('./components/training/TrainingM
 const TrainingScreen = lazyWithRetry(() => import('./components/training/TrainingScreen'));
 const TrainingStats = lazyWithRetry(() => import('./components/training/TrainingStats'));
 const TournamentMenu = lazyWithRetry(() => import('./components/tournament/TournamentMenu'));
+const CricketGame = lazyWithRetry(() => import('./components/game/CricketGame'));
 const Settings = lazyWithRetry(() => import('./components/Settings'));
 const AchievementsScreen = lazyWithRetry(() => import('./components/achievements/AchievementsScreen'));
 const Leaderboard = lazyWithRetry(() => import('./components/leaderboard/Leaderboard'));
@@ -130,6 +132,7 @@ function AppContent() {
                 <GameProvider>
                   <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex flex-col">
                     <AchievementNotification />
+                    <OfflineIndicator />
                     <div className="flex-1">
                       <Suspense fallback={<LoadingScreen />}>
                       <Routes>
@@ -172,6 +175,12 @@ function AppContent() {
                       <Route path="/game" element={
                         <ProtectedRoute>
                           <GameScreen />
+                        </ProtectedRoute>
+                      } />
+                      
+                      <Route path="/cricket" element={
+                        <ProtectedRoute>
+                          <CricketGame />
                         </ProtectedRoute>
                       } />
                       

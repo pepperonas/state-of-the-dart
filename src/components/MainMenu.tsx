@@ -50,6 +50,13 @@ const MainMenu: React.FC = () => {
       gradient: 'from-primary-500 to-primary-600',
     },
     {
+      title: '🎯 Cricket',
+      icon: Target,
+      description: 'Cricket-Modus spielen',
+      onClick: () => navigate('/cricket'),
+      gradient: 'from-green-500 to-green-600',
+    },
+    {
       title: t('menu.players'),
       icon: Users,
       description: t('menu.players_desc'),
