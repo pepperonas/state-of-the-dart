@@ -7,6 +7,40 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.1.11] - 2026-01-31
+
+### ✨ Hinzugefügt
+
+#### Professionelle Heatmap mit Polarkoordinaten-Histogramm
+- **Feinere Granularität** - 1440 Zellen statt 82 Standard-Felder
+  - 20 konzentrische Ringe (radiale Bins)
+  - 72 Winkelsegmente (5° pro Segment)
+  - Zeigt systematische Abweichungen (zu hoch/tief, links/rechts)
+- **Gaussian Blur (15px)** - Smooth Übergänge für professionellen Look
+  - 2D-Histogramm wird mit Gaussian-Blur geglättet
+  - Power-Kurve für besseren Kontrast
+- **Cluster-Analyse** - Wissenschaftliche Visualisierung
+  - **Fadenkreuz (⊕)** - Zeigt gewichteten Schwerpunkt aller Würfe
+  - **Gestrichelter Kreis (○)** - Streuungsradius (Standardabweichung)
+  - Visualisiert Präzision des Spielers
+- **Neue Statistik-Karten** - Detaillierte Analyse
+  - Cluster-Zentrum: "Sehr präzise" / "Präzise" / "Gestreut"
+  - Streuungsradius: % vom Scheibendurchmesser
+  - Triple-Rate: % aller Würfe auf Triple-Felder
+  - Double-Rate: % aller Würfe auf Double-Felder
+  - Bull-Rate: % auf Bull + Outer Bull (mit separater Inner-Bull-Rate)
+- **Farbcodierung** - 6-stufiger Gradient
+  - Blau (kalt) → Cyan → Grün → Gelb → Orange → Rot (heiß)
+  - Halbtransparent für sichtbare Dartscheibe
+
+### 🔧 Geändert
+
+#### Heatmap-Komponente
+- Alte Version gesichert in `DartboardHeatmapBlur.backup.tsx`
+- Komplett neu geschrieben mit Polarkoordinaten-System
+- Optimierte Canvas-Rendering-Pipeline
+- Verbesserte Legende mit Erklärung der Overlay-Elemente
+
 ## [0.1.10] - 2026-01-31
 
 ### ✨ Hinzugefügt

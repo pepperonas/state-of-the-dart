@@ -9,7 +9,7 @@
 **Professionelles Dart-Zählsystem** - Eine funktionsreiche, webbasierte Dart-Scoring-Anwendung mit Multi-User-Support, professionellem Statistik-Tracking und Live-Deployment.
 
 [![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green)](https://stateofthedart.com)
-![Version](https://img.shields.io/badge/Version-0.1.10-blue)
+![Version](https://img.shields.io/badge/Version-0.1.11-blue)
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
 ![React](https://img.shields.io/badge/React-19.2-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)
@@ -577,6 +577,25 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 
 ## 📝 Changelog
 
+### v0.1.11 (31. Januar 2026) - Professionelle Heatmap mit Cluster-Analyse
+
+#### ✨ Neue Features
+- **Polarkoordinaten-Histogramm** - 1440 Zellen (20 Ringe × 72 Winkel) statt 82 Standard-Felder
+- **Cluster-Analyse** - Gewichteter Schwerpunkt mit Fadenkreuz-Visualisierung
+- **Streuungsradius** - Gestrichelter Kreis zeigt Präzision des Spielers
+- **Neue Statistik-Karten**:
+  - Cluster-Zentrum: "Sehr präzise" / "Präzise" / "Gestreut"
+  - Streuungsradius: % vom Scheibendurchmesser
+  - Triple-Rate: % aller Würfe auf Triple-Felder
+  - Double-Rate: % aller Würfe auf Double-Felder
+  - Bull-Rate: % auf Bull + Outer Bull
+
+#### 🔧 Verbesserungen
+- Gaussian Blur für smooth Übergänge (15px)
+- Power-Kurve für besseren Kontrast
+- Feinere Granularität zeigt systematische Abweichungen
+- Backup der alten Heatmap-Version erstellt
+
 ### v0.1.10 (31. Januar 2026) - Suchfunktion & Pagination
 
 #### ✨ Neue Features
@@ -648,7 +667,7 @@ Siehe [CHANGELOG.md](CHANGELOG.md) für eine vollständige Liste der Änderungen
 
 <div align="center">
   <p>Made with ❤️ and 🎯 by Martin Pfeffer</p>
-  <p>© 2026 celox.io | Version 0.1.10</p>
+  <p>© 2026 celox.io | Version 0.1.11</p>
   <p>
     <a href="https://stateofthedart.com">🌐 Live Demo</a> •
     <a href="https://github.com/pepperonas/state-of-the-dart">📦 GitHub</a> •
