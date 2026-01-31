@@ -2,7 +2,7 @@
   <img src="public/images/state-of-the-dart-thumb-xs.jpg" alt="State of the Dart" width="800" />
 </div>
 
-> [🇩🇪 Deutsch](README.md) | 🇬🇧 **English**
+> [🇩🇪 Deutsch](../README.md) | 🇬🇧 **English**
 
 # 🎯 State of the Dart
 

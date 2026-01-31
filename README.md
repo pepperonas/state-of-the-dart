@@ -2,7 +2,7 @@
   <img src="public/images/state-of-the-dart-thumb-xs.jpg" alt="State of the Dart" width="800" />
 </div>
 
-> 🇩🇪 **Deutsch** | [🇬🇧 English](README.en.md)
+> 🇩🇪 **Deutsch** | [🇬🇧 English](docs/README.en.md)
 
 # 🎯 State of the Dart
 
@@ -16,7 +16,7 @@
 ![Vite](https://img.shields.io/badge/Vite-5.4-blue)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-blue)
 
-🌐 **[Live App](https://stateofthedart.com)** | 📖 **[Deployment Guide](DEPLOYMENT_VPS.md)** | 🏗️ **[Architektur](ARCHITECTURE.md)** | 🐛 **[Issues melden](https://github.com/pepperonas/state-of-the-dart/issues)**
+🌐 **[Live App](https://stateofthedart.com)** | 📖 **[Deployment Guide](docs/DEPLOYMENT_VPS.md)** | 🏗️ **[Architektur](docs/ARCHITECTURE.md)** | 🐛 **[Issues melden](https://github.com/pepperonas/state-of-the-dart/issues)**
 
 ---
 
@@ -240,7 +240,7 @@ npm start
 
 Der Backend-Server läuft auf `http://localhost:3002`
 
-📚 **Vollständige Setup-Anleitung**: Siehe [DEPLOYMENT_VPS.md](DEPLOYMENT_VPS.md) und [server/README.md](server/README.md)
+📚 **Vollständige Setup-Anleitung**: Siehe [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) und [server/README.md](server/README.md)
 
 ### Build für Produktion
 
@@ -282,26 +282,19 @@ state-of-the-dart/
 │   │   ├── tournament/       # Turniersystem
 │   │   └── training/         # Trainingsmodi
 │   ├── context/              # React Context (State Management)
-│   │   ├── AchievementContext.tsx
-│   │   ├── GameContext.tsx
-│   │   ├── PlayerContext.tsx
-│   │   ├── SettingsContext.tsx
-│   │   └── TenantContext.tsx
 │   ├── hooks/                # Custom React Hooks
-│   │   ├── useAchievementHints.ts
-│   │   └── useGameAchievements.ts
 │   ├── types/                # TypeScript Typen
-│   │   ├── achievements.ts
-│   │   ├── index.ts
-│   │   └── personalBests.ts
 │   ├── utils/                # Utility-Funktionen
-│   │   ├── audio.ts          # Audio-System
-│   │   ├── exportImport.ts   # Daten-Export/Import
-│   │   ├── scoring.ts        # Scoring-Logik
-│   │   └── storage.ts        # LocalStorage-Wrapper
 │   ├── data/                 # Statische Daten
-│   │   └── checkoutTable.ts  # Checkout-Vorschläge
 │   └── tests/                # Unit Tests
+├── server/                   # Backend (Express + SQLite)
+├── docs/                     # Dokumentation
+│   ├── ARCHITECTURE.md       # System-Architektur
+│   ├── DEPLOYMENT_VPS.md     # VPS Deployment Guide
+│   ├── BACKUP.md             # Backup & Restore
+│   ├── B2B.md                # Business Features
+│   ├── DART_ONLINE_TURNIER.md # Online-Turnier Konzept
+│   └── README.en.md          # English README
 ├── public/
 │   ├── sounds/               # 400+ Audio-Dateien
 │   └── images/               # Bilder & Thumbnails
@@ -499,7 +492,7 @@ Das Script führt aus:
 3. Permissions setzen
 4. Verifizierung
 
-Siehe [DEPLOYMENT_VPS.md](DEPLOYMENT_VPS.md) für Details.
+Siehe [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) für Details.
 
 ---
 
