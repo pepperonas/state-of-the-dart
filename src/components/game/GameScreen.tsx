@@ -1190,11 +1190,11 @@ const GameScreen: React.FC = () => {
           {/* Center Section - Dartboard and Input */}
           <div className="lg:col-span-1 flex flex-col items-center space-y-6">
             {settings.showDartboardHelper && (
-              <div className="w-full max-w-sm space-y-3">
+              <div className="w-full max-w-lg space-y-3">
                 <Dartboard
                   onDartHit={handleDartHit}
                   highlightedSegments={state.checkoutSuggestion || []}
-                  size={320}
+                  size={480}
                 />
                 {/* Miss Button */}
                 <button
