@@ -195,9 +195,16 @@ const PlayerManagement: React.FC = () => {
                   key={player.id}
                   className="flex items-center justify-between p-4 bg-dark-900/50 border border-dark-700 rounded-lg hover:border-dark-600 transition-all"
                 >
-                  <div className="flex items-center gap-3 flex-1">
-                    <button
-                      onClick={() => setShowEmojiPicker(player.id)}
+                  <div 
+                    className="flex items-center gap-3 flex-1 cursor-pointer"
+                    onClick={() => navigate(`/players/${player.id}`)}
+                    title="Zum Profil"
+                  >
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowEmojiPicker(player.id);
+                      }}
                       className="relative group"
                       title="Emoji ändern"
                     >
@@ -205,7 +212,7 @@ const PlayerManagement: React.FC = () => {
                       <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <Smile size={16} className="text-white" />
                       </div>
-                    </button>
+                    </div>
                     {editingPlayer === player.id ? (
                       <input
                         type="text"
@@ -215,6 +222,7 @@ const PlayerManagement: React.FC = () => {
                           if (e.key === 'Enter') handleEditPlayer(player.id);
                         }}
                         onBlur={() => handleEditPlayer(player.id)}
+                        onClick={(e) => e.stopPropagation()}
                         className="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                         autoFocus
                       />
@@ -237,14 +245,18 @@ const PlayerManagement: React.FC = () => {
                   
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => navigate(`/players/${player.id}`)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/players/${player.id}`);
+                      }}
                       className="p-2 text-primary-400 hover:bg-primary-500/20 rounded-lg transition-colors"
                       title={t('players.view_profile')}
                     >
                       <Eye size={18} />
                     </button>
                     <button
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         // Set player as selected and navigate to stats
                         localStorage.setItem('stats_selected_player_id', player.id);
                         navigate('/stats');
@@ -256,7 +268,10 @@ const PlayerManagement: React.FC = () => {
                     </button>
                     {mainPlayerId !== player.id && (
                       <button
-                        onClick={() => handleSetMainPlayer(player.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSetMainPlayer(player.id);
+                        }}
                         className="p-2 text-amber-400 hover:bg-amber-500/20 rounded-lg transition-colors"
                         title="Als Haupt-Profil setzen"
                       >
@@ -264,7 +279,8 @@ const PlayerManagement: React.FC = () => {
                       </button>
                     )}
                     <button
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setEditingPlayer(player.id);
                         setEditName(player.name);
                         setEditAvatar(player.avatar);
@@ -275,7 +291,8 @@ const PlayerManagement: React.FC = () => {
                       <Edit2 size={18} />
                     </button>
                     <button
-                      onClick={async () => {
+                      onClick={async (e) => {
+                        e.stopPropagation();
                         if (confirm(`${t('players.delete_confirm')} "${player.name}"?`)) {
                           try {
                             await deletePlayer(player.id);
