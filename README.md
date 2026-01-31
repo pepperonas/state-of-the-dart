@@ -600,7 +600,7 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 
 <div align="center">
   <p>Made with ❤️ and 🎯 by Martin Pfeffer</p>
-  <p>© 2026 celox.io | Version 0.1.7</p>
+  <p>© 2026 celox.io | Version 0.1.9</p>
   <p>
     <a href="https://stateofthedart.com">🌐 Live Demo</a> •
     <a href="https://github.com/pepperonas/state-of-the-dart">📦 GitHub</a> •
