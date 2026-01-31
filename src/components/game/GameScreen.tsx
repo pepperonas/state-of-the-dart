@@ -55,6 +55,11 @@ const GameScreen: React.FC = () => {
     audioSystem.setEffectsVolume(settings.effectsVolume ?? settings.soundVolume);
   }, [settings.soundVolume, settings.callerVolume, settings.effectsVolume]);
 
+  // Reset navigation flag when component mounts (user returns to game)
+  useEffect(() => {
+    isNavigatingAwayRef.current = false;
+  }, []);
+
   // Track processed matches to avoid duplicate achievement checks
   const [processedMatchIds, setProcessedMatchIds] = useState<Set<string>>(new Set());
 
@@ -240,6 +245,7 @@ const GameScreen: React.FC = () => {
   });
   const isBotPlayingRef = useRef(false);
   const botTimersRef = useRef<NodeJS.Timeout[]>([]);
+  const isNavigatingAwayRef = useRef(false);
 
   // Calculate total throws count for dependency tracking
   const totalThrowsCount = state.currentMatch?.legs.reduce(
@@ -443,7 +449,12 @@ const GameScreen: React.FC = () => {
   }, [state.currentPlayerIndex, state.currentMatch?.currentLegIndex, state.currentMatch?.status, dispatch]);
 
   useEffect(() => {
-    // Auto-resume paused matches
+    // Don't auto-resume if we're navigating away (user clicked "Pause")
+    if (isNavigatingAwayRef.current) {
+      return;
+    }
+    
+    // Auto-resume paused matches (only when returning to game screen)
     if (state.currentMatch?.status === 'paused') {
       dispatch({ type: 'RESUME_MATCH' });
       setShowSetup(false);
@@ -728,6 +739,9 @@ const GameScreen: React.FC = () => {
   };
 
   const confirmBackToMenu = () => {
+    // Mark that we're navigating away to prevent auto-resume
+    isNavigatingAwayRef.current = true;
+    
     // First pause the match (this saves it)
     dispatch({ type: 'PAUSE_MATCH' });
     setShowBackConfirm(false);
