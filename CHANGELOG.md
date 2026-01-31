@@ -7,6 +7,71 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.1.9] - 2026-01-31
+
+### 🐛 Behoben
+
+#### Achievement-Speicherung (HIGH Priority)
+- **Achievements werden jetzt korrekt gespeichert und angezeigt**
+  - Problem: Achievements wurden nach Spielende angezeigt, aber nicht auf der Achievements-Seite gespeichert
+  - Lösung: Merge-Logik für localStorage und API-Daten beim Laden
+  - Verhindert Überschreibung von lokal freigeschalteten Achievements
+  - Achievements werden jetzt korrekt aus beiden Quellen zusammengeführt
+  - **Fix**: Achievements gingen beim Seiten-Reload verloren
+  - **Jetzt**: Achievements bleiben dauerhaft erhalten
+
+#### Rekord Score UNDO (MEDIUM Priority)
+- **Statistiken werden beim UNDO korrekt zurückgesetzt**
+  - Problem: 180 wurde als höchster Score gewertet, auch nach UNDO
+  - Lösung: Vollständige Neuberechnung aller Statistiken beim UNDO_THROW
+  - matchHighestScore wird neu berechnet aus allen verbleibenden Würfen
+  - match180s, match171Plus, match140Plus werden korrekt zurückgesetzt
+  - matchAverage wird neu berechnet
+  - Checkout-Versuche und Checkouts werden neu gezählt
+  - **Fix**: Statistiken blieben nach UNDO falsch
+  - **Jetzt**: Alle Statistiken werden korrekt zurückgesetzt
+
+#### Match-Ende rückgängig machen (HIGH Priority)
+- **Versehentlich beendete Matches können fortgesetzt werden**
+  - Problem: Versehentlich beendetes Match konnte nicht fortgesetzt werden
+  - Lösung: UNDO_END_MATCH Action hinzugefügt
+  - Button zum Rückgängigmachen wird angezeigt, wenn Match beendet wurde
+  - Match-Status wird von 'completed' zurück auf 'in-progress' gesetzt
+  - **Fix**: Keine Möglichkeit, Match-Ende rückgängig zu machen
+  - **Jetzt**: Match kann wieder fortgesetzt werden
+
+#### Verlaufsanzeige beim UNDO (MEDIUM Priority)
+- **Preview-Panel zeigt entfernte Würfe an**
+  - Problem: Keine Anzeige der entfernten Würfe beim UNDO
+  - Lösung: Temporäres Preview-Panel zeigt die entfernten Würfe
+  - Zeigt alle Würfe des Spielers, die durch UNDO entfernt wurden
+  - Format: Wurf #, Dart-Kombinationen, Score
+  - Auto-Hide nach 3 Sekunden
+  - **Feature**: Hilft beim Rekonstruieren des Verlaufs
+
+#### Finish Marker
+- **Finish Marker sollten bereits korrekt funktionieren**
+  - checkoutSuggestion wird als highlightedSegments an Dartboard übergeben
+  - isHighlighted-Funktion prüft korrekt mit T/D/S-Notation
+  - Doppel-Segmente werden gelb hervorgehoben beim Checkout
+
+### 🔧 Geändert
+
+#### AchievementContext
+- Merge-Logik für localStorage und API-Daten beim Laden
+- Verhindert Überschreibung von lokal freigeschalteten Achievements
+- Bevorzugt neuere Unlock-Daten bei Konflikten
+
+#### GameContext
+- UNDO_THROW berechnet jetzt alle Statistiken vollständig neu
+- UNDO_END_MATCH Action hinzugefügt für Match-Ende rückgängig machen
+- Verbesserte Statistik-Berechnung beim UNDO
+
+#### GameScreen
+- Undo-End-Match-Button wird angezeigt, wenn Match beendet wurde
+- Preview-Panel für entfernte Würfe beim UNDO
+- Verbesserte UX für Match-Management
+
 ### 🐛 Behoben
 
 #### Heatmap-Visualisierung
