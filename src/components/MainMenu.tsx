@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Target, Users, TrendingUp, Trophy, Award, Dumbbell, Settings, Play, LogOut, Medal, Shield, BookOpen } from 'lucide-react';
+import { Target, Users, TrendingUp, Trophy, Award, Dumbbell, Settings, Play, LogOut, Medal, Shield, BookOpen, Pause } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTenant } from '../context/TenantContext';
 import { useAuth } from '../context/AuthContext';
@@ -14,14 +14,23 @@ const MainMenu: React.FC = () => {
   const navigate = useNavigate();
   const { currentTenant, setCurrentTenant, storage } = useTenant();
   const { user } = useAuth();
-  // Compute hasSavedMatch directly from storage
-  const hasSavedMatch = React.useMemo(() => {
+  
+  // Check for saved matches (in-progress or paused)
+  const savedMatchInfo = React.useMemo(() => {
     if (storage) {
-      const savedMatch = storage.get<{status?: string} | null>('currentMatch', null);
-      return !!savedMatch && savedMatch.status === 'in-progress';
+      const savedMatch = storage.get<{status?: string; players?: Array<{name: string}>} | null>('currentMatch', null);
+      if (savedMatch && (savedMatch.status === 'in-progress' || savedMatch.status === 'paused')) {
+        return {
+          exists: true,
+          isPaused: savedMatch.status === 'paused',
+          playerNames: savedMatch.players?.map(p => p.name).join(' vs ') || ''
+        };
+      }
     }
-    return false;
+    return { exists: false, isPaused: false, playerNames: '' };
   }, [storage]);
+  
+  const hasSavedMatch = savedMatchInfo.exists;
 
   const [showGuideModal, setShowGuideModal] = useState(false);
 
@@ -155,10 +164,19 @@ const MainMenu: React.FC = () => {
           >
             <button
               onClick={() => navigate('/game')}
-              className="w-full py-4 bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white rounded-xl font-bold text-lg flex items-center justify-center gap-3 shadow-lg transition-all"
+              className={`w-full py-4 ${
+                savedMatchInfo.isPaused 
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600' 
+                  : 'bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600'
+              } text-white rounded-xl font-bold text-lg flex items-center justify-center gap-3 shadow-lg transition-all`}
             >
-              <Play size={24} />
-              {t('menu.continue_match')}
+              {savedMatchInfo.isPaused ? <Pause size={24} /> : <Play size={24} />}
+              <div className="flex flex-col items-center">
+                <span>{savedMatchInfo.isPaused ? '⏸️ Pausiertes Match fortsetzen' : t('menu.continue_match')}</span>
+                {savedMatchInfo.playerNames && (
+                  <span className="text-sm font-normal opacity-80">{savedMatchInfo.playerNames}</span>
+                )}
+              </div>
             </button>
           </motion.div>
         )}
