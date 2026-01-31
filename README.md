@@ -28,7 +28,7 @@
 
 | Dashboard | Spiel | Turnier |
 |:---------:|:-----:|:-------:|
-| <a href="SCREENSHOTS.md"><img src="docs/mockups/screencapture-stateofthedart-dashboard-2026-02-01-00_28_45.png" alt="Dashboard" width="280" /></a> | <a href="SCREENSHOTS.md"><img src="docs/mockups/screencapture-stateofthedart-game-2026-02-01-00_29_59.png" alt="Spiel" width="280" /></a> | <a href="SCREENSHOTS.md"><img src="docs/mockups/screencapture-stateofthedart-tournament-2026-02-01-00_36_55.png" alt="Turnier" width="280" /></a> |
+| <a href="SCREENSHOTS.md"><img src="docs/mockups/screencapture-stateofthedart-dashboard-2026-02-01-00_28_45.png" alt="Dashboard" width="280" /></a> | <a href="SCREENSHOTS.md"><img src="docs/mockups/screencapture-stateofthedart-game-2026-02-01-00_30_11.png" alt="Spiel" width="280" /></a> | <a href="SCREENSHOTS.md"><img src="docs/mockups/screencapture-stateofthedart-tournament-2026-02-01-00_36_55.png" alt="Turnier" width="280" /></a> |
 
 **[📸 Alle 19 Screenshots ansehen →](SCREENSHOTS.md)**
 
