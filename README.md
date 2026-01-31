@@ -30,22 +30,22 @@
 ### Hauptmenü & Dashboard
 | Hauptmenü | Dashboard |
 |-----------|-----------|
-| ![Hauptmenü](docs/mockups/main-menu.png) | ![Dashboard](docs/mockups/dashboard.png) |
+| ![Hauptmenü](docs/mockups/screencapture-stateofthedart-2026-02-01-00_28_31.png) | ![Dashboard](docs/mockups/screencapture-stateofthedart-dashboard-2026-02-01-00_28_45.png) |
 
 ### Spielmodi
 | X01 Spiel | Cricket |
 |-----------|---------|
-| ![X01](docs/mockups/game-x01.png) | ![Cricket](docs/mockups/game-cricket.png) |
+| ![X01](docs/mockups/screencapture-stateofthedart-game-2026-02-01-00_29_59.png) | ![Cricket](docs/mockups/screencapture-stateofthedart-cricket-2026-02-01-00_29_35.png) |
 
 ### Turniere
 | Turnier-Menü | Match-Scoring |
 |--------------|---------------|
-| ![Turnier](docs/mockups/tournament-menu.png) | ![Match](docs/mockups/tournament-match.png) |
+| ![Turnier](docs/mockups/screencapture-stateofthedart-tournament-2026-02-01-00_36_37.png) | ![Match](docs/mockups/screencapture-stateofthedart-tournament-2026-02-01-00_36_55.png) |
 
 ### Spieler & Statistiken
-| Spielerprofil | Heatmap |
-|---------------|---------|
-| ![Profil](docs/mockups/player-profile.png) | ![Heatmap](docs/mockups/player-heatmap.png) |
+| Spielerprofil | Achievements |
+|---------------|--------------|
+| ![Profil](docs/mockups/screencapture-stateofthedart-players-36bbe0a9-431a-4c7f-ac13-c8f97dc8f1f9-2026-02-01-00_32_02.png) | ![Achievements](docs/mockups/screencapture-stateofthedart-achievements-2026-02-01-00_33_09.png) |
 
 ➡️ **[Alle Screenshots ansehen](docs/mockups/README.md)**
 
