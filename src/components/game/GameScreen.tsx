@@ -241,6 +241,11 @@ const GameScreen: React.FC = () => {
   const isBotPlayingRef = useRef(false);
   const botTimersRef = useRef<NodeJS.Timeout[]>([]);
 
+  // Calculate total throws count for dependency tracking
+  const totalThrowsCount = state.currentMatch?.legs.reduce(
+    (total, leg) => total + (leg.throws?.length || 0), 0
+  ) || 0;
+
   // Calculate live heatmap data from current match throws
   const liveHeatmapData = useMemo((): Record<string, HeatmapData> => {
     if (!state.currentMatch) return {};
@@ -278,7 +283,7 @@ const GameScreen: React.FC = () => {
     });
     
     return heatmaps;
-  }, [state.currentMatch?.legs, state.currentMatch?.players]);
+  }, [state.currentMatch?.legs, state.currentMatch?.players, totalThrowsCount]);
 
   // Announce "You require X" when player's turn STARTS and they can checkout
   useEffect(() => {
