@@ -3,6 +3,7 @@ import { Match, Throw } from '../../types';
 import { X, Calendar, TrendingUp } from 'lucide-react';
 import { formatDateTime, getTimestampForSort } from '../../utils/dateUtils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { calculateAverage } from '../../utils/scoring';
 import logger from '../../utils/logger';
 
 interface MatchDetailModalProps {
@@ -13,11 +14,66 @@ interface MatchDetailModalProps {
 const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) => {
   const matchPlayers = match.players || [];
 
+  // Calculate statistics from throws if not present in player object
+  const calculateStatsFromThrows = (playerId: string, throws: Throw[]) => {
+    const playerThrows = throws.filter(t => t.playerId === playerId);
+    if (playerThrows.length === 0) {
+      return {
+        matchAverage: 0,
+        matchHighestScore: 0,
+        match180s: 0,
+        match171Plus: 0,
+        match140Plus: 0,
+        match100Plus: 0,
+        match60Plus: 0,
+        checkoutsHit: 0,
+        checkoutAttempts: 0,
+      };
+    }
+
+    // Use calculateAverage from utils for consistency
+    const average = calculateAverage(playerThrows);
+    const highestScore = Math.max(...scores, 0);
+    const count180s = scores.filter(s => s === 180).length;
+    const count171Plus = scores.filter(s => s >= 171).length;
+    const count140Plus = scores.filter(s => s >= 140).length;
+    const count100Plus = scores.filter(s => s >= 100).length;
+    const count60Plus = scores.filter(s => s >= 60).length;
+    const checkoutsHit = playerThrows.filter(t => t.remaining === 0 && !t.isBust).length;
+    const checkoutAttempts = playerThrows.filter(t => t.isCheckoutAttempt).length;
+
+    return {
+      matchAverage: average,
+      matchHighestScore: highestScore,
+      match180s: count180s,
+      match171Plus: count171Plus,
+      match140Plus: count140Plus,
+      match100Plus: count100Plus,
+      match60Plus: count60Plus,
+      checkoutsHit,
+      checkoutAttempts,
+    };
+  };
+
   // Filter players who actually played (have throws)
   const getPlayersWithThrows = (match: Match) => {
     const allThrows = match.legs?.flatMap(leg => leg.throws || []) || [];
     const playerIdsWithThrows = new Set(allThrows.map(t => t.playerId));
-    return (match.players || []).filter(p => playerIdsWithThrows.has(p.playerId));
+    const players = (match.players || []).filter(p => playerIdsWithThrows.has(p.playerId));
+    
+    // Calculate stats from throws if missing or zero
+    return players.map(player => {
+      // If stats are missing or all zero, recalculate from throws
+      const hasStats = player.matchAverage !== undefined && player.matchAverage !== 0;
+      if (!hasStats && allThrows.length > 0) {
+        const calculatedStats = calculateStatsFromThrows(player.playerId, allThrows);
+        return {
+          ...player,
+          ...calculatedStats,
+        };
+      }
+      return player;
+    });
   };
 
   // Prepare round-by-round data for chart
