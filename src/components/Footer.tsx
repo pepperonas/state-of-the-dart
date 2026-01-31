@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExternalLink, Github, Linkedin } from 'lucide-react';
+import { Globe, Github, Linkedin } from 'lucide-react';
 import packageJson from '../../package.json';
 
 const Footer: React.FC = () => {
@@ -15,8 +15,8 @@ const Footer: React.FC = () => {
             rel="noopener noreferrer"
             className="text-primary-400 hover:text-primary-300 transition-colors flex items-center gap-1"
           >
+            <Globe size={14} />
             celox.io
-            <ExternalLink size={12} />
           </a>
           <span>•</span>
           <a 
