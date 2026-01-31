@@ -29,14 +29,25 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
 
     setExpandedMatch(matchId);
 
-    // Load details if not already loaded
+    // Load details if not already loaded and not currently loading
     if (!matchDetails[matchId] && !loadingDetails[matchId]) {
       setLoadingDetails(prev => ({ ...prev, [matchId]: true }));
       try {
         const fullMatch = await api.matches.getById(matchId);
         setMatchDetails(prev => ({ ...prev, [matchId]: fullMatch }));
-      } catch (error) {
-        console.error('Failed to load match details:', error);
+      } catch (error: any) {
+        // Handle rate limit errors gracefully
+        if (error?.message?.includes('429') || error?.message?.includes('rate limit')) {
+          console.warn('Rate limit reached, please wait a moment before trying again');
+          // Retry after a delay
+          setTimeout(() => {
+            if (!matchDetails[matchId] && !loadingDetails[matchId]) {
+              toggleMatch(matchId);
+            }
+          }, 2000);
+        } else {
+          console.error('Failed to load match details:', error);
+        }
       } finally {
         setLoadingDetails(prev => ({ ...prev, [matchId]: false }));
       }

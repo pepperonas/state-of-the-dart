@@ -237,6 +237,11 @@ const Dashboard: React.FC = () => {
   };
 
   const handleMatchClick = async (matchId: string) => {
+    // Prevent multiple simultaneous requests for the same match
+    if (loadingMatch || (selectedMatch && selectedMatch.id === matchId)) {
+      return;
+    }
+    
     setLoadingMatch(true);
     try {
       // Load full match with legs and throws
