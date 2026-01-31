@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Target, Users, TrendingUp, Trophy, Award, Dumbbell, Settings, Play, LogOut, Medal, Shield, BookOpen } from 'lucide-react';
+import { Target, Users, TrendingUp, Trophy, Award, Dumbbell, Settings, Play, LogOut, Medal, Shield, BookOpen, ExternalLink, Github, Linkedin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTenant } from '../context/TenantContext';
 import { useAuth } from '../context/AuthContext';
@@ -193,10 +193,82 @@ const MainMenu: React.FC = () => {
           })}
         </div>
         
-        <div className="mt-12 text-center space-y-2">
-          <p className="text-sm text-dark-500">
-            © 2026 Martin Pfeffer | celox.io
-          </p>
+        <div className="mt-12 text-center space-y-3">
+          <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-dark-400">
+            <span>© 2026 Martin Pfeffer</span>
+            <span>•</span>
+            <a 
+              href="https://celox.io" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary-400 hover:text-primary-300 transition-colors flex items-center gap-1"
+            >
+              celox.io
+              <ExternalLink size={12} />
+            </a>
+            <span>•</span>
+            <a 
+              href="https://github.com/pepperonas/state-of-the-dart" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary-400 hover:text-primary-300 transition-colors flex items-center gap-1"
+            >
+              <Github size={14} />
+              GitHub
+            </a>
+          </div>
+          
+          <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-dark-500">
+            <a 
+              href="https://celox.io/impressum" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:text-dark-400 transition-colors"
+            >
+              Impressum
+            </a>
+            <span>•</span>
+            <a 
+              href="https://celox.io/datenschutz" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:text-dark-400 transition-colors"
+            >
+              Datenschutz
+            </a>
+            <span>•</span>
+            <a 
+              href="https://celox.io/agb" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:text-dark-400 transition-colors"
+            >
+              AGB
+            </a>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-dark-500">
+            <a 
+              href="https://www.linkedin.com/in/martin-pfeffer-020831134/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:text-primary-400 transition-colors flex items-center gap-1"
+            >
+              <Linkedin size={14} />
+              LinkedIn
+            </a>
+            <span>•</span>
+            <a 
+              href="https://github.com/pepperonas" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:text-primary-400 transition-colors flex items-center gap-1"
+            >
+              <Github size={14} />
+              GitHub Profil
+            </a>
+          </div>
+
           <p className="text-xs text-dark-600">
             Version {packageJson.version}
           </p>
