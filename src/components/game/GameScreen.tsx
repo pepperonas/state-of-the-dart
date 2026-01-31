@@ -206,6 +206,7 @@ const GameScreen: React.FC = () => {
   const [showBotSelector, setShowBotSelector] = useState(false);
   const [showThrowHistory, setShowThrowHistory] = useState(false);
   const [showThrowChart, setShowThrowChart] = useState(false);
+  const [showMatchStats, setShowMatchStats] = useState(false);
   const [showLiveHeatmap, setShowLiveHeatmap] = useState(false);
   const [selectedHeatmapPlayer, setSelectedHeatmapPlayer] = useState<string | null>(null);
   const [showBugReportModal, setShowBugReportModal] = useState(false);
@@ -1345,41 +1346,52 @@ const GameScreen: React.FC = () => {
             />
           </div>
           
-          {/* Stats Section */}
+          {/* Stats Section - Collapsible */}
           <div className="lg:col-span-1">
             {settings.showStatsDuringGame && (
-              <div className="glass-card rounded-xl shadow-lg p-6">
-                <h3 className="text-lg font-bold mb-4 text-white">Match Statistics</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Average:</span>
-                    <span className="font-semibold text-white">{currentPlayer!.matchAverage.toFixed(2)}</span>
+              <div>
+                <button
+                  onClick={() => setShowMatchStats(!showMatchStats)}
+                  className="w-full glass-card rounded-xl p-4 flex items-center justify-between hover:glass-card-hover transition-all"
+                >
+                  <h3 className="text-lg font-bold text-white">Match Statistics</h3>
+                  {showMatchStats ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                </button>
+                
+                {showMatchStats && (
+                  <div className="glass-card rounded-xl shadow-lg p-6 mt-2 animate-fade-in">
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Average:</span>
+                        <span className="font-semibold text-white">{currentPlayer!.matchAverage.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Highest Score:</span>
+                        <span className="font-semibold text-white">{currentPlayer!.matchHighestScore}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">180s:</span>
+                        <span className="font-semibold text-white">{currentPlayer!.match180s}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">140+:</span>
+                        <span className="font-semibold text-white">{currentPlayer!.match140Plus}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">100+:</span>
+                        <span className="font-semibold text-white">{currentPlayer!.match100Plus}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Checkout %:</span>
+                        <span className="font-semibold text-white">
+                          {currentPlayer!.checkoutAttempts > 0
+                            ? ((currentPlayer!.checkoutsHit / currentPlayer!.checkoutAttempts) * 100).toFixed(1)
+                            : '0.0'}%
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Highest Score:</span>
-                    <span className="font-semibold text-white">{currentPlayer!.matchHighestScore}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">180s:</span>
-                    <span className="font-semibold text-white">{currentPlayer!.match180s}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">140+:</span>
-                    <span className="font-semibold text-white">{currentPlayer!.match140Plus}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">100+:</span>
-                    <span className="font-semibold text-white">{currentPlayer!.match100Plus}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Checkout %:</span>
-                    <span className="font-semibold text-white">
-                      {currentPlayer!.checkoutAttempts > 0
-                        ? ((currentPlayer!.checkoutsHit / currentPlayer!.checkoutAttempts) * 100).toFixed(1)
-                        : '0.0'}%
-                    </span>
-                  </div>
-                </div>
+                )}
               </div>
             )}
           </div>
