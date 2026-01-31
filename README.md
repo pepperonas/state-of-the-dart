@@ -69,16 +69,31 @@
 
 ### 🎮 Spielmodi
 - **X01-Spiele** - Vollständige Unterstützung für 301/501/701/1001 mit anpassbaren Einstellungen
+- **🎯 Cricket-Modus (NEU in v0.2.0)** - Vollständiger Cricket-Spielmodus
+  - Zahlen 15-20 und Bull müssen 3x getroffen werden
+  - Triple = 3 Marks, Double = 2 Marks, Single = 1 Mark
+  - Punkte sammeln nach dem Schließen (solange Gegner offen)
+  - Mark-Anzeige: `/` (1), `X` (2), `⊗` (geschlossen)
+  - Dedizierte Cricket-Eingabe-Buttons
 - **Double Out/In** - Konfigurierbare Checkout-Regeln
 - **Best of Sets/Legs** - Turnier-Matchformate
 - **Multi-Player** - Unterstützung für 2+ Spieler mit eigenen Avataren und Namen
 - **Match fortsetzen** - Unterbrochene Spiele automatisch fortsetzen
 - **Trainingsmodi** - 6 Trainingsmodi inkl. Doubles/Triples-Training, Around the Clock und Bob's 27
-- **Training Player Selection (NEU in v0.1.8)** - Wähle vor jedem Training, welcher Spieler trainiert:
-  - Nur echte Spieler können trainieren (Bots gefiltert)
-  - Training-Würfe werden automatisch in Heatmap gespeichert
-  - Player-Selection-Screen mit Avatar, Name und Average
-- **Turniersystem** - Knockout, Round Robin, Liga und Swiss System (Coming Soon)
+
+### 🏆 Turniersystem (NEU in v0.2.0)
+- **Knockout-Modus** - Single Elimination Turniere
+  - 4-16 Spieler unterstützt
+  - Automatische Bracket-Generierung
+  - Gewinner rückt automatisch in nächste Runde vor
+- **Round Robin-Modus** - Jeder gegen jeden
+  - 3-8 Spieler unterstützt
+  - Automatische Paarungsgenerierung
+  - Live-Tabelle mit Siegen, Niederlagen, Leg-Differenz
+- **Live-Tabelle** mit Medaillen (🥇🥈🥉)
+- **Match-Scoring** direkt im Turnier
+- **Best-of-X** konfigurierbar (2-5 Legs)
+- **Turniersieger-Anzeige** mit Konfetti-Animation
 
 ### 📊 Erweiterte Statistiken & Charts
 - **10+ interaktive Charts** - Wunderschöne Visualisierungen mit Recharts
@@ -156,6 +171,16 @@
 - **Filter & Suche** - Filtere nach Subscription-Status (Trial, Active, Lifetime, Expired)
 - **Benutzer löschen** - Lösche Benutzer permanent mit allen Daten
 - **Echtzeit-Updates** - Änderungen werden sofort angezeigt
+
+### 📴 Offline-First PWA (NEU in v0.2.0)
+- **Vollständiger Offline-Modus** - App funktioniert ohne Internetverbindung
+- **IndexedDB-Speicherung** - Lokale Datenspeicherung mit `idb` Library
+- **Pending Actions Queue** - Aktionen werden gespeichert und bei Reconnect synchronisiert
+- **NetworkFirst API-Caching** - Intelligentes Caching für Players, Matches, Settings
+- **Auto-Sync** - Automatische Synchronisation beim Wiederherstellen der Verbindung
+- **Offline-Indicator** - Zeigt aktuellen Verbindungsstatus mit ausstehenden Aktionen
+- **PWA-Installation** - Als App auf Smartphone/Desktop installierbar
+- **Service Worker** - Hintergrund-Synchronisation und Cache-Management
 
 ### 🔊 Professionelles Audio-System
 - **Score-Ansagen** - Professionelle Caller-Stimme für jeden Score (0-180)
@@ -584,7 +609,7 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 
 ## 👨‍💻 Autor
 
-**Martin Pfeffer**
+**Martin Pfeffer**  
 - Website: [celox.io](https://celox.io)
 - GitHub: [@pepperonas](https://github.com/pepperonas)
 
