@@ -252,6 +252,16 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
                 </p>
               </div>
 
+              <div className="glass-card p-4 rounded-lg bg-primary-500/10 border border-primary-500/30">
+                <h4 className="font-semibold text-white mb-2">🔍 Suchfunktion & Pagination</h4>
+                <p className="text-dark-300 text-sm mb-2">
+                  <strong>Suche nach Spielern:</strong> Nutze das Suchfeld, um schnell einen Spieler zu finden.
+                </p>
+                <p className="text-dark-300 text-sm mb-2">
+                  <strong>Blättere durch Seiten:</strong> Wähle 10/20/50/100 Items pro Seite und nutze die Navigation, um durch große Listen zu blättern.
+                </p>
+              </div>
+
               <div className="glass-card p-4 rounded-lg bg-blue-500/10 border border-blue-500/30">
                 <h4 className="font-semibold text-white mb-2">💡 Tipp: Multi-Tenant</h4>
                 <p className="text-dark-300 text-sm">
@@ -365,10 +375,15 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
 
               <div className="glass-card p-4 rounded-lg">
                 <h4 className="font-semibold text-white mb-2">Match History</h4>
-                <p className="text-dark-300 text-sm">
+                <p className="text-dark-300 text-sm mb-2">
                   Alle gespielten Matches mit Details: Gegner, Score, Datum, Average, 180s.
                   Klicke auf ein Match für detaillierte Statistiken.
                 </p>
+                <ul className="text-dark-300 text-sm space-y-1 mt-2">
+                  <li>• <strong>Suchfunktion:</strong> Suche nach Gegner, Datum oder Spieltyp</li>
+                  <li>• <strong>Pagination:</strong> Blättere durch Seiten (10/20/50/100 pro Seite)</li>
+                  <li>• <strong>Wurfverlauf:</strong> Im Detail-Modal siehst du alle Würfe pro Spieler</li>
+                </ul>
               </div>
 
               <div className="glass-card p-4 rounded-lg bg-primary-500/10 border border-primary-500/30">

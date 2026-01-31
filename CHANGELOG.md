@@ -7,6 +7,48 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.1.10] - 2026-01-31
+
+### ✨ Hinzugefügt
+
+#### Suchfunktion & Pagination für Spielerliste
+- **Live-Suche nach Spielernamen** - Filtert Spielerliste in Echtzeit
+- **Pagination** - Blättere durch Seiten mit 10/20/50/100 Items pro Seite
+- **Vorherige/Nächste Buttons** - Einfache Navigation zwischen Seiten
+- **Seitenzahlen** - Intelligente Anzeige (max. 5 Seiten sichtbar)
+- **Items pro Seite wählbar** - Dropdown für individuelle Einstellung
+- **Gefilterte Anzahl** - Zeigt "von X Spielern"
+- **Empty State** - "Keine Spieler gefunden" bei Suche
+
+#### Suchfunktion & Pagination für Match-Historie
+- **Multi-Kriterien-Suche** - Filter nach Gegner, Datum oder Spieltyp
+- **Pagination** - Blättere durch Seiten mit 10/20/50/100 Items pro Seite
+- **Vorherige/Nächste Buttons** - Einfache Navigation zwischen Seiten
+- **Seitenzahlen** - Intelligente Anzeige (max. 5 Seiten sichtbar)
+- **Items pro Seite wählbar** - Dropdown für individuelle Einstellung
+- **Gefilterte Anzahl** - Zeigt "von X Matches"
+- **Empty State** - "Keine Matches gefunden" bei Suche
+
+#### Wurfverlauf im MatchDetailModal
+- **Detaillierter Wurfverlauf** - Zeigt alle Würfe pro Spieler aus allen Legs
+- **Gleiche Formatierung wie im GameScreen** - Konsistente Darstellung
+- **Collapsible Sektion** - Expand/Collapse für bessere Übersicht
+- **Farbcodierung** - 140+ orange, 100+ blue, BUST rot
+- **Dart-Kombinationen** - T20, D16, S5, Miss mit Farbcodierung
+
+#### Größere Dartscheibe im GameScreen
+- **Größe erhöht** - 320px → 480px (+50%)
+- **Container angepasst** - max-w-sm → max-w-lg
+- **Bessere Eingaben** - Größere Klick-/Touch-Bereiche
+- **Bessere Lesbarkeit** - Größere Zahlen und Segmente
+
+### 🔧 Geändert
+
+#### Performance-Optimierungen
+- **useMemo für Filterung** - Performante Suche ohne Re-Renders
+- **Automatisches Zurücksetzen** - Seite 1 bei neuer Suche
+- **Responsive Pagination** - Intelligente Seitenzahl-Anzeige
+
 ## [0.1.9] - 2026-01-31
 
 ### ✨ Hinzugefügt

@@ -9,7 +9,7 @@
 **Professionelles Dart-Zählsystem** - Eine funktionsreiche, webbasierte Dart-Scoring-Anwendung mit Multi-User-Support, professionellem Statistik-Tracking und Live-Deployment.
 
 [![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green)](https://stateofthedart.com)
-![Version](https://img.shields.io/badge/Version-0.1.9-blue)
+![Version](https://img.shields.io/badge/Version-0.1.10-blue)
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
 ![React](https://img.shields.io/badge/React-19.2-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)
@@ -63,6 +63,8 @@
 - **Echtzeit-Stats** - Live-Scoring mit sofortiger Berechnung
 - **Spieler-Statistiken** - Average, Checkout %, High Scores, 180s, 171+, 140+, 100+
 - **Match-Historie** - Vollständiges Tracking aller gespielten Spiele
+  - **Suchfunktion & Pagination (NEU)** - Durchsuche Matches nach Gegner, Datum oder Spieltyp und blättere durch Seiten
+  - **Wurfverlauf im Detail-Modal** - Zeigt alle Würfe pro Spieler wie im laufenden Spiel
 - **Trendanalyse** - Verbesserungs-Metriken und Performance-Trends
 - **Persönliche Bestleistungen** - Tracke höchste Checkouts, beste Averages, 9-Darter
 - **Multi-Format Export (NEU in v0.1.0)** - Exportiere Statistiken in 3 Formaten:
@@ -86,6 +88,7 @@
 ### 👤 Spielerprofile & Bestenliste
 - **Detaillierte Spielerprofile** - Individuelle Seiten für jeden Spieler mit:
   - **Klickbare Spielerliste** - Gesamter Listeneintrag führt zur Detailansicht
+  - **Suchfunktion & Pagination (NEU)** - Durchsuche Spielerliste und blättere durch Seiten (10/20/50/100 pro Seite)
   - **8 Persönliche Bestleistungen** - Höchster Score, bester Average, meiste 180s, höchstes Checkout, beste Checkout-Rate, kürzestes Leg, längste Siegesserie, meiste Legs gewonnen
   - **Performance-Charts** - Verfolge Verbesserungen über die letzten 10 Spiele
   - **Skill-Radar** - 5-dimensionale Skill-Visualisierung
@@ -574,6 +577,21 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 
 ## 📝 Changelog
 
+### v0.1.10 (31. Januar 2026) - Suchfunktion & Pagination
+
+#### ✨ Neue Features
+- **Suchfunktion für Spielerliste** - Live-Suche nach Spielernamen
+- **Pagination für Spielerliste** - Blättere durch Seiten (10/20/50/100 pro Seite)
+- **Suchfunktion für Match-Historie** - Suche nach Gegner, Datum oder Spieltyp
+- **Pagination für Match-Historie** - Blättere durch Seiten (10/20/50/100 pro Seite)
+- **Wurfverlauf im MatchDetailModal** - Zeigt alle Würfe pro Spieler wie im laufenden Spiel
+
+#### 🔧 Verbesserungen
+- Größere Dartscheibe im GameScreen (320px → 480px) für bessere Eingaben
+- Performance-Optimierung durch `useMemo` für Filterung
+- Intelligente Pagination (zeigt max. 5 Seiten)
+- Empty States für keine Suchergebnisse
+
 ### v0.1.9 (31. Januar 2026) - Bug Fixes & Player Avatar System
 
 #### 🐛 Bug Fixes
@@ -630,7 +648,7 @@ Siehe [CHANGELOG.md](CHANGELOG.md) für eine vollständige Liste der Änderungen
 
 <div align="center">
   <p>Made with ❤️ and 🎯 by Martin Pfeffer</p>
-  <p>© 2026 celox.io | Version 0.1.9</p>
+  <p>© 2026 celox.io | Version 0.1.10</p>
   <p>
     <a href="https://stateofthedart.com">🌐 Live Demo</a> •
     <a href="https://github.com/pepperonas/state-of-the-dart">📦 GitHub</a> •
