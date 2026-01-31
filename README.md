@@ -22,6 +22,37 @@
 
 ---
 
+## 📸 Screenshots
+
+<details>
+<summary><b>Klicken zum Anzeigen der Screenshots</b></summary>
+
+### Hauptmenü & Dashboard
+| Hauptmenü | Dashboard |
+|-----------|-----------|
+| ![Hauptmenü](docs/mockups/main-menu.png) | ![Dashboard](docs/mockups/dashboard.png) |
+
+### Spielmodi
+| X01 Spiel | Cricket |
+|-----------|---------|
+| ![X01](docs/mockups/game-x01.png) | ![Cricket](docs/mockups/game-cricket.png) |
+
+### Turniere
+| Turnier-Menü | Match-Scoring |
+|--------------|---------------|
+| ![Turnier](docs/mockups/tournament-menu.png) | ![Match](docs/mockups/tournament-match.png) |
+
+### Spieler & Statistiken
+| Spielerprofil | Heatmap |
+|---------------|---------|
+| ![Profil](docs/mockups/player-profile.png) | ![Heatmap](docs/mockups/player-heatmap.png) |
+
+➡️ **[Alle Screenshots ansehen](docs/mockups/README.md)**
+
+</details>
+
+---
+
 ## ✨ Features
 
 ### 👥 Multi-User & Authentication System
