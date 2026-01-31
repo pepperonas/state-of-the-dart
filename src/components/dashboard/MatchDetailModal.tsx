@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Match, Throw } from '../../types';
-import { X, Calendar, TrendingUp } from 'lucide-react';
+import { X, Calendar, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatDateTime, getTimestampForSort } from '../../utils/dateUtils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { calculateAverage } from '../../utils/scoring';
@@ -13,6 +13,7 @@ interface MatchDetailModalProps {
 
 const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) => {
   const matchPlayers = match.players || [];
+  const [showThrowHistory, setShowThrowHistory] = useState(false);
 
   // Calculate statistics from throws if not present in player object
   const calculateStatsFromThrows = (playerId: string, throws: Throw[]) => {
@@ -165,6 +166,23 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
   const chartData = prepareRoundData(match);
   const playersWithThrows = useMemo(() => getPlayersWithThrows(match), [match]);
 
+  // Get all throws for a player across all legs
+  const getPlayerThrows = (playerId: string): Throw[] => {
+    const allThrows: Throw[] = [];
+    const legs = match.legs || [];
+    
+    legs.forEach(leg => {
+      const throws = leg.throws || [];
+      const playerThrows = throws.filter(t => t.playerId === playerId);
+      allThrows.push(...playerThrows);
+    });
+    
+    // Sort by timestamp
+    return allThrows.sort((a, b) =>
+      getTimestampForSort(a.timestamp) - getTimestampForSort(b.timestamp)
+    );
+  };
+
   return (
     <div
       className="fixed inset-0 bg-black/70 flex items-start justify-center z-50 p-4 pt-16 overflow-y-auto"
@@ -308,6 +326,110 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Throw History - Collapsable */}
+        <div className="mt-6">
+          <button
+            onClick={() => setShowThrowHistory(!showThrowHistory)}
+            className="w-full glass-card rounded-xl p-4 flex items-center justify-between hover:glass-card-hover transition-all"
+          >
+            <h3 className="text-lg font-bold text-white">Wurf-Verlauf</h3>
+            {showThrowHistory ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+          </button>
+
+          {showThrowHistory && (
+            <div className="glass-card rounded-xl p-6 mt-2 animate-fade-in">
+              {playersWithThrows.map((player) => {
+                const playerThrows = getPlayerThrows(player.playerId);
+
+                return (
+                  <div key={player.playerId} className="mb-6 last:mb-0">
+                    <h4 className="text-white font-bold mb-3 flex items-center gap-2">
+                      <span>{player.name}</span>
+                      <span className="text-sm text-gray-400">
+                        ({playerThrows.length} {playerThrows.length === 1 ? 'Wurf' : 'Würfe'})
+                      </span>
+                    </h4>
+
+                    {playerThrows.length === 0 ? (
+                      <p className="text-gray-400 text-sm italic">Keine Würfe</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {playerThrows.map((throwData, index) => (
+                          <div
+                            key={throwData.id || `${player.playerId}-${index}`}
+                            className="bg-dark-800/50 rounded-lg p-3 border border-dark-600"
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-gray-400 text-sm">
+                                Wurf #{index + 1}
+                              </span>
+                              <div className="flex items-center gap-3">
+                                {throwData.isBust && (
+                                  <span className="text-red-400 text-xs font-bold bg-red-500/20 px-2 py-1 rounded">
+                                    BUST
+                                  </span>
+                                )}
+                                <span className={`font-bold text-lg ${
+                                  throwData.isBust
+                                    ? 'text-red-400 line-through'
+                                    : throwData.score >= 140
+                                      ? 'text-orange-400'
+                                      : throwData.score >= 100
+                                        ? 'text-blue-400'
+                                        : 'text-white'
+                                }`}>
+                                  {throwData.score}
+                                </span>
+                                <span className="text-gray-400 text-sm">
+                                  → {throwData.remaining}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex gap-2">
+                              {throwData.darts && throwData.darts.length > 0 ? (
+                                throwData.darts.map((dart, dartIndex) => (
+                                  <div
+                                    key={dartIndex}
+                                    className={`flex-1 text-center py-2 rounded ${
+                                      dart.multiplier === 3
+                                        ? 'bg-green-500/20 text-green-400'
+                                        : dart.multiplier === 2
+                                          ? 'bg-red-500/20 text-red-400'
+                                          : dart.score === 0
+                                            ? 'bg-gray-700/50 text-gray-500'
+                                            : 'bg-blue-500/20 text-blue-400'
+                                    }`}
+                                  >
+                                    <span className="text-xs font-semibold">
+                                      {dart.score === 0
+                                        ? 'Miss'
+                                        : dart.multiplier === 3
+                                          ? `T${dart.segment}`
+                                          : dart.multiplier === 2
+                                            ? `D${dart.segment}`
+                                            : dart.segment
+                                      }
+                                    </span>
+                                  </div>
+                                ))
+                              ) : (
+                                <div className="flex-1 text-center py-2 rounded bg-gray-700/50 text-gray-500 text-xs">
+                                  Keine Dart-Details
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Leg-by-Leg Breakdown */}
