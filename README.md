@@ -566,6 +566,28 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 
 ## 📝 Changelog
 
+### v0.1.9 (31. Januar 2026) - Bug Fixes & Player Avatar System
+
+#### 🐛 Bug Fixes
+- **Achievement-Speicherung** - Achievements werden jetzt korrekt gespeichert und angezeigt
+- **UNDO-Statistiken** - Statistiken werden beim UNDO korrekt zurückgesetzt
+- **Match-Ende rückgängig** - Versehentlich beendete Matches können fortgesetzt werden
+- **Verlaufsanzeige beim UNDO** - Preview-Panel zeigt entfernte Würfe an
+
+#### ✨ Neue Features
+- **WhatsApp-Style Emoji Picker** - Vollständige Emoji-Auswahl mit 8 Kategorien
+- **Player Avatar System** - Professionelle Avatar-Darstellung mit geschwungener Schrift
+- **Verlaufsanzeige** - Temporäres Preview-Panel beim UNDO
+
+#### 🔧 Verbesserungen
+- Merge-Logik für Achievements (localStorage + API)
+- Vollständige Statistik-Neuberechnung beim UNDO
+- Verbesserte UX für Match-Management
+
+Siehe [CHANGELOG.md](CHANGELOG.md) für eine vollständige Liste der Änderungen.
+
+---
+
 ### v0.1.0 (Januar 2026) - Database-First & Multi-Format Export
 
 #### ✨ Neue Features
