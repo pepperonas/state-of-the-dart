@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, Pause, Play, X, Bot, ChevronDown, ChevronUp, AlertTriangle, Smile } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Pause, Play, X, Bot, ChevronDown, ChevronUp, AlertTriangle, Smile, Flame } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Confetti from 'react-confetti';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -11,6 +11,7 @@ import { useTenant } from '../../context/TenantContext';
 import { useGameAchievements } from '../../hooks/useGameAchievements';
 import { useAchievementHints } from '../../hooks/useAchievementHints';
 import Dartboard from '../dartboard/Dartboard';
+import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
 import ScoreInput from './ScoreInput';
 import PlayerScore from './PlayerScore';
 import CheckoutSuggestion from '../dartboard/CheckoutSuggestion';
@@ -19,7 +20,7 @@ import SpinnerWheel from './SpinnerWheel';
 import BugReportModal from '../bugReport/BugReportModal';
 import PlayerAvatar from '../player/PlayerAvatar';
 import EmojiPicker from '../player/EmojiPicker';
-import { Dart, Player, GameType, MatchSettings, Throw } from '../../types/index';
+import { Dart, Player, GameType, MatchSettings, Throw, HeatmapData } from '../../types/index';
 import { calculateThrowScore } from '../../utils/scoring';
 import { PersonalBests, createEmptyPersonalBests, updatePersonalBests } from '../../types/personalBests';
 import audioSystem from '../../utils/audio';
@@ -205,6 +206,8 @@ const GameScreen: React.FC = () => {
   const [showBotSelector, setShowBotSelector] = useState(false);
   const [showThrowHistory, setShowThrowHistory] = useState(false);
   const [showThrowChart, setShowThrowChart] = useState(false);
+  const [showLiveHeatmap, setShowLiveHeatmap] = useState(false);
+  const [selectedHeatmapPlayer, setSelectedHeatmapPlayer] = useState<string | null>(null);
   const [showBugReportModal, setShowBugReportModal] = useState(false);
   const [undoPreviewThrows, setUndoPreviewThrows] = useState<Throw[] | null>(null);
 
@@ -236,6 +239,45 @@ const GameScreen: React.FC = () => {
   });
   const isBotPlayingRef = useRef(false);
   const botTimersRef = useRef<NodeJS.Timeout[]>([]);
+
+  // Calculate live heatmap data from current match throws
+  const liveHeatmapData = useMemo((): Record<string, HeatmapData> => {
+    if (!state.currentMatch) return {};
+    
+    const heatmaps: Record<string, HeatmapData> = {};
+    
+    // Collect all throws from all legs
+    const allThrows: Throw[] = state.currentMatch.legs.flatMap(leg => leg.throws || []);
+    
+    // Group throws by player
+    state.currentMatch.players.forEach(player => {
+      const playerThrows = allThrows.filter(t => t.playerId === player.playerId);
+      const segments: Record<string, number> = {};
+      let totalDarts = 0;
+      
+      playerThrows.forEach(throwData => {
+        if (throwData.darts) {
+          throwData.darts.forEach(dart => {
+            if (dart.segment > 0 && dart.multiplier > 0) {
+              // Format: "multiplier x segment" (e.g., "3x20" for triple 20)
+              const key = `${dart.multiplier}x${dart.segment}`;
+              segments[key] = (segments[key] || 0) + 1;
+              totalDarts++;
+            }
+          });
+        }
+      });
+      
+      heatmaps[player.playerId] = {
+        playerId: player.playerId,
+        segments,
+        totalDarts,
+        lastUpdated: new Date(),
+      };
+    });
+    
+    return heatmaps;
+  }, [state.currentMatch?.legs, state.currentMatch?.players]);
 
   // Announce "You require X" when player's turn STARTS and they can checkout
   useEffect(() => {
@@ -1505,6 +1547,80 @@ const GameScreen: React.FC = () => {
                   </LineChart>
                 </ResponsiveContainer>
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* Live Heatmap - Collapsable */}
+        <div className="mt-6">
+          <button
+            onClick={() => setShowLiveHeatmap(!showLiveHeatmap)}
+            className="w-full glass-card rounded-xl p-4 flex items-center justify-between hover:glass-card-hover transition-all"
+          >
+            <div className="flex items-center gap-3">
+              <Flame size={24} className="text-orange-400" />
+              <h3 className="text-lg font-bold text-white">Live-Heatmap (aktuelles Spiel)</h3>
+            </div>
+            {showLiveHeatmap ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+          </button>
+
+          {showLiveHeatmap && (
+            <div className="glass-card rounded-xl p-6 mt-2 animate-fade-in">
+              {/* Player Selector */}
+              {state.currentMatch.players.length > 1 && (
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-dark-300 mb-2">Spieler auswählen</label>
+                  <div className="flex flex-wrap gap-2">
+                    {state.currentMatch.players.map(player => (
+                      <button
+                        key={player.playerId}
+                        onClick={() => setSelectedHeatmapPlayer(
+                          selectedHeatmapPlayer === player.playerId ? null : player.playerId
+                        )}
+                        className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
+                          selectedHeatmapPlayer === player.playerId || (!selectedHeatmapPlayer && state.currentMatch!.players[0].playerId === player.playerId)
+                            ? 'bg-primary-500 text-white'
+                            : 'bg-dark-800 text-dark-300 hover:bg-dark-700'
+                        }`}
+                      >
+                        <PlayerAvatar avatar={players.find(p => p.id === player.playerId)?.avatar} name={player.name} size="sm" />
+                        {player.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Heatmap Display */}
+              {(() => {
+                const displayPlayerId = selectedHeatmapPlayer || state.currentMatch.players[0]?.playerId;
+                const playerHeatmap = displayPlayerId ? liveHeatmapData[displayPlayerId] : null;
+                const playerName = state.currentMatch.players.find(p => p.playerId === displayPlayerId)?.name || '';
+
+                if (!playerHeatmap || playerHeatmap.totalDarts === 0) {
+                  return (
+                    <div className="text-center py-12">
+                      <Flame size={48} className="mx-auto mb-4 text-dark-600" />
+                      <p className="text-dark-400 text-lg">Noch keine Wurf-Daten für {playerName}</p>
+                      <p className="text-dark-500 text-sm mt-2">Die Heatmap wird mit jedem Wurf aktualisiert</p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div>
+                    <div className="text-center mb-4">
+                      <span className="text-lg font-bold text-white">{playerName}</span>
+                      <span className="text-dark-400 ml-2">({playerHeatmap.totalDarts} Darts)</span>
+                    </div>
+                    <DartboardHeatmapBlur 
+                      heatmapData={playerHeatmap} 
+                      size={Math.min(500, window.innerWidth - 80)}
+                      compact={true}
+                    />
+                  </div>
+                );
+              })()}
             </div>
           )}
         </div>
