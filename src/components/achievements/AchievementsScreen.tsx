@@ -33,7 +33,13 @@ const AchievementsScreen: React.FC = () => {
 
   const playerProgress = useMemo(() => {
     if (!selectedPlayerId) return null;
-    return getPlayerProgress(selectedPlayerId);
+    const progress = getPlayerProgress(selectedPlayerId);
+    console.log(`[AchievementsScreen] Player progress for ${selectedPlayerId}:`, {
+      unlockedCount: progress.unlockedAchievements.length,
+      totalPoints: progress.totalPoints,
+      unlockedIds: progress.unlockedAchievements.map(u => u.achievementId)
+    });
+    return progress;
   }, [selectedPlayerId, getPlayerProgress]);
 
   const selectedPlayer = useMemo(() => {
@@ -42,7 +48,9 @@ const AchievementsScreen: React.FC = () => {
 
   const unlockedAchievements = useMemo(() => {
     if (!selectedPlayerId) return [];
-    return getUnlockedAchievements(selectedPlayerId);
+    const unlocked = getUnlockedAchievements(selectedPlayerId);
+    console.log(`[AchievementsScreen] Unlocked achievements for ${selectedPlayerId}:`, unlocked.length, unlocked.map(a => a.id));
+    return unlocked;
   }, [selectedPlayerId, getUnlockedAchievements]);
 
   const lockedAchievements = useMemo(() => {

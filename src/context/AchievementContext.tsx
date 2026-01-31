@@ -62,15 +62,22 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
       const currentUnlockedIds = new Set(currentProgress?.unlockedAchievements.map(u => u.achievementId) || []);
       
       const apiAchievements = await api.achievements.getByPlayer(playerId);
+      logger.debug(`API returned ${apiAchievements?.length || 0} achievements for player ${playerId}`, apiAchievements);
 
       if (apiAchievements && Array.isArray(apiAchievements)) {
         // Convert API format to PlayerAchievementProgress format
-        const apiUnlockedAchievements: UnlockedAchievement[] = apiAchievements.map((a: any) => ({
-          achievementId: a.achievement_id || a.achievementId,
-          unlockedAt: new Date(a.unlocked_at || a.unlockedAt),
-          playerId: a.player_id || a.playerId || playerId,
-          gameId: a.game_id || a.gameId,
-        }));
+        const apiUnlockedAchievements: UnlockedAchievement[] = apiAchievements.map((a: any) => {
+          const achievementId = a.achievement_id || a.achievementId;
+          const unlockedAt = a.unlocked_at || a.unlockedAt;
+          logger.debug(`Converting achievement: ${achievementId}, unlocked_at: ${unlockedAt}`);
+          return {
+            achievementId,
+            unlockedAt: unlockedAt ? new Date(unlockedAt) : new Date(),
+            playerId: a.player_id || a.playerId || playerId,
+            gameId: a.game_id || a.gameId,
+          };
+        });
+        logger.debug(`Converted ${apiUnlockedAchievements.length} achievements`);
 
         // Merge API achievements with localStorage achievements (prefer newer unlock date)
         const mergedAchievements: UnlockedAchievement[] = [...apiUnlockedAchievements];
@@ -148,11 +155,13 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
   // Get player progress
   const getPlayerProgress = useCallback((playerId: string): PlayerAchievementProgress => {
     // Trigger API load if not loaded yet (async, doesn't block)
-    if (!loadedPlayers.has(playerId)) {
+    if (!loadedPlayers.has(playerId) && playerId) {
+      logger.debug(`Triggering API load for player ${playerId}`);
       loadPlayerAchievementsFromAPI(playerId);
     }
 
     if (progressCache[playerId]) {
+      logger.debug(`Returning cached progress for player ${playerId}: ${progressCache[playerId].unlockedAchievements.length} unlocked`);
       return progressCache[playerId];
     }
 
@@ -164,6 +173,7 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
       totalPoints: 0,
     };
 
+    logger.debug(`Initializing new progress for player ${playerId} (no cache)`);
     return newProgress;
   }, [progressCache, loadedPlayers, loadPlayerAchievementsFromAPI]);
 

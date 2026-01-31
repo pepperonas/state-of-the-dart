@@ -23,14 +23,30 @@ router.get('/player/:playerId', authenticateTenant, (req: AuthRequest, res: Resp
   const db = getDatabase();
 
   try {
+    console.log(`[Achievements API] Fetching achievements for player ${playerId}, tenant ${req.tenantId}`);
+    
     const achievements = db.prepare(`
-      SELECT pa.*, a.name, a.description, a.icon, a.category, a.points, a.rarity, a.target
+      SELECT 
+        pa.id,
+        pa.player_id,
+        pa.achievement_id,
+        pa.unlocked_at,
+        pa.progress,
+        pa.game_id,
+        a.name, 
+        a.description, 
+        a.icon, 
+        a.category, 
+        a.points, 
+        a.rarity, 
+        a.target
       FROM player_achievements pa
       JOIN achievements a ON pa.achievement_id = a.id
       WHERE pa.player_id = ?
       ORDER BY pa.unlocked_at DESC
     `).all(playerId);
 
+    console.log(`[Achievements API] Found ${achievements.length} achievements for player ${playerId}`);
     res.json(achievements);
   } catch (error) {
     console.error('Error fetching player achievements:', error);
