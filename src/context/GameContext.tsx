@@ -647,57 +647,87 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const matchSavingRef = React.useRef<boolean>(false);
 
   // Save game state to API with debouncing (during active game)
+  // Save match to API with debouncing and dependency tracking
   useEffect(() => {
-    if (state.currentMatch && state.currentMatch.status === 'in-progress') {
-      const matchId = state.currentMatch.id;
-      const abortController = new AbortController();
+    if (!state.currentMatch || state.currentMatch.status !== 'in-progress') {
+      return;
+    }
 
-      const saveTimer = setTimeout(async () => {
-        // Prevent concurrent save operations
-        if (matchSavingRef.current) {
-          return;
-        }
+    const matchId = state.currentMatch.id;
+    const abortController = new AbortController();
+    let isMounted = true;
 
-        matchSavingRef.current = true;
-        const apiMatch = transformMatchForApi(state.currentMatch!);
+    // Use a ref to track the last saved match state to prevent unnecessary saves
+    const lastSavedStateRef = useRef<string>('');
+    const currentStateString = JSON.stringify({
+      id: matchId,
+      status: state.currentMatch.status,
+      currentLegIndex: state.currentMatch.currentLegIndex,
+      currentPlayerIndex: state.currentPlayerIndex,
+      legsCount: state.currentMatch.legs.length,
+      lastLegThrowsCount: state.currentMatch.legs[state.currentMatch.currentLegIndex]?.throws.length || 0,
+    });
 
-        try {
-          // If we haven't created this match yet, create it first
-          if (matchCreatedRef.current !== matchId) {
-            try {
-              await api.matches.create(apiMatch, { signal: abortController.signal });
+    // Only save if state actually changed
+    if (lastSavedStateRef.current === currentStateString) {
+      return;
+    }
+
+    const saveTimer = setTimeout(async () => {
+      if (!isMounted) return;
+      
+      // Prevent concurrent save operations
+      if (matchSavingRef.current) {
+        return;
+      }
+
+      matchSavingRef.current = true;
+      const apiMatch = transformMatchForApi(state.currentMatch!);
+
+      try {
+        // If we haven't created this match yet, create it first
+        if (matchCreatedRef.current !== matchId) {
+          try {
+            await api.matches.create(apiMatch, { signal: abortController.signal });
+            matchCreatedRef.current = matchId;
+            logger.success('Match created in DB:', matchId);
+          } catch (createError: any) {
+            // If aborted, exit silently
+            if (createError.name === 'AbortError' || !isMounted) return;
+            // If it already exists, mark as created and continue
+            if (createError?.response?.status === 409) {
               matchCreatedRef.current = matchId;
-              logger.success('Match created in DB:', matchId);
-            } catch (createError: any) {
-              // If aborted, exit silently
-              if (createError.name === 'AbortError') return;
-              // If it already exists, mark as created and continue
-              if (createError?.response?.status === 409) {
-                matchCreatedRef.current = matchId;
-              } else {
-                logger.warn('Match create failed:', createError);
-              }
+            } else {
+              logger.warn('Match create failed:', createError);
             }
-          } else {
-            // Match exists, update it
-            await api.matches.update(matchId, apiMatch, { signal: abortController.signal });
           }
-        } catch (error: any) {
-          // If aborted, exit silently
-          if (error.name === 'AbortError') return;
-          // Silently fail - don't block the game
-          logger.warn('Match save failed:', error);
-        } finally {
+        } else {
+          // Match exists, update it
+          await api.matches.update(matchId, apiMatch, { signal: abortController.signal });
+        }
+        
+        // Update last saved state only on success
+        if (isMounted) {
+          lastSavedStateRef.current = currentStateString;
+        }
+      } catch (error: any) {
+        // If aborted, exit silently
+        if (error.name === 'AbortError' || !isMounted) return;
+        // Silently fail - don't block the game
+        logger.warn('Match save failed:', error);
+      } finally {
+        if (isMounted) {
           matchSavingRef.current = false;
         }
-      }, 1000); // Debounce: Save every 1 second
+      }
+    }, 2000); // Increased debounce to 2 seconds to reduce request frequency
 
-      return () => {
-        clearTimeout(saveTimer);
-        abortController.abort(); // Cancel any in-flight API calls
-      };
-    }
-  }, [state.currentMatch]);
+    return () => {
+      isMounted = false;
+      clearTimeout(saveTimer);
+      abortController.abort(); // Cancel any in-flight API calls
+    };
+  }, [state.currentMatch?.id, state.currentMatch?.status, state.currentMatch?.currentLegIndex, state.currentPlayerIndex, state.currentMatch?.legs.length]);
 
   // Reset match created ref when match ID changes
   useEffect(() => {
