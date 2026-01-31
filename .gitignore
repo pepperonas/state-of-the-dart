@@ -44,3 +44,12 @@ Thumbs.db
 *.temp
 .temp/
 .tmp/
+
+# AI/Editor specific
+CLAUDE.md
+.cursor/
+.cursorignore
+
+# Database
+*.sqlite
+*.db

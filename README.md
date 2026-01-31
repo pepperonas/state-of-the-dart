@@ -24,32 +24,15 @@
 
 ## 📸 Screenshots
 
-<details>
-<summary><b>Klicken zum Anzeigen der Screenshots</b></summary>
+<div align="center">
 
-### Hauptmenü & Dashboard
-| Hauptmenü | Dashboard |
-|-----------|-----------|
-| ![Hauptmenü](docs/mockups/screencapture-stateofthedart-2026-02-01-00_28_31.png) | ![Dashboard](docs/mockups/screencapture-stateofthedart-dashboard-2026-02-01-00_28_45.png) |
+| Dashboard | Spiel | Turnier |
+|:---------:|:-----:|:-------:|
+| <a href="SCREENSHOTS.md"><img src="docs/mockups/screencapture-stateofthedart-dashboard-2026-02-01-00_28_45.png" alt="Dashboard" width="280" /></a> | <a href="SCREENSHOTS.md"><img src="docs/mockups/screencapture-stateofthedart-game-2026-02-01-00_29_59.png" alt="Spiel" width="280" /></a> | <a href="SCREENSHOTS.md"><img src="docs/mockups/screencapture-stateofthedart-tournament-2026-02-01-00_36_55.png" alt="Turnier" width="280" /></a> |
 
-### Spielmodi
-| X01 Spiel | Cricket |
-|-----------|---------|
-| ![X01](docs/mockups/screencapture-stateofthedart-game-2026-02-01-00_29_59.png) | ![Cricket](docs/mockups/screencapture-stateofthedart-cricket-2026-02-01-00_29_35.png) |
+**[📸 Alle 19 Screenshots ansehen →](SCREENSHOTS.md)**
 
-### Turniere
-| Turnier-Menü | Match-Scoring |
-|--------------|---------------|
-| ![Turnier](docs/mockups/screencapture-stateofthedart-tournament-2026-02-01-00_36_37.png) | ![Match](docs/mockups/screencapture-stateofthedart-tournament-2026-02-01-00_36_55.png) |
-
-### Spieler & Statistiken
-| Spielerprofil | Achievements |
-|---------------|--------------|
-| ![Profil](docs/mockups/screencapture-stateofthedart-players-36bbe0a9-431a-4c7f-ac13-c8f97dc8f1f9-2026-02-01-00_32_02.png) | ![Achievements](docs/mockups/screencapture-stateofthedart-achievements-2026-02-01-00_33_09.png) |
-
-➡️ **[Alle Screenshots ansehen](docs/mockups/README.md)**
-
-</details>
+</div>
 
 ---
 
