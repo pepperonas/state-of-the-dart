@@ -10,6 +10,7 @@ import MainMenu from './components/MainMenu';
 import AchievementNotification from './components/achievements/AchievementNotification';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import ThemeManager from './components/ThemeManager';
+import Footer from './components/Footer';
 import './index.css';
 
 // Auth components (not lazy - need immediate load)
@@ -127,10 +128,11 @@ function AppContent() {
             <PlayerProvider>
               <AchievementProvider>
                 <GameProvider>
-                  <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+                  <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex flex-col">
                     <AchievementNotification />
-                    <Suspense fallback={<LoadingScreen />}>
-                    <Routes>
+                    <div className="flex-1">
+                      <Suspense fallback={<LoadingScreen />}>
+                      <Routes>
                       {/* Public Auth Routes */}
                       <Route path="/login" element={<Login />} />
                       <Route path="/register" element={<Register />} />
@@ -248,8 +250,10 @@ function AppContent() {
                       } />
                       
                       <Route path="*" element={<Navigate to="/" replace />} />
-                    </Routes>
-                    </Suspense>
+                      </Routes>
+                      </Suspense>
+                    </div>
+                    <Footer />
                   </div>
                 </GameProvider>
               </AchievementProvider>
