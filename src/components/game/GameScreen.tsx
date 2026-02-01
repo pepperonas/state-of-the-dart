@@ -750,9 +750,9 @@ const GameScreen: React.FC = () => {
     setShowSetup(true);
 
     // Navigate with a small delay to ensure state updates complete
+    // Use React Router navigate() for client-side routing (avoids full page reload)
     setTimeout(() => {
-      // Force a clean navigation by using window.location for reliability
-      window.location.href = '/';
+      navigate('/');
     }, 150);
   };
 
@@ -775,12 +775,7 @@ const GameScreen: React.FC = () => {
       <div className="min-h-screen p-4 md:p-8 gradient-mesh">
         <div className="max-w-4xl mx-auto">
           <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              console.log('🔙 Back to Menu clicked from Setup');
-              window.location.href = '/';
-            }}
+            onClick={() => navigate('/')}
             className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
           >
             <ArrowLeft size={20} />
