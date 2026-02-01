@@ -8,7 +8,6 @@ const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
 const morgan_1 = __importDefault(require("morgan"));
 const compression_1 = __importDefault(require("compression"));
-const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const express_session_1 = __importDefault(require("express-session"));
 const passport_1 = __importDefault(require("./config/passport"));
 const http_1 = require("http");
@@ -61,24 +60,22 @@ if (config_1.config.nodeEnv === 'development') {
 else {
     app.use((0, morgan_1.default)('combined'));
 }
-// Rate limiting
-const limiter = (0, express_rate_limit_1.default)({
-    windowMs: config_1.config.rateLimitWindowMs,
-    max: config_1.config.rateLimitMaxRequests,
-    message: 'Too many requests from this IP, please try again later.',
-    standardHeaders: true,
-    legacyHeaders: false,
-    validate: {
-        trustProxy: false, // Disable trust proxy validation (we're behind Nginx)
-    },
-    skip: (req) => {
-        // When mounted at /api/, req.path is relative (e.g., /auth/me, not /api/auth/me)
-        // Skip rate limiting for auth routes (Google OAuth makes multiple redirects)
-        // Also skip matches (frequent updates during gameplay)
-        return req.path.startsWith('/auth/') || req.path.startsWith('/matches');
-    }
+// Rate limiting - disabled for now, using Nginx rate limiting instead
+// The express-rate-limit was causing issues with normal app usage
+// TODO: Re-enable with proper configuration if needed
+/*
+const limiter = rateLimit({
+  windowMs: config.rateLimitWindowMs,
+  max: config.rateLimitMaxRequests,
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: {
+    trustProxy: false,
+  },
 });
 app.use('/api/', limiter);
+*/
 // Health check
 app.get('/health', (req, res) => {
     res.json({

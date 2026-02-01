@@ -746,14 +746,8 @@ const GameScreen: React.FC = () => {
     dispatch({ type: 'PAUSE_MATCH' });
     setShowBackConfirm(false);
 
-    // Reset showSetup state to ensure clean state
-    setShowSetup(true);
-
-    // Navigate with a small delay to ensure state updates complete
-    // Use React Router navigate() for client-side routing (avoids full page reload)
-    setTimeout(() => {
-      navigate('/');
-    }, 150);
+    // Navigate immediately - no need for state reset since we're leaving
+    navigate('/');
   };
 
   const handleEndMatch = () => {
