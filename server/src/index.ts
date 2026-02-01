@@ -65,7 +65,10 @@ if (config.nodeEnv === 'development') {
   app.use(morgan('combined'));
 }
 
-// Rate limiting
+// Rate limiting - disabled for now, using Nginx rate limiting instead
+// The express-rate-limit was causing issues with normal app usage
+// TODO: Re-enable with proper configuration if needed
+/*
 const limiter = rateLimit({
   windowMs: config.rateLimitWindowMs,
   max: config.rateLimitMaxRequests,
@@ -73,16 +76,11 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   validate: {
-    trustProxy: false, // Disable trust proxy validation (we're behind Nginx)
+    trustProxy: false,
   },
-  skip: (req) => {
-    // When mounted at /api/, req.path is relative (e.g., /auth/me, not /api/auth/me)
-    // Skip rate limiting for auth routes (Google OAuth makes multiple redirects)
-    // Also skip matches (frequent updates during gameplay)
-    return req.path.startsWith('/auth/') || req.path.startsWith('/matches');
-  }
 });
 app.use('/api/', limiter);
+*/
 
 // Health check
 app.get('/health', (req: Request, res: Response) => {
