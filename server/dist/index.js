@@ -72,8 +72,10 @@ const limiter = (0, express_rate_limit_1.default)({
         trustProxy: false, // Disable trust proxy validation (we're behind Nginx)
     },
     skip: (req) => {
+        // When mounted at /api/, req.path is relative (e.g., /auth/me, not /api/auth/me)
         // Skip rate limiting for auth routes (Google OAuth makes multiple redirects)
-        return req.path.startsWith('/api/auth/');
+        // Also skip matches (frequent updates during gameplay)
+        return req.path.startsWith('/auth/') || req.path.startsWith('/matches');
     }
 });
 app.use('/api/', limiter);

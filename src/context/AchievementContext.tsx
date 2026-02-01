@@ -37,7 +37,9 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
   const [progressCache, setProgressCache] = useState<Record<string, PlayerAchievementProgress>>({});
 
   const STORAGE_KEY = 'achievements';
-  const [loadedPlayers, setLoadedPlayers] = useState<Set<string>>(new Set());
+  // Use a ref to track loading state to prevent race conditions
+  const loadingPlayersRef = React.useRef<Set<string>>(new Set());
+  const loadedPlayersRef = React.useRef<Set<string>>(new Set());
 
   // Load all player progress from localStorage on mount
   useEffect(() => {
@@ -50,9 +52,13 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
 
   // Load player achievements from API
   const loadPlayerAchievementsFromAPI = useCallback(async (playerId: string) => {
-    if (loadedPlayers.has(playerId)) {
-      return; // Already loaded
+    // Check refs immediately to prevent duplicate calls (refs update synchronously)
+    if (loadedPlayersRef.current.has(playerId) || loadingPlayersRef.current.has(playerId)) {
+      return; // Already loaded or loading
     }
+
+    // Mark as loading IMMEDIATELY (before async operation)
+    loadingPlayersRef.current.add(playerId);
 
     try {
       logger.apiEvent(`Loading achievements for player ${playerId} from API...`);
@@ -133,15 +139,19 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
           storage.set(STORAGE_KEY, newProgressCache);
         }
 
-        // Mark as loaded
-        setLoadedPlayers(prev => new Set([...prev, playerId]));
+        // Mark as loaded (ref for immediate sync check)
+        loadedPlayersRef.current.add(playerId);
+        loadingPlayersRef.current.delete(playerId);
         logger.success(`Achievements loaded for player ${playerId} (${mergedAchievements.length} unlocked)`);
       }
     } catch (error) {
       logger.warn(`Failed to load achievements from API for player ${playerId}:`, error);
+      // Mark as loaded anyway to prevent retry loops on errors
+      loadedPlayersRef.current.add(playerId);
+      loadingPlayersRef.current.delete(playerId);
       // Continue with localStorage data (offline mode)
     }
-  }, [currentTenant, progressCache, loadedPlayers]);
+  }, [currentTenant]);
 
   // Save progress to storage
   const saveProgress = useCallback((progress: Record<string, PlayerAchievementProgress>) => {
@@ -155,13 +165,12 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
   // Get player progress
   const getPlayerProgress = useCallback((playerId: string): PlayerAchievementProgress => {
     // Trigger API load if not loaded yet (async, doesn't block)
-    if (!loadedPlayers.has(playerId) && playerId) {
-      logger.debug(`Triggering API load for player ${playerId}`);
+    // Use refs to check - they update synchronously to prevent race conditions
+    if (!loadedPlayersRef.current.has(playerId) && !loadingPlayersRef.current.has(playerId) && playerId) {
       loadPlayerAchievementsFromAPI(playerId);
     }
 
     if (progressCache[playerId]) {
-      logger.debug(`Returning cached progress for player ${playerId}: ${progressCache[playerId].unlockedAchievements.length} unlocked`);
       return progressCache[playerId];
     }
 
@@ -173,9 +182,8 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
       totalPoints: 0,
     };
 
-    logger.debug(`Initializing new progress for player ${playerId} (no cache)`);
     return newProgress;
-  }, [progressCache, loadedPlayers, loadPlayerAchievementsFromAPI]);
+  }, [progressCache, loadPlayerAchievementsFromAPI]);
 
   // Get all player progress
   const getAllPlayerProgress = useCallback((): Record<string, PlayerAchievementProgress> => {
