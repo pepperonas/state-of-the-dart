@@ -739,19 +739,21 @@ const GameScreen: React.FC = () => {
   };
 
   const confirmBackToMenu = () => {
+    console.log('🔙 confirmBackToMenu called');
+    
     // Mark that we're navigating away to prevent auto-resume
     isNavigatingAwayRef.current = true;
     
-    // Close dialog first
+    // Close dialog
     setShowBackConfirm(false);
     
-    // Pause the match (this saves it to storage)
+    // Pause the match (this saves it to localStorage via GameContext)
     dispatch({ type: 'PAUSE_MATCH' });
-
-    // Use replace to prevent back-button issues, navigate in next tick to ensure state is saved
-    requestAnimationFrame(() => {
-      navigate('/', { replace: true });
-    });
+    
+    console.log('🔙 Match paused, navigating to home...');
+    
+    // Hard redirect - most reliable method
+    window.location.href = '/';
   };
 
   const handleEndMatch = () => {
@@ -1832,13 +1834,19 @@ const GameScreen: React.FC = () => {
             </p>
             <div className="flex gap-3">
               <button
-                onClick={() => setShowBackConfirm(false)}
+                onClick={() => {
+                  console.log('❌ Abbrechen clicked');
+                  setShowBackConfirm(false);
+                }}
                 className="flex-1 px-4 py-3 bg-dark-700 hover:bg-dark-600 text-white rounded-xl font-semibold transition-all"
               >
                 Abbrechen
               </button>
               <button
-                onClick={confirmBackToMenu}
+                onClick={() => {
+                  console.log('✅ Pausieren clicked');
+                  confirmBackToMenu();
+                }}
                 className="flex-1 px-4 py-3 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-semibold transition-all"
               >
                 Pausieren
