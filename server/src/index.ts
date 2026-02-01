@@ -6,8 +6,10 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import session from 'express-session';
 import passport from './config/passport';
+import { createServer } from 'http';
 import { config } from './config';
 import { initDatabase } from './database';
+import { setupSocketIO } from './socket';
 
 // Initialize Express app
 const app = express();
@@ -199,14 +201,19 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   });
 });
 
+// Create HTTP server and attach Socket.IO
+const httpServer = createServer(app);
+const io = setupSocketIO(httpServer);
+
 // Start server
-const server = app.listen(config.port, () => {
+httpServer.listen(config.port, () => {
   console.log(`
 🚀 State of the Dart API Server
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📡 Server: http://localhost:${config.port}
 🏥 Health: http://localhost:${config.port}/health
 🔧 API: http://localhost:${config.port}/api
+🌐 WebSocket: ws://localhost:${config.port}
 🌍 Environment: ${config.nodeEnv}
 📊 Database: ${config.databasePath}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -216,7 +223,8 @@ const server = app.listen(config.port, () => {
 // Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('SIGTERM signal received: closing HTTP server');
-  server.close(() => {
+  io.close();
+  httpServer.close(() => {
     console.log('HTTP server closed');
     process.exit(0);
   });

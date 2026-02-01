@@ -7,6 +7,70 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-02-01
+
+### ✨ Neue Features
+
+#### 🕐 Around the Clock Spielmodus
+- Triff Zahlen 1-20 der Reihe nach
+- Optional mit Bull (25) als Finale
+- Konfigurierbare Optionen:
+  - Doubles erlaubt
+  - Triples erlaubt
+  - Bull ein/ausschließen
+- Live-Timer und Dart-Zähler
+- Fortschrittsanzeige mit farbigen Markern
+- Mehrspieler-Unterstützung (1-4 Spieler)
+
+#### ⚡ Shanghai Spielmodus
+- Bonus-Runden-basierter Spielmodus
+- Jede Runde zielt auf eine bestimmte Zahl (z.B. 1-7, 1-20)
+- Punktesystem:
+  - Single = Zahl × 1
+  - Double = Zahl × 2
+  - Triple = Zahl × 3
+- **SHANGHAI** (Single + Double + Triple derselben Zahl) = Sofortiger Sieg!
+- Konfigurierbare Startnummer (1, 5, 10, 15)
+- Konfigurierbare Rundenanzahl (5, 7, 10, 15, 20)
+- Live-Rangliste mit Medaillen
+
+#### 🌐 Online Multiplayer
+- WebSocket-basierte Echtzeit-Kommunikation (Socket.IO)
+- Lobby-System:
+  - Räume erstellen (öffentlich/privat)
+  - Räume beitreten
+  - Spielerliste in Echtzeit
+- Raum-Einstellungen:
+  - Startscore (301, 501, 701)
+  - Legs zum Gewinnen
+  - Privat/Öffentlich
+- In-Game Features:
+  - Live-Chat
+  - Echtzeit-Spielstand
+  - Host-Kontrolle
+- Bis zu 4 Spieler pro Raum
+
+#### 🤖 Verbesserte Bot-KI
+- Neue Bot-Persönlichkeiten:
+  - 🔥 Aggressiv - Hohes Risiko, hohe Belohnung
+  - 🛡️ Defensiv - Konsistente Punktzahl
+  - ⚖️ Ausgewogen - Allrounder
+  - 💎 Nervenstark - Beste Leistung unter Druck
+- Persönlichkeits-Modifikatoren:
+  - Triple-Bonus
+  - Checkout-Bonus
+  - Druck-Modifikator
+  - Konsistenz-Varianz
+
+### 🔧 Technische Änderungen
+- Socket.IO Integration im Backend
+- Neuer WebSocket-Port für Echtzeit-Kommunikation
+- Bot-Logik mit Spielstilen erweitert
+
+### 📦 Neue Abhängigkeiten
+- `socket.io` (Backend)
+- `socket.io-client` (Frontend)
+
 ## [0.2.0] - 2026-01-31
 
 ### ✨ Neue Features

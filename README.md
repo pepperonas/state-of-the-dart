@@ -9,7 +9,7 @@
 **Professionelles Dart-Zählsystem** - Eine funktionsreiche, webbasierte Dart-Scoring-Anwendung mit Multi-User-Support, professionellem Statistik-Tracking und Live-Deployment.
 
 [![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green)](https://stateofthedart.com)
-![Version](https://img.shields.io/badge/Version-0.2.0-blue)
+![Version](https://img.shields.io/badge/Version-0.3.0-blue)
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -52,12 +52,26 @@
 
 ### 🎮 Spielmodi
 - **X01-Spiele** - Vollständige Unterstützung für 301/501/701/1001 mit anpassbaren Einstellungen
-- **🎯 Cricket-Modus (NEU in v0.2.0)** - Vollständiger Cricket-Spielmodus
+- **🎯 Cricket-Modus** - Vollständiger Cricket-Spielmodus
   - Zahlen 15-20 und Bull müssen 3x getroffen werden
   - Triple = 3 Marks, Double = 2 Marks, Single = 1 Mark
   - Punkte sammeln nach dem Schließen (solange Gegner offen)
   - Mark-Anzeige: `/` (1), `X` (2), `⊗` (geschlossen)
-  - Dedizierte Cricket-Eingabe-Buttons
+- **🕐 Around the Clock (NEU in v0.3.0)** - Klassischer Trainingsmodus
+  - Triff Zahlen 1-20 der Reihe nach
+  - Optional mit Bull als Finale
+  - Optionen: Doubles/Triples erlaubt
+  - Timer und Dart-Zähler
+- **⚡ Shanghai (NEU in v0.3.0)** - Bonus-Runden Spielmodus
+  - Jede Runde zielt auf eine bestimmte Zahl
+  - Single/Double/Triple für Punkte
+  - SHANGHAI (S+D+T) = Sofortiger Sieg!
+  - Konfigurierbare Startnummer und Runden
+- **🌐 Online Multiplayer (NEU in v0.3.0)** - Echtzeit-Spiele
+  - WebSocket-basierte Verbindung
+  - Räume erstellen und beitreten
+  - Live-Chat während des Spiels
+  - Bis zu 4 Spieler pro Raum
 - **Double Out/In** - Konfigurierbare Checkout-Regeln
 - **Best of Sets/Legs** - Turnier-Matchformate
 - **Multi-Player** - Unterstützung für 2+ Spieler mit eigenen Avataren und Namen

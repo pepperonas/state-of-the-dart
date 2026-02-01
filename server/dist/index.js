@@ -11,8 +11,10 @@ const compression_1 = __importDefault(require("compression"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const express_session_1 = __importDefault(require("express-session"));
 const passport_1 = __importDefault(require("./config/passport"));
+const http_1 = require("http");
 const config_1 = require("./config");
 const database_1 = require("./database");
+const socket_1 = require("./socket");
 // Initialize Express app
 const app = (0, express_1.default)();
 // Trust proxy - required when behind Nginx
@@ -173,14 +175,18 @@ app.use((err, req, res, next) => {
         ...(config_1.config.isProduction ? {} : { stack: err.stack }),
     });
 });
+// Create HTTP server and attach Socket.IO
+const httpServer = (0, http_1.createServer)(app);
+const io = (0, socket_1.setupSocketIO)(httpServer);
 // Start server
-const server = app.listen(config_1.config.port, () => {
+httpServer.listen(config_1.config.port, () => {
     console.log(`
 🚀 State of the Dart API Server
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📡 Server: http://localhost:${config_1.config.port}
 🏥 Health: http://localhost:${config_1.config.port}/health
 🔧 API: http://localhost:${config_1.config.port}/api
+🌐 WebSocket: ws://localhost:${config_1.config.port}
 🌍 Environment: ${config_1.config.nodeEnv}
 📊 Database: ${config_1.config.databasePath}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -189,7 +195,8 @@ const server = app.listen(config_1.config.port, () => {
 // Graceful shutdown
 process.on('SIGTERM', () => {
     console.log('SIGTERM signal received: closing HTTP server');
-    server.close(() => {
+    io.close();
+    httpServer.close(() => {
         console.log('HTTP server closed');
         process.exit(0);
     });

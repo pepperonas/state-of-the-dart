@@ -61,6 +61,9 @@ const TrainingScreen = lazyWithRetry(() => import('./components/training/Trainin
 const TrainingStats = lazyWithRetry(() => import('./components/training/TrainingStats'));
 const TournamentMenu = lazyWithRetry(() => import('./components/tournament/TournamentMenu'));
 const CricketGame = lazyWithRetry(() => import('./components/game/CricketGame'));
+const AroundTheClockGame = lazyWithRetry(() => import('./components/game/AroundTheClockGame'));
+const ShanghaiGame = lazyWithRetry(() => import('./components/game/ShanghaiGame'));
+const OnlineMultiplayer = lazyWithRetry(() => import('./components/game/OnlineMultiplayer'));
 const Settings = lazyWithRetry(() => import('./components/Settings'));
 const AchievementsScreen = lazyWithRetry(() => import('./components/achievements/AchievementsScreen'));
 const Leaderboard = lazyWithRetry(() => import('./components/leaderboard/Leaderboard'));
@@ -181,6 +184,24 @@ function AppContent() {
                       <Route path="/cricket" element={
                         <ProtectedRoute>
                           <CricketGame />
+                        </ProtectedRoute>
+                      } />
+                      
+                      <Route path="/around-the-clock" element={
+                        <ProtectedRoute>
+                          <AroundTheClockGame />
+                        </ProtectedRoute>
+                      } />
+                      
+                      <Route path="/shanghai" element={
+                        <ProtectedRoute>
+                          <ShanghaiGame />
+                        </ProtectedRoute>
+                      } />
+                      
+                      <Route path="/online" element={
+                        <ProtectedRoute>
+                          <OnlineMultiplayer />
                         </ProtectedRoute>
                       } />
                       

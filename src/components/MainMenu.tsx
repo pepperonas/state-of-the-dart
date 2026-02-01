@@ -57,6 +57,27 @@ const MainMenu: React.FC = () => {
       gradient: 'from-green-500 to-green-600',
     },
     {
+      title: '🕐 Around the Clock',
+      icon: Target,
+      description: '1-20 der Reihe nach',
+      onClick: () => navigate('/around-the-clock'),
+      gradient: 'from-cyan-500 to-cyan-600',
+    },
+    {
+      title: '⚡ Shanghai',
+      icon: Target,
+      description: 'Bonus-Runden Modus',
+      onClick: () => navigate('/shanghai'),
+      gradient: 'from-yellow-500 to-orange-500',
+    },
+    {
+      title: '🌐 Online Multiplayer',
+      icon: Target,
+      description: 'Gegen andere spielen',
+      onClick: () => navigate('/online'),
+      gradient: 'from-purple-500 to-pink-500',
+    },
+    {
       title: t('menu.players'),
       icon: Users,
       description: t('menu.players_desc'),

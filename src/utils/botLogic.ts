@@ -28,6 +28,71 @@ export const BOT_PRESETS: BotPreset[] = [
 ];
 
 /**
+ * Bot play styles for more varied gameplay
+ */
+export type BotPlayStyle = 'aggressive' | 'defensive' | 'balanced' | 'clutch';
+
+export interface BotPersonality {
+  style: BotPlayStyle;
+  name: string;
+  nameDE: string;
+  emoji: string;
+  description: string;
+  // Modifiers
+  tripleBonus: number; // +/- accuracy when aiming for triples
+  checkoutBonus: number; // +/- accuracy on checkout attempts
+  pressureModifier: number; // How bot performs under pressure (remaining < 100)
+  consistencyVariance: number; // How much performance varies (0 = consistent, 1 = streaky)
+}
+
+export const BOT_PERSONALITIES: BotPersonality[] = [
+  {
+    style: 'aggressive',
+    name: 'Aggressive',
+    nameDE: 'Aggressiv',
+    emoji: '🔥',
+    description: 'Always goes for T20, high risk high reward',
+    tripleBonus: 0.1,
+    checkoutBonus: -0.05,
+    pressureModifier: -0.1,
+    consistencyVariance: 0.3,
+  },
+  {
+    style: 'defensive',
+    name: 'Defensive',
+    nameDE: 'Defensiv',
+    emoji: '🛡️',
+    description: 'Plays it safe, consistent scoring',
+    tripleBonus: -0.05,
+    checkoutBonus: 0.05,
+    pressureModifier: 0.05,
+    consistencyVariance: 0.1,
+  },
+  {
+    style: 'balanced',
+    name: 'Balanced',
+    nameDE: 'Ausgewogen',
+    emoji: '⚖️',
+    description: 'Well-rounded player',
+    tripleBonus: 0,
+    checkoutBonus: 0,
+    pressureModifier: 0,
+    consistencyVariance: 0.15,
+  },
+  {
+    style: 'clutch',
+    name: 'Clutch Player',
+    nameDE: 'Nervenstark',
+    emoji: '💎',
+    description: 'Performs best under pressure',
+    tripleBonus: -0.05,
+    checkoutBonus: 0.15,
+    pressureModifier: 0.15,
+    consistencyVariance: 0.25,
+  },
+];
+
+/**
  * Adaptive bot difficulty categories
  * These categories adjust based on player skill
  */
