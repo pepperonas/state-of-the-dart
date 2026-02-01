@@ -50,7 +50,11 @@ const apiClient = async (endpoint: string, options: RequestInit = {}) => {
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Request failed' }));
-    throw new Error(error.error || `HTTP ${response.status}`);
+    // Include status code in error message for proper error handling
+    const statusText = response.status === 429 ? 'Too Many Requests' : 
+                       response.status === 401 ? 'Unauthorized' :
+                       response.status === 403 ? 'Forbidden' : '';
+    throw new Error(error.error || `HTTP ${response.status}${statusText ? ` ${statusText}` : ''}`);
   }
 
   return response.json();

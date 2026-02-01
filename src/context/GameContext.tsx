@@ -740,8 +740,16 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Save match when paused (before navigating away)
   useEffect(() => {
     if (state.currentMatch?.status === 'paused') {
+      // Skip if already saving to prevent duplicate requests
+      if (matchSavingRef.current) {
+        logger.debug('Skipping paused save - already saving');
+        return;
+      }
+
       const apiMatch = transformMatchForApi(state.currentMatch);
       const matchId = state.currentMatch.id;
+
+      matchSavingRef.current = true;
 
       // Try to save immediately when paused
       (async () => {
@@ -753,9 +761,14 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             await api.matches.update(matchId, apiMatch);
           }
           logger.success('Paused match saved');
-        } catch (err) {
-          logger.warn('Failed to save paused match:', err);
+        } catch (err: any) {
+          // Don't warn on rate limiting - it's not critical
+          if (!err?.message?.includes('429')) {
+            logger.warn('Failed to save paused match:', err);
+          }
           // Don't throw - allow navigation to continue
+        } finally {
+          matchSavingRef.current = false;
         }
       })();
     }

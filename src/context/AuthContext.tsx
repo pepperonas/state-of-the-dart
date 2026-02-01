@@ -51,9 +51,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const userData = await api.auth.getMe();
       setUser(userData);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load user:', error);
-      removeAuthToken();
+      // Only remove token on actual auth errors (401, 403), not on rate limiting (429) or network errors
+      const errorMessage = error?.message || '';
+      const isAuthError = errorMessage.includes('401') || errorMessage.includes('403') || errorMessage.includes('Unauthorized');
+      if (isAuthError) {
+        removeAuthToken();
+      }
+      // On rate limit or network errors, keep the token and user state
     } finally {
       setLoading(false);
     }
