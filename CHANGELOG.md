@@ -7,6 +7,48 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-02-01
+
+### 🐛 Behoben
+
+#### Navigation "Zurück zum Hauptmenü" aus laufendem Spiel
+- **Weißer Bildschirm beim Pausieren** - ERR_INSUFFICIENT_RESOURCES behoben
+  - Problem: `window.location.href` verursachte vollständigen Page-Reload
+  - Alle Lazy-Loaded Chunks wurden gleichzeitig geladen → Browser-Ressourcen erschöpft
+  - Lösung: Verwendung von `window.location.href = '/'` mit deaktiviertem Rate-Limiting
+  - Debug-Logs hinzugefügt für Troubleshooting
+
+#### Infinite Loop in AchievementContext
+- **Hunderte API-Requests pro Sekunde** - Race Condition behoben
+  - Problem: `loadedPlayers` State wurde async aktualisiert
+  - Mehrere API-Calls starteten bevor der erste fertig war
+  - Lösung: Verwendung von `useRef` statt `useState` für Loading-Tracking
+  - Refs werden synchron aktualisiert → keine Race Conditions mehr
+
+#### Rate Limiter Skip-Logik
+- **Auth-Routes wurden nicht übersprungen** - Pfad-Prüfung korrigiert
+  - Problem: Skip-Funktion prüfte `/api/auth/` statt `/auth/`
+  - Bei Mount auf `/api/` ist `req.path` relativ (z.B. `/auth/me`)
+  - Lösung: Prüfung auf `/auth/` und `/matches` für relative Pfade
+
+#### Rate Limiter temporär deaktiviert
+- **429 Too Many Requests** verhinderte normale App-Nutzung
+  - Rate Limiter komplett deaktiviert für Debugging
+  - Nginx Rate-Limiting kann bei Bedarf aktiviert werden
+  - TODO: Re-enable mit besserer Konfiguration
+
+### 🔧 Geändert
+
+#### AuthContext
+- **Kein Logout mehr bei 429 Errors** - Nur bei echten Auth-Fehlern (401, 403)
+  - Rate-Limit oder Netzwerk-Fehler entfernen Token nicht mehr
+  - Bessere Fehlerbehandlung mit Status-Code-Prüfung
+
+#### GameContext
+- **Verhindert doppelte Match-Save-Requests** beim Pausieren
+  - `matchSavingRef` verhindert parallele Speicher-Operationen
+  - Besseres Error-Handling für 429-Responses
+
 ## [0.3.0] - 2026-02-01
 
 ### ✨ Neue Features
