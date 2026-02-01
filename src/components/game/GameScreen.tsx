@@ -742,12 +742,16 @@ const GameScreen: React.FC = () => {
     // Mark that we're navigating away to prevent auto-resume
     isNavigatingAwayRef.current = true;
     
-    // First pause the match (this saves it)
-    dispatch({ type: 'PAUSE_MATCH' });
+    // Close dialog first
     setShowBackConfirm(false);
+    
+    // Pause the match (this saves it to storage)
+    dispatch({ type: 'PAUSE_MATCH' });
 
-    // Navigate immediately - no need for state reset since we're leaving
-    navigate('/');
+    // Use replace to prevent back-button issues, navigate in next tick to ensure state is saved
+    requestAnimationFrame(() => {
+      navigate('/', { replace: true });
+    });
   };
 
   const handleEndMatch = () => {
