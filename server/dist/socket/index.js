@@ -20,10 +20,10 @@ function setupSocketIO(server) {
         // Player joins with their info
         socket.on('player:join', (data) => {
             const player = {
-                oderId: socket.id,
-                odername: data.name,
-                odersocketId: socket.id,
-                oderplayerId: data.playerId,
+                id: socket.id,
+                name: data.name,
+                socketId: socket.id,
+                playerId: data.playerId,
             };
             onlinePlayers.set(socket.id, player);
             // Broadcast updated player list
@@ -76,14 +76,14 @@ function setupSocketIO(server) {
             const room = gameRooms.get(roomId);
             if (!room)
                 return;
-            room.players = room.players.filter(p => p.odersocketId !== socket.id);
+            room.players = room.players.filter(p => p.socketId !== socket.id);
             socket.leave(roomId);
             if (room.players.length === 0) {
                 gameRooms.delete(roomId);
             }
             else if (room.host === socket.id) {
                 // Transfer host to next player
-                room.host = room.players[0].odersocketId;
+                room.host = room.players[0].socketId;
             }
             io.to(roomId).emit('room:updated', room);
             io.emit('rooms:list', Array.from(gameRooms.values()).filter(r => !r.settings.isPrivate && r.status === 'waiting'));
@@ -101,11 +101,11 @@ function setupSocketIO(server) {
             room.gameState = {
                 currentPlayerIndex: 0,
                 scores: room.players.reduce((acc, p) => {
-                    acc[p.odersocketId] = room.settings.startScore;
+                    acc[p.socketId] = room.settings.startScore;
                     return acc;
                 }, {}),
                 legs: room.players.reduce((acc, p) => {
-                    acc[p.odersocketId] = 0;
+                    acc[p.socketId] = 0;
                     return acc;
                 }, {}),
             };
@@ -118,7 +118,7 @@ function setupSocketIO(server) {
             if (!room || room.status !== 'playing')
                 return;
             const currentPlayer = room.players[room.gameState.currentPlayerIndex];
-            if (currentPlayer.odersocketId !== socket.id)
+            if (currentPlayer.socketId !== socket.id)
                 return;
             // Update score
             const newScore = room.gameState.scores[socket.id] - data.score;
@@ -164,7 +164,7 @@ function setupSocketIO(server) {
             if (!player)
                 return;
             io.to(data.roomId).emit('chat:message', {
-                from: player.odername,
+                from: player.name,
                 message: data.message,
                 timestamp: Date.now(),
             });
@@ -176,14 +176,14 @@ function setupSocketIO(server) {
             onlinePlayers.delete(socket.id);
             // Remove from rooms
             gameRooms.forEach((room, roomId) => {
-                const wasInRoom = room.players.some(p => p.odersocketId === socket.id);
+                const wasInRoom = room.players.some(p => p.socketId === socket.id);
                 if (wasInRoom) {
-                    room.players = room.players.filter(p => p.odersocketId !== socket.id);
+                    room.players = room.players.filter(p => p.socketId !== socket.id);
                     if (room.players.length === 0) {
                         gameRooms.delete(roomId);
                     }
                     else if (room.host === socket.id) {
-                        room.host = room.players[0].odersocketId;
+                        room.host = room.players[0].socketId;
                     }
                     io.to(roomId).emit('room:updated', room);
                     io.to(roomId).emit('player:left', { socketId: socket.id });

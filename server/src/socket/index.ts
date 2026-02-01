@@ -3,10 +3,10 @@ import { Server, Socket } from 'socket.io';
 import { config } from '../config';
 
 interface OnlinePlayer {
-  oderId: string;
-  odername: string;
-  odersocketId: string;
-  oderplayerId?: string;
+  id: string;
+  name: string;
+  socketId: string;
+  playerId?: string;
 }
 
 interface GameRoom {
@@ -44,10 +44,10 @@ export function setupSocketIO(server: HttpServer): Server {
     // Player joins with their info
     socket.on('player:join', (data: { name: string; playerId?: string }) => {
       const player: OnlinePlayer = {
-        oderId: socket.id,
-        odername: data.name,
-        odersocketId: socket.id,
-        oderplayerId: data.playerId,
+        id: socket.id,
+        name: data.name,
+        socketId: socket.id,
+        playerId: data.playerId,
       };
       onlinePlayers.set(socket.id, player);
       
@@ -112,14 +112,14 @@ export function setupSocketIO(server: HttpServer): Server {
       const room = gameRooms.get(roomId);
       if (!room) return;
 
-      room.players = room.players.filter(p => p.odersocketId !== socket.id);
+      room.players = room.players.filter(p => p.socketId !== socket.id);
       socket.leave(roomId);
 
       if (room.players.length === 0) {
         gameRooms.delete(roomId);
       } else if (room.host === socket.id) {
         // Transfer host to next player
-        room.host = room.players[0].odersocketId;
+        room.host = room.players[0].socketId;
       }
 
       io.to(roomId).emit('room:updated', room);
@@ -140,11 +140,11 @@ export function setupSocketIO(server: HttpServer): Server {
       room.gameState = {
         currentPlayerIndex: 0,
         scores: room.players.reduce((acc, p) => {
-          acc[p.odersocketId] = room.settings.startScore;
+          acc[p.socketId] = room.settings.startScore;
           return acc;
         }, {} as Record<string, number>),
         legs: room.players.reduce((acc, p) => {
-          acc[p.odersocketId] = 0;
+          acc[p.socketId] = 0;
           return acc;
         }, {} as Record<string, number>),
       };
@@ -159,7 +159,7 @@ export function setupSocketIO(server: HttpServer): Server {
       if (!room || room.status !== 'playing') return;
 
       const currentPlayer = room.players[room.gameState.currentPlayerIndex];
-      if (currentPlayer.odersocketId !== socket.id) return;
+      if (currentPlayer.socketId !== socket.id) return;
 
       // Update score
       const newScore = room.gameState.scores[socket.id] - data.score;
@@ -207,7 +207,7 @@ export function setupSocketIO(server: HttpServer): Server {
       if (!player) return;
 
       io.to(data.roomId).emit('chat:message', {
-        from: player.odername,
+        from: player.name,
         message: data.message,
         timestamp: Date.now(),
       });
@@ -222,14 +222,14 @@ export function setupSocketIO(server: HttpServer): Server {
       
       // Remove from rooms
       gameRooms.forEach((room, roomId) => {
-        const wasInRoom = room.players.some(p => p.odersocketId === socket.id);
+        const wasInRoom = room.players.some(p => p.socketId === socket.id);
         if (wasInRoom) {
-          room.players = room.players.filter(p => p.odersocketId !== socket.id);
+          room.players = room.players.filter(p => p.socketId !== socket.id);
           
           if (room.players.length === 0) {
             gameRooms.delete(roomId);
           } else if (room.host === socket.id) {
-            room.host = room.players[0].odersocketId;
+            room.host = room.players[0].socketId;
           }
           
           io.to(roomId).emit('room:updated', room);

@@ -746,10 +746,14 @@ const GameScreen: React.FC = () => {
     dispatch({ type: 'PAUSE_MATCH' });
     setShowBackConfirm(false);
 
+    // Reset showSetup state to ensure clean state
+    setShowSetup(true);
+
     // Navigate with a small delay to ensure state updates complete
     setTimeout(() => {
-      navigate('/', { replace: true });
-    }, 100);
+      // Force a clean navigation by using window.location for reliability
+      window.location.href = '/';
+    }, 150);
   };
 
   const handleEndMatch = () => {

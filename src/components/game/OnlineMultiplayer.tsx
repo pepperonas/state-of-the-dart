@@ -12,10 +12,10 @@ import { useAuth } from '../../context/AuthContext';
 import PlayerAvatar from '../player/PlayerAvatar';
 
 interface OnlinePlayer {
-visibleId: string;
-visibleName: string;
-visibleSocketId: string;
-visiblePlayerId?: string;
+  id: string;
+  name: string;
+  socketId: string;
+  playerId?: string;
 }
 
 interface GameRoom {
@@ -224,25 +224,25 @@ const OnlineMultiplayer: React.FC = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
               {currentRoom.players.map((player, idx) => (
                 <div
-                  key={player.visibleSocketId}
+                  key={player.socketId}
                   className={`p-4 rounded-xl text-center ${
-                    player.visibleSocketId === currentRoom.host 
+                    player.socketId === currentRoom.host 
                       ? 'bg-yellow-500/20 ring-2 ring-yellow-500' 
                       : 'bg-dark-800'
                   }`}
                 >
                   <div className="relative inline-block">
                     <div className="w-12 h-12 rounded-full bg-primary-500 flex items-center justify-center text-white text-xl font-bold">
-                      {player.visibleName.charAt(0).toUpperCase()}
+                      {player.name.charAt(0).toUpperCase()}
                     </div>
-                    {player.visibleSocketId === currentRoom.host && (
+                    {player.socketId === currentRoom.host && (
                       <Crown size={16} className="absolute -top-1 -right-1 text-yellow-400" />
                     )}
                   </div>
-                  <p className="text-white font-medium mt-2 text-sm truncate">{player.visibleName}</p>
+                  <p className="text-white font-medium mt-2 text-sm truncate">{player.name}</p>
                   {currentRoom.gameState && (
                     <p className="text-primary-400 text-xl font-bold">
-                      {currentRoom.gameState.scores[player.visibleSocketId]}
+                      {currentRoom.gameState.scores[player.socketId]}
                     </p>
                   )}
                 </div>
