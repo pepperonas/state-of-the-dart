@@ -86,7 +86,9 @@
     "online_multiplayer": "Online Multiplayer",
     "online_multiplayer_desc": "Play against others",
     "guide": "Guide",
-    "guide_desc": "Comprehensive app guide"
+    "guide_desc": "Comprehensive app guide",
+    "contact": "Contact",
+    "contact_desc": "Send us a message"
   },
   "players": {
     "title": "Players",
@@ -297,6 +299,25 @@
     "manage": "Manage",
     "days_left": "days left",
     "trial_days": "Trial days"
+  },
+  "contact": {
+    "title": "Contact",
+    "menu_desc": "Send us a message",
+    "name": "Name",
+    "name_placeholder": "Your name",
+    "email": "Email",
+    "email_placeholder": "your@email.com",
+    "subject": "Subject",
+    "subject_placeholder": "What is it about?",
+    "message": "Message",
+    "message_placeholder": "Your message...",
+    "send": "Send Message",
+    "sending": "Sending...",
+    "success_title": "Message sent!",
+    "success_text": "We'll get back to you as soon as possible.",
+    "error": "Failed to send. Please try again later.",
+    "rate_limit": "Too many requests. Please try again later.",
+    "char_count": "{{count}} / {{max}} characters"
   },
   "resume": {
     "title": "Resume Games",

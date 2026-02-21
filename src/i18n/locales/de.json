@@ -86,7 +86,9 @@
     "online_multiplayer": "Online Multiplayer",
     "online_multiplayer_desc": "Gegen andere spielen",
     "guide": "Anleitung",
-    "guide_desc": "Umfassende Anleitung zur App"
+    "guide_desc": "Umfassende Anleitung zur App",
+    "contact": "Kontakt",
+    "contact_desc": "Schreib uns eine Nachricht"
   },
   "players": {
     "title": "Spieler",
@@ -297,6 +299,25 @@
     "manage": "Verwalten",
     "days_left": "Tage übrig",
     "trial_days": "Tage Testphase"
+  },
+  "contact": {
+    "title": "Kontakt",
+    "menu_desc": "Schreib uns eine Nachricht",
+    "name": "Name",
+    "name_placeholder": "Dein Name",
+    "email": "E-Mail",
+    "email_placeholder": "deine@email.de",
+    "subject": "Betreff",
+    "subject_placeholder": "Worum geht es?",
+    "message": "Nachricht",
+    "message_placeholder": "Deine Nachricht...",
+    "send": "Nachricht senden",
+    "sending": "Wird gesendet...",
+    "success_title": "Nachricht gesendet!",
+    "success_text": "Wir melden uns so schnell wie möglich bei dir.",
+    "error": "Fehler beim Senden. Bitte versuche es später erneut.",
+    "rate_limit": "Zu viele Anfragen. Bitte versuche es später erneut.",
+    "char_count": "{{count}} / {{max}} Zeichen"
   },
   "resume": {
     "title": "Spiele fortsetzen",

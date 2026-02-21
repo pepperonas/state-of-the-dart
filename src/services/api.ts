@@ -390,6 +390,14 @@ export const api = {
         method: 'DELETE',
       }),
   },
+  // Contact
+  contact: {
+    send: (data: { name: string; email: string; subject: string; message: string }) =>
+      apiClient('/api/contact', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+  },
 };
 
 export default api;

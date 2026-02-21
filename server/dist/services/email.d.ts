@@ -15,5 +15,9 @@ export declare const emailService: {
      * Send trial expiry reminder
      */
     sendTrialExpiryReminder(email: string, name: string, daysLeft: number): Promise<void>;
+    /**
+     * Send contact form email to support
+     */
+    sendContactEmail(name: string, email: string, subject: string, message: string): Promise<void>;
 };
 //# sourceMappingURL=email.d.ts.map

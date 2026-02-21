@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, Crown, Zap, Clock, XCircle, Shield, Trash2, UserMinus, UserPlus, AlertCircle, Eye, Edit, CheckCircle, Copy } from 'lucide-react';
+import { ArrowLeft, Users, Crown, Zap, Clock, XCircle, Shield, Trash2, UserMinus, UserPlus, AlertCircle, Eye, Edit, CheckCircle, Copy, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
@@ -48,6 +48,7 @@ const AdminPanel: React.FC = () => {
   const [bugSeverityFilter, setBugSeverityFilter] = useState<string>('all');
   const [selectedBugReport, setSelectedBugReport] = useState<BugReport | null>(null);
   const [bugLoading, setBugLoading] = useState(false);
+  const [bugReportsOpen, setBugReportsOpen] = useState(false);
 
   // Subscription Edit Modal
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
@@ -532,10 +533,21 @@ const AdminPanel: React.FC = () => {
           transition={{ delay: 0.3 }}
           className="glass-card rounded-2xl p-6 mt-8"
         >
-          <div className="flex items-center gap-3 mb-6">
-            <AlertCircle className="text-warning-400" size={28} />
-            <h2 className="text-2xl font-bold text-white">Bug Reports</h2>
-          </div>
+          <button
+            onClick={() => setBugReportsOpen(!bugReportsOpen)}
+            className="w-full flex items-center justify-between"
+          >
+            <div className="flex items-center gap-3">
+              <AlertCircle className="text-warning-400" size={28} />
+              <h2 className="text-2xl font-bold text-white">Bug Reports</h2>
+              {bugReports.length > 0 && (
+                <span className="text-sm bg-dark-700 text-dark-300 px-2.5 py-0.5 rounded-full">{bugReports.length}</span>
+              )}
+            </div>
+            <ChevronDown size={24} className={`text-dark-400 transform transition-transform ${bugReportsOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {bugReportsOpen && <div className="mt-6">
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -728,6 +740,7 @@ const AdminPanel: React.FC = () => {
               </table>
             </div>
           )}
+          </div>}
         </motion.div>
 
         {/* Subscription Edit Modal */}

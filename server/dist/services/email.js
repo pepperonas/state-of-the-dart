@@ -255,5 +255,57 @@ exports.emailService = {
         await transporter.sendMail(mailOptions);
         console.log(`✅ Trial expiry reminder sent to ${email}`);
     },
+    /**
+     * Send contact form email to support
+     */
+    async sendContactEmail(name, email, subject, message) {
+        const mailOptions = {
+            from: config_1.config.smtp.from,
+            to: 'support@celox.io',
+            replyTo: email,
+            subject: `📬 Kontaktformular: ${subject}`,
+            html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #0ea5e9 0%, #a855f7 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
+            .field { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #0ea5e9; }
+            .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>📬 Neue Kontaktanfrage</h1>
+            </div>
+            <div class="content">
+              <div class="field">
+                <strong>Name:</strong><br>${name}
+              </div>
+              <div class="field">
+                <strong>E-Mail:</strong><br><a href="mailto:${email}">${email}</a>
+              </div>
+              <div class="field">
+                <strong>Betreff:</strong><br>${subject}
+              </div>
+              <div class="field">
+                <strong>Nachricht:</strong><br>${message.replace(/\n/g, '<br>')}
+              </div>
+            </div>
+            <div class="footer">
+              <p>Gesendet über das Kontaktformular von stateofthedart.com</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+        };
+        await transporter.sendMail(mailOptions);
+        console.log(`✅ Contact email sent from ${email}`);
+    },
 };
 //# sourceMappingURL=email.js.map

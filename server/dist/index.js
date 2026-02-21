@@ -116,6 +116,7 @@ const leaderboard_1 = __importDefault(require("./routes/leaderboard"));
 const admin_1 = __importDefault(require("./routes/admin"));
 const settings_1 = __importDefault(require("./routes/settings"));
 const bugReports_1 = __importDefault(require("./routes/bugReports"));
+const contact_1 = __importDefault(require("./routes/contact"));
 // API Routes
 app.get('/api', (req, res) => {
     res.json({
@@ -146,6 +147,7 @@ app.use('/api/leaderboard', leaderboard_1.default);
 app.use('/api/admin', admin_1.default);
 app.use('/api/settings', settings_1.default);
 app.use('/api/bug-reports', bugReports_1.default);
+app.use('/api/contact', contact_1.default);
 // Google OAuth routes
 app.get('/api/auth/google', passport_1.default.authenticate('google', { scope: ['profile', 'email'] }));
 app.get('/api/auth/google/callback', (req, res, next) => {

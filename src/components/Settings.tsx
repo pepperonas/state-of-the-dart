@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Moon, Sun, Volume2, Bell, Globe, LogOut, User, Play, Download, Upload, Smartphone, Palette, Check, Sparkles, AlertCircle, X } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, Volume2, Bell, Globe, LogOut, User, Play, Download, Upload, Smartphone, Palette, Check, Sparkles, AlertCircle, X, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useSettings } from '../context/SettingsContext';
 import { useTenant } from '../context/TenantContext';
@@ -39,6 +39,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
   const [showBugReportModal, setShowBugReportModal] = useState(false);
   const [isLoadingReports, setIsLoadingReports] = useState(false);
   const [selectedBugReport, setSelectedBugReport] = useState<BugReport | null>(null);
+  const [bugReportsOpen, setBugReportsOpen] = useState(false);
 
   // Load bug reports
   useEffect(() => {
@@ -503,11 +504,21 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
 
             {/* Bug Reports */}
             <div className="pb-6 border-b border-dark-700">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-white">
-                <AlertCircle size={20} />
-                {t('settings.bug_reports')}
-              </h3>
+              <button
+                onClick={() => setBugReportsOpen(!bugReportsOpen)}
+                className="w-full text-lg font-semibold flex items-center justify-between text-white hover:text-primary-400 transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <AlertCircle size={20} />
+                  {t('settings.bug_reports')}
+                  {bugReports.length > 0 && (
+                    <span className="text-xs bg-dark-700 text-dark-300 px-2 py-0.5 rounded-full">{bugReports.length}</span>
+                  )}
+                </span>
+                <ChevronDown size={20} className={`transform transition-transform ${bugReportsOpen ? 'rotate-180' : ''}`} />
+              </button>
 
+              {bugReportsOpen && <div className="mt-4">
               {isLoadingReports ? (
                 <div className="text-center py-8 text-gray-400">
                   {t('settings.loading_reports')}
@@ -573,6 +584,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 <AlertCircle size={20} className="drop-shadow" />
                 {t('settings.report_new_bug')}
               </button>
+              </div>}
             </div>
 
             {/* Profile */}

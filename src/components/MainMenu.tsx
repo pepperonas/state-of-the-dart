@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Target, Users, TrendingUp, Trophy, Award, Dumbbell, Settings, Play, LogOut, Medal, Shield, BookOpen, RotateCcw } from 'lucide-react';
+import { Target, Users, TrendingUp, Trophy, Award, Dumbbell, Settings, Play, LogOut, Medal, Shield, BookOpen, RotateCcw, Mail } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTenant } from '../context/TenantContext';
 import { useAuth } from '../context/AuthContext';
@@ -9,6 +9,7 @@ import { api } from '../services/api';
 import UserMenu from './auth/UserMenu';
 import SyncStatus from './sync/SyncStatus';
 import UserGuideModal from './guide/UserGuideModal';
+import ContactModal from './contact/ContactModal';
 
 const MainMenu: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -28,6 +29,7 @@ const MainMenu: React.FC = () => {
   }, []);
 
   const [showGuideModal, setShowGuideModal] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
 
   const menuItems = [
     {
@@ -145,6 +147,13 @@ const MainMenu: React.FC = () => {
       onClick: () => setShowGuideModal(true),
       gradient: 'from-blue-500 to-blue-600',
     },
+    {
+      title: t('menu.contact'),
+      icon: Mail,
+      description: t('menu.contact_desc'),
+      onClick: () => setShowContactModal(true),
+      gradient: 'from-teal-500 to-teal-600',
+    },
   ];
 
   // Add Admin Panel button only if user is admin
@@ -226,6 +235,10 @@ const MainMenu: React.FC = () => {
 
       {showGuideModal && (
         <UserGuideModal onClose={() => setShowGuideModal(false)} />
+      )}
+
+      {showContactModal && (
+        <ContactModal onClose={() => setShowContactModal(false)} />
       )}
     </div>
   );
