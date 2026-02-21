@@ -9,7 +9,7 @@
 **Professionelles Dart-Zählsystem** - Eine funktionsreiche, webbasierte Dart-Scoring-Anwendung mit Multi-User-Support, professionellem Statistik-Tracking und Live-Deployment.
 
 [![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green)](https://stateofthedart.com)
-![Version](https://img.shields.io/badge/Version-0.5.2-blue)
+![Version](https://img.shields.io/badge/Version-0.5.3-blue)
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -571,7 +571,7 @@ Siehe [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) für Details.
 
 ## 🔢 Versionierung
 
-- **Aktuell**: v0.5.2
+- **Aktuell**: v0.5.3
 - **Schema**: MAJOR.MINOR.PATCH
 - **Auto-Increment**: `npm run version:bump`
 
@@ -646,6 +646,17 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.5.3 (21. Februar 2026) - Rechtliche Seiten & Bug Fixes
+
+#### ✨ Neue Features
+- **Impressum** - Rechtlich konformes Impressum nach §5 TMG als In-App-Seite
+- **Datenschutzerklärung** - DSGVO-konforme Datenschutzerklärung mit allen Pflichtangaben
+- **Nutzungsbedingungen** - Vollständige AGB mit Widerrufsrecht, Haftung, Zahlungsbedingungen
+- Footer-Links verweisen jetzt auf die eigenen In-App-Seiten statt auf celox.io
+
+#### 🐛 Bug Fixes
+- **Quick Match Refresh-Bug behoben** - Seite neu laden auf `/game` setzte fälschlicherweise ein pausiertes Spiel fort. Jetzt wird korrekt die Spielerauswahl angezeigt.
 
 ### v0.5.2 (21. Februar 2026) - Spieler-Statistiken zurücksetzen
 
@@ -818,7 +829,7 @@ Siehe [CHANGELOG.md](CHANGELOG.md) für eine vollständige Liste der Änderungen
 
 <div align="center">
   <p>Made with ❤️ and 🎯 by Martin Pfeffer</p>
-  <p>© 2026 celox.io | Version 0.5.2</p>
+  <p>© 2026 celox.io | Version 0.5.3</p>
   <p>
     <a href="https://stateofthedart.com">🌐 Live Demo</a> •
     <a href="https://github.com/pepperonas/state-of-the-dart">📦 GitHub</a> •

@@ -72,6 +72,11 @@ const Dashboard = lazyWithRetry(() => import('./components/dashboard/Dashboard')
 const AdminPanel = lazyWithRetry(() => import('./components/admin/AdminPanel'));
 const ResumeGameScreen = lazyWithRetry(() => import('./components/game/ResumeGameScreen'));
 
+// Legal pages
+const Impressum = lazyWithRetry(() => import('./components/legal/Impressum'));
+const Datenschutz = lazyWithRetry(() => import('./components/legal/Datenschutz'));
+const Nutzungsbedingungen = lazyWithRetry(() => import('./components/legal/Nutzungsbedingungen'));
+
 // Loading component
 const LoadingScreen = () => (
   <div className="min-h-screen flex items-center justify-center gradient-mesh">
@@ -148,7 +153,12 @@ function AppContent() {
                       <Route path="/verify-email" element={<VerifyEmail />} />
                       <Route path="/resend-verification" element={<ResendVerification />} />
                       <Route path="/auth/callback" element={<AuthCallback />} />
-                      
+
+                      {/* Public Legal Pages */}
+                      <Route path="/impressum" element={<Impressum />} />
+                      <Route path="/datenschutz" element={<Datenschutz />} />
+                      <Route path="/nutzungsbedingungen" element={<Nutzungsbedingungen />} />
+
                       {/* Pricing (accessible to authenticated users) */}
                       <Route path="/pricing" element={
                         <ProtectedRoute requireSubscription={false}>

@@ -32,6 +32,7 @@ const GameScreen: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const forceNewGameRef = useRef(searchParams.get('new') === '1');
+  const resumeRequestedRef = useRef(searchParams.get('resume') === '1');
   const { state, dispatch, pauseCurrentMatch } = useGame();
   const { players, addPlayer, updatePlayerHeatmap } = usePlayer();
   const { settings } = useSettings();
@@ -213,11 +214,14 @@ const GameScreen: React.FC = () => {
       }
     }
   }, [state.currentMatch?.status, state.currentMatch?.winner, state.currentMatch?.id, checkMatchAchievements, checkLegAchievements, processedMatchIds, storage]);
-  const [showSetup, setShowSetup] = useState(!state.currentMatch || forceNewGameRef.current);
+  const [showSetup, setShowSetup] = useState(
+    !state.currentMatch || forceNewGameRef.current ||
+    (state.currentMatch?.status === 'paused' && !resumeRequestedRef.current)
+  );
 
-  // Clear ?new=1 from URL after consuming it
+  // Clear ?new=1 or ?resume=1 from URL after consuming it
   useEffect(() => {
-    if (forceNewGameRef.current) {
+    if (forceNewGameRef.current || resumeRequestedRef.current) {
       setSearchParams({}, { replace: true });
     }
   }, []);
@@ -483,10 +487,17 @@ const GameScreen: React.FC = () => {
       return;
     }
 
-    // Auto-resume paused matches (only when returning to game screen)
-    if (state.currentMatch?.status === 'paused') {
+    // Auto-resume paused matches only when explicitly requested via ?resume=1
+    if (state.currentMatch?.status === 'paused' && resumeRequestedRef.current) {
+      resumeRequestedRef.current = false;
       dispatch({ type: 'RESUME_MATCH' });
       setShowSetup(false);
+      return;
+    }
+
+    // If there's a paused match but no explicit resume request, show setup
+    if (state.currentMatch?.status === 'paused' && !resumeRequestedRef.current) {
+      setShowSetup(true);
       return;
     }
 

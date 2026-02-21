@@ -60,7 +60,7 @@ const ResumeGameScreen: React.FC = () => {
       const match = reconstructMatch(fullMatch);
       loadMatchFromDb(matchId);
       dispatch({ type: 'LOAD_MATCH', payload: match });
-      navigate('/game');
+      navigate('/game?resume=1');
     } catch {
       setLoadingMatchId(null);
     }
