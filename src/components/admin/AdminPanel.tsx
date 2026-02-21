@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, Crown, Zap, Clock, XCircle, Shield, Trash2, UserMinus, UserPlus, AlertCircle, Eye, Edit, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Users, Crown, Zap, Clock, XCircle, Shield, Trash2, UserMinus, UserPlus, AlertCircle, Eye, Edit, CheckCircle, Copy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
@@ -693,6 +693,25 @@ const AdminPanel: React.FC = () => {
                               title="View Details"
                             >
                               <Eye size={16} />
+                            </button>
+                            <button
+                              onClick={() => {
+                                const text = [
+                                  `Bug Report: ${report.title}`,
+                                  `Status: ${report.status.replace('_', ' ').toUpperCase()}`,
+                                  `Severity: ${report.severity.toUpperCase()}`,
+                                  `Category: ${report.category}`,
+                                  `Reporter: ${report.userName} (${report.userEmail})`,
+                                  `Date: ${new Date(report.createdAt).toLocaleDateString()}`,
+                                  `Description: ${report.description}`,
+                                  report.adminNotes ? `Admin Notes: ${report.adminNotes}` : '',
+                                ].filter(Boolean).join('\n');
+                                navigator.clipboard.writeText(text);
+                              }}
+                              className="p-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-lg transition-colors"
+                              title="Copy to clipboard"
+                            >
+                              <Copy size={16} />
                             </button>
                             <button
                               onClick={() => handleDeleteBugReport(report.id)}
