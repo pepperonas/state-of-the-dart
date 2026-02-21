@@ -9,6 +9,7 @@ interface ScoreInputProps {
   onRemoveDart: () => void;
   onClearThrow: () => void;
   onConfirm: () => void;
+  onReplaceDart?: (index: number, dart: Dart) => void;
   remaining: number;
 }
 
@@ -18,18 +19,20 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   onRemoveDart,
   onClearThrow,
   onConfirm,
+  onReplaceDart,
   remaining,
 }) => {
   const [currentInput, setCurrentInput] = useState('');
   const [inputMode, setInputMode] = useState<'quick' | 'numpad'>('numpad');
+  const [editingDartIndex, setEditingDartIndex] = useState<number | null>(null);
   
   const currentScore = calculateThrowScore(currentThrow);
   
   // Keyboard support
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      // Don't capture if user is typing in an input field
-      if (e.target instanceof HTMLInputElement) return;
+      // Don't capture if user is typing in an input field or textarea
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return;
       
       if (e.key >= '0' && e.key <= '9') {
         handleNumpadClick(e.key);
@@ -86,8 +89,19 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   };
   
   const addScore = (score: number) => {
+    // If editing a specific dart, replace it
+    if (editingDartIndex !== null && onReplaceDart) {
+      const darts = convertScoreToDarts(score);
+      if (darts.length > 0) {
+        onReplaceDart(editingDartIndex, darts[0]);
+      }
+      setEditingDartIndex(null);
+      setCurrentInput('');
+      return;
+    }
+
     if (currentThrow.length >= 3) return;
-    
+
     // Convert score to plausible darts
     const darts = convertScoreToDarts(score);
     // Add darts one by one, respecting the 3-dart limit
@@ -117,9 +131,16 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
         {[0, 1, 2].map((index) => (
           <div
             key={index}
+            onClick={() => {
+              if (currentThrow[index] && onReplaceDart) {
+                setEditingDartIndex(editingDartIndex === index ? null : index);
+              }
+            }}
             className={`flex-1 h-16 rounded-lg border-2 flex items-center justify-center transition-all ${
-              currentThrow[index]
-                ? 'border-primary-500 bg-primary-500/10'
+              editingDartIndex === index
+                ? 'border-accent-500 bg-accent-500/20 ring-2 ring-accent-500/50'
+                : currentThrow[index]
+                ? 'border-primary-500 bg-primary-500/10 cursor-pointer hover:bg-primary-500/20'
                 : 'border-dark-700 bg-dark-900/50'
             }`}
           >

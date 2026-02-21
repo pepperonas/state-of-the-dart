@@ -235,8 +235,9 @@ CREATE TABLE IF NOT EXISTS player_achievements (
   id TEXT PRIMARY KEY,
   player_id TEXT NOT NULL,
   achievement_id TEXT NOT NULL,
-  unlocked_at INTEGER NOT NULL,
+  unlocked_at INTEGER,
   progress REAL,
+  game_id TEXT,
   FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE,
   FOREIGN KEY (achievement_id) REFERENCES achievements(id) ON DELETE CASCADE,
   UNIQUE(player_id, achievement_id)

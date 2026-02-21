@@ -22,6 +22,7 @@ import PlayerAvatar from '../player/PlayerAvatar';
 import EmojiPicker from '../player/EmojiPicker';
 import { Dart, Player, GameType, MatchSettings, Throw, HeatmapData } from '../../types/index';
 import { calculateThrowScore } from '../../utils/scoring';
+import { getCheckoutAlternatives } from '../../data/checkoutTable';
 import { PersonalBests, createEmptyPersonalBests, updatePersonalBests } from '../../types/personalBests';
 import audioSystem from '../../utils/audio';
 import { createAdaptiveBotPlayer, getAdaptiveBotConfigs, generateBotTurn, AdaptiveBotCategory } from '../../utils/botLogic';
@@ -33,7 +34,7 @@ const GameScreen: React.FC = () => {
   const { players, addPlayer, updatePlayerHeatmap } = usePlayer();
   const { settings } = useSettings();
   const { storage } = useTenant();
-  const { checkMatchAchievements, checkLegAchievements } = useGameAchievements();
+  const { checkMatchAchievements, checkLegAchievements, checkThrowAchievements } = useGameAchievements();
   
   // Track achievement hints
   const [dismissedHints, setDismissedHints] = useState<Set<string>>(new Set());
@@ -133,6 +134,14 @@ const GameScreen: React.FC = () => {
       }
     }
 
+    // Check leg achievements for the completed leg
+    if (lastLegIndexRef.current !== null && lastLegIndexRef.current < currentLegIndex) {
+      const completedLeg = state.currentMatch?.legs[lastLegIndexRef.current];
+      if (completedLeg?.winner && state.currentMatch) {
+        checkLegAchievements(completedLeg, state.currentMatch, completedLeg.winner);
+      }
+    }
+
     lastLegIndexRef.current = currentLegIndex;
   }, [state.currentMatch?.currentLegIndex]);
 
@@ -214,6 +223,8 @@ const GameScreen: React.FC = () => {
   const [showMatchStats, setShowMatchStats] = useState(false);
   const [showLiveHeatmap, setShowLiveHeatmap] = useState(false);
   const [selectedHeatmapPlayer, setSelectedHeatmapPlayer] = useState<string | null>(null);
+  const [heatmapView, setHeatmapView] = useState<'leg' | 'match'>('match');
+  const [statsView, setStatsView] = useState<'leg' | 'match'>('match');
   const [showBugReportModal, setShowBugReportModal] = useState(false);
   const [undoPreviewThrows, setUndoPreviewThrows] = useState<Throw[] | null>(null);
 
@@ -255,11 +266,13 @@ const GameScreen: React.FC = () => {
   // Calculate live heatmap data from current match throws
   const liveHeatmapData = useMemo((): Record<string, HeatmapData> => {
     if (!state.currentMatch) return {};
-    
+
     const heatmaps: Record<string, HeatmapData> = {};
-    
-    // Collect all throws from all legs
-    const allThrows: Throw[] = state.currentMatch.legs.flatMap(leg => leg.throws || []);
+
+    // Collect throws based on view mode
+    const allThrows: Throw[] = heatmapView === 'leg'
+      ? (state.currentMatch.legs[state.currentMatch.currentLegIndex]?.throws || [])
+      : state.currentMatch.legs.flatMap(leg => leg.throws || []);
     
     // Group throws by player
     state.currentMatch.players.forEach(player => {
@@ -289,7 +302,7 @@ const GameScreen: React.FC = () => {
     });
     
     return heatmaps;
-  }, [state.currentMatch?.legs, state.currentMatch?.players, totalThrowsCount]);
+  }, [state.currentMatch?.legs, state.currentMatch?.players, totalThrowsCount, heatmapView]);
 
   // Announce "You require X" when player's turn STARTS and they can checkout
   useEffect(() => {
@@ -601,6 +614,27 @@ const GameScreen: React.FC = () => {
     }
 
     dispatch({ type: 'CONFIRM_THROW' });
+
+    // Check throw achievements (180s, checkouts, etc.)
+    if (currentPlayer) {
+      const isCheckout = currentLeg && (() => {
+        const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
+        const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
+        const startScore = state.currentMatch?.settings.startScore || 501;
+        const remaining = startScore - totalScored;
+        const newRemaining = remaining - currentScore;
+        const requiresDouble = state.currentMatch?.settings.doubleOut || false;
+        const lastDart = state.currentThrow[state.currentThrow.length - 1];
+        return newRemaining === 0 && (!requiresDouble || lastDart?.multiplier === 2);
+      })();
+      checkThrowAchievements(
+        currentPlayer.playerId,
+        currentScore,
+        !!isCheckout,
+        isCheckout ? currentScore : undefined,
+        state.currentMatch?.id
+      );
+    }
 
     // Note: "You require X" is now announced when the player's turn STARTS (not after throwing)
     // This is handled in handleNextPlayer()
@@ -1357,6 +1391,7 @@ const GameScreen: React.FC = () => {
             {state.checkoutSuggestion && (
               <CheckoutSuggestion
                 suggestion={state.checkoutSuggestion}
+                alternatives={getCheckoutAlternatives(remaining, 3 - state.currentThrow.length, state.currentMatch?.settings.doubleOut ?? true)}
                 remaining={remaining}
               />
             )}
@@ -1367,6 +1402,7 @@ const GameScreen: React.FC = () => {
               onRemoveDart={handleRemoveDart}
               onClearThrow={handleClearThrow}
               onConfirm={handleConfirmThrow}
+              onReplaceDart={(index, dart) => dispatch({ type: 'REPLACE_DART', payload: { index, dart } })}
               remaining={remaining}
             />
           </div>
@@ -1434,8 +1470,30 @@ const GameScreen: React.FC = () => {
 
           {showThrowHistory && (
             <div className="glass-card rounded-xl p-6 mt-2 animate-fade-in">
+              {/* Leg/Match Toggle */}
+              <div className="flex gap-2 mb-4">
+                <button
+                  onClick={() => setStatsView('leg')}
+                  className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-all ${
+                    statsView === 'leg' ? 'bg-primary-500 text-white' : 'bg-dark-800 text-dark-400 hover:bg-dark-700'
+                  }`}
+                >
+                  Aktuelles Leg
+                </button>
+                <button
+                  onClick={() => setStatsView('match')}
+                  className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-all ${
+                    statsView === 'match' ? 'bg-primary-500 text-white' : 'bg-dark-800 text-dark-400 hover:bg-dark-700'
+                  }`}
+                >
+                  Gesamtes Spiel
+                </button>
+              </div>
               {state.currentMatch.players.map((player) => {
-                const playerThrows = currentLeg.throws.filter(t => t.playerId === player.playerId);
+                const allPlayerThrowsView = statsView === 'leg'
+                  ? currentLeg.throws.filter(t => t.playerId === player.playerId)
+                  : state.currentMatch!.legs.flatMap(l => l.throws.filter(t => t.playerId === player.playerId));
+                const playerThrows = allPlayerThrowsView;
 
                 return (
                   <div key={player.playerId} className="mb-6 last:mb-0">
@@ -1530,8 +1588,31 @@ const GameScreen: React.FC = () => {
             {showThrowChart ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
           </button>
 
-          {showThrowChart && (
+          {showThrowChart && (() => {
+            const chartThrows = statsView === 'leg'
+              ? currentLeg.throws
+              : state.currentMatch.legs.flatMap(l => l.throws);
+            return (
             <div className="glass-card rounded-xl p-6 mt-2 animate-fade-in">
+              {/* Leg/Match Toggle */}
+              <div className="flex gap-2 mb-4">
+                <button
+                  onClick={() => setStatsView('leg')}
+                  className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-all ${
+                    statsView === 'leg' ? 'bg-primary-500 text-white' : 'bg-dark-800 text-dark-400 hover:bg-dark-700'
+                  }`}
+                >
+                  Aktuelles Leg
+                </button>
+                <button
+                  onClick={() => setStatsView('match')}
+                  className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-all ${
+                    statsView === 'match' ? 'bg-primary-500 text-white' : 'bg-dark-800 text-dark-400 hover:bg-dark-700'
+                  }`}
+                >
+                  Gesamtes Spiel
+                </button>
+              </div>
               {/* Score Chart */}
               <div className="mb-8">
                 <h4 className="text-white font-bold mb-4">Geworfene Punkte pro Aufnahme</h4>
@@ -1540,7 +1621,7 @@ const GameScreen: React.FC = () => {
                     // Build chart data
                     const maxThrows = Math.max(
                       ...state.currentMatch.players.map(p =>
-                        currentLeg.throws.filter(t => t.playerId === p.playerId).length
+                        chartThrows.filter(t => t.playerId === p.playerId).length
                       )
                     );
 
@@ -1549,7 +1630,7 @@ const GameScreen: React.FC = () => {
                       const dataPoint: any = { throwNumber: i + 1 };
 
                       state.currentMatch.players.forEach(player => {
-                        const playerThrows = currentLeg.throws.filter(t => t.playerId === player.playerId);
+                        const playerThrows = chartThrows.filter(t => t.playerId === player.playerId);
                         const throwData = playerThrows[i];
                         dataPoint[player.name] = throwData ? throwData.score : null;
                       });
@@ -1605,7 +1686,7 @@ const GameScreen: React.FC = () => {
                     // Build remaining chart data
                     const maxThrows = Math.max(
                       ...state.currentMatch.players.map(p =>
-                        currentLeg.throws.filter(t => t.playerId === p.playerId).length
+                        chartThrows.filter(t => t.playerId === p.playerId).length
                       )
                     );
 
@@ -1614,7 +1695,7 @@ const GameScreen: React.FC = () => {
                       const dataPoint: any = { throwNumber: i + 1 };
 
                       state.currentMatch.players.forEach(player => {
-                        const playerThrows = currentLeg.throws.filter(t => t.playerId === player.playerId);
+                        const playerThrows = chartThrows.filter(t => t.playerId === player.playerId);
                         const throwData = playerThrows[i];
                         dataPoint[player.name] = throwData ? throwData.remaining : null;
                       });
@@ -1663,7 +1744,8 @@ const GameScreen: React.FC = () => {
                 </ResponsiveContainer>
               </div>
             </div>
-          )}
+            );
+          })()}
         </div>
 
         {/* Live Heatmap - Collapsable */}
@@ -1681,6 +1763,25 @@ const GameScreen: React.FC = () => {
 
           {showLiveHeatmap && (
             <div className="glass-card rounded-xl p-6 mt-2 animate-fade-in">
+              {/* Leg/Match Toggle */}
+              <div className="flex gap-2 mb-4">
+                <button
+                  onClick={() => setHeatmapView('leg')}
+                  className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-all ${
+                    heatmapView === 'leg' ? 'bg-primary-500 text-white' : 'bg-dark-800 text-dark-400 hover:bg-dark-700'
+                  }`}
+                >
+                  Aktuelles Leg
+                </button>
+                <button
+                  onClick={() => setHeatmapView('match')}
+                  className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-all ${
+                    heatmapView === 'match' ? 'bg-primary-500 text-white' : 'bg-dark-800 text-dark-400 hover:bg-dark-700'
+                  }`}
+                >
+                  Gesamtes Spiel
+                </button>
+              </div>
               {/* Player Selector */}
               {state.currentMatch.players.length > 1 && (
                 <div className="mb-6">
@@ -1826,16 +1927,18 @@ const GameScreen: React.FC = () => {
 
       {/* Back to Menu Confirmation Dialog */}
       {showBackConfirm && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={(e) => e.stopPropagation()}>
           <div className="glass-card rounded-2xl p-6 max-w-md w-full">
-            <h3 className="text-xl font-bold text-white mb-4">⏸️ Match pausieren?</h3>
+            <h3 className="text-xl font-bold text-white mb-4">Match verlassen?</h3>
+            <p className="text-gray-300 mb-2">
+              <strong className="text-primary-400">Pausieren & Verlassen:</strong> Dein Match wird gespeichert und kann jederzeit aus dem Hauptmenü fortgesetzt werden.
+            </p>
             <p className="text-gray-300 mb-6">
-              Das Match wird gespeichert und kann später fortgesetzt werden.
+              <strong className="text-gray-400">Abbrechen:</strong> Zurück zum laufenden Spiel.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => {
-                  console.log('❌ Abbrechen clicked');
                   setShowBackConfirm(false);
                 }}
                 className="flex-1 px-4 py-3 bg-dark-700 hover:bg-dark-600 text-white rounded-xl font-semibold transition-all"
@@ -1844,12 +1947,11 @@ const GameScreen: React.FC = () => {
               </button>
               <button
                 onClick={() => {
-                  console.log('✅ Pausieren clicked');
                   confirmBackToMenu();
                 }}
                 className="flex-1 px-4 py-3 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-semibold transition-all"
               >
-                Pausieren
+                Pausieren & Verlassen
               </button>
             </div>
           </div>

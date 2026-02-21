@@ -73,6 +73,16 @@ class Logger {
       console.log(`🔄 ${message}`, ...args);
     }
   }
+
+  userAction(action: string, details?: Record<string, unknown>): void {
+    if (this.shouldLog('info')) {
+      console.log(`👤 [${action}]`, JSON.stringify({
+        timestamp: new Date().toISOString(),
+        action,
+        ...details,
+      }));
+    }
+  }
 }
 
 // Export singleton instance

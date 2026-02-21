@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
-const morgan_1 = __importDefault(require("morgan"));
 const compression_1 = __importDefault(require("compression"));
 const express_session_1 = __importDefault(require("express-session"));
 const passport_1 = __importDefault(require("./config/passport"));
@@ -14,10 +13,14 @@ const http_1 = require("http");
 const config_1 = require("./config");
 const database_1 = require("./database");
 const socket_1 = require("./socket");
+const logger_1 = __importDefault(require("./utils/logger"));
+const requestId_1 = require("./middleware/requestId");
 // Initialize Express app
 const app = (0, express_1.default)();
 // Trust proxy - required when behind Nginx
 app.set('trust proxy', true);
+// Request ID for tracing
+app.use(requestId_1.requestIdMiddleware);
 // Initialize database
 (0, database_1.initDatabase)();
 // Security middleware
@@ -53,13 +56,29 @@ app.use(passport_1.default.initialize());
 app.use(passport_1.default.session());
 // Compression
 app.use((0, compression_1.default)());
-// Logging
-if (config_1.config.nodeEnv === 'development') {
-    app.use((0, morgan_1.default)('dev'));
-}
-else {
-    app.use((0, morgan_1.default)('combined'));
-}
+// HTTP Request Logging via Winston
+app.use((req, res, next) => {
+    const start = Date.now();
+    res.on('finish', () => {
+        const duration = Date.now() - start;
+        const logData = {
+            requestId: req.requestId,
+            method: req.method,
+            url: req.originalUrl,
+            status: res.statusCode,
+            duration: `${duration}ms`,
+            ip: req.ip,
+            userAgent: req.get('user-agent'),
+        };
+        if (res.statusCode >= 400) {
+            logger_1.default.warn('HTTP Request', logData);
+        }
+        else {
+            logger_1.default.info('HTTP Request', logData);
+        }
+    });
+    next();
+});
 // Rate limiting - disabled for now, using Nginx rate limiting instead
 // The express-rate-limit was causing issues with normal app usage
 // TODO: Re-enable with proper configuration if needed

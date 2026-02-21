@@ -747,13 +747,29 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               )}
             </div>
 
-            {/* Close Button */}
-            <div className="mt-6">
+            {/* Action Buttons */}
+            <div className="mt-6 flex gap-3">
               <button
                 onClick={() => setSelectedBugReport(null)}
-                className="w-full py-3 px-4 bg-dark-700 hover:bg-dark-600 rounded-lg text-white font-semibold transition-colors"
+                className="flex-1 py-3 px-4 bg-dark-700 hover:bg-dark-600 rounded-lg text-white font-semibold transition-colors"
               >
                 {t('common.close')}
+              </button>
+              <button
+                onClick={async () => {
+                  if (confirm('Bug Report wirklich löschen?')) {
+                    try {
+                      await api.bugReports.delete(selectedBugReport.id);
+                      setBugReports(prev => prev.filter(r => r.id !== selectedBugReport.id));
+                      setSelectedBugReport(null);
+                    } catch (err) {
+                      console.error('Failed to delete bug report:', err);
+                    }
+                  }
+                }}
+                className="py-3 px-4 bg-red-600/20 hover:bg-red-600/40 border border-red-500/30 rounded-lg text-red-400 font-semibold transition-colors"
+              >
+                Löschen
               </button>
             </div>
           </div>

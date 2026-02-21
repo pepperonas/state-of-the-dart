@@ -18,7 +18,23 @@ export async function captureScreenshot(): Promise<string | null> {
       backgroundColor: '#0a0e1a',
     });
 
-    return canvas.toDataURL('image/png');
+    // Compress: resize to max 1280px width and use JPEG at 0.7 quality
+    const maxWidth = 1280;
+    let outputCanvas = canvas;
+
+    if (canvas.width > maxWidth) {
+      const scale = maxWidth / canvas.width;
+      const resizedCanvas = document.createElement('canvas');
+      resizedCanvas.width = maxWidth;
+      resizedCanvas.height = Math.round(canvas.height * scale);
+      const ctx = resizedCanvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(canvas, 0, 0, resizedCanvas.width, resizedCanvas.height);
+        outputCanvas = resizedCanvas;
+      }
+    }
+
+    return outputCanvas.toDataURL('image/jpeg', 0.7);
   } catch (error) {
     console.error('Screenshot capture failed:', error);
     return null;

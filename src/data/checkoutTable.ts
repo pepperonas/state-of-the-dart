@@ -5,7 +5,10 @@ export const checkoutTable: CheckoutTable = {
   167: [{ score: 167, darts: ['T20', 'T19', 'Bull'], preferred: true }],
   164: [{ score: 164, darts: ['T20', 'T18', 'Bull'], preferred: true }],
   161: [{ score: 161, darts: ['T20', 'T17', 'Bull'], preferred: true }],
-  160: [{ score: 160, darts: ['T20', 'T20', 'D20'], preferred: true }],
+  160: [
+    { score: 160, darts: ['T20', 'T20', 'D20'], preferred: true },
+    { score: 160, darts: ['T20', 'Bull', 'Bull'] },
+  ],
   158: [{ score: 158, darts: ['T20', 'T20', 'D19'], preferred: true }],
   157: [{ score: 157, darts: ['T20', 'T19', 'D20'], preferred: true }],
   156: [{ score: 156, darts: ['T20', 'T20', 'D18'], preferred: true }],
@@ -13,8 +16,14 @@ export const checkoutTable: CheckoutTable = {
   154: [{ score: 154, darts: ['T20', 'T18', 'D20'], preferred: true }],
   153: [{ score: 153, darts: ['T20', 'T19', 'D18'], preferred: true }],
   152: [{ score: 152, darts: ['T20', 'T20', 'D16'], preferred: true }],
-  151: [{ score: 151, darts: ['T20', 'T17', 'D20'], preferred: true }],
-  150: [{ score: 150, darts: ['T20', 'T18', 'D18'], preferred: true }],
+  151: [
+    { score: 151, darts: ['T20', 'T17', 'D20'], preferred: true },
+    { score: 151, darts: ['T19', 'T18', 'D20'] },
+  ],
+  150: [
+    { score: 150, darts: ['T20', 'T18', 'D18'], preferred: true },
+    { score: 150, darts: ['T20', 'Bull', 'D20'] },
+  ],
   149: [{ score: 149, darts: ['T20', 'T19', 'D16'], preferred: true }],
   148: [{ score: 148, darts: ['T20', 'T16', 'D20'], preferred: true }],
   147: [{ score: 147, darts: ['T20', 'T17', 'D18'], preferred: true }],
@@ -24,7 +33,10 @@ export const checkoutTable: CheckoutTable = {
   143: [{ score: 143, darts: ['T20', 'T17', 'D16'], preferred: true }],
   142: [{ score: 142, darts: ['T20', 'T14', 'D20'], preferred: true }],
   141: [{ score: 141, darts: ['T20', 'T19', 'D12'], preferred: true }],
-  140: [{ score: 140, darts: ['T20', 'T20', 'D10'], preferred: true }],
+  140: [
+    { score: 140, darts: ['T20', 'T20', 'D10'], preferred: true },
+    { score: 140, darts: ['T20', 'T16', 'D16'] },
+  ],
   139: [{ score: 139, darts: ['T19', 'T14', 'D20'], preferred: true }],
   138: [{ score: 138, darts: ['T20', 'T18', 'D12'], preferred: true }],
   137: [{ score: 137, darts: ['T20', 'T15', 'D16'], preferred: true }],
@@ -228,6 +240,18 @@ export const getCheckoutSuggestion = (score: number, dartsRemaining: number = 3,
   }
 
   return preferredRoute.darts.slice(0, dartsRemaining);
+};
+
+export const getCheckoutAlternatives = (score: number, dartsRemaining: number = 3, requireDouble: boolean = true): string[][] => {
+  if (!requireDouble || score > 170 || score < 2) return [];
+
+  const routes = checkoutTable[score];
+  if (!routes || routes.length <= 1) return [];
+
+  // Return all non-preferred routes that fit within dartsRemaining
+  return routes
+    .filter(r => !r.preferred && r.darts.length <= dartsRemaining)
+    .map(r => r.darts.slice(0, dartsRemaining));
 };
 
 export const isCheckoutPossible = (score: number, dartsRemaining: number = 3): boolean => {

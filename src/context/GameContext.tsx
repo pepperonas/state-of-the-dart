@@ -22,6 +22,7 @@ type GameAction =
   | { type: 'ADD_DART'; payload: Dart }
   | { type: 'REMOVE_DART' }
   | { type: 'CLEAR_THROW' }
+  | { type: 'REPLACE_DART'; payload: { index: number; dart: Dart } }
   | { type: 'CONFIRM_THROW' }
   | { type: 'UNDO_THROW' }
   | { type: 'NEXT_PLAYER' }
@@ -44,13 +45,13 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       const match = action.payload;
       const currentLeg = match.legs[match.currentLegIndex];
 
-      // Calculate which player's turn it is based on throw count
-      // In darts, players alternate throws, so we count throws to determine current player
+      // Calculate which player's turn it is based on throw count and leg start player
       const throwsInLeg = currentLeg.throws.length;
       const numPlayers = match.players.length;
+      const legStartPlayer = match.legStartPlayerIndex ?? 0;
 
-      // Each player throws once per "round", so current player = throwsInLeg % numPlayers
-      const currentPlayerIndex = throwsInLeg % numPlayers;
+      // Each player throws once per "round", offset by the leg's starting player
+      const currentPlayerIndex = (legStartPlayer + throwsInLeg) % numPlayers;
 
       const currentPlayer = match.players[currentPlayerIndex];
       const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
@@ -115,10 +116,11 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         }],
         currentLegIndex: 0,
         currentSetIndex: 0,
+        legStartPlayerIndex: 0,
         status: 'in-progress',
         startedAt: new Date(),
       };
-      
+
       return {
         ...state,
         currentMatch: match,
@@ -185,6 +187,33 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       };
     }
     
+    case 'REPLACE_DART': {
+      if (!state.currentMatch || action.payload.index < 0 || action.payload.index >= state.currentThrow.length) return state;
+
+      const replacedThrow = [...state.currentThrow];
+      replacedThrow[action.payload.index] = action.payload.dart;
+
+      const rCurrentPlayer = state.currentMatch.players[state.currentPlayerIndex];
+      const rCurrentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
+      const rPlayerThrows = rCurrentLeg.throws.filter(t => t.playerId === rCurrentPlayer.playerId);
+      const rTotalScored = rPlayerThrows.reduce((sum, t) => sum + t.score, 0);
+      const rThrowScore = calculateThrowScore(replacedThrow);
+      const rStartScore = state.currentMatch.settings.startScore || 501;
+      const rRemaining = rStartScore - rTotalScored - rThrowScore;
+
+      let rCheckoutSuggestion = null;
+      const rRequireDouble = state.currentMatch.settings.doubleOut ?? true;
+      if (rRemaining <= 170 && rRemaining >= 1) {
+        rCheckoutSuggestion = getCheckoutSuggestion(rRemaining, 3 - replacedThrow.length, rRequireDouble);
+      }
+
+      return {
+        ...state,
+        currentThrow: replacedThrow,
+        checkoutSuggestion: rCheckoutSuggestion,
+      };
+    }
+
     case 'CLEAR_THROW': {
       // Clear all darts at once
       if (!state.currentMatch) return { ...state, currentThrow: [], checkoutSuggestion: null };
@@ -235,7 +264,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         remaining: bustOccurred ? previousRemaining : newRemaining,
         timestamp: new Date(),
         isBust: bustOccurred,
-        isCheckoutAttempt: newRemaining <= 170 && !bustOccurred,
+        isCheckoutAttempt: previousRemaining <= 170,
         visitNumber: playerThrows.length + 1,
         runningAverage: 0, // Will calculate after adding
       };
@@ -276,11 +305,16 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       }
       
       // Calculate running average
-      const allPlayerThrows = updatedMatch.legs.flatMap(l => 
+      const allPlayerThrows = updatedMatch.legs.flatMap(l =>
         l.throws.filter(t => t.playerId === currentPlayer.playerId)
       );
       currentPlayer.matchAverage = calculateAverage(allPlayerThrows);
-      
+
+      // Track checkout attempts (when remaining before throw was <= 170)
+      if (previousRemaining <= 170) {
+        currentPlayer.checkoutAttempts++;
+      }
+
       // Handle leg win
       if (legWon) {
         currentPlayer.legsWon++;
@@ -306,6 +340,11 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
           // Announce leg checkout
           audioSystem.announceCheckout(currentThrowScore, 'leg');
 
+          // Alternate starting player for new leg
+          const previousStartPlayer = updatedMatch.legStartPlayerIndex ?? 0;
+          const newStartPlayer = (previousStartPlayer + 1) % updatedMatch.players.length;
+          updatedMatch.legStartPlayerIndex = newStartPlayer;
+
           const newLegId = uuidv4();
           const newLeg = {
             id: newLegId,
@@ -315,13 +354,13 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
           updatedMatch.legs.push(newLeg);
           updatedMatch.currentLegIndex = updatedMatch.legs.length - 1;
 
-          // Reset to first player for new leg
+          // Set starting player for new leg (alternating)
           return {
             ...state,
             currentMatch: updatedMatch,
             currentThrow: [],
             checkoutSuggestion: null,
-            currentPlayerIndex: 0,
+            currentPlayerIndex: newStartPlayer,
           };
         }
       }
@@ -348,10 +387,10 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         legWinner: currentLeg.winner,
       });
 
-      // If current leg just completed and new leg started, reset to first player
+      // If current leg just completed and new leg started, reset to leg start player
       if (currentLeg.winner && state.currentPlayerIndex === state.currentMatch.players.length - 1) {
-        nextIndex = 0;
-        logger.debug('Leg completed, resetting to player 0');
+        nextIndex = state.currentMatch.legStartPlayerIndex ?? 0;
+        logger.debug('Leg completed, resetting to player', nextIndex);
       }
 
       // Calculate checkout suggestion for next player
@@ -403,6 +442,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         player.match100Plus = 0;
         player.match60Plus = 0;
         player.matchHighestScore = 0;
+        player.legsWon = 0;
         player.checkoutsHit = 0;
         player.checkoutAttempts = 0;
         
@@ -433,14 +473,17 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
             player.legsWon++;
             player.checkoutsHit++;
           }
-          // Count checkout attempts (when remaining <= 170)
-          const playerThrowsInLeg = leg.throws.filter(t => t.playerId === player.playerId);
-          const totalScoredInLeg = playerThrowsInLeg.reduce((sum, t) => sum + t.score, 0);
+          // Count checkout attempts per throw: check remaining BEFORE each throw
           const startScore = updatedMatch.settings.startScore || 501;
-          const remaining = startScore - totalScoredInLeg;
-          if (remaining <= 170 && remaining > 0) {
-            player.checkoutAttempts++;
-          }
+          let runningTotal = 0;
+          const playerThrowsInLeg = leg.throws.filter(t => t.playerId === player.playerId);
+          playerThrowsInLeg.forEach(t => {
+            const remainingBefore = startScore - runningTotal;
+            if (remainingBefore <= 170 && remainingBefore > 0) {
+              player.checkoutAttempts++;
+            }
+            runningTotal += t.score;
+          });
         });
       });
       

@@ -1,7 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import morgan from 'morgan';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import session from 'express-session';
@@ -10,12 +9,17 @@ import { createServer } from 'http';
 import { config } from './config';
 import { initDatabase } from './database';
 import { setupSocketIO } from './socket';
+import logger from './utils/logger';
+import { requestIdMiddleware } from './middleware/requestId';
 
 // Initialize Express app
 const app = express();
 
 // Trust proxy - required when behind Nginx
 app.set('trust proxy', true);
+
+// Request ID for tracing
+app.use(requestIdMiddleware);
 
 // Initialize database
 initDatabase();
@@ -58,12 +62,28 @@ app.use(passport.session());
 // Compression
 app.use(compression());
 
-// Logging
-if (config.nodeEnv === 'development') {
-  app.use(morgan('dev'));
-} else {
-  app.use(morgan('combined'));
-}
+// HTTP Request Logging via Winston
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    const logData = {
+      requestId: req.requestId,
+      method: req.method,
+      url: req.originalUrl,
+      status: res.statusCode,
+      duration: `${duration}ms`,
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    };
+    if (res.statusCode >= 400) {
+      logger.warn('HTTP Request', logData);
+    } else {
+      logger.info('HTTP Request', logData);
+    }
+  });
+  next();
+});
 
 // Rate limiting - disabled for now, using Nginx rate limiting instead
 // The express-rate-limit was causing issues with normal app usage

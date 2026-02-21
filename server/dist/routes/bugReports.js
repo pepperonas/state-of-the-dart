@@ -236,15 +236,22 @@ router.patch('/:id/notes', requireAdmin, (req, res) => {
     }
 });
 /**
- * DELETE /:id - Delete bug report (Admin only)
+ * DELETE /:id - Delete bug report (Admin or report owner)
  */
-router.delete('/:id', requireAdmin, (req, res) => {
+router.delete('/:id', (req, res) => {
     const { id } = req.params;
     const db = (0, database_1.getDatabase)();
     try {
         const report = db.prepare('SELECT * FROM bug_reports WHERE id = ?').get(id);
         if (!report) {
             return res.status(404).json({ error: 'Bug report not found' });
+        }
+        // Check if user is admin or report owner
+        const user = db.prepare('SELECT is_admin FROM users WHERE id = ?').get(req.user?.id);
+        const isAdmin = user?.is_admin === 1;
+        const isOwner = report.user_id === req.user?.id;
+        if (!isAdmin && !isOwner) {
+            return res.status(403).json({ error: 'Not authorized to delete this report' });
         }
         db.prepare('DELETE FROM bug_reports WHERE id = ?').run(id);
         res.json({ message: 'Bug report deleted successfully' });

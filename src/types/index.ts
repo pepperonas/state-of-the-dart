@@ -53,6 +53,7 @@ export interface Match {
   legs: Leg[];
   currentLegIndex: number;
   currentSetIndex: number;
+  legStartPlayerIndex?: number;
   sets?: Set[];
   status: GameStatus;
   winner?: string;

@@ -61,7 +61,27 @@ export default function BugReportModal({ onClose, currentRoute }: BugReportModal
         onClose();
       }, 1500);
     } catch (err: any) {
-      setError(err.message || 'Fehler beim Senden des Bug-Reports');
+      // If screenshot might be too large, retry without it
+      if (screenshot && (err.message?.includes('413') || err.message?.includes('payload') || err.message?.includes('too large') || err.response?.status === 413)) {
+        try {
+          await api.bugReports.create({
+            title: title.trim(),
+            description: description.trim(),
+            severity,
+            category,
+            browserInfo: getBrowserInfo(),
+            route: currentRoute,
+          });
+          setScreenshot(null);
+          setSuccess(true);
+          setTimeout(() => onClose(), 1500);
+          return;
+        } catch (retryErr: any) {
+          setError(retryErr.message || 'Fehler beim Senden des Bug-Reports');
+        }
+      } else {
+        setError(err.message || 'Fehler beim Senden des Bug-Reports');
+      }
     } finally {
       setIsSubmitting(false);
     }

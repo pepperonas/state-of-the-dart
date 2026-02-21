@@ -19,7 +19,7 @@ echo ""
 # ============================================
 # SCHRITT 1: Frontend bauen
 # ============================================
-echo "1/4 Frontend bauen..."
+echo "1/5 Frontend bauen..."
 
 # .env für Production erstellen
 cat > .env << 'EOF'
@@ -33,14 +33,14 @@ echo "   Frontend gebaut"
 # ============================================
 # SCHRITT 2: Frontend deployen
 # ============================================
-echo "2/4 Frontend deployen..."
+echo "2/5 Frontend deployen..."
 rsync -avz --delete dist/ ${VPS_USER}@${VPS_IP}:${FRONTEND_PATH}/
 echo "   Frontend deployed"
 
 # ============================================
 # SCHRITT 3: Backend bauen und deployen
 # ============================================
-echo "3/4 Backend bauen und deployen..."
+echo "3/5 Backend bauen und deployen..."
 cd server
 npm run build
 cd ..
@@ -64,9 +64,23 @@ echo "   ⚠️  HINWEIS: .env wird NICHT deployed (Production-Secrets!)"
 echo "   Backend deployed"
 
 # ============================================
-# SCHRITT 4: Server neu starten
+# SCHRITT 4: Backup-Scripts deployen
 # ============================================
-echo "4/4 Backend neu starten..."
+echo "4/5 Backup-Scripts deployen..."
+
+# Backup- und Restore-Scripts auf VPS aktualisieren
+scp -q scripts/backup-db.sh scripts/restore-db.sh ${VPS_USER}@${VPS_IP}:${BACKEND_PATH}/
+ssh ${VPS_USER}@${VPS_IP} "chmod +x ${BACKEND_PATH}/backup-db.sh ${BACKEND_PATH}/restore-db.sh && mkdir -p ${BACKEND_PATH}/backups"
+echo "   Backup-Scripts deployed"
+
+# Pre-Deployment Backup erstellen
+echo "   Erstelle Pre-Deployment Backup..."
+ssh ${VPS_USER}@${VPS_IP} "${BACKEND_PATH}/backup-db.sh" || echo "   Backup fehlgeschlagen (DB evtl. noch nicht vorhanden)"
+
+# ============================================
+# SCHRITT 5: Server neu starten
+# ============================================
+echo "5/5 Backend neu starten..."
 
 # ============================================
 # KRITISCH: VPS .env validieren
@@ -117,6 +131,17 @@ echo "   VPS .env OK ✓"
 
 ssh ${VPS_USER}@${VPS_IP} << ENDSSH
   cd ${BACKEND_PATH}
+
+  # Nginx: client_max_body_size auf 10m setzen (für Screenshot-Uploads)
+  if grep -q 'client_max_body_size' /etc/nginx/sites-enabled/api.stateofthedart.com 2>/dev/null; then
+    sed -i 's/client_max_body_size.*/client_max_body_size 10m;/' /etc/nginx/sites-enabled/api.stateofthedart.com
+  else
+    sed -i '/server_name/a\\    client_max_body_size 10m;' /etc/nginx/sites-enabled/api.stateofthedart.com 2>/dev/null || true
+  fi
+  nginx -t 2>/dev/null && nginx -s reload 2>/dev/null || true
+
+  # Logs-Verzeichnis erstellen
+  mkdir -p ${BACKEND_PATH}/logs
 
   # Dependencies aktualisieren falls nötig
   npm install --production --silent 2>/dev/null || true
