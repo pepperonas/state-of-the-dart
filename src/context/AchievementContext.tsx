@@ -474,6 +474,10 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
 
   // Reset player achievements
   const resetPlayerAchievements = useCallback((playerId: string) => {
+    // Clear loaded/loading flags so achievements can be re-fetched from API
+    loadedPlayersRef.current.delete(playerId);
+    loadingPlayersRef.current.delete(playerId);
+
     setProgressCache(prev => {
       const updated = { ...prev };
       delete updated[playerId];

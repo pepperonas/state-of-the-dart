@@ -19,7 +19,7 @@ const PlayerProfile: React.FC = () => {
   const navigate = useNavigate();
   const { playerId } = useParams<{ playerId: string }>();
   const { players, getPlayerHeatmap, refreshPlayers } = usePlayer();
-  const { getPlayerProgress, getUnlockedAchievements } = useAchievements();
+  const { getPlayerProgress, getUnlockedAchievements, resetPlayerAchievements } = useAchievements();
   const { storage } = useTenant();
 
   const player = useMemo(() => {
@@ -151,6 +151,7 @@ const PlayerProfile: React.FC = () => {
     setResetting(true);
     try {
       await api.players.resetStats(playerId);
+      resetPlayerAchievements(playerId);
       await refreshPlayers();
       setShowResetConfirm(false);
     } catch (error) {
