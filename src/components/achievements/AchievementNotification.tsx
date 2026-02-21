@@ -51,7 +51,7 @@ function getTierGlowIntense(tier: AchievementTier): string {
 }
 
 const AchievementNotification: React.FC = () => {
-  const { currentNotification, dismissNotification, getPlayerProgress } = useAchievements();
+  const { currentNotification, dismissNotification } = useAchievements();
   const [isVisible, setIsVisible] = useState(false);
   const [showFlash, setShowFlash] = useState(false);
   const [progress, setProgress] = useState(100);
@@ -185,11 +185,9 @@ const AchievementNotification: React.FC = () => {
 
   if (!currentNotification) return null;
 
-  const { achievement, playerId } = currentNotification;
+  const { achievement, unlockedCount } = currentNotification;
   const tier = achievement.tier;
   const tierColor = getTierColor(tier);
-  const playerProgress = getPlayerProgress(playerId);
-  const unlockedCount = playerProgress.unlockedAchievements.length;
   const totalAchievements = 247; // Updated count after removing 3 unreachable achievements
 
   return (

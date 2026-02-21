@@ -666,12 +666,11 @@ const GameScreen: React.FC = () => {
     // This is handled in handleNextPlayer()
 
     // Clear editing state
-    const wasEditing = isEditingThrow;
     setIsEditingThrow(false);
     setEditingDartIndex(null);
 
-    // Skip auto-next when editing a throw - let user manually advance
-    if (!wasEditing && settings.autoNextPlayer) {
+    // Auto-advance to next player (also after editing a corrected throw)
+    if (settings.autoNextPlayer) {
       setTimeout(() => {
         dispatch({ type: 'NEXT_PLAYER' });
       }, 1000);

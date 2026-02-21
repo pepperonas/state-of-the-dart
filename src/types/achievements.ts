@@ -57,6 +57,7 @@ export interface AchievementNotification {
   achievement: Achievement;
   playerId: string;
   timestamp: Date;
+  unlockedCount: number;
 }
 
 // All available achievements in the game

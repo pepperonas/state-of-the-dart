@@ -567,7 +567,7 @@ Siehe [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) für Details.
 
 ## 🔢 Versionierung
 
-- **Aktuell**: v0.4.0
+- **Aktuell**: v0.4.1
 - **Schema**: MAJOR.MINOR.PATCH
 - **Auto-Increment**: `npm run version:bump`
 
@@ -637,6 +637,13 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.4.1 (21. Februar 2026) - Bugfixes
+
+#### 🐛 Bug Fixes
+- **Korrektur-Button: Spielerwechsel repariert** - Nach dem Korrigieren eines Wurfs wurde NEXT_PLAYER nicht dispatcht, wodurch derselbe Spieler nochmal werfen konnte statt zum nächsten zu wechseln
+- **Achievement-Notification Counter** - Bei mehreren gleichzeitig freigeschalteten Achievements zeigte der Fortschrittszähler immer denselben Wert (z.B. "1/247") statt hochzuzählen ("1/247", "2/247", "3/247")
+- **progressCacheRef synchron aktualisiert** - Ref wird jetzt vor dem State-Update gesetzt, damit aufeinanderfolgende Unlocks im selben Tick korrekte Daten lesen
 
 ### v0.4.0 (21. Februar 2026) - Achievement-System Komplett-Rewrite
 
