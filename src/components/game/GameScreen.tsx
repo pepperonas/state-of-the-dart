@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, RotateCcw, X, Bot, ChevronDown, ChevronUp, AlertTriangle, Smile, Flame } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Confetti from 'react-confetti';
@@ -30,6 +30,8 @@ import { createAdaptiveBotPlayer, getAdaptiveBotConfigs, generateBotTurn, Adapti
 const GameScreen: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const forceNewGame = searchParams.get('new') === '1';
   const { state, dispatch, pauseCurrentMatch } = useGame();
   const { players, addPlayer, updatePlayerHeatmap } = usePlayer();
   const { settings } = useSettings();
@@ -211,7 +213,15 @@ const GameScreen: React.FC = () => {
       }
     }
   }, [state.currentMatch?.status, state.currentMatch?.winner, state.currentMatch?.id, checkMatchAchievements, checkLegAchievements, processedMatchIds, storage]);
-  const [showSetup, setShowSetup] = useState(!state.currentMatch);
+  const [showSetup, setShowSetup] = useState(!state.currentMatch || forceNewGame);
+
+  // Clear ?new=1 from URL after consuming it
+  useEffect(() => {
+    if (forceNewGame) {
+      setSearchParams({}, { replace: true });
+    }
+  }, []);
+
   const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
   const [showPlayerNameInput, setShowPlayerNameInput] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');

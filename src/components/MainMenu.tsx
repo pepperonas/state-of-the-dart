@@ -51,7 +51,7 @@ const MainMenu: React.FC = () => {
       title: t('menu.quick_match'),
       icon: Target,
       description: t('menu.quick_match_desc'),
-      onClick: () => navigate('/game'),
+      onClick: () => navigate('/game?new=1'),
       gradient: 'from-primary-500 to-primary-600',
     },
     ...(pausedMatchCount > 0

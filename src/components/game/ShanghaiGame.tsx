@@ -247,7 +247,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
 
             {/* Player Selection */}
             <div className="mb-6">
-              <h2 className="text-lg font-semibold text-white mb-3">{t('game.selectPlayers')}</h2>
+              <h2 className="text-lg font-semibold text-white mb-3">{t('game.select_players')}</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {players.filter(p => !p.isBot).map(player => (
                   <button
@@ -293,7 +293,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
               }`}
             >
               {selectedPlayers.length < 2 
-                ? `${t('game.selectPlayers')} (${selectedPlayers.length}/2)`
+                ? `${t('game.select_players')} (${selectedPlayers.length}/2)`
                 : 'Shanghai starten ⚡'
               }
             </button>

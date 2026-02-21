@@ -224,7 +224,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
 
             {/* Player Selection */}
             <div className="mb-6">
-              <h2 className="text-lg font-semibold text-white mb-3">{t('game.selectPlayers')}</h2>
+              <h2 className="text-lg font-semibold text-white mb-3">{t('game.select_players')}</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {players.filter(p => !p.isBot).map(player => (
                   <button
@@ -269,7 +269,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
               }`}
             >
               {selectedPlayers.length < 1 
-                ? `${t('game.selectPlayers')} (min. 1)`
+                ? `${t('game.select_players')} (min. 1)`
                 : 'Spiel starten 🕐'
               }
             </button>
