@@ -188,6 +188,11 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(heatmapData),
       }),
+
+    resetStats: (id: string) =>
+      apiClient(`/api/players/${id}/reset-stats`, {
+        method: 'POST',
+      }),
   },
 
   // Matches

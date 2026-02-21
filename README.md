@@ -9,7 +9,7 @@
 **Professionelles Dart-Zählsystem** - Eine funktionsreiche, webbasierte Dart-Scoring-Anwendung mit Multi-User-Support, professionellem Statistik-Tracking und Live-Deployment.
 
 [![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green)](https://stateofthedart.com)
-![Version](https://img.shields.io/badge/Version-0.5.1-blue)
+![Version](https://img.shields.io/badge/Version-0.5.2-blue)
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -571,7 +571,7 @@ Siehe [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) für Details.
 
 ## 🔢 Versionierung
 
-- **Aktuell**: v0.5.1
+- **Aktuell**: v0.5.2
 - **Schema**: MAJOR.MINOR.PATCH
 - **Auto-Increment**: `npm run version:bump`
 
@@ -646,6 +646,15 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.5.2 (21. Februar 2026) - Spieler-Statistiken zurücksetzen
+
+#### ✨ Neue Features
+- **Statistiken zurücksetzen** - Button auf der Spieler-Profilseite zum Zurücksetzen aller Statistiken
+  - Setzt Stats, Heatmap, Personal Bests, Match-Daten, Training und Achievements zurück
+  - Spieler selbst bleibt erhalten (Name, Avatar)
+  - Bestätigungsdialog vor dem Zurücksetzen
+  - Betrifft nur den ausgewählten Spieler
 
 ### v0.5.1 (21. Februar 2026) - Comprehensive Bug Audit
 
@@ -809,7 +818,7 @@ Siehe [CHANGELOG.md](CHANGELOG.md) für eine vollständige Liste der Änderungen
 
 <div align="center">
   <p>Made with ❤️ and 🎯 by Martin Pfeffer</p>
-  <p>© 2026 celox.io | Version 0.5.1</p>
+  <p>© 2026 celox.io | Version 0.5.2</p>
   <p>
     <a href="https://stateofthedart.com">🌐 Live Demo</a> •
     <a href="https://github.com/pepperonas/state-of-the-dart">📦 GitHub</a> •

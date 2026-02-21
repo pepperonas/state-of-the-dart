@@ -492,4 +492,61 @@ router.post('/:id/personal-bests', authenticateTenant, (req: AuthRequest, res: R
   }
 });
 
+// Reset player stats (keeps player, deletes all stats/history)
+router.post('/:id/reset-stats', authenticateTenant, (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const db = getDatabase();
+
+  try {
+    // Verify ownership
+    const player = db.prepare('SELECT * FROM players WHERE id = ? AND tenant_id = ?').get(id, req.tenantId);
+    if (!player) {
+      return res.status(404).json({ error: 'Player not found' });
+    }
+
+    const resetTransaction = db.transaction(() => {
+      // Reset player_stats to defaults
+      db.prepare(`
+        UPDATE player_stats SET
+          games_played = 0, games_won = 0,
+          total_legs_played = 0, total_legs_won = 0,
+          highest_checkout = 0, total_180s = 0,
+          total_171_plus = 0, total_140_plus = 0,
+          total_100_plus = 0, total_60_plus = 0,
+          best_average = 0, average_overall = 0,
+          checkout_percentage = 0, total_checkout_attempts = 0,
+          total_checkout_hits = 0, best_leg = 999,
+          nine_dart_finishes = 0
+        WHERE player_id = ?
+      `).run(id);
+
+      // Reset heatmap
+      db.prepare(`
+        UPDATE heatmap_data SET segments = '{}', total_darts = 0, last_updated = ?
+        WHERE player_id = ?
+      `).run(Date.now(), id);
+
+      // Reset personal bests
+      db.prepare('DELETE FROM personal_bests WHERE player_id = ?').run(id);
+
+      // Delete match participation data (match_players + throws for this player)
+      db.prepare('DELETE FROM throws WHERE player_id = ?').run(id);
+      db.prepare('DELETE FROM match_players WHERE player_id = ?').run(id);
+
+      // Delete training sessions
+      db.prepare('DELETE FROM training_sessions WHERE player_id = ?').run(id);
+
+      // Delete achievements
+      db.prepare('DELETE FROM player_achievements WHERE player_id = ?').run(id);
+    });
+
+    resetTransaction();
+
+    res.json({ message: 'Player stats reset successfully' });
+  } catch (error) {
+    console.error('Error resetting player stats:', error);
+    res.status(500).json({ error: 'Failed to reset player stats' });
+  }
+});
+
 export default router;

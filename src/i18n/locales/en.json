@@ -103,7 +103,12 @@
     "delete_confirm": "Delete player",
     "games": "Games",
     "avg": "Avg",
-    "add": "Add"
+    "add": "Add",
+    "reset_stats": "Reset Statistics",
+    "reset_stats_confirm_title": "Reset Statistics?",
+    "reset_stats_confirm_text": "All statistics, match data, heatmap, training and achievements of {{name}} will be permanently deleted. The player itself will be kept.",
+    "reset_stats_success": "Statistics have been reset",
+    "reset_stats_error": "Failed to reset statistics"
   },
   "game": {
     "game": "Game",

@@ -103,7 +103,12 @@
     "delete_confirm": "Spieler löschen",
     "games": "Spiele",
     "avg": "Ø",
-    "add": "Hinzufügen"
+    "add": "Hinzufügen",
+    "reset_stats": "Statistiken zurücksetzen",
+    "reset_stats_confirm_title": "Statistiken zurücksetzen?",
+    "reset_stats_confirm_text": "Alle Statistiken, Match-Daten, Heatmap, Training und Achievements von {{name}} werden unwiderruflich gelöscht. Der Spieler selbst bleibt erhalten.",
+    "reset_stats_success": "Statistiken wurden zurückgesetzt",
+    "reset_stats_error": "Fehler beim Zurücksetzen der Statistiken"
   },
   "game": {
     "game": "Spiel",

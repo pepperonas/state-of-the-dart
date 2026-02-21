@@ -18,6 +18,7 @@ interface PlayerContextType {
   getPlayer: (id: string) => Player | undefined;
   getPlayerHeatmap: (playerId: string) => HeatmapData;
   updatePlayerHeatmap: (playerId: string, newDarts: Dart[]) => void;
+  refreshPlayers: () => Promise<void>;
 }
 
 const PlayerContext = createContext<PlayerContextType | null>(null);
@@ -67,55 +68,55 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
   const [loading, setLoading] = useState(true);
   
+  const loadPlayers = async () => {
+    if (!user) {
+      setPlayers([]);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await api.players.getAll();
+      const loadedPlayers = response.players.map(reviveDates);
+
+      // Load all heatmaps in one batch request (much faster!)
+      try {
+        const heatmapsResponse = await api.players.getHeatmapsBatch();
+        const heatmaps = heatmapsResponse.heatmaps;
+        // Merge heatmaps with players
+        const playersWithHeatmaps = loadedPlayers.map((player: Player) => {
+          const heatmapData = heatmaps[player.id];
+
+          if (heatmapData && heatmapData.total_darts > 0) {
+            return {
+              ...player,
+              heatmapData: {
+                playerId: player.id,
+                segments: heatmapData.segments,
+                totalDarts: heatmapData.total_darts,
+                lastUpdated: new Date(heatmapData.last_updated || Date.now())
+              }
+            };
+          }
+          return player;
+        });
+
+        setPlayers(playersWithHeatmaps);
+      } catch (error) {
+        logger.error('Failed to load heatmaps:', error);
+        setPlayers(loadedPlayers);
+      }
+    } catch (error) {
+      logger.error('Failed to load players:', error);
+      setPlayers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Load players from API when user is authenticated
   useEffect(() => {
-    const loadPlayers = async () => {
-      if (!user) {
-        setPlayers([]);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        const response = await api.players.getAll();
-        const loadedPlayers = response.players.map(reviveDates);
-        
-        // Load all heatmaps in one batch request (much faster!)
-        try {
-          const heatmapsResponse = await api.players.getHeatmapsBatch();
-          const heatmaps = heatmapsResponse.heatmaps;
-          // Merge heatmaps with players
-          const playersWithHeatmaps = loadedPlayers.map((player: Player) => {
-            const heatmapData = heatmaps[player.id];
-            
-            if (heatmapData && heatmapData.total_darts > 0) {
-              return {
-                ...player,
-                heatmapData: {
-                  playerId: player.id,
-                  segments: heatmapData.segments,
-                  totalDarts: heatmapData.total_darts,
-                  lastUpdated: new Date(heatmapData.last_updated || Date.now())
-                }
-              };
-            }
-            return player;
-          });
-
-          setPlayers(playersWithHeatmaps);
-        } catch (error) {
-          logger.error('Failed to load heatmaps:', error);
-          setPlayers(loadedPlayers);
-        }
-      } catch (error) {
-        logger.error('Failed to load players:', error);
-        setPlayers([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadPlayers();
   }, [user]);
   
@@ -233,6 +234,7 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       getPlayer,
       getPlayerHeatmap,
       updatePlayerHeatmap,
+      refreshPlayers: loadPlayers,
     }}>
       {children}
     </PlayerContext.Provider>

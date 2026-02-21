@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Trophy, Target, TrendingUp, Award, Calendar, Zap, Star, Flame } from 'lucide-react';
+import { ArrowLeft, Trophy, Target, TrendingUp, Award, Calendar, Zap, Star, Flame, Trash2, AlertTriangle, Loader } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { usePlayer } from '../../context/PlayerContext';
 import { useAchievements } from '../../context/AchievementContext';
 import { useTenant } from '../../context/TenantContext';
+import { api } from '../../services/api';
 import { PersonalBests, createEmptyPersonalBests } from '../../types/personalBests';
 import { LineChart, Line, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
@@ -17,7 +18,7 @@ const PlayerProfile: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { playerId } = useParams<{ playerId: string }>();
-  const { players, getPlayerHeatmap } = usePlayer();
+  const { players, getPlayerHeatmap, refreshPlayers } = usePlayer();
   const { getPlayerProgress, getUnlockedAchievements } = useAchievements();
   const { storage } = useTenant();
 
@@ -140,6 +141,24 @@ const PlayerProfile: React.FC = () => {
     if (!heatmapData) return null;
     return calculateAccuracyStats(heatmapData);
   }, [heatmapData]);
+
+  // Reset stats state
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [resetting, setResetting] = useState(false);
+
+  const handleResetStats = async () => {
+    if (!playerId) return;
+    setResetting(true);
+    try {
+      await api.players.resetStats(playerId);
+      await refreshPlayers();
+      setShowResetConfirm(false);
+    } catch (error) {
+      console.error('Failed to reset stats:', error);
+    } finally {
+      setResetting(false);
+    }
+  };
 
   if (!player || !playerId) {
     return (
@@ -473,7 +492,7 @@ const PlayerProfile: React.FC = () => {
 
         {/* Career Timeline */}
         {personalBests.firstGameDate && (
-          <div className="glass-card p-6">
+          <div className="glass-card p-6 mb-6">
             <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
               <Calendar size={24} />
               Karriere
@@ -519,6 +538,66 @@ const PlayerProfile: React.FC = () => {
               <div className="text-center">
                 <div className="text-2xl font-bold text-amber-400">{personalBests.totalCheckouts}</div>
                 <div className="text-xs text-dark-400 mt-1">Checkouts</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Reset Stats */}
+        <div className="glass-card p-6 border border-red-500/20">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-red-400 flex items-center gap-2">
+                <AlertTriangle size={20} />
+                {t('players.reset_stats')}
+              </h3>
+              <p className="text-sm text-dark-400 mt-1">
+                {t('players.reset_stats_confirm_text', { name: player.name })}
+              </p>
+            </div>
+            <button
+              onClick={() => setShowResetConfirm(true)}
+              className="ml-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-400 rounded-lg font-semibold transition-all flex items-center gap-2 flex-shrink-0"
+            >
+              <Trash2 size={18} />
+              {t('players.reset_stats')}
+            </button>
+          </div>
+        </div>
+
+        {/* Reset Confirmation Modal */}
+        {showResetConfirm && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={() => setShowResetConfirm(false)}>
+            <div className="glass-card p-6 rounded-2xl max-w-md w-full" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">
+                  <AlertTriangle className="text-red-400" size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-white">{t('players.reset_stats_confirm_title')}</h3>
+              </div>
+              <p className="text-dark-300 mb-6">
+                {t('players.reset_stats_confirm_text', { name: player.name })}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowResetConfirm(false)}
+                  disabled={resetting}
+                  className="flex-1 px-4 py-3 bg-dark-700 hover:bg-dark-600 text-white rounded-lg font-semibold transition-all"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  onClick={handleResetStats}
+                  disabled={resetting}
+                  className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-500 text-white rounded-lg font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {resetting ? (
+                    <Loader className="animate-spin" size={18} />
+                  ) : (
+                    <Trash2 size={18} />
+                  )}
+                  {resetting ? t('common.loading') : t('players.reset_stats')}
+                </button>
               </div>
             </div>
           </div>
