@@ -884,7 +884,7 @@ const GameScreen: React.FC = () => {
             onClick={() => {
               forceNewGameRef.current = false;
               isNavigatingAwayRef.current = true;
-              navigate('/');
+              window.location.href = '/';
             }}
             className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
           >
@@ -1188,7 +1188,7 @@ const GameScreen: React.FC = () => {
         <div className="text-center">
           <p className="text-xl text-gray-600 dark:text-gray-400 mb-4">No active game</p>
           <button
-            onClick={() => navigate('/')}
+            onClick={() => { window.location.href = '/'; }}
             className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
           >
             {t('common.back')}

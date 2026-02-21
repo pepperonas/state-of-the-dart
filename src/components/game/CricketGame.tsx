@@ -192,10 +192,10 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
   if (showSetup) {
     return (
       <div className="min-h-screen p-4 md:p-8 gradient-mesh">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <button
-            onClick={onBack || (() => navigate('/'))}
-            className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
+            onClick={onBack || (() => { window.location.href = '/'; })}
+            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
           >
             <ArrowLeft size={20} />
             {t('common.back')}
