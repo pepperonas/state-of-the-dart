@@ -226,7 +226,6 @@ const GameScreen: React.FC = () => {
   const [heatmapView, setHeatmapView] = useState<'leg' | 'match'>('match');
   const [statsView, setStatsView] = useState<'leg' | 'match'>('match');
   const [showBugReportModal, setShowBugReportModal] = useState(false);
-  const [undoPreviewThrows, setUndoPreviewThrows] = useState<Throw[] | null>(null);
   const [editingDartIndex, setEditingDartIndex] = useState<number | null>(null);
   const [isEditingThrow, setIsEditingThrow] = useState(false);
 
@@ -763,20 +762,11 @@ const GameScreen: React.FC = () => {
     const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
     if (currentLeg.throws.length === 0) return;
 
-    // Show preview of the throw that will be removed (and previous 2 for context)
-    const lastThreeThrows = currentLeg.throws.slice(-3);
-    setUndoPreviewThrows(lastThreeThrows);
-
     // Enter editing mode - darts will be loaded into currentThrow by the reducer
     setIsEditingThrow(true);
     setEditingDartIndex(null);
 
     dispatch({ type: 'UNDO_THROW' });
-
-    // Hide preview after 5 seconds (longer for better review)
-    setTimeout(() => {
-      setUndoPreviewThrows(null);
-    }, 5000);
   };
   
   const handleRemoveDart = () => {
@@ -1237,84 +1227,6 @@ const GameScreen: React.FC = () => {
     <div className="min-h-screen p-4 md:p-8 gradient-mesh">
       {showConfetti && <Confetti recycle={false} numberOfPieces={300} gravity={0.3} />}
       
-      {/* Undo Preview Panel - Fixed floating panel */}
-      {undoPreviewThrows && undoPreviewThrows.length > 0 && (
-        <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
-          <div className="bg-gradient-to-br from-amber-900/95 to-orange-900/95 backdrop-blur-lg rounded-xl p-4 shadow-2xl border border-amber-500/30 max-w-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <RotateCcw size={18} className="text-amber-400" />
-                <span className="font-bold text-amber-200">Rückgängig gemacht</span>
-              </div>
-              <button
-                onClick={() => setUndoPreviewThrows(null)}
-                className="text-amber-400/70 hover:text-amber-200 transition-colors"
-              >
-                <X size={18} />
-              </button>
-            </div>
-            
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              {undoPreviewThrows.slice(-3).reverse().map((throwData, index) => {
-                const playerName = state.currentMatch?.players.find(p => p.playerId === throwData.playerId)?.name || 'Unbekannt';
-                return (
-                  <div 
-                    key={throwData.id} 
-                    className={`bg-dark-800/60 rounded-lg p-3 ${index === 0 ? 'ring-2 ring-amber-500/50' : ''}`}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm text-dark-300">{playerName} • Wurf #{throwData.visitNumber}</span>
-                      <span className={`font-bold text-lg ${
-                        throwData.score >= 140 ? 'text-orange-400' :
-                        throwData.score >= 100 ? 'text-blue-400' :
-                        throwData.isBust ? 'text-red-400' : 'text-white'
-                      }`}>
-                        {throwData.isBust ? 'BUST' : throwData.score}
-                      </span>
-                    </div>
-                    <div className="flex gap-2 flex-wrap">
-                      {throwData.darts.map((dart, i) => (
-                        <span 
-                          key={i}
-                          className={`px-2 py-0.5 rounded text-xs font-medium ${
-                            dart.multiplier === 3 ? 'bg-red-500/30 text-red-300' :
-                            dart.multiplier === 2 ? 'bg-green-500/30 text-green-300' :
-                            dart.segment === 25 || dart.segment === 50 ? 'bg-yellow-500/30 text-yellow-300' :
-                            dart.multiplier === 0 ? 'bg-dark-600 text-dark-400' :
-                            'bg-dark-600 text-dark-300'
-                          }`}
-                        >
-                          {dart.multiplier === 0 ? 'Miss' :
-                           dart.multiplier === 3 ? `T${dart.segment}` :
-                           dart.multiplier === 2 ? `D${dart.segment}` :
-                           dart.segment === 25 ? 'OB' :
-                           dart.segment === 50 ? 'Bull' :
-                           `S${dart.segment}`}
-                        </span>
-                      ))}
-                    </div>
-                    {index === 0 && (
-                      <div className="mt-2 text-xs text-amber-400/70 flex items-center gap-1">
-                        <span>↩️ Dieser Wurf wurde entfernt</span>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-            
-            <div className="mt-3 pt-3 border-t border-amber-500/20">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-dark-400">Schließt automatisch</span>
-                <div className="h-1 w-24 bg-dark-700 rounded-full overflow-hidden">
-                  <div className="h-full bg-amber-500 animate-shrink-width" style={{ animationDuration: '5s' }} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <button
