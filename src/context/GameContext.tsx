@@ -507,7 +507,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         ...state,
         currentMatch: updatedMatch,
         currentPlayerIndex: playerIndex >= 0 ? playerIndex : state.currentPlayerIndex,
-        currentThrow: [],
+        currentThrow: lastThrow.darts || [],
         checkoutSuggestion,
       };
     }

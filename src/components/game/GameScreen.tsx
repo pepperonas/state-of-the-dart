@@ -227,6 +227,8 @@ const GameScreen: React.FC = () => {
   const [statsView, setStatsView] = useState<'leg' | 'match'>('match');
   const [showBugReportModal, setShowBugReportModal] = useState(false);
   const [undoPreviewThrows, setUndoPreviewThrows] = useState<Throw[] | null>(null);
+  const [editingDartIndex, setEditingDartIndex] = useState<number | null>(null);
+  const [isEditingThrow, setIsEditingThrow] = useState(false);
 
   // Load last players from storage
   const getLastPlayers = (): string[] => {
@@ -539,7 +541,13 @@ const GameScreen: React.FC = () => {
   };
   
   const handleDartHit = (dart: Dart) => {
-    dispatch({ type: 'ADD_DART', payload: dart });
+    // If a dart is selected for editing, replace it
+    if (editingDartIndex !== null) {
+      dispatch({ type: 'REPLACE_DART', payload: { index: editingDartIndex, dart } });
+      setEditingDartIndex(null);
+    } else {
+      dispatch({ type: 'ADD_DART', payload: dart });
+    }
     // Play a subtle click sound for dart hit feedback
     audioSystem.playSound('/sounds/OMNI/pop.mp3', false);
   };
@@ -639,14 +647,20 @@ const GameScreen: React.FC = () => {
     // Note: "You require X" is now announced when the player's turn STARTS (not after throwing)
     // This is handled in handleNextPlayer()
 
-    if (settings.autoNextPlayer) {
+    // Clear editing state
+    const wasEditing = isEditingThrow;
+    setIsEditingThrow(false);
+    setEditingDartIndex(null);
+
+    // Skip auto-next when editing a throw - let user manually advance
+    if (!wasEditing && settings.autoNextPlayer) {
       setTimeout(() => {
         dispatch({ type: 'NEXT_PLAYER' });
       }, 1000);
     }
-  }, [state.currentThrow, state.currentPlayerIndex, state.currentMatch, settings.autoNextPlayer, dispatch, updatePlayerHeatmap]);
+  }, [state.currentThrow, state.currentPlayerIndex, state.currentMatch, settings.autoNextPlayer, dispatch, updatePlayerHeatmap, isEditingThrow]);
 
-  // Auto-confirm after 3rd dart (skip for bots - they handle their own confirm/next)
+  // Auto-confirm after 3rd dart (skip for bots and editing mode)
   useEffect(() => {
     if (state.currentThrow.length === 3) {
       // Skip auto-confirm for bots
@@ -656,13 +670,16 @@ const GameScreen: React.FC = () => {
         return;
       }
 
+      // Skip auto-confirm when editing a throw
+      if (isEditingThrow) return;
+
       // Auto-confirm after a short delay to show the 3rd dart
       const timer = setTimeout(() => {
         handleConfirmThrow();
       }, 600);
       return () => clearTimeout(timer);
     }
-  }, [state.currentThrow.length]);
+  }, [state.currentThrow.length, isEditingThrow]);
 
   // Auto-confirm on checkout (when remaining reaches exactly 0)
   useEffect(() => {
@@ -673,9 +690,10 @@ const GameScreen: React.FC = () => {
     if (!currentPlayer || !currentLeg || currentLeg.winner) return;
 
     // Skip auto-checkout for bots - they handle their own confirm/next
-    if (currentPlayer.isBot) {
-      return;
-    }
+    if (currentPlayer.isBot) return;
+
+    // Skip auto-checkout when editing a throw
+    if (isEditingThrow) return;
 
     // Calculate remaining score
     const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
@@ -698,7 +716,7 @@ const GameScreen: React.FC = () => {
       }, 400);
       return () => clearTimeout(timer);
     }
-  }, [state.currentThrow]);
+  }, [state.currentThrow, isEditingThrow]);
 
   // Auto-confirm on bust (when player goes below 0 or to 1)
   useEffect(() => {
@@ -709,9 +727,10 @@ const GameScreen: React.FC = () => {
     if (!currentPlayer || !currentLeg || currentLeg.winner) return;
 
     // Skip auto-bust for bots - they handle their own confirm/next
-    if (currentPlayer.isBot) {
-      return;
-    }
+    if (currentPlayer.isBot) return;
+
+    // Skip auto-bust when editing a throw
+    if (isEditingThrow) return;
 
     // Calculate remaining score
     const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
@@ -736,20 +755,24 @@ const GameScreen: React.FC = () => {
       }, 800);
       return () => clearTimeout(timer);
     }
-  }, [state.currentThrow]);
+  }, [state.currentThrow, isEditingThrow]);
 
   const handleUndoThrow = () => {
     if (!state.currentMatch) return;
-    
+
     const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
     if (currentLeg.throws.length === 0) return;
-    
+
     // Show preview of the throw that will be removed (and previous 2 for context)
     const lastThreeThrows = currentLeg.throws.slice(-3);
     setUndoPreviewThrows(lastThreeThrows);
-    
+
+    // Enter editing mode - darts will be loaded into currentThrow by the reducer
+    setIsEditingThrow(true);
+    setEditingDartIndex(null);
+
     dispatch({ type: 'UNDO_THROW' });
-    
+
     // Hide preview after 5 seconds (longer for better review)
     setTimeout(() => {
       setUndoPreviewThrows(null);
@@ -1403,6 +1426,9 @@ const GameScreen: React.FC = () => {
               onClearThrow={handleClearThrow}
               onConfirm={handleConfirmThrow}
               onReplaceDart={(index, dart) => dispatch({ type: 'REPLACE_DART', payload: { index, dart } })}
+              editingDartIndex={editingDartIndex}
+              onSetEditingDartIndex={setEditingDartIndex}
+              isEditingThrow={isEditingThrow}
               remaining={remaining}
             />
           </div>

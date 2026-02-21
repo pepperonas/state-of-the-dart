@@ -10,6 +10,9 @@ interface ScoreInputProps {
   onClearThrow: () => void;
   onConfirm: () => void;
   onReplaceDart?: (index: number, dart: Dart) => void;
+  editingDartIndex: number | null;
+  onSetEditingDartIndex: (index: number | null) => void;
+  isEditingThrow?: boolean;
   remaining: number;
 }
 
@@ -20,11 +23,14 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   onClearThrow,
   onConfirm,
   onReplaceDart,
+  editingDartIndex,
+  onSetEditingDartIndex,
+  isEditingThrow,
   remaining,
 }) => {
   const [currentInput, setCurrentInput] = useState('');
   const [inputMode, setInputMode] = useState<'quick' | 'numpad'>('numpad');
-  const [editingDartIndex, setEditingDartIndex] = useState<number | null>(null);
+  const setEditingDartIndex = onSetEditingDartIndex;
   
   const currentScore = calculateThrowScore(currentThrow);
   
@@ -294,10 +300,14 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
         <button
           onClick={onConfirm}
           disabled={currentThrow.length === 0}
-          className="flex items-center justify-center gap-1 p-3 rounded-lg bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold shadow-lg"
+          className={`flex items-center justify-center gap-1 p-3 rounded-lg text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold shadow-lg ${
+            isEditingThrow
+              ? 'bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 col-span-1'
+              : 'bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700'
+          }`}
         >
           <Check size={20} />
-          <span>OK</span>
+          <span>{isEditingThrow ? 'Korrektur' : 'OK'}</span>
         </button>
       </div>
       
