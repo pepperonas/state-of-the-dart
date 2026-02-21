@@ -217,6 +217,9 @@ export const api = {
         ...options,
       }),
 
+    getResumable: (options?: RequestInit) =>
+      apiClient('/api/matches?status=paused,in-progress&limit=20', options),
+
     delete: (id: string, options?: RequestInit) =>
       apiClient(`/api/matches/${id}`, {
         method: 'DELETE',

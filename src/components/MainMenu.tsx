@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Target, Users, TrendingUp, Trophy, Award, Dumbbell, Settings, Play, LogOut, Medal, Shield, BookOpen, Pause } from 'lucide-react';
+import { Target, Users, TrendingUp, Trophy, Award, Dumbbell, Settings, Play, LogOut, Medal, Shield, BookOpen, Pause, RotateCcw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTenant } from '../context/TenantContext';
 import { useAuth } from '../context/AuthContext';
+import { useGame } from '../context/GameContext';
+import { api } from '../services/api';
 import UserMenu from './auth/UserMenu';
 import SyncStatus from './sync/SyncStatus';
 import UserGuideModal from './guide/UserGuideModal';
@@ -14,23 +16,26 @@ const MainMenu: React.FC = () => {
   const navigate = useNavigate();
   const { currentTenant, setCurrentTenant, storage } = useTenant();
   const { user } = useAuth();
-  
-  // Check for saved matches (in-progress or paused)
-  const savedMatchInfo = React.useMemo(() => {
-    if (storage) {
-      const savedMatch = storage.get<{status?: string; players?: Array<{name: string}>} | null>('currentMatch', null);
-      if (savedMatch && (savedMatch.status === 'in-progress' || savedMatch.status === 'paused')) {
-        return {
-          exists: true,
-          isPaused: savedMatch.status === 'paused',
-          playerNames: savedMatch.players?.map(p => p.name).join(' vs ') || ''
-        };
-      }
-    }
-    return { exists: false, isPaused: false, playerNames: '' };
-  }, [storage]);
-  
-  const hasSavedMatch = savedMatchInfo.exists;
+  const { state: gameState } = useGame();
+
+  // Active match = currently loaded in GameContext
+  const activeMatch = gameState.currentMatch;
+  const hasActiveMatch = !!activeMatch && (activeMatch.status === 'in-progress' || activeMatch.status === 'paused');
+  const activePlayerNames = activeMatch?.players?.map(p => p.name).join(' vs ') || '';
+  const activeIsPaused = activeMatch?.status === 'paused';
+
+  // Count paused/in-progress matches from DB (for resume badge)
+  const [pausedMatchCount, setPausedMatchCount] = useState(0);
+
+  useEffect(() => {
+    api.matches.getResumable()
+      .then((data: any) => {
+        // Exclude the currently active match from the count
+        const others = (data as any[]).filter(m => m.id !== activeMatch?.id);
+        setPausedMatchCount(others.length);
+      })
+      .catch(() => {});
+  }, [activeMatch?.id]);
 
   const [showGuideModal, setShowGuideModal] = useState(false);
 
@@ -49,6 +54,16 @@ const MainMenu: React.FC = () => {
       onClick: () => navigate('/game'),
       gradient: 'from-primary-500 to-primary-600',
     },
+    ...(pausedMatchCount > 0
+      ? [{
+          title: t('resume.menu_title'),
+          icon: RotateCcw,
+          description: t('resume.menu_desc', { count: pausedMatchCount }),
+          onClick: () => navigate('/resume'),
+          gradient: 'from-amber-500 to-orange-500',
+          badge: pausedMatchCount,
+        }]
+      : []),
     {
       title: '🎯 Cricket',
       icon: Target,
@@ -184,7 +199,7 @@ const MainMenu: React.FC = () => {
           </p>
         </motion.div>
         
-        {hasSavedMatch && (
+        {hasActiveMatch && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -193,16 +208,16 @@ const MainMenu: React.FC = () => {
             <button
               onClick={() => navigate('/game')}
               className={`w-full py-4 ${
-                savedMatchInfo.isPaused 
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600' 
+                activeIsPaused
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600'
                   : 'bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600'
               } text-white rounded-xl font-bold text-lg flex items-center justify-center gap-3 shadow-lg transition-all`}
             >
-              {savedMatchInfo.isPaused ? <Pause size={24} /> : <Play size={24} />}
+              {activeIsPaused ? <Pause size={24} /> : <Play size={24} />}
               <div className="flex flex-col items-center">
-                <span>{savedMatchInfo.isPaused ? '⏸️ Pausiertes Match fortsetzen' : t('menu.continue_match')}</span>
-                {savedMatchInfo.playerNames && (
-                  <span className="text-sm font-normal opacity-80">{savedMatchInfo.playerNames}</span>
+                <span>{activeIsPaused ? t('resume.paused_banner') : t('menu.continue_match')}</span>
+                {activePlayerNames && (
+                  <span className="text-sm font-normal opacity-80">{activePlayerNames}</span>
                 )}
               </div>
             </button>
@@ -225,8 +240,13 @@ const MainMenu: React.FC = () => {
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
                 <div className="flex flex-col items-center space-y-4 relative z-10">
-                  <div className={`p-4 rounded-2xl bg-gradient-to-br ${item.gradient} shadow-lg`}>
+                  <div className={`p-4 rounded-2xl bg-gradient-to-br ${item.gradient} shadow-lg relative`}>
                     <Icon size={40} className="text-white" />
+                    {'badge' in item && (item as any).badge > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                        {(item as any).badge}
+                      </span>
+                    )}
                   </div>
                   <div className="text-center">
                     <h2 className="text-xl font-semibold text-white mb-1">{item.title}</h2>

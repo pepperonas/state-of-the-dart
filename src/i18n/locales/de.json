@@ -282,5 +282,17 @@
     "manage": "Verwalten",
     "days_left": "Tage übrig",
     "trial_days": "Tage Testphase"
+  },
+  "resume": {
+    "title": "Spiele fortsetzen",
+    "menu_title": "Spiel fortsetzen",
+    "menu_desc": "{{count}} pausierte Spiele",
+    "no_matches": "Keine pausierten Spiele vorhanden",
+    "continue": "Fortsetzen",
+    "delete": "Löschen",
+    "confirm_delete": "Wirklich?",
+    "paused": "Pausiert",
+    "in_progress": "Laufend",
+    "paused_banner": "Pausiertes Match fortsetzen"
   }
 }

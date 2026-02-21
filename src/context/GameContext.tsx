@@ -574,11 +574,13 @@ interface GameContextValue {
   state: GameState;
   dispatch: React.Dispatch<GameAction>;
   syncPlayerStats: (liveUpdate?: boolean) => void;
+  pauseCurrentMatch: () => Promise<void>;
+  loadMatchFromDb: (matchId: string) => void;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
 
-const reviveMatchDates = (match: any): Match => {
+export const reviveMatchDates = (match: any): Match => {
   // Import inline to avoid circular dependency
   const toDateOrNow = (value: unknown): Date => {
     if (value === null || value === undefined) return new Date();
@@ -958,8 +960,42 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [state.currentMatch?.legs, updatePlayerHeatmap]);
 
+  // Pause the current match: dispatch PAUSE_MATCH and wait for DB save
+  const pauseCurrentMatch = async (): Promise<void> => {
+    if (!state.currentMatch || state.currentMatch.status !== 'in-progress') return;
+
+    dispatch({ type: 'PAUSE_MATCH' });
+
+    // The paused-save effect will fire, but we also do an immediate save
+    // to guarantee persistence before a new match starts.
+    const apiMatch = transformMatchForApi({
+      ...state.currentMatch,
+      status: 'paused',
+      pausedAt: new Date(),
+    });
+    const matchId = state.currentMatch.id;
+
+    try {
+      if (matchCreatedRef.current !== matchId) {
+        await api.matches.create(apiMatch);
+        matchCreatedRef.current = matchId;
+      } else {
+        await api.matches.update(matchId, apiMatch);
+      }
+      logger.success('Match paused and saved:', matchId);
+    } catch (err) {
+      logger.warn('Failed to save paused match (pauseCurrentMatch):', err);
+    }
+  };
+
+  // Load a match from the DB by fetching its full details
+  const loadMatchFromDb = (matchId: string) => {
+    matchCreatedRef.current = matchId;
+    lastSavedStateRef.current = '';
+  };
+
   return (
-    <GameContext.Provider value={{ state, dispatch, syncPlayerStats }}>
+    <GameContext.Provider value={{ state, dispatch, syncPlayerStats, pauseCurrentMatch, loadMatchFromDb }}>
       {children}
     </GameContext.Provider>
   );

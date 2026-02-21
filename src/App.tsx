@@ -70,6 +70,7 @@ const Leaderboard = lazyWithRetry(() => import('./components/leaderboard/Leaderb
 const GlobalLeaderboard = lazyWithRetry(() => import('./components/leaderboard/GlobalLeaderboard'));
 const Dashboard = lazyWithRetry(() => import('./components/dashboard/Dashboard'));
 const AdminPanel = lazyWithRetry(() => import('./components/admin/AdminPanel'));
+const ResumeGameScreen = lazyWithRetry(() => import('./components/game/ResumeGameScreen'));
 
 // Loading component
 const LoadingScreen = () => (
@@ -178,6 +179,12 @@ function AppContent() {
                       <Route path="/game" element={
                         <ProtectedRoute>
                           <GameScreen />
+                        </ProtectedRoute>
+                      } />
+
+                      <Route path="/resume" element={
+                        <ProtectedRoute>
+                          <ResumeGameScreen />
                         </ProtectedRoute>
                       } />
                       

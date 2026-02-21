@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, Pause, Play, X, Bot, ChevronDown, ChevronUp, AlertTriangle, Smile, Flame } from 'lucide-react';
+import { ArrowLeft, RotateCcw, X, Bot, ChevronDown, ChevronUp, AlertTriangle, Smile, Flame } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Confetti from 'react-confetti';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -30,7 +30,7 @@ import { createAdaptiveBotPlayer, getAdaptiveBotConfigs, generateBotTurn, Adapti
 const GameScreen: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { state, dispatch } = useGame();
+  const { state, dispatch, pauseCurrentMatch } = useGame();
   const { players, addPlayer, updatePlayerHeatmap } = usePlayer();
   const { settings } = useSettings();
   const { storage } = useTenant();
@@ -512,11 +512,16 @@ const GameScreen: React.FC = () => {
     setShowSpinner(true);
   };
 
-  const handleSpinnerComplete = (startingPlayerIndex: number) => {
+  const handleSpinnerComplete = async (startingPlayerIndex: number) => {
     if (!pendingGameStart) return;
 
     const spinnerWinner = pendingGameStart.players[startingPlayerIndex];
     console.log(`🎯 Spinner winner: ${spinnerWinner?.name} (index ${startingPlayerIndex})`);
+
+    // Pause existing match before starting a new one
+    if (state.currentMatch && state.currentMatch.status === 'in-progress') {
+      await pauseCurrentMatch();
+    }
 
     // Reorder players so the winner goes first
     const reorderedPlayers = [
@@ -1279,20 +1284,6 @@ const GameScreen: React.FC = () => {
               <RotateCcw size={20} />
             </button>
 
-            <button
-              onClick={() => {
-                if (state.currentMatch?.status === 'paused') {
-                  dispatch({ type: 'RESUME_MATCH' });
-                } else {
-                  dispatch({ type: 'PAUSE_MATCH' });
-                }
-              }}
-              className="glass-card p-3 rounded-lg hover:glass-card-hover text-white transition-all"
-              title={state.currentMatch?.status === 'paused' ? 'Fortsetzen' : 'Pausieren'}
-            >
-              {state.currentMatch?.status === 'paused' ? <Play size={20} /> : <Pause size={20} />}
-            </button>
-            
             <button
               onClick={handleEndMatch}
               className="p-3 rounded-lg bg-red-600 hover:bg-red-500 text-white transition-all"

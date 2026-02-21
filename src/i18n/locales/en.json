@@ -282,5 +282,17 @@
     "manage": "Manage",
     "days_left": "days left",
     "trial_days": "Trial days"
+  },
+  "resume": {
+    "title": "Resume Games",
+    "menu_title": "Resume Game",
+    "menu_desc": "{{count}} paused games",
+    "no_matches": "No paused games available",
+    "continue": "Resume",
+    "delete": "Delete",
+    "confirm_delete": "Sure?",
+    "paused": "Paused",
+    "in_progress": "Active",
+    "paused_banner": "Resume paused match"
   }
 }
