@@ -31,7 +31,7 @@ const GameScreen: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const forceNewGame = searchParams.get('new') === '1';
+  const forceNewGameRef = useRef(searchParams.get('new') === '1');
   const { state, dispatch, pauseCurrentMatch } = useGame();
   const { players, addPlayer, updatePlayerHeatmap } = usePlayer();
   const { settings } = useSettings();
@@ -213,11 +213,11 @@ const GameScreen: React.FC = () => {
       }
     }
   }, [state.currentMatch?.status, state.currentMatch?.winner, state.currentMatch?.id, checkMatchAchievements, checkLegAchievements, processedMatchIds, storage]);
-  const [showSetup, setShowSetup] = useState(!state.currentMatch || forceNewGame);
+  const [showSetup, setShowSetup] = useState(!state.currentMatch || forceNewGameRef.current);
 
   // Clear ?new=1 from URL after consuming it
   useEffect(() => {
-    if (forceNewGame) {
+    if (forceNewGameRef.current) {
       setSearchParams({}, { replace: true });
     }
   }, []);
@@ -477,14 +477,19 @@ const GameScreen: React.FC = () => {
     if (isNavigatingAwayRef.current) {
       return;
     }
-    
+
+    // If user explicitly requested a new game, show setup — don't auto-resume
+    if (forceNewGameRef.current) {
+      return;
+    }
+
     // Auto-resume paused matches (only when returning to game screen)
     if (state.currentMatch?.status === 'paused') {
       dispatch({ type: 'RESUME_MATCH' });
       setShowSetup(false);
       return;
     }
-    
+
     // Show setup if no match or if match is completed
     if ((!state.currentMatch || state.currentMatch.status === 'completed') && showSetup === false) {
       setShowSetup(true);
@@ -529,9 +534,12 @@ const GameScreen: React.FC = () => {
     console.log(`🎯 Spinner winner: ${spinnerWinner?.name} (index ${startingPlayerIndex})`);
 
     // Pause existing match before starting a new one
-    if (state.currentMatch && state.currentMatch.status === 'in-progress') {
+    if (state.currentMatch && (state.currentMatch.status === 'in-progress' || state.currentMatch.status === 'paused')) {
       await pauseCurrentMatch();
     }
+
+    // New game is now being started, clear the force flag
+    forceNewGameRef.current = false;
 
     // Reorder players so the winner goes first
     const reorderedPlayers = [
