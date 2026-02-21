@@ -11,7 +11,7 @@ import SyncStatus from './sync/SyncStatus';
 import UserGuideModal from './guide/UserGuideModal';
 
 const MainMenu: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { currentTenant, setCurrentTenant, storage } = useTenant();
   const { user } = useAuth();
@@ -55,30 +55,30 @@ const MainMenu: React.FC = () => {
         }]
       : []),
     {
-      title: '🎯 Cricket',
+      title: '🎯 ' + t('menu.cricket'),
       icon: Target,
-      description: 'Cricket-Modus spielen',
+      description: t('menu.cricket_desc'),
       onClick: () => navigate('/cricket'),
       gradient: 'from-green-500 to-green-600',
     },
     {
-      title: '🕐 Around the Clock',
+      title: '🕐 ' + t('menu.around_the_clock'),
       icon: Target,
-      description: '1-20 der Reihe nach',
+      description: t('menu.around_the_clock_desc'),
       onClick: () => navigate('/around-the-clock'),
       gradient: 'from-cyan-500 to-cyan-600',
     },
     {
-      title: '⚡ Shanghai',
+      title: '⚡ ' + t('menu.shanghai'),
       icon: Target,
-      description: 'Bonus-Runden Modus',
+      description: t('menu.shanghai_desc'),
       onClick: () => navigate('/shanghai'),
       gradient: 'from-yellow-500 to-orange-500',
     },
     {
-      title: '🌐 Online Multiplayer',
+      title: '🌐 ' + t('menu.online_multiplayer'),
       icon: Target,
-      description: 'Gegen andere spielen',
+      description: t('menu.online_multiplayer_desc'),
       onClick: () => navigate('/online'),
       gradient: 'from-purple-500 to-pink-500',
     },
@@ -139,9 +139,9 @@ const MainMenu: React.FC = () => {
       gradient: 'from-dark-600 to-dark-700',
     },
     {
-      title: 'Anleitung',
+      title: t('menu.guide'),
       icon: BookOpen,
-      description: 'Umfassende Anleitung zur App',
+      description: t('menu.guide_desc'),
       onClick: () => setShowGuideModal(true),
       gradient: 'from-blue-500 to-blue-600',
     },
@@ -185,7 +185,7 @@ const MainMenu: React.FC = () => {
             </h1>
           </div>
           <p className="text-xl text-white font-light mt-4" style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)' }}>
-            {t('common.language') === 'de' ? 'Professionelles Dart Zählsystem' : 'Professional Dart Scoring System'}
+            {i18n.language === 'de' ? 'Professionelles Dart Zählsystem' : 'Professional Dart Scoring System'}
           </p>
         </motion.div>
         

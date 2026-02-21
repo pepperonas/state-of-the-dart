@@ -288,46 +288,54 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         audioSystem.announceBust();
       }
       
-      // Update match
-      const updatedMatch = { ...state.currentMatch };
-      updatedMatch.legs[state.currentMatch.currentLegIndex] = updatedLeg;
-      
+      // Update match — deep copy players and legs to avoid mutations
+      const updatedPlayers = state.currentMatch.players.map(p => ({ ...p }));
+      const updatedPlayer = updatedPlayers[state.currentPlayerIndex];
+      const updatedLegs = state.currentMatch.legs.map((l, i) =>
+        i === state.currentMatch!.currentLegIndex ? updatedLeg : l
+      );
+      const updatedMatch = {
+        ...state.currentMatch,
+        players: updatedPlayers,
+        legs: updatedLegs,
+      };
+
       // Update player stats
       const throwScore = bustOccurred ? 0 : currentThrowScore;
-      if (throwScore === 180) currentPlayer.match180s++;
-      else if (throwScore >= 171) currentPlayer.match171Plus++;
-      else if (throwScore >= 140) currentPlayer.match140Plus++;
-      else if (throwScore >= 100) currentPlayer.match100Plus++;
-      else if (throwScore >= 60) currentPlayer.match60Plus++;
-      
-      if (throwScore > currentPlayer.matchHighestScore) {
-        currentPlayer.matchHighestScore = throwScore;
+      if (throwScore === 180) updatedPlayer.match180s++;
+      else if (throwScore >= 171) updatedPlayer.match171Plus++;
+      else if (throwScore >= 140) updatedPlayer.match140Plus++;
+      else if (throwScore >= 100) updatedPlayer.match100Plus++;
+      else if (throwScore >= 60) updatedPlayer.match60Plus++;
+
+      if (throwScore > updatedPlayer.matchHighestScore) {
+        updatedPlayer.matchHighestScore = throwScore;
       }
-      
+
       // Calculate running average
       const allPlayerThrows = updatedMatch.legs.flatMap(l =>
-        l.throws.filter(t => t.playerId === currentPlayer.playerId)
+        l.throws.filter(t => t.playerId === updatedPlayer.playerId)
       );
-      currentPlayer.matchAverage = calculateAverage(allPlayerThrows);
+      updatedPlayer.matchAverage = calculateAverage(allPlayerThrows);
 
       // Track checkout attempts (when remaining before throw was <= 170)
       if (previousRemaining <= 170) {
-        currentPlayer.checkoutAttempts++;
+        updatedPlayer.checkoutAttempts++;
       }
 
       // Handle leg win
       if (legWon) {
-        currentPlayer.legsWon++;
-        currentPlayer.checkoutsHit++;
-        
+        updatedPlayer.legsWon++;
+        updatedPlayer.checkoutsHit++;
+
         // Check for set/match win
         const legsToWin = state.currentMatch.settings.legsToWin || 3;
-        if (currentPlayer.legsWon >= legsToWin) {
+        if (updatedPlayer.legsWon >= legsToWin) {
           // Set or match won
-          updatedMatch.winner = currentPlayer.playerId;
+          updatedMatch.winner = updatedPlayer.playerId;
           updatedMatch.status = 'completed';
           updatedMatch.completedAt = new Date();
-          
+
           // Announce set or match win
           if (state.currentMatch.settings.setsToWin && state.currentMatch.settings.setsToWin > 1) {
             audioSystem.announceCheckout(currentThrowScore, 'set');
@@ -351,7 +359,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
             throws: [],
             startedAt: new Date(),
           };
-          updatedMatch.legs.push(newLeg);
+          updatedMatch.legs = [...updatedMatch.legs, newLeg];
           updatedMatch.currentLegIndex = updatedMatch.legs.length - 1;
 
           // Set starting player for new leg (alternating)
@@ -430,11 +438,12 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         completedAt: undefined,
       };
       
-      const updatedMatch = { ...state.currentMatch };
-      updatedMatch.legs[state.currentMatch.currentLegIndex] = updatedLeg;
-      
-      // Recalculate all player statistics after undo
-      updatedMatch.players.forEach((player) => {
+      // Deep copy match with players and legs to avoid mutations
+      const updatedLegs = state.currentMatch.legs.map((l, i) =>
+        i === state.currentMatch!.currentLegIndex ? updatedLeg : l
+      );
+      const updatedPlayers = state.currentMatch.players.map(p => {
+        const player = { ...p };
         // Reset stats
         player.match180s = 0;
         player.match171Plus = 0;
@@ -445,12 +454,12 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         player.legsWon = 0;
         player.checkoutsHit = 0;
         player.checkoutAttempts = 0;
-        
+
         // Recalculate from all throws
-        const allPlayerThrows = updatedMatch.legs.flatMap(l => 
+        const allPlayerThrows = updatedLegs.flatMap(l =>
           l.throws.filter(t => t.playerId === player.playerId)
         );
-        
+
         allPlayerThrows.forEach(throwData => {
           const throwScore = throwData.isBust ? 0 : throwData.score;
           if (throwScore === 180) player.match180s++;
@@ -458,23 +467,23 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
           else if (throwScore >= 140) player.match140Plus++;
           else if (throwScore >= 100) player.match100Plus++;
           else if (throwScore >= 60) player.match60Plus++;
-          
+
           if (throwScore > player.matchHighestScore) {
             player.matchHighestScore = throwScore;
           }
         });
-        
+
         // Recalculate average
         player.matchAverage = calculateAverage(allPlayerThrows);
-        
+
         // Recalculate legs won and checkouts
-        updatedMatch.legs.forEach(leg => {
+        updatedLegs.forEach(leg => {
           if (leg.winner === player.playerId) {
             player.legsWon++;
             player.checkoutsHit++;
           }
           // Count checkout attempts per throw: check remaining BEFORE each throw
-          const startScore = updatedMatch.settings.startScore || 501;
+          const startScore = state.currentMatch!.settings.startScore || 501;
           let runningTotal = 0;
           const playerThrowsInLeg = leg.throws.filter(t => t.playerId === player.playerId);
           playerThrowsInLeg.forEach(t => {
@@ -485,7 +494,14 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
             runningTotal += t.score;
           });
         });
+
+        return player;
       });
+      const updatedMatch = {
+        ...state.currentMatch,
+        players: updatedPlayers,
+        legs: updatedLegs,
+      };
       
       // Find the player who threw last
       const playerIndex = state.currentMatch.players.findIndex(p => p.playerId === lastThrow.playerId);

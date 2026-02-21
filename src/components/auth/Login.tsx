@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 
 const Login: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { login, googleAuth } = useAuth();
   
@@ -130,7 +130,7 @@ const Login: React.FC = () => {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-4 bg-dark-900 text-dark-400">
-                {t('common.language') === 'de' ? 'Oder' : 'Or'}
+                {i18n.language === 'de' ? 'Oder' : 'Or'}
               </span>
             </div>
           </div>

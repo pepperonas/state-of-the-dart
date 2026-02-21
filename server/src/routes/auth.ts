@@ -571,13 +571,8 @@ router.delete('/account', authenticateToken, async (req: Request, res: Response)
       }
     }
 
-    // Delete all user data
-    db.prepare('DELETE FROM training_sessions WHERE user_id = ?').run(userId);
-    db.prepare('DELETE FROM match_throws WHERE match_id IN (SELECT id FROM matches WHERE user_id = ?)').run(userId);
-    db.prepare('DELETE FROM match_legs WHERE match_id IN (SELECT id FROM matches WHERE user_id = ?)').run(userId);
-    db.prepare('DELETE FROM matches WHERE user_id = ?').run(userId);
-    db.prepare('DELETE FROM player_achievements WHERE player_id IN (SELECT id FROM players WHERE user_id = ?)').run(userId);
-    db.prepare('DELETE FROM players WHERE user_id = ?').run(userId);
+    // Delete all user data — ON DELETE CASCADE propagates from tenants
+    // to players, matches, legs, throws, training_sessions, etc.
     db.prepare('DELETE FROM tenants WHERE user_id = ?').run(userId);
     db.prepare('DELETE FROM users WHERE id = ?').run(userId);
 

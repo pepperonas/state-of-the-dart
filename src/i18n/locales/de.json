@@ -76,7 +76,17 @@
     "tournaments_desc": "Turniere & Wettbewerbe",
     "training_desc": "Trainingsmodi & Übungen",
     "settings_desc": "App-Einstellungen",
-    "admin_panel_desc": "Systemverwaltung"
+    "admin_panel_desc": "Systemverwaltung",
+    "cricket": "Cricket",
+    "cricket_desc": "Cricket-Modus spielen",
+    "around_the_clock": "Around the Clock",
+    "around_the_clock_desc": "1-20 der Reihe nach",
+    "shanghai": "Shanghai",
+    "shanghai_desc": "Bonus-Runden Modus",
+    "online_multiplayer": "Online Multiplayer",
+    "online_multiplayer_desc": "Gegen andere spielen",
+    "guide": "Anleitung",
+    "guide_desc": "Umfassende Anleitung zur App"
   },
   "players": {
     "title": "Spieler",
