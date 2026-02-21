@@ -560,6 +560,10 @@ const GameScreen: React.FC = () => {
     const currentPlayer = state.currentMatch?.players[state.currentPlayerIndex];
     const currentLeg = state.currentMatch?.legs[state.currentMatch.currentLegIndex];
 
+    // Track whether this throw wins the leg (checkout) - if so, CONFIRM_THROW
+    // already handles the player transition, so we must NOT dispatch NEXT_PLAYER
+    let isLegWinningThrow = false;
+
     if (currentPlayer && currentLeg) {
       const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
       const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
@@ -580,6 +584,8 @@ const GameScreen: React.FC = () => {
       const willBust = newRemaining < 0 ||
                        newRemaining === 1 ||
                        (newRemaining === 0 && requiresDouble && lastDart?.multiplier !== 2);
+
+      isLegWinningThrow = isValidCheckout;
 
       // Only announce score if not checkout or bust
       if (!isValidCheckout && !willBust) {
@@ -669,8 +675,9 @@ const GameScreen: React.FC = () => {
     setIsEditingThrow(false);
     setEditingDartIndex(null);
 
-    // Auto-advance to next player (also after editing a corrected throw)
-    if (settings.autoNextPlayer) {
+    // Auto-advance to next player, but NOT after a checkout/leg-win
+    // (CONFIRM_THROW already sets currentPlayerIndex for the new leg)
+    if (settings.autoNextPlayer && !isLegWinningThrow) {
       setTimeout(() => {
         dispatch({ type: 'NEXT_PLAYER' });
       }, 1000);

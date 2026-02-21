@@ -66,6 +66,12 @@ router.post('/player/:playerId/unlock', authenticateTenant, (req: AuthRequest, r
   const db = getDatabase();
 
   try {
+    // Check if player exists in database
+    const playerExists = db.prepare('SELECT 1 FROM players WHERE id = ?').get(playerId);
+    if (!playerExists) {
+      return res.json({ message: 'Skipped - player not in database' });
+    }
+
     // Check if achievement exists
     const achievement = db.prepare('SELECT * FROM achievements WHERE id = ?').get(achievementId);
     if (!achievement) {
@@ -104,11 +110,18 @@ router.put('/player/:playerId/progress', authenticateTenant, (req: AuthRequest, 
 
   try {
     console.log(`[Achievements API] Updating progress for player ${playerId}:`, Object.keys(achievements).length, 'achievements');
-    
+
+    // Check if player exists in database before attempting to write
+    const playerExists = db.prepare('SELECT 1 FROM players WHERE id = ?').get(playerId);
+    if (!playerExists) {
+      // Player not in DB (e.g. bot or local-only player) - silently skip
+      return res.json({ message: 'Skipped - player not in database' });
+    }
+
     // Process each achievement progress update
     for (const [achievementId, progressData] of Object.entries(achievements)) {
       const progress = (progressData as any).percentage || (progressData as any).progress || 0;
-      
+
       // Only update if not already unlocked (progress < 100)
       if (progress < 100) {
         db.prepare(`
@@ -121,7 +134,6 @@ router.put('/player/:playerId/progress', authenticateTenant, (req: AuthRequest, 
           null, // unlocked_at is null for progress updates (not unlocked yet)
           progress
         );
-        console.log(`[Achievements API] Updated progress for ${achievementId}: ${progress}%`);
       }
     }
 

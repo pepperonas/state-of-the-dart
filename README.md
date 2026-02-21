@@ -567,7 +567,7 @@ Siehe [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) für Details.
 
 ## 🔢 Versionierung
 
-- **Aktuell**: v0.4.3
+- **Aktuell**: v0.4.4
 - **Schema**: MAJOR.MINOR.PATCH
 - **Auto-Increment**: `npm run version:bump`
 
@@ -637,6 +637,12 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.4.4 (21. Februar 2026) - Spiellogik & API Fixes
+
+#### 🐛 Bug Fixes
+- **Spielreihenfolge nach Checkout repariert** - NEXT_PLAYER wurde auch nach Leg-Gewinn dispatcht, wodurch der Startspieler des neuen Legs übersprungen wurde (Spieler konnte doppelt werfen)
+- **API 500 bei Achievement-Progress behoben** - FOREIGN KEY constraint failed wenn Spieler nicht in DB existiert (z.B. Bots). Jetzt wird graceful übersprungen.
 
 ### v0.4.3 (21. Februar 2026) - Admin & Achievement UX
 
