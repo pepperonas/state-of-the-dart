@@ -26,8 +26,10 @@ const Impressum: React.FC = () => {
             Angaben gem. &sect; 5 TMG
           </h2>
           <div className="text-dark-300 space-y-2">
+            <p>celox</p>
             <p>Martin Pfeffer</p>
-            <p>celox.io (Einzelunternehmen)</p>
+            <p>Flughafenstra&szlig;e 24</p>
+            <p>12053 Berlin</p>
           </div>
         </div>
 
@@ -76,6 +78,29 @@ const Impressum: React.FC = () => {
           </h2>
           <div className="text-dark-300 space-y-2">
             <p>Martin Pfeffer</p>
+            <p>Flughafenstra&szlig;e 24</p>
+            <p>12053 Berlin</p>
+            <p>
+              E-Mail:{' '}
+              <a
+                href="mailto:martin.pfeffer@celox.io"
+                className="text-primary-400 hover:text-primary-300 transition-colors"
+              >
+                martin.pfeffer@celox.io
+              </a>
+            </p>
+          </div>
+        </div>
+
+        {/* Datenschutzbeauftragter */}
+        <div className="glass-card p-6 md:p-8 mb-6">
+          <h2 className="text-xl font-semibold text-white mb-4">
+            Datenschutzbeauftragter
+          </h2>
+          <div className="text-dark-300 space-y-2">
+            <p>Martin Pfeffer</p>
+            <p>Flughafenstra&szlig;e 24</p>
+            <p>12053 Berlin</p>
             <p>
               E-Mail:{' '}
               <a

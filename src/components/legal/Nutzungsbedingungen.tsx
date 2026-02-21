@@ -45,8 +45,10 @@ const Nutzungsbedingungen: React.FC = () => {
               , betrieben von:
             </p>
             <div className="mt-2">
+              <p>celox</p>
               <p>Martin Pfeffer</p>
-              <p>celox.io (Einzelunternehmen)</p>
+              <p>Flughafenstra&szlig;e 24</p>
+              <p>12053 Berlin</p>
               <p>
                 E-Mail:{' '}
                 <a
