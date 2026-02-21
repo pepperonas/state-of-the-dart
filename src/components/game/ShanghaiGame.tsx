@@ -259,14 +259,16 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
                         setSelectedPlayers(prev => [...prev, player]);
                       }
                     }}
-                    className={`p-4 rounded-xl border-2 transition-all ${
+                    className={`p-3 rounded-lg border-2 transition-all ${
                       selectedPlayers.find(p => p.id === player.id)
-                        ? 'border-primary-500 bg-primary-500/20'
-                        : 'border-dark-600 bg-dark-800 hover:border-dark-500'
+                        ? 'border-success-500 bg-success-500/20 shadow-lg'
+                        : 'border-dark-700 hover:border-dark-600'
                     }`}
                   >
-                    <PlayerAvatar avatar={player.avatar} name={player.name} size="md" />
-                    <p className="text-white font-medium mt-2">{player.name}</p>
+                    <div className="flex justify-center mb-1">
+                      <PlayerAvatar avatar={player.avatar} name={player.name} size="sm" />
+                    </div>
+                    <div className="text-sm font-medium text-white text-center">{player.name}</div>
                   </button>
                 ))}
               </div>
