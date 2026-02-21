@@ -18,8 +18,15 @@ router.get('/', auth_1.authenticateTenant, (req, res) => {
     `;
         const params = [req.tenantId];
         if (status) {
-            query += ` AND status = ?`;
-            params.push(status);
+            const statuses = status.split(',').map(s => s.trim()).filter(Boolean);
+            if (statuses.length === 1) {
+                query += ` AND status = ?`;
+                params.push(statuses[0]);
+            }
+            else if (statuses.length > 1) {
+                query += ` AND status IN (${statuses.map(() => '?').join(',')})`;
+                params.push(...statuses);
+            }
         }
         // Order by completed_at DESC for completed matches, started_at DESC for others
         query += ` ORDER BY 
@@ -37,7 +44,9 @@ router.get('/', auth_1.authenticateTenant, (req, res) => {
         SELECT
           mp.*,
           p.name,
-          p.avatar
+          p.avatar,
+          p.is_bot,
+          p.bot_level
         FROM match_players mp
         LEFT JOIN players p ON mp.player_id = p.id
         WHERE mp.match_id = ?
@@ -48,6 +57,8 @@ router.get('/', auth_1.authenticateTenant, (req, res) => {
                 playerId: mp.player_id,
                 name: mp.name || 'Unknown',
                 avatar: mp.avatar || '🎯',
+                isBot: mp.is_bot === 1,
+                botLevel: mp.bot_level,
                 matchAverage: mp.match_average || 0,
                 first9Average: mp.first9_average || 0,
                 matchHighestScore: mp.highest_score || 0,

@@ -100,8 +100,12 @@ router.put('/player/:playerId/progress', auth_1.authenticateTenant, (req, res) =
             // Player not in DB (e.g. bot or local-only player) - silently skip
             return res.json({ message: 'Skipped - player not in database' });
         }
+        // Load valid achievement IDs to skip invalid ones
+        const validAchievements = new Set(db.prepare('SELECT id FROM achievements').all().map(a => a.id));
         // Process each achievement progress update
         for (const [achievementId, progressData] of Object.entries(achievements)) {
+            if (!validAchievements.has(achievementId))
+                continue;
             const progress = progressData.percentage || progressData.progress || 0;
             // Only update if not already unlocked (progress < 100)
             if (progress < 100) {

@@ -9,7 +9,7 @@
 **Professionelles Dart-Zählsystem** - Eine funktionsreiche, webbasierte Dart-Scoring-Anwendung mit Multi-User-Support, professionellem Statistik-Tracking und Live-Deployment.
 
 [![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green)](https://stateofthedart.com)
-![Version](https://img.shields.io/badge/Version-0.4.0-blue)
+![Version](https://img.shields.io/badge/Version-0.5.1-blue)
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -75,7 +75,11 @@
 - **Double Out/In** - Konfigurierbare Checkout-Regeln
 - **Best of Sets/Legs** - Turnier-Matchformate
 - **Multi-Player** - Unterstützung für 2+ Spieler mit eigenen Avataren und Namen
-- **Match fortsetzen** - Unterbrochene Spiele automatisch fortsetzen
+- **Match fortsetzen (NEU in v0.5.0)** - Mehrere Spiele gleichzeitig pausieren und später fortsetzen
+  - Automatische Pause beim Starten eines neuen Spiels
+  - Resume-Liste mit allen pausierten Matches
+  - Deterministische Match-Namen aus UUID (z.B. "Cosmic Tiger")
+  - Vollständige Match-Rekonstruktion aus der Datenbank
 - **Trainingsmodi** - 6 Trainingsmodi inkl. Doubles/Triples-Training, Around the Clock und Bob's 27
 
 ### 🏆 Turniersystem (NEU in v0.2.0)
@@ -567,7 +571,7 @@ Siehe [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) für Details.
 
 ## 🔢 Versionierung
 
-- **Aktuell**: v0.4.4
+- **Aktuell**: v0.5.1
 - **Schema**: MAJOR.MINOR.PATCH
 - **Auto-Increment**: `npm run version:bump`
 
@@ -592,9 +596,14 @@ Siehe [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) für Details.
 - [x] Achievement-Fortschritts-Hinweise (#4/36)
 - [x] Sound-Mixing (Separate Lautstärke) (#5/36)
 
+- [x] Cricket-Spielmodus
+- [x] Around the Clock-Spielmodus
+- [x] Shanghai-Spielmodus
+- [x] Online Multiplayer (WebSocket)
+- [x] Turniersystem (Knockout & Round Robin)
+- [x] Multi-Game Resume (v0.5.0)
+
 ### 🎯 Geplant
-- [ ] Cricket-Spielmodus
-- [ ] Turniersystem-Implementierung
 - [ ] Head-to-Head-Stats
 - [ ] Keyboard-Shortcuts
 - [ ] Smart-Checkout-Trainer
@@ -637,6 +646,29 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.5.1 (21. Februar 2026) - Comprehensive Bug Audit
+
+#### 🐛 Bug Fixes
+- **Achievement 500-Error behoben** - FOREIGN KEY constraint bei ungültigen Achievement-IDs wird jetzt übersprungen
+- **Account-Löschung repariert** - Referenzierte nicht-existierende Tabellen, nutzt jetzt CASCADE korrekt
+- **Heatmap-Batch-Endpoint erreichbar** - Route-Reihenfolge korrigiert (`/heatmaps/batch` vor `/:id`)
+- **State-Mutationen im GameContext behoben** - CONFIRM_THROW und UNDO_THROW erstellen jetzt Deep Copies statt direkte Mutation
+- **i18n: Hardcoded Deutsch im MainMenu ersetzt** - Cricket, Shanghai, Around the Clock, Online Multiplayer, Guide nutzen jetzt Übersetzungskeys
+- **i18n: Spracherkennung korrigiert** - `t('common.language')` → `i18n.language` in MainMenu und Login
+
+### v0.5.0 (21. Februar 2026) - Multi-Game Resume
+
+#### ✨ Neue Features
+- **Mehrere Spiele pausieren & fortsetzen** - Beliebig viele Matches gleichzeitig pausiert halten
+- **Resume-Screen** - Übersicht aller pausierten Matches mit Match-Namen, Spielstand und Spieler-Info
+- **Deterministische Match-Namen** - Einprägsame Namen aus UUID generiert (z.B. "Cosmic Tiger", "Swift Phoenix")
+- **Auto-Pause** - Beim Starten eines neuen Spiels wird das aktive Match automatisch pausiert
+- **Match-Rekonstruktion** - Vollständige Wiederherstellung des Spielstands aus der Datenbank
+
+#### 🐛 Bug Fixes
+- **Quick Match vs Resume** - "Schnelles Match" öffnet immer die Spielerauswahl, Resume lädt das pausierte Spiel
+- **Setup-Zurück-Button** - Navigiert jetzt korrekt ins Hauptmenü
 
 ### v0.4.4 (21. Februar 2026) - Spiellogik & API Fixes
 
@@ -777,7 +809,7 @@ Siehe [CHANGELOG.md](CHANGELOG.md) für eine vollständige Liste der Änderungen
 
 <div align="center">
   <p>Made with ❤️ and 🎯 by Martin Pfeffer</p>
-  <p>© 2026 celox.io | Version 0.4.0</p>
+  <p>© 2026 celox.io | Version 0.5.1</p>
   <p>
     <a href="https://stateofthedart.com">🌐 Live Demo</a> •
     <a href="https://github.com/pepperonas/state-of-the-dart">📦 GitHub</a> •

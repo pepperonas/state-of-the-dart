@@ -62,6 +62,47 @@ router.get('/', auth_1.authenticateTenant, (req, res) => {
         res.status(500).json({ error: 'Failed to fetch players' });
     }
 });
+// Get all heatmaps for tenant (batch) — MUST be before /:id to avoid route shadowing
+router.get('/heatmaps/batch', auth_1.authenticateTenant, (req, res) => {
+    const db = (0, database_1.getDatabase)();
+    try {
+        // Get all players for this tenant
+        const players = db.prepare('SELECT id FROM players WHERE tenant_id = ?').all(req.tenantId);
+        const playerIds = players.map(p => p.id);
+        if (playerIds.length === 0) {
+            return res.json({ heatmaps: {} });
+        }
+        // Get all heatmaps in one query
+        const placeholders = playerIds.map(() => '?').join(',');
+        const heatmaps = db.prepare(`SELECT * FROM heatmap_data WHERE player_id IN (${placeholders})`).all(...playerIds);
+        // Format response
+        const heatmapMap = {};
+        heatmaps.forEach(heatmap => {
+            heatmapMap[heatmap.player_id] = {
+                player_id: heatmap.player_id,
+                segments: JSON.parse(heatmap.segments),
+                total_darts: heatmap.total_darts,
+                last_updated: heatmap.last_updated,
+            };
+        });
+        // Add empty heatmaps for players without data
+        playerIds.forEach(id => {
+            if (!heatmapMap[id]) {
+                heatmapMap[id] = {
+                    player_id: id,
+                    segments: {},
+                    total_darts: 0,
+                    last_updated: Date.now(),
+                };
+            }
+        });
+        res.json({ heatmaps: heatmapMap });
+    }
+    catch (error) {
+        console.error('Error fetching batch heatmaps:', error);
+        res.status(500).json({ error: 'Failed to fetch heatmaps' });
+    }
+});
 // Get single player
 router.get('/:id', auth_1.authenticateTenant, (req, res) => {
     const { id } = req.params;
@@ -287,47 +328,6 @@ router.get('/:id/heatmap', auth_1.authenticateTenant, (req, res) => {
     catch (error) {
         console.error('Error fetching heatmap:', error);
         res.status(500).json({ error: 'Failed to fetch heatmap' });
-    }
-});
-// Get all heatmaps for tenant (batch)
-router.get('/heatmaps/batch', auth_1.authenticateTenant, (req, res) => {
-    const db = (0, database_1.getDatabase)();
-    try {
-        // Get all players for this tenant
-        const players = db.prepare('SELECT id FROM players WHERE tenant_id = ?').all(req.tenantId);
-        const playerIds = players.map(p => p.id);
-        if (playerIds.length === 0) {
-            return res.json({ heatmaps: {} });
-        }
-        // Get all heatmaps in one query
-        const placeholders = playerIds.map(() => '?').join(',');
-        const heatmaps = db.prepare(`SELECT * FROM heatmap_data WHERE player_id IN (${placeholders})`).all(...playerIds);
-        // Format response
-        const heatmapMap = {};
-        heatmaps.forEach(heatmap => {
-            heatmapMap[heatmap.player_id] = {
-                player_id: heatmap.player_id,
-                segments: JSON.parse(heatmap.segments),
-                total_darts: heatmap.total_darts,
-                last_updated: heatmap.last_updated,
-            };
-        });
-        // Add empty heatmaps for players without data
-        playerIds.forEach(id => {
-            if (!heatmapMap[id]) {
-                heatmapMap[id] = {
-                    player_id: id,
-                    segments: {},
-                    total_darts: 0,
-                    last_updated: Date.now(),
-                };
-            }
-        });
-        res.json({ heatmaps: heatmapMap });
-    }
-    catch (error) {
-        console.error('Error fetching batch heatmaps:', error);
-        res.status(500).json({ error: 'Failed to fetch heatmaps' });
     }
 });
 // Update player heatmap
