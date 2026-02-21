@@ -567,7 +567,7 @@ Siehe [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) für Details.
 
 ## 🔢 Versionierung
 
-- **Aktuell**: v0.4.1
+- **Aktuell**: v0.4.2
 - **Schema**: MAJOR.MINOR.PATCH
 - **Auto-Increment**: `npm run version:bump`
 
@@ -637,6 +637,12 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.4.2 (21. Februar 2026) - Admin & Achievement UX
+
+#### ✨ Verbesserungen
+- **Admin: Status-Dropdown in Bug-Reports-Tabelle** - Status direkt in der Listenansicht per Dropdown ändern (open/in_progress/resolved/closed)
+- **Achievement-Notification: Spielername anzeigen** - Notification zeigt jetzt wer das Achievement freigeschaltet hat (z.B. "MARTIN — ACHIEVEMENT FREIGESCHALTET")
 
 ### v0.4.1 (21. Februar 2026) - Bugfixes
 

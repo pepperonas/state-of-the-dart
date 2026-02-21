@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Star } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useAchievements } from '../../context/AchievementContext';
+import { usePlayer } from '../../context/PlayerContext';
 import { AchievementTier, getTierColor, getRarityColor } from '../../types/achievements';
 import { audioSystem } from '../../utils/audio';
 
@@ -52,6 +53,7 @@ function getTierGlowIntense(tier: AchievementTier): string {
 
 const AchievementNotification: React.FC = () => {
   const { currentNotification, dismissNotification } = useAchievements();
+  const { getPlayer } = usePlayer();
   const [isVisible, setIsVisible] = useState(false);
   const [showFlash, setShowFlash] = useState(false);
   const [progress, setProgress] = useState(100);
@@ -185,10 +187,12 @@ const AchievementNotification: React.FC = () => {
 
   if (!currentNotification) return null;
 
-  const { achievement, unlockedCount } = currentNotification;
+  const { achievement, playerId, unlockedCount } = currentNotification;
   const tier = achievement.tier;
   const tierColor = getTierColor(tier);
   const totalAchievements = 247; // Updated count after removing 3 unreachable achievements
+  const player = getPlayer(playerId);
+  const playerName = player?.name || 'Spieler';
 
   return (
     <>
@@ -265,7 +269,7 @@ const AchievementNotification: React.FC = () => {
                       animate={{ opacity: [0.7, 1, 0.7] }}
                       transition={{ duration: 2, repeat: Infinity }}
                     >
-                      Achievement Freigeschaltet
+                      {playerName} — Achievement Freigeschaltet
                     </motion.span>
                   </motion.div>
                   <button

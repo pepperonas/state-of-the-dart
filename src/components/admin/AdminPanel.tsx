@@ -665,14 +665,21 @@ const AdminPanel: React.FC = () => {
                           </span>
                         </td>
                         <td className="py-3 px-4">
-                          <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                            report.status === 'open' ? 'bg-red-500/20 text-red-400' :
-                            report.status === 'in_progress' ? 'bg-blue-500/20 text-blue-400' :
-                            report.status === 'resolved' ? 'bg-green-500/20 text-green-400' :
-                            'bg-gray-700 text-gray-300'
-                          }`}>
-                            {report.status.replace('_', ' ').toUpperCase()}
-                          </span>
+                          <select
+                            value={report.status}
+                            onChange={(e) => handleUpdateBugStatus(report.id, e.target.value)}
+                            className={`px-2 py-1 rounded text-xs font-semibold border-none cursor-pointer outline-none ${
+                              report.status === 'open' ? 'bg-red-500/20 text-red-400' :
+                              report.status === 'in_progress' ? 'bg-blue-500/20 text-blue-400' :
+                              report.status === 'resolved' ? 'bg-green-500/20 text-green-400' :
+                              'bg-gray-700 text-gray-300'
+                            }`}
+                          >
+                            <option value="open">OPEN</option>
+                            <option value="in_progress">IN PROGRESS</option>
+                            <option value="resolved">RESOLVED</option>
+                            <option value="closed">CLOSED</option>
+                          </select>
                         </td>
                         <td className="py-3 px-4 text-dark-300 capitalize">{report.category}</td>
                         <td className="py-3 px-4 text-dark-400 text-sm">
