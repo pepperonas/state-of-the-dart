@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Target, Users, TrendingUp, Trophy, Award, Dumbbell, Settings, Play, LogOut, Medal, Shield, BookOpen, Pause, RotateCcw } from 'lucide-react';
+import { Target, Users, TrendingUp, Trophy, Award, Dumbbell, Settings, Play, LogOut, Medal, Shield, BookOpen, RotateCcw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTenant } from '../context/TenantContext';
 import { useAuth } from '../context/AuthContext';
-import { useGame } from '../context/GameContext';
 import { api } from '../services/api';
 import UserMenu from './auth/UserMenu';
 import SyncStatus from './sync/SyncStatus';
@@ -16,26 +15,17 @@ const MainMenu: React.FC = () => {
   const navigate = useNavigate();
   const { currentTenant, setCurrentTenant, storage } = useTenant();
   const { user } = useAuth();
-  const { state: gameState } = useGame();
 
-  // Active match = currently loaded in GameContext
-  const activeMatch = gameState.currentMatch;
-  const hasActiveMatch = !!activeMatch && (activeMatch.status === 'in-progress' || activeMatch.status === 'paused');
-  const activePlayerNames = activeMatch?.players?.map(p => p.name).join(' vs ') || '';
-  const activeIsPaused = activeMatch?.status === 'paused';
-
-  // Count paused/in-progress matches from DB (for resume badge)
-  const [pausedMatchCount, setPausedMatchCount] = useState(0);
+  // Count all paused/in-progress matches from DB (for resume badge)
+  const [resumableMatchCount, setResumableMatchCount] = useState(0);
 
   useEffect(() => {
     api.matches.getResumable()
       .then((data: any) => {
-        // Exclude the currently active match from the count
-        const others = (data as any[]).filter(m => m.id !== activeMatch?.id);
-        setPausedMatchCount(others.length);
+        setResumableMatchCount((data as any[]).length);
       })
       .catch(() => {});
-  }, [activeMatch?.id]);
+  }, []);
 
   const [showGuideModal, setShowGuideModal] = useState(false);
 
@@ -54,14 +44,14 @@ const MainMenu: React.FC = () => {
       onClick: () => navigate('/game?new=1'),
       gradient: 'from-primary-500 to-primary-600',
     },
-    ...(pausedMatchCount > 0
+    ...(resumableMatchCount > 0
       ? [{
           title: t('resume.menu_title'),
           icon: RotateCcw,
-          description: t('resume.menu_desc', { count: pausedMatchCount }),
+          description: t('resume.menu_desc', { count: resumableMatchCount }),
           onClick: () => navigate('/resume'),
           gradient: 'from-amber-500 to-orange-500',
-          badge: pausedMatchCount,
+          badge: resumableMatchCount,
         }]
       : []),
     {
@@ -198,31 +188,6 @@ const MainMenu: React.FC = () => {
             {t('common.language') === 'de' ? 'Professionelles Dart Zählsystem' : 'Professional Dart Scoring System'}
           </p>
         </motion.div>
-        
-        {hasActiveMatch && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6"
-          >
-            <button
-              onClick={() => navigate('/game')}
-              className={`w-full py-4 ${
-                activeIsPaused
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600'
-                  : 'bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600'
-              } text-white rounded-xl font-bold text-lg flex items-center justify-center gap-3 shadow-lg transition-all`}
-            >
-              {activeIsPaused ? <Pause size={24} /> : <Play size={24} />}
-              <div className="flex flex-col items-center">
-                <span>{activeIsPaused ? t('resume.paused_banner') : t('menu.continue_match')}</span>
-                {activePlayerNames && (
-                  <span className="text-sm font-normal opacity-80">{activePlayerNames}</span>
-                )}
-              </div>
-            </button>
-          </motion.div>
-        )}
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {menuItems.map((item, index) => {

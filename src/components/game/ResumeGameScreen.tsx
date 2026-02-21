@@ -45,11 +45,7 @@ const ResumeGameScreen: React.FC = () => {
   const loadMatches = async () => {
     try {
       const data = await api.matches.getResumable();
-      // Filter out the currently active match (it's already in memory)
-      const filtered = (data as ResumableMatch[]).filter(
-        (m) => m.id !== state.currentMatch?.id
-      );
-      setMatches(filtered);
+      setMatches(data as ResumableMatch[]);
     } catch {
       // silently fail
     } finally {
