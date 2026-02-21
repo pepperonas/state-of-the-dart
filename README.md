@@ -9,7 +9,7 @@
 **Professionelles Dart-Zählsystem** - Eine funktionsreiche, webbasierte Dart-Scoring-Anwendung mit Multi-User-Support, professionellem Statistik-Tracking und Live-Deployment.
 
 [![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green)](https://stateofthedart.com)
-![Version](https://img.shields.io/badge/Version-0.3.0-blue)
+![Version](https://img.shields.io/badge/Version-0.4.0-blue)
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -119,14 +119,27 @@
 - **Export/Import** - JSON für vollständige Datensicherung
 - **Automatische Synchronisation** - Stats werden automatisch nach jedem Match aktualisiert
 
-### 🏆 Achievements & Gamification
-- **145+ Achievements** - In 7 Kategorien (Erste Schritte, Scoring, Checkout, Training, Konsistenz, Spezial, Meisterschaft)
+### 🏆 Achievements & Gamification (Komplett-Rewrite in v0.4.0)
+- **247 Achievements** - In 7 Kategorien (Erste Schritte, Scoring, Checkout, Training, Konsistenz, Spezial, Meisterschaft)
 - **Achievement-Synchronisation** - Achievements werden automatisch in der Datenbank gespeichert und bleiben erhalten
 - **Tier-System** - Bronze, Silber, Gold, Platin, Diamant
 - **Seltenheitsstufen** - Common, Rare, Epic, Legendary Achievements
-- **Fortschritts-Tracking** - Sieh deinen Fortschritt für gesperrte Achievements
-- **Benachrichtigungen** - Animierte Popups beim Freischalten
-- **Punktesystem** - Verdiene Punkte für Achievements (bis zu 500 pro Achievement)
+- **Fortschritts-Tracking** - Kumulative Metriken (Spiele, Siege, 180s etc.) akkumulieren korrekt
+- **AAA-Game-Feel Benachrichtigungen (NEU in v0.4.0)** - Cinematic Achievement-Popups:
+  - Fullscreen-Flash-Overlay beim Freischalten (Tier-Farbe)
+  - Spring-Animation Card-Entrance mit Overshoot
+  - Tier-basierte Confetti-Partikel (Bronze: 30, Diamond: 200+ mit Shimmer-Rain)
+  - Pulsierender Glow-Border mit Tier-Farbe
+  - Countdown-Progressbar (5-10s je nach Tier)
+  - Sound-Feedback beim Freischalten
+  - Notification-Queue: Mehrere Achievements werden nacheinander angezeigt
+- **Umfassende Dart-Analyse (NEU in v0.4.0)** - Segment-Level Achievement-Tracking:
+  - Jeder Dart wird auf Triples, Doubles, Singles, Bulls, Misses analysiert
+  - Visit-Pattern-Erkennung: Shanghai, Robin Hood, Triple-Triple, Same-Segment
+  - Checkout-Analyse: Double-Identifikation (D20, D16, D1...), 1/2-Dart-Finishes
+  - Kalender-Achievements: Mitternacht, Wochenende, Feiertage (Weihnachten, Neujahr, Halloween)
+- **Meta-Achievements** - Werden automatisch bei Punktestand-/Unlock-Meilensteinen geprüft
+- **Punktesystem** - Verdiene Punkte für Achievements (bis zu 1000 pro Achievement)
 - **Versteckte Achievements** - Spezielle geheime Achievements zum Entdecken
 - **Achievement-Hinweise** - Zeigt Fortschritt an, wenn du kurz vor einem Achievement stehst
 
@@ -385,7 +398,7 @@ state-of-the-dart/
 
 ### 5. Achievements freischalten
 - Spiele Matches um Achievements zu verdienen
-- 20 Achievements in 6 Kategorien
+- 247 Achievements in 7 Kategorien
 - Erhalte Hinweise, wenn du kurz vor einem Achievement stehst
 
 ---
@@ -435,22 +448,23 @@ Alle Charts werden mit der Recharts-Library erstellt.
 
 ## 🏆 Achievement-System
 
-20 Achievements in 6 Kategorien:
+247 Achievements in 7 Kategorien:
 
 ### Kategorien
-1. **Erste Schritte** (5) - Rookie bis Legend
-2. **Scoring** (5) - Von Ton 80 bis World Class
-3. **Checkout** (4) - Perfekte Finishes
-4. **Training** (3) - Trainingserfolge
-5. **Konsistenz** (2) - Siegesserien ohne Bust
-6. **Spezial** (1) - 9-Darter (Hidden)
+1. **Erste Schritte** (15+) - Rookie bis Millennium
+2. **Scoring** (40+) - Von Ton Plus bis 180 Sammler
+3. **Checkout** (35+) - Perfekte Finishes, Double-Spezialisten, Big Fish
+4. **Training** (19+) - Trainingserfolge, Modus-Meister
+5. **Konsistenz** (25+) - Siegesserien, Comebacks, Dominanz
+6. **Spezial** (15+) - 9-Darter, Kalender-Events, Speed Demon
+7. **Meisterschaft** (10+) - Achievement-Punkte, Allrounder, Ultimativer Meister
 
 ### Tier-System
-- **Bronze** (5-25 Punkte) - Einstiegs-Achievements
-- **Silber** (30-75 Punkte) - Fortgeschrittene
-- **Gold** (100-150 Punkte) - Experten
-- **Platin** (200-300 Punkte) - Meister
-- **Diamant** (500 Punkte) - Legenden
+- **Bronze** (5-30 Punkte) - Einstiegs-Achievements
+- **Silber** (35-75 Punkte) - Fortgeschrittene
+- **Gold** (75-150 Punkte) - Experten
+- **Platin** (150-300 Punkte) - Meister
+- **Diamant** (250-1000 Punkte) - Legenden
 
 Siehe vollständige Liste in `src/types/achievements.ts`
 
@@ -553,7 +567,7 @@ Siehe [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) für Details.
 
 ## 🔢 Versionierung
 
-- **Aktuell**: v0.1.7
+- **Aktuell**: v0.4.0
 - **Schema**: MAJOR.MINOR.PATCH
 - **Auto-Increment**: `npm run version:bump`
 
@@ -567,7 +581,7 @@ Siehe [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) für Details.
 - [x] Erweiterte Statistiken mit 10+ Charts
 - [x] Export/Import (JSON/CSV)
 - [x] PWA mit Offline-Support
-- [x] Achievement-System (20 Achievements)
+- [x] Achievement-System (247 Achievements, AAA-Notifications)
 - [x] Spielerprofile & Personal Bests
 - [x] Bestenlisten
 - [x] Spielervergleich (bis zu 4 Spieler)
@@ -623,6 +637,35 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.4.0 (21. Februar 2026) - Achievement-System Komplett-Rewrite
+
+#### ✨ Neue Features
+- **AAA-Game-Feel Notifications** - Cinematic Achievement-Popups mit:
+  - Fullscreen-Impact-Flash (Tier-Farbe)
+  - Spring-Animation Card-Entrance
+  - Tier-basierte Confetti (canvas-confetti: 30-200 Partikel)
+  - Diamond-Tier: Shimmer-Rain-Effekt
+  - Pulsierender Glow-Border
+  - Countdown-Progressbar (Bronze 5s bis Diamond 10s)
+  - Sound-Feedback via AudioSystem
+- **Notification-Queue** - Mehrere gleichzeitige Achievements werden nacheinander angezeigt
+- **Umfassende Dart-Analyse** - Jeder geworfene Dart wird analysiert:
+  - Segment-Tracking: Triples, Doubles, Singles, Bulls, Misses
+  - Visit-Patterns: Shanghai, Robin Hood, Triple-Triple, Same-Segment
+  - Checkout-Analyse: Double-Identifikation, 1/2-Dart-Finishes, Impossible Checkouts
+- **Kalender-Achievements** - Mitternacht, Wochenende, Weihnachten, Neujahr, Halloween, Valentinstag
+- **Meta-Achievements** - Automatische Prüfung bei Punktestand-/Unlock-Meilensteinen
+- **Match-Kontext** - Pressure-Checkouts, Checkout-nach-180, First-Visit-Checkouts
+
+#### 🐛 Bug Fixes
+- **Stale-Closure-Bug behoben** - progressCacheRef verhindert Datenverlust bei gleichzeitigen Saves
+- **Kumulative Metriken** - games_played, wins, 180s etc. akkumulieren jetzt korrekt (vorher immer auf 1 gesetzt)
+- **Lower-is-better Metriken** - game_time_max, leg_darts funktionieren jetzt korrekt
+
+#### 🗑️ Entfernt
+- 3 unerreichbare Achievements entfernt (birthday_win, wrong_number_three, easter_game)
+- Robin Hood Beschreibung korrigiert (3 Darts auf exakt dasselbe Feld)
 
 ### v0.1.11 (31. Januar 2026) - Professionelle Heatmap mit Cluster-Analyse
 
@@ -714,7 +757,7 @@ Siehe [CHANGELOG.md](CHANGELOG.md) für eine vollständige Liste der Änderungen
 
 <div align="center">
   <p>Made with ❤️ and 🎯 by Martin Pfeffer</p>
-  <p>© 2026 celox.io | Version 0.1.11</p>
+  <p>© 2026 celox.io | Version 0.4.0</p>
   <p>
     <a href="https://stateofthedart.com">🌐 Live Demo</a> •
     <a href="https://github.com/pepperonas/state-of-the-dart">📦 GitHub</a> •

@@ -1,9 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { useTenant } from './TenantContext';
 import { TenantStorage } from '../utils/storage';
 import { api } from '../services/api';
 import {
   Achievement,
+  AchievementCategory,
   UnlockedAchievement,
   PlayerAchievementProgress,
   AchievementNotification,
@@ -12,16 +13,32 @@ import {
 } from '../types/achievements';
 import logger from '../utils/logger';
 
+// Cumulative metrics that should use increment mode
+const CUMULATIVE_METRICS = new Set([
+  'games_played', 'wins', 'score_180', 'training_completed', 'checkouts',
+  'triples_hit', 'doubles_hit', 'singles_hit', 'bullseye_hit', 'outer_bull_hit',
+  'single_bull_hit', 'triple_20_hit', 'triple_19_hit', 'triple_18_hit', 'triple_17_hit',
+  'score_100_plus', 'score_60_plus', 'score_80_plus', 'score_150_plus',
+  'perfect_checkout', 'checkout_d20', 'checkout_d16', 'checkout_d12', 'checkout_d18', 'checkout_d1',
+  'checkout_bullseye', 'weekend_games', 'late_night_games', 'early_morning_wins',
+  'lunch_games', 'bot_wins', 'human_wins', 'missed_board', 'whitewash_wins',
+  'unique_checkout_values', 'unique_opponents', 'legs_under_15_darts',
+  'decider_wins', 'weekend_training', 'training_morning', 'training_around_clock',
+]);
+
+export type CheckMode = 'absolute' | 'increment';
+
 interface AchievementContextType {
   getPlayerProgress: (playerId: string) => PlayerAchievementProgress;
-  checkAchievement: (playerId: string, metric: string, value: number, gameId?: string) => void;
+  checkAchievement: (playerId: string, metric: string, value: number, gameId?: string, options?: { mode?: CheckMode }) => void;
   unlockAchievement: (playerId: string, achievementId: string, gameId?: string) => void;
   isAchievementUnlocked: (playerId: string, achievementId: string) => boolean;
   getUnlockedAchievements: (playerId: string) => Achievement[];
   getLockedAchievements: (playerId: string) => Achievement[];
   getAllPlayerProgress: () => Record<string, PlayerAchievementProgress>;
-  notification: AchievementNotification | null;
-  clearNotification: () => void;
+  notificationQueue: AchievementNotification[];
+  currentNotification: AchievementNotification | null;
+  dismissNotification: () => void;
   resetPlayerAchievements: (playerId: string) => void;
 }
 
@@ -33,13 +50,33 @@ interface AchievementProviderProps {
 
 export const AchievementProvider: React.FC<AchievementProviderProps> = ({ children }) => {
   const { currentTenant } = useTenant();
-  const [notification, setNotification] = useState<AchievementNotification | null>(null);
   const [progressCache, setProgressCache] = useState<Record<string, PlayerAchievementProgress>>({});
+  const [notificationQueue, setNotificationQueue] = useState<AchievementNotification[]>([]);
+  const [currentNotification, setCurrentNotification] = useState<AchievementNotification | null>(null);
+
+  // Ref to avoid stale closures - always has the latest progressCache
+  const progressCacheRef = useRef<Record<string, PlayerAchievementProgress>>({});
+
+  // Meta-achievement recursion guard
+  const isCheckingMetaRef = useRef(false);
 
   const STORAGE_KEY = 'achievements';
-  // Use a ref to track loading state to prevent race conditions
-  const loadingPlayersRef = React.useRef<Set<string>>(new Set());
-  const loadedPlayersRef = React.useRef<Set<string>>(new Set());
+  const loadingPlayersRef = useRef<Set<string>>(new Set());
+  const loadedPlayersRef = useRef<Set<string>>(new Set());
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    progressCacheRef.current = progressCache;
+  }, [progressCache]);
+
+  // Notification queue consumer: show next notification when current is dismissed
+  useEffect(() => {
+    if (!currentNotification && notificationQueue.length > 0) {
+      const [next, ...rest] = notificationQueue;
+      setCurrentNotification(next);
+      setNotificationQueue(rest);
+    }
+  }, [currentNotification, notificationQueue]);
 
   // Load all player progress from localStorage on mount
   useEffect(() => {
@@ -47,68 +84,46 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
       const storage = new TenantStorage(currentTenant.id);
       const saved = storage.get<Record<string, PlayerAchievementProgress>>(STORAGE_KEY, {});
       setProgressCache(saved);
+      progressCacheRef.current = saved;
     }
   }, [currentTenant]);
 
   // Load player achievements from API
   const loadPlayerAchievementsFromAPI = useCallback(async (playerId: string) => {
-    // Check refs immediately to prevent duplicate calls (refs update synchronously)
     if (loadedPlayersRef.current.has(playerId) || loadingPlayersRef.current.has(playerId)) {
-      return; // Already loaded or loading
+      return;
     }
-
-    // Mark as loading IMMEDIATELY (before async operation)
     loadingPlayersRef.current.add(playerId);
 
     try {
       logger.apiEvent(`Loading achievements for player ${playerId} from API...`);
-      
-      // Get current localStorage data first (to merge, not overwrite)
-      const currentProgress = progressCache[playerId];
-      const currentUnlockedIds = new Set(currentProgress?.unlockedAchievements.map(u => u.achievementId) || []);
-      
+      const currentProgress = progressCacheRef.current[playerId];
+
       const apiAchievements = await api.achievements.getByPlayer(playerId);
-      logger.debug(`API returned ${apiAchievements?.length || 0} achievements for player ${playerId}`, apiAchievements);
+      logger.debug(`API returned ${apiAchievements?.length || 0} achievements for player ${playerId}`);
 
       if (apiAchievements && Array.isArray(apiAchievements)) {
-        // Convert API format to PlayerAchievementProgress format
-        const apiUnlockedAchievements: UnlockedAchievement[] = apiAchievements.map((a: any) => {
-          const achievementId = a.achievement_id || a.achievementId;
-          const unlockedAt = a.unlocked_at || a.unlockedAt;
-          logger.debug(`Converting achievement: ${achievementId}, unlocked_at: ${unlockedAt}`);
-          return {
-            achievementId,
-            unlockedAt: unlockedAt ? new Date(unlockedAt) : new Date(),
-            playerId: a.player_id || a.playerId || playerId,
-            gameId: a.game_id || a.gameId,
-          };
-        });
-        logger.debug(`Converted ${apiUnlockedAchievements.length} achievements`);
+        const apiUnlockedAchievements: UnlockedAchievement[] = apiAchievements.map((a: any) => ({
+          achievementId: a.achievement_id || a.achievementId,
+          unlockedAt: (a.unlocked_at || a.unlockedAt) ? new Date(a.unlocked_at || a.unlockedAt) : new Date(),
+          playerId: a.player_id || a.playerId || playerId,
+          gameId: a.game_id || a.gameId,
+        }));
 
-        // Merge API achievements with localStorage achievements (prefer newer unlock date)
+        // Merge API achievements with localStorage achievements
         const mergedAchievements: UnlockedAchievement[] = [...apiUnlockedAchievements];
-        
-        // Add localStorage achievements that are not in API
         if (currentProgress?.unlockedAchievements) {
           currentProgress.unlockedAchievements.forEach(localAchievement => {
-            const existsInAPI = apiUnlockedAchievements.some(
-              api => api.achievementId === localAchievement.achievementId
+            const apiMatch = apiUnlockedAchievements.find(
+              a => a.achievementId === localAchievement.achievementId
             );
-            if (!existsInAPI) {
+            if (!apiMatch) {
               mergedAchievements.push(localAchievement);
-            } else {
-              // Use the newer unlock date
-              const apiAchievement = apiUnlockedAchievements.find(
-                api => api.achievementId === localAchievement.achievementId
+            } else if (localAchievement.unlockedAt > apiMatch.unlockedAt) {
+              const index = mergedAchievements.findIndex(
+                a => a.achievementId === localAchievement.achievementId
               );
-              if (apiAchievement && localAchievement.unlockedAt > apiAchievement.unlockedAt) {
-                const index = mergedAchievements.findIndex(
-                  a => a.achievementId === localAchievement.achievementId
-                );
-                if (index >= 0) {
-                  mergedAchievements[index] = localAchievement;
-                }
-              }
+              if (index >= 0) mergedAchievements[index] = localAchievement;
             }
           });
         }
@@ -125,106 +140,204 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
           totalPoints,
         };
 
-        // Update cache
-        const newProgressCache = {
-          ...progressCache,
-          [playerId]: playerProgress,
-        };
+        // Use functional update to avoid stale closure
+        setProgressCache(prev => {
+          const updated = { ...prev, [playerId]: playerProgress };
+          progressCacheRef.current = updated;
+          if (currentTenant) {
+            const storage = new TenantStorage(currentTenant.id);
+            storage.set(STORAGE_KEY, updated);
+          }
+          return updated;
+        });
 
-        setProgressCache(newProgressCache);
-
-        // Save to localStorage
-        if (currentTenant) {
-          const storage = new TenantStorage(currentTenant.id);
-          storage.set(STORAGE_KEY, newProgressCache);
-        }
-
-        // Mark as loaded (ref for immediate sync check)
         loadedPlayersRef.current.add(playerId);
         loadingPlayersRef.current.delete(playerId);
         logger.success(`Achievements loaded for player ${playerId} (${mergedAchievements.length} unlocked)`);
       }
     } catch (error) {
       logger.warn(`Failed to load achievements from API for player ${playerId}:`, error);
-      // Mark as loaded anyway to prevent retry loops on errors
       loadedPlayersRef.current.add(playerId);
       loadingPlayersRef.current.delete(playerId);
-      // Continue with localStorage data (offline mode)
     }
   }, [currentTenant]);
 
-  // Save progress to storage
-  const saveProgress = useCallback((progress: Record<string, PlayerAchievementProgress>) => {
-    if (currentTenant) {
+  // Save progress using functional update to avoid stale closures
+  const saveProgressForPlayer = useCallback((playerId: string, updatedPlayerProgress: PlayerAchievementProgress) => {
+    if (!currentTenant) return;
+    setProgressCache(prev => {
+      const updated = { ...prev, [playerId]: updatedPlayerProgress };
+      progressCacheRef.current = updated;
       const storage = new TenantStorage(currentTenant.id);
-      storage.set(STORAGE_KEY, progress);
-      setProgressCache(progress);
-    }
+      storage.set(STORAGE_KEY, updated);
+      return updated;
+    });
   }, [currentTenant]);
 
-  // Get player progress
+  // Get player progress - reads from ref to always be current
   const getPlayerProgress = useCallback((playerId: string): PlayerAchievementProgress => {
-    // Trigger API load if not loaded yet (async, doesn't block)
-    // Use refs to check - they update synchronously to prevent race conditions
     if (!loadedPlayersRef.current.has(playerId) && !loadingPlayersRef.current.has(playerId) && playerId) {
       loadPlayerAchievementsFromAPI(playerId);
     }
 
-    if (progressCache[playerId]) {
-      return progressCache[playerId];
-    }
+    const cached = progressCacheRef.current[playerId];
+    if (cached) return cached;
 
-    // Initialize new player progress (will be replaced when API loads)
-    const newProgress: PlayerAchievementProgress = {
+    return {
       playerId,
       unlockedAchievements: [],
       progress: {},
       totalPoints: 0,
     };
-
-    return newProgress;
-  }, [progressCache, loadPlayerAchievementsFromAPI]);
+  }, [loadPlayerAchievementsFromAPI]);
 
   // Get all player progress
   const getAllPlayerProgress = useCallback((): Record<string, PlayerAchievementProgress> => {
-    return progressCache;
-  }, [progressCache]);
+    return progressCacheRef.current;
+  }, []);
 
-  // Check if achievement is unlocked
+  // Check if achievement is unlocked - reads from ref
   const isAchievementUnlocked = useCallback((playerId: string, achievementId: string): boolean => {
-    const progress = getPlayerProgress(playerId);
+    const progress = progressCacheRef.current[playerId];
+    if (!progress) return false;
     return progress.unlockedAchievements.some(u => u.achievementId === achievementId);
-  }, [getPlayerProgress]);
+  }, []);
 
   // Get unlocked achievements
   const getUnlockedAchievements = useCallback((playerId: string): Achievement[] => {
     const progress = getPlayerProgress(playerId);
     return progress.unlockedAchievements
       .map(u => getAchievementById(u.achievementId))
-      .filter(a => a !== undefined) as Achievement[];
+      .filter((a): a is Achievement => a !== undefined);
   }, [getPlayerProgress]);
 
-  // Get locked achievements (not unlocked yet)
+  // Get locked achievements
   const getLockedAchievements = useCallback((playerId: string): Achievement[] => {
     const unlocked = getUnlockedAchievements(playerId);
     const unlockedIds = new Set(unlocked.map(a => a.id));
     return ACHIEVEMENTS.filter(a => !unlockedIds.has(a.id));
   }, [getUnlockedAchievements]);
 
+  // Queue a notification instead of overwriting
+  const queueNotification = useCallback((notification: AchievementNotification) => {
+    setNotificationQueue(prev => [...prev, notification]);
+  }, []);
+
+  // Check meta-achievements (achievement points, unlock count, etc.)
+  const checkMetaAchievements = useCallback((playerId: string) => {
+    if (isCheckingMetaRef.current) return;
+    isCheckingMetaRef.current = true;
+
+    try {
+      const progress = progressCacheRef.current[playerId];
+      if (!progress) return;
+
+      const totalPoints = progress.totalPoints;
+      const unlockedCount = progress.unlockedAchievements.length;
+
+      // Check achievement_points achievements
+      const pointsAchievements = ACHIEVEMENTS.filter(a => a.requirement.metric === 'achievement_points');
+      for (const achievement of pointsAchievements) {
+        if (progress.unlockedAchievements.some(u => u.achievementId === achievement.id)) continue;
+        if (totalPoints >= achievement.requirement.target) {
+          // Inline unlock for meta to avoid circular dependency
+          const unlockedAchievement: UnlockedAchievement = {
+            achievementId: achievement.id,
+            unlockedAt: new Date(),
+            playerId,
+          };
+          const updatedProgress: PlayerAchievementProgress = {
+            ...progressCacheRef.current[playerId],
+            unlockedAchievements: [...progressCacheRef.current[playerId].unlockedAchievements, unlockedAchievement],
+            totalPoints: progressCacheRef.current[playerId].totalPoints + achievement.points,
+            lastUnlocked: unlockedAchievement,
+          };
+          saveProgressForPlayer(playerId, updatedProgress);
+          queueNotification({ achievement, playerId, timestamp: new Date() });
+          api.achievements.unlock(playerId, achievement.id).catch(() => {});
+          logger.achievementEvent(`Meta achievement unlocked: ${achievement.name}`);
+        }
+      }
+
+      // Check achievements_unlocked achievements
+      const unlockCountAchievements = ACHIEVEMENTS.filter(a => a.requirement.metric === 'achievements_unlocked');
+      for (const achievement of unlockCountAchievements) {
+        if (progressCacheRef.current[playerId]?.unlockedAchievements.some(u => u.achievementId === achievement.id)) continue;
+        if (unlockedCount >= achievement.requirement.target) {
+          const unlockedAchievement: UnlockedAchievement = {
+            achievementId: achievement.id,
+            unlockedAt: new Date(),
+            playerId,
+          };
+          const currentProg = progressCacheRef.current[playerId];
+          const updatedProgress: PlayerAchievementProgress = {
+            ...currentProg,
+            unlockedAchievements: [...currentProg.unlockedAchievements, unlockedAchievement],
+            totalPoints: currentProg.totalPoints + achievement.points,
+            lastUnlocked: unlockedAchievement,
+          };
+          saveProgressForPlayer(playerId, updatedProgress);
+          queueNotification({ achievement, playerId, timestamp: new Date() });
+          api.achievements.unlock(playerId, achievement.id).catch(() => {});
+          logger.achievementEvent(`Meta achievement unlocked: ${achievement.name}`);
+        }
+      }
+
+      // Check gold_all_categories
+      const goldAllCat = ACHIEVEMENTS.find(a => a.requirement.metric === 'gold_all_categories');
+      if (goldAllCat && !progressCacheRef.current[playerId]?.unlockedAchievements.some(u => u.achievementId === goldAllCat.id)) {
+        const categories: AchievementCategory[] = ['first_steps', 'scoring', 'checkout', 'training', 'consistency', 'special', 'master'];
+        const goldTiers = new Set(['gold', 'platinum', 'diamond']);
+        const unlockedIds = new Set(progressCacheRef.current[playerId]?.unlockedAchievements.map(u => u.achievementId) || []);
+        const hasGoldInAll = categories.every(cat => {
+          return ACHIEVEMENTS.some(a =>
+            a.category === cat && goldTiers.has(a.tier) && unlockedIds.has(a.id)
+          );
+        });
+        if (hasGoldInAll) {
+          const unlockedAchievement: UnlockedAchievement = {
+            achievementId: goldAllCat.id,
+            unlockedAt: new Date(),
+            playerId,
+          };
+          const currentProg = progressCacheRef.current[playerId];
+          const updatedProgress: PlayerAchievementProgress = {
+            ...currentProg,
+            unlockedAchievements: [...currentProg.unlockedAchievements, unlockedAchievement],
+            totalPoints: currentProg.totalPoints + goldAllCat.points,
+            lastUnlocked: unlockedAchievement,
+          };
+          saveProgressForPlayer(playerId, updatedProgress);
+          queueNotification({ achievement: goldAllCat, playerId, timestamp: new Date() });
+          api.achievements.unlock(playerId, goldAllCat.id).catch(() => {});
+          logger.achievementEvent(`Meta achievement unlocked: ${goldAllCat.name}`);
+        }
+      }
+    } finally {
+      isCheckingMetaRef.current = false;
+    }
+  }, [saveProgressForPlayer, queueNotification]);
+
   // Unlock an achievement
-  const unlockAchievement = useCallback(async (playerId: string, achievementId: string, gameId?: string) => {
+  const unlockAchievement = useCallback((playerId: string, achievementId: string, gameId?: string) => {
     const achievement = getAchievementById(achievementId);
     if (!achievement) {
       logger.warn(`Achievement ${achievementId} not found`);
       return;
     }
 
-    // Check if already unlocked
+    // Check if already unlocked using ref (always current)
     if (isAchievementUnlocked(playerId, achievementId)) {
       return;
     }
 
-    const progress = getPlayerProgress(playerId);
+    const progress = progressCacheRef.current[playerId] || {
+      playerId,
+      unlockedAchievements: [],
+      progress: {},
+      totalPoints: 0,
+    };
+
     const unlockedAchievement: UnlockedAchievement = {
       achievementId,
       unlockedAt: new Date(),
@@ -239,130 +352,132 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
       lastUnlocked: unlockedAchievement,
     };
 
-    const newProgressCache = {
-      ...progressCache,
-      [playerId]: updatedProgress,
-    };
-
-    // Save to localStorage immediately
-    saveProgress(newProgressCache);
+    // Save immediately via functional update
+    saveProgressForPlayer(playerId, updatedProgress);
 
     // Sync to API in background
-    try {
-      await api.achievements.unlock(playerId, achievementId);
+    api.achievements.unlock(playerId, achievementId).then(() => {
       logger.achievementEvent(`Achievement synced to API: ${achievement.name}`);
-    } catch (error) {
+    }).catch(error => {
       logger.error('Failed to sync achievement to API:', error);
-      // Continue anyway - localStorage has the data
-    }
+    });
 
-    // Show notification
-    setNotification({
+    // Queue notification
+    queueNotification({
       achievement,
       playerId,
       timestamp: new Date(),
     });
 
-    // Auto-clear notification after 5 seconds
-    setTimeout(() => {
-      setNotification(null);
-    }, 5000);
-
     logger.achievementEvent(`Achievement unlocked: ${achievement.name} for player ${playerId}`);
-  }, [progressCache, getPlayerProgress, isAchievementUnlocked, saveProgress]);
+
+    // Check meta-achievements after unlock
+    checkMetaAchievements(playerId);
+  }, [isAchievementUnlocked, saveProgressForPlayer, queueNotification, checkMetaAchievements]);
 
   // Check achievements based on metrics
-  const checkAchievement = useCallback(async (playerId: string, metric: string, value: number, gameId?: string) => {
-    // Find relevant achievements for this metric
+  const checkAchievement = useCallback((
+    playerId: string,
+    metric: string,
+    value: number,
+    gameId?: string,
+    options?: { mode?: CheckMode }
+  ) => {
+    const mode = options?.mode ?? (CUMULATIVE_METRICS.has(metric) ? 'increment' : 'absolute');
+
     const relevantAchievements = ACHIEVEMENTS.filter(a => a.requirement.metric === metric);
-    let progressUpdated = false;
-    const progressUpdates: Record<string, any> = {};
+    const progressUpdates: Record<string, { current: number; target: number; percentage: number }> = {};
 
     for (const achievement of relevantAchievements) {
-      // Skip if already unlocked
       if (isAchievementUnlocked(playerId, achievement.id)) {
         continue;
       }
 
-      const { type, target } = achievement.requirement;
-      let shouldUnlock = false;
+      const { target } = achievement.requirement;
 
-      switch (type) {
-        case 'count':
-        case 'streak':
-          // For count/streak, check if value meets or exceeds target
-          shouldUnlock = value >= target;
-          break;
-
-        case 'value':
-          // For value, check if value meets or exceeds target
-          shouldUnlock = value >= target;
-          break;
-
-        case 'special':
-          // Special achievements have custom logic
-          shouldUnlock = value >= target;
-          break;
-
-        default:
-          break;
+      // Calculate effective value
+      let effectiveValue = value;
+      if (mode === 'increment') {
+        const playerProgress = progressCacheRef.current[playerId];
+        const existing = playerProgress?.progress[achievement.id]?.current || 0;
+        effectiveValue = existing + value;
       }
 
+      // Special handling for metrics where lower is better (e.g. game_time_max, leg_darts)
+      const isLowerBetter = metric === 'game_time_max' || metric === 'leg_darts' ||
+                            metric === 'leg_301_darts' || metric === 'checkout_darts_max' ||
+                            metric === 'avg_darts_per_leg_max';
+      const shouldUnlock = isLowerBetter
+        ? (effectiveValue <= target && effectiveValue > 0)
+        : (effectiveValue >= target);
+
       if (shouldUnlock) {
-        await unlockAchievement(playerId, achievement.id, gameId);
+        unlockAchievement(playerId, achievement.id, gameId);
       } else {
-        // Update progress
-        const progress = getPlayerProgress(playerId);
-        const updatedProgress = {
-          ...progress,
+        // Update progress tracking
+        const progressValue = isLowerBetter ? value : effectiveValue;
+        const progressPercentage = isLowerBetter
+          ? Math.min(((target - Math.max(0, progressValue - target)) / target) * 100, 100)
+          : Math.min((effectiveValue / target) * 100, 100);
+
+        const playerProgress = progressCacheRef.current[playerId] || {
+          playerId,
+          unlockedAchievements: [],
+          progress: {},
+          totalPoints: 0,
+        };
+
+        const updatedPlayerProgress: PlayerAchievementProgress = {
+          ...playerProgress,
           progress: {
-            ...progress.progress,
+            ...playerProgress.progress,
             [achievement.id]: {
-              current: value,
+              current: effectiveValue,
               target,
-              percentage: Math.min((value / target) * 100, 100),
+              percentage: Math.max(0, progressPercentage),
             },
           },
         };
 
-        const newProgressCache = {
-          ...progressCache,
-          [playerId]: updatedProgress,
-        };
-
-        saveProgress(newProgressCache);
-        progressUpdated = true;
+        saveProgressForPlayer(playerId, updatedPlayerProgress);
         progressUpdates[achievement.id] = {
-          current: value,
+          current: effectiveValue,
           target,
-          percentage: Math.min((value / target) * 100, 100),
+          percentage: Math.max(0, progressPercentage),
         };
       }
     }
 
-    // Sync progress updates to API in background
-    if (progressUpdated && Object.keys(progressUpdates).length > 0) {
-      try {
-        await api.achievements.updateProgress(playerId, progressUpdates);
-        logger.debug('Achievement progress synced to API');
-      } catch (error) {
-        logger.error('Failed to sync achievement progress to API:', error);
-        // Continue anyway - localStorage has the data
+    // Sync progress updates to API in background (transform to API format)
+    if (Object.keys(progressUpdates).length > 0) {
+      const apiPayload: Record<string, { progress: number; completed: boolean }> = {};
+      for (const [id, prog] of Object.entries(progressUpdates)) {
+        apiPayload[id] = { progress: prog.percentage, completed: false };
       }
+      api.achievements.updateProgress(playerId, apiPayload).catch(error => {
+        logger.error('Failed to sync achievement progress to API:', error);
+      });
     }
-  }, [progressCache, isAchievementUnlocked, unlockAchievement, getPlayerProgress, saveProgress]);
+  }, [isAchievementUnlocked, unlockAchievement, saveProgressForPlayer]);
 
-  // Clear notification
-  const clearNotification = useCallback(() => {
-    setNotification(null);
+  // Dismiss current notification (advances queue)
+  const dismissNotification = useCallback(() => {
+    setCurrentNotification(null);
   }, []);
 
-  // Reset player achievements (for testing or data management)
+  // Reset player achievements
   const resetPlayerAchievements = useCallback((playerId: string) => {
-    const newProgressCache = { ...progressCache };
-    delete newProgressCache[playerId];
-    saveProgress(newProgressCache);
-  }, [progressCache, saveProgress]);
+    setProgressCache(prev => {
+      const updated = { ...prev };
+      delete updated[playerId];
+      progressCacheRef.current = updated;
+      if (currentTenant) {
+        const storage = new TenantStorage(currentTenant.id);
+        storage.set(STORAGE_KEY, updated);
+      }
+      return updated;
+    });
+  }, [currentTenant]);
 
   const value: AchievementContextType = {
     getPlayerProgress,
@@ -372,8 +487,9 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
     getUnlockedAchievements,
     getLockedAchievements,
     getAllPlayerProgress,
-    notification,
-    clearNotification,
+    notificationQueue,
+    currentNotification,
+    dismissNotification,
     resetPlayerAchievements,
   };
 

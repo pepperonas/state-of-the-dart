@@ -319,6 +319,21 @@ class AudioSystem {
     this.playSound(`/sounds/effects/${effectName}.mp3`);
   }
 
+  // Play achievement unlock sound based on tier
+  playAchievementSound(tier: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond') {
+    if (!this.enabled) return;
+    // Use pop-success for all tiers (higher tiers play at slightly higher volume)
+    const tierVolumes: Record<string, number> = {
+      bronze: 0.5,
+      silver: 0.6,
+      gold: 0.7,
+      platinum: 0.8,
+      diamond: 0.9,
+    };
+    // Play the sound effect
+    this.playSound('/sounds/OMNI/pop-success.mp3', tier === 'diamond' || tier === 'platinum');
+  }
+
   // Play dart hit sound (using a random number sound for variety)
   playDartHit() {
     const randomScore = Math.floor(Math.random() * 26) + 1; // 1-26 for single hits

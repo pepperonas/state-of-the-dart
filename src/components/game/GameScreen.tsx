@@ -623,23 +623,42 @@ const GameScreen: React.FC = () => {
     dispatch({ type: 'CONFIRM_THROW' });
 
     // Check throw achievements (180s, checkouts, etc.)
-    if (currentPlayer) {
-      const isCheckout = currentLeg && (() => {
-        const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
-        const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
-        const startScore = state.currentMatch?.settings.startScore || 501;
-        const remaining = startScore - totalScored;
-        const newRemaining = remaining - currentScore;
-        const requiresDouble = state.currentMatch?.settings.doubleOut || false;
-        const lastDart = state.currentThrow[state.currentThrow.length - 1];
-        return newRemaining === 0 && (!requiresDouble || lastDart?.multiplier === 2);
-      })();
+    if (currentPlayer && currentLeg) {
+      const playerThrowsForCheckout = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
+      const totalScoredForCheckout = playerThrowsForCheckout.reduce((sum, t) => sum + t.score, 0);
+      const startScoreForCheckout = state.currentMatch?.settings.startScore || 501;
+      const remainingBeforeThrow = startScoreForCheckout - totalScoredForCheckout;
+      const newRemainingAfterThrow = remainingBeforeThrow - currentScore;
+      const requiresDoubleForCheckout = state.currentMatch?.settings.doubleOut || false;
+      const lastDartForCheckout = state.currentThrow[state.currentThrow.length - 1];
+      const isCheckout = newRemainingAfterThrow === 0 && (!requiresDoubleForCheckout || lastDartForCheckout?.multiplier === 2);
+
+      // Build match context for advanced achievement checks
+      const previousThrow = playerThrowsForCheckout[playerThrowsForCheckout.length - 1];
+      const visitNumber = playerThrowsForCheckout.length + 1;
+
+      // Calculate opponent remaining
+      let opponentRemaining: number | undefined;
+      const otherPlayers = state.currentMatch?.players.filter(p => p.playerId !== currentPlayer.playerId) || [];
+      if (otherPlayers.length > 0) {
+        const opponentId = otherPlayers[0].playerId;
+        const opponentThrows = currentLeg.throws.filter(t => t.playerId === opponentId);
+        const opponentScored = opponentThrows.reduce((sum, t) => sum + t.score, 0);
+        opponentRemaining = startScoreForCheckout - opponentScored;
+      }
+
       checkThrowAchievements(
         currentPlayer.playerId,
+        [...state.currentThrow],
         currentScore,
-        !!isCheckout,
+        isCheckout,
         isCheckout ? currentScore : undefined,
-        state.currentMatch?.id
+        state.currentMatch?.id,
+        {
+          previousThrowScore: previousThrow?.score,
+          visitNumber,
+          opponentRemaining,
+        }
       );
     }
 
