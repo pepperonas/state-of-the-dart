@@ -125,7 +125,7 @@
 - **Automatische Synchronisation** - Stats werden automatisch nach jedem Match aktualisiert
 
 ### 🏆 Achievements & Gamification (Komplett-Rewrite in v0.4.0)
-- **247 Achievements** - In 7 Kategorien (Erste Schritte, Scoring, Checkout, Training, Konsistenz, Spezial, Meisterschaft)
+- **364 Achievements** - In 7 Kategorien (Erste Schritte, Scoring, Checkout, Training, Konsistenz, Spezial, Meisterschaft)
 - **Achievement-Synchronisation** - Achievements werden automatisch in der Datenbank gespeichert und bleiben erhalten
 - **Tier-System** - Bronze, Silber, Gold, Platin, Diamant
 - **Seltenheitsstufen** - Common, Rare, Epic, Legendary Achievements
@@ -403,7 +403,7 @@ state-of-the-dart/
 
 ### 5. Achievements freischalten
 - Spiele Matches um Achievements zu verdienen
-- 247 Achievements in 7 Kategorien
+- 364 Achievements in 7 Kategorien
 - Erhalte Hinweise, wenn du kurz vor einem Achievement stehst
 
 ---
@@ -453,7 +453,7 @@ Alle Charts werden mit der Recharts-Library erstellt.
 
 ## 🏆 Achievement-System
 
-247 Achievements in 7 Kategorien:
+364 Achievements in 7 Kategorien:
 
 ### Kategorien
 1. **Erste Schritte** (15+) - Rookie bis Millennium

@@ -4,7 +4,7 @@ import { X, Star } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useAchievements } from '../../context/AchievementContext';
 import { usePlayer } from '../../context/PlayerContext';
-import { AchievementTier, AchievementNotification as AchievementNotificationType, getTierColor, getRarityColor } from '../../types/achievements';
+import { AchievementTier, AchievementNotification as AchievementNotificationType, getTierColor, getRarityColor, ACHIEVEMENTS } from '../../types/achievements';
 import { audioSystem } from '../../utils/audio';
 
 const TIER_CONFETTI_COUNT: Record<AchievementTier, number> = {
@@ -55,7 +55,7 @@ const NotificationCard: React.FC<{
   const { achievement, playerId, unlockedCount } = notification;
   const tier = achievement.tier;
   const tierColor = getTierColor(tier);
-  const totalAchievements = 247;
+  const totalAchievements = ACHIEVEMENTS.length;
   const player = getPlayer(playerId);
   const playerName = player?.name || 'Spieler';
 
@@ -212,7 +212,7 @@ const NotificationCard: React.FC<{
                   +{achievement.points} <Star size={12} fill={tierColor} />
                 </span>
               </div>
-              <p className="text-gray-400 text-sm line-clamp-1">{achievement.description}</p>
+              <p className="text-gray-400 text-sm line-clamp-2">{achievement.description}</p>
             </div>
           </div>
 
