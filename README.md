@@ -9,7 +9,7 @@
 **Professionelles Dart-Zählsystem** - Eine funktionsreiche, webbasierte Dart-Scoring-Anwendung mit Multi-User-Support, professionellem Statistik-Tracking und Live-Deployment.
 
 [![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green)](https://stateofthedart.com)
-![Version](https://img.shields.io/badge/Version-0.8.0-blue)
+![Version](https://img.shields.io/badge/Version-0.8.1-blue)
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -573,7 +573,7 @@ Siehe [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) für Details.
 
 ## 🔢 Versionierung
 
-- **Aktuell**: v0.8.0
+- **Aktuell**: v0.8.1
 - **Schema**: MAJOR.MINOR.PATCH
 - **Auto-Increment**: `npm run version:bump`
 
@@ -648,6 +648,15 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.8.1 (22. Februar 2026) - Bugfixes & UX
+
+#### 🐛 Bug Fixes
+- **Exact-Score Achievements gefixt** - 10 Achievements (Pechvogel, Glückszahl, Minimalist u.a.) wurden fälschlicherweise gleichzeitig freigeschaltet. Ursache: `type: 'value'` (>=) statt `type: 'special'` (exakter Vergleich)
+- **Fehlende Score-Targets ergänzt** - 9 Werte (3, 7, 13, 42, 66, 69, 111, 123, 170) zum Trigger-Array hinzugefügt
+
+#### ✨ Verbesserungen
+- **"Alle schließen" Button** - Bei mehreren gleichzeitigen Achievement-Benachrichtigungen erscheint ein Button zum Schließen aller auf einmal
 
 ### v0.8.0 (22. Februar 2026) - 100 Fail-Achievements & Checkout-Bug-Fix
 
