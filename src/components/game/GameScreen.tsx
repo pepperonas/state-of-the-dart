@@ -25,6 +25,7 @@ import { calculateThrowScore } from '../../utils/scoring';
 import { getCheckoutAlternatives } from '../../data/checkoutTable';
 import { PersonalBests, createEmptyPersonalBests, updatePersonalBests } from '../../types/personalBests';
 import audioSystem from '../../utils/audio';
+import { api } from '../../services/api';
 import { createAdaptiveBotPlayer, getAdaptiveBotConfigs, generateBotTurn, AdaptiveBotCategory } from '../../utils/botLogic';
 
 const GameScreen: React.FC = () => {
@@ -208,8 +209,19 @@ const GameScreen: React.FC = () => {
           personalBestsData[playerId] = updatedBests;
         });
 
-        // Save updated personal bests
+        // Save updated personal bests to localStorage (cache) and API (primary)
         storage.set('personalBests', personalBestsData);
+
+        // Sync each player's personal bests to database
+        match.players.forEach((matchPlayer) => {
+          const playerId = matchPlayer.playerId;
+          const bests = personalBestsData[playerId];
+          if (bests && !matchPlayer.isBot) {
+            api.players.updatePersonalBests(playerId, bests).catch(error => {
+              console.error(`Failed to sync personal bests for ${playerId} to API:`, error);
+            });
+          }
+        });
         console.log('✅ Personal Bests updated for all players');
       }
     }

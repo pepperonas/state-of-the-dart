@@ -193,6 +193,15 @@ export const api = {
       apiClient(`/api/players/${id}/reset-stats`, {
         method: 'POST',
       }),
+
+    // Personal Bests
+    getPersonalBests: (id: string) => apiClient(`/api/players/${id}/personal-bests`),
+
+    updatePersonalBests: (id: string, data: unknown) =>
+      apiClient(`/api/players/${id}/personal-bests`, {
+        method: 'POST',
+        body: JSON.stringify({ data }),
+      }),
   },
 
   // Matches

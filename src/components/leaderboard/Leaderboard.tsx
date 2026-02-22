@@ -1,10 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Trophy, TrendingUp, Target, Zap, Award, Medal, Crown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { usePlayer } from '../../context/PlayerContext';
 import { useAchievements } from '../../context/AchievementContext';
 import { useTenant } from '../../context/TenantContext';
+import { api } from '../../services/api';
 import { PersonalBests, createEmptyPersonalBests } from '../../types/personalBests';
 import { ACHIEVEMENTS } from '../../types/achievements';
 
@@ -25,10 +26,39 @@ const Leaderboard: React.FC = () => {
   const { storage } = useTenant();
   const [category, setCategory] = useState<LeaderboardCategory>('average');
 
-  const allPersonalBests = useMemo(() => {
-    if (!storage) return {};
-    return storage.get<Record<string, PersonalBests>>('personalBests', {});
-  }, [storage]);
+  const [allPersonalBests, setAllPersonalBests] = useState<Record<string, PersonalBests>>({});
+
+  // Load personal bests from API (primary) with localStorage fallback
+  useEffect(() => {
+    // Load localStorage cache for instant UI
+    if (storage) {
+      const cached = storage.get<Record<string, PersonalBests>>('personalBests', {});
+      if (Object.keys(cached).length > 0) {
+        setAllPersonalBests(cached);
+      }
+    }
+
+    // Fetch from API for each player
+    const loadFromAPI = async () => {
+      const result: Record<string, PersonalBests> = {};
+      for (const player of players) {
+        try {
+          const response = await api.players.getPersonalBests(player.id);
+          if (response?.data && Object.keys(response.data).length > 0) {
+            result[player.id] = response.data;
+          }
+        } catch {
+          // Fallback to localStorage for this player
+        }
+      }
+      if (Object.keys(result).length > 0) {
+        setAllPersonalBests(prev => ({ ...prev, ...result }));
+      }
+    };
+    if (players.length > 0) {
+      loadFromAPI();
+    }
+  }, [players, storage]);
 
   const achievementProgress = useMemo(() => {
     return getAllPlayerProgress();
