@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo, ReactNode } from 'react';
 import { useTenant } from './TenantContext';
 import { TenantStorage } from '../utils/storage';
 import { api } from '../services/api';
@@ -38,7 +38,7 @@ interface AchievementContextType {
   getAllPlayerProgress: () => Record<string, PlayerAchievementProgress>;
   notificationQueue: AchievementNotification[];
   currentNotification: AchievementNotification | null;
-  dismissNotification: () => void;
+  dismissNotification: (index?: number) => void;
   resetPlayerAchievements: (playerId: string) => void;
 }
 
@@ -467,9 +467,15 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
     }
   }, [isAchievementUnlocked, unlockAchievement, saveProgressForPlayer]);
 
-  // Dismiss current notification (advances queue)
-  const dismissNotification = useCallback(() => {
-    setCurrentNotification(null);
+  // Dismiss a specific notification by index (0 = currentNotification, 1+ = queue items)
+  const dismissNotification = useCallback((index?: number) => {
+    if (index === undefined || index === 0) {
+      // Dismiss current notification (queue consumer useEffect will advance)
+      setCurrentNotification(null);
+    } else {
+      // Dismiss a specific queue item
+      setNotificationQueue(prev => prev.filter((_, i) => i !== index - 1));
+    }
   }, []);
 
   // Reset player achievements
@@ -490,7 +496,7 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
     });
   }, [currentTenant]);
 
-  const value: AchievementContextType = {
+  const value: AchievementContextType = useMemo(() => ({
     getPlayerProgress,
     checkAchievement,
     unlockAchievement,
@@ -502,7 +508,11 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
     currentNotification,
     dismissNotification,
     resetPlayerAchievements,
-  };
+  }), [
+    getPlayerProgress, checkAchievement, unlockAchievement, isAchievementUnlocked,
+    getUnlockedAchievements, getLockedAchievements, getAllPlayerProgress,
+    notificationQueue, currentNotification, dismissNotification, resetPlayerAchievements,
+  ]);
 
   return (
     <AchievementContext.Provider value={value}>

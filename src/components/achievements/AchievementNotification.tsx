@@ -321,7 +321,7 @@ const AchievementNotification: React.FC = () => {
               key={`${notification.achievement.id}-${notification.playerId}-${index}`}
               notification={notification}
               index={index}
-              onDismiss={dismissNotification}
+              onDismiss={() => dismissNotification(index)}
             />
           ))}
         </AnimatePresence>

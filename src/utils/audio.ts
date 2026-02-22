@@ -2,6 +2,7 @@
 
 class AudioSystem {
   private audioCache: Map<string, HTMLAudioElement> = new Map();
+  private static readonly MAX_CACHE_SIZE = 50;
   private enabled: boolean = true;
   private volume: number = 0.7; // Master volume (deprecated, kept for backward compatibility)
   private callerVolume: number = 0.7;
@@ -71,6 +72,16 @@ class AudioSystem {
     }
 
     try {
+      // Evict oldest entries if cache is full
+      if (this.audioCache.size >= AudioSystem.MAX_CACHE_SIZE) {
+        const firstKey = this.audioCache.keys().next().value;
+        if (firstKey) {
+          const old = this.audioCache.get(firstKey);
+          if (old) { old.src = ''; }
+          this.audioCache.delete(firstKey);
+        }
+      }
+
       const audio = new Audio(path);
       audio.volume = this.volume;
       this.audioCache.set(path, audio);
