@@ -2958,7 +2958,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'bronze',
     icon: '🧮',
     points: 20,
-    requirement: { type: 'value', target: 100, metric: 'exact_score' },
+    requirement: { type: 'special', target: 100, metric: 'exact_score' },
     rarity: 'common',
   },
   {
@@ -2969,7 +2969,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'bronze',
     icon: '🐦‍⬛',
     points: 15,
-    requirement: { type: 'value', target: 13, metric: 'exact_score' },
+    requirement: { type: 'special', target: 13, metric: 'exact_score' },
     rarity: 'common',
   },
   {
@@ -2980,7 +2980,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'bronze',
     icon: '😈',
     points: 20,
-    requirement: { type: 'value', target: 66, metric: 'exact_score' },
+    requirement: { type: 'special', target: 66, metric: 'exact_score' },
     rarity: 'common',
   },
   {
@@ -2991,7 +2991,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'bronze',
     icon: '🌌',
     points: 20,
-    requirement: { type: 'value', target: 42, metric: 'exact_score' },
+    requirement: { type: 'special', target: 42, metric: 'exact_score' },
     rarity: 'common',
   },
   {
@@ -4021,7 +4021,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'bronze',
     icon: '😏',
     points: 15,
-    requirement: { type: 'value', target: 69, metric: 'exact_score' },
+    requirement: { type: 'special', target: 69, metric: 'exact_score' },
     rarity: 'common',
   },
   {
@@ -4032,7 +4032,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'bronze',
     icon: '🍻',
     points: 20,
-    requirement: { type: 'value', target: 111, metric: 'exact_score' },
+    requirement: { type: 'special', target: 111, metric: 'exact_score' },
     rarity: 'common',
   },
   {
@@ -4043,7 +4043,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'bronze',
     icon: '🔢',
     points: 20,
-    requirement: { type: 'value', target: 123, metric: 'exact_score' },
+    requirement: { type: 'special', target: 123, metric: 'exact_score' },
     rarity: 'common',
   },
   {
@@ -4054,7 +4054,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'bronze',
     icon: '🍀',
     points: 10,
-    requirement: { type: 'value', target: 7, metric: 'exact_score' },
+    requirement: { type: 'special', target: 7, metric: 'exact_score' },
     rarity: 'common',
   },
   {
@@ -4065,7 +4065,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'bronze',
     icon: '🐌',
     points: 10,
-    requirement: { type: 'value', target: 3, metric: 'exact_score' },
+    requirement: { type: 'special', target: 3, metric: 'exact_score' },
     rarity: 'common',
   },
   {
@@ -4076,7 +4076,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'silver',
     icon: '💎',
     points: 40,
-    requirement: { type: 'value', target: 170, metric: 'exact_score' },
+    requirement: { type: 'special', target: 170, metric: 'exact_score' },
     rarity: 'rare',
   },
   {

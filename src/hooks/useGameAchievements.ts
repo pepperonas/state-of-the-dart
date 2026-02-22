@@ -44,7 +44,7 @@ export const useGameAchievements = () => {
     }
 
     // Exact score achievements
-    const exactScoreTargets = [26, 41, 45, 60, 77, 85, 99, 100, 126, 140, 141, 160, 171];
+    const exactScoreTargets = [3, 7, 13, 26, 41, 42, 45, 60, 66, 69, 77, 85, 99, 100, 111, 123, 126, 140, 141, 160, 170, 171];
     if (exactScoreTargets.includes(score)) {
       checkAchievement(playerId, 'exact_score', score, gameId);
     }
