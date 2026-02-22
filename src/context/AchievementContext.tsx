@@ -53,6 +53,7 @@ interface AchievementContextType {
   notificationQueue: AchievementNotification[];
   currentNotification: AchievementNotification | null;
   dismissNotification: (index?: number) => void;
+  dismissAllNotifications: () => void;
   resetPlayerAchievements: (playerId: string) => void;
 }
 
@@ -572,6 +573,12 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
     }
   }, []);
 
+  // Dismiss all notifications at once
+  const dismissAllNotifications = useCallback(() => {
+    setCurrentNotification(null);
+    setNotificationQueue([]);
+  }, []);
+
   // Reset player achievements
   const resetPlayerAchievements = useCallback((playerId: string) => {
     // Clear loaded/loading flags so achievements can be re-fetched from API
@@ -601,11 +608,12 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
     notificationQueue,
     currentNotification,
     dismissNotification,
+    dismissAllNotifications,
     resetPlayerAchievements,
   }), [
     getPlayerProgress, checkAchievement, unlockAchievement, isAchievementUnlocked,
     getUnlockedAchievements, getLockedAchievements, getAllPlayerProgress,
-    notificationQueue, currentNotification, dismissNotification, resetPlayerAchievements,
+    notificationQueue, currentNotification, dismissNotification, dismissAllNotifications, resetPlayerAchievements,
   ]);
 
   return (

@@ -272,7 +272,7 @@ const NotificationCard: React.FC<{
 
 // Main component: shows all active notifications stacked
 const AchievementNotification: React.FC = () => {
-  const { currentNotification, notificationQueue, dismissNotification } = useAchievements();
+  const { currentNotification, notificationQueue, dismissNotification, dismissAllNotifications } = useAchievements();
   const [showFlash, setShowFlash] = useState(false);
   const lastNotificationRef = useRef<string | null>(null);
 
@@ -315,6 +315,17 @@ const AchievementNotification: React.FC = () => {
 
       {/* Stacked notification cards */}
       <div className="fixed top-4 left-1/2 z-[9999] w-full max-w-md px-4 flex flex-col gap-3 max-h-[80vh] overflow-y-auto" style={{ transform: 'translateX(-50%)' }}>
+        {allNotifications.length > 1 && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            onClick={dismissAllNotifications}
+            className="self-end px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide text-gray-300 hover:text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all"
+          >
+            Alle schließen ({allNotifications.length})
+          </motion.button>
+        )}
         <AnimatePresence mode="popLayout">
           {allNotifications.map((notification, index) => (
             <NotificationCard
