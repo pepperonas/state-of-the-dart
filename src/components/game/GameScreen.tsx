@@ -761,9 +761,31 @@ const GameScreen: React.FC = () => {
     }
   }, [state.currentThrow.length, isEditingThrow]);
 
-  // Auto-confirm on checkout (when remaining reaches exactly 0)
+  // Detect checkout state for pulsing button (when < 3 darts produce a valid checkout)
+  const isEarlyCheckout = useMemo(() => {
+    if (!state.currentMatch || state.currentThrow.length === 0 || state.currentThrow.length >= 3) return false;
+    if (isEditingThrow) return false;
+
+    const currentPlayer = state.currentMatch.players[state.currentPlayerIndex];
+    const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
+    if (!currentPlayer || !currentLeg || currentLeg.winner) return false;
+    if (currentPlayer.isBot) return false;
+
+    const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
+    const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
+    const startScore = state.currentMatch.settings.startScore || 501;
+    const remainingScore = startScore - totalScored;
+    const currentScore = calculateThrowScore(state.currentThrow);
+    const newRemaining = remainingScore - currentScore;
+
+    const requiresDouble = state.currentMatch.settings.doubleOut || false;
+    const lastDart = state.currentThrow[state.currentThrow.length - 1];
+    return newRemaining === 0 && (!requiresDouble || lastDart?.multiplier === 2);
+  }, [state.currentThrow, state.currentMatch, state.currentPlayerIndex, isEditingThrow]);
+
+  // Auto-confirm on checkout ONLY when all 3 darts have been thrown
   useEffect(() => {
-    if (!state.currentMatch || state.currentThrow.length === 0) return;
+    if (!state.currentMatch || state.currentThrow.length < 3) return;
 
     const currentPlayer = state.currentMatch.players[state.currentPlayerIndex];
     const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
@@ -779,9 +801,9 @@ const GameScreen: React.FC = () => {
     const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
     const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
     const startScore = state.currentMatch.settings.startScore || 501;
-    const remaining = startScore - totalScored;
+    const remainingScore = startScore - totalScored;
     const currentScore = calculateThrowScore(state.currentThrow);
-    const newRemaining = remaining - currentScore;
+    const newRemaining = remainingScore - currentScore;
 
     // Check if this is a valid checkout
     const requiresDouble = state.currentMatch.settings.doubleOut || false;
@@ -1413,6 +1435,7 @@ const GameScreen: React.FC = () => {
               onSetEditingDartIndex={setEditingDartIndex}
               isEditingThrow={isEditingThrow}
               remaining={remaining}
+              isCheckout={isEarlyCheckout}
             />
           </div>
           

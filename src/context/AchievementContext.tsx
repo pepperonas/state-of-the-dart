@@ -24,6 +24,20 @@ const CUMULATIVE_METRICS = new Set([
   'lunch_games', 'bot_wins', 'human_wins', 'missed_board', 'whitewash_wins',
   'unique_checkout_values', 'unique_opponents', 'legs_under_15_darts',
   'decider_wins', 'weekend_training', 'training_morning', 'training_around_clock',
+  // Fail achievement metrics
+  'busts', 'three_miss_visit', 'legs_lost', 'matches_lost', 'single_1_hit',
+  'legs_lost_on_checkout', 'bust_on_high_score', 'bust_on_low_score', 'bust_on_2',
+  'matches_lost_whitewash', 'missed_checkouts', 'visit_under_10_fail',
+  'worst_visit_under_5', 'match_average_under_30', 'match_average_under_20',
+  'zero_first_visit', 'miss_on_checkout_attempt', 'bust_on_checkout_attempt',
+  'bust_after_180', 'double_bust_leg', 'triple_bust_leg', 'consecutive_misses',
+  'visit_starts_with_miss', 'descending_darts', 'three_different_low',
+  'same_low_score_streak', 'crash_after_high', 'lost_with_higher_average',
+  'lost_big_avg_diff', 'last_place_multi', 'lost_to_easy_bot',
+  'three_checkout_attempts_no_hit', 'five_checkout_attempts_no_hit',
+  'checkout_pct_under_10', 'missed_match_dart', 'lost_more_legs',
+  'lead_blown', 'match_average_under_15', 'no_60_plus_match',
+  'visit_score_3', 'three_low_visits_row',
 ]);
 
 export type CheckMode = 'absolute' | 'increment';

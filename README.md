@@ -9,7 +9,7 @@
 **Professionelles Dart-Zählsystem** - Eine funktionsreiche, webbasierte Dart-Scoring-Anwendung mit Multi-User-Support, professionellem Statistik-Tracking und Live-Deployment.
 
 [![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green)](https://stateofthedart.com)
-![Version](https://img.shields.io/badge/Version-0.6.1-blue)
+![Version](https://img.shields.io/badge/Version-0.8.0-blue)
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -125,7 +125,7 @@
 - **Automatische Synchronisation** - Stats werden automatisch nach jedem Match aktualisiert
 
 ### 🏆 Achievements & Gamification (Komplett-Rewrite in v0.4.0)
-- **364 Achievements** - In 7 Kategorien (Erste Schritte, Scoring, Checkout, Training, Konsistenz, Spezial, Meisterschaft)
+- **464 Achievements** - In 8 Kategorien (Erste Schritte, Scoring, Checkout, Training, Konsistenz, Spezial, Meisterschaft, Fails)
 - **Achievement-Synchronisation** - Achievements werden automatisch in der Datenbank gespeichert und bleiben erhalten
 - **Tier-System** - Bronze, Silber, Gold, Platin, Diamant
 - **Seltenheitsstufen** - Common, Rare, Epic, Legendary Achievements
@@ -403,7 +403,7 @@ state-of-the-dart/
 
 ### 5. Achievements freischalten
 - Spiele Matches um Achievements zu verdienen
-- 364 Achievements in 7 Kategorien
+- 464 Achievements in 8 Kategorien
 - Erhalte Hinweise, wenn du kurz vor einem Achievement stehst
 
 ---
@@ -453,7 +453,7 @@ Alle Charts werden mit der Recharts-Library erstellt.
 
 ## 🏆 Achievement-System
 
-364 Achievements in 7 Kategorien:
+464 Achievements in 8 Kategorien:
 
 ### Kategorien
 1. **Erste Schritte** (15+) - Rookie bis Millennium
@@ -463,6 +463,7 @@ Alle Charts werden mit der Recharts-Library erstellt.
 5. **Konsistenz** (25+) - Siegesserien, Comebacks, Dominanz
 6. **Spezial** (15+) - 9-Darter, Kalender-Events, Speed Demon
 7. **Meisterschaft** (10+) - Achievement-Punkte, Allrounder, Ultimativer Meister
+8. **Fails** (100) - Humorvolle Achievements für Misses, Busts, Verluste und peinliche Muster
 
 ### Tier-System
 - **Bronze** (5-30 Punkte) - Einstiegs-Achievements
@@ -572,7 +573,7 @@ Siehe [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) für Details.
 
 ## 🔢 Versionierung
 
-- **Aktuell**: v0.6.0
+- **Aktuell**: v0.8.0
 - **Schema**: MAJOR.MINOR.PATCH
 - **Auto-Increment**: `npm run version:bump`
 
@@ -586,7 +587,7 @@ Siehe [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) für Details.
 - [x] Erweiterte Statistiken mit 10+ Charts
 - [x] Export/Import (JSON/CSV)
 - [x] PWA mit Offline-Support
-- [x] Achievement-System (247 Achievements, AAA-Notifications)
+- [x] Achievement-System (464 Achievements, AAA-Notifications)
 - [x] Spielerprofile & Personal Bests
 - [x] Bestenlisten
 - [x] Spielervergleich (bis zu 4 Spieler)
@@ -647,6 +648,23 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.8.0 (22. Februar 2026) - 100 Fail-Achievements & Checkout-Bug-Fix
+
+#### ✨ Neue Features
+- **100 Fail-Achievements** - Neue Kategorie "Fails" mit humorvollen Achievements für Misserfolge:
+  - Misses & Nullrunden (20): Daneben!, Luftgitarrist, Blindschütze, Meister der Leere
+  - Busts (20): Überworfen!, Madhouse Bust, Deja Bust, Bust Maschine
+  - Niedrige Scores (20): Minimal-Score, Einstellig, Abwärtsspirale, Broken Record
+  - Verlorene Legs & Matches (20): Serienverlierer, Weißwaschung, Ewiger Zweiter
+  - Checkout-Fails (10): Checkout-Phobie, Vergebliche Mühe, Checkout-Blindgänger
+  - Peinliche Muster (10): Schlechter als ein Bot, Pechsträhne, Verkehrte Welt
+- **Fail-Kategorie im Achievement-Screen** - Neuer Filter "Fails" in der Kategorie-Auswahl
+- **464 Achievements total** (364 bestehende + 100 neue Fail-Achievements)
+
+#### 🐛 Bug Fixes
+- **Checkout-Bug behoben** - Darts in falscher Reihenfolge eingeben (z.B. D16 bei Rest=32) löste sofort Auto-Checkout aus. Jetzt wird Auto-Checkout nur bei 3 Darts ausgelöst
+- **Pulsierender "Checkout!" Button** - Bei Early-Checkout (<3 Darts) erscheint ein goldener, pulsierender Button statt Auto-Confirm
 
 ### v0.6.0 (22. Februar 2026) - Spielhistorie & Bug Fixes
 
@@ -862,7 +880,7 @@ Siehe [CHANGELOG.md](CHANGELOG.md) für eine vollständige Liste der Änderungen
 
 <div align="center">
   <p>Made with ❤️ and 🎯 by Martin Pfeffer</p>
-  <p>© 2026 celox.io | Version 0.6.0</p>
+  <p>© 2026 celox.io | Version 0.8.0</p>
   <p>
     <a href="https://stateofthedart.com">🌐 Live Demo</a> •
     <a href="https://github.com/pepperonas/state-of-the-dart">📦 GitHub</a> •

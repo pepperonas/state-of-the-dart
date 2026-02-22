@@ -76,6 +76,7 @@ const AchievementsScreen: React.FC = () => {
     'training',
     'consistency',
     'special',
+    'fail',
   ];
 
   const completionPercentage = useMemo(() => {
