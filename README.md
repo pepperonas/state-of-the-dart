@@ -9,7 +9,7 @@
 **Professionelles Dart-Zählsystem** - Eine funktionsreiche, webbasierte Dart-Scoring-Anwendung mit Multi-User-Support, professionellem Statistik-Tracking und Live-Deployment.
 
 [![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green)](https://stateofthedart.com)
-![Version](https://img.shields.io/badge/Version-0.5.8-blue)
+![Version](https://img.shields.io/badge/Version-0.6.0-blue)
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -112,7 +112,8 @@
 - **Echtzeit-Stats** - Live-Scoring mit sofortiger Berechnung
 - **Spieler-Statistiken** - Average, Checkout %, High Scores, 180s, 171+, 140+, 100+
 - **Match-Historie** - Vollständiges Tracking aller gespielten Spiele
-  - **Suchfunktion & Pagination (NEU)** - Durchsuche Matches nach Gegner, Datum oder Spieltyp und blättere durch Seiten
+  - **Spielhistorie-Seite (NEU in v0.6.0)** - Eigene Seite im Hauptmenü mit allen Matches, Detail-Ansicht mit Charts, Heatmaps und Wurf-Verlauf
+  - **Suchfunktion & Pagination** - Durchsuche Matches nach Gegner, Datum oder Spieltyp und blättere durch Seiten
   - **Wurfverlauf im Detail-Modal** - Zeigt alle Würfe pro Spieler wie im laufenden Spiel
 - **Trendanalyse** - Verbesserungs-Metriken und Performance-Trends
 - **Persönliche Bestleistungen** - Tracke höchste Checkouts, beste Averages, 9-Darter
@@ -571,7 +572,7 @@ Siehe [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) für Details.
 
 ## 🔢 Versionierung
 
-- **Aktuell**: v0.5.3
+- **Aktuell**: v0.6.0
 - **Schema**: MAJOR.MINOR.PATCH
 - **Auto-Increment**: `npm run version:bump`
 
@@ -646,6 +647,38 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.6.0 (22. Februar 2026) - Spielhistorie & Bug Fixes
+
+#### ✨ Neue Features
+- **Spielhistorie** - Neue Seite im Hauptmenü mit allen abgeschlossenen Matches
+  - Suchfilter nach Spielern, Datum oder Spieltyp
+  - Spieltyp-Dropdown (Alle, X01, Cricket, Around the Clock, Shanghai)
+  - Pagination (10/20/50 pro Seite)
+  - Aufklappbare Detail-Ansicht pro Match mit:
+    - Spieler-Statistiken (Average, Legs, 180s, High Score, 140+, Checkout %)
+    - Runden-Verlauf als Linien-Chart
+    - Per-Spieler Dartboard-Heatmap
+    - Leg-Übersicht mit Gewinner pro Leg
+    - Ausklappbarer Wurf-Verlauf mit einzelnen Darts
+
+#### 🐛 Bug Fixes
+- **Alternative Checkout-Wege** - Werden jetzt in separaten blauen Karten angezeigt (primärer Weg in grün)
+- **Audio-Fehler bei Bogey-Nummern** - Unmögliche Checkouts (159, 169 etc.) werden beim Sound übersprungen
+- **"Perfekter Checkout" Achievement** - Wird nur noch freigeschaltet wenn kein Bust im Leg war
+- **Achievement-Notifications** - Verschwinden nicht mehr automatisch, sondern nur per Schließen-Button. Mehrere Achievements werden untereinander gestapelt
+- **Achievement-Sync 404** - Backend validiert nicht mehr gegen Legacy-DB (247 Frontend-Achievements werden direkt gespeichert)
+
+### v0.5.8 (22. Februar 2026) - Achievement-Reset Fix
+
+#### 🐛 Bug Fixes
+- **Achievements beim Statistiken-Reset** - "Statistiken zurücksetzen" löscht jetzt auch alle Achievements des Spielers korrekt
+- **AchievementContext Cache-Bereinigung** - loadedPlayersRef und loadingPlayersRef werden beim Reset korrekt geleert
+
+### v0.5.7 (21. Februar 2026) - Spielerauswahl-Vereinheitlichung
+
+#### 🔧 Verbesserungen
+- **Einheitliche Spielerauswahl-Karten** - Alle Spielmodi (X01, Cricket, Around the Clock, Shanghai) verwenden jetzt dasselbe Karten-Design
 
 ### v0.5.3 (21. Februar 2026) - Rechtliche Seiten & Bug Fixes
 
@@ -829,7 +862,7 @@ Siehe [CHANGELOG.md](CHANGELOG.md) für eine vollständige Liste der Änderungen
 
 <div align="center">
   <p>Made with ❤️ and 🎯 by Martin Pfeffer</p>
-  <p>© 2026 celox.io | Version 0.5.3</p>
+  <p>© 2026 celox.io | Version 0.6.0</p>
   <p>
     <a href="https://stateofthedart.com">🌐 Live Demo</a> •
     <a href="https://github.com/pepperonas/state-of-the-dart">📦 GitHub</a> •
