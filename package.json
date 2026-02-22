@@ -1,7 +1,7 @@
 {
   "name": "state-of-the-dart",
   "private": true,
-  "version": "0.5.8",
+  "version": "0.5.9",
   "type": "module",
   "description": "Professional Dart Scoring System with Multi-User Support",
   "repository": {

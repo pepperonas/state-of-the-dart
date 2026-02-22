@@ -1,19 +1,11 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Star } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useAchievements } from '../../context/AchievementContext';
 import { usePlayer } from '../../context/PlayerContext';
-import { AchievementTier, getTierColor, getRarityColor } from '../../types/achievements';
+import { AchievementTier, AchievementNotification as AchievementNotificationType, getTierColor, getRarityColor } from '../../types/achievements';
 import { audioSystem } from '../../utils/audio';
-
-const TIER_DURATIONS: Record<AchievementTier, number> = {
-  bronze: 5000,
-  silver: 6000,
-  gold: 7000,
-  platinum: 8000,
-  diamond: 10000,
-};
 
 const TIER_CONFETTI_COUNT: Record<AchievementTier, number> = {
   bronze: 30,
@@ -51,25 +43,30 @@ function getTierGlowIntense(tier: AchievementTier): string {
   return `0 0 30px ${color}A0, 0 0 60px ${color}60, 0 0 90px ${color}30`;
 }
 
-const AchievementNotification: React.FC = () => {
-  const { currentNotification, dismissNotification } = useAchievements();
+// Individual notification card
+const NotificationCard: React.FC<{
+  notification: AchievementNotificationType;
+  onDismiss: () => void;
+  index: number;
+}> = ({ notification, onDismiss, index }) => {
   const { getPlayer } = usePlayer();
-  const [isVisible, setIsVisible] = useState(false);
-  const [showFlash, setShowFlash] = useState(false);
-  const [progress, setProgress] = useState(100);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const confettiFiredRef = useRef(false);
 
-  const fireConfetti = useCallback((tier: AchievementTier) => {
+  const { achievement, playerId, unlockedCount } = notification;
+  const tier = achievement.tier;
+  const tierColor = getTierColor(tier);
+  const totalAchievements = 247;
+  const player = getPlayer(playerId);
+  const playerName = player?.name || 'Spieler';
+
+  const fireConfetti = useCallback((t: AchievementTier) => {
     if (confettiFiredRef.current) return;
     confettiFiredRef.current = true;
 
-    const count = TIER_CONFETTI_COUNT[tier];
-    const colors = getTierColors(tier);
-    const spread = tier === 'diamond' ? 160 : tier === 'platinum' ? 140 : 120;
+    const count = TIER_CONFETTI_COUNT[t];
+    const colors = getTierColors(t);
+    const spread = t === 'diamond' ? 160 : t === 'platinum' ? 140 : 120;
 
-    // Main burst
     confetti({
       particleCount: Math.floor(count * 0.6),
       spread,
@@ -82,8 +79,7 @@ const AchievementNotification: React.FC = () => {
       disableForReducedMotion: true,
     });
 
-    // Side bursts for higher tiers
-    if (tier === 'gold' || tier === 'platinum' || tier === 'diamond') {
+    if (t === 'gold' || t === 'platinum' || t === 'diamond') {
       setTimeout(() => {
         confetti({
           particleCount: Math.floor(count * 0.2),
@@ -106,8 +102,7 @@ const AchievementNotification: React.FC = () => {
       }, 200);
     }
 
-    // Diamond shimmer rain
-    if (tier === 'diamond') {
+    if (t === 'diamond') {
       for (let i = 0; i < 3; i++) {
         setTimeout(() => {
           confetti({
@@ -127,72 +122,180 @@ const AchievementNotification: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (currentNotification) {
-      const tier = currentNotification.achievement.tier;
-      const duration = TIER_DURATIONS[tier];
-      confettiFiredRef.current = false;
-
-      // Phase 1: Flash
-      setShowFlash(true);
-      setTimeout(() => setShowFlash(false), 300);
-
-      // Phase 2: Show card
-      setTimeout(() => {
-        setIsVisible(true);
-        setProgress(100);
-
-        // Fire confetti
-        fireConfetti(tier);
-
-        // Play sound
-        audioSystem.playAchievementSound(tier);
-
-        // Start progress countdown
-        const updateInterval = 50;
-        const steps = duration / updateInterval;
-        let currentStep = 0;
-        progressRef.current = setInterval(() => {
-          currentStep++;
-          setProgress(Math.max(0, 100 - (currentStep / steps) * 100));
-          if (currentStep >= steps) {
-            if (progressRef.current) clearInterval(progressRef.current);
-          }
-        }, updateInterval);
-
-        // Auto-dismiss
-        timerRef.current = setTimeout(() => {
-          handleDismiss();
-        }, duration);
-      }, 150);
-    } else {
-      setIsVisible(false);
-      setShowFlash(false);
+    // Only fire confetti and sound for the first card
+    if (index === 0) {
+      fireConfetti(tier);
+      audioSystem.playAchievementSound(tier);
     }
+  }, [tier, index, fireConfetti]);
 
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-      if (progressRef.current) clearInterval(progressRef.current);
-    };
-  }, [currentNotification, fireConfetti]);
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: -30, scale: 0.9 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, x: 100, scale: 0.9 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+    >
+      <motion.div
+        className="relative overflow-hidden rounded-2xl"
+        style={{
+          background: 'linear-gradient(145deg, rgba(20, 20, 35, 0.95), rgba(10, 10, 25, 0.98))',
+          backdropFilter: 'blur(20px)',
+        }}
+        animate={{
+          boxShadow: [getTierGlow(tier), getTierGlowIntense(tier), getTierGlow(tier)],
+        }}
+        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        {/* Animated gradient border */}
+        <motion.div
+          className="absolute inset-0 rounded-2xl pointer-events-none"
+          style={{
+            border: `2px solid ${tierColor}`,
+            opacity: 0.6,
+          }}
+          animate={{ opacity: [0.4, 0.8, 0.4] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        />
 
-  const handleDismiss = useCallback(() => {
-    setIsVisible(false);
-    if (timerRef.current) clearTimeout(timerRef.current);
-    if (progressRef.current) clearInterval(progressRef.current);
-    // Wait for exit animation before advancing queue
-    setTimeout(() => {
-      dismissNotification();
-    }, 400);
-  }, [dismissNotification]);
+        {/* Background shimmer */}
+        <div
+          className="absolute inset-0 opacity-10 pointer-events-none"
+          style={{
+            background: `radial-gradient(ellipse at 30% 20%, ${tierColor}40, transparent 60%),
+                         radial-gradient(ellipse at 70% 80%, ${tierColor}20, transparent 50%)`,
+          }}
+        />
 
-  if (!currentNotification) return null;
+        <div className="relative z-10 p-4">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-3">
+            <motion.span
+              className="text-xs font-bold tracking-[0.2em] uppercase"
+              style={{ color: tierColor }}
+              animate={{ opacity: [0.7, 1, 0.7] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              {playerName} — Achievement Freigeschaltet
+            </motion.span>
+            <button
+              onClick={onDismiss}
+              className="text-gray-500 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10 ml-2 flex-shrink-0"
+              aria-label="Schliessen"
+            >
+              <X size={18} />
+            </button>
+          </div>
 
-  const { achievement, playerId, unlockedCount } = currentNotification;
-  const tier = achievement.tier;
-  const tierColor = getTierColor(tier);
-  const totalAchievements = 247; // Updated count after removing 3 unreachable achievements
-  const player = getPlayer(playerId);
-  const playerName = player?.name || 'Spieler';
+          {/* Icon + Achievement Info */}
+          <div className="flex items-center gap-3 mb-3">
+            <motion.div
+              className="w-14 h-14 rounded-xl flex items-center justify-center text-3xl flex-shrink-0"
+              style={{
+                background: `linear-gradient(135deg, ${tierColor}30, ${tierColor}10)`,
+                border: `1px solid ${tierColor}40`,
+              }}
+              animate={{ scale: [1, 1.08, 1] }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              {achievement.icon}
+            </motion.div>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <h4 className="text-white font-bold text-base truncate">{achievement.name}</h4>
+                <span
+                  className="flex items-center gap-0.5 text-sm font-bold flex-shrink-0"
+                  style={{ color: tierColor }}
+                >
+                  +{achievement.points} <Star size={12} fill={tierColor} />
+                </span>
+              </div>
+              <p className="text-gray-400 text-sm line-clamp-1">{achievement.description}</p>
+            </div>
+          </div>
+
+          {/* Badges */}
+          <div className="flex items-center gap-2 flex-wrap mb-3">
+            <span
+              className="px-2 py-0.5 rounded-md text-xs font-bold tracking-wider"
+              style={{
+                backgroundColor: tierColor + '25',
+                color: tierColor,
+                border: `1px solid ${tierColor}30`,
+              }}
+            >
+              {TIER_LABELS[tier]}
+            </span>
+            {achievement.rarity && (
+              <span
+                className="px-2 py-0.5 rounded-md text-xs font-bold tracking-wider"
+                style={{
+                  backgroundColor: getRarityColor(achievement.rarity) + '25',
+                  color: getRarityColor(achievement.rarity),
+                  border: `1px solid ${getRarityColor(achievement.rarity)}30`,
+                }}
+              >
+                {achievement.rarity.toUpperCase()}
+              </span>
+            )}
+            <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-white/5 text-gray-400 flex items-center gap-1 border border-white/10">
+              <Star size={10} />
+              {achievement.points} Pkt.
+            </span>
+          </div>
+
+          {/* Achievement progress bar */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs text-gray-500">Fortschritt</span>
+              <span className="text-xs text-gray-400 font-medium">
+                {unlockedCount}/{totalAchievements} Achievements
+              </span>
+            </div>
+            <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full rounded-full"
+                style={{ backgroundColor: tierColor }}
+                initial={{ width: `${((unlockedCount - 1) / totalAchievements) * 100}%` }}
+                animate={{ width: `${(unlockedCount / totalAchievements) * 100}%` }}
+                transition={{ delay: 0.3, duration: 0.6, ease: 'easeOut' }}
+              />
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+// Main component: shows all active notifications stacked
+const AchievementNotification: React.FC = () => {
+  const { currentNotification, notificationQueue, dismissNotification } = useAchievements();
+  const [showFlash, setShowFlash] = useState(false);
+  const lastNotificationRef = useRef<string | null>(null);
+
+  // Collect all active notifications
+  const allNotifications: AchievementNotificationType[] = [];
+  if (currentNotification) allNotifications.push(currentNotification);
+  allNotifications.push(...notificationQueue);
+
+  // Flash effect when new notification arrives
+  useEffect(() => {
+    if (currentNotification) {
+      const key = `${currentNotification.achievement.id}-${currentNotification.playerId}`;
+      if (key !== lastNotificationRef.current) {
+        lastNotificationRef.current = key;
+        setShowFlash(true);
+        setTimeout(() => setShowFlash(false), 300);
+      }
+    }
+  }, [currentNotification]);
+
+  if (allNotifications.length === 0) return null;
+
+  const firstTierColor = getTierColor(allNotifications[0].achievement.tier);
 
   return (
     <>
@@ -201,7 +304,7 @@ const AchievementNotification: React.FC = () => {
         {showFlash && (
           <motion.div
             className="fixed inset-0 z-[9998] pointer-events-none"
-            style={{ backgroundColor: tierColor }}
+            style={{ backgroundColor: firstTierColor }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.25 }}
             exit={{ opacity: 0 }}
@@ -210,199 +313,19 @@ const AchievementNotification: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Achievement Card */}
-      <AnimatePresence>
-        {isVisible && (
-          <motion.div
-            className="fixed top-4 left-1/2 z-[9999] w-full max-w-md px-4"
-            style={{ x: '-50%' }}
-            initial={{ opacity: 0, y: 100, scale: 0.8 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -50, scale: 0.9 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-          >
-            <motion.div
-              className="relative overflow-hidden rounded-2xl"
-              style={{
-                background: 'linear-gradient(145deg, rgba(20, 20, 35, 0.95), rgba(10, 10, 25, 0.98))',
-                backdropFilter: 'blur(20px)',
-              }}
-              animate={{
-                boxShadow: [getTierGlow(tier), getTierGlowIntense(tier), getTierGlow(tier)],
-              }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              {/* Animated gradient border */}
-              <motion.div
-                className="absolute inset-0 rounded-2xl pointer-events-none"
-                style={{
-                  border: `2px solid ${tierColor}`,
-                  opacity: 0.6,
-                }}
-                animate={{
-                  opacity: [0.4, 0.8, 0.4],
-                }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              />
-
-              {/* Background shimmer */}
-              <div
-                className="absolute inset-0 opacity-10 pointer-events-none"
-                style={{
-                  background: `radial-gradient(ellipse at 30% 20%, ${tierColor}40, transparent 60%),
-                               radial-gradient(ellipse at 70% 80%, ${tierColor}20, transparent 50%)`,
-                }}
-              />
-
-              <div className="relative z-10 p-5">
-                {/* Header: "ACHIEVEMENT UNLOCKED" */}
-                <div className="flex items-center justify-between mb-4">
-                  <motion.div
-                    className="flex items-center gap-2"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3, duration: 0.5 }}
-                  >
-                    <motion.span
-                      className="text-xs font-bold tracking-[0.3em] uppercase"
-                      style={{ color: tierColor }}
-                      animate={{ opacity: [0.7, 1, 0.7] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    >
-                      {playerName} — Achievement Freigeschaltet
-                    </motion.span>
-                  </motion.div>
-                  <button
-                    onClick={handleDismiss}
-                    className="text-gray-500 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
-                    aria-label="Schliessen"
-                  >
-                    <X size={18} />
-                  </button>
-                </div>
-
-                {/* Icon + Achievement Info */}
-                <div className="flex items-center gap-4 mb-4">
-                  <motion.div
-                    className="relative flex-shrink-0"
-                    initial={{ scale: 0, rotate: -180 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{
-                      type: 'spring',
-                      stiffness: 260,
-                      damping: 15,
-                      delay: 0.4,
-                    }}
-                  >
-                    <motion.div
-                      className="w-16 h-16 rounded-xl flex items-center justify-center text-4xl"
-                      style={{
-                        background: `linear-gradient(135deg, ${tierColor}30, ${tierColor}10)`,
-                        border: `1px solid ${tierColor}40`,
-                      }}
-                      animate={{
-                        scale: [1, 1.08, 1],
-                      }}
-                      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                    >
-                      {achievement.icon}
-                    </motion.div>
-                  </motion.div>
-
-                  <motion.div
-                    className="flex-1 min-w-0"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.5, duration: 0.4 }}
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="text-white font-bold text-lg truncate">{achievement.name}</h4>
-                      <span
-                        className="flex items-center gap-0.5 text-sm font-bold flex-shrink-0"
-                        style={{ color: tierColor }}
-                      >
-                        +{achievement.points} <Star size={12} fill={tierColor} />
-                      </span>
-                    </div>
-                    <p className="text-gray-400 text-sm line-clamp-2">{achievement.description}</p>
-                  </motion.div>
-                </div>
-
-                {/* Badges */}
-                <motion.div
-                  className="flex items-center gap-2 flex-wrap mb-4"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6, duration: 0.3 }}
-                >
-                  <span
-                    className="px-2.5 py-1 rounded-md text-xs font-bold tracking-wider"
-                    style={{
-                      backgroundColor: tierColor + '25',
-                      color: tierColor,
-                      border: `1px solid ${tierColor}30`,
-                    }}
-                  >
-                    {TIER_LABELS[tier]}
-                  </span>
-                  {achievement.rarity && (
-                    <span
-                      className="px-2.5 py-1 rounded-md text-xs font-bold tracking-wider"
-                      style={{
-                        backgroundColor: getRarityColor(achievement.rarity) + '25',
-                        color: getRarityColor(achievement.rarity),
-                        border: `1px solid ${getRarityColor(achievement.rarity)}30`,
-                      }}
-                    >
-                      {achievement.rarity.toUpperCase()}
-                    </span>
-                  )}
-                  <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-white/5 text-gray-400 flex items-center gap-1 border border-white/10">
-                    <Star size={10} />
-                    {achievement.points} Pkt.
-                  </span>
-                </motion.div>
-
-                {/* Achievement progress bar */}
-                <motion.div
-                  className="mb-3"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.7, duration: 0.3 }}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-gray-500">Fortschritt</span>
-                    <span className="text-xs text-gray-400 font-medium">
-                      {unlockedCount}/{totalAchievements} Achievements
-                    </span>
-                  </div>
-                  <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full rounded-full"
-                      style={{ backgroundColor: tierColor }}
-                      initial={{ width: `${((unlockedCount - 1) / totalAchievements) * 100}%` }}
-                      animate={{ width: `${(unlockedCount / totalAchievements) * 100}%` }}
-                      transition={{ delay: 0.8, duration: 0.6, ease: 'easeOut' }}
-                    />
-                  </div>
-                </motion.div>
-
-                {/* Countdown progress bar */}
-                <div className="h-0.5 bg-white/5 rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full rounded-full"
-                    style={{
-                      backgroundColor: tierColor,
-                      width: `${progress}%`,
-                      opacity: 0.5,
-                    }}
-                  />
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Stacked notification cards */}
+      <div className="fixed top-4 left-1/2 z-[9999] w-full max-w-md px-4 flex flex-col gap-3 max-h-[80vh] overflow-y-auto" style={{ transform: 'translateX(-50%)' }}>
+        <AnimatePresence mode="popLayout">
+          {allNotifications.map((notification, index) => (
+            <NotificationCard
+              key={`${notification.achievement.id}-${notification.playerId}-${index}`}
+              notification={notification}
+              index={index}
+              onDismiss={dismissNotification}
+            />
+          ))}
+        </AnimatePresence>
+      </div>
     </>
   );
 };

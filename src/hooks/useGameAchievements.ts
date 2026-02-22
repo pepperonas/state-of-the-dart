@@ -6,6 +6,7 @@ interface MatchContext {
   previousThrowScore?: number;
   visitNumber?: number;
   opponentRemaining?: number;
+  hadBustInLeg?: boolean;
 }
 
 /**
@@ -152,7 +153,10 @@ export const useGameAchievements = () => {
     // --- Checkout Analysis ---
     if (isCheckout && checkoutValue) {
       checkAchievement(playerId, 'checkouts', 1, gameId);
-      checkAchievement(playerId, 'perfect_checkout', 1, gameId);
+      // Perfect checkout: only if no busts occurred in this leg
+      if (!matchContext?.hadBustInLeg) {
+        checkAchievement(playerId, 'perfect_checkout', 1, gameId);
+      }
 
       // Check all checkout value achievements
       checkAchievement(playerId, 'checkout_value', checkoutValue, gameId);

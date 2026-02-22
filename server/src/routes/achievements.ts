@@ -72,11 +72,8 @@ router.post('/player/:playerId/unlock', authenticateTenant, (req: AuthRequest, r
       return res.json({ message: 'Skipped - player not in database' });
     }
 
-    // Check if achievement exists
-    const achievement = db.prepare('SELECT * FROM achievements WHERE id = ?').get(achievementId);
-    if (!achievement) {
-      return res.status(404).json({ error: 'Achievement not found' });
-    }
+    // Achievement definitions are managed by the frontend (247 achievements).
+    // We just store the unlock record without validating against the legacy achievements table.
 
     // Unlock achievement
     db.prepare(`

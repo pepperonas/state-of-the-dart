@@ -687,6 +687,9 @@ const GameScreen: React.FC = () => {
         opponentRemaining = startScoreForCheckout - opponentScored;
       }
 
+      // Check if player had any busts in this leg
+      const hadBustInLeg = playerThrowsForCheckout.some(t => t.isBust);
+
       checkThrowAchievements(
         currentPlayer.playerId,
         [...state.currentThrow],
@@ -698,6 +701,7 @@ const GameScreen: React.FC = () => {
           previousThrowScore: previousThrow?.score,
           visitNumber,
           opponentRemaining,
+          hadBustInLeg,
         }
       );
     }

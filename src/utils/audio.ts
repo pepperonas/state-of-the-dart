@@ -212,11 +212,15 @@ class AudioSystem {
     // Announce remaining score
     // "You require X" for current player, "Requires X" for opponent
     if (remaining <= 0 || remaining > 170) return; // Only announce checkout ranges
-    
+
+    // Skip bogey numbers (impossible checkouts) — sound files don't exist
+    const bogeyNumbers = [169, 168, 166, 165, 163, 162, 159];
+    if (bogeyNumbers.includes(remaining)) return;
+
     const soundPath = isCurrentPlayer
       ? `/sounds/yourequire/${remaining}.mp3`
       : `/sounds/requires/${remaining}.mp3`;
-    
+
     this.playSound(soundPath, false);
   }
 

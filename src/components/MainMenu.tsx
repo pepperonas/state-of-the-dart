@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Target, Users, TrendingUp, Trophy, Award, Dumbbell, Settings, Play, LogOut, Medal, Shield, BookOpen, RotateCcw, Mail } from 'lucide-react';
+import { Target, Users, TrendingUp, Trophy, Award, Dumbbell, Settings, Play, LogOut, Medal, Shield, BookOpen, RotateCcw, Mail, ClipboardList } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTenant } from '../context/TenantContext';
 import { useAuth } from '../context/AuthContext';
@@ -97,6 +97,13 @@ const MainMenu: React.FC = () => {
       description: t('menu.statistics_desc'),
       onClick: () => navigate('/stats'),
       gradient: 'from-primary-600 to-accent-600',
+    },
+    {
+      title: t('menu.match_history'),
+      icon: ClipboardList,
+      description: t('menu.match_history_desc'),
+      onClick: () => navigate('/match-history'),
+      gradient: 'from-indigo-500 to-indigo-600',
     },
     {
       title: t('menu.achievements'),

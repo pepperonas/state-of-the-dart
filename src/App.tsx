@@ -71,6 +71,7 @@ const GlobalLeaderboard = lazyWithRetry(() => import('./components/leaderboard/G
 const Dashboard = lazyWithRetry(() => import('./components/dashboard/Dashboard'));
 const AdminPanel = lazyWithRetry(() => import('./components/admin/AdminPanel'));
 const ResumeGameScreen = lazyWithRetry(() => import('./components/game/ResumeGameScreen'));
+const MatchHistoryPage = lazyWithRetry(() => import('./components/stats/MatchHistoryPage'));
 
 // Legal pages
 const Impressum = lazyWithRetry(() => import('./components/legal/Impressum'));
@@ -237,6 +238,12 @@ function AppContent() {
                       <Route path="/stats" element={
                         <ProtectedRoute>
                           <StatsOverview />
+                        </ProtectedRoute>
+                      } />
+
+                      <Route path="/match-history" element={
+                        <ProtectedRoute>
+                          <MatchHistoryPage />
                         </ProtectedRoute>
                       } />
                       
