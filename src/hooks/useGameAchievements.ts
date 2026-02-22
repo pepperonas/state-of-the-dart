@@ -127,7 +127,7 @@ export const useGameAchievements = () => {
 
       // Three ones (S1-S1-S1)
       if (darts.every(d => d.segment === 1 && d.multiplier === 1)) {
-        checkAchievement(playerId, 'three_ones', 3, gameId);
+        checkAchievement(playerId, 'three_ones', 1, gameId);
       }
 
       // Same segment: all 3 darts same number
@@ -429,8 +429,7 @@ export const useGameAchievements = () => {
 
       // 180s in match (absolute - how many 180s in THIS match)
       if (player.match180s && player.match180s > 0) {
-        // Cumulative 180 count across all matches
-        checkAchievement(playerId, 'score_180', player.match180s, match.id);
+        // NOTE: score_180 is already incremented per-throw in checkThrowAchievements, don't double-count here
         // 180s in this specific match (absolute)
         checkAchievement(playerId, 'match_180_count', player.match180s, match.id, { mode: 'absolute' });
       }

@@ -38,6 +38,17 @@ const CUMULATIVE_METRICS = new Set([
   'checkout_pct_under_10', 'missed_match_dart', 'lost_more_legs',
   'lead_blown', 'match_average_under_15', 'no_60_plus_match',
   'visit_score_3', 'three_low_visits_row',
+  // Missing cumulative metrics (count achievements that need increment mode)
+  'checkout_after_180', 'checkout_one_dart', 'checkout_two_dart', 'clutch_checkout',
+  'first_visit_checkout', 'impossible_checkout', 'leg_no_bust', 'pressure_checkout',
+  'robin_hood', 'same_segment', 'shanghai', 'shutout_leg', 'three_ones',
+  'three_triples', 'triple_single_double', 'two_doubles_visit', 'visit_under_10',
+  // Meta/tracking cumulative metrics
+  'achievements_unlocked', 'unique_play_days', 'comeback_wins', 'best_of_five_wins',
+  'close_wins', 'weekend_wins', 'unique_win_days', 'legendary_achievements',
+  'triple_consecutive_180', 'first_leg_wins', 'last_leg_wins', 'match_no_bust',
+  'consecutive_60_plus', 'fail_achievements_unlocked',
+  'unique_doubles', 'same_double', 'training_scoring_100',
 ]);
 
 export type CheckMode = 'absolute' | 'increment';

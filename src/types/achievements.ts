@@ -499,7 +499,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'platinum',
     icon: '💎',
     points: 150,
-    requirement: { type: 'special', target: 100, metric: 'leg_average' },
+    requirement: { type: 'value', target: 100, metric: 'leg_average' },
     rarity: 'legendary',
   },
   {
@@ -3046,7 +3046,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'silver',
     icon: '🎪',
     points: 50,
-    requirement: { type: 'value', target: 5, metric: 'tons_in_match' },
+    requirement: { type: 'special', target: 5, metric: 'tons_in_match' },
     rarity: 'rare',
   },
   {
@@ -3057,7 +3057,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'gold',
     icon: '🎆',
     points: 100,
-    requirement: { type: 'value', target: 10, metric: 'tons_in_match' },
+    requirement: { type: 'special', target: 10, metric: 'tons_in_match' },
     rarity: 'epic',
   },
 
@@ -3575,7 +3575,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'three_ones_again',
     name: 'Das magische Trio',
-    description: 'Wirf 5-mal S1-S1-S1 (drei Einser)',
+    description: 'Wirf 15-mal S1-S1-S1 (drei Einser)',
     category: 'special',
     tier: 'silver',
     icon: '1️⃣',
@@ -3648,7 +3648,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'gold',
     icon: '⚡',
     points: 75,
-    requirement: { type: 'value', target: 120, metric: 'game_time_max' },
+    requirement: { type: 'special', target: 120, metric: 'game_time_max' },
     rarity: 'epic',
   },
   {
@@ -3659,7 +3659,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'platinum',
     icon: '💨',
     points: 150,
-    requirement: { type: 'value', target: 60, metric: 'game_time_max' },
+    requirement: { type: 'special', target: 60, metric: 'game_time_max' },
     rarity: 'legendary',
   },
   {
@@ -3670,7 +3670,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'silver',
     icon: '⏳',
     points: 30,
-    requirement: { type: 'value', target: 1800, metric: 'game_time_min' },
+    requirement: { type: 'special', target: 1800, metric: 'game_time_min' },
     rarity: 'common',
   },
   {
@@ -3681,7 +3681,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'gold',
     icon: '♾️',
     points: 50,
-    requirement: { type: 'value', target: 3600, metric: 'game_time_min' },
+    requirement: { type: 'special', target: 3600, metric: 'game_time_min' },
     rarity: 'rare',
   },
 
@@ -3762,7 +3762,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'platinum',
     icon: '🚀',
     points: 200,
-    requirement: { type: 'value', target: 12, metric: 'leg_darts' },
+    requirement: { type: 'special', target: 12, metric: 'leg_darts' },
     rarity: 'legendary',
   },
   {
@@ -3773,7 +3773,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'diamond',
     icon: '💫',
     points: 300,
-    requirement: { type: 'value', target: 11, metric: 'leg_darts' },
+    requirement: { type: 'special', target: 11, metric: 'leg_darts' },
     rarity: 'legendary',
   },
   {
@@ -3784,7 +3784,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'diamond',
     icon: '🌟',
     points: 400,
-    requirement: { type: 'value', target: 10, metric: 'leg_darts' },
+    requirement: { type: 'special', target: 10, metric: 'leg_darts' },
     rarity: 'legendary',
   },
   {
@@ -3986,7 +3986,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'gold',
     icon: '3️⃣',
     points: 100,
-    requirement: { type: 'value', target: 3, metric: 'match_180_count' },
+    requirement: { type: 'special', target: 3, metric: 'match_180_count' },
     rarity: 'epic',
   },
   {
@@ -3997,7 +3997,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'platinum',
     icon: '🌊',
     points: 200,
-    requirement: { type: 'value', target: 5, metric: 'match_180_count' },
+    requirement: { type: 'special', target: 5, metric: 'match_180_count' },
     rarity: 'legendary',
   },
   {
