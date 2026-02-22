@@ -231,6 +231,8 @@ CREATE TABLE IF NOT EXISTS achievements (
 );
 
 -- Player Achievements
+-- Note: No FK on achievement_id — the 247 achievement definitions are managed
+-- entirely by the frontend (src/types/achievements.ts), not the legacy achievements table.
 CREATE TABLE IF NOT EXISTS player_achievements (
   id TEXT PRIMARY KEY,
   player_id TEXT NOT NULL,
@@ -239,7 +241,6 @@ CREATE TABLE IF NOT EXISTS player_achievements (
   progress REAL,
   game_id TEXT,
   FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE,
-  FOREIGN KEY (achievement_id) REFERENCES achievements(id) ON DELETE CASCADE,
   UNIQUE(player_id, achievement_id)
 );
 

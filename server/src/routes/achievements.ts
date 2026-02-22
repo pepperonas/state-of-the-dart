@@ -24,26 +24,20 @@ router.get('/player/:playerId', authenticateTenant, (req: AuthRequest, res: Resp
 
   try {
     console.log(`[Achievements API] Fetching achievements for player ${playerId}, tenant ${req.tenantId}`);
-    
+
+    // No JOIN with legacy achievements table — achievement definitions are managed
+    // by the frontend (247 achievements in src/types/achievements.ts)
     const achievements = db.prepare(`
-      SELECT 
-        pa.id,
-        pa.player_id,
-        pa.achievement_id,
-        pa.unlocked_at,
-        pa.progress,
-        pa.game_id,
-        a.name, 
-        a.description, 
-        a.icon, 
-        a.category, 
-        a.points, 
-        a.rarity, 
-        a.target
-      FROM player_achievements pa
-      JOIN achievements a ON pa.achievement_id = a.id
-      WHERE pa.player_id = ?
-      ORDER BY pa.unlocked_at DESC
+      SELECT
+        id,
+        player_id,
+        achievement_id,
+        unlocked_at,
+        progress,
+        game_id
+      FROM player_achievements
+      WHERE player_id = ?
+      ORDER BY unlocked_at DESC
     `).all(playerId);
 
     console.log(`[Achievements API] Found ${achievements.length} achievements for player ${playerId}`);
@@ -115,15 +109,9 @@ router.put('/player/:playerId/progress', authenticateTenant, (req: AuthRequest, 
       return res.json({ message: 'Skipped - player not in database' });
     }
 
-    // Load valid achievement IDs to skip invalid ones
-    const validAchievements = new Set(
-      (db.prepare('SELECT id FROM achievements').all() as any[]).map(a => a.id)
-    );
-
     // Process each achievement progress update
+    // No validation against legacy achievements table — all 247 frontend achievement IDs are valid
     for (const [achievementId, progressData] of Object.entries(achievements)) {
-      if (!validAchievements.has(achievementId)) continue;
-
       const progress = (progressData as any).percentage || (progressData as any).progress || 0;
 
       // Only update if not already unlocked (progress < 100)
