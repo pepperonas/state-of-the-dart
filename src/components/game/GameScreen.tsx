@@ -409,16 +409,26 @@ const GameScreen: React.FC = () => {
       if (isCancelled) return; // Stop if cancelled
 
       if (dartIndex >= botTurn.length) {
-        // All darts thrown, confirm and move to next player
+        // All darts thrown — check if this was a checkout before confirming
+        const totalBotScore = botTurn.reduce((sum, d) => sum + d.score, 0);
+        const lastBotDart = botTurn[botTurn.length - 1];
+        const requireDouble = state.currentMatch?.settings.doubleOut ?? true;
+        const botCheckedOut = totalBotScore === remaining && (!requireDouble || lastBotDart?.multiplier === 2);
+
         const timer1 = setTimeout(() => {
           if (isCancelled) return;
           dispatch({ type: 'CONFIRM_THROW' });
-          const timer2 = setTimeout(() => {
-            if (isCancelled) return;
-            isBotPlayingRef.current = false; // Set to false BEFORE dispatch
-            dispatch({ type: 'NEXT_PLAYER' });
-          }, 800);
-          botTimersRef.current.push(timer2);
+          // Skip NEXT_PLAYER if bot checked out (CONFIRM_THROW already handles leg/match transition)
+          if (!botCheckedOut) {
+            const timer2 = setTimeout(() => {
+              if (isCancelled) return;
+              isBotPlayingRef.current = false;
+              dispatch({ type: 'NEXT_PLAYER' });
+            }, 800);
+            botTimersRef.current.push(timer2);
+          } else {
+            isBotPlayingRef.current = false;
+          }
         }, 400);
         botTimersRef.current.push(timer1);
         return;
@@ -439,17 +449,13 @@ const GameScreen: React.FC = () => {
       const isValidCheckout = newRemaining === 0 && (!requireDouble || dart.multiplier === 2);
 
       if (isValidCheckout) {
-        // Checkout! Stop throwing more darts
+        // Checkout! Stop throwing more darts — don't dispatch NEXT_PLAYER
+        // (CONFIRM_THROW handles leg/match transition and sets correct player index)
         console.log('🎉 Bot checked out!');
         const timer1 = setTimeout(() => {
           if (isCancelled) return;
           dispatch({ type: 'CONFIRM_THROW' });
-          const timer2 = setTimeout(() => {
-            if (isCancelled) return;
-            isBotPlayingRef.current = false; // Set to false BEFORE dispatch
-            dispatch({ type: 'NEXT_PLAYER' });
-          }, 800);
-          botTimersRef.current.push(timer2);
+          isBotPlayingRef.current = false;
         }, 400);
         botTimersRef.current.push(timer1);
         return;

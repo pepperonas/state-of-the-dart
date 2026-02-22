@@ -392,14 +392,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         from: state.currentPlayerIndex,
         to: nextIndex,
         playerName: state.currentMatch.players[nextIndex].name,
-        legWinner: currentLeg.winner,
       });
-
-      // If current leg just completed and new leg started, reset to leg start player
-      if (currentLeg.winner && state.currentPlayerIndex === state.currentMatch.players.length - 1) {
-        nextIndex = state.currentMatch.legStartPlayerIndex ?? 0;
-        logger.debug('Leg completed, resetting to player', nextIndex);
-      }
 
       // Calculate checkout suggestion for next player
       const nextPlayer = state.currentMatch.players[nextIndex];
