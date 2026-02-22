@@ -53,7 +53,10 @@ router.post('/player/:playerId/unlock', authenticateTenant, (req: AuthRequest, r
   const { playerId } = req.params;
   const { achievementId, progress } = req.body;
 
+  console.log(`[Achievements API] Unlock request for player ${playerId}, achievement ${achievementId}`);
+
   if (!achievementId) {
+    console.warn(`[Achievements API] Unlock rejected: no achievementId provided`);
     return res.status(400).json({ error: 'achievementId is required' });
   }
 
@@ -63,6 +66,7 @@ router.post('/player/:playerId/unlock', authenticateTenant, (req: AuthRequest, r
     // Check if player exists in database
     const playerExists = db.prepare('SELECT 1 FROM players WHERE id = ?').get(playerId);
     if (!playerExists) {
+      console.log(`[Achievements API] Unlock skipped: player ${playerId} not in database`);
       return res.json({ message: 'Skipped - player not in database' });
     }
 
@@ -70,6 +74,7 @@ router.post('/player/:playerId/unlock', authenticateTenant, (req: AuthRequest, r
     // We just store the unlock record without validating against the legacy achievements table.
 
     // Unlock achievement
+    const unlockTime = Date.now();
     db.prepare(`
       INSERT OR REPLACE INTO player_achievements (id, player_id, achievement_id, unlocked_at, progress)
       VALUES (?, ?, ?, ?, ?)
@@ -77,13 +82,14 @@ router.post('/player/:playerId/unlock', authenticateTenant, (req: AuthRequest, r
       `${playerId}-${achievementId}`,
       playerId,
       achievementId,
-      Date.now(),
+      unlockTime,
       progress || 100
     );
 
-    res.json({ message: 'Achievement unlocked successfully' });
+    console.log(`[Achievements API] Achievement unlocked: ${achievementId} for player ${playerId} at ${unlockTime}`);
+    res.json({ message: 'Achievement unlocked successfully', achievementId, unlockTime });
   } catch (error) {
-    console.error('Error unlocking achievement:', error);
+    console.error('[Achievements API] Error unlocking achievement:', error);
     res.status(500).json({ error: 'Failed to unlock achievement' });
   }
 });
@@ -116,6 +122,16 @@ router.put('/player/:playerId/progress', authenticateTenant, (req: AuthRequest, 
 
       // Only update if not already unlocked (progress < 100)
       if (progress < 100) {
+        // Don't overwrite already-unlocked achievements (unlocked_at IS NOT NULL)
+        const existing = db.prepare(
+          'SELECT unlocked_at FROM player_achievements WHERE player_id = ? AND achievement_id = ?'
+        ).get(playerId, achievementId) as { unlocked_at: number | null } | undefined;
+
+        if (existing?.unlocked_at) {
+          // Already unlocked — skip progress update to avoid overwriting
+          continue;
+        }
+
         db.prepare(`
           INSERT OR REPLACE INTO player_achievements (id, player_id, achievement_id, unlocked_at, progress)
           VALUES (?, ?, ?, ?, ?)

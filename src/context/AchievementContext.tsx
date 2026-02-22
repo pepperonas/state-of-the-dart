@@ -61,6 +61,7 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
   const isCheckingMetaRef = useRef(false);
 
   const STORAGE_KEY = 'achievements';
+  const PENDING_SYNC_KEY = 'achievements_pending_sync';
   const loadingPlayersRef = useRef<Set<string>>(new Set());
   const loadedPlayersRef = useRef<Set<string>>(new Set());
 
@@ -78,15 +79,45 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
     }
   }, [currentNotification, notificationQueue]);
 
-  // Load all player progress from localStorage on mount
+  // Load player progress: API is primary source, localStorage is fallback cache
   useEffect(() => {
     if (currentTenant) {
+      // Load localStorage cache first for instant UI (will be overwritten by API data)
       const storage = new TenantStorage(currentTenant.id);
       const saved = storage.get<Record<string, PlayerAchievementProgress>>(STORAGE_KEY, {});
-      setProgressCache(saved);
-      progressCacheRef.current = saved;
+      if (Object.keys(saved).length > 0) {
+        setProgressCache(saved);
+        progressCacheRef.current = saved;
+      }
+
+      // Sync any pending unlocks that failed to reach the server
+      syncPendingUnlocks(storage);
     }
   }, [currentTenant]);
+
+  // Sync pending unlocks that failed to reach the server
+  const syncPendingUnlocks = async (storage: TenantStorage) => {
+    const pending = storage.get<Array<{ playerId: string; achievementId: string; gameId?: string }>>(PENDING_SYNC_KEY, []);
+    if (pending.length === 0) return;
+
+    logger.info(`Syncing ${pending.length} pending achievement unlocks...`);
+    const remaining: typeof pending = [];
+
+    for (const item of pending) {
+      try {
+        await api.achievements.unlock(item.playerId, item.achievementId);
+        logger.success(`Synced pending unlock: ${item.achievementId} for ${item.playerId}`);
+      } catch (error) {
+        logger.error(`Failed to sync pending unlock: ${item.achievementId}`, error);
+        remaining.push(item);
+      }
+    }
+
+    storage.set(PENDING_SYNC_KEY, remaining);
+    if (remaining.length > 0) {
+      logger.warn(`${remaining.length} achievement unlocks still pending sync`);
+    }
+  };
 
   // Load player achievements from API
   const loadPlayerAchievementsFromAPI = useCallback(async (playerId: string) => {
@@ -103,29 +134,57 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
       logger.debug(`API returned ${apiAchievements?.length || 0} achievements for player ${playerId}`);
 
       if (apiAchievements && Array.isArray(apiAchievements)) {
-        const apiUnlockedAchievements: UnlockedAchievement[] = apiAchievements.map((a: any) => ({
-          achievementId: a.achievement_id || a.achievementId,
-          unlockedAt: (a.unlocked_at || a.unlockedAt) ? new Date(a.unlocked_at || a.unlockedAt) : new Date(),
-          playerId: a.player_id || a.playerId || playerId,
-          gameId: a.game_id || a.gameId,
-        }));
+        // Only treat records with unlocked_at as actually unlocked
+        const apiUnlockedAchievements: UnlockedAchievement[] = apiAchievements
+          .filter((a: any) => a.unlocked_at || a.unlockedAt)
+          .map((a: any) => ({
+            achievementId: a.achievement_id || a.achievementId,
+            unlockedAt: new Date(a.unlocked_at || a.unlockedAt),
+            playerId: a.player_id || a.playerId || playerId,
+            gameId: a.game_id || a.gameId,
+          }));
+
+        // Build progress map from API records (those without unlocked_at are progress-only)
+        const apiProgressMap: Record<string, { current: number; target: number; percentage: number }> = {};
+        apiAchievements.forEach((a: any) => {
+          if (!(a.unlocked_at || a.unlockedAt) && (a.progress != null)) {
+            const achievementId = a.achievement_id || a.achievementId;
+            const achievement = getAchievementById(achievementId);
+            if (achievement) {
+              apiProgressMap[achievementId] = {
+                current: Math.round((a.progress / 100) * achievement.requirement.target),
+                target: achievement.requirement.target,
+                percentage: a.progress,
+              };
+            }
+          }
+        });
 
         // Merge API achievements with localStorage achievements
         const mergedAchievements: UnlockedAchievement[] = [...apiUnlockedAchievements];
+        const localOnlyAchievements: UnlockedAchievement[] = [];
+
         if (currentProgress?.unlockedAchievements) {
           currentProgress.unlockedAchievements.forEach(localAchievement => {
             const apiMatch = apiUnlockedAchievements.find(
               a => a.achievementId === localAchievement.achievementId
             );
             if (!apiMatch) {
+              // localStorage has an unlock that API doesn't — keep it and try to sync
               mergedAchievements.push(localAchievement);
-            } else if (localAchievement.unlockedAt > apiMatch.unlockedAt) {
-              const index = mergedAchievements.findIndex(
-                a => a.achievementId === localAchievement.achievementId
-              );
-              if (index >= 0) mergedAchievements[index] = localAchievement;
+              localOnlyAchievements.push(localAchievement);
             }
           });
+        }
+
+        // Sync localStorage-only unlocks back to server
+        if (localOnlyAchievements.length > 0) {
+          logger.info(`Syncing ${localOnlyAchievements.length} localStorage-only achievements to API...`);
+          for (const la of localOnlyAchievements) {
+            api.achievements.unlock(playerId, la.achievementId).catch(error => {
+              logger.error(`Failed to sync localStorage achievement ${la.achievementId} to API:`, error);
+            });
+          }
         }
 
         const totalPoints = mergedAchievements.reduce((sum, ua) => {
@@ -133,10 +192,13 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
           return sum + (achievement?.points || 0);
         }, 0);
 
+        // Merge progress: API progress takes precedence, fallback to localStorage
+        const mergedProgress = { ...(currentProgress?.progress || {}), ...apiProgressMap };
+
         const playerProgress: PlayerAchievementProgress = {
           playerId,
           unlockedAchievements: mergedAchievements,
-          progress: currentProgress?.progress || {},
+          progress: mergedProgress,
           totalPoints,
         };
 
@@ -361,12 +423,30 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
     // Persist to state + localStorage
     saveProgressForPlayer(playerId, updatedProgress);
 
-    // Sync to API in background
-    api.achievements.unlock(playerId, achievementId).then(() => {
-      logger.achievementEvent(`Achievement synced to API: ${achievement.name}`);
-    }).catch(error => {
-      logger.error('Failed to sync achievement to API:', error);
-    });
+    // Sync to API — retry once on failure, store in pending queue if still failing
+    const syncUnlockToAPI = async () => {
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          await api.achievements.unlock(playerId, achievementId);
+          logger.achievementEvent(`Achievement synced to API: ${achievement.name} (attempt ${attempt})`);
+          return; // Success
+        } catch (error) {
+          logger.error(`Failed to sync achievement to API (attempt ${attempt}):`, error);
+          if (attempt < 2) {
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s before retry
+          }
+        }
+      }
+      // Both attempts failed — store in pending queue for next session
+      if (currentTenant) {
+        const storage = new TenantStorage(currentTenant.id);
+        const pending = storage.get<Array<{ playerId: string; achievementId: string; gameId?: string }>>(PENDING_SYNC_KEY, []);
+        pending.push({ playerId, achievementId, gameId });
+        storage.set(PENDING_SYNC_KEY, pending);
+        logger.warn(`Achievement ${achievementId} added to pending sync queue`);
+      }
+    };
+    syncUnlockToAPI();
 
     // Queue notification with snapshot of current unlocked count
     queueNotification({
