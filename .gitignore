@@ -50,6 +50,9 @@ CLAUDE.md
 .cursor/
 .cursorignore
 
+# Website build output
+website/dist/
+
 # Database
 *.sqlite
 *.db

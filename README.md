@@ -9,6 +9,7 @@
 **Professionelles Dart-Zählsystem** - Eine funktionsreiche, webbasierte Dart-Scoring-Anwendung mit Multi-User-Support, professionellem Statistik-Tracking und Live-Deployment.
 
 [![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green)](https://stateofthedart.com)
+[![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-purple)](https://stateofthedart.celox.io)
 ![Version](https://img.shields.io/badge/Version-0.8.1-blue)
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -18,7 +19,7 @@
 ![Vite](https://img.shields.io/badge/Vite-5.4-blue)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-blue)
 
-🌐 **[Live App](https://stateofthedart.com)** | 📖 **[Deployment Guide](docs/DEPLOYMENT_VPS.md)** | 🏗️ **[Architektur](docs/ARCHITECTURE.md)** | 🐛 **[Issues melden](https://github.com/pepperonas/state-of-the-dart/issues)**
+🌐 **[Live App](https://stateofthedart.com)** | 🏠 **[Website](https://stateofthedart.celox.io)** | 📖 **[Deployment Guide](docs/DEPLOYMENT_VPS.md)** | 🏗️ **[Architektur](docs/ARCHITECTURE.md)** | 🐛 **[Issues melden](https://github.com/pepperonas/state-of-the-dart/issues)**
 
 ---
 
@@ -371,6 +372,7 @@ state-of-the-dart/
 ├── public/
 │   ├── sounds/               # 400+ Audio-Dateien
 │   └── images/               # Bilder & Thumbnails
+├── website/                  # Landing Page (stateofthedart.celox.io)
 ├── dist/                     # Production Build
 └── deploy.sh                 # Deployment-Script
 ```
@@ -889,7 +891,7 @@ Siehe [CHANGELOG.md](CHANGELOG.md) für eine vollständige Liste der Änderungen
 
 <div align="center">
   <p>Made with ❤️ and 🎯 by Martin Pfeffer</p>
-  <p>© 2026 celox.io | Version 0.8.0</p>
+  <p>© 2026 celox.io | Version 0.8.1</p>
   <p>
     <a href="https://stateofthedart.com">🌐 Live Demo</a> •
     <a href="https://github.com/pepperonas/state-of-the-dart">📦 GitHub</a> •

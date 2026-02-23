@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <!-- Primary Meta Tags -->
+  <title>State of the Dart - Professionelles Dart Scoring System</title>
+  <meta name="title" content="State of the Dart - Professionelles Dart Scoring System" />
+  <meta name="description" content="Professionelles Dart Scoring System mit Multi-User Support. 464 Achievements, Heatmaps, Statistiken, Turniere, Training und mehr. Kostenlos als PWA." />
+  <meta name="keywords" content="Dart Scoring, Dart Counter, Dart App, X01, Cricket, Around the Clock, Shanghai, Dart Statistiken, Dart Achievements, Dart Training, Dart Turnier, PWA" />
+  <meta name="author" content="Martin Pfeffer" />
+  <meta name="robots" content="index, follow" />
+  <meta name="language" content="German" />
+  <meta name="theme-color" content="#0ea5e9" />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://stateofthedart.celox.io/" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://stateofthedart.celox.io/" />
+  <meta property="og:title" content="State of the Dart - Professionelles Dart Scoring System" />
+  <meta property="og:description" content="Professionelles Dart Scoring System mit Multi-User Support. 464 Achievements, Heatmaps, Statistiken, Turniere, Training und mehr." />
+  <meta property="og:image" content="https://stateofthedart.celox.io/images/og-image.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="State of the Dart - Dartboard mit Score-Display" />
+  <meta property="og:locale" content="de_DE" />
+  <meta property="og:site_name" content="State of the Dart" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://stateofthedart.celox.io/" />
+  <meta name="twitter:title" content="State of the Dart - Professionelles Dart Scoring System" />
+  <meta name="twitter:description" content="464 Achievements, Heatmaps, Statistiken, Turniere & Training. Kostenlos als PWA." />
+  <meta name="twitter:image" content="https://stateofthedart.celox.io/images/og-image.jpg" />
+  <meta name="twitter:image:alt" content="State of the Dart - Dartboard mit Score-Display" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=optional" rel="stylesheet" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/src/styles.css" />
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "State of the Dart",
+    "description": "Professionelles Dart Scoring System mit Multi-User Support, 464 Achievements, Heatmaps, Statistiken, Turnieren und Training.",
+    "url": "https://stateofthedart.com",
+    "applicationCategory": "SportsApplication",
+    "operatingSystem": "Web Browser",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "EUR"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "Martin Pfeffer",
+      "url": "https://celox.io"
+    },
+    "screenshot": "https://stateofthedart.celox.io/images/og-image.jpg",
+    "featureList": "X01, Cricket, Around the Clock, Shanghai, Turniere, Training, Heatmaps, 464 Achievements, Multi-User, Offline PWA"
+  }
+  </script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-sm border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="/" class="flex items-center gap-3 flex-shrink-0">
+          <img src="/favicon.svg" alt="" class="w-8 h-8" />
+          <span class="text-xl font-bold gradient-text-brand">State of the Dart</span>
+        </a>
+
+        <!-- Desktop Nav -->
+        <nav class="hidden md:flex items-center gap-1">
+          <a href="#features" class="px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-lg transition-all">Features</a>
+          <a href="#screenshots" class="px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-lg transition-all">Screenshots</a>
+          <a href="#game-modes" class="px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-lg transition-all">Spielmodi</a>
+          <a href="#stats" class="px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-lg transition-all">Statistiken</a>
+          <a href="https://stateofthedart.com" class="ml-3 px-5 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transition-all whitespace-nowrap">
+            Jetzt spielen
+          </a>
+        </nav>
+
+        <!-- Mobile Menu Button -->
+        <button id="mobile-menu-btn" class="md:hidden p-2 -mr-2 min-w-[44px] min-h-[44px] text-slate-300 hover:text-white rounded-lg hover:bg-slate-800/50 transition-colors" aria-label="Menu">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="md:hidden hidden border-t border-slate-800 bg-slate-900">
+      <div class="px-4 py-4 space-y-1">
+        <a href="#features" class="block px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all">Features</a>
+        <a href="#screenshots" class="block px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all">Screenshots</a>
+        <a href="#game-modes" class="block px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all">Spielmodi</a>
+        <a href="#stats" class="block px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all">Statistiken</a>
+        <a href="https://stateofthedart.com" class="block mt-3 px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold rounded-xl text-center">Jetzt spielen</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative overflow-hidden bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 py-16 sm:py-20 md:py-28 lg:py-36">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-900/0 to-slate-900/0"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <div class="text-center max-w-4xl mx-auto">
+        <!-- App Icon -->
+        <div class="mb-8 animate-fade-in-up">
+          <img src="/images/thumb.jpg" alt="State of the Dart" class="w-32 h-32 sm:w-40 sm:h-40 mx-auto rounded-3xl shadow-2xl shadow-indigo-500/20 border-2 border-slate-700/50" />
+        </div>
+
+        <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-6 leading-tight animate-fade-in-up animate-delay-100">
+          Dein professionelles
+          <br />
+          <span class="bg-gradient-to-r from-sky-400 via-indigo-400 to-purple-400 text-transparent bg-clip-text">
+            Dart Scoring System
+          </span>
+        </h1>
+
+        <p class="text-base sm:text-lg md:text-xl text-slate-300 mb-10 max-w-3xl mx-auto animate-fade-in-up animate-delay-200">
+          Tracke Scores, analysiere dein Spiel mit Heatmaps, sammle 464 Achievements und spiele Turniere &ndash; alles in einer kostenlosen Web-App.
+        </p>
+
+        <!-- Trust Badges -->
+        <div class="flex flex-wrap justify-center gap-3 mb-10 animate-fade-in-up animate-delay-300">
+          <div class="flex items-center gap-2 px-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg">
+            <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span class="text-slate-300 text-sm">100% Kostenlos</span>
+          </div>
+          <div class="flex items-center gap-2 px-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg">
+            <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+            <span class="text-slate-300 text-sm">PWA &ndash; Offline nutzbar</span>
+          </div>
+          <div class="flex items-center gap-2 px-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg">
+            <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <span class="text-slate-300 text-sm">Multi-User Support</span>
+          </div>
+          <div class="flex items-center gap-2 px-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg">
+            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+            <span class="text-slate-300 text-sm">464 Achievements</span>
+          </div>
+        </div>
+
+        <!-- CTA Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up animate-delay-400">
+          <a href="https://stateofthedart.com" class="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-lg font-semibold rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transition-all transform hover:scale-105 text-center">
+            Jetzt kostenlos spielen
+          </a>
+          <a href="https://github.com/pepperonas/state-of-the-dart" class="px-8 py-4 bg-slate-800 border border-slate-700 text-white text-lg font-semibold rounded-lg hover:bg-slate-700 transition-all text-center flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            GitHub
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="py-16 sm:py-20 md:py-24 bg-slate-950">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12 md:mb-16">
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
+          Alles was du brauchst,
+          <span class="bg-gradient-to-r from-indigo-400 to-purple-400 text-transparent bg-clip-text">in einer App</span>
+        </h2>
+        <p class="text-slate-400 text-lg max-w-2xl mx-auto">Von einfachem Score-Tracking bis hin zu professionellen Statistiken und Turnieren.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Feature 1: Game Modes -->
+        <div class="card">
+          <div class="w-12 h-12 bg-sky-500/10 rounded-xl flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">6 Spielmodi</h3>
+          <p class="text-slate-400 text-sm">X01 (301/501/701), Cricket, Around the Clock, Shanghai, Turniere und Online Multiplayer.</p>
+        </div>
+
+        <!-- Feature 2: Achievements -->
+        <div class="card">
+          <div class="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">464 Achievements</h3>
+          <p class="text-slate-400 text-sm">Bronze bis Diamant &ndash; 8 Kategorien mit Scoring, Checkout, Consistency, Milestone, Fun, Social, Training und Fail.</p>
+        </div>
+
+        <!-- Feature 3: Statistics -->
+        <div class="card">
+          <div class="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">Detaillierte Statistiken</h3>
+          <p class="text-slate-400 text-sm">10+ interaktive Charts, Spieler-Vergleich, Fortschritts-Tracking und Personal Bests.</p>
+        </div>
+
+        <!-- Feature 4: Heatmaps -->
+        <div class="card">
+          <div class="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"></path></svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">Wurf-Heatmaps</h3>
+          <p class="text-slate-400 text-sm">Visualisiere deine Wurfmuster auf der Dartscheibe mit Cluster-Erkennung und Streuungsanalyse.</p>
+        </div>
+
+        <!-- Feature 5: Training -->
+        <div class="card">
+          <div class="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">6 Trainingsmodi</h3>
+          <p class="text-slate-400 text-sm">Doppel, Triple, Around the Clock, Checkout, Bob&apos;s 27 und Score-Training mit Fortschritts-Tracking.</p>
+        </div>
+
+        <!-- Feature 6: Tournaments -->
+        <div class="card">
+          <div class="w-12 h-12 bg-indigo-500/10 rounded-xl flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">Turniersystem</h3>
+          <p class="text-slate-400 text-sm">Knockout und Round Robin Turniere mit Bracket-Ansicht und automatischer Spielplanung.</p>
+        </div>
+
+        <!-- Feature 7: Bot AI -->
+        <div class="card">
+          <div class="w-12 h-12 bg-cyan-500/10 rounded-xl flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">KI-Gegner (10 Level)</h3>
+          <p class="text-slate-400 text-sm">Trainiere gegen intelligente Bot-Gegner mit 10 Schwierigkeitsstufen &ndash; vom Anf&auml;nger bis zum Profi.</p>
+        </div>
+
+        <!-- Feature 8: Audio -->
+        <div class="card">
+          <div class="w-12 h-12 bg-pink-500/10 rounded-xl flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">Professioneller Dart Caller</h3>
+          <p class="text-slate-400 text-sm">400+ Soundeffekte mit professionellem Dart Caller &ndash; wie im Pub oder bei der WM.</p>
+        </div>
+
+        <!-- Feature 9: Export -->
+        <div class="card">
+          <div class="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">Export & Import</h3>
+          <p class="text-slate-400 text-sm">Exportiere deine Daten als CSV, Excel, PDF oder JSON. Teile Screenshots deiner besten Matches.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screenshots Section -->
+  <section id="screenshots" class="py-16 sm:py-20 md:py-24 bg-gradient-to-b from-slate-950 to-slate-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12 md:mb-16">
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
+          <span class="bg-gradient-to-r from-indigo-400 to-purple-400 text-transparent bg-clip-text">Designed</span> zum Spielen
+        </h2>
+        <p class="text-slate-400 text-lg max-w-2xl mx-auto">Modernes Dark Theme mit glassmorphen Karten und intuitiver Navigation.</p>
+      </div>
+
+      <!-- Screenshot Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <a href="/screenshots/dashboard.jpg" class="group block overflow-hidden rounded-xl border border-slate-700/50 hover:border-indigo-500/50 transition-all hover:shadow-lg hover:shadow-indigo-500/10" data-lightbox>
+          <div class="aspect-video overflow-hidden">
+            <img src="/screenshots/dashboard.jpg" alt="Dashboard mit Quick Actions und Statistiken" width="800" height="450" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+          </div>
+          <div class="p-3 bg-slate-800/50">
+            <p class="text-sm text-slate-300 font-medium">Dashboard</p>
+          </div>
+        </a>
+
+        <a href="/screenshots/game.jpg" class="group block overflow-hidden rounded-xl border border-slate-700/50 hover:border-indigo-500/50 transition-all hover:shadow-lg hover:shadow-indigo-500/10" data-lightbox>
+          <div class="aspect-video overflow-hidden">
+            <img src="/screenshots/game.jpg" alt="X01 Scoring Interface" width="800" height="450" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+          </div>
+          <div class="p-3 bg-slate-800/50">
+            <p class="text-sm text-slate-300 font-medium">Spielansicht</p>
+          </div>
+        </a>
+
+        <a href="/screenshots/stats.jpg" class="group block overflow-hidden rounded-xl border border-slate-700/50 hover:border-indigo-500/50 transition-all hover:shadow-lg hover:shadow-indigo-500/10" data-lightbox>
+          <div class="aspect-video overflow-hidden">
+            <img src="/screenshots/stats.jpg" alt="Heatmap und Statistiken" width="800" height="450" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+          </div>
+          <div class="p-3 bg-slate-800/50">
+            <p class="text-sm text-slate-300 font-medium">Heatmap & Statistiken</p>
+          </div>
+        </a>
+
+        <a href="/screenshots/training.jpg" class="group block overflow-hidden rounded-xl border border-slate-700/50 hover:border-indigo-500/50 transition-all hover:shadow-lg hover:shadow-indigo-500/10" data-lightbox>
+          <div class="aspect-video overflow-hidden">
+            <img src="/screenshots/training.jpg" alt="6 Trainingsmodi" width="800" height="450" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+          </div>
+          <div class="p-3 bg-slate-800/50">
+            <p class="text-sm text-slate-300 font-medium">Training</p>
+          </div>
+        </a>
+
+        <a href="/screenshots/achievements.jpg" class="group block overflow-hidden rounded-xl border border-slate-700/50 hover:border-indigo-500/50 transition-all hover:shadow-lg hover:shadow-indigo-500/10" data-lightbox>
+          <div class="aspect-video overflow-hidden">
+            <img src="/screenshots/achievements.jpg" alt="464 Achievements" width="800" height="450" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+          </div>
+          <div class="p-3 bg-slate-800/50">
+            <p class="text-sm text-slate-300 font-medium">Achievements</p>
+          </div>
+        </a>
+
+        <a href="/screenshots/tournament.jpg" class="group block overflow-hidden rounded-xl border border-slate-700/50 hover:border-indigo-500/50 transition-all hover:shadow-lg hover:shadow-indigo-500/10" data-lightbox>
+          <div class="aspect-video overflow-hidden">
+            <img src="/screenshots/tournament.jpg" alt="Turniersystem" width="800" height="450" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+          </div>
+          <div class="p-3 bg-slate-800/50">
+            <p class="text-sm text-slate-300 font-medium">Turniere</p>
+          </div>
+        </a>
+
+        <a href="/screenshots/player-profile.jpg" class="group block overflow-hidden rounded-xl border border-slate-700/50 hover:border-indigo-500/50 transition-all hover:shadow-lg hover:shadow-indigo-500/10" data-lightbox>
+          <div class="aspect-video overflow-hidden">
+            <img src="/screenshots/player-profile.jpg" alt="Spielerprofil mit Charts" width="800" height="450" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+          </div>
+          <div class="p-3 bg-slate-800/50">
+            <p class="text-sm text-slate-300 font-medium">Spielerprofil</p>
+          </div>
+        </a>
+
+        <a href="/screenshots/leaderboard.jpg" class="group block overflow-hidden rounded-xl border border-slate-700/50 hover:border-indigo-500/50 transition-all hover:shadow-lg hover:shadow-indigo-500/10" data-lightbox>
+          <div class="aspect-video overflow-hidden">
+            <img src="/screenshots/leaderboard.jpg" alt="Leaderboard" width="800" height="450" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+          </div>
+          <div class="p-3 bg-slate-800/50">
+            <p class="text-sm text-slate-300 font-medium">Leaderboard</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Game Modes Section -->
+  <section id="game-modes" class="py-16 sm:py-20 md:py-24 bg-slate-950">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12 md:mb-16">
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
+          Spielmodi f&uuml;r
+          <span class="bg-gradient-to-r from-sky-400 to-indigo-400 text-transparent bg-clip-text">jeden Geschmack</span>
+        </h2>
+        <p class="text-slate-400 text-lg max-w-2xl mx-auto">Ob klassisches X01, Cricket oder Turnier &ndash; es ist f&uuml;r jeden etwas dabei.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="relative overflow-hidden rounded-xl bg-gradient-to-br from-sky-500/10 to-sky-500/5 border border-sky-500/20 p-6">
+          <div class="text-3xl mb-3">&#127919;</div>
+          <h3 class="text-lg font-semibold text-white mb-2">X01</h3>
+          <p class="text-slate-400 text-sm">301, 501 oder 701 &ndash; der Klassiker. Mit Checkout-Vorschl&auml;gen und professionellem Scoring.</p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <span class="px-2 py-0.5 bg-sky-500/10 text-sky-300 text-xs rounded-md">301</span>
+            <span class="px-2 py-0.5 bg-sky-500/10 text-sky-300 text-xs rounded-md">501</span>
+            <span class="px-2 py-0.5 bg-sky-500/10 text-sky-300 text-xs rounded-md">701</span>
+          </div>
+        </div>
+
+        <div class="relative overflow-hidden rounded-xl bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 p-6">
+          <div class="text-3xl mb-3">&#9898;</div>
+          <h3 class="text-lg font-semibold text-white mb-2">Cricket</h3>
+          <p class="text-slate-400 text-sm">Schlie&szlig;e die Zahlen 15-20 und das Bullseye. Strategie trifft Pr&auml;zision.</p>
+        </div>
+
+        <div class="relative overflow-hidden rounded-xl bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 p-6">
+          <div class="text-3xl mb-3">&#128339;</div>
+          <h3 class="text-lg font-semibold text-white mb-2">Around the Clock</h3>
+          <p class="text-slate-400 text-sm">Triff jede Zahl von 1 bis 20 der Reihe nach. Perfekt zum Aufw&auml;rmen.</p>
+        </div>
+
+        <div class="relative overflow-hidden rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 border border-amber-500/20 p-6">
+          <div class="text-3xl mb-3">&#127912;</div>
+          <h3 class="text-lg font-semibold text-white mb-2">Shanghai</h3>
+          <p class="text-slate-400 text-sm">Wirf Single, Double und Triple jeder Zahl &ndash; oder erziele Shanghai f&uuml;r den Sofortsieg!</p>
+        </div>
+
+        <div class="relative overflow-hidden rounded-xl bg-gradient-to-br from-indigo-500/10 to-indigo-500/5 border border-indigo-500/20 p-6">
+          <div class="text-3xl mb-3">&#127942;</div>
+          <h3 class="text-lg font-semibold text-white mb-2">Turniere</h3>
+          <p class="text-slate-400 text-sm">Knockout oder Round Robin &ndash; erstelle Turniere mit bis zu 8 Spielern und Bracket-Ansicht.</p>
+        </div>
+
+        <div class="relative overflow-hidden rounded-xl bg-gradient-to-br from-pink-500/10 to-pink-500/5 border border-pink-500/20 p-6">
+          <div class="text-3xl mb-3">&#127760;</div>
+          <h3 class="text-lg font-semibold text-white mb-2">Online Multiplayer</h3>
+          <p class="text-slate-400 text-sm">Spiele in Echtzeit gegen Freunde per WebSocket. Erstelle oder tritt Lobbys bei.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats/Numbers Section -->
+  <section id="stats" class="py-16 sm:py-20 md:py-24 bg-gradient-to-b from-slate-950 to-slate-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12 md:mb-16">
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
+          Die App in
+          <span class="bg-gradient-to-r from-purple-400 to-pink-400 text-transparent bg-clip-text">Zahlen</span>
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-16">
+        <div class="text-center p-6 rounded-xl bg-slate-800/30 border border-slate-700/30">
+          <div class="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-sky-400 to-indigo-400 text-transparent bg-clip-text mb-2">464</div>
+          <div class="text-slate-400 text-sm sm:text-base">Achievements</div>
+        </div>
+        <div class="text-center p-6 rounded-xl bg-slate-800/30 border border-slate-700/30">
+          <div class="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 text-transparent bg-clip-text mb-2">6</div>
+          <div class="text-slate-400 text-sm sm:text-base">Spielmodi</div>
+        </div>
+        <div class="text-center p-6 rounded-xl bg-slate-800/30 border border-slate-700/30">
+          <div class="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 text-transparent bg-clip-text mb-2">10+</div>
+          <div class="text-slate-400 text-sm sm:text-base">Charts & Analysen</div>
+        </div>
+        <div class="text-center p-6 rounded-xl bg-slate-800/30 border border-slate-700/30">
+          <div class="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 text-transparent bg-clip-text mb-2">400+</div>
+          <div class="text-slate-400 text-sm sm:text-base">Sound-Effekte</div>
+        </div>
+      </div>
+
+      <!-- Tech Stack -->
+      <div class="text-center mb-8">
+        <h3 class="text-xl font-semibold text-white mb-6">Gebaut mit modernen Technologien</h3>
+        <div class="flex flex-wrap justify-center gap-3">
+          <span class="px-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg text-slate-300 text-sm">React 19</span>
+          <span class="px-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg text-slate-300 text-sm">TypeScript</span>
+          <span class="px-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg text-slate-300 text-sm">Vite</span>
+          <span class="px-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg text-slate-300 text-sm">Tailwind CSS</span>
+          <span class="px-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg text-slate-300 text-sm">Node.js</span>
+          <span class="px-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg text-slate-300 text-sm">SQLite</span>
+          <span class="px-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg text-slate-300 text-sm">Recharts</span>
+          <span class="px-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg text-slate-300 text-sm">Framer Motion</span>
+          <span class="px-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg text-slate-300 text-sm">PWA / Workbox</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-16 sm:py-20 md:py-24 bg-slate-900 relative overflow-hidden">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-900/0 to-slate-900/0"></div>
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
+      <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-6">
+        Bereit f&uuml;r dein n&auml;chstes
+        <span class="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 text-transparent bg-clip-text">Dart-Match?</span>
+      </h2>
+      <p class="text-slate-300 text-lg mb-10 max-w-2xl mx-auto">
+        Keine Installation n&ouml;tig &ndash; einfach im Browser &ouml;ffnen und losspielen. Funktioniert auf Smartphone, Tablet und Desktop.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="https://stateofthedart.com" class="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-lg font-semibold rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transition-all transform hover:scale-105 text-center">
+          Jetzt kostenlos starten
+        </a>
+        <a href="https://github.com/pepperonas/state-of-the-dart" class="px-8 py-4 bg-slate-800 border border-slate-700 text-white text-lg font-semibold rounded-lg hover:bg-slate-700 transition-all text-center">
+          Quellcode auf GitHub
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-slate-900 border-t border-slate-800 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Column 1: About -->
+        <div>
+          <h3 class="font-semibold mb-4">
+            <span class="bg-gradient-to-r from-sky-400 to-purple-400 text-transparent bg-clip-text">State of the Dart</span>
+          </h3>
+          <p class="text-slate-400 text-sm mb-4">
+            Professionelles Dart Scoring System mit Multi-User Support. Open Source und kostenlos.
+          </p>
+          <div class="flex gap-4">
+            <a href="https://github.com/pepperonas/state-of-the-dart" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-white transition-colors" aria-label="GitHub">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+            <a href="https://celox.io" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-white transition-colors" aria-label="celox.io">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Column 2: Links -->
+        <div>
+          <h3 class="text-white font-semibold mb-4">Links</h3>
+          <ul class="space-y-2">
+            <li><a href="https://stateofthedart.com" class="text-slate-400 hover:text-white transition-colors text-sm">App starten</a></li>
+            <li><a href="https://github.com/pepperonas/state-of-the-dart" class="text-slate-400 hover:text-white transition-colors text-sm">GitHub Repository</a></li>
+            <li><a href="https://celox.io" class="text-slate-400 hover:text-white transition-colors text-sm">celox.io</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 3: Legal -->
+        <div>
+          <h3 class="text-white font-semibold mb-4">Rechtliches</h3>
+          <ul class="space-y-2">
+            <li><a href="https://celox.io/impressum" class="text-slate-400 hover:text-white transition-colors text-sm">Impressum</a></li>
+            <li><a href="https://celox.io/datenschutz" class="text-slate-400 hover:text-white transition-colors text-sm">Datenschutz</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Copyright -->
+      <div class="mt-12 pt-8 border-t border-slate-800 text-center">
+        <p class="text-slate-500 text-sm">&copy; 2026 Martin Pfeffer | <a href="https://celox.io" class="hover:text-white transition-colors">celox.io</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Bild-Vorschau">
+    <img src="" alt="" />
+  </div>
+
+  <!-- Scripts -->
+  <script>
+    // Mobile menu toggle
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    menuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+    // Close on link click
+    mobileMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+    });
+
+    // Lightbox
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = lightbox.querySelector('img');
+    document.querySelectorAll('[data-lightbox]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        lightboxImg.src = el.href;
+        lightboxImg.alt = el.querySelector('img')?.alt || '';
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      });
+    });
+    lightbox.addEventListener('click', () => {
+      lightbox.classList.remove('active');
+      document.body.style.overflow = '';
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+  </script>
+</body>
+</html>
