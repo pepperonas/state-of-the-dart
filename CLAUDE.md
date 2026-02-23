@@ -117,7 +117,7 @@ Express routes in `server/src/routes/`, registered in `server/src/index.ts`:
 ## Critical Patterns & Pitfalls
 
 ### Achievement System Persistence
-- 247 achievements defined in `src/types/achievements.ts` (frontend is source of truth for definitions)
+- 464 achievements defined in `src/types/achievements.ts` (frontend is source of truth for definitions)
 - DB table `player_achievements` stores unlock records and progress (no FK to legacy achievements table)
 - Achievement IDs use underscores (`first_180`, `ten_180s`) — legacy DB had dashes (`first-180`), don't mix
 - `AchievementContext` unlock flow: save to localStorage immediately, then API call with retry (2 attempts + pending queue)
@@ -157,6 +157,15 @@ Express routes in `server/src/routes/`, registered in `server/src/index.ts`:
 - Themes: `'modern'` (dark, default) and `'modern-light'` (light). Legacy themes auto-mapped to `'modern'`
 - Screenshots: html2canvas excludes elements with z-index >= 50
 
+## Website (Landing Page)
+
+Static landing page at `website/` — separate Vite + Tailwind CSS build (not React).
+- **URL**: https://stateofthedart.celox.io
+- **VPS path**: `/var/www/stateofthedart-landing`
+- **Build**: `cd website && npm run build`
+- **Deploy**: `scp -r website/dist/* root@69.62.121.168:/var/www/stateofthedart-landing/`
+- Nginx config at `/etc/nginx/sites-available/stateofthedart.celox.io` with SSL via Let's Encrypt
+
 ## Testing
 
 Tests in `src/tests/` using Vitest + React Testing Library. Setup in `src/tests/setup.ts`.
@@ -173,9 +182,15 @@ Tests in `src/tests/` using Vitest + React Testing Library. Setup in `src/tests/
 
 See `docs/DEPLOYMENT_VPS.md` and `docs/ARCHITECTURE.md` for details.
 
+## CI/CD
+
+GitHub Actions in `.github/workflows/`:
+- `test.yml` — Runs on push/PR to main: lint → test (Vitest + JUnit reporter) → build
+- `version.yml` — Manual trigger for version bumping
+
 ## Build Notes
 
 - PWA config in `vite.config.ts` with Workbox caching
-- Production builds drop console.log via terser
+- Terser minification configured (`drop_console` toggle in `vite.config.ts`)
 - Manual chunk splitting: react-vendor, charts, utils, icons
 - Audio cached 30 days, fonts 1 year
