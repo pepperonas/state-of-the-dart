@@ -162,9 +162,9 @@ export const calculateLegWinner = (leg: Leg, players: MatchPlayer[], startScore:
   });
   
   for (const throwData of leg.throws) {
-    const score = calculateThrowScore(throwData.darts);
+    const score = throwData.isBust ? 0 : throwData.score;
     playerScores[throwData.playerId] -= score;
-    
+
     if (playerScores[throwData.playerId] === 0) {
       return throwData.playerId;
     }

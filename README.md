@@ -10,7 +10,7 @@
 
 [![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green)](https://stateofthedart.com)
 [![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-purple)](https://stateofthedart.celox.io)
-![Version](https://img.shields.io/badge/Version-0.8.1-blue)
+![Version](https://img.shields.io/badge/Version-0.8.2-blue)
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -575,7 +575,7 @@ Siehe [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) für Details.
 
 ## 🔢 Versionierung
 
-- **Aktuell**: v0.8.1
+- **Aktuell**: v0.8.2
 - **Schema**: MAJOR.MINOR.PATCH
 - **Auto-Increment**: `npm run version:bump`
 
@@ -650,6 +650,14 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.8.2 (27. Februar 2026) - Bust-Logik Fix
+
+#### 🐛 Bug Fixes
+- **Bust-Erkennung inkonsistent** - `doubleOut`-Default in GameScreen (`|| false`) wich vom Reducer (`?? true`) ab, was bei geladenen/fortgesetzten Matches zu falscher Bust-Erkennung führte. Alle 5 Stellen auf `?? true` vereinheitlicht.
+- **Auto-Bust bei Rest=1 ohne Double-Out** - `newRemaining === 1` wurde immer als Bust behandelt, auch ohne Double-Out-Regel. Jetzt nur noch Bust wenn `requiresDouble` aktiv.
+- **Bogey-Nummern nicht erkannt** - Rest-Scores 159, 162, 163, 165, 166, 168, 169 (unmögliche Checkouts bei Double-Out) wurden in der Auto-Bust-Erkennung nicht berücksichtigt.
+- **calculateLegWinner ignorierte Busts** - Berechnete Score direkt aus Darts statt `throwData.score` zu nutzen, wodurch Bust-Würfe (score: 0) mit ihrem tatsächlichen Wert gezählt wurden.
 
 ### v0.8.1 (22. Februar 2026) - Bugfixes & UX
 
@@ -891,7 +899,7 @@ Siehe [CHANGELOG.md](CHANGELOG.md) für eine vollständige Liste der Änderungen
 
 <div align="center">
   <p>Made with ❤️ and 🎯 by Martin Pfeffer</p>
-  <p>© 2026 celox.io | Version 0.8.1</p>
+  <p>© 2026 celox.io | Version 0.8.2</p>
   <p>
     <a href="https://stateofthedart.com">🌐 Live Demo</a> •
     <a href="https://github.com/pepperonas/state-of-the-dart">📦 GitHub</a> •

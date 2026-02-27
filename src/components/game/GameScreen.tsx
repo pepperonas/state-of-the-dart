@@ -21,7 +21,7 @@ import BugReportModal from '../bugReport/BugReportModal';
 import PlayerAvatar from '../player/PlayerAvatar';
 import EmojiPicker from '../player/EmojiPicker';
 import { Dart, Player, GameType, MatchSettings, Throw, HeatmapData } from '../../types/index';
-import { calculateThrowScore } from '../../utils/scoring';
+import { calculateThrowScore, isBogeyNumber } from '../../utils/scoring';
 import { getCheckoutAlternatives } from '../../data/checkoutTable';
 import { PersonalBests, createEmptyPersonalBests, updatePersonalBests } from '../../types/personalBests';
 import audioSystem from '../../utils/audio';
@@ -624,7 +624,7 @@ const GameScreen: React.FC = () => {
       const newRemaining = remaining - currentScore;
 
       // Check for checkout and bust
-      const requiresDouble = state.currentMatch?.settings.doubleOut || false;
+      const requiresDouble = state.currentMatch?.settings.doubleOut ?? true;
       const lastDart = state.currentThrow[state.currentThrow.length - 1];
 
       // Don't announce score if it's a valid checkout (will be announced by GameContext)
@@ -634,8 +634,9 @@ const GameScreen: React.FC = () => {
 
       // Don't announce score if it's a bust (will be announced by GameContext)
       const willBust = newRemaining < 0 ||
-                       newRemaining === 1 ||
-                       (newRemaining === 0 && requiresDouble && lastDart?.multiplier !== 2);
+                       (newRemaining === 1 && requiresDouble) ||
+                       (newRemaining === 0 && requiresDouble && lastDart?.multiplier !== 2) ||
+                       (requiresDouble && isBogeyNumber(newRemaining));
 
       isLegWinningThrow = isValidCheckout;
 
@@ -687,7 +688,7 @@ const GameScreen: React.FC = () => {
       const startScoreForCheckout = state.currentMatch?.settings.startScore || 501;
       const remainingBeforeThrow = startScoreForCheckout - totalScoredForCheckout;
       const newRemainingAfterThrow = remainingBeforeThrow - currentScore;
-      const requiresDoubleForCheckout = state.currentMatch?.settings.doubleOut || false;
+      const requiresDoubleForCheckout = state.currentMatch?.settings.doubleOut ?? true;
       const lastDartForCheckout = state.currentThrow[state.currentThrow.length - 1];
       const isCheckout = newRemainingAfterThrow === 0 && (!requiresDoubleForCheckout || lastDartForCheckout?.multiplier === 2);
 
@@ -778,7 +779,7 @@ const GameScreen: React.FC = () => {
     const currentScore = calculateThrowScore(state.currentThrow);
     const newRemaining = remainingScore - currentScore;
 
-    const requiresDouble = state.currentMatch.settings.doubleOut || false;
+    const requiresDouble = state.currentMatch.settings.doubleOut ?? true;
     const lastDart = state.currentThrow[state.currentThrow.length - 1];
     return newRemaining === 0 && (!requiresDouble || lastDart?.multiplier === 2);
   }, [state.currentThrow, state.currentMatch, state.currentPlayerIndex, isEditingThrow]);
@@ -806,7 +807,7 @@ const GameScreen: React.FC = () => {
     const newRemaining = remainingScore - currentScore;
 
     // Check if this is a valid checkout
-    const requiresDouble = state.currentMatch.settings.doubleOut || false;
+    const requiresDouble = state.currentMatch.settings.doubleOut ?? true;
     const lastDart = state.currentThrow[state.currentThrow.length - 1];
     const isValidCheckout = newRemaining === 0 &&
       (!requiresDouble || lastDart?.multiplier === 2);
@@ -820,7 +821,7 @@ const GameScreen: React.FC = () => {
     }
   }, [state.currentThrow, isEditingThrow]);
 
-  // Auto-confirm on bust (when player goes below 0 or to 1)
+  // Auto-confirm on bust
   useEffect(() => {
     if (!state.currentMatch || state.currentThrow.length === 0) return;
 
@@ -842,14 +843,15 @@ const GameScreen: React.FC = () => {
     const currentScore = calculateThrowScore(state.currentThrow);
     const newRemaining = remaining - currentScore;
 
-    // Check if this is a bust
-    const requiresDouble = state.currentMatch.settings.doubleOut || false;
+    // Check if this is a bust (must match isBust() in scoring.ts exactly)
+    const requiresDouble = state.currentMatch.settings.doubleOut ?? true;
     const lastDart = state.currentThrow[state.currentThrow.length - 1];
-    const isBust = newRemaining < 0 ||
-                   newRemaining === 1 ||
-                   (newRemaining === 0 && requiresDouble && lastDart?.multiplier !== 2);
+    const bustDetected = newRemaining < 0 ||
+                   (newRemaining === 1 && requiresDouble) ||
+                   (newRemaining === 0 && requiresDouble && lastDart?.multiplier !== 2) ||
+                   (requiresDouble && isBogeyNumber(newRemaining));
 
-    if (isBust) {
+    if (bustDetected) {
       console.log('💥 Auto-confirming bust:', { remaining, currentScore, newRemaining });
       // Auto-confirm bust after short delay
       const timer = setTimeout(() => {
