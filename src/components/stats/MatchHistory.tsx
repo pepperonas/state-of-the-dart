@@ -209,16 +209,16 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                 </button>
                 
                 <div className="flex items-center gap-1">
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
                     let pageNum;
-                    if (totalPages <= 5) {
+                    if (totalPages <= 3) {
                       pageNum = i + 1;
-                    } else if (currentPage <= 3) {
+                    } else if (currentPage <= 2) {
                       pageNum = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
+                    } else if (currentPage >= totalPages - 1) {
+                      pageNum = totalPages - 2 + i;
                     } else {
-                      pageNum = currentPage - 2 + i;
+                      pageNum = currentPage - 1 + i;
                     }
                     
                     return (
@@ -345,7 +345,7 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                     ) : matchDetails[match.id] ? (
                       <div className="bg-dark-900 rounded-lg p-4">
                         {prepareRoundData(matchDetails[match.id]).length > 0 ? (
-                          <ResponsiveContainer width="100%" height={300}>
+                          <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                             <LineChart data={prepareRoundData(matchDetails[match.id])}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
                           <XAxis 
@@ -387,7 +387,7 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                             />
                           ))}
                         </LineChart>
-                      </ResponsiveContainer>
+                      </ResponsiveContainer></div>
                         ) : (
                           <div className="bg-dark-900 rounded-lg p-8 text-center">
                             <TrendingUp size={48} className="mx-auto mb-3 text-dark-600 opacity-30" />

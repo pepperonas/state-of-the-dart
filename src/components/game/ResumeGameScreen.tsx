@@ -97,7 +97,7 @@ const ResumeGameScreen: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-2xl mx-auto">
         <button
           onClick={() => navigate('/')}

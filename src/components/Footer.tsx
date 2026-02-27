@@ -9,7 +9,7 @@ const Footer: React.FC = () => {
       <div className="max-w-6xl mx-auto px-4 text-center space-y-3">
         <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-dark-400">
           <span>&copy; 2026 Martin Pfeffer</span>
-          <span>&bull;</span>
+          <span className="hidden sm:inline">&bull;</span>
           <a
             href="https://celox.io"
             target="_blank"
@@ -19,7 +19,7 @@ const Footer: React.FC = () => {
             <Globe size={14} />
             celox.io
           </a>
-          <span>&bull;</span>
+          <span className="hidden sm:inline">&bull;</span>
           <a
             href="https://github.com/pepperonas/state-of-the-dart"
             target="_blank"
@@ -38,14 +38,14 @@ const Footer: React.FC = () => {
           >
             Impressum
           </Link>
-          <span>&bull;</span>
+          <span className="hidden sm:inline">&bull;</span>
           <Link
             to="/datenschutz"
             className="hover:text-dark-400 transition-colors"
           >
             Datenschutz
           </Link>
-          <span>&bull;</span>
+          <span className="hidden sm:inline">&bull;</span>
           <Link
             to="/nutzungsbedingungen"
             className="hover:text-dark-400 transition-colors"
@@ -64,7 +64,7 @@ const Footer: React.FC = () => {
             <Linkedin size={14} />
             LinkedIn
           </a>
-          <span>&bull;</span>
+          <span className="hidden sm:inline">&bull;</span>
           <a
             href="https://github.com/pepperonas"
             target="_blank"

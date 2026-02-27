@@ -195,13 +195,13 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
       {inputMode === 'quick' ? (
         <>
           {/* Common Scores - Large Buttons */}
-          <div className="grid grid-cols-5 gap-2 mb-3">
+          <div className="grid grid-cols-5 gap-1.5 sm:gap-2 mb-3">
             {commonScores.map((score) => (
               <button
                 key={score}
                 onClick={() => handleQuickScore(score)}
                 disabled={currentThrow.length >= 3}
-                className={`p-3 text-lg font-bold rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed ${
+                className={`p-2 sm:p-3 text-lg font-bold rounded-lg transition-all min-h-[44px] disabled:opacity-30 disabled:cursor-not-allowed ${
                   score === 180 
                     ? 'bg-accent-500/80 hover:bg-accent-600 text-white'
                     : score >= 100

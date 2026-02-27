@@ -157,6 +157,16 @@ Express routes in `server/src/routes/`, registered in `server/src/index.ts`:
 - Themes: `'modern'` (dark, default) and `'modern-light'` (light). Legacy themes auto-mapped to `'modern'`
 - Screenshots: html2canvas excludes elements with z-index >= 50
 
+### Mobile & Tablet Optimization
+- **Viewport**: Use `min-h-dvh` (NOT `min-h-screen`) — adapts to mobile browser address bar
+- **Safe areas**: `body` has `env(safe-area-inset-*)` padding in `index.css` for iPhone Notch/Dynamic Island/Home Indicator
+- **Touch**: `touch-action: manipulation` on `*` in `index.css` — eliminates 300ms double-tap-zoom delay
+- **Responsive patterns**: Use `sm:` breakpoint for phone→tablet transitions (e.g. `p-2 sm:p-4`, `text-xl sm:text-2xl`, `gap-1.5 sm:gap-2`)
+- **Charts**: Wrap `<ResponsiveContainer>` in responsive-height divs (e.g. `<div className="h-[220px] sm:h-[300px]">`) with `height="100%"`
+- **Tailwind JIT**: Never use dynamic class strings like `` `md:grid-cols-${n}` `` — use lookup objects with full class strings instead
+- **Pagination**: Show max 3 page buttons (not 5) for compact mobile layout
+- **Overflow**: Use `truncate` on player names, `line-clamp-2` on descriptions, `overflow-x-auto` + `min-w-[...]` on wide tables
+
 ## Website (Landing Page)
 
 Static landing page at `website/` — separate Vite + Tailwind CSS build (not React).

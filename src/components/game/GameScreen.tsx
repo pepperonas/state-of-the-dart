@@ -924,7 +924,7 @@ const GameScreen: React.FC = () => {
   
   if (showSetup) {
     return (
-      <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+      <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-4xl mx-auto">
           <button
             onClick={() => {
@@ -1230,7 +1230,7 @@ const GameScreen: React.FC = () => {
 
   if (!state.currentMatch) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-dvh flex items-center justify-center">
         <div className="text-center">
           <p className="text-xl text-gray-600 dark:text-gray-400 mb-4">No active game</p>
           <button
@@ -1251,7 +1251,7 @@ const GameScreen: React.FC = () => {
     const loser = currentMatch.players.find(p => p.playerId !== currentMatch.winner);
     
     return (
-      <div className="min-h-screen p-4 gradient-mesh flex items-center justify-center">
+      <div className="min-h-dvh p-4 gradient-mesh flex items-center justify-center">
         <div className="fixed inset-0 pointer-events-none z-0">
           <Confetti recycle={true} numberOfPieces={200} gravity={0.15} />
         </div>
@@ -1333,7 +1333,7 @@ const GameScreen: React.FC = () => {
   const remaining = (state.currentMatch.settings.startScore || 501) - totalScored - currentThrowScore;
   
   return (
-    <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       {showConfetti && <Confetti recycle={false} numberOfPieces={300} gravity={0.3} />}
       
       <div className="max-w-7xl mx-auto">

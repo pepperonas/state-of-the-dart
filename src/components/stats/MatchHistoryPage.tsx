@@ -175,14 +175,14 @@ const MatchHistoryPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen p-4 md:p-8 gradient-mesh flex items-center justify-center">
+      <div className="min-h-dvh p-4 md:p-8 gradient-mesh flex items-center justify-center">
         <Loader className="animate-spin text-primary-400" size={48} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-5xl mx-auto">
         {/* Back button */}
         <button
@@ -254,12 +254,12 @@ const MatchHistoryPage: React.FC = () => {
                 >
                   <ChevronLeft size={16} />
                 </button>
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
                   let pageNum;
-                  if (totalPages <= 5) pageNum = i + 1;
-                  else if (currentPage <= 3) pageNum = i + 1;
-                  else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
-                  else pageNum = currentPage - 2 + i;
+                  if (totalPages <= 3) pageNum = i + 1;
+                  else if (currentPage <= 2) pageNum = i + 1;
+                  else if (currentPage >= totalPages - 1) pageNum = totalPages - 2 + i;
+                  else pageNum = currentPage - 1 + i;
                   return (
                     <button
                       key={pageNum}
@@ -368,7 +368,7 @@ const MatchHistoryPage: React.FC = () => {
                       ) : detail ? (
                         <>
                           {/* Player stats grid */}
-                          <div className={`grid gap-4 ${players.length === 2 ? 'md:grid-cols-2' : `md:grid-cols-${Math.min(players.length, 3)}`}`}>
+                          <div className={`grid gap-4 ${{ 1: 'md:grid-cols-1', 2: 'md:grid-cols-2', 3: 'md:grid-cols-3' }[Math.min(players.length, 3)] || 'md:grid-cols-3'}`}>
                             {(detail.players || players).map((p: any) => (
                               <div key={p.playerId} className={`rounded-xl p-4 ${p.playerId === match.winner ? 'bg-success-500/10 border border-success-500/30' : 'bg-dark-800/50 border border-dark-700'}`}>
                                 <div className="flex items-center gap-2 mb-3">
@@ -409,7 +409,7 @@ const MatchHistoryPage: React.FC = () => {
                                   <TrendingUp size={16} className="text-primary-400" />
                                   {t('match_history.round_chart', 'Runden-Verlauf')}
                                 </h4>
-                                <ResponsiveContainer width="100%" height={250}>
+                                <div className="h-[180px] sm:h-[250px]"><ResponsiveContainer width="100%" height="100%">
                                   <LineChart data={chartData}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
                                     <XAxis dataKey="round" stroke="#737373" style={{ fontSize: '11px' }} />
@@ -431,7 +431,7 @@ const MatchHistoryPage: React.FC = () => {
                                       />
                                     ))}
                                   </LineChart>
-                                </ResponsiveContainer>
+                                </ResponsiveContainer></div>
                               </div>
                             );
                           })()}

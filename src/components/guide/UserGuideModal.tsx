@@ -655,26 +655,26 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
           </button>
         </div>
 
-        <div className="flex flex-1 overflow-hidden">
-          {/* Sidebar */}
-          <div className="w-64 border-r border-dark-700 overflow-y-auto p-4 bg-dark-900/30">
-            <nav className="space-y-1">
+        <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+          {/* Sidebar: horizontal scroll on mobile, vertical sidebar on md+ */}
+          <div className="border-b md:border-b-0 md:border-r border-dark-700 md:w-64 overflow-x-auto md:overflow-x-visible md:overflow-y-auto p-2 md:p-4 bg-dark-900/30 flex-shrink-0">
+            <nav className="flex md:flex-col gap-1 md:gap-1 min-w-max md:min-w-0">
               {sections.map((section) => {
                 const Icon = section.icon;
                 return (
                   <button
                     key={section.id}
                     onClick={() => setActiveSection(section.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-left ${
+                    className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg transition-all text-left whitespace-nowrap md:whitespace-normal md:w-full ${
                       activeSection === section.id
                         ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
                         : 'text-dark-300 hover:bg-dark-800/50 hover:text-white'
                     }`}
                   >
-                    <Icon size={20} />
-                    <span className="font-medium">{section.title}</span>
+                    <Icon size={18} className="flex-shrink-0 md:[&]:w-5 md:[&]:h-5" />
+                    <span className="font-medium text-sm md:text-base">{section.title}</span>
                     {activeSection === section.id && (
-                      <ChevronRight size={16} className="ml-auto" />
+                      <ChevronRight size={16} className="ml-auto hidden md:block" />
                     )}
                   </button>
                 );
@@ -683,7 +683,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6">
             {renderContent()}
           </div>
         </div>

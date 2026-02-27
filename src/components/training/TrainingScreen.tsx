@@ -495,7 +495,7 @@ const TrainingScreen: React.FC = () => {
     const realPlayers = players.filter(p => !p.isBot);
     
     return (
-      <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+      <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-2xl mx-auto">
           <button
             onClick={() => navigate('/training')}
@@ -567,7 +567,7 @@ const TrainingScreen: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -604,18 +604,18 @@ const TrainingScreen: React.FC = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="glass-card p-4 text-center">
-            <p className="text-2xl font-bold text-white">{trainingState.attempts}</p>
-            <p className="text-sm text-dark-400">Versuche</p>
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
+          <div className="glass-card p-2 sm:p-4 text-center">
+            <p className="text-xl sm:text-2xl font-bold text-white">{trainingState.attempts}</p>
+            <p className="text-xs sm:text-sm text-dark-400">Versuche</p>
           </div>
-          <div className="glass-card p-4 text-center">
-            <p className="text-2xl font-bold text-success-400">{trainingState.hits}</p>
-            <p className="text-sm text-dark-400">Treffer</p>
+          <div className="glass-card p-2 sm:p-4 text-center">
+            <p className="text-xl sm:text-2xl font-bold text-success-400">{trainingState.hits}</p>
+            <p className="text-xs sm:text-sm text-dark-400">Treffer</p>
           </div>
-          <div className="glass-card p-4 text-center">
-            <p className="text-2xl font-bold text-primary-400">{accuracy}%</p>
-            <p className="text-sm text-dark-400">Genauigkeit</p>
+          <div className="glass-card p-2 sm:p-4 text-center">
+            <p className="text-xl sm:text-2xl font-bold text-primary-400">{accuracy}%</p>
+            <p className="text-xs sm:text-sm text-dark-400">Genauigkeit</p>
           </div>
         </div>
 

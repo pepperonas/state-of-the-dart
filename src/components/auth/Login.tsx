@@ -34,7 +34,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center gradient-mesh p-4">
+    <div className="min-h-dvh flex items-center justify-center gradient-mesh p-4">
       <div className="w-full max-w-md">
         {/* Logo/Header */}
         <div className="text-center mb-8">

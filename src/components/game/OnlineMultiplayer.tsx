@@ -171,7 +171,7 @@ const OnlineMultiplayer: React.FC = () => {
   // Room View
   if (currentRoom) {
     return (
-      <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+      <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
@@ -329,7 +329,7 @@ const OnlineMultiplayer: React.FC = () => {
 
   // Lobby View
   return (
-    <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">

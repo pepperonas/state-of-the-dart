@@ -281,14 +281,14 @@ const Dashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center gradient-mesh">
+      <div className="min-h-dvh flex items-center justify-center gradient-mesh">
         <Loader className="animate-spin text-primary-400" size={48} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-7xl mx-auto">
         {/* Back Button */}
         <button

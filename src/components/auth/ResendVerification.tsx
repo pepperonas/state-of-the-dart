@@ -26,7 +26,7 @@ const ResendVerification: React.FC = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center gradient-mesh p-4">
+      <div className="min-h-dvh flex items-center justify-center gradient-mesh p-4">
         <div className="w-full max-w-md">
           <div className="glass-card p-8 rounded-2xl shadow-2xl text-center">
             <div className="w-16 h-16 bg-success-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -52,7 +52,7 @@ const ResendVerification: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center gradient-mesh p-4">
+    <div className="min-h-dvh flex items-center justify-center gradient-mesh p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="text-6xl mb-4">📧</div>

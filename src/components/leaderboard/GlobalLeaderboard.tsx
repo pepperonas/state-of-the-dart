@@ -78,7 +78,7 @@ const GlobalLeaderboard: React.FC = () => {
   const currentMetric = metrics.find((m) => m.id === metric);
 
   return (
-    <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <button

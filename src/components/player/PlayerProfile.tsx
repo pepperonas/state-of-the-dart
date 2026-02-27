@@ -163,7 +163,7 @@ const PlayerProfile: React.FC = () => {
 
   if (!player || !playerId) {
     return (
-      <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+      <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-6xl mx-auto">
           <button
             onClick={() => navigate('/players')}
@@ -185,7 +185,7 @@ const PlayerProfile: React.FC = () => {
     : 0;
 
   return (
-    <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <button
@@ -329,7 +329,7 @@ const PlayerProfile: React.FC = () => {
             </h3>
             {performanceData.length > 0 ? (
               <div className="bg-dark-900 rounded-lg p-4">
-                <ResponsiveContainer width="100%" height={250}>
+                <div className="h-[180px] sm:h-[250px]"><ResponsiveContainer width="100%" height="100%">
                   <LineChart data={performanceData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
                     <XAxis dataKey="game" stroke="#737373" style={{ fontSize: '12px' }} />
@@ -351,7 +351,7 @@ const PlayerProfile: React.FC = () => {
                       name="Checkout %"
                     />
                   </LineChart>
-                </ResponsiveContainer>
+                </ResponsiveContainer></div>
               </div>
             ) : (
               <div className="text-center text-dark-400 py-8">Noch keine Matches gespielt</div>
@@ -365,7 +365,7 @@ const PlayerProfile: React.FC = () => {
               Skill Profile
             </h3>
             <div className="bg-dark-900 rounded-lg p-4">
-              <ResponsiveContainer width="100%" height={250}>
+              <div className="h-[180px] sm:h-[250px]"><ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="#404040" />
                   <PolarAngleAxis dataKey="skill" stroke="#737373" style={{ fontSize: '12px' }} />
@@ -385,7 +385,7 @@ const PlayerProfile: React.FC = () => {
                     }}
                   />
                 </RadarChart>
-              </ResponsiveContainer>
+              </ResponsiveContainer></div>
             </div>
           </div>
         </div>

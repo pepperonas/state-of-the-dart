@@ -144,7 +144,7 @@ const TrainingStats: React.FC = () => {
 
   if (!currentPlayer) {
     return (
-      <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+      <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-6xl mx-auto">
           {/* Back Button */}
           <button
@@ -196,7 +196,7 @@ const TrainingStats: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -297,7 +297,7 @@ const TrainingStats: React.FC = () => {
                 Performance Verlauf
               </h3>
               <div className="bg-dark-900 rounded-lg p-4">
-                <ResponsiveContainer width="100%" height={250}>
+                <div className="h-[180px] sm:h-[250px]"><ResponsiveContainer width="100%" height="100%">
                   <LineChart data={performanceData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
                     <XAxis dataKey="date" stroke="#737373" style={{ fontSize: '12px' }} />
@@ -313,7 +313,7 @@ const TrainingStats: React.FC = () => {
                     <Line type="monotone" dataKey="score" stroke="#22c55e" strokeWidth={2} name="Score" />
                     <Line type="monotone" dataKey="accuracy" stroke="#0ea5e9" strokeWidth={2} name="Genauigkeit %" />
                   </LineChart>
-                </ResponsiveContainer>
+                </ResponsiveContainer></div>
               </div>
             </div>
 
@@ -325,7 +325,7 @@ const TrainingStats: React.FC = () => {
                   Training Modi Verteilung
                 </h3>
                 <div className="bg-dark-900 rounded-lg p-4">
-                  <ResponsiveContainer width="100%" height={250}>
+                  <div className="h-[180px] sm:h-[250px]"><ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={typeDistribution}
@@ -349,7 +349,7 @@ const TrainingStats: React.FC = () => {
                         }}
                       />
                     </PieChart>
-                  </ResponsiveContainer>
+                  </ResponsiveContainer></div>
                 </div>
               </div>
             )}

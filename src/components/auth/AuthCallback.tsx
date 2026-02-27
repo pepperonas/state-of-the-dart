@@ -43,7 +43,7 @@ const AuthCallback: React.FC = () => {
   }, [searchParams, navigate, refreshUser]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center gradient-mesh p-4">
+    <div className="min-h-dvh flex items-center justify-center gradient-mesh p-4">
       <div className="text-center">
         {error ? (
           <>

@@ -33,7 +33,7 @@ const TenantSelector: React.FC = () => {
   }
   
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 gradient-mesh">
+    <div className="min-h-dvh flex items-center justify-center p-4 gradient-mesh">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}

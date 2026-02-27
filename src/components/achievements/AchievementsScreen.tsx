@@ -105,11 +105,11 @@ const AchievementsScreen: React.FC = () => {
             {isHidden ? '❓' : achievement.icon}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-white text-lg flex items-center gap-2">
-              {isHidden ? '???' : achievement.name}
-              {unlocked && <Award size={16} className="text-primary-400" />}
+            <h3 className="font-bold text-white text-lg flex items-center gap-2 truncate">
+              <span className="truncate">{isHidden ? '???' : achievement.name}</span>
+              {unlocked && <Award size={16} className="text-primary-400 flex-shrink-0" />}
             </h3>
-            <p className="text-sm text-dark-400 mt-1">
+            <p className="text-sm text-dark-400 mt-1 line-clamp-2">
               {isHidden ? 'Verstecktes Achievement' : achievement.description}
             </p>
           </div>
@@ -134,8 +134,8 @@ const AchievementsScreen: React.FC = () => {
         )}
 
         {/* Achievement Meta Info */}
-        <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between text-xs flex-wrap gap-1">
+          <div className="flex items-center gap-2 flex-wrap">
             <span
               className="px-2 py-1 rounded font-semibold"
               style={{
@@ -186,7 +186,7 @@ const AchievementsScreen: React.FC = () => {
 
   if (players.length === 0) {
     return (
-      <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+      <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-6xl mx-auto">
           <button
             onClick={() => navigate('/')}
@@ -209,7 +209,7 @@ const AchievementsScreen: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <button
@@ -246,25 +246,25 @@ const AchievementsScreen: React.FC = () => {
           {selectedPlayer && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-dark-900 rounded-lg p-4 text-center">
-                <div className="text-3xl font-bold text-primary-400">
+                <div className="text-2xl sm:text-3xl font-bold text-primary-400">
                   {unlockedAchievements.length}
                 </div>
                 <div className="text-sm text-dark-400 mt-1">Freigeschaltet</div>
               </div>
               <div className="bg-dark-900 rounded-lg p-4 text-center">
-                <div className="text-3xl font-bold text-dark-400">
+                <div className="text-2xl sm:text-3xl font-bold text-dark-400">
                   {lockedAchievements.length}
                 </div>
                 <div className="text-sm text-dark-400 mt-1">Gesperrt</div>
               </div>
               <div className="bg-dark-900 rounded-lg p-4 text-center">
-                <div className="text-3xl font-bold text-accent-400">
+                <div className="text-2xl sm:text-3xl font-bold text-accent-400">
                   {playerProgress?.totalPoints || 0}
                 </div>
                 <div className="text-sm text-dark-400 mt-1">Punkte</div>
               </div>
               <div className="bg-dark-900 rounded-lg p-4 text-center">
-                <div className="text-3xl font-bold text-success-400">{completionPercentage}%</div>
+                <div className="text-2xl sm:text-3xl font-bold text-success-400">{completionPercentage}%</div>
                 <div className="text-sm text-dark-400 mt-1">Abgeschlossen</div>
               </div>
             </div>

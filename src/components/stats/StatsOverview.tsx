@@ -303,7 +303,7 @@ const StatsOverview: React.FC = () => {
   
   if (players.length === 0) {
     return (
-      <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+      <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-6xl mx-auto">
           <button
             onClick={() => navigate('/')}
@@ -334,7 +334,7 @@ const StatsOverview: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -537,7 +537,7 @@ const StatsOverview: React.FC = () => {
                           Performance-Profil
                         </h3>
                         <div className="bg-dark-900 rounded-lg p-4">
-                          <ResponsiveContainer width="100%" height={300}>
+                          <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                             <RadarChart data={performanceRadar}>
                               <PolarGrid stroke="#404040" />
                               <PolarAngleAxis 
@@ -570,7 +570,7 @@ const StatsOverview: React.FC = () => {
                                 formatter={(value: number) => [`${value.toFixed(1)}%`, 'Score']}
                               />
                             </RadarChart>
-                          </ResponsiveContainer>
+                          </ResponsiveContainer></div>
                         </div>
                       </div>
 
@@ -581,7 +581,7 @@ const StatsOverview: React.FC = () => {
                           Sieg-Statistik
                         </h3>
                         <div className="bg-dark-900 rounded-lg p-4">
-                          <ResponsiveContainer width="100%" height={300}>
+                          <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                               <Pie
                                 data={winLossData}
@@ -607,7 +607,7 @@ const StatsOverview: React.FC = () => {
                                 labelStyle={{ color: '#fff', fontWeight: 'bold' }}
                               />
                             </PieChart>
-                          </ResponsiveContainer>
+                          </ResponsiveContainer></div>
                         </div>
                       </div>
                     </div>
@@ -620,7 +620,7 @@ const StatsOverview: React.FC = () => {
                           Score-Verteilung
                         </h3>
                         <div className="bg-dark-900 rounded-lg p-4">
-                          <ResponsiveContainer width="100%" height={350}>
+                          <div className="h-[250px] sm:h-[350px]"><ResponsiveContainer width="100%" height="100%">
                             <BarChart 
                               data={scoreDistribution}
                               layout="vertical"
@@ -656,7 +656,7 @@ const StatsOverview: React.FC = () => {
                                 ))}
                               </Bar>
                             </BarChart>
-                          </ResponsiveContainer>
+                          </ResponsiveContainer></div>
                         </div>
                       </div>
                     )}
@@ -688,7 +688,7 @@ const StatsOverview: React.FC = () => {
                         </div>
                         {timeSeriesData.length > 0 ? (
                           <div className="bg-dark-900 rounded-lg p-4">
-                            <ResponsiveContainer width="100%" height={350}>
+                            <div className="h-[250px] sm:h-[350px]"><ResponsiveContainer width="100%" height="100%">
                               <ComposedChart data={timeSeriesData}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
                                 <XAxis
@@ -742,7 +742,7 @@ const StatsOverview: React.FC = () => {
                                   name="Win Rate %"
                                 />
                               </ComposedChart>
-                            </ResponsiveContainer>
+                            </ResponsiveContainer></div>
                           </div>
                         ) : (
                           <div className="bg-dark-900 rounded-lg p-12 text-center">
@@ -782,7 +782,7 @@ const StatsOverview: React.FC = () => {
                     <div className="glass-card p-6">
                       <h3 className="text-xl font-bold text-white mb-4">📈 Average-Entwicklung</h3>
                       <div className="bg-dark-900 rounded-lg p-4">
-                        <ResponsiveContainer width="100%" height={300}>
+                        <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <LineChart data={progressData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
                             <XAxis
@@ -823,7 +823,7 @@ const StatsOverview: React.FC = () => {
                               name="Durchschnitt"
                             />
                           </LineChart>
-                        </ResponsiveContainer>
+                        </ResponsiveContainer></div>
                       </div>
                     </div>
 
@@ -831,7 +831,7 @@ const StatsOverview: React.FC = () => {
                     <div className="glass-card p-6">
                       <h3 className="text-xl font-bold text-white mb-4">🎯 Checkout-Quote</h3>
                       <div className="bg-dark-900 rounded-lg p-4">
-                        <ResponsiveContainer width="100%" height={300}>
+                        <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <LineChart data={progressData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
                             <XAxis
@@ -872,7 +872,7 @@ const StatsOverview: React.FC = () => {
                               name="Checkout %"
                             />
                           </LineChart>
-                        </ResponsiveContainer>
+                        </ResponsiveContainer></div>
                       </div>
                     </div>
 
@@ -880,7 +880,7 @@ const StatsOverview: React.FC = () => {
                     <div className="glass-card p-6">
                       <h3 className="text-xl font-bold text-white mb-4">🔥 Score-Verteilung pro Match</h3>
                       <div className="bg-dark-900 rounded-lg p-4">
-                        <ResponsiveContainer width="100%" height={300}>
+                        <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <BarChart data={progressData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
                             <XAxis
@@ -928,7 +928,7 @@ const StatsOverview: React.FC = () => {
                               radius={[8, 8, 0, 0]}
                             />
                           </BarChart>
-                        </ResponsiveContainer>
+                        </ResponsiveContainer></div>
                       </div>
                     </div>
 
@@ -936,7 +936,7 @@ const StatsOverview: React.FC = () => {
                     <div className="glass-card p-6">
                       <h3 className="text-xl font-bold text-white mb-4">🎯 Legs Gewonnen vs. Verloren</h3>
                       <div className="bg-dark-900 rounded-lg p-4">
-                        <ResponsiveContainer width="100%" height={300}>
+                        <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={progressData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
                             <XAxis
@@ -983,7 +983,7 @@ const StatsOverview: React.FC = () => {
                               name="Legs Verloren"
                             />
                           </AreaChart>
-                        </ResponsiveContainer>
+                        </ResponsiveContainer></div>
                       </div>
                     </div>
 
@@ -991,7 +991,7 @@ const StatsOverview: React.FC = () => {
                     <div className="glass-card p-6">
                       <h3 className="text-xl font-bold text-white mb-4">🚀 Höchste Scores</h3>
                       <div className="bg-dark-900 rounded-lg p-4">
-                        <ResponsiveContainer width="100%" height={300}>
+                        <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <ComposedChart data={progressData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
                             <XAxis
@@ -1041,7 +1041,7 @@ const StatsOverview: React.FC = () => {
                               </linearGradient>
                             </defs>
                           </ComposedChart>
-                        </ResponsiveContainer>
+                        </ResponsiveContainer></div>
                       </div>
                     </div>
 
@@ -1373,7 +1373,7 @@ const PlayerComparisonView: React.FC<{
           <div className="glass-card p-6">
             <h3 className="text-xl font-bold text-white mb-4">📊 Leistungsvergleich</h3>
             <div className="bg-dark-900 rounded-lg p-4">
-              <ResponsiveContainer width="100%" height={400}>
+              <div className="h-[280px] sm:h-[400px]"><ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="#404040" />
                   <PolarAngleAxis dataKey="category" stroke="#737373" style={{ fontSize: '12px' }} />
@@ -1397,7 +1397,7 @@ const PlayerComparisonView: React.FC<{
                   />
                   <Legend />
                 </RadarChart>
-              </ResponsiveContainer>
+              </ResponsiveContainer></div>
             </div>
           </div>
 
@@ -1405,7 +1405,7 @@ const PlayerComparisonView: React.FC<{
           <div className="glass-card p-6">
             <h3 className="text-xl font-bold text-white mb-4">📈 Statistik-Vergleich</h3>
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full min-w-[500px]">
                 <thead>
                   <tr className="border-b border-dark-700">
                     <th className="text-left p-3 text-dark-400 font-semibold">Kategorie</th>
@@ -1485,7 +1485,7 @@ const PlayerComparisonView: React.FC<{
           <div className="glass-card p-6">
             <h3 className="text-xl font-bold text-white mb-4">📊 Direktvergleich</h3>
             <div className="bg-dark-900 rounded-lg p-4">
-              <ResponsiveContainer width="100%" height={300}>
+              <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={[
                     {
@@ -1523,7 +1523,7 @@ const PlayerComparisonView: React.FC<{
                     />
                   ))}
                 </BarChart>
-              </ResponsiveContainer>
+              </ResponsiveContainer></div>
             </div>
           </div>
         </>

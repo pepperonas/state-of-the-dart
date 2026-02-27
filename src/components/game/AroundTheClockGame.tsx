@@ -171,7 +171,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
   // Setup screen
   if (showSetup) {
     return (
-      <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+      <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-4xl mx-auto">
           <button
             onClick={onBack || (() => { window.location.href = '/'; })}
@@ -283,7 +283,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
 
   // Game screen
   return (
-    <div className="min-h-screen p-4 gradient-mesh">
+    <div className="min-h-dvh p-4 gradient-mesh">
       {/* Winner Modal */}
       <AnimatePresence>
         {showWinner && winner && (

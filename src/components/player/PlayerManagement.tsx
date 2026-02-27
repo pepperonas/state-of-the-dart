@@ -119,7 +119,7 @@ const PlayerManagement: React.FC = () => {
   };
   
   return (
-    <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-4xl mx-auto">
         <button
           onClick={() => navigate('/')}
@@ -259,9 +259,9 @@ const PlayerManagement: React.FC = () => {
                         autoFocus
                       />
                     ) : (
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
-                          {player.name}
+                          <span className="truncate">{player.name}</span>
                           {mainPlayerId === player.id && (
                             <span title="Haupt-Profil">
                               <Crown size={18} className="text-amber-400" />
@@ -275,13 +275,13 @@ const PlayerManagement: React.FC = () => {
                     )}
                   </div>
                   
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         navigate(`/players/${player.id}`);
                       }}
-                      className="p-2 text-primary-400 hover:bg-primary-500/20 rounded-lg transition-colors"
+                      className="p-1.5 sm:p-2 text-primary-400 hover:bg-primary-500/20 rounded-lg transition-colors"
                       title={t('players.view_profile')}
                     >
                       <Eye size={18} />
@@ -293,7 +293,7 @@ const PlayerManagement: React.FC = () => {
                         localStorage.setItem('stats_selected_player_id', player.id);
                         navigate('/stats');
                       }}
-                      className="p-2 text-green-400 hover:bg-green-500/20 rounded-lg transition-colors"
+                      className="p-1.5 sm:p-2 text-green-400 hover:bg-green-500/20 rounded-lg transition-colors"
                       title="Statistiken anzeigen"
                     >
                       <BarChart3 size={18} />
@@ -304,7 +304,7 @@ const PlayerManagement: React.FC = () => {
                           e.stopPropagation();
                           handleSetMainPlayer(player.id);
                         }}
-                        className="p-2 text-amber-400 hover:bg-amber-500/20 rounded-lg transition-colors"
+                        className="p-1.5 sm:p-2 text-amber-400 hover:bg-amber-500/20 rounded-lg transition-colors"
                         title="Als Haupt-Profil setzen"
                       >
                         <Crown size={18} />
@@ -317,7 +317,7 @@ const PlayerManagement: React.FC = () => {
                         setEditName(player.name);
                         setEditAvatar(player.avatar);
                       }}
-                      className="p-2 text-accent-400 hover:bg-accent-500/20 rounded-lg transition-colors"
+                      className="p-1.5 sm:p-2 text-accent-400 hover:bg-accent-500/20 rounded-lg transition-colors"
                       title={t('players.edit_name')}
                     >
                       <Edit2 size={18} />
@@ -334,7 +334,7 @@ const PlayerManagement: React.FC = () => {
                           }
                         }
                       }}
-                      className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                      className="p-1.5 sm:p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
                       title={t('players.delete_player')}
                     >
                       <Trash2 size={18} />

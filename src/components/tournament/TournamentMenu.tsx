@@ -279,7 +279,7 @@ const TournamentMenu: React.FC = () => {
     const winnerPlayer = winner ? getParticipantPlayer(winner) : null;
     
     return (
-      <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+      <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-4xl mx-auto">
           <button
             onClick={() => setActiveTournament(null)}
@@ -470,7 +470,7 @@ const TournamentMenu: React.FC = () => {
   // Create tournament view
   if (showCreate) {
     return (
-      <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+      <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-2xl mx-auto">
           <button
             onClick={() => setShowCreate(false)}
@@ -595,7 +595,7 @@ const TournamentMenu: React.FC = () => {
 
   // Main menu view
   return (
-    <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-4xl mx-auto">
         <button
           onClick={() => navigate('/')}
