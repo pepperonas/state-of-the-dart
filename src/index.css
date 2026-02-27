@@ -8,6 +8,11 @@
   touch-action: manipulation;
 }
 
+/* Prevent horizontal scroll on mobile */
+html, body {
+  overflow-x: hidden;
+}
+
 /* Safe area insets for iPhone Notch/Dynamic Island/Home Indicator */
 body {
   padding-top: env(safe-area-inset-top);

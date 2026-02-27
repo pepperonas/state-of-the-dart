@@ -1333,9 +1333,9 @@ const GameScreen: React.FC = () => {
   const remaining = (state.currentMatch.settings.startScore || 501) - totalScored - currentThrowScore;
   
   return (
-    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
+    <div className="min-h-dvh p-4 md:p-8 gradient-mesh overflow-x-hidden">
       {showConfetti && <Confetti recycle={false} numberOfPieces={300} gravity={0.3} />}
-      
+
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <button
@@ -1650,7 +1650,8 @@ const GameScreen: React.FC = () => {
               {/* Score Chart */}
               <div className="mb-8">
                 <h4 className="text-white font-bold mb-4">Geworfene Punkte pro Aufnahme</h4>
-                <ResponsiveContainer width="100%" height={300}>
+                <div className="h-[220px] sm:h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={(() => {
                     // Build chart data
                     const maxThrows = Math.max(
@@ -1710,12 +1711,14 @@ const GameScreen: React.FC = () => {
                     })}
                   </LineChart>
                 </ResponsiveContainer>
+                </div>
               </div>
 
               {/* Remaining Chart */}
               <div>
                 <h4 className="text-white font-bold mb-4">Verbleibende Punkte</h4>
-                <ResponsiveContainer width="100%" height={300}>
+                <div className="h-[220px] sm:h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={(() => {
                     // Build remaining chart data
                     const maxThrows = Math.max(
@@ -1776,6 +1779,7 @@ const GameScreen: React.FC = () => {
                     })}
                   </LineChart>
                 </ResponsiveContainer>
+                </div>
               </div>
             </div>
             );

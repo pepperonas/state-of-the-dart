@@ -72,10 +72,11 @@ const Dartboard: React.FC<DartboardProps> = ({
   };
   
   return (
-    <svg 
-      width={size} 
-      height={size} 
-      className="dart-shadow rounded-full"
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      className="dart-shadow rounded-full max-w-full h-auto"
       style={{ touchAction: 'none' }}
       role="application"
       aria-label="Interactive Dartboard"
