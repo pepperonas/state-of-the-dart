@@ -1,55 +1,12 @@
 import express, { Response } from 'express';
-import jwt from 'jsonwebtoken';
 import { getDatabase } from '../database';
-import { config } from '../config';
 import { AuthRequest, authenticateTenant } from '../middleware/auth';
 
 const router = express.Router();
 
-// Register/Login with tenant
-router.post('/auth', (req: AuthRequest, res: Response) => {
-  const { tenantId, name, avatar } = req.body;
-
-  if (!tenantId || !name) {
-    return res.status(400).json({ error: 'tenantId and name are required' });
-  }
-
-  const db = getDatabase();
-
-  try {
-    // Check if tenant exists
-    const existingTenant = db.prepare('SELECT * FROM tenants WHERE id = ?').get(tenantId);
-
-    if (existingTenant) {
-      // Update last_active
-      db.prepare('UPDATE tenants SET last_active = ? WHERE id = ?').run(Date.now(), tenantId);
-    } else {
-      // Create new tenant
-      db.prepare(`
-        INSERT INTO tenants (id, name, avatar, created_at, last_active)
-        VALUES (?, ?, ?, ?, ?)
-      `).run(tenantId, name, avatar || name.charAt(0).toUpperCase(), Date.now(), Date.now());
-    }
-
-    // Generate JWT
-    const token = jwt.sign(
-      { tenantId },
-      config.jwtSecret,
-      { expiresIn: config.jwtExpiresIn } as jwt.SignOptions
-    );
-
-    res.json({
-      token,
-      tenant: {
-        id: tenantId,
-        name,
-        avatar: avatar || name.charAt(0).toUpperCase(),
-      },
-    });
-  } catch (error) {
-    console.error('Error in tenant auth:', error);
-    res.status(500).json({ error: 'Failed to authenticate tenant' });
-  }
+// Legacy tenant auth - deprecated, use /api/auth/login or /api/auth/google instead
+router.post('/auth', (_req: AuthRequest, res: Response) => {
+  return res.status(410).json({ error: 'This endpoint is deprecated. Use /api/auth/login or /api/auth/google instead.' });
 });
 
 // Get tenant info

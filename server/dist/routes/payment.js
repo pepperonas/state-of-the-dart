@@ -223,7 +223,18 @@ router.post('/webhook', express_1.default.raw({ type: 'application/json' }), asy
 router.get('/status', auth_1.authenticateTenant, async (req, res) => {
     const db = (0, database_1.getDatabase)();
     try {
-        const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.tenantId);
+        // Get user - use req.user?.id if available (new auth system), otherwise look up via tenant
+        const userId = req.user?.id;
+        let user;
+        if (userId) {
+            user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+        }
+        else if (req.tenantId) {
+            const tenant = db.prepare('SELECT user_id FROM tenants WHERE id = ?').get(req.tenantId);
+            if (tenant?.user_id) {
+                user = db.prepare('SELECT * FROM users WHERE id = ?').get(tenant.user_id);
+            }
+        }
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }

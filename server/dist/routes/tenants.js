@@ -4,47 +4,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const database_1 = require("../database");
-const config_1 = require("../config");
 const auth_1 = require("../middleware/auth");
 const router = express_1.default.Router();
-// Register/Login with tenant
-router.post('/auth', (req, res) => {
-    const { tenantId, name, avatar } = req.body;
-    if (!tenantId || !name) {
-        return res.status(400).json({ error: 'tenantId and name are required' });
-    }
-    const db = (0, database_1.getDatabase)();
-    try {
-        // Check if tenant exists
-        const existingTenant = db.prepare('SELECT * FROM tenants WHERE id = ?').get(tenantId);
-        if (existingTenant) {
-            // Update last_active
-            db.prepare('UPDATE tenants SET last_active = ? WHERE id = ?').run(Date.now(), tenantId);
-        }
-        else {
-            // Create new tenant
-            db.prepare(`
-        INSERT INTO tenants (id, name, avatar, created_at, last_active)
-        VALUES (?, ?, ?, ?, ?)
-      `).run(tenantId, name, avatar || name.charAt(0).toUpperCase(), Date.now(), Date.now());
-        }
-        // Generate JWT
-        const token = jsonwebtoken_1.default.sign({ tenantId }, config_1.config.jwtSecret, { expiresIn: config_1.config.jwtExpiresIn });
-        res.json({
-            token,
-            tenant: {
-                id: tenantId,
-                name,
-                avatar: avatar || name.charAt(0).toUpperCase(),
-            },
-        });
-    }
-    catch (error) {
-        console.error('Error in tenant auth:', error);
-        res.status(500).json({ error: 'Failed to authenticate tenant' });
-    }
+// Legacy tenant auth - deprecated, use /api/auth/login or /api/auth/google instead
+router.post('/auth', (_req, res) => {
+    return res.status(410).json({ error: 'This endpoint is deprecated. Use /api/auth/login or /api/auth/google instead.' });
 });
 // Get tenant info
 router.get('/:id', auth_1.authenticateTenant, (req, res) => {

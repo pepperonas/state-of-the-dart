@@ -20,6 +20,7 @@ const getAuthToken = (): string | null => {
   return localStorage.getItem('auth_token');
 };
 
+
 // Set auth token
 export const setAuthToken = (token: string) => {
   localStorage.setItem('auth_token', token);

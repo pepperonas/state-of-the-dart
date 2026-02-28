@@ -222,6 +222,10 @@ router.delete('/users/:userId', async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
+        // Prevent deletion of master admin account
+        if (user.email?.toLowerCase() === 'martinpaush@gmail.com') {
+            return res.status(403).json({ error: 'Cannot delete master admin account' });
+        }
         // Delete all user data (cascade)
         db.prepare('DELETE FROM users WHERE id = ?').run(userId);
         res.json({ message: 'User deleted successfully' });

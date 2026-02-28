@@ -185,11 +185,13 @@ body {
 .modern-light h2,
 .modern-light h3 {
   color: #1a1a1a;
+  text-shadow: none !important;
 }
 
 .modern-light .text-white,
 .modern-light p {
   color: #1a1a1a;
+  text-shadow: none !important;
 }
 
 .modern-light .text-dark-300,
@@ -207,40 +209,47 @@ body {
    ============================================================ */
 
 .modern-light button {
-  background: #ffffff;
+  background-color: #ffffff;
   border: 1px solid #e5e7eb;
   color: #1a1a1a;
   transition: all 0.2s ease;
 }
 
 .modern-light button:hover {
-  background: #f8f9fa;
+  background-color: #f8f9fa;
   border-color: #d1d5db;
+}
+
+/* Gradient buttons - preserve gradient backgrounds */
+.modern-light button[class*="bg-gradient"] {
+  background-color: transparent;
+  border: none;
+  color: #ffffff;
 }
 
 /* Success buttons */
 .modern-light button[class*="bg-success"],
 .modern-light button[class*="bg-green"] {
-  background: #10b981;
+  background-color: #10b981;
   border-color: #10b981;
   color: #ffffff;
 }
 
 .modern-light button[class*="bg-success"]:hover,
 .modern-light button[class*="bg-green"]:hover {
-  background: #059669;
+  background-color: #059669;
   border-color: #059669;
 }
 
 /* Primary buttons */
 .modern-light button[class*="bg-primary"] {
-  background: #3b82f6;
+  background-color: #3b82f6;
   border-color: #3b82f6;
   color: #ffffff;
 }
 
 .modern-light button[class*="bg-primary"]:hover {
-  background: #2563eb;
+  background-color: #2563eb;
   border-color: #2563eb;
 }
 
@@ -295,6 +304,113 @@ body {
   border: 1px solid #e5e7eb;
 }
 
+.modern-light .bg-dark-700 {
+  background: #f3f4f6;
+}
+
+.modern-light .bg-dark-700\/50,
+.modern-light .bg-dark-600\/50 {
+  background: #f8f9fa;
+}
+
+.modern-light .bg-dark-700\/30 {
+  background: #f9fafb;
+}
+
+/* ============================================================
+   BORDERS - Visible on light backgrounds
+   ============================================================ */
+
+.modern-light .border-white\/5,
+.modern-light .border-white\/10 {
+  border-color: #e5e7eb;
+}
+
+/* ============================================================
+   HEADER BOX - Light theme override
+   ============================================================ */
+
+.modern-light .bg-dark-900\/40 {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.modern-light .bg-dark-900\/95 {
+  background: rgba(255, 255, 255, 0.97);
+}
+
+/* ============================================================
+   RANGE SLIDER - Light theme
+   ============================================================ */
+
+.modern-light input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  outline: none;
+}
+
+.modern-light input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.modern-light input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #3b82f6;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.modern-light input[type="range"]::-moz-range-track {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+}
+
+/* ============================================================
+   SCROLLBAR - Light theme
+   ============================================================ */
+
+.modern-light ::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+.modern-light ::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+}
+
+.modern-light ::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* ============================================================
+   SELECT/OPTION - Light backgrounds
+   ============================================================ */
+
+.modern-light select option {
+  background: #ffffff;
+  color: #1a1a1a;
+}
+
+/* ============================================================
+   SHADOW OVERRIDES - Remove dark shadows
+   ============================================================ */
+
+.modern-light .shadow-2xl {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
 
 /* ============================================================
    ANIMATIONS - Subtle neon pulse

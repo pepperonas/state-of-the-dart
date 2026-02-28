@@ -96,41 +96,43 @@ router.patch('/:key', authenticateTenant, (req: AuthRequest, res: Response) => {
   const { value } = req.body;
   const db = getDatabase();
   
-  const allowedKeys = [
-    'theme',
-    'language',
-    'sound_enabled',
-    'caller_voice',
-    'caller_language',
-    'auto_next_player',
-    'show_checkout_suggestions',
-    'enable_achievements_hints'
-  ];
-  
-  if (!allowedKeys.includes(key)) {
+  // Map of allowed keys to their exact column names (prevents SQL interpolation risk)
+  const allowedColumns: Record<string, string> = {
+    'theme': 'theme',
+    'language': 'language',
+    'sound_enabled': 'sound_enabled',
+    'caller_voice': 'caller_voice',
+    'caller_language': 'caller_language',
+    'auto_next_player': 'auto_next_player',
+    'show_checkout_suggestions': 'show_checkout_suggestions',
+    'enable_achievements_hints': 'enable_achievements_hints',
+  };
+
+  const column = allowedColumns[key];
+  if (!column) {
     return res.status(400).json({ error: 'Invalid setting key' });
   }
-  
+
   try {
     // Get current settings
     let settings = db.prepare('SELECT * FROM user_settings WHERE tenant_id = ?').get(req.tenantId) as any;
-    
+
     if (!settings) {
       // Create default settings first
       db.prepare(`
         INSERT INTO user_settings (tenant_id, updated_at)
         VALUES (?, ?)
       `).run(req.tenantId, Date.now());
-      
+
       settings = db.prepare('SELECT * FROM user_settings WHERE tenant_id = ?').get(req.tenantId);
     }
-    
-    // Update specific field
+
+    // Update specific field using safe column name from whitelist
     const updateValue = typeof value === 'boolean' ? (value ? 1 : 0) : value;
-    
+
     db.prepare(`
-      UPDATE user_settings 
-      SET ${key} = ?, updated_at = ?
+      UPDATE user_settings
+      SET ${column} = ?, updated_at = ?
       WHERE tenant_id = ?
     `).run(updateValue, Date.now(), req.tenantId);
     

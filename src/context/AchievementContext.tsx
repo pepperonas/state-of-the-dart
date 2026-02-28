@@ -56,6 +56,7 @@ export type CheckMode = 'absolute' | 'increment';
 interface AchievementContextType {
   getPlayerProgress: (playerId: string) => PlayerAchievementProgress;
   checkAchievement: (playerId: string, metric: string, value: number, gameId?: string, options?: { mode?: CheckMode }) => void;
+  checkStreakProgress: (playerId: string, metric: string, currentStreak: number, gameId?: string) => void;
   unlockAchievement: (playerId: string, achievementId: string, gameId?: string) => void;
   isAchievementUnlocked: (playerId: string, achievementId: string) => boolean;
   getUnlockedAchievements: (playerId: string) => Achievement[];
@@ -498,7 +499,7 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
   ) => {
     const mode = options?.mode ?? (CUMULATIVE_METRICS.has(metric) ? 'increment' : 'absolute');
 
-    const relevantAchievements = ACHIEVEMENTS.filter(a => a.requirement.metric === metric);
+    const relevantAchievements = ACHIEVEMENTS.filter(a => a.requirement.metric === metric && a.requirement.type !== 'streak');
     const progressUpdates: Record<string, { current: number; target: number; percentage: number }> = {};
 
     for (const achievement of relevantAchievements) {
@@ -561,14 +562,76 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
       }
     }
 
-    // Sync progress updates to API in background (transform to API format)
+    // Sync progress updates to API in background
+    if (Object.keys(progressUpdates).length > 0) {
+      const apiPayload: Record<string, { progress: number; completed: boolean }> = {};
+      for (const [id, prog] of Object.entries(progressUpdates)) {
+        apiPayload[id] = { progress: prog.percentage, completed: prog.percentage >= 100 };
+      }
+      api.achievements.updateProgress(playerId, apiPayload).catch(error => {
+        logger.error('Failed to sync achievement progress to API:', error);
+      });
+    }
+  }, [isAchievementUnlocked, unlockAchievement, saveProgressForPlayer]);
+
+  // Check streak-type achievements with actual streak count (absolute, resets on streak break)
+  const checkStreakProgress = useCallback((
+    playerId: string,
+    metric: string,
+    currentStreak: number,
+    gameId?: string
+  ) => {
+    const relevantAchievements = ACHIEVEMENTS.filter(
+      a => a.requirement.metric === metric && a.requirement.type === 'streak'
+    );
+
+    const progressUpdates: Record<string, { current: number; target: number; percentage: number }> = {};
+
+    for (const achievement of relevantAchievements) {
+      if (isAchievementUnlocked(playerId, achievement.id)) continue;
+
+      const { target } = achievement.requirement;
+
+      if (currentStreak >= target) {
+        unlockAchievement(playerId, achievement.id, gameId);
+      } else {
+        const percentage = Math.min((currentStreak / target) * 100, 100);
+
+        const playerProgress = progressCacheRef.current[playerId] || {
+          playerId,
+          unlockedAchievements: [],
+          progress: {},
+          totalPoints: 0,
+        };
+
+        const updatedPlayerProgress: PlayerAchievementProgress = {
+          ...playerProgress,
+          progress: {
+            ...playerProgress.progress,
+            [achievement.id]: {
+              current: currentStreak,
+              target,
+              percentage: Math.max(0, percentage),
+            },
+          },
+        };
+
+        saveProgressForPlayer(playerId, updatedPlayerProgress);
+        progressUpdates[achievement.id] = {
+          current: currentStreak,
+          target,
+          percentage: Math.max(0, percentage),
+        };
+      }
+    }
+
     if (Object.keys(progressUpdates).length > 0) {
       const apiPayload: Record<string, { progress: number; completed: boolean }> = {};
       for (const [id, prog] of Object.entries(progressUpdates)) {
         apiPayload[id] = { progress: prog.percentage, completed: false };
       }
       api.achievements.updateProgress(playerId, apiPayload).catch(error => {
-        logger.error('Failed to sync achievement progress to API:', error);
+        logger.error('Failed to sync streak achievement progress to API:', error);
       });
     }
   }, [isAchievementUnlocked, unlockAchievement, saveProgressForPlayer]);
@@ -611,6 +674,7 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
   const value: AchievementContextType = useMemo(() => ({
     getPlayerProgress,
     checkAchievement,
+    checkStreakProgress,
     unlockAchievement,
     isAchievementUnlocked,
     getUnlockedAchievements,
@@ -622,7 +686,7 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
     dismissAllNotifications,
     resetPlayerAchievements,
   }), [
-    getPlayerProgress, checkAchievement, unlockAchievement, isAchievementUnlocked,
+    getPlayerProgress, checkAchievement, checkStreakProgress, unlockAchievement, isAchievementUnlocked,
     getUnlockedAchievements, getLockedAchievements, getAllPlayerProgress,
     notificationQueue, currentNotification, dismissNotification, dismissAllNotifications, resetPlayerAchievements,
   ]);

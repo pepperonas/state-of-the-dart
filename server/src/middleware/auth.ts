@@ -37,8 +37,19 @@ export const authenticateTenant = (req: Request, res: Response, next: NextFuncti
       authReq.tenantId = decoded.tenantId;
       authReq.playerId = decoded.playerId;
     } else if (decoded.userId) {
-      // New system - get tenant from user_id (most recently active)
-      const tenant = db.prepare('SELECT id FROM tenants WHERE user_id = ? ORDER BY last_active DESC LIMIT 1').get(decoded.userId) as any;
+      // New system - resolve tenant from user_id
+      // If X-Tenant-Id header is provided, validate it belongs to this user
+      const requestedTenantId = req.headers['x-tenant-id'] as string | undefined;
+      let tenant: any;
+
+      if (requestedTenantId) {
+        tenant = db.prepare('SELECT id FROM tenants WHERE id = ? AND user_id = ?').get(requestedTenantId, decoded.userId);
+      }
+
+      if (!tenant) {
+        // Fallback: use most recently active tenant for this user
+        tenant = db.prepare('SELECT id FROM tenants WHERE user_id = ? ORDER BY last_active DESC LIMIT 1').get(decoded.userId);
+      }
 
       if (!tenant) {
         return res.status(404).json({ error: 'No tenant found for user' });

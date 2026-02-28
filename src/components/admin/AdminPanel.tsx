@@ -33,7 +33,7 @@ interface AdminStats {
 }
 
 const AdminPanel: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -49,6 +49,7 @@ const AdminPanel: React.FC = () => {
   const [selectedBugReport, setSelectedBugReport] = useState<BugReport | null>(null);
   const [bugLoading, setBugLoading] = useState(false);
   const [bugReportsOpen, setBugReportsOpen] = useState(false);
+  const [failedAvatars, setFailedAvatars] = useState<Set<string>>(new Set());
 
   // Subscription Edit Modal
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
@@ -97,11 +98,16 @@ const AdminPanel: React.FC = () => {
   };
 
   const handleUpdateBugStatus = async (reportId: string, newStatus: string) => {
+    // Optimistic update: change status locally to avoid list jumping
+    setBugReports(prev => prev.map(r => r.id === reportId ? { ...r, status: newStatus as BugReport['status'] } : r));
+    if (selectedBugReport?.id === reportId) {
+      setSelectedBugReport(prev => prev ? { ...prev, status: newStatus as BugReport['status'] } : null);
+    }
     try {
       await api.bugReports.updateStatus(reportId, newStatus);
-      await loadBugReports();
-      setSelectedBugReport(null);
     } catch (err: any) {
+      // Revert on failure
+      await loadBugReports();
       alert('Failed to update status: ' + err.message);
     }
   };
@@ -116,7 +122,7 @@ const AdminPanel: React.FC = () => {
   };
 
   const handleDeleteBugReport = async (reportId: string) => {
-    if (!confirm('Are you sure you want to delete this bug report?')) return;
+    if (!confirm(t('admin.confirm_delete_bug'))) return;
 
     try {
       await api.bugReports.delete(reportId);
@@ -128,7 +134,7 @@ const AdminPanel: React.FC = () => {
   };
 
   const handleGrantLifetime = async (userId: string) => {
-    if (!confirm('Grant lifetime access to this user?')) return;
+    if (!confirm(t('admin.confirm_grant_lifetime'))) return;
     
     try {
       await api.admin.grantLifetime(userId);
@@ -139,7 +145,7 @@ const AdminPanel: React.FC = () => {
   };
 
   const handleRevokeAccess = async (userId: string) => {
-    if (!confirm('Revoke access for this user?')) return;
+    if (!confirm(t('admin.confirm_revoke_access'))) return;
     
     try {
       await api.admin.revokeAccess(userId);
@@ -150,7 +156,7 @@ const AdminPanel: React.FC = () => {
   };
 
   const handleDeleteUser = async (userId: string) => {
-    if (!confirm('⚠️ DELETE this user permanently? This cannot be undone!')) return;
+    if (!confirm(t('admin.confirm_delete_user'))) return;
     
     try {
       await api.admin.deleteUser(userId);
@@ -161,8 +167,8 @@ const AdminPanel: React.FC = () => {
   };
 
   const handleToggleAdmin = async (userId: string, isCurrentlyAdmin: boolean) => {
-    const action = isCurrentlyAdmin ? 'remove admin status from' : 'make admin';
-    if (!confirm(`${action} this user?`)) return;
+    const confirmMsg = isCurrentlyAdmin ? t('admin.confirm_remove_admin') : t('admin.confirm_make_admin');
+    if (!confirm(confirmMsg)) return;
     
     try {
       if (isCurrentlyAdmin) {
@@ -187,6 +193,18 @@ const AdminPanel: React.FC = () => {
 
   const handleUpdateSubscription = async () => {
     if (!editingUser) return;
+
+    // Validate: lifetime should not have an end date
+    if (editFormData.subscriptionStatus === 'lifetime' && editFormData.subscriptionEndsAt) {
+      alert(t('admin.error_lifetime_with_end_date', 'Lifetime subscriptions should not have an end date.'));
+      return;
+    }
+
+    // Validate: end date should be in the future (if provided)
+    if (editFormData.subscriptionEndsAt && new Date(editFormData.subscriptionEndsAt) < new Date()) {
+      alert(t('admin.error_past_end_date', 'End date must be in the future.'));
+      return;
+    }
 
     try {
       await api.admin.updateSubscription(editingUser.id, {
@@ -217,7 +235,7 @@ const AdminPanel: React.FC = () => {
   };
 
   const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleDateString('de-DE', {
+    return new Date(timestamp).toLocaleDateString(i18n.language === 'de' ? 'de-DE' : 'en-US', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -231,10 +249,10 @@ const AdminPanel: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center gradient-mesh">
+      <div className="min-h-dvh flex items-center justify-center gradient-mesh">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-primary-500 mx-auto mb-4"></div>
-          <p className="text-dark-300">Lade Admin Panel...</p>
+          <p className="text-dark-300">{t('admin.loading_panel')}</p>
         </div>
       </div>
     );
@@ -242,11 +260,11 @@ const AdminPanel: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center gradient-mesh">
+      <div className="min-h-dvh flex items-center justify-center gradient-mesh">
         <div className="glass-card p-8 text-center">
-          <p className="text-error-400 text-xl mb-4">{error}</p>
+          <p className="text-red-400 text-xl mb-4">{error}</p>
           <button onClick={loadData} className="px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl font-semibold transition-all">
-            Erneut versuchen
+            {t('admin.retry')}
           </button>
         </div>
       </div>
@@ -254,7 +272,7 @@ const AdminPanel: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8 gradient-mesh">
+    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div
@@ -275,8 +293,8 @@ const AdminPanel: React.FC = () => {
               <Shield size={32} className="text-white" />
             </div>
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-white">Admin Panel</h1>
-              <p className="text-dark-300">Benutzer & Abonnements verwalten</p>
+              <h1 className="text-3xl md:text-4xl font-bold text-white">{t('admin.admin_panel')}</h1>
+              <p className="text-dark-300">{t('admin.subtitle')}</p>
             </div>
           </div>
         </motion.div>
@@ -296,7 +314,7 @@ const AdminPanel: React.FC = () => {
                 </div>
                 <p className="text-2xl md:text-3xl font-bold text-white">{stats.totalUsers}</p>
               </div>
-              <p className="text-dark-400 text-sm">Gesamt</p>
+              <p className="text-dark-400 text-sm">{t('admin.total')}</p>
             </div>
             <div className="glass-card p-4 md:p-6 rounded-xl border border-white/5">
               <div className="flex items-center gap-3 mb-2">
@@ -305,7 +323,7 @@ const AdminPanel: React.FC = () => {
                 </div>
                 <p className="text-2xl md:text-3xl font-bold text-success-400">{stats.activeSubscriptions}</p>
               </div>
-              <p className="text-dark-400 text-sm">Aktive Abos</p>
+              <p className="text-dark-400 text-sm">{t('admin.active_subscriptions')}</p>
             </div>
             <div className="glass-card p-4 md:p-6 rounded-xl border border-white/5">
               <div className="flex items-center gap-3 mb-2">
@@ -314,7 +332,7 @@ const AdminPanel: React.FC = () => {
                 </div>
                 <p className="text-2xl md:text-3xl font-bold text-amber-400">{stats.lifetimeSubscriptions}</p>
               </div>
-              <p className="text-dark-400 text-sm">Lifetime</p>
+              <p className="text-dark-400 text-sm">{t('admin.lifetime')}</p>
             </div>
             <div className="glass-card p-4 md:p-6 rounded-xl border border-white/5">
               <div className="flex items-center gap-3 mb-2">
@@ -323,16 +341,16 @@ const AdminPanel: React.FC = () => {
                 </div>
                 <p className="text-2xl md:text-3xl font-bold text-blue-400">{stats.trialUsers}</p>
               </div>
-              <p className="text-dark-400 text-sm">Trial</p>
+              <p className="text-dark-400 text-sm">{t('admin.trial')}</p>
             </div>
             <div className="glass-card p-4 md:p-6 rounded-xl border border-white/5 col-span-2 sm:col-span-1">
               <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-lg bg-error-500/20">
-                  <XCircle size={20} className="text-error-400" />
+                <div className="p-2 rounded-lg bg-red-500/20">
+                  <XCircle size={20} className="text-red-400" />
                 </div>
-                <p className="text-2xl md:text-3xl font-bold text-error-400">{stats.expiredUsers}</p>
+                <p className="text-2xl md:text-3xl font-bold text-red-400">{stats.expiredUsers}</p>
               </div>
-              <p className="text-dark-400 text-sm">Abgelaufen</p>
+              <p className="text-dark-400 text-sm">{t('admin.expired')}</p>
             </div>
           </motion.div>
         )}
@@ -351,7 +369,7 @@ const AdminPanel: React.FC = () => {
                 filter === 'all' ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg' : 'bg-dark-700/50 text-dark-200 hover:bg-dark-600/50'
               }`}
             >
-              Alle
+              {t('admin.filter_all')}
             </button>
             <button
               onClick={() => setFilter('lifetime')}
@@ -359,7 +377,7 @@ const AdminPanel: React.FC = () => {
                 filter === 'lifetime' ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg' : 'bg-dark-700/50 text-dark-200 hover:bg-dark-600/50'
               }`}
             >
-              Lifetime
+              {t('admin.filter_lifetime')}
             </button>
             <button
               onClick={() => setFilter('active')}
@@ -367,7 +385,7 @@ const AdminPanel: React.FC = () => {
                 filter === 'active' ? 'bg-gradient-to-r from-success-500 to-success-600 text-white shadow-lg' : 'bg-dark-700/50 text-dark-200 hover:bg-dark-600/50'
               }`}
             >
-              Aktiv
+              {t('admin.filter_active')}
             </button>
             <button
               onClick={() => setFilter('trial')}
@@ -375,15 +393,15 @@ const AdminPanel: React.FC = () => {
                 filter === 'trial' ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg' : 'bg-dark-700/50 text-dark-200 hover:bg-dark-600/50'
               }`}
             >
-              Trial
+              {t('admin.filter_trial')}
             </button>
             <button
               onClick={() => setFilter('expired')}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                filter === 'expired' ? 'bg-gradient-to-r from-error-500 to-error-600 text-white shadow-lg' : 'bg-dark-700/50 text-dark-200 hover:bg-dark-600/50'
+                filter === 'expired' ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg' : 'bg-dark-700/50 text-dark-200 hover:bg-dark-600/50'
               }`}
             >
-              Abgelaufen
+              {t('admin.filter_expired')}
             </button>
           </div>
         </motion.div>
@@ -399,11 +417,11 @@ const AdminPanel: React.FC = () => {
             <table className="w-full">
               <thead className="bg-dark-800/80">
                 <tr className="text-left">
-                  <th className="px-6 py-4 font-semibold text-dark-300 text-sm uppercase tracking-wide">Benutzer</th>
-                  <th className="px-6 py-4 font-semibold text-dark-300 text-sm uppercase tracking-wide">Status</th>
-                  <th className="px-6 py-4 font-semibold text-dark-300 text-sm uppercase tracking-wide hidden md:table-cell">Plan</th>
-                  <th className="px-6 py-4 font-semibold text-dark-300 text-sm uppercase tracking-wide hidden lg:table-cell">Erstellt</th>
-                  <th className="px-6 py-4 font-semibold text-dark-300 text-sm uppercase tracking-wide">Aktionen</th>
+                  <th className="px-6 py-4 font-semibold text-dark-300 text-sm uppercase tracking-wide">{t('admin.table_user')}</th>
+                  <th className="px-6 py-4 font-semibold text-dark-300 text-sm uppercase tracking-wide">{t('admin.table_status')}</th>
+                  <th className="px-6 py-4 font-semibold text-dark-300 text-sm uppercase tracking-wide hidden md:table-cell">{t('admin.table_plan')}</th>
+                  <th className="px-6 py-4 font-semibold text-dark-300 text-sm uppercase tracking-wide hidden lg:table-cell">{t('admin.table_created')}</th>
+                  <th className="px-6 py-4 font-semibold text-dark-300 text-sm uppercase tracking-wide">{t('admin.table_actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -417,20 +435,18 @@ const AdminPanel: React.FC = () => {
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        {u.avatar?.startsWith('http') ? (
+                        {u.avatar?.startsWith('http') && !failedAvatars.has(u.id) ? (
                           <img
                             src={u.avatar}
                             alt={u.name}
                             className="w-10 h-10 rounded-full object-cover ring-2 ring-white/10"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = 'none';
-                              (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                            }}
+                            onError={() => setFailedAvatars(prev => new Set(prev).add(u.id))}
                           />
-                        ) : null}
-                        <div className={`w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-xl font-bold text-white ${u.avatar?.startsWith('http') ? 'hidden' : ''}`}>
-                          {u.avatar?.startsWith('http') ? u.name.charAt(0).toUpperCase() : u.avatar}
-                        </div>
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-xl font-bold text-white">
+                            {u.avatar && !u.avatar.startsWith('http') ? u.avatar : u.name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
                         <div>
                           <p className="font-semibold text-white flex items-center gap-2">
                             {u.name}
@@ -446,10 +462,10 @@ const AdminPanel: React.FC = () => {
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase ${getStatusBadgeClass(u.subscription_status)}`}>
-                        {u.subscription_status === 'lifetime' ? 'Lifetime' :
-                         u.subscription_status === 'active' ? 'Aktiv' :
-                         u.subscription_status === 'trial' ? 'Trial' :
-                         u.subscription_status === 'expired' ? 'Abgelaufen' : u.subscription_status}
+                        {u.subscription_status === 'lifetime' ? t('admin.status_lifetime') :
+                         u.subscription_status === 'active' ? t('admin.status_active') :
+                         u.subscription_status === 'trial' ? t('admin.status_trial') :
+                         u.subscription_status === 'expired' ? t('admin.status_expired') : u.subscription_status}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-dark-300 hidden md:table-cell">
@@ -463,7 +479,7 @@ const AdminPanel: React.FC = () => {
                         <button
                           onClick={() => handleOpenEditModal(u)}
                           className="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors"
-                          title="Abonnement bearbeiten"
+                          title={t('admin.edit_subscription')}
                         >
                           <Edit size={16} />
                         </button>
@@ -471,7 +487,7 @@ const AdminPanel: React.FC = () => {
                           <button
                             onClick={() => handleGrantLifetime(u.id)}
                             className="p-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 rounded-lg transition-colors"
-                            title="Lifetime gewähren"
+                            title={t('admin.grant_lifetime')}
                           >
                             <Crown size={16} />
                           </button>
@@ -479,8 +495,8 @@ const AdminPanel: React.FC = () => {
                         {u.subscription_status !== 'expired' && (
                           <button
                             onClick={() => handleRevokeAccess(u.id)}
-                            className="p-2 bg-error-500/20 hover:bg-error-500/30 text-error-400 rounded-lg transition-colors"
-                            title="Zugang entziehen"
+                            className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors"
+                            title={t('admin.revoke_access')}
                           >
                             <XCircle size={16} />
                           </button>
@@ -493,7 +509,7 @@ const AdminPanel: React.FC = () => {
                                 ? 'bg-dark-600/50 hover:bg-dark-600 text-dark-300'
                                 : 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-400'
                             }`}
-                            title={u.is_admin === 1 ? 'Admin entfernen' : 'Zum Admin machen'}
+                            title={u.is_admin === 1 ? t('admin.remove_admin') : t('admin.make_admin')}
                           >
                             {u.is_admin === 1 ? <UserMinus size={16} /> : <UserPlus size={16} />}
                           </button>
@@ -502,7 +518,7 @@ const AdminPanel: React.FC = () => {
                           <button
                             onClick={() => handleDeleteUser(u.id)}
                             className="p-2 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 rounded-lg transition-colors"
-                            title="Benutzer löschen"
+                            title={t('admin.delete_user')}
                           >
                             <Trash2 size={16} />
                           </button>
@@ -522,7 +538,7 @@ const AdminPanel: React.FC = () => {
             animate={{ opacity: 1 }}
             className="text-center py-12 text-dark-400"
           >
-            Keine Benutzer mit Filter "{filter}" gefunden
+            {t('admin.no_users_found', { filter })}
           </motion.div>
         )}
 
@@ -539,7 +555,7 @@ const AdminPanel: React.FC = () => {
           >
             <div className="flex items-center gap-3">
               <AlertCircle className="text-warning-400" size={28} />
-              <h2 className="text-2xl font-bold text-white">Bug Reports</h2>
+              <h2 className="text-2xl font-bold text-white">{t('admin.bug_reports')}</h2>
               {bugReports.length > 0 && (
                 <span className="text-sm bg-dark-700 text-dark-300 px-2.5 py-0.5 rounded-full">{bugReports.length}</span>
               )}
@@ -558,7 +574,7 @@ const AdminPanel: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-white">{bugReports.length}</p>
-                  <p className="text-sm text-dark-300">Total Reports</p>
+                  <p className="text-sm text-dark-300">{t('admin.total_reports')}</p>
                 </div>
               </div>
             </div>
@@ -569,7 +585,7 @@ const AdminPanel: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-white">{bugReports.filter(r => r.status === 'open').length}</p>
-                  <p className="text-sm text-dark-300">Open</p>
+                  <p className="text-sm text-dark-300">{t('admin.open')}</p>
                 </div>
               </div>
             </div>
@@ -580,7 +596,7 @@ const AdminPanel: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-white">{bugReports.filter(r => r.status === 'in_progress').length}</p>
-                  <p className="text-sm text-dark-300">In Progress</p>
+                  <p className="text-sm text-dark-300">{t('admin.in_progress')}</p>
                 </div>
               </div>
             </div>
@@ -591,7 +607,7 @@ const AdminPanel: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-white">{bugReports.filter(r => r.status === 'resolved').length}</p>
-                  <p className="text-sm text-dark-300">Resolved</p>
+                  <p className="text-sm text-dark-300">{t('admin.resolved')}</p>
                 </div>
               </div>
             </div>
@@ -600,31 +616,31 @@ const AdminPanel: React.FC = () => {
           {/* Filters */}
           <div className="flex gap-4 mb-6">
             <div>
-              <label className="block text-sm font-semibold text-dark-300 mb-2">Status</label>
+              <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.status_label')}</label>
               <select
                 value={bugFilter}
                 onChange={(e) => setBugFilter(e.target.value)}
                 className="px-4 py-2 bg-dark-800/50 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-warning-500"
               >
-                <option value="all">All</option>
-                <option value="open">Open</option>
-                <option value="in_progress">In Progress</option>
-                <option value="resolved">Resolved</option>
-                <option value="closed">Closed</option>
+                <option value="all">{t('admin.select_all')}</option>
+                <option value="open">{t('admin.select_open')}</option>
+                <option value="in_progress">{t('admin.select_in_progress')}</option>
+                <option value="resolved">{t('admin.select_resolved')}</option>
+                <option value="closed">{t('admin.select_closed')}</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-dark-300 mb-2">Severity</label>
+              <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.severity_label')}</label>
               <select
                 value={bugSeverityFilter}
                 onChange={(e) => setBugSeverityFilter(e.target.value)}
                 className="px-4 py-2 bg-dark-800/50 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-warning-500"
               >
-                <option value="all">All</option>
-                <option value="critical">Critical</option>
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-                <option value="low">Low</option>
+                <option value="all">{t('admin.select_all')}</option>
+                <option value="critical">{t('admin.select_critical')}</option>
+                <option value="high">{t('admin.select_high')}</option>
+                <option value="medium">{t('admin.select_medium')}</option>
+                <option value="low">{t('admin.select_low')}</option>
               </select>
             </div>
           </div>
@@ -632,31 +648,35 @@ const AdminPanel: React.FC = () => {
           {/* Bug Reports Table */}
           {bugLoading ? (
             <div className="text-center py-12 text-dark-400">
-              Loading bug reports...
+              {t('admin.loading_bug_reports')}
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-dark-700">
-                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">Title</th>
-                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">Reporter</th>
-                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">Severity</th>
-                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">Status</th>
-                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">Category</th>
-                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">Date</th>
-                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">Actions</th>
+                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('admin.table_title')}</th>
+                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('admin.table_reporter')}</th>
+                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('admin.table_severity')}</th>
+                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('admin.table_bug_status')}</th>
+                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('admin.table_category')}</th>
+                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('admin.table_date')}</th>
+                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('admin.table_actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {bugReports
                     .filter(r => bugFilter === 'all' || r.status === bugFilter)
                     .filter(r => bugSeverityFilter === 'all' || r.severity === bugSeverityFilter)
+                    .sort((a, b) => {
+                      const statusOrder: Record<string, number> = { open: 0, in_progress: 1, resolved: 2, closed: 3 };
+                      const orderDiff = (statusOrder[a.status] ?? 4) - (statusOrder[b.status] ?? 4);
+                      if (orderDiff !== 0) return orderDiff;
+                      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                    })
                     .map((report) => (
-                      <motion.tr
+                      <tr
                         key={report.id}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
                         className="border-b border-dark-700/50 hover:bg-dark-700/30 transition-colors"
                       >
                         <td className="py-3 px-4 text-white font-medium">{report.title}</td>
@@ -687,10 +707,10 @@ const AdminPanel: React.FC = () => {
                               'bg-gray-700 text-gray-300'
                             }`}
                           >
-                            <option value="open">OPEN</option>
-                            <option value="in_progress">IN PROGRESS</option>
-                            <option value="resolved">RESOLVED</option>
-                            <option value="closed">CLOSED</option>
+                            <option value="open">{t('admin.status_open')}</option>
+                            <option value="in_progress">{t('admin.status_in_progress')}</option>
+                            <option value="resolved">{t('admin.status_resolved')}</option>
+                            <option value="closed">{t('admin.status_closed')}</option>
                           </select>
                         </td>
                         <td className="py-3 px-4 text-dark-300 capitalize">{report.category}</td>
@@ -702,7 +722,7 @@ const AdminPanel: React.FC = () => {
                             <button
                               onClick={() => setSelectedBugReport(report)}
                               className="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors"
-                              title="View Details"
+                              title={t('admin.view_details')}
                             >
                               <Eye size={16} />
                             </button>
@@ -721,20 +741,20 @@ const AdminPanel: React.FC = () => {
                                 navigator.clipboard.writeText(text);
                               }}
                               className="p-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-lg transition-colors"
-                              title="Copy to clipboard"
+                              title={t('admin.copy_clipboard')}
                             >
                               <Copy size={16} />
                             </button>
                             <button
                               onClick={() => handleDeleteBugReport(report.id)}
                               className="p-2 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 rounded-lg transition-colors"
-                              title="Delete"
+                              title={t('common.delete')}
                             >
                               <Trash2 size={16} />
                             </button>
                           </div>
                         </td>
-                      </motion.tr>
+                      </tr>
                     ))}
                 </tbody>
               </table>
@@ -748,7 +768,7 @@ const AdminPanel: React.FC = () => {
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
             <div className="glass-card rounded-2xl p-6 max-w-2xl w-full">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-white">Abonnement bearbeiten</h3>
+                <h3 className="text-2xl font-bold text-white">{t('admin.edit_subscription_title')}</h3>
                 <button
                   onClick={() => setEditingUser(null)}
                   className="p-2 hover:bg-dark-700/50 rounded-lg transition-colors"
@@ -782,41 +802,41 @@ const AdminPanel: React.FC = () => {
                 {/* Status */}
                 <div>
                   <label className="block text-sm font-semibold text-dark-300 mb-2">
-                    Status *
+                    {t('admin.status_required')}
                   </label>
                   <select
                     value={editFormData.subscriptionStatus}
                     onChange={(e) => setEditFormData({ ...editFormData, subscriptionStatus: e.target.value })}
                     className="w-full px-4 py-3 bg-dark-800/50 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-primary-500"
                   >
-                    <option value="expired">Abgelaufen (Expired)</option>
-                    <option value="trial">Testphase (Trial)</option>
-                    <option value="active">Aktiv (Active)</option>
-                    <option value="lifetime">Lifetime</option>
+                    <option value="expired">{t('admin.option_expired')}</option>
+                    <option value="trial">{t('admin.option_trial')}</option>
+                    <option value="active">{t('admin.option_active')}</option>
+                    <option value="lifetime">{t('admin.option_lifetime')}</option>
                   </select>
                 </div>
 
                 {/* Plan */}
                 <div>
                   <label className="block text-sm font-semibold text-dark-300 mb-2">
-                    Plan
+                    {t('admin.plan_label')}
                   </label>
                   <select
                     value={editFormData.subscriptionPlan}
                     onChange={(e) => setEditFormData({ ...editFormData, subscriptionPlan: e.target.value })}
                     className="w-full px-4 py-3 bg-dark-800/50 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-primary-500"
                   >
-                    <option value="">Kein Plan</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="annual">Annual</option>
-                    <option value="lifetime">Lifetime</option>
+                    <option value="">{t('admin.plan_none')}</option>
+                    <option value="monthly">{t('admin.plan_monthly')}</option>
+                    <option value="annual">{t('admin.plan_annual')}</option>
+                    <option value="lifetime">{t('admin.plan_lifetime')}</option>
                   </select>
                 </div>
 
                 {/* Ends At */}
                 <div>
                   <label className="block text-sm font-semibold text-dark-300 mb-2">
-                    Ablaufdatum (optional)
+                    {t('admin.expiry_date')}
                   </label>
                   <input
                     type="datetime-local"
@@ -825,7 +845,7 @@ const AdminPanel: React.FC = () => {
                     className="w-full px-4 py-3 bg-dark-800/50 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-primary-500"
                   />
                   <p className="text-xs text-dark-400 mt-1">
-                    Leer lassen für unbegrenzt (z.B. bei Lifetime)
+                    {t('admin.expiry_hint')}
                   </p>
                 </div>
 
@@ -835,13 +855,13 @@ const AdminPanel: React.FC = () => {
                     onClick={() => setEditingUser(null)}
                     className="flex-1 px-6 py-3 bg-dark-700 hover:bg-dark-600 text-white rounded-lg font-semibold transition-all"
                   >
-                    Abbrechen
+                    {t('common.cancel')}
                   </button>
                   <button
                     onClick={handleUpdateSubscription}
                     className="flex-1 px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg font-semibold transition-all"
                   >
-                    Speichern
+                    {t('common.save')}
                   </button>
                 </div>
               </div>
@@ -854,7 +874,7 @@ const AdminPanel: React.FC = () => {
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
             <div className="glass-card rounded-2xl p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-white">Bug Report Details</h3>
+                <h3 className="text-2xl font-bold text-white">{t('admin.bug_report_details')}</h3>
                 <button
                   onClick={() => setSelectedBugReport(null)}
                   className="p-2 hover:bg-dark-700/50 rounded-lg transition-colors"
@@ -870,7 +890,7 @@ const AdminPanel: React.FC = () => {
                     <div className="flex-1">
                       <h4 className="text-xl font-bold text-white mb-2">{selectedBugReport.title}</h4>
                       <p className="text-dark-400 text-sm">
-                        Reported by {selectedBugReport.userName} ({selectedBugReport.userEmail})
+                        {t('admin.reported_by')} {selectedBugReport.userName} ({selectedBugReport.userEmail})
                       </p>
                       <p className="text-dark-400 text-sm">
                         {new Date(selectedBugReport.createdAt).toLocaleString()}
@@ -894,7 +914,7 @@ const AdminPanel: React.FC = () => {
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-semibold text-dark-300 mb-2">Description</label>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.description')}</label>
                   <p className="text-white bg-dark-800/50 rounded-lg p-4 border border-dark-700 whitespace-pre-wrap">
                     {selectedBugReport.description}
                   </p>
@@ -903,7 +923,7 @@ const AdminPanel: React.FC = () => {
                 {/* Screenshot */}
                 {selectedBugReport.screenshotUrl && (
                   <div>
-                    <label className="block text-sm font-semibold text-dark-300 mb-2">Screenshot</label>
+                    <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.screenshot')}</label>
                     <div className="relative group">
                       <img
                         src={selectedBugReport.screenshotUrl}
@@ -918,7 +938,7 @@ const AdminPanel: React.FC = () => {
                           className="px-3 py-1 bg-dark-900/90 hover:bg-dark-800 text-white text-sm rounded-lg transition-colors"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          Download
+                          {t('admin.download')}
                         </a>
                       </div>
                     </div>
@@ -928,11 +948,11 @@ const AdminPanel: React.FC = () => {
                 {/* Browser Info */}
                 {selectedBugReport.browserInfo && (
                   <div>
-                    <label className="block text-sm font-semibold text-dark-300 mb-2">Browser Info</label>
+                    <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.browser_info')}</label>
                     <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700 text-sm">
-                      <p className="text-dark-400 mb-1"><span className="text-white font-medium">User Agent:</span> {selectedBugReport.browserInfo.userAgent}</p>
-                      <p className="text-dark-400 mb-1"><span className="text-white font-medium">Screen:</span> {selectedBugReport.browserInfo.screenResolution}</p>
-                      <p className="text-dark-400"><span className="text-white font-medium">Viewport:</span> {selectedBugReport.browserInfo.viewport}</p>
+                      <p className="text-dark-400 mb-1"><span className="text-white font-medium">{t('admin.user_agent')}:</span> {selectedBugReport.browserInfo.userAgent}</p>
+                      <p className="text-dark-400 mb-1"><span className="text-white font-medium">{t('admin.screen')}:</span> {selectedBugReport.browserInfo.screenResolution}</p>
+                      <p className="text-dark-400"><span className="text-white font-medium">{t('admin.viewport')}:</span> {selectedBugReport.browserInfo.viewport}</p>
                     </div>
                   </div>
                 )}
@@ -940,7 +960,7 @@ const AdminPanel: React.FC = () => {
                 {/* Route */}
                 {selectedBugReport.route && (
                   <div>
-                    <label className="block text-sm font-semibold text-dark-300 mb-2">Route</label>
+                    <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.route')}</label>
                     <p className="text-white bg-dark-800/50 rounded-lg p-3 border border-dark-700 font-mono text-sm">
                       {selectedBugReport.route}
                     </p>
@@ -949,19 +969,19 @@ const AdminPanel: React.FC = () => {
 
                 {/* Admin Notes */}
                 <div>
-                  <label className="block text-sm font-semibold text-dark-300 mb-2">Admin Notes</label>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.admin_notes')}</label>
                   <textarea
                     defaultValue={selectedBugReport.adminNotes || ''}
                     onBlur={(e) => handleUpdateBugNotes(selectedBugReport.id, e.target.value)}
                     className="w-full px-4 py-3 bg-dark-800/50 border border-dark-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-warning-500 resize-none"
                     rows={4}
-                    placeholder="Add notes for internal tracking..."
+                    placeholder={t('admin.admin_notes_placeholder')}
                   />
                 </div>
 
                 {/* Status Update */}
                 <div>
-                  <label className="block text-sm font-semibold text-dark-300 mb-2">Update Status</label>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.update_status')}</label>
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleUpdateBugStatus(selectedBugReport.id, 'open')}
@@ -971,7 +991,7 @@ const AdminPanel: React.FC = () => {
                           : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
                       }`}
                     >
-                      Open
+                      {t('admin.status_open')}
                     </button>
                     <button
                       onClick={() => handleUpdateBugStatus(selectedBugReport.id, 'in_progress')}
@@ -981,7 +1001,7 @@ const AdminPanel: React.FC = () => {
                           : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
                       }`}
                     >
-                      In Progress
+                      {t('admin.status_in_progress')}
                     </button>
                     <button
                       onClick={() => handleUpdateBugStatus(selectedBugReport.id, 'resolved')}
@@ -991,7 +1011,7 @@ const AdminPanel: React.FC = () => {
                           : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
                       }`}
                     >
-                      Resolved
+                      {t('admin.status_resolved')}
                     </button>
                     <button
                       onClick={() => handleUpdateBugStatus(selectedBugReport.id, 'closed')}
@@ -1001,7 +1021,7 @@ const AdminPanel: React.FC = () => {
                           : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
                       }`}
                     >
-                      Closed
+                      {t('admin.status_closed')}
                     </button>
                   </div>
                 </div>

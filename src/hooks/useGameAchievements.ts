@@ -14,10 +14,17 @@ interface MatchContext {
  * Covers throw-level, leg-level, match-level, calendar/time, and pattern checks.
  */
 export const useGameAchievements = () => {
-  const { checkAchievement, unlockAchievement } = useAchievements();
+  const { checkAchievement, checkStreakProgress, unlockAchievement } = useAchievements();
 
   // Track consecutive 180 count for streak detection
   const consecutive180CountRef = useRef<Record<string, number>>({});
+
+  // Track score-based streaks for streak achievements
+  const scoreStreaksRef = useRef<Record<string, { s60: number; s100: number; s45: number }>>({});
+
+  // Track win/loss streaks across matches
+  const winStreakRef = useRef<Record<string, number>>({});
+  const lossStreakRef = useRef<Record<string, number>>({});
 
   // ==================== THROW-LEVEL CHECKS ====================
   const checkThrowAchievements = useCallback((
@@ -49,11 +56,33 @@ export const useGameAchievements = () => {
       checkAchievement(playerId, 'exact_score', score, gameId);
     }
 
-    // Score threshold increments
+    // Score threshold increments (count achievements)
     if (score >= 60) checkAchievement(playerId, 'score_60_plus', 1, gameId);
     if (score >= 80) checkAchievement(playerId, 'score_80_plus', 1, gameId);
     if (score >= 100) checkAchievement(playerId, 'score_100_plus', 1, gameId);
     if (score >= 150) checkAchievement(playerId, 'score_150_plus', 1, gameId);
+
+    // Track consecutive score streaks for streak achievements
+    const streaks = scoreStreaksRef.current[playerId] || { s60: 0, s100: 0, s45: 0 };
+    if (score >= 60) {
+      streaks.s60++;
+      checkStreakProgress(playerId, 'score_60_plus', streaks.s60, gameId);
+    } else {
+      streaks.s60 = 0;
+    }
+    if (score >= 100) {
+      streaks.s100++;
+      checkStreakProgress(playerId, 'score_100_plus', streaks.s100, gameId);
+    } else {
+      streaks.s100 = 0;
+    }
+    if (score >= 45) {
+      streaks.s45++;
+      checkStreakProgress(playerId, 'score_45_plus', streaks.s45, gameId);
+    } else {
+      streaks.s45 = 0;
+    }
+    scoreStreaksRef.current[playerId] = streaks;
 
     // Low score
     if (score < 10 && darts.length > 0) {
@@ -257,7 +286,7 @@ export const useGameAchievements = () => {
         }
       }
     }
-  }, [checkAchievement]);
+  }, [checkAchievement, checkStreakProgress]);
 
   // ==================== LEG-LEVEL CHECKS ====================
   const checkLegAchievements = useCallback((
@@ -415,6 +444,15 @@ export const useGameAchievements = () => {
 
       if (isWinner) {
         checkAchievement(playerId, 'wins', 1, match.id);
+        // Track win streak
+        winStreakRef.current[playerId] = (winStreakRef.current[playerId] || 0) + 1;
+        lossStreakRef.current[playerId] = 0;
+        checkStreakProgress(playerId, 'wins', winStreakRef.current[playerId], match.id);
+      } else {
+        // Track loss streak
+        winStreakRef.current[playerId] = 0;
+        lossStreakRef.current[playerId] = (lossStreakRef.current[playerId] || 0) + 1;
+        checkStreakProgress(playerId, 'losses', lossStreakRef.current[playerId], match.id);
       }
 
       // Match average (absolute)
@@ -697,7 +735,7 @@ export const useGameAchievements = () => {
         checkAchievement(playerId, 'unique_opponents', 1, match.id);
       }
     });
-  }, [checkAchievement]);
+  }, [checkAchievement, checkStreakProgress]);
 
   // ==================== TRAINING CHECKS ====================
   const checkTrainingAchievements = useCallback((

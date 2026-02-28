@@ -104,6 +104,7 @@ CREATE TABLE IF NOT EXISTS matches (
 
 CREATE INDEX IF NOT EXISTS idx_matches_tenant ON matches(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_matches_started_at ON matches(started_at);
+CREATE INDEX IF NOT EXISTS idx_matches_completed_at ON matches(completed_at);
 CREATE INDEX IF NOT EXISTS idx_matches_status ON matches(status);
 
 -- Match Players
@@ -164,15 +165,6 @@ CREATE TABLE IF NOT EXISTS throws (
 
 CREATE INDEX IF NOT EXISTS idx_throws_leg ON throws(leg_id);
 CREATE INDEX IF NOT EXISTS idx_throws_player ON throws(player_id);
-
--- Heatmap Data
-CREATE TABLE IF NOT EXISTS heatmap_data (
-  player_id TEXT PRIMARY KEY,
-  segments TEXT NOT NULL, -- JSON object
-  total_darts INTEGER DEFAULT 0,
-  last_updated INTEGER NOT NULL,
-  FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
-);
 
 -- Training Sessions
 CREATE TABLE IF NOT EXISTS training_sessions (

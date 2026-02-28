@@ -771,9 +771,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // Silently fail - don't block the game
         logger.warn('Match save failed:', error);
       } finally {
-        if (isMounted) {
-          matchSavingRef.current = false;
-        }
+        // Always reset the saving flag to prevent permanent blocking
+        matchSavingRef.current = false;
       }
     }, 2000); // Increased debounce to 2 seconds to reduce request frequency
 
@@ -781,6 +780,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       isMounted = false;
       clearTimeout(saveTimer);
       abortController.abort(); // Cancel any in-flight API calls
+      matchSavingRef.current = false; // Reset saving flag on cleanup
     };
   }, [state.currentMatch?.id, state.currentMatch?.status, state.currentMatch?.currentLegIndex, state.currentPlayerIndex, state.currentMatch?.legs.length]);
 
