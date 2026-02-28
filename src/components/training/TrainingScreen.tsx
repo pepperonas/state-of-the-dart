@@ -10,6 +10,7 @@ import { useSettings } from '../../context/SettingsContext';
 import { usePlayer } from '../../context/PlayerContext';
 import { useTenant } from '../../context/TenantContext';
 import { api } from '../../services/api';
+import { useGameAchievements } from '../../hooks/useGameAchievements';
 
 interface TrainingState {
   currentTarget: number;
@@ -29,7 +30,8 @@ const TrainingScreen: React.FC = () => {
   const { settings } = useSettings();
   const { players, currentPlayer, setCurrentPlayer, updatePlayerHeatmap } = usePlayer();
   const { storage } = useTenant();
-  
+  const { checkTrainingAchievements, checkCalendarAchievements } = useGameAchievements();
+
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(currentPlayer?.id || null);
   const [currentThrow, setCurrentThrow] = useState<Dart[]>([]);
   const [trainingState, setTrainingState] = useState<TrainingState>({
@@ -455,6 +457,27 @@ const TrainingScreen: React.FC = () => {
       // Save session if completed (non-blocking)
       if (newState.completed) {
         saveSession().catch(err => console.error('Failed to save session:', err));
+
+        // Check training achievements
+        if (currentPlayer && mode) {
+          checkTrainingAchievements(currentPlayer.id, {
+            mode,
+            completed: true,
+            hitRate: newState.attempts > 0 ? (newState.hits / newState.attempts) * 100 : 0,
+            score: newState.score,
+            averageScore: sessionRef.current?.averageScore,
+            highestScore: sessionRef.current?.highestScore,
+            totalDarts: sessionRef.current?.totalDarts,
+            totalHits: newState.hits,
+            totalAttempts: newState.attempts,
+            duration: sessionStartTimeRef.current
+              ? Math.floor((new Date().getTime() - sessionStartTimeRef.current.getTime()) / 1000)
+              : undefined,
+          });
+
+          // Check calendar achievements (async, non-blocking)
+          checkCalendarAchievements(currentPlayer.id);
+        }
       }
     }
 

@@ -38,7 +38,7 @@ const GameScreen: React.FC = () => {
   const { players, addPlayer, updatePlayerHeatmap } = usePlayer();
   const { settings } = useSettings();
   const { storage } = useTenant();
-  const { checkMatchAchievements, checkLegAchievements, checkThrowAchievements } = useGameAchievements();
+  const { checkMatchAchievements, checkLegAchievements, checkThrowAchievements, checkCalendarAchievements } = useGameAchievements();
   
   // Track achievement hints
   const [dismissedHints, setDismissedHints] = useState<Set<string>>(new Set());
@@ -168,6 +168,13 @@ const GameScreen: React.FC = () => {
 
         // Check match achievements for all players
         checkMatchAchievements(match, winnerId, (playerId) => playerId === winnerId);
+
+        // Check calendar achievements (async, non-blocking)
+        for (const player of match.players) {
+          if (!player.isBot) {
+            checkCalendarAchievements(player.playerId);
+          }
+        }
 
         // Check leg achievements for winner
         const lastLeg = match.legs[match.legs.length - 1];
@@ -709,6 +716,14 @@ const GameScreen: React.FC = () => {
       // Check if player had any busts in this leg
       const hadBustInLeg = playerThrowsForCheckout.some(t => t.isBust);
 
+      // Bust detection for current throw
+      const isBust = newRemainingAfterThrow < 0 ||
+        newRemainingAfterThrow === 1 ||
+        (newRemainingAfterThrow === 0 && requiresDoubleForCheckout && lastDartForCheckout?.multiplier !== 2);
+
+      // Checkout attempt: remaining was <=170 before this throw
+      const isCheckoutAttempt = remainingBeforeThrow <= 170 && remainingBeforeThrow > 0;
+
       checkThrowAchievements(
         currentPlayer.playerId,
         [...state.currentThrow],
@@ -721,6 +736,8 @@ const GameScreen: React.FC = () => {
           visitNumber,
           opponentRemaining,
           hadBustInLeg,
+          isBust,
+          isCheckoutAttempt,
         }
       );
     }

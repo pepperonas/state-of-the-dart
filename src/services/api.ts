@@ -283,6 +283,9 @@ export const api = {
         method: 'PUT',
         body: JSON.stringify({ achievements }),
       }),
+
+    getCalendarStats: (playerId: string) =>
+      apiClient(`/api/achievements/player/${playerId}/calendar-stats`),
   },
 
   // Settings

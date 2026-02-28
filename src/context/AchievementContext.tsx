@@ -49,6 +49,7 @@ const CUMULATIVE_METRICS = new Set([
   'triple_consecutive_180', 'first_leg_wins', 'last_leg_wins', 'match_no_bust',
   'consecutive_60_plus', 'fail_achievements_unlocked',
   'unique_doubles', 'same_double', 'training_scoring_100',
+  'training_100_triples',
 ]);
 
 export type CheckMode = 'absolute' | 'increment';
@@ -405,6 +406,76 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
           logger.achievementEvent(`Meta achievement unlocked: ${goldAllCat.name}`);
         }
       }
+
+      // Helper to unlock a meta achievement by reference
+      const unlockMeta = (achievement: Achievement) => {
+        const currentProg = progressCacheRef.current[playerId];
+        if (!currentProg || currentProg.unlockedAchievements.some(u => u.achievementId === achievement.id)) return;
+        const unlockedAchievement: UnlockedAchievement = {
+          achievementId: achievement.id,
+          unlockedAt: new Date(),
+          playerId,
+        };
+        const updatedProgress: PlayerAchievementProgress = {
+          ...currentProg,
+          unlockedAchievements: [...currentProg.unlockedAchievements, unlockedAchievement],
+          totalPoints: currentProg.totalPoints + achievement.points,
+          lastUnlocked: unlockedAchievement,
+        };
+        progressCacheRef.current = { ...progressCacheRef.current, [playerId]: updatedProgress };
+        saveProgressForPlayer(playerId, updatedProgress);
+        queueNotification({ achievement, playerId, timestamp: new Date(), unlockedCount: updatedProgress.unlockedAchievements.length });
+        api.achievements.unlock(playerId, achievement.id).catch(() => {});
+        logger.achievementEvent(`Meta achievement unlocked: ${achievement.name}`);
+      };
+
+      const unlockedIds = new Set(progressCacheRef.current[playerId]?.unlockedAchievements.map(u => u.achievementId) || []);
+
+      // Check all_diamond_unlocked: all diamond-tier achievements unlocked
+      const allDiamond = ACHIEVEMENTS.find(a => a.requirement.metric === 'all_diamond_unlocked');
+      if (allDiamond && !unlockedIds.has(allDiamond.id)) {
+        const diamondAchievements = ACHIEVEMENTS.filter(a => a.tier === 'diamond' && a.id !== allDiamond.id);
+        const allDiamondsUnlocked = diamondAchievements.every(a => unlockedIds.has(a.id));
+        if (allDiamondsUnlocked && diamondAchievements.length > 0) {
+          unlockMeta(allDiamond);
+        }
+      }
+
+      // Check legendary_achievements: count of legendary rarity achievements unlocked
+      const legendaryCountAchievements = ACHIEVEMENTS.filter(a => a.requirement.metric === 'legendary_achievements');
+      for (const achievement of legendaryCountAchievements) {
+        if (unlockedIds.has(achievement.id)) continue;
+        const legendaryCount = ACHIEVEMENTS.filter(a =>
+          a.rarity === 'legendary' && unlockedIds.has(a.id) && a.requirement.metric !== 'legendary_achievements'
+        ).length;
+        if (legendaryCount >= achievement.requirement.target) {
+          unlockMeta(achievement);
+        }
+      }
+
+      // Check first_all_categories: at least 1 achievement in every category
+      const firstAllCat = ACHIEVEMENTS.find(a => a.requirement.metric === 'first_all_categories');
+      if (firstAllCat && !unlockedIds.has(firstAllCat.id)) {
+        const allCategories: AchievementCategory[] = ['first_steps', 'scoring', 'checkout', 'training', 'consistency', 'special', 'master', 'fail'];
+        const hasOneInEach = allCategories.every(cat =>
+          ACHIEVEMENTS.some(a => a.category === cat && unlockedIds.has(a.id))
+        );
+        if (hasOneInEach) {
+          unlockMeta(firstAllCat);
+        }
+      }
+
+      // Check fail_achievements_unlocked: count of fail category achievements
+      const failCountAchievements = ACHIEVEMENTS.filter(a => a.requirement.metric === 'fail_achievements_unlocked');
+      for (const achievement of failCountAchievements) {
+        if (unlockedIds.has(achievement.id)) continue;
+        const failCount = ACHIEVEMENTS.filter(a =>
+          a.category === 'fail' && unlockedIds.has(a.id) && a.requirement.metric !== 'fail_achievements_unlocked'
+        ).length;
+        if (failCount >= achievement.requirement.target) {
+          unlockMeta(achievement);
+        }
+      }
     } finally {
       isCheckingMetaRef.current = false;
     }
@@ -519,11 +590,15 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
 
       // Special handling for metrics where lower is better (e.g. game_time_max, leg_darts)
       const isLowerBetter = metric === 'game_time_max' || metric === 'leg_darts' ||
-                            metric === 'leg_301_darts' || metric === 'checkout_darts_max' ||
+                            metric === 'leg_301_darts' || metric === 'leg_701_darts' ||
+                            metric === 'checkout_darts_max' || metric === 'leg_visits_min' ||
                             metric === 'avg_darts_per_leg_max';
-      const shouldUnlock = isLowerBetter
-        ? (effectiveValue <= target && effectiveValue > 0)
-        : (effectiveValue >= target);
+      const isExact = achievement.requirement.matchMode === 'exact';
+      const shouldUnlock = isExact
+        ? (effectiveValue === target)
+        : isLowerBetter
+          ? (effectiveValue <= target && effectiveValue > 0)
+          : (effectiveValue >= target);
 
       if (shouldUnlock) {
         unlockAchievement(playerId, achievement.id, gameId);

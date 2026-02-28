@@ -152,4 +152,228 @@ router.put('/player/:playerId/progress', authenticateTenant, (req: AuthRequest, 
   }
 });
 
+// Get calendar stats for a player (for calendar-based achievements)
+router.get('/player/:playerId/calendar-stats', authenticateTenant, (req: AuthRequest, res: Response) => {
+  const { playerId } = req.params;
+  const db = getDatabase();
+
+  try {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayMs = todayStart.getTime();
+
+    // Get distinct play days (days with completed matches)
+    const playDays = db.prepare(`
+      SELECT DISTINCT date(m.completed_at / 1000, 'unixepoch', 'localtime') as play_date
+      FROM matches m
+      JOIN match_players mp ON mp.match_id = m.id
+      WHERE mp.player_id = ? AND m.status = 'completed' AND m.completed_at IS NOT NULL
+      AND m.tenant_id = ?
+      ORDER BY play_date DESC
+    `).all(playerId, req.tenantId) as { play_date: string }[];
+
+    // Get distinct win days
+    const winDays = db.prepare(`
+      SELECT DISTINCT date(m.completed_at / 1000, 'unixepoch', 'localtime') as win_date
+      FROM matches m
+      JOIN match_players mp ON mp.match_id = m.id
+      WHERE mp.player_id = ? AND m.status = 'completed' AND m.winner = ?
+      AND m.tenant_id = ?
+      ORDER BY win_date DESC
+    `).all(playerId, playerId, req.tenantId) as { win_date: string }[];
+
+    // Get wins today
+    const winsToday = db.prepare(`
+      SELECT COUNT(*) as count FROM matches m
+      JOIN match_players mp ON mp.match_id = m.id
+      WHERE mp.player_id = ? AND m.status = 'completed' AND m.winner = ?
+      AND m.completed_at >= ? AND m.tenant_id = ?
+    `).get(playerId, playerId, todayMs, req.tenantId) as { count: number };
+
+    // Get first game date
+    const firstGame = db.prepare(`
+      SELECT MIN(m.completed_at) as first_at FROM matches m
+      JOIN match_players mp ON mp.match_id = m.id
+      WHERE mp.player_id = ? AND m.status = 'completed' AND m.tenant_id = ?
+    `).get(playerId, req.tenantId) as { first_at: number | null };
+
+    // Calculate consecutive play day streak (from today backwards)
+    let dailyPlayStreak = 0;
+    if (playDays.length > 0) {
+      const todayStr = todayStart.toISOString().split('T')[0];
+      const playDateSet = new Set(playDays.map(d => d.play_date));
+
+      const checkDate = new Date(todayStart);
+      // If today has a match, start counting from today; otherwise check yesterday
+      if (!playDateSet.has(todayStr)) {
+        checkDate.setDate(checkDate.getDate() - 1);
+      }
+
+      while (true) {
+        const dateStr = checkDate.toISOString().split('T')[0];
+        if (playDateSet.has(dateStr)) {
+          dailyPlayStreak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+    }
+
+    // Get training days and today's training count
+    const trainingDays = db.prepare(`
+      SELECT DISTINCT date(completed_at / 1000, 'unixepoch', 'localtime') as train_date
+      FROM training_sessions
+      WHERE player_id = ? AND completed_at IS NOT NULL AND tenant_id = ?
+      ORDER BY train_date DESC
+    `).all(playerId, req.tenantId) as { train_date: string }[];
+
+    const trainingsToday = db.prepare(`
+      SELECT COUNT(*) as count FROM training_sessions
+      WHERE player_id = ? AND completed_at >= ? AND tenant_id = ?
+    `).get(playerId, todayMs, req.tenantId) as { count: number };
+
+    // Calculate training day streak
+    let dailyTrainingStreak = 0;
+    if (trainingDays.length > 0) {
+      const todayStr = todayStart.toISOString().split('T')[0];
+      const trainDateSet = new Set(trainingDays.map(d => d.train_date));
+
+      const checkDate = new Date(todayStart);
+      if (!trainDateSet.has(todayStr)) {
+        checkDate.setDate(checkDate.getDate() - 1);
+      }
+
+      while (true) {
+        const dateStr = checkDate.toISOString().split('T')[0];
+        if (trainDateSet.has(dateStr)) {
+          dailyTrainingStreak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+    }
+
+    // Win days this month
+    const monthStart = new Date(todayStart);
+    monthStart.setDate(1);
+    const winDaysThisMonth = winDays.filter(d => d.win_date >= monthStart.toISOString().split('T')[0]).length;
+
+    // Consecutive days with 3+ wins (check last 30 days)
+    let dailyThreeWinsStreak = 0;
+    {
+      const checkDate = new Date(todayStart);
+      for (let i = 0; i < 30; i++) {
+        const dateStr = checkDate.toISOString().split('T')[0];
+        const dayStart = new Date(dateStr + 'T00:00:00').getTime();
+        const dayEnd = dayStart + 86400000;
+        const dayWins = db.prepare(`
+          SELECT COUNT(*) as count FROM matches m
+          JOIN match_players mp ON mp.match_id = m.id
+          WHERE mp.player_id = ? AND m.status = 'completed' AND m.winner = ?
+          AND m.completed_at >= ? AND m.completed_at < ? AND m.tenant_id = ?
+        `).get(playerId, playerId, dayStart, dayEnd, req.tenantId) as { count: number };
+
+        if (dayWins.count >= 3) {
+          dailyThreeWinsStreak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+    }
+
+    // Days since first game
+    const daysSinceFirstGame = firstGame.first_at
+      ? Math.floor((Date.now() - firstGame.first_at) / 86400000)
+      : 0;
+
+    // Check if 100 wins were reached within 30 days
+    // (find the 100th win's date, compare to first win's date)
+    let wins100InDays: number | null = null;
+    {
+      const allWinDates = db.prepare(`
+        SELECT m.completed_at FROM matches m
+        JOIN match_players mp ON mp.match_id = m.id
+        WHERE mp.player_id = ? AND m.status = 'completed' AND m.winner = ?
+        AND m.tenant_id = ?
+        ORDER BY m.completed_at ASC
+        LIMIT 100
+      `).all(playerId, playerId, req.tenantId) as { completed_at: number }[];
+
+      if (allWinDates.length >= 100) {
+        const firstWinDate = allWinDates[0].completed_at;
+        const hundredthWinDate = allWinDates[99].completed_at;
+        wins100InDays = Math.ceil((hundredthWinDate - firstWinDate) / 86400000);
+      }
+    }
+
+    // Game mode variety stats
+    const gameModeCounts = db.prepare(`
+      SELECT m.game_type,
+             json_extract(m.settings, '$.startScore') as start_score,
+             COUNT(*) as games,
+             SUM(CASE WHEN m.winner = ? THEN 1 ELSE 0 END) as wins
+      FROM matches m
+      JOIN match_players mp ON mp.match_id = m.id
+      WHERE mp.player_id = ? AND m.status = 'completed' AND m.tenant_id = ?
+      GROUP BY m.game_type, start_score
+    `).all(playerId, playerId, req.tenantId) as { game_type: string; start_score: number | null; games: number; wins: number }[];
+
+    // Distinct game types played
+    const distinctGameTypes = new Set(gameModeCounts.map(r => r.game_type));
+
+    // X01 variant wins: 301, 501, 701
+    const x01Wins: Record<string, number> = {};
+    const x01Games: Record<string, number> = {};
+    for (const row of gameModeCounts) {
+      if (row.game_type === 'x01' && row.start_score) {
+        x01Wins[String(row.start_score)] = row.wins;
+        x01Games[String(row.start_score)] = row.games;
+      }
+    }
+
+    // Min wins across 301/501/701
+    const minWinsAllModes = Math.min(x01Wins['301'] || 0, x01Wins['501'] || 0, x01Wins['701'] || 0);
+    const minGamesAllModes = Math.min(x01Games['301'] || 0, x01Games['501'] || 0, x01Games['701'] || 0);
+
+    // Training type stats (hit rates by mode)
+    const trainingTypeStats = db.prepare(`
+      SELECT type, MAX(hit_rate) as best_hit_rate, COUNT(*) as sessions
+      FROM training_sessions
+      WHERE player_id = ? AND completed_at IS NOT NULL AND tenant_id = ?
+      GROUP BY type
+    `).all(playerId, req.tenantId) as { type: string; best_hit_rate: number | null; sessions: number }[];
+
+    const distinctTrainingTypes = trainingTypeStats.length;
+    const minHitRateAllTraining = trainingTypeStats.length >= 6
+      ? Math.min(...trainingTypeStats.map(t => t.best_hit_rate || 0))
+      : 0;
+
+    res.json({
+      uniquePlayDays: playDays.length,
+      uniqueWinDays: winDays.length,
+      dailyPlayStreak,
+      dailyTrainingStreak,
+      daysSinceFirstGame,
+      winsToday: winsToday.count,
+      trainingsToday: trainingsToday.count,
+      winDaysThisMonth,
+      dailyThreeWinsStreak,
+      wins100InDays,
+      // Game mode variety
+      distinctGameTypes: distinctGameTypes.size,
+      minWinsAllModes,
+      minGamesAllModes,
+      // Training variety
+      distinctTrainingTypes,
+      minHitRateAllTraining,
+    });
+  } catch (error) {
+    console.error('Error fetching calendar stats:', error);
+    res.status(500).json({ error: 'Failed to fetch calendar stats' });
+  }
+});
+
 export default router;
