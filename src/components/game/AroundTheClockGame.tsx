@@ -159,9 +159,10 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Save game state on changes
+  // Save game state on changes (elapsedTime excluded — computed dynamically to avoid 1Hz localStorage thrashing)
   useEffect(() => {
     if (showSetup || showWinner || selectedPlayers.length === 0) return;
+    const currentElapsed = gameStartTime > 0 ? Math.floor((Date.now() - gameStartTime) / 1000) : 0;
     saveGameState(STORAGE_KEYS.ATC, {
       gameType: 'around-the-clock',
       selectedPlayers: selectedPlayers.map(p => ({ id: p.id, name: p.name, avatar: p.avatar })),
@@ -173,10 +174,11 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
       playerDarts,
       playerHits,
       turnHistory,
-      elapsedTime,
+      elapsedTime: currentElapsed,
       savedAt: Date.now(),
     });
-  }, [showSetup, showWinner, selectedPlayers, bullMode, direction, variant, currentPlayerIndex, playerProgress, playerDarts, playerHits, turnHistory, elapsedTime]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showSetup, showWinner, selectedPlayers, bullMode, direction, variant, currentPlayerIndex, playerProgress, playerDarts, playerHits, turnHistory]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
