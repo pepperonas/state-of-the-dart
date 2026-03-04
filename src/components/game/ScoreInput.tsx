@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Check, X, Delete, Keyboard } from 'lucide-react';
 import { Dart } from '../../types/index';
 import { calculateThrowScore, convertScoreToDarts } from '../../utils/scoring';
@@ -33,8 +33,16 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   const [currentInput, setCurrentInput] = useState('');
   const [inputMode, setInputMode] = useState<'quick' | 'numpad'>('numpad');
   const setEditingDartIndex = onSetEditingDartIndex;
-  
+  const confirmBtnRef = useRef<HTMLButtonElement>(null);
+
   const currentScore = calculateThrowScore(currentThrow);
+
+  // Auto-scroll confirm button into view on early checkout
+  useEffect(() => {
+    if (isCheckout && confirmBtnRef.current) {
+      confirmBtnRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [isCheckout]);
   
   // Keyboard support
   useEffect(() => {
@@ -300,6 +308,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
         </button>
         
         <button
+          ref={confirmBtnRef}
           onClick={onConfirm}
           disabled={currentThrow.length === 0}
           className={`flex items-center justify-center gap-1 p-3 rounded-lg text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold shadow-lg ${
