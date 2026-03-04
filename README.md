@@ -8,16 +8,33 @@
 
 **Professionelles Dart-Zählsystem** - Eine funktionsreiche, webbasierte Dart-Scoring-Anwendung mit Multi-User-Support, professionellem Statistik-Tracking und Live-Deployment.
 
-[![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green)](https://stateofthedart.com)
-[![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-purple)](https://stateofthedart.celox.io)
-![Version](https://img.shields.io/badge/Version-0.8.2-blue)
+[![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green?style=for-the-badge)](https://stateofthedart.com)
+[![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-purple?style=for-the-badge)](https://stateofthedart.celox.io)
+![Version](https://img.shields.io/badge/Version-0.8.3-blue?style=for-the-badge)
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-![React](https://img.shields.io/badge/React-19.2-blue)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)
-![Vite](https://img.shields.io/badge/Vite-5.4-blue)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-blue)
+
+![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?logo=tailwindcss&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express-4.x-000000?logo=express&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white)
+![PWA](https://img.shields.io/badge/PWA-Installable-5A0FC8?logo=pwa&logoColor=white)
+![Socket.IO](https://img.shields.io/badge/Socket.IO-4.x-010101?logo=socket.io&logoColor=white)
+![Framer Motion](https://img.shields.io/badge/Framer_Motion-12.x-0055FF?logo=framer&logoColor=white)
+![Recharts](https://img.shields.io/badge/Recharts-2.12-FF6384)
+![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
+![Stripe](https://img.shields.io/badge/Stripe-Payments-635BFF?logo=stripe&logoColor=white)
+
+![Achievements](https://img.shields.io/badge/Achievements-464-gold)
+![Game Modes](https://img.shields.io/badge/Game_Modes-6-orange)
+![Audio Files](https://img.shields.io/badge/Audio_Files-400+-red)
+![Tests](https://img.shields.io/badge/Tests-294_passing-brightgreen)
+![i18n](https://img.shields.io/badge/i18n-DE_%7C_EN-informational)
+![Mobile](https://img.shields.io/badge/Mobile-Optimized-success)
 
 🌐 **[Live App](https://stateofthedart.com)** | 🏠 **[Website](https://stateofthedart.celox.io)** | 📖 **[Deployment Guide](docs/DEPLOYMENT_VPS.md)** | 🏗️ **[Architektur](docs/ARCHITECTURE.md)** | 🐛 **[Issues melden](https://github.com/pepperonas/state-of-the-dart/issues)**
 
@@ -130,6 +147,11 @@
 - **Achievement-Synchronisation** - Achievements werden automatisch in der Datenbank gespeichert und bleiben erhalten
 - **Tier-System** - Bronze, Silber, Gold, Platin, Diamant
 - **Seltenheitsstufen** - Common, Rare, Epic, Legendary Achievements
+- **Scope-System (NEU in v0.8.3)** - Jedes Achievement zeigt seinen Auslöse-Kontext:
+  - 7 Scopes: Runde, Leg, Match, Karriere, Training, Ereignis, Meta
+  - Farbige Scope-Badges auf Achievement-Karten und Benachrichtigungen
+  - Filter nach Scope im Achievement-Screen
+  - Deterministisch berechnet aus Metric/Type/Target (kein manuelles Pflegen)
 - **Fortschritts-Tracking** - Kumulative Metriken (Spiele, Siege, 180s etc.) akkumulieren korrekt
 - **AAA-Game-Feel Benachrichtigungen (NEU in v0.4.0)** - Cinematic Achievement-Popups:
   - Fullscreen-Flash-Overlay beim Freischalten (Tier-Farbe)
@@ -187,6 +209,11 @@
 - **Filter & Suche** - Filtere nach Subscription-Status (Trial, Active, Lifetime, Expired)
 - **Benutzer löschen** - Lösche Benutzer permanent mit allen Daten
 - **Echtzeit-Updates** - Änderungen werden sofort angezeigt
+- **Debug Flag System (NEU in v0.8.3)** - Integriertes Bug-Reporting für Admins:
+  - Floating Flag-Button erfasst Snapshot: Log-Buffer, Screenshot, Browser-Info, Game-State, Route
+  - In-Memory Ring-Buffer (1000 Einträge) sammelt alle Logs unabhängig von der Umgebung
+  - Status-Workflow: open → investigating → resolved/dismissed
+  - "Copy for AI" exportiert strukturierten Debug-Text zur Analyse
 
 ### 📴 Offline-First PWA (NEU in v0.2.0)
 - **Vollständiger Offline-Modus** - App funktioniert ohne Internetverbindung
@@ -349,6 +376,7 @@ state-of-the-dart/
 │   ├── components/           # React-Komponenten
 │   │   ├── achievements/     # Achievement-System
 │   │   ├── dartboard/        # Dartboard & Checkout
+│   │   ├── debug/            # Debug Flag System
 │   │   ├── game/             # Game-Screen & Score-Input
 │   │   ├── leaderboard/      # Bestenlisten
 │   │   ├── player/           # Spielerverwaltung & Profile
@@ -455,7 +483,7 @@ Alle Charts werden mit der Recharts-Library erstellt.
 
 ## 🏆 Achievement-System
 
-464 Achievements in 8 Kategorien:
+464 Achievements in 8 Kategorien und 7 Scopes:
 
 ### Kategorien
 1. **Erste Schritte** (15+) - Rookie bis Millennium
@@ -473,6 +501,16 @@ Alle Charts werden mit der Recharts-Library erstellt.
 - **Gold** (75-150 Punkte) - Experten
 - **Platin** (150-300 Punkte) - Meister
 - **Diamant** (250-1000 Punkte) - Legenden
+
+### Scope-System
+Jedes Achievement hat einen Scope, der anzeigt WANN/WO es ausgelöst wird:
+- **Runde** (46) - Einzelne 3-Dart-Aufnahme (z.B. 180, Shanghai, Robin Hood)
+- **Leg** (63) - Ergebnis eines einzelnen Legs (z.B. 9-Darter, Checkout-Wert)
+- **Match** (61) - Ergebnis eines Matches (z.B. Average, Whitewash)
+- **Karriere** (240) - Akkumuliert über alle Spiele (z.B. 1000 Siege, 500 180s)
+- **Training** (32) - Trainingsmodus-spezifisch
+- **Ereignis** (6) - Kalender/Zeit-basiert (Neujahr, Weihnachten etc.)
+- **Meta** (16) - Über Achievements selbst (Punkte, Unlock-Meilensteine)
 
 Siehe vollständige Liste in `src/types/achievements.ts`
 
@@ -575,7 +613,7 @@ Siehe [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) für Details.
 
 ## 🔢 Versionierung
 
-- **Aktuell**: v0.8.2
+- **Aktuell**: v0.8.3
 - **Schema**: MAJOR.MINOR.PATCH
 - **Auto-Increment**: `npm run version:bump`
 
@@ -650,6 +688,26 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.8.3 (4. März 2026) - Achievement Scope System & Debug Flags
+
+#### ✨ Neue Features
+- **Achievement Scope System** - Jedes der 464 Achievements zeigt seinen Auslöse-Kontext:
+  - 7 Scopes: Runde (46), Leg (63), Match (61), Karriere (240), Training (32), Ereignis (6), Meta (16)
+  - Farbige Scope-Badges auf Achievement-Karten und Benachrichtigungen
+  - Scope-Filter im Achievement-Screen (kombinierbar mit Kategorie-Filter)
+  - Deterministisch berechnet aus Metric/Type/Target via `getAchievementScope()`
+- **Debug Flag System** - Integriertes Bug-Reporting für Admins:
+  - Floating Flag-Button erstellt Snapshots: Log-Buffer + Screenshot + Browser-Info + Game-State + Route
+  - In-Memory Ring-Buffer (1000 Einträge) sammelt alle Logs unabhängig von der Umgebung
+  - Admin Panel: Debug Flags Sektion mit Status-Workflow (open → investigating → resolved/dismissed)
+  - "Copy for AI" exportiert strukturierten Debug-Text zur Analyse
+- **API Request Logging** - Automatisches Logging aller API-Requests/Responses mit Dauer
+- **Around the Clock Rework** - Verbessertes State-Management und Undo-System
+
+#### 🔧 Verbesserungen
+- Logger Ring-Buffer immer aktiv (auch in Production), Konsolen-Ausgabe bleibt environment-gated
+- 11 neue Scope-Tests (294 Tests total)
 
 ### v0.8.2 (27. Februar 2026) - Bust-Logik Fix
 
@@ -899,7 +957,7 @@ Siehe [CHANGELOG.md](CHANGELOG.md) für eine vollständige Liste der Änderungen
 
 <div align="center">
   <p>Made with ❤️ and 🎯 by Martin Pfeffer</p>
-  <p>© 2026 celox.io | Version 0.8.2</p>
+  <p>© 2026 celox.io | Version 0.8.3</p>
   <p>
     <a href="https://stateofthedart.com">🌐 Live Demo</a> •
     <a href="https://github.com/pepperonas/state-of-the-dart">📦 GitHub</a> •
