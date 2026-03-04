@@ -268,7 +268,7 @@ const ResumeGameScreen: React.FC = () => {
                         ) : (
                           <button
                             onClick={() => setConfirmDeleteId(match.id)}
-                            className="flex items-center justify-center gap-1.5 px-4 py-2 bg-dark-700 hover:bg-red-500/20 hover:text-red-400 text-dark-400 rounded-lg text-sm transition-colors"
+                            className="flex items-center justify-center gap-1.5 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400/70 hover:text-red-400 rounded-lg text-sm transition-colors"
                           >
                             <Trash2 size={16} />
                             {t('resume.delete')}
@@ -350,7 +350,7 @@ const ResumeGameScreen: React.FC = () => {
                       ) : (
                         <button
                           onClick={() => setConfirmDeleteId(deleteKey)}
-                          className="flex items-center justify-center gap-1.5 px-4 py-2 bg-dark-700 hover:bg-red-500/20 hover:text-red-400 text-dark-400 rounded-lg text-sm transition-colors"
+                          className="flex items-center justify-center gap-1.5 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400/70 hover:text-red-400 rounded-lg text-sm transition-colors"
                         >
                           <Trash2 size={16} />
                           {t('resume.delete')}
