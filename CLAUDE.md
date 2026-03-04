@@ -117,7 +117,7 @@ Express routes in `server/src/routes/`, registered in `server/src/index.ts`:
 - **Cricket** - `CricketGame.tsx` (uses GameContext for match shell, localStorage for cricketState)
 - **Around the Clock** - `AroundTheClockGame.tsx` (Hit/Miss input, standalone state with turnHistory undo)
 - **Shanghai** - `ShanghaiGame.tsx` (standalone state with turnHistory undo + auto-confirm)
-- **Online Multiplayer** - `OnlineMultiplayer.tsx` (WebSocket via Socket.IO, no persistence)
+- **Online Multiplayer** - `OnlineMultiplayer.tsx` (WebSocket via Socket.IO, no persistence). Private rooms show Room ID with copy button; lobby has join-by-code input
 - **6 Training Modes** - `TrainingScreen.tsx`
 
 All game modes except Online Multiplayer persist state to localStorage and appear in the Resume Game screen (`/resume`). See "Game State Persistence" below.
@@ -165,12 +165,18 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - Undo with no current darts: pops last entry from `turnHistory`, restores player state, re-loads darts into slots
 - Undo button enabled: `disabled={currentDarts.length === 0 && turnHistory.length === 0}`
 - Auto-confirm (300ms after 3rd dart) uses `useRef` timeout, cancelable by undo
+- **CRITICAL**: `restoringRef` flag prevents auto-confirm from re-confirming restored darts. When undo restores 3 darts from turnHistory, set `restoringRef.current = true` BEFORE `setCurrentDarts(last.darts)`. Auto-confirm useEffect checks and resets it.
+
+### Standalone Game Common Features (ATC, Shanghai, Cricket)
+- **SpinnerWheel**: All 3 modes show `SpinnerWheel` for random starting player when 2+ players selected. `handleStartGame` → `setPendingGamePlayers` + `setShowSpinner(true)` → `handleSpinnerComplete` reorders players → `initGame(reordered)`
+- **Pause dialog**: Back button during active game shows confirmation dialog with 3 options: Pause & Leave (keeps localStorage), End Game (clears localStorage), Cancel. Uses `resume.pause_title`, `resume.pause_and_leave`, `resume.end_game` i18n keys
+- **Back button styling**: Game screen back buttons must have `glass-card px-3 py-2 rounded-lg text-white` + `{t('common.back')}` label
 
 ### Game State Persistence (gameStorage.ts)
 - `src/utils/gameStorage.ts` provides `saveGameState`, `loadGameState`, `clearGameState`, `getLocalGameSummaries`
 - Each game type has its own localStorage key (`state-of-the-dart-atc-game`, `-shanghai-game`, `-cricket-game`)
 - 48h staleness threshold — auto-cleared on load if older
-- **Save**: `useEffect` watching game state, gated by `!showSetup && !showWinner`
+- **Save**: `useEffect` watching game state, gated by `!showSetup && !showWinner`. **CRITICAL**: Never include timer-driven state (like `elapsedTime`) in save useEffect dependencies — this causes 1Hz localStorage thrashing and UI flickering. Compute elapsed time dynamically at save time instead.
 - **Restore**: `useEffect([], [])` on mount — validates saved player IDs still exist in PlayerContext, discards if below minimum
 - **Clear**: on `handleStartGame()` (new game) AND on game completion (winner). NOT on Back button (game stays resumable)
 - `ResumeGameScreen` merges localStorage games with API matches, sorted by timestamp
@@ -197,7 +203,7 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - react-i18next with `de.json` and `en.json` in `src/i18n/locales/`
 - Always use `t('namespace.key')` for user-facing text, never hardcode strings
 - Add new translations to BOTH language files simultaneously
-- Keys organized by feature: `common`, `auth`, `menu`, `game`, `players`, `stats`, `training`, `settings`, `achievements`, `resume`, `contact`, `debug`, `atc`
+- Keys organized by feature: `common`, `auth`, `menu`, `game`, `players`, `stats`, `training`, `settings`, `achievements`, `resume`, `contact`, `debug`, `atc`, `online`
 
 ### UI Conventions
 - Back buttons: `glass-card` style with `<ArrowLeft size={20} />` and `t('common.back')`
