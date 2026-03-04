@@ -52,7 +52,8 @@ bash scripts/deploy.sh  # Full deploy: build frontend + backend, scp to VPS, PM2
 | Settings | DB via API | TenantStorage |
 | Auth Token (JWT) | localStorage only | N/A (correct) |
 | UI state (selected tab, filters) | localStorage only | N/A (correct) |
-| Active match (in-progress game) | localStorage only | N/A (temporary) |
+| Active match (in-progress X01) | localStorage only | N/A (temporary) |
+| ATC / Shanghai / Cricket state | localStorage only (gameStorage.ts) | N/A (48h expiry) |
 | Debug Flags | DB via API (admin only) | N/A |
 | Tournaments | Not persisted (React state only) | N/A (TODO) |
 
@@ -112,12 +113,14 @@ Express routes in `server/src/routes/`, registered in `server/src/index.ts`:
 - Debug flags: `src/types/debugFlag.ts`
 
 ### Game Modes
-- **X01** (301/501/701) - `GameScreen.tsx` (main game screen)
-- **Cricket** - `CricketGame.tsx`
+- **X01** (301/501/701) - `GameScreen.tsx` (main game screen, persisted via GameContext + API)
+- **Cricket** - `CricketGame.tsx` (uses GameContext for match shell, localStorage for cricketState)
 - **Around the Clock** - `AroundTheClockGame.tsx` (Hit/Miss input, standalone state with turnHistory undo)
-- **Shanghai** - `ShanghaiGame.tsx`
-- **Online Multiplayer** - `OnlineMultiplayer.tsx` (WebSocket via Socket.IO)
+- **Shanghai** - `ShanghaiGame.tsx` (standalone state with turnHistory undo + auto-confirm)
+- **Online Multiplayer** - `OnlineMultiplayer.tsx` (WebSocket via Socket.IO, no persistence)
 - **6 Training Modes** - `TrainingScreen.tsx`
+
+All game modes except Online Multiplayer persist state to localStorage and appear in the Resume Game screen (`/resume`). See "Game State Persistence" below.
 
 ## Critical Patterns & Pitfalls
 
@@ -162,6 +165,17 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - Undo with no current darts: pops last entry from `turnHistory`, restores player state, re-loads darts into slots
 - Undo button enabled: `disabled={currentDarts.length === 0 && turnHistory.length === 0}`
 - Auto-confirm (300ms after 3rd dart) uses `useRef` timeout, cancelable by undo
+
+### Game State Persistence (gameStorage.ts)
+- `src/utils/gameStorage.ts` provides `saveGameState`, `loadGameState`, `clearGameState`, `getLocalGameSummaries`
+- Each game type has its own localStorage key (`state-of-the-dart-atc-game`, `-shanghai-game`, `-cricket-game`)
+- 48h staleness threshold — auto-cleared on load if older
+- **Save**: `useEffect` watching game state, gated by `!showSetup && !showWinner`
+- **Restore**: `useEffect([], [])` on mount — validates saved player IDs still exist in PlayerContext, discards if below minimum
+- **Clear**: on `handleStartGame()` (new game) AND on game completion (winner). NOT on Back button (game stays resumable)
+- `ResumeGameScreen` merges localStorage games with API matches, sorted by timestamp
+- `MainMenu` badge count includes localStorage games
+- Cricket restore dispatches `START_MATCH` to reinitialize GameContext, then overlays saved `cricketState`
 
 ### Database Safety
 - `ON DELETE CASCADE` throughout schema - deleting a user/tenant cascades to ALL related data
@@ -240,4 +254,4 @@ GitHub Actions in `.github/workflows/`:
 - Terser minification configured (`drop_console` toggle in `vite.config.ts`)
 - Manual chunk splitting: react-vendor, charts, utils, icons
 - Audio cached 30 days, fonts 1 year
-- Version bump: `npm run version:bump` (uses `scripts/bump-version.js`), display: `npm run version:show`
+- Version bump: manually edit `"version"` in `package.json` (`npm run version:bump` is broken — ESM/CJS conflict). Display: `npm run version:show`

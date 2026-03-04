@@ -10,7 +10,7 @@
 
 [![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green?style=for-the-badge)](https://stateofthedart.com)
 [![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-purple?style=for-the-badge)](https://stateofthedart.celox.io)
-![Version](https://img.shields.io/badge/Version-0.8.3-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-0.8.4-blue?style=for-the-badge)
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -93,11 +93,12 @@
 - **Double Out/In** - Konfigurierbare Checkout-Regeln
 - **Best of Sets/Legs** - Turnier-Matchformate
 - **Multi-Player** - Unterstützung für 2+ Spieler mit eigenen Avataren und Namen
-- **Match fortsetzen (NEU in v0.5.0)** - Mehrere Spiele gleichzeitig pausieren und später fortsetzen
+- **Match fortsetzen (v0.5.0 / erweitert v0.8.4)** - Alle Spielmodi pausieren und später fortsetzen
   - Automatische Pause beim Starten eines neuen Spiels
-  - Resume-Liste mit allen pausierten Matches
+  - Resume-Liste mit X01 (API) + ATC/Shanghai/Cricket (localStorage)
   - Deterministische Match-Namen aus UUID (z.B. "Cosmic Tiger")
   - Vollständige Match-Rekonstruktion aus der Datenbank
+  - 48h-Ablaufzeit für localStorage-Spielstände
 - **Trainingsmodi** - 6 Trainingsmodi inkl. Doubles/Triples-Training, Around the Clock und Bob's 27
 
 ### 🏆 Turniersystem (NEU in v0.2.0)
@@ -613,7 +614,7 @@ Siehe [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) für Details.
 
 ## 🔢 Versionierung
 
-- **Aktuell**: v0.8.3
+- **Aktuell**: v0.8.4
 - **Schema**: MAJOR.MINOR.PATCH
 - **Auto-Increment**: `npm run version:bump`
 
@@ -643,7 +644,7 @@ Siehe [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) für Details.
 - [x] Shanghai-Spielmodus
 - [x] Online Multiplayer (WebSocket)
 - [x] Turniersystem (Knockout & Round Robin)
-- [x] Multi-Game Resume (v0.5.0)
+- [x] Multi-Game Resume (v0.5.0, alle Modi v0.8.4)
 
 ### 🎯 Geplant
 - [ ] Head-to-Head-Stats
@@ -688,6 +689,26 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.8.4 (4. März 2026) - Game State Persistence für alle Modi
+
+#### ✨ Neue Features
+- **Spielstand-Persistenz für ATC, Shanghai & Cricket** - Alle Spielmodi (außer Online Multiplayer) überleben Seite-Neuladen und erscheinen im Resume-Screen
+  - Automatisches Speichern bei jeder Spielzustandsänderung in localStorage
+  - Wiederherstellung beim Öffnen des Spielmodus mit Spieler-Validierung
+  - 48h-Ablaufzeit — veraltete Spielstände werden automatisch entfernt
+  - Jeder Spielmodus hat eigenen localStorage-Key (koexistieren unabhängig)
+- **Resume-Screen zeigt alle Spielmodi** - X01 (API) + ATC/Shanghai/Cricket (localStorage) in einer sortierten Liste
+  - Farbige "Lokal"-Badges für localStorage-Spiele
+  - Fortschrittsanzeige: Ziele (ATC), Runde (Shanghai), Cricket Match
+  - Löschen-Button entfernt localStorage-Eintrag
+- **Shanghai Undo-System erweitert** - Bestätigte Würfe können jetzt rückgängig gemacht werden (war vorher nur für unbestätigte Darts)
+- **Shanghai Auto-Confirm** - Automatische Bestätigung nach 3 Darts (300ms Verzögerung, abbrechbar durch Undo)
+- **MainMenu Badge** - Resumable-Zähler enthält jetzt auch localStorage-Spiele
+
+#### 🔧 Verbesserungen
+- Shanghai/Cricket Back-Button nutzt `window.location.href` statt `navigate()` (konsistent mit ATC/X01)
+- Neue i18n-Keys für Spieltyp-Labels und Fortschrittstext (DE + EN)
 
 ### v0.8.3 (4. März 2026) - Achievement Scope System & Debug Flags
 
@@ -957,7 +978,7 @@ Siehe [CHANGELOG.md](CHANGELOG.md) für eine vollständige Liste der Änderungen
 
 <div align="center">
   <p>Made with ❤️ and 🎯 by Martin Pfeffer</p>
-  <p>© 2026 celox.io | Version 0.8.3</p>
+  <p>© 2026 celox.io | Version 0.8.4</p>
   <p>
     <a href="https://stateofthedart.com">🌐 Live Demo</a> •
     <a href="https://github.com/pepperonas/state-of-the-dart">📦 GitHub</a> •
