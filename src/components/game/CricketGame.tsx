@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,6 +8,7 @@ import { usePlayer } from '../../context/PlayerContext';
 import { Player, CricketState, Dart } from '../../types/index';
 import PlayerAvatar from '../player/PlayerAvatar';
 import confetti from 'canvas-confetti';
+import { saveGameState, loadGameState, clearGameState, STORAGE_KEYS, CricketSavedState } from '../../utils/gameStorage';
 
 // Cricket numbers: 20, 19, 18, 17, 16, 15, Bull
 const CRICKET_NUMBERS = [20, 19, 18, 17, 16, 15, 25];
@@ -29,9 +30,49 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
   
   // Cricket state per player
   const [cricketState, setCricketState] = useState<CricketState>({});
-  
-  // Initialize cricket state when match starts
+  const restoredRef = useRef(false);
+
+  // Restore saved game on mount
   useEffect(() => {
+    if (restoredRef.current) return;
+    const saved = loadGameState<CricketSavedState>(STORAGE_KEYS.CRICKET);
+    if (!saved) return;
+    const validPlayers = saved.selectedPlayers.filter(sp =>
+      players.some(p => p.id === sp.id)
+    );
+    if (validPlayers.length < 2) {
+      clearGameState(STORAGE_KEYS.CRICKET);
+      return;
+    }
+    const restoredPlayers = saved.selectedPlayers
+      .map(sp => players.find(p => p.id === sp.id))
+      .filter((p): p is Player => !!p);
+    if (restoredPlayers.length < 2) {
+      clearGameState(STORAGE_KEYS.CRICKET);
+      return;
+    }
+    restoredRef.current = true;
+    setSelectedPlayers(restoredPlayers);
+    // Dispatch START_MATCH to initialize GameContext
+    dispatch({
+      type: 'START_MATCH',
+      payload: {
+        players: restoredPlayers,
+        settings: {
+          cricketMode: 'standard',
+          cricketNumbers: CRICKET_NUMBERS,
+        },
+        gameType: 'cricket',
+      },
+    });
+    setCricketState(saved.cricketState);
+    setShowSetup(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Initialize cricket state when match starts (only if not restored)
+  useEffect(() => {
+    if (restoredRef.current) return;
     if (state.currentMatch?.type === 'cricket' && Object.keys(cricketState).length === 0) {
       const initialState: CricketState = {};
       state.currentMatch.players.forEach(player => {
@@ -44,6 +85,18 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
     }
   }, [state.currentMatch, cricketState]);
 
+  // Save game state on changes
+  useEffect(() => {
+    if (showSetup || showWinner || selectedPlayers.length === 0 || Object.keys(cricketState).length === 0) return;
+    saveGameState(STORAGE_KEYS.CRICKET, {
+      gameType: 'cricket',
+      selectedPlayers: selectedPlayers.map(p => ({ id: p.id, name: p.name, avatar: p.avatar })),
+      cricketState,
+      currentPlayerIndex: state.currentPlayerIndex,
+      savedAt: Date.now(),
+    });
+  }, [showSetup, showWinner, selectedPlayers, cricketState, state.currentPlayerIndex]);
+
   const currentPlayer = useMemo(() => {
     if (!state.currentMatch) return null;
     return state.currentMatch.players[state.currentPlayerIndex];
@@ -51,7 +104,9 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
 
   const handleStartGame = () => {
     if (selectedPlayers.length < 2) return;
-    
+
+    clearGameState(STORAGE_KEYS.CRICKET);
+
     dispatch({
       type: 'START_MATCH',
       payload: {
@@ -154,6 +209,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
       });
       
       if (hasWon) {
+        clearGameState(STORAGE_KEYS.CRICKET);
         setShowWinner(true);
         confetti({
           particleCount: 100,
@@ -308,7 +364,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
       <div className="max-w-4xl mx-auto mb-6">
         <div className="flex items-center justify-between">
           <button
-            onClick={onBack || (() => navigate('/'))}
+            onClick={onBack || (() => { window.location.href = '/'; })}
             className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
           >
             <ArrowLeft size={20} />

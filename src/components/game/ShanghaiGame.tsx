@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -7,6 +7,7 @@ import { usePlayer } from '../../context/PlayerContext';
 import { Player, Dart } from '../../types/index';
 import PlayerAvatar from '../player/PlayerAvatar';
 import confetti from 'canvas-confetti';
+import { saveGameState, loadGameState, clearGameState, STORAGE_KEYS, ShanghaiSavedState } from '../../utils/gameStorage';
 
 interface ShanghaiGameProps {
   onBack?: () => void;
@@ -32,6 +33,18 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
   const [winner, setWinner] = useState<Player | null>(null);
   const [shanghaiWinner, setShanghaiWinner] = useState<Player | null>(null);
 
+  // History stack for undoing confirmed throws
+  const [turnHistory, setTurnHistory] = useState<{
+    playerId: string;
+    playerIndex: number;
+    darts: Dart[];
+    prevRound: number;
+    prevScores: Record<string, number>;
+    prevRoundScores: Record<string, Record<number, number>>;
+  }[]>([]);
+
+  const autoConfirmRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const targetNumbers = useMemo(() => {
     return Array.from({ length: rounds }, (_, i) => startNumber + i);
   }, [startNumber, rounds]);
@@ -44,21 +57,71 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
     return selectedPlayers[currentPlayerIndex];
   }, [selectedPlayers, currentPlayerIndex]);
 
+  // Restore saved game on mount
+  useEffect(() => {
+    const saved = loadGameState<ShanghaiSavedState>(STORAGE_KEYS.SHANGHAI);
+    if (!saved) return;
+    const validPlayers = saved.selectedPlayers.filter(sp =>
+      players.some(p => p.id === sp.id)
+    );
+    if (validPlayers.length < 2) {
+      clearGameState(STORAGE_KEYS.SHANGHAI);
+      return;
+    }
+    const restoredPlayers = saved.selectedPlayers
+      .map(sp => players.find(p => p.id === sp.id))
+      .filter((p): p is Player => !!p);
+    if (restoredPlayers.length < 2) {
+      clearGameState(STORAGE_KEYS.SHANGHAI);
+      return;
+    }
+    setSelectedPlayers(restoredPlayers);
+    setStartNumber(saved.startNumber);
+    setRounds(saved.rounds);
+    setCurrentRound(saved.currentRound);
+    setCurrentPlayerIndex(saved.currentPlayerIndex);
+    setPlayerScores(saved.playerScores);
+    setRoundScores(saved.roundScores);
+    setTurnHistory(saved.turnHistory || []);
+    setShowSetup(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Save game state on changes
+  useEffect(() => {
+    if (showSetup || showWinner || selectedPlayers.length === 0) return;
+    saveGameState(STORAGE_KEYS.SHANGHAI, {
+      gameType: 'shanghai',
+      selectedPlayers: selectedPlayers.map(p => ({ id: p.id, name: p.name, avatar: p.avatar })),
+      startNumber,
+      rounds,
+      currentRound,
+      currentPlayerIndex,
+      playerScores,
+      roundScores,
+      turnHistory,
+      savedAt: Date.now(),
+    });
+  }, [showSetup, showWinner, selectedPlayers, startNumber, rounds, currentRound, currentPlayerIndex, playerScores, roundScores, turnHistory]);
+
   const handleStartGame = () => {
     if (selectedPlayers.length < 2) return;
-    
+
+    clearGameState(STORAGE_KEYS.SHANGHAI);
+
     const initialScores: Record<string, number> = {};
     const initialRoundScores: Record<string, Record<number, number>> = {};
     selectedPlayers.forEach(p => {
       initialScores[p.id] = 0;
       initialRoundScores[p.id] = {};
     });
-    
+
     setPlayerScores(initialScores);
     setRoundScores(initialRoundScores);
     setCurrentRound(0);
     setCurrentPlayerIndex(0);
     setCurrentDarts([]);
+    setTurnHistory([]);
     setShowSetup(false);
   };
 
@@ -88,15 +151,26 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
     setCurrentDarts(prev => [...prev, dart]);
   };
 
-  const handleConfirmThrow = () => {
+  const handleConfirmThrow = useCallback(() => {
     if (!currentPlayer || currentDarts.length === 0) return;
-    
+
     const playerId = currentPlayer.id;
+
+    // Save snapshot for undo
+    setTurnHistory(prev => [...prev, {
+      playerId,
+      playerIndex: currentPlayerIndex,
+      darts: [...currentDarts],
+      prevRound: currentRound,
+      prevScores: { ...playerScores },
+      prevRoundScores: JSON.parse(JSON.stringify(roundScores)),
+    }]);
+
     let roundScore = 0;
     let hasSingle = false;
     let hasDouble = false;
     let hasTriple = false;
-    
+
     // Calculate score for this round (only target number counts)
     currentDarts.forEach(dart => {
       if (dart.segment === currentTarget) {
@@ -106,16 +180,16 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
         if (dart.multiplier === 3) hasTriple = true;
       }
     });
-    
+
     // Check for Shanghai (Single + Double + Triple of the same number)
     const isShanghai = hasSingle && hasDouble && hasTriple;
-    
+
     // Update scores
     setPlayerScores(prev => ({
       ...prev,
       [playerId]: (prev[playerId] || 0) + roundScore
     }));
-    
+
     setRoundScores(prev => ({
       ...prev,
       [playerId]: {
@@ -123,9 +197,10 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
         [currentRound]: roundScore
       }
     }));
-    
+
     // Shanghai instant win!
     if (isShanghai) {
+      clearGameState(STORAGE_KEYS.SHANGHAI);
       setShanghaiWinner(currentPlayer);
       setWinner(currentPlayer);
       setShowWinner(true);
@@ -136,10 +211,10 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
       });
       return;
     }
-    
+
     // Next player or round
     setCurrentDarts([]);
-    
+
     if (currentPlayerIndex < selectedPlayers.length - 1) {
       // Next player
       setCurrentPlayerIndex(prev => prev + 1);
@@ -150,11 +225,12 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
         setCurrentPlayerIndex(0);
       } else {
         // Game over - find winner by highest score
+        clearGameState(STORAGE_KEYS.SHANGHAI);
         const finalScores = { ...playerScores, [playerId]: (playerScores[playerId] || 0) + roundScore };
         const highestScore = Math.max(...Object.values(finalScores));
         const winnerId = Object.keys(finalScores).find(id => finalScores[id] === highestScore);
         const gameWinner = selectedPlayers.find(p => p.id === winnerId);
-        
+
         if (gameWinner) {
           setWinner(gameWinner);
           setShowWinner(true);
@@ -166,11 +242,40 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
         }
       }
     }
+  }, [currentPlayer, currentDarts, currentPlayerIndex, currentRound, currentTarget, playerScores, roundScores, selectedPlayers, rounds]);
+
+  // Auto-confirm after 3 darts
+  useEffect(() => {
+    if (currentDarts.length === 3) {
+      autoConfirmRef.current = setTimeout(() => {
+        handleConfirmThrow();
+      }, 300);
+      return () => {
+        if (autoConfirmRef.current) clearTimeout(autoConfirmRef.current);
+      };
+    }
+  }, [currentDarts.length, handleConfirmThrow]);
+
+  const cancelAutoConfirm = () => {
+    if (autoConfirmRef.current) {
+      clearTimeout(autoConfirmRef.current);
+      autoConfirmRef.current = null;
+    }
   };
 
   const handleUndo = () => {
     if (currentDarts.length > 0) {
+      cancelAutoConfirm();
       setCurrentDarts(prev => prev.slice(0, -1));
+    } else if (turnHistory.length > 0) {
+      // Restore previous confirmed throw
+      const last = turnHistory[turnHistory.length - 1];
+      setTurnHistory(prev => prev.slice(0, -1));
+      setPlayerScores(last.prevScores);
+      setRoundScores(last.prevRoundScores);
+      setCurrentRound(last.prevRound);
+      setCurrentPlayerIndex(last.playerIndex);
+      setCurrentDarts(last.darts);
     }
   };
 
@@ -354,7 +459,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
       <div className="max-w-4xl mx-auto mb-4">
         <div className="flex items-center justify-between">
           <button
-            onClick={onBack || (() => navigate('/'))}
+            onClick={onBack || (() => { window.location.href = '/'; })}
             className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
           >
             <ArrowLeft size={20} />
@@ -414,13 +519,13 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
             <h3 className="text-white font-semibold">Wurf ({currentDarts.length}/3)</h3>
             <button
               onClick={handleUndo}
-              disabled={currentDarts.length === 0}
+              disabled={currentDarts.length === 0 && turnHistory.length === 0}
               className="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 text-gray-400 disabled:opacity-50"
             >
               <RotateCcw size={18} />
             </button>
           </div>
-          
+
           <div className="flex gap-3 mb-4">
             {[0, 1, 2].map(idx => {
               const dart = currentDarts[idx];

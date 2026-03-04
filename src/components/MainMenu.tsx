@@ -10,6 +10,7 @@ import UserMenu from './auth/UserMenu';
 import SyncStatus from './sync/SyncStatus';
 import UserGuideModal from './guide/UserGuideModal';
 import ContactModal from './contact/ContactModal';
+import { getLocalGameSummaries } from '../utils/gameStorage';
 
 const MainMenu: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -21,11 +22,14 @@ const MainMenu: React.FC = () => {
   const [resumableMatchCount, setResumableMatchCount] = useState(0);
 
   useEffect(() => {
+    const localCount = getLocalGameSummaries().length;
     api.matches.getResumable()
       .then((data: any) => {
-        setResumableMatchCount((data as any[]).length);
+        setResumableMatchCount((data as any[]).length + localCount);
       })
-      .catch(() => {});
+      .catch(() => {
+        setResumableMatchCount(localCount);
+      });
   }, []);
 
   const [showGuideModal, setShowGuideModal] = useState(false);

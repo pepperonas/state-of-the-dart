@@ -7,6 +7,7 @@ import { Player, Dart } from '../../types/index';
 import PlayerAvatar from '../player/PlayerAvatar';
 import confetti from 'canvas-confetti';
 import audioSystem from '../../utils/audio';
+import { saveGameState, loadGameState, clearGameState, STORAGE_KEYS, ATCSavedState } from '../../utils/gameStorage';
 
 interface AroundTheClockGameProps {
   onBack?: () => void;
@@ -114,6 +115,60 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
     }
   }, [showSetup, showWinner, gameStartTime]);
 
+  // Restore saved game on mount
+  useEffect(() => {
+    const saved = loadGameState<ATCSavedState>(STORAGE_KEYS.ATC);
+    if (!saved) return;
+    // Validate that saved players still exist
+    const validPlayers = saved.selectedPlayers.filter(sp =>
+      players.some(p => p.id === sp.id)
+    );
+    if (validPlayers.length < 1) {
+      clearGameState(STORAGE_KEYS.ATC);
+      return;
+    }
+    // Restore full Player objects (with current data from PlayerContext)
+    const restoredPlayers = saved.selectedPlayers
+      .map(sp => players.find(p => p.id === sp.id))
+      .filter((p): p is Player => !!p);
+    if (restoredPlayers.length < 1) {
+      clearGameState(STORAGE_KEYS.ATC);
+      return;
+    }
+    setSelectedPlayers(restoredPlayers);
+    setBullMode(saved.bullMode);
+    setDirection(saved.direction);
+    setVariant(saved.variant);
+    setCurrentPlayerIndex(saved.currentPlayerIndex);
+    setPlayerProgress(saved.playerProgress);
+    setPlayerDarts(saved.playerDarts);
+    setPlayerHits(saved.playerHits);
+    setTurnHistory(saved.turnHistory);
+    setElapsedTime(saved.elapsedTime);
+    setGameStartTime(Date.now() - saved.elapsedTime * 1000);
+    setShowSetup(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Save game state on changes
+  useEffect(() => {
+    if (showSetup || showWinner || selectedPlayers.length === 0) return;
+    saveGameState(STORAGE_KEYS.ATC, {
+      gameType: 'around-the-clock',
+      selectedPlayers: selectedPlayers.map(p => ({ id: p.id, name: p.name, avatar: p.avatar })),
+      bullMode,
+      direction,
+      variant,
+      currentPlayerIndex,
+      playerProgress,
+      playerDarts,
+      playerHits,
+      turnHistory,
+      elapsedTime,
+      savedAt: Date.now(),
+    });
+  }, [showSetup, showWinner, selectedPlayers, bullMode, direction, variant, currentPlayerIndex, playerProgress, playerDarts, playerHits, turnHistory, elapsedTime]);
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -122,6 +177,8 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
 
   const handleStartGame = () => {
     if (selectedPlayers.length < 1) return;
+
+    clearGameState(STORAGE_KEYS.ATC);
 
     const initialProgress: Record<string, number> = {};
     const initialDarts: Record<string, number> = {};
@@ -179,6 +236,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
     setPlayerHits(prev => ({ ...prev, [playerId]: hits }));
 
     if (progress >= targets.length) {
+      clearGameState(STORAGE_KEYS.ATC);
       setWinner(currentPlayer);
       setShowWinner(true);
       audioSystem.playSound('/sounds/OMNI/pop-success.mp3', true);

@@ -565,6 +565,13 @@
     "confirm_delete": "Wirklich?",
     "paused": "Pausiert",
     "in_progress": "Laufend",
-    "paused_banner": "Pausiertes Match fortsetzen"
+    "paused_banner": "Pausiertes Match fortsetzen",
+    "game_type_atc": "Around the Clock",
+    "game_type_shanghai": "Shanghai",
+    "game_type_cricket": "Cricket",
+    "local_game": "Lokal",
+    "progress_atc": "{{done}}/{{total}} Ziele",
+    "progress_shanghai": "Runde {{current}}/{{total}}",
+    "progress_cricket": "Cricket Match"
   }
 }
