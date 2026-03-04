@@ -87,7 +87,9 @@
   - Konfigurierbare Startnummer und Runden
 - **🌐 Online Multiplayer (NEU in v0.3.0)** - Echtzeit-Spiele
   - WebSocket-basierte Verbindung
-  - Räume erstellen und beitreten
+  - Öffentliche und private Räume erstellen
+  - Raum-ID kopieren und teilen für private Räume
+  - Per Raum-Code einem privaten Raum beitreten
   - Live-Chat während des Spiels
   - Bis zu 4 Spieler pro Raum
 - **Double Out/In** - Konfigurierbare Checkout-Regeln
@@ -690,7 +692,7 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 
 ## 📝 Changelog
 
-### v0.8.4 (4. März 2026) - Game State Persistence für alle Modi
+### v0.8.4 (4. März 2026) - Game State Persistence, SpinnerWheel & UX
 
 #### ✨ Neue Features
 - **Spielstand-Persistenz für ATC, Shanghai & Cricket** - Alle Spielmodi (außer Online Multiplayer) überleben Seite-Neuladen und erscheinen im Resume-Screen
@@ -701,14 +703,23 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 - **Resume-Screen zeigt alle Spielmodi** - X01 (API) + ATC/Shanghai/Cricket (localStorage) in einer sortierten Liste
   - Farbige "Lokal"-Badges für localStorage-Spiele
   - Fortschrittsanzeige: Ziele (ATC), Runde (Shanghai), Cricket Match
-  - Löschen-Button entfernt localStorage-Eintrag
+  - Rötlicher Löschen-Button passend zum Dark-Theme
+- **SpinnerWheel für Spielreihenfolge** - Bei 2+ Spielern dreht ein Glücksrad die Startreihenfolge (ATC, Shanghai, Cricket)
+- **Pause-Dialog mit 3 Optionen** - Beim Verlassen eines laufenden Spiels:
+  - "Pausieren & Verlassen" — Spielstand bleibt in localStorage erhalten
+  - "Spiel beenden" — localStorage wird gelöscht, Neues Spiel beim nächsten Aufruf
+  - "Abbrechen" — Zurück zum Spiel
 - **Shanghai Undo-System erweitert** - Bestätigte Würfe können jetzt rückgängig gemacht werden (war vorher nur für unbestätigte Darts)
 - **Shanghai Auto-Confirm** - Automatische Bestätigung nach 3 Darts (300ms Verzögerung, abbrechbar durch Undo)
 - **MainMenu Badge** - Resumable-Zähler enthält jetzt auch localStorage-Spiele
+- **Online Multiplayer: Private Räume verbessert** - Raum-ID wird angezeigt und kann kopiert werden; Beitreten per Raum-Code möglich
 
 #### 🔧 Verbesserungen
+- **Auto-Scroll bei Checkout** - X01 scrollt automatisch zum Bestätigungs-Button wenn Checkout erreicht wird
+- **Flickering behoben** - Timer-State (elapsedTime) wird nicht mehr als Save-Dependency verwendet, verhindert 1Hz localStorage-Thrashing
+- **Undo Race Condition behoben** - `restoringRef` Pattern verhindert Auto-Confirm bei wiederhergestellten Darts nach Undo
 - Shanghai/Cricket Back-Button nutzt `window.location.href` statt `navigate()` (konsistent mit ATC/X01)
-- Neue i18n-Keys für Spieltyp-Labels und Fortschrittstext (DE + EN)
+- Neue i18n-Keys für Pause-Dialog, Spieltyp-Labels, Fortschrittstext und Online-Multiplayer (DE + EN)
 
 ### v0.8.3 (4. März 2026) - Achievement Scope System & Debug Flags
 
