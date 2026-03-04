@@ -569,6 +569,7 @@
     "pause_title": "Leave game?",
     "pause_message": "Your game will be saved and can be resumed from the main menu at any time.",
     "pause_and_leave": "Pause & Leave",
+    "end_game": "End Game",
     "game_type_atc": "Around the Clock",
     "game_type_shanghai": "Shanghai",
     "game_type_cricket": "Cricket",

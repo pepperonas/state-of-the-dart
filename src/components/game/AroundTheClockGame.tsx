@@ -426,6 +426,12 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
     window.location.href = '/';
   };
 
+  const handleEndGame = () => {
+    setShowBackConfirm(false);
+    clearGameState(STORAGE_KEYS.ATC);
+    window.location.href = '/';
+  };
+
   // Segmented button component with descriptions
   const SegmentedButtons = ({ options, value, onChange }: {
     options: { value: string; label: string; desc?: string }[];
@@ -687,23 +693,29 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
               className="glass-card rounded-2xl p-6 max-w-sm w-full text-center"
             >
               <h3 className="text-xl font-bold text-white mb-3">
-                {t('game.pause_title')}
+                {t('resume.pause_title')}
               </h3>
               <p className="text-gray-400 mb-6">
-                {t('game.pause_message')}
+                {t('resume.pause_message')}
               </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowBackConfirm(false)}
-                  className="flex-1 py-3 rounded-xl bg-dark-700 text-white font-semibold hover:bg-dark-600"
-                >
-                  {t('common.cancel')}
-                </button>
+              <div className="flex flex-col gap-3">
                 <button
                   onClick={handleConfirmBack}
-                  className="flex-1 py-3 rounded-xl bg-primary-500 text-white font-semibold hover:bg-primary-600"
+                  className="w-full py-3 rounded-xl bg-primary-500 text-white font-semibold hover:bg-primary-600"
                 >
-                  {t('game.pause_and_leave')}
+                  {t('resume.pause_and_leave')}
+                </button>
+                <button
+                  onClick={handleEndGame}
+                  className="w-full py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-500"
+                >
+                  {t('resume.end_game')}
+                </button>
+                <button
+                  onClick={() => setShowBackConfirm(false)}
+                  className="w-full py-3 rounded-xl bg-dark-700 text-white font-semibold hover:bg-dark-600"
+                >
+                  {t('common.cancel')}
                 </button>
               </div>
             </motion.div>
