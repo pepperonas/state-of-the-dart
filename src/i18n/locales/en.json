@@ -577,5 +577,11 @@
     "progress_atc": "{{done}}/{{total}} targets",
     "progress_shanghai": "Round {{current}}/{{total}}",
     "progress_cricket": "Cricket Match"
+  },
+  "online": {
+    "room_id": "Room ID",
+    "join_private": "Join Private Room",
+    "enter_room_id": "Enter Room ID...",
+    "join": "Join"
   }
 }

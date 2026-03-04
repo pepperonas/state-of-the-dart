@@ -2,9 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ArrowLeft, Users, Plus, Play, RefreshCw, Send, 
-  Globe, Lock, Wifi, WifiOff, Crown, MessageCircle 
+import {
+  ArrowLeft, Users, Plus, Play, RefreshCw, Send,
+  Globe, Lock, Wifi, WifiOff, Crown, MessageCircle, Copy, Check, LogIn
 } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { usePlayer } from '../../context/PlayerContext';
@@ -59,6 +59,10 @@ const OnlineMultiplayer: React.FC = () => {
   const [startScore, setStartScore] = useState(501);
   const [legsToWin, setLegsToWin] = useState(3);
   const [isPrivate, setIsPrivate] = useState(false);
+
+  // Join private room
+  const [joinRoomId, setJoinRoomId] = useState('');
+  const [copiedRoomId, setCopiedRoomId] = useState(false);
 
   // Connect to socket
   useEffect(() => {
@@ -166,6 +170,20 @@ const OnlineMultiplayer: React.FC = () => {
     setChatInput('');
   };
 
+  const handleCopyRoomId = () => {
+    if (!currentRoom) return;
+    navigator.clipboard.writeText(currentRoom.id).then(() => {
+      setCopiedRoomId(true);
+      setTimeout(() => setCopiedRoomId(false), 2000);
+    });
+  };
+
+  const handleJoinByCode = () => {
+    if (!socket || !joinRoomId.trim()) return;
+    socket.emit('room:join', joinRoomId.trim());
+    setJoinRoomId('');
+  };
+
   const isHost = currentRoom?.host === socket?.id;
 
   // Room View
@@ -206,6 +224,20 @@ const OnlineMultiplayer: React.FC = () => {
                 <p className="text-gray-400">
                   {currentRoom.settings.startScore} • Best of {currentRoom.settings.legsToWin * 2 - 1}
                 </p>
+                {currentRoom.settings.isPrivate && (
+                  <button
+                    onClick={handleCopyRoomId}
+                    className="mt-2 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 text-sm transition-colors"
+                  >
+                    <span className="text-gray-400">{t('online.room_id')}:</span>
+                    <code className="text-primary-400 font-mono">{currentRoom.id}</code>
+                    {copiedRoomId ? (
+                      <Check size={14} className="text-green-400" />
+                    ) : (
+                      <Copy size={14} className="text-gray-500" />
+                    )}
+                  </button>
+                )}
               </div>
               <div className={`px-4 py-2 rounded-full text-sm font-medium ${
                 currentRoom.status === 'waiting' 
@@ -369,6 +401,31 @@ const OnlineMultiplayer: React.FC = () => {
           <Plus size={24} />
           Raum erstellen
         </button>
+
+        {/* Join Private Room by Code */}
+        <div className="glass-card rounded-2xl p-4 mb-6">
+          <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+            <LogIn size={18} />
+            {t('online.join_private')}
+          </h3>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={joinRoomId}
+              onChange={(e) => setJoinRoomId(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleJoinByCode()}
+              placeholder={t('online.enter_room_id')}
+              className="flex-1 px-4 py-3 rounded-xl bg-dark-800 border border-dark-600 text-white placeholder-gray-500 focus:border-primary-500 focus:outline-none font-mono"
+            />
+            <button
+              onClick={handleJoinByCode}
+              disabled={!joinRoomId.trim()}
+              className="px-6 py-3 rounded-xl bg-primary-500 hover:bg-primary-600 text-white font-medium disabled:opacity-50 transition-all"
+            >
+              {t('online.join')}
+            </button>
+          </div>
+        </div>
 
         {/* Create Room Modal */}
         <AnimatePresence>
