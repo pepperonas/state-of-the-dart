@@ -8,6 +8,7 @@ import PlayerAvatar from '../player/PlayerAvatar';
 import confetti from 'canvas-confetti';
 import audioSystem from '../../utils/audio';
 import { saveGameState, loadGameState, clearGameState, STORAGE_KEYS, ATCSavedState } from '../../utils/gameStorage';
+import { SpinnerWheel } from './SpinnerWheel';
 
 interface AroundTheClockGameProps {
   onBack?: () => void;
@@ -56,7 +57,15 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
     prevHits: number;
   }[]>([]);
 
+  // Spinner wheel for player order
+  const [showSpinner, setShowSpinner] = useState(false);
+  const [pendingGamePlayers, setPendingGamePlayers] = useState<Player[] | null>(null);
+
+  // Back confirmation dialog
+  const [showBackConfirm, setShowBackConfirm] = useState(false);
+
   const autoConfirmRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const restoringRef = useRef(false);
 
   // Build target list
   const targets: Target[] = useMemo(() => {
@@ -180,15 +189,27 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
 
     clearGameState(STORAGE_KEYS.ATC);
 
+    if (selectedPlayers.length >= 2) {
+      // Show spinner to determine starting player
+      setPendingGamePlayers([...selectedPlayers]);
+      setShowSpinner(true);
+    } else {
+      // Solo game — start directly
+      initGame(selectedPlayers);
+    }
+  };
+
+  const initGame = (orderedPlayers: Player[]) => {
     const initialProgress: Record<string, number> = {};
     const initialDarts: Record<string, number> = {};
     const initialHits: Record<string, number> = {};
-    selectedPlayers.forEach(p => {
+    orderedPlayers.forEach(p => {
       initialProgress[p.id] = 0;
       initialDarts[p.id] = 0;
       initialHits[p.id] = 0;
     });
 
+    setSelectedPlayers(orderedPlayers);
     setPlayerProgress(initialProgress);
     setPlayerDarts(initialDarts);
     setPlayerHits(initialHits);
@@ -197,6 +218,18 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
     setTurnHistory([]);
     setGameStartTime(Date.now());
     setShowSetup(false);
+  };
+
+  const handleSpinnerComplete = (startingPlayerIndex: number) => {
+    if (!pendingGamePlayers) return;
+    // Reorder players so the spinner winner goes first
+    const reordered = [
+      ...pendingGamePlayers.slice(startingPlayerIndex),
+      ...pendingGamePlayers.slice(0, startingPlayerIndex),
+    ];
+    setShowSpinner(false);
+    setPendingGamePlayers(null);
+    initGame(reordered);
   };
 
   const confirmThrow = useCallback(() => {
@@ -247,9 +280,13 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
     }
   }, [currentPlayer, currentDarts, playerProgress, playerDarts, playerHits, targets, selectedPlayers, currentPlayerIndex]);
 
-  // Auto-confirm after 3 darts
+  // Auto-confirm after 3 darts (skip if restoring from undo/history)
   useEffect(() => {
     if (currentDarts.length === 3) {
+      if (restoringRef.current) {
+        restoringRef.current = false;
+        return;
+      }
       autoConfirmRef.current = setTimeout(() => {
         confirmThrow();
       }, 300);
@@ -315,6 +352,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
       setPlayerDarts(prev => ({ ...prev, [last.playerId]: last.prevDarts }));
       setPlayerHits(prev => ({ ...prev, [last.playerId]: last.prevHits }));
       setCurrentPlayerIndex(last.playerIndex);
+      restoringRef.current = true;
       setCurrentDarts(last.darts);
     }
   };
@@ -364,16 +402,28 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
       setPlayerDarts(prev => ({ ...prev, ...dartsUpdates }));
       setPlayerHits(prev => ({ ...prev, ...hitsUpdates }));
       setCurrentPlayerIndex(targetIdx);
+      restoringRef.current = true;
       setCurrentDarts(restoredDarts);
     }
   };
 
   const handleBack = () => {
+    // If game is active (not setup, not winner), show confirmation
+    if (!showSetup && !showWinner) {
+      setShowBackConfirm(true);
+      return;
+    }
     if (onBack) {
       onBack();
     } else {
       window.location.href = '/';
     }
+  };
+
+  const handleConfirmBack = () => {
+    setShowBackConfirm(false);
+    // State is already saved in localStorage via the save useEffect
+    window.location.href = '/';
   };
 
   // Segmented button component with descriptions
@@ -405,6 +455,18 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
       )}
     </div>
   );
+
+  // Spinner screen
+  if (showSpinner && pendingGamePlayers) {
+    return (
+      <div className="min-h-dvh gradient-mesh flex items-center justify-center">
+        <SpinnerWheel
+          players={pendingGamePlayers}
+          onComplete={handleSpinnerComplete}
+        />
+      </div>
+    );
+  }
 
   // Setup screen
   if (showSetup) {
@@ -609,14 +671,55 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
         )}
       </AnimatePresence>
 
+      {/* Back Confirmation Dialog */}
+      <AnimatePresence>
+        {showBackConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="glass-card rounded-2xl p-6 max-w-sm w-full text-center"
+            >
+              <h3 className="text-xl font-bold text-white mb-3">
+                {t('game.pause_title')}
+              </h3>
+              <p className="text-gray-400 mb-6">
+                {t('game.pause_message')}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowBackConfirm(false)}
+                  className="flex-1 py-3 rounded-xl bg-dark-700 text-white font-semibold hover:bg-dark-600"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  onClick={handleConfirmBack}
+                  className="flex-1 py-3 rounded-xl bg-primary-500 text-white font-semibold hover:bg-primary-600"
+                >
+                  {t('game.pause_and_leave')}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="max-w-4xl mx-auto mb-3">
         <div className="flex items-center justify-between">
           <button
             onClick={handleBack}
-            className="flex items-center gap-2 glass-card px-3 py-2 rounded-lg text-gray-400 hover:text-white transition-colors"
+            className="flex items-center gap-2 glass-card px-3 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
           >
             <ArrowLeft size={20} />
+            {t('common.back')}
           </button>
           <div className="text-center">
             <h1 className="text-lg sm:text-xl font-bold text-white">{t('atc.title')}</h1>

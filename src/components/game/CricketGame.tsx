@@ -9,6 +9,7 @@ import { Player, CricketState, Dart } from '../../types/index';
 import PlayerAvatar from '../player/PlayerAvatar';
 import confetti from 'canvas-confetti';
 import { saveGameState, loadGameState, clearGameState, STORAGE_KEYS, CricketSavedState } from '../../utils/gameStorage';
+import { SpinnerWheel } from './SpinnerWheel';
 
 // Cricket numbers: 20, 19, 18, 17, 16, 15, Bull
 const CRICKET_NUMBERS = [20, 19, 18, 17, 16, 15, 25];
@@ -31,6 +32,13 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
   // Cricket state per player
   const [cricketState, setCricketState] = useState<CricketState>({});
   const restoredRef = useRef(false);
+
+  // Spinner wheel for player order
+  const [showSpinner, setShowSpinner] = useState(false);
+  const [pendingGamePlayers, setPendingGamePlayers] = useState<Player[] | null>(null);
+
+  // Back confirmation dialog
+  const [showBackConfirm, setShowBackConfirm] = useState(false);
 
   // Restore saved game on mount
   useEffect(() => {
@@ -107,10 +115,18 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
 
     clearGameState(STORAGE_KEYS.CRICKET);
 
+    // Show spinner to determine starting player
+    setPendingGamePlayers([...selectedPlayers]);
+    setShowSpinner(true);
+  };
+
+  const initGame = (orderedPlayers: Player[]) => {
+    setSelectedPlayers(orderedPlayers);
+
     dispatch({
       type: 'START_MATCH',
       payload: {
-        players: selectedPlayers,
+        players: orderedPlayers,
         settings: {
           cricketMode: 'standard',
           cricketNumbers: CRICKET_NUMBERS,
@@ -118,10 +134,9 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
         gameType: 'cricket',
       },
     });
-    
-    // Initialize cricket state
+
     const initialState: CricketState = {};
-    selectedPlayers.forEach(player => {
+    orderedPlayers.forEach(player => {
       initialState[player.id] = {
         '20': 0, '19': 0, '18': 0, '17': 0, '16': 0, '15': 0, '25': 0,
         points: 0
@@ -129,6 +144,17 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
     });
     setCricketState(initialState);
     setShowSetup(false);
+  };
+
+  const handleSpinnerComplete = (startingPlayerIndex: number) => {
+    if (!pendingGamePlayers) return;
+    const reordered = [
+      ...pendingGamePlayers.slice(startingPlayerIndex),
+      ...pendingGamePlayers.slice(0, startingPlayerIndex),
+    ];
+    setShowSpinner(false);
+    setPendingGamePlayers(null);
+    initGame(reordered);
   };
 
   const handleDartHit = (segment: number, multiplier: 1 | 2 | 3) => {
@@ -243,6 +269,35 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
     if (marks < 3) return 'text-yellow-400';
     return 'text-green-400';
   };
+
+  const handleBack = () => {
+    if (!showSetup && !showWinner) {
+      setShowBackConfirm(true);
+      return;
+    }
+    if (onBack) {
+      onBack();
+    } else {
+      window.location.href = '/';
+    }
+  };
+
+  const handleConfirmBack = () => {
+    setShowBackConfirm(false);
+    window.location.href = '/';
+  };
+
+  // Spinner screen
+  if (showSpinner && pendingGamePlayers) {
+    return (
+      <div className="min-h-dvh gradient-mesh flex items-center justify-center">
+        <SpinnerWheel
+          players={pendingGamePlayers}
+          onComplete={handleSpinnerComplete}
+        />
+      </div>
+    );
+  }
 
   // Setup screen
   if (showSetup) {
@@ -360,14 +415,55 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
         )}
       </AnimatePresence>
 
+      {/* Back Confirmation Dialog */}
+      <AnimatePresence>
+        {showBackConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="glass-card rounded-2xl p-6 max-w-sm w-full text-center"
+            >
+              <h3 className="text-xl font-bold text-white mb-3">
+                {t('game.pause_title')}
+              </h3>
+              <p className="text-gray-400 mb-6">
+                {t('game.pause_message')}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowBackConfirm(false)}
+                  className="flex-1 py-3 rounded-xl bg-dark-700 text-white font-semibold hover:bg-dark-600"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  onClick={handleConfirmBack}
+                  className="flex-1 py-3 rounded-xl bg-primary-500 text-white font-semibold hover:bg-primary-600"
+                >
+                  {t('game.pause_and_leave')}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="max-w-4xl mx-auto mb-6">
         <div className="flex items-center justify-between">
           <button
-            onClick={onBack || (() => { window.location.href = '/'; })}
-            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+            onClick={handleBack}
+            className="flex items-center gap-2 glass-card px-3 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
           >
             <ArrowLeft size={20} />
+            {t('common.back')}
           </button>
           <h1 className="text-2xl font-bold text-white">🎯 Cricket</h1>
           <div className="w-10" />

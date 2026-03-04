@@ -8,6 +8,7 @@ import { Player, Dart } from '../../types/index';
 import PlayerAvatar from '../player/PlayerAvatar';
 import confetti from 'canvas-confetti';
 import { saveGameState, loadGameState, clearGameState, STORAGE_KEYS, ShanghaiSavedState } from '../../utils/gameStorage';
+import { SpinnerWheel } from './SpinnerWheel';
 
 interface ShanghaiGameProps {
   onBack?: () => void;
@@ -44,6 +45,14 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
   }[]>([]);
 
   const autoConfirmRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const restoringRef = useRef(false);
+
+  // Spinner wheel for player order
+  const [showSpinner, setShowSpinner] = useState(false);
+  const [pendingGamePlayers, setPendingGamePlayers] = useState<Player[] | null>(null);
+
+  // Back confirmation dialog
+  const [showBackConfirm, setShowBackConfirm] = useState(false);
 
   const targetNumbers = useMemo(() => {
     return Array.from({ length: rounds }, (_, i) => startNumber + i);
@@ -109,13 +118,20 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
 
     clearGameState(STORAGE_KEYS.SHANGHAI);
 
+    // Show spinner to determine starting player
+    setPendingGamePlayers([...selectedPlayers]);
+    setShowSpinner(true);
+  };
+
+  const initGame = (orderedPlayers: Player[]) => {
     const initialScores: Record<string, number> = {};
     const initialRoundScores: Record<string, Record<number, number>> = {};
-    selectedPlayers.forEach(p => {
+    orderedPlayers.forEach(p => {
       initialScores[p.id] = 0;
       initialRoundScores[p.id] = {};
     });
 
+    setSelectedPlayers(orderedPlayers);
     setPlayerScores(initialScores);
     setRoundScores(initialRoundScores);
     setCurrentRound(0);
@@ -123,6 +139,17 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
     setCurrentDarts([]);
     setTurnHistory([]);
     setShowSetup(false);
+  };
+
+  const handleSpinnerComplete = (startingPlayerIndex: number) => {
+    if (!pendingGamePlayers) return;
+    const reordered = [
+      ...pendingGamePlayers.slice(startingPlayerIndex),
+      ...pendingGamePlayers.slice(0, startingPlayerIndex),
+    ];
+    setShowSpinner(false);
+    setPendingGamePlayers(null);
+    initGame(reordered);
   };
 
   const handleDartHit = (segment: number, multiplier: 1 | 2 | 3) => {
@@ -244,9 +271,13 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
     }
   }, [currentPlayer, currentDarts, currentPlayerIndex, currentRound, currentTarget, playerScores, roundScores, selectedPlayers, rounds]);
 
-  // Auto-confirm after 3 darts
+  // Auto-confirm after 3 darts (skip if restoring from undo/history)
   useEffect(() => {
     if (currentDarts.length === 3) {
+      if (restoringRef.current) {
+        restoringRef.current = false;
+        return;
+      }
       autoConfirmRef.current = setTimeout(() => {
         handleConfirmThrow();
       }, 300);
@@ -275,6 +306,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
       setRoundScores(last.prevRoundScores);
       setCurrentRound(last.prevRound);
       setCurrentPlayerIndex(last.playerIndex);
+      restoringRef.current = true;
       setCurrentDarts(last.darts);
     }
   };
@@ -284,6 +316,35 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
       (playerScores[b.id] || 0) - (playerScores[a.id] || 0)
     );
   };
+
+  const handleBack = () => {
+    if (!showSetup && !showWinner) {
+      setShowBackConfirm(true);
+      return;
+    }
+    if (onBack) {
+      onBack();
+    } else {
+      window.location.href = '/';
+    }
+  };
+
+  const handleConfirmBack = () => {
+    setShowBackConfirm(false);
+    window.location.href = '/';
+  };
+
+  // Spinner screen
+  if (showSpinner && pendingGamePlayers) {
+    return (
+      <div className="min-h-dvh gradient-mesh flex items-center justify-center">
+        <SpinnerWheel
+          players={pendingGamePlayers}
+          onComplete={handleSpinnerComplete}
+        />
+      </div>
+    );
+  }
 
   // Setup screen
   if (showSetup) {
@@ -455,14 +516,55 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
         )}
       </AnimatePresence>
 
+      {/* Back Confirmation Dialog */}
+      <AnimatePresence>
+        {showBackConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="glass-card rounded-2xl p-6 max-w-sm w-full text-center"
+            >
+              <h3 className="text-xl font-bold text-white mb-3">
+                {t('game.pause_title')}
+              </h3>
+              <p className="text-gray-400 mb-6">
+                {t('game.pause_message')}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowBackConfirm(false)}
+                  className="flex-1 py-3 rounded-xl bg-dark-700 text-white font-semibold hover:bg-dark-600"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  onClick={handleConfirmBack}
+                  className="flex-1 py-3 rounded-xl bg-primary-500 text-white font-semibold hover:bg-primary-600"
+                >
+                  {t('game.pause_and_leave')}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="max-w-4xl mx-auto mb-4">
         <div className="flex items-center justify-between">
           <button
-            onClick={onBack || (() => { window.location.href = '/'; })}
-            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+            onClick={handleBack}
+            className="flex items-center gap-2 glass-card px-3 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
           >
             <ArrowLeft size={20} />
+            {t('common.back')}
           </button>
           <div className="text-center">
             <h1 className="text-xl font-bold text-white">⚡ Shanghai</h1>
