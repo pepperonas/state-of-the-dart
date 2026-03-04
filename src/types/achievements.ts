@@ -5322,6 +5322,12 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
 ];
 
+// Patch self-referencing achievements so their target stays in sync with the array length.
+// This avoids hardcoding 464 which would break when achievements are added/removed.
+ACHIEVEMENTS
+  .filter(a => a.requirement.metric === 'achievements_unlocked' && a.requirement.type === 'special')
+  .forEach(a => { a.requirement.target = ACHIEVEMENTS.length; });
+
 // Helper functions
 export const getAchievementById = (id: string): Achievement | undefined => {
   return ACHIEVEMENTS.find(a => a.id === id);

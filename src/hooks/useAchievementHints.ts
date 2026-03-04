@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAchievements } from '../context/AchievementContext';
 import { Achievement } from '../types/achievements';
 
@@ -17,6 +18,7 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
   checkoutRate?: number;
   currentWinStreak?: number;
 }) => {
+  const { t } = useTranslation();
   const { getLockedAchievements } = useAchievements();
   const [hints, setHints] = useState<AchievementHint[]>([]);
 
@@ -26,12 +28,9 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
     const lockedAchievements = getLockedAchievements(playerId);
     const newHints: AchievementHint[] = [];
 
-    // Check each locked achievement for near-completion
     lockedAchievements.forEach((achievement: Achievement) => {
-
-      // Check different achievement types
       switch (achievement.id) {
-        case 'highRoller': {
+        case 'high_roller': {
           const currentAvg = currentMatchData?.matchAverage || 0;
           if (currentAvg >= 55 && currentAvg < 60) {
             newHints.push({
@@ -40,13 +39,13 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
               achievementIcon: achievement.icon,
               progress: currentAvg,
               target: 60,
-              message: `Nur noch ${(60 - currentAvg).toFixed(1)} Average bis zum Achievement!`,
+              message: t('achievements.hint_average', { remaining: (60 - currentAvg).toFixed(1) }),
             });
           }
           break;
         }
 
-        case 'proScorer': {
+        case 'pro_scorer': {
           const currentAvg = currentMatchData?.matchAverage || 0;
           if (currentAvg >= 75 && currentAvg < 80) {
             newHints.push({
@@ -55,13 +54,13 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
               achievementIcon: achievement.icon,
               progress: currentAvg,
               target: 80,
-              message: `Nur noch ${(80 - currentAvg).toFixed(1)} Average bis zum Achievement!`,
+              message: t('achievements.hint_average', { remaining: (80 - currentAvg).toFixed(1) }),
             });
           }
           break;
         }
 
-        case 'worldClass': {
+        case 'world_class': {
           const currentAvg = currentMatchData?.matchAverage || 0;
           if (currentAvg >= 95 && currentAvg < 100) {
             newHints.push({
@@ -70,13 +69,13 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
               achievementIcon: achievement.icon,
               progress: currentAvg,
               target: 100,
-              message: `Nur noch ${(100 - currentAvg).toFixed(1)} Average bis zum Achievement!`,
+              message: t('achievements.hint_average', { remaining: (100 - currentAvg).toFixed(1) }),
             });
           }
           break;
         }
 
-        case 'maxOut': {
+        case 'max_out': {
           const current180s = currentMatchData?.score180s || 0;
           if (current180s >= 7 && current180s < 10) {
             newHints.push({
@@ -85,13 +84,13 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
               achievementIcon: achievement.icon,
               progress: current180s,
               target: 10,
-              message: `Noch ${10 - current180s} 180er bis zum Achievement!`,
+              message: t('achievements.hint_180s', { remaining: 10 - current180s }),
             });
           }
           break;
         }
 
-        case 'checkoutKing': {
+        case 'checkout_king': {
           const currentRate = currentMatchData?.checkoutRate || 0;
           if (currentRate >= 45 && currentRate < 50) {
             newHints.push({
@@ -100,13 +99,13 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
               achievementIcon: achievement.icon,
               progress: currentRate,
               target: 50,
-              message: `Nur noch ${(50 - currentRate).toFixed(1)}% Checkout-Quote bis zum Achievement!`,
+              message: t('achievements.hint_checkout', { remaining: (50 - currentRate).toFixed(1) }),
             });
           }
           break;
         }
 
-        case 'winStreak': {
+        case 'winning_streak': {
           const currentStreak = currentMatchData?.currentWinStreak || 0;
           if (currentStreak >= 3 && currentStreak < 5) {
             newHints.push({
@@ -115,7 +114,7 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
               achievementIcon: achievement.icon,
               progress: currentStreak,
               target: 5,
-              message: `Noch ${5 - currentStreak} Siege in Folge bis zum Achievement!`,
+              message: t('achievements.hint_winstreak', { remaining: 5 - currentStreak }),
             });
           }
           break;
@@ -127,7 +126,7 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
     });
 
     return newHints;
-  }, [playerId, currentMatchData, getLockedAchievements]);
+  }, [playerId, currentMatchData, getLockedAchievements, t]);
 
   useEffect(() => {
     const newHints = checkForHints();

@@ -220,7 +220,7 @@ CREATE TABLE IF NOT EXISTS achievements (
 );
 
 -- Player Achievements
--- Note: No FK on achievement_id — the 247 achievement definitions are managed
+-- Note: No FK on achievement_id — the 464 achievement definitions are managed
 -- entirely by the frontend (src/types/achievements.ts), not the legacy achievements table.
 CREATE TABLE IF NOT EXISTS player_achievements (
   id TEXT PRIMARY KEY,
@@ -306,7 +306,10 @@ CREATE INDEX IF NOT EXISTS idx_debug_flags_status ON debug_flags(status);
 CREATE INDEX IF NOT EXISTS idx_debug_flags_created_at ON debug_flags(created_at);
 `;
 
-// Default achievements to seed
+// Legacy achievements seed data (15 entries with dash-IDs like 'first-180').
+// These are seeded into the `achievements` table but NOT used by the frontend,
+// which manages all 464 achievements in src/types/achievements.ts with snake_case IDs.
+// Kept for backwards compatibility with any external tools reading the DB.
 export const defaultAchievements = [
   {
     id: 'first-180',
