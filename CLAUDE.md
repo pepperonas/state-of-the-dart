@@ -53,6 +53,7 @@ bash scripts/deploy.sh  # Full deploy: build frontend + backend, scp to VPS, PM2
 | Auth Token (JWT) | localStorage only | N/A (correct) |
 | UI state (selected tab, filters) | localStorage only | N/A (correct) |
 | Active match (in-progress game) | localStorage only | N/A (temporary) |
+| Debug Flags | DB via API (admin only) | N/A |
 | Tournaments | Not persisted (React state only) | N/A (TODO) |
 
 ### Frontend State Management
@@ -82,6 +83,7 @@ Express routes in `server/src/routes/`, registered in `server/src/index.ts`:
 - `/api/payment` - Stripe integration
 - `/api/admin` - User management, analytics (admin only)
 - `/api/bug-reports` - Bug report tracking
+- `/api/debug-flags` - Debug flag system (admin only: CRUD + status/notes)
 - `/api/contact` - Contact form (rate-limited: 3/hour/IP)
 - `/api/leaderboard` - Leaderboard data
 - `/api/settings` - User settings persistence
@@ -99,17 +101,20 @@ Express routes in `server/src/routes/`, registered in `server/src/index.ts`:
 - Match reconstruction: `src/utils/matchReconstruction.ts` (rebuilds Match from API)
 - Match naming: `src/utils/matchNames.ts` (deterministic names from UUID)
 - Logger: `src/utils/logger.ts` (production: errors only; dev: all levels)
+- Log buffer: `src/utils/logBuffer.ts` (in-memory ring buffer, 1000 entries, always active)
+- Debug export: `src/utils/debugExport.ts` (formats debug flags as structured text for AI analysis)
 
 ### Type System
 - Core types: `src/types/index.ts` (Match, Player, Dart, Throw, GameSettings, BugReport)
 - API types: `src/types/api.ts` (typed request/response interfaces)
 - Achievements: `src/types/achievements.ts`
 - Personal bests: `src/types/personalBests.ts`
+- Debug flags: `src/types/debugFlag.ts`
 
 ### Game Modes
 - **X01** (301/501/701) - `GameScreen.tsx` (main game screen)
 - **Cricket** - `CricketGame.tsx`
-- **Around the Clock** - `AroundTheClockGame.tsx`
+- **Around the Clock** - `AroundTheClockGame.tsx` (Hit/Miss input, standalone state with turnHistory undo)
 - **Shanghai** - `ShanghaiGame.tsx`
 - **Online Multiplayer** - `OnlineMultiplayer.tsx` (WebSocket via Socket.IO)
 - **6 Training Modes** - `TrainingScreen.tsx`
@@ -117,7 +122,7 @@ Express routes in `server/src/routes/`, registered in `server/src/index.ts`:
 ## Critical Patterns & Pitfalls
 
 ### Achievement System Persistence
-- 464 achievements defined in `src/types/achievements.ts` (frontend is source of truth for definitions)
+- 466 achievements defined in `src/types/achievements.ts` (frontend is source of truth for definitions)
 - DB table `player_achievements` stores unlock records and progress (no FK to legacy achievements table)
 - Achievement IDs use underscores (`first_180`, `ten_180s`) — legacy DB had dashes (`first-180`), don't mix
 - `AchievementContext` unlock flow: save to localStorage immediately, then API call with retry (2 attempts + pending queue)
@@ -135,21 +140,41 @@ Express routes in `server/src/routes/`, registered in `server/src/index.ts`:
 - **CRITICAL**: On bot checkout, do NOT dispatch NEXT_PLAYER — CONFIRM_THROW already handles leg/match transition
 - `isBotPlayingRef.current = false` MUST be set BEFORE `dispatch({ type: 'NEXT_PLAYER' })`
 
-### GameScreen Navigation
-- Use `window.location.href = '/'` (hard redirect) to leave GameScreen, NOT `navigate('/')` from React Router
+### Game Navigation
+- Use `window.location.href = '/'` (hard redirect) to leave game screens, NOT `navigate('/')` from React Router
 - `navigate()` doesn't work reliably due to useEffect interference during route transitions
-- Multiple `useRef` flags control navigation: `isNavigatingAwayRef`, `forceNewGameRef`, `resumeRequestedRef`
+- Applies to GameScreen, AroundTheClockGame, ShanghaiGame, CricketGame
+- GameScreen uses multiple `useRef` flags: `isNavigatingAwayRef`, `forceNewGameRef`, `resumeRequestedRef`
+
+### Standalone Game Undo Pattern (ATC, Shanghai)
+- Games outside GameContext (AroundTheClockGame, ShanghaiGame) use a `turnHistory` state stack for undo
+- Each confirmed throw pushes a snapshot: `{ playerId, playerIndex, darts, prevProgress, prevDarts, prevHits }`
+- Undo with current darts: removes last dart from `currentDarts`, cancels auto-confirm timer
+- Undo with no current darts: pops last entry from `turnHistory`, restores player state, re-loads darts into slots
+- Undo button enabled: `disabled={currentDarts.length === 0 && turnHistory.length === 0}`
+- Auto-confirm (300ms after 3rd dart) uses `useRef` timeout, cancelable by undo
 
 ### Database Safety
 - `ON DELETE CASCADE` throughout schema - deleting a user/tenant cascades to ALL related data
 - No soft-delete mechanism exists
 - Master admin: `martinpaush@gmail.com` (auto-granted admin rights on DB init, never remove)
 
+### Debug Flag & Logging System
+- In-memory ring buffer (`logBuffer`) captures ALL logs regardless of environment (production included)
+- Console output remains environment-gated via `logger.ts`; ring buffer is independent
+- Admin users see a floating Flag button (`DebugFlagButton`) — creates a snapshot: log buffer + screenshot + browser info + game state + route
+- `api.ts` `apiClient()` automatically logs all API requests/responses/errors with duration (no body logging for security)
+- Global error handlers in `App.tsx` capture `window.error` and `unhandledrejection` events
+- Route changes logged as `navigation` category via `RouteLogger` component
+- Game events (ADD_DART, CONFIRM_THROW, etc.), achievements, and auth state changes also feed the buffer
+- Admin Panel has a "Debug Flags" section with status workflow: `open → investigating → resolved/dismissed`
+- "Copy for AI" button formats the entire flag (logs, state, browser info) as structured text for AI analysis
+
 ### Internationalization
 - react-i18next with `de.json` and `en.json` in `src/i18n/locales/`
 - Always use `t('namespace.key')` for user-facing text, never hardcode strings
 - Add new translations to BOTH language files simultaneously
-- Keys organized by feature: `common`, `auth`, `menu`, `game`, `players`, `stats`, `training`, `settings`, `achievements`, `resume`, `contact`
+- Keys organized by feature: `common`, `auth`, `menu`, `game`, `players`, `stats`, `training`, `settings`, `achievements`, `resume`, `contact`, `debug`, `atc`
 
 ### UI Conventions
 - Back buttons: `glass-card` style with `<ArrowLeft size={20} />` and `t('common.back')`
@@ -206,3 +231,4 @@ GitHub Actions in `.github/workflows/`:
 - Terser minification configured (`drop_console` toggle in `vite.config.ts`)
 - Manual chunk splitting: react-vendor, charts, utils, icons
 - Audio cached 30 days, fonts 1 year
+- Version bump: `npm run version:bump` (uses `scripts/bump-version.js`), display: `npm run version:show`

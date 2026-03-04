@@ -8,6 +8,7 @@ import { useTenant } from './TenantContext';
 import { usePlayer } from './PlayerContext';
 import { api } from '../services/api';
 import logger from '../utils/logger';
+import { logBuffer } from '../utils/logBuffer';
 
 interface GameState {
   currentMatch: Match | null;
@@ -78,6 +79,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
     
     case 'START_MATCH': {
       const { players, settings, gameType } = action.payload;
+      logBuffer.log('info', 'game_event', 'START_MATCH', { gameType, playerCount: players.length, startScore: settings.startScore });
       const matchId = uuidv4();
       const legId = uuidv4();
       
@@ -132,7 +134,8 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
     
     case 'ADD_DART': {
       if (!state.currentMatch || state.currentThrow.length >= 3) return state;
-      
+      logBuffer.log('debug', 'game_event', 'ADD_DART', { segment: action.payload.segment, multiplier: action.payload.multiplier, score: calculateThrowScore([action.payload]), player: state.currentMatch.players[state.currentPlayerIndex]?.name });
+
       const newThrow = [...state.currentThrow, action.payload];
       const currentPlayer = state.currentMatch.players[state.currentPlayerIndex];
       const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
@@ -240,7 +243,8 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
     
     case 'CONFIRM_THROW': {
       if (!state.currentMatch || state.currentThrow.length === 0) return state;
-      
+      logBuffer.log('info', 'game_event', 'CONFIRM_THROW', { totalScore: calculateThrowScore(state.currentThrow), player: state.currentMatch.players[state.currentPlayerIndex]?.name, dartsCount: state.currentThrow.length });
+
       const currentPlayer = state.currentMatch.players[state.currentPlayerIndex];
       const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
       const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
@@ -523,7 +527,8 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
     
     case 'END_MATCH': {
       if (!state.currentMatch) return state;
-      
+      logBuffer.log('info', 'game_event', 'END_MATCH', { matchId: state.currentMatch.id, winner: state.currentMatch.winner });
+
       return {
         ...state,
         currentMatch: {
@@ -550,7 +555,8 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
     
     case 'PAUSE_MATCH': {
       if (!state.currentMatch) return state;
-      
+      logBuffer.log('info', 'game_event', 'PAUSE_MATCH', { matchId: state.currentMatch.id });
+
       return {
         ...state,
         currentMatch: {
@@ -563,7 +569,8 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
     
     case 'RESUME_MATCH': {
       if (!state.currentMatch) return state;
-      
+      logBuffer.log('info', 'game_event', 'RESUME_MATCH', { matchId: state.currentMatch.id });
+
       return {
         ...state,
         currentMatch: {

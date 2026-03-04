@@ -84,8 +84,8 @@ export interface MatchSettings {
   
   // Around the Clock Settings
   clockDirection?: 'ascending' | 'descending';
-  clockIncludeDoubles?: boolean;
-  clockIncludeTriples?: boolean;
+  clockBullMode?: 'off' | 'standard' | 'split';
+  clockVariant?: 'standard' | 'doubles' | 'triples';
   
   // Shanghai Settings
   shanghaiRounds?: number;

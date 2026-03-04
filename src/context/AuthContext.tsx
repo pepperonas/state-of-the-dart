@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import api, { setAuthToken, removeAuthToken } from '../services/api';
 import { syncService } from '../services/sync';
+import { logBuffer } from '../utils/logBuffer';
 
 interface User {
   id: string;
@@ -69,7 +70,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const response = await api.auth.login(email, password);
     setAuthToken(response.token);
     setUser(response.user);
-    
+    logBuffer.log('info', 'state_change', 'User logged in', { email: response.user?.email });
+
     // Trigger initial sync after login
     setTimeout(() => triggerSync(), 1000);
   };
@@ -80,6 +82,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = () => {
+    logBuffer.log('info', 'state_change', 'User logged out');
     api.auth.logout();
     setUser(null);
   };

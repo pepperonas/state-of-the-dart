@@ -9,9 +9,11 @@ import { AchievementProvider } from './context/AchievementContext';
 import MainMenu from './components/MainMenu';
 import AchievementNotification from './components/achievements/AchievementNotification';
 import OfflineIndicator from './components/sync/OfflineIndicator';
+import DebugFlagButton from './components/debug/DebugFlagButton';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import ThemeManager from './components/ThemeManager';
 import Footer from './components/Footer';
+import { logBuffer } from './utils/logBuffer';
 import './index.css';
 
 // Auth components (not lazy - need immediate load)
@@ -96,6 +98,14 @@ function ScrollToTop() {
   return null;
 }
 
+function RouteLogger() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    logBuffer.log('info', 'navigation', `Route: ${pathname}`);
+  }, [pathname]);
+  return null;
+}
+
 function AppContent() {
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
@@ -112,9 +122,39 @@ function AppContent() {
     localStorage.setItem('darkMode', darkMode.toString());
   }, [darkMode]);
 
+  // Global error handlers for ring buffer
+  useEffect(() => {
+    logBuffer.log('info', 'lifecycle', 'Session started');
+
+    const handleError = (event: ErrorEvent) => {
+      logBuffer.log('error', 'error', `Uncaught error: ${event.message}`, {
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno,
+        stack: event.error?.stack?.slice(0, 500),
+      });
+    };
+
+    const handleRejection = (event: PromiseRejectionEvent) => {
+      const reason = event.reason instanceof Error
+        ? { message: event.reason.message, stack: event.reason.stack?.slice(0, 500) }
+        : String(event.reason);
+      logBuffer.log('error', 'error', 'Unhandled promise rejection', { reason });
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleRejection);
+
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleRejection);
+    };
+  }, []);
+
   return (
     <Router>
       <ScrollToTop />
+      <RouteLogger />
       <AuthProvider>
         <TenantProvider>
           <SettingsProvider>
@@ -125,6 +165,7 @@ function AppContent() {
                   <div className="min-h-dvh bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex flex-col">
                     <AchievementNotification />
                     <OfflineIndicator />
+                    <DebugFlagButton />
                     <div className="flex-1">
                       <Suspense fallback={<LoadingScreen />}>
                       <Routes>

@@ -12,6 +12,7 @@ import {
   getAchievementById,
 } from '../types/achievements';
 import logger from '../utils/logger';
+import { logBuffer } from '../utils/logBuffer';
 
 // Cumulative metrics that should use increment mode
 const CUMULATIVE_METRICS = new Set([
@@ -555,6 +556,7 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
     });
 
     logger.achievementEvent(`Achievement unlocked: ${achievement.name} for player ${playerId}`);
+    logBuffer.log('info', 'achievement', `Unlocked: ${achievement.name}`, { achievementId, playerId, points: achievement.points });
 
     // Check meta-achievements after unlock
     checkMetaAchievements(playerId);

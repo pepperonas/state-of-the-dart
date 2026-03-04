@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, Crown, Zap, Clock, XCircle, Shield, Trash2, UserMinus, UserPlus, AlertCircle, Eye, Edit, CheckCircle, Copy, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Users, Crown, Zap, Clock, XCircle, Shield, Trash2, UserMinus, UserPlus, AlertCircle, Eye, Edit, CheckCircle, Copy, ChevronDown, Flag, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import type { BugReport } from '../../types';
+import type { DebugFlag } from '../../types/debugFlag';
+import { formatDebugFlagForAI } from '../../utils/debugExport';
 
 interface AdminUser {
   id: string;
@@ -49,6 +51,15 @@ const AdminPanel: React.FC = () => {
   const [selectedBugReport, setSelectedBugReport] = useState<BugReport | null>(null);
   const [bugLoading, setBugLoading] = useState(false);
   const [bugReportsOpen, setBugReportsOpen] = useState(false);
+
+  // Debug Flags
+  const [debugFlags, setDebugFlags] = useState<DebugFlag[]>([]);
+  const [debugFilter, setDebugFilter] = useState<string>('all');
+  const [selectedDebugFlag, setSelectedDebugFlag] = useState<DebugFlag | null>(null);
+  const [debugLoading, setDebugLoading] = useState(false);
+  const [debugFlagsOpen, setDebugFlagsOpen] = useState(false);
+  const [copiedFlagId, setCopiedFlagId] = useState<string | null>(null);
+
   const [failedAvatars, setFailedAvatars] = useState<Set<string>>(new Set());
 
   // Subscription Edit Modal
@@ -66,6 +77,7 @@ const AdminPanel: React.FC = () => {
     }
     loadData();
     loadBugReports();
+    loadDebugFlags();
   }, [user, navigate]);
 
   const loadData = async () => {
@@ -95,6 +107,58 @@ const AdminPanel: React.FC = () => {
     } finally {
       setBugLoading(false);
     }
+  };
+
+  const loadDebugFlags = async () => {
+    setDebugLoading(true);
+    try {
+      const flags = await api.debugFlags.getAll();
+      setDebugFlags(flags);
+    } catch (err: any) {
+      console.error('Failed to load debug flags:', err);
+    } finally {
+      setDebugLoading(false);
+    }
+  };
+
+  const handleUpdateDebugStatus = async (flagId: string, newStatus: string) => {
+    setDebugFlags(prev => prev.map(f => f.id === flagId ? { ...f, status: newStatus as DebugFlag['status'] } : f));
+    if (selectedDebugFlag?.id === flagId) {
+      setSelectedDebugFlag(prev => prev ? { ...prev, status: newStatus as DebugFlag['status'] } : null);
+    }
+    try {
+      await api.debugFlags.updateStatus(flagId, newStatus);
+    } catch (err: any) {
+      await loadDebugFlags();
+      alert('Failed to update status: ' + err.message);
+    }
+  };
+
+  const handleUpdateDebugNotes = async (flagId: string, notes: string) => {
+    try {
+      await api.debugFlags.updateNotes(flagId, notes);
+      await loadDebugFlags();
+    } catch (err: any) {
+      alert('Failed to update notes: ' + err.message);
+    }
+  };
+
+  const handleDeleteDebugFlag = async (flagId: string) => {
+    if (!confirm(t('debug.confirm_delete'))) return;
+    try {
+      await api.debugFlags.delete(flagId);
+      await loadDebugFlags();
+      setSelectedDebugFlag(null);
+    } catch (err: any) {
+      alert('Failed to delete debug flag: ' + err.message);
+    }
+  };
+
+  const handleCopyForAI = (flag: DebugFlag) => {
+    const text = formatDebugFlagForAI(flag);
+    navigator.clipboard.writeText(text);
+    setCopiedFlagId(flag.id);
+    setTimeout(() => setCopiedFlagId(null), 2000);
   };
 
   const handleUpdateBugStatus = async (reportId: string, newStatus: string) => {
@@ -762,6 +826,336 @@ const AdminPanel: React.FC = () => {
           )}
           </div>}
         </motion.div>
+
+        {/* Debug Flags Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="glass-card rounded-2xl p-6 mt-8"
+        >
+          <button
+            onClick={() => setDebugFlagsOpen(!debugFlagsOpen)}
+            className="w-full flex items-center justify-between"
+          >
+            <div className="flex items-center gap-3">
+              <Flag className="text-amber-400" size={28} />
+              <h2 className="text-2xl font-bold text-white">{t('debug.debug_flags')}</h2>
+              {debugFlags.length > 0 && (
+                <span className="text-sm bg-dark-700 text-dark-300 px-2.5 py-0.5 rounded-full">{debugFlags.length}</span>
+              )}
+            </div>
+            <ChevronDown size={24} className={`text-dark-400 transform transition-transform ${debugFlagsOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {debugFlagsOpen && <div className="mt-6">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-amber-500/20 rounded-lg">
+                    <Flag className="text-amber-400" size={20} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-white">{debugFlags.length}</p>
+                    <p className="text-sm text-dark-300">{t('debug.total_flags')}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-red-500/20 rounded-lg">
+                    <XCircle className="text-red-400" size={20} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-white">{debugFlags.filter(f => f.status === 'open').length}</p>
+                    <p className="text-sm text-dark-300">{t('admin.open')}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-500/20 rounded-lg">
+                    <Search className="text-blue-400" size={20} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-white">{debugFlags.filter(f => f.status === 'investigating').length}</p>
+                    <p className="text-sm text-dark-300">{t('debug.investigating')}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-500/20 rounded-lg">
+                    <CheckCircle className="text-green-400" size={20} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-white">{debugFlags.filter(f => f.status === 'resolved').length}</p>
+                    <p className="text-sm text-dark-300">{t('admin.resolved')}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Filter */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.status_label')}</label>
+              <select
+                value={debugFilter}
+                onChange={(e) => setDebugFilter(e.target.value)}
+                className="px-4 py-2 bg-dark-800/50 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-amber-500"
+              >
+                <option value="all">{t('debug.select_all')}</option>
+                <option value="open">{t('debug.select_open')}</option>
+                <option value="investigating">{t('debug.select_investigating')}</option>
+                <option value="resolved">{t('debug.select_resolved')}</option>
+                <option value="dismissed">{t('debug.select_dismissed')}</option>
+              </select>
+            </div>
+
+            {/* Debug Flags Table */}
+            {debugLoading ? (
+              <div className="text-center py-12 text-dark-400">{t('debug.loading_flags')}</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-dark-700">
+                      <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('debug.table_comment')}</th>
+                      <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('debug.table_route')}</th>
+                      <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('debug.table_status')}</th>
+                      <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('debug.table_date')}</th>
+                      <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('debug.table_actions')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {debugFlags
+                      .filter(f => debugFilter === 'all' || f.status === debugFilter)
+                      .sort((a, b) => {
+                        const statusOrder: Record<string, number> = { open: 0, investigating: 1, resolved: 2, dismissed: 3 };
+                        const orderDiff = (statusOrder[a.status] ?? 4) - (statusOrder[b.status] ?? 4);
+                        if (orderDiff !== 0) return orderDiff;
+                        return b.createdAt - a.createdAt;
+                      })
+                      .map(flag => (
+                        <tr key={flag.id} className="border-b border-dark-700/50 hover:bg-dark-700/30 transition-colors">
+                          <td className="py-3 px-4 text-white font-medium max-w-xs truncate">{flag.comment}</td>
+                          <td className="py-3 px-4 text-dark-400 font-mono text-sm">{flag.route || '-'}</td>
+                          <td className="py-3 px-4">
+                            <select
+                              value={flag.status}
+                              onChange={(e) => handleUpdateDebugStatus(flag.id, e.target.value)}
+                              className={`px-2 py-1 rounded text-xs font-semibold border-none cursor-pointer outline-none ${
+                                flag.status === 'open' ? 'bg-red-500/20 text-red-400' :
+                                flag.status === 'investigating' ? 'bg-blue-500/20 text-blue-400' :
+                                flag.status === 'resolved' ? 'bg-green-500/20 text-green-400' :
+                                'bg-gray-700 text-gray-300'
+                              }`}
+                            >
+                              <option value="open">{t('debug.status_open')}</option>
+                              <option value="investigating">{t('debug.status_investigating')}</option>
+                              <option value="resolved">{t('debug.status_resolved')}</option>
+                              <option value="dismissed">{t('debug.status_dismissed')}</option>
+                            </select>
+                          </td>
+                          <td className="py-3 px-4 text-dark-400 text-sm">
+                            {new Date(flag.createdAt).toLocaleDateString()}
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => setSelectedDebugFlag(flag)}
+                                className="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors"
+                                title={t('admin.view_details')}
+                              >
+                                <Eye size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleCopyForAI(flag)}
+                                className={`p-2 rounded-lg transition-colors ${
+                                  copiedFlagId === flag.id
+                                    ? 'bg-green-500/30 text-green-400'
+                                    : 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-400'
+                                }`}
+                                title={t('debug.copy_for_ai')}
+                              >
+                                <Copy size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteDebugFlag(flag.id)}
+                                className="p-2 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 rounded-lg transition-colors"
+                                title={t('common.delete')}
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>}
+        </motion.div>
+
+        {/* Debug Flag Details Modal */}
+        {selectedDebugFlag && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div className="glass-card rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-white">{t('debug.flag_details')}</h3>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleCopyForAI(selectedDebugFlag)}
+                    className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2 ${
+                      copiedFlagId === selectedDebugFlag.id
+                        ? 'bg-green-500/30 text-green-400'
+                        : 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-400'
+                    }`}
+                  >
+                    <Copy size={16} />
+                    {copiedFlagId === selectedDebugFlag.id ? t('debug.copied') : t('debug.copy_for_ai')}
+                  </button>
+                  <button
+                    onClick={() => setSelectedDebugFlag(null)}
+                    className="p-2 hover:bg-dark-700/50 rounded-lg transition-colors"
+                  >
+                    <XCircle size={24} className="text-gray-400" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                {/* Comment */}
+                <div>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.description')}</label>
+                  <p className="text-white bg-dark-800/50 rounded-lg p-4 border border-dark-700 whitespace-pre-wrap">
+                    {selectedDebugFlag.comment}
+                  </p>
+                </div>
+
+                {/* Screenshot */}
+                {selectedDebugFlag.screenshotUrl && (
+                  <div>
+                    <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.screenshot')}</label>
+                    <img
+                      src={selectedDebugFlag.screenshotUrl}
+                      alt="Debug screenshot"
+                      className="w-full rounded-lg border border-dark-700 cursor-pointer hover:border-amber-500 transition-colors"
+                      onClick={() => window.open(selectedDebugFlag.screenshotUrl, '_blank')}
+                    />
+                  </div>
+                )}
+
+                {/* Browser Info */}
+                {selectedDebugFlag.browserInfo && (
+                  <div>
+                    <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.browser_info')}</label>
+                    <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700 text-sm">
+                      <p className="text-dark-400 mb-1"><span className="text-white font-medium">{t('admin.user_agent')}:</span> {selectedDebugFlag.browserInfo.userAgent}</p>
+                      <p className="text-dark-400 mb-1"><span className="text-white font-medium">{t('admin.screen')}:</span> {selectedDebugFlag.browserInfo.screenResolution}</p>
+                      <p className="text-dark-400"><span className="text-white font-medium">{t('admin.viewport')}:</span> {selectedDebugFlag.browserInfo.viewport}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Route */}
+                {selectedDebugFlag.route && (
+                  <div>
+                    <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.route')}</label>
+                    <p className="text-white bg-dark-800/50 rounded-lg p-3 border border-dark-700 font-mono text-sm">
+                      {selectedDebugFlag.route}
+                    </p>
+                  </div>
+                )}
+
+                {/* Game State */}
+                {!!selectedDebugFlag.gameState && (
+                  <div>
+                    <label className="block text-sm font-semibold text-dark-300 mb-2">{t('debug.game_state')}</label>
+                    <pre className="text-white bg-dark-800/50 rounded-lg p-4 border border-dark-700 font-mono text-xs overflow-x-auto">
+                      {JSON.stringify(selectedDebugFlag.gameState, null, 2)}
+                    </pre>
+                  </div>
+                )}
+
+                {/* Log Entries */}
+                <div>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">
+                    {t('debug.log_entries')} ({selectedDebugFlag.logEntries?.length || 0})
+                  </label>
+                  {selectedDebugFlag.logEntries && selectedDebugFlag.logEntries.length > 0 ? (
+                    <div className="bg-dark-900/80 rounded-lg border border-dark-700 max-h-80 overflow-y-auto p-3 font-mono text-xs">
+                      {selectedDebugFlag.logEntries.map((entry, i) => (
+                        <div key={i} className={`py-0.5 ${
+                          entry.level === 'error' ? 'text-red-400' :
+                          entry.level === 'warn' ? 'text-yellow-400' :
+                          'text-dark-300'
+                        }`}>
+                          <span className="text-dark-500">[{entry.timestamp.split('T')[1]?.slice(0, 12)}]</span>
+                          {' '}
+                          <span className={`font-semibold ${
+                            entry.level === 'error' ? 'text-red-400' :
+                            entry.level === 'warn' ? 'text-yellow-400' :
+                            entry.level === 'info' ? 'text-blue-400' :
+                            'text-dark-500'
+                          }`}>{entry.level.toUpperCase().padEnd(5)}</span>
+                          {' '}
+                          <span className="text-amber-400/70">[{entry.category}]</span>
+                          {' '}
+                          {entry.message}
+                          {entry.data != null && (
+                            <div className="text-dark-500 pl-4 break-all">
+                              {String(JSON.stringify(entry.data)).slice(0, 200)}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-dark-500 text-sm">{t('debug.no_logs')}</p>
+                  )}
+                </div>
+
+                {/* Admin Notes */}
+                <div>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.admin_notes')}</label>
+                  <textarea
+                    defaultValue={selectedDebugFlag.adminNotes || ''}
+                    onBlur={(e) => handleUpdateDebugNotes(selectedDebugFlag.id, e.target.value)}
+                    className="w-full px-4 py-3 bg-dark-800/50 border border-dark-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 resize-none"
+                    rows={3}
+                    placeholder={t('admin.admin_notes_placeholder')}
+                  />
+                </div>
+
+                {/* Status Update */}
+                <div>
+                  <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.update_status')}</label>
+                  <div className="flex gap-2">
+                    {(['open', 'investigating', 'resolved', 'dismissed'] as const).map(status => (
+                      <button
+                        key={status}
+                        onClick={() => handleUpdateDebugStatus(selectedDebugFlag.id, status)}
+                        className={`flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-colors ${
+                          selectedDebugFlag.status === status
+                            ? status === 'open' ? 'bg-red-500/30 text-red-400 border border-red-500'
+                            : status === 'investigating' ? 'bg-blue-500/30 text-blue-400 border border-blue-500'
+                            : status === 'resolved' ? 'bg-green-500/30 text-green-400 border border-green-500'
+                            : 'bg-gray-700/50 text-gray-300 border border-gray-600'
+                            : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
+                        }`}
+                      >
+                        {t(`debug.status_${status}`)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Subscription Edit Modal */}
         {editingUser && (

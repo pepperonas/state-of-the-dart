@@ -285,6 +285,28 @@ CREATE INDEX IF NOT EXISTS idx_bug_reports_user ON bug_reports(user_id);
 CREATE INDEX IF NOT EXISTS idx_bug_reports_status ON bug_reports(status);
 CREATE INDEX IF NOT EXISTS idx_bug_reports_severity ON bug_reports(severity);
 CREATE INDEX IF NOT EXISTS idx_bug_reports_created_at ON bug_reports(created_at);
+
+-- Debug Flags (admin-only debug snapshots with log buffer)
+CREATE TABLE IF NOT EXISTS debug_flags (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  comment TEXT NOT NULL,
+  route TEXT,
+  browser_info TEXT,
+  screenshot_url TEXT,
+  game_state TEXT,
+  log_entries TEXT NOT NULL DEFAULT '[]',
+  status TEXT NOT NULL DEFAULT 'open'
+    CHECK(status IN ('open', 'investigating', 'resolved', 'dismissed')),
+  admin_notes TEXT,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  resolved_at INTEGER,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_debug_flags_status ON debug_flags(status);
+CREATE INDEX IF NOT EXISTS idx_debug_flags_created_at ON debug_flags(created_at);
 `;
 // Default achievements to seed
 exports.defaultAchievements = [

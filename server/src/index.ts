@@ -124,6 +124,7 @@ import leaderboardRouter from './routes/leaderboard';
 import adminRouter from './routes/admin';
 import settingsRouter from './routes/settings';
 import bugReportsRouter from './routes/bugReports';
+import debugFlagsRouter from './routes/debugFlags';
 import contactRouter from './routes/contact';
 
 // API Routes
@@ -157,6 +158,7 @@ app.use('/api/leaderboard', leaderboardRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/bug-reports', bugReportsRouter);
+app.use('/api/debug-flags', debugFlagsRouter);
 app.use('/api/contact', contactRouter);
 
 // Google OAuth routes

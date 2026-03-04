@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, RotateCcw, Trophy, Clock, Check, X } from 'lucide-react';
@@ -7,47 +6,103 @@ import { usePlayer } from '../../context/PlayerContext';
 import { Player, Dart } from '../../types/index';
 import PlayerAvatar from '../player/PlayerAvatar';
 import confetti from 'canvas-confetti';
+import audioSystem from '../../utils/audio';
 
 interface AroundTheClockGameProps {
   onBack?: () => void;
 }
 
+type BullMode = 'off' | 'standard' | 'split';
+type Direction = 'ascending' | 'descending';
+type Variant = 'standard' | 'doubles' | 'triples';
+
+interface Target {
+  label: string;
+  shortLabel: string;
+  segment: number;
+  multiplier: number;
+}
+
 const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { players } = usePlayer();
-  
+
+  // Setup state
   const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
   const [showSetup, setShowSetup] = useState(true);
-  const [includeDoubles, setIncludeDoubles] = useState(false);
-  const [includeTriples, setIncludeTriples] = useState(false);
-  const [includeBull, setIncludeBull] = useState(true);
-  
+  const [bullMode, setBullMode] = useState<BullMode>('standard');
+  const [direction, setDirection] = useState<Direction>('ascending');
+  const [variant, setVariant] = useState<Variant>('standard');
+
   // Game state
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
   const [playerProgress, setPlayerProgress] = useState<Record<string, number>>({});
   const [playerDarts, setPlayerDarts] = useState<Record<string, number>>({});
+  const [playerHits, setPlayerHits] = useState<Record<string, number>>({});
   const [currentDarts, setCurrentDarts] = useState<Dart[]>([]);
   const [showWinner, setShowWinner] = useState(false);
   const [winner, setWinner] = useState<Player | null>(null);
-  const [gameStartTime, setGameStartTime] = useState<number>(0);
-  const [elapsedTime, setElapsedTime] = useState<number>(0);
+  const [gameStartTime, setGameStartTime] = useState(0);
+  const [elapsedTime, setElapsedTime] = useState(0);
 
-  // Target numbers (1-20, optionally Bull)
-  const targetNumbers = useMemo(() => {
-    const numbers = Array.from({ length: 20 }, (_, i) => i + 1);
-    if (includeBull) numbers.push(25);
-    return numbers;
-  }, [includeBull]);
+  // History stack for undoing confirmed throws
+  const [turnHistory, setTurnHistory] = useState<{
+    playerId: string;
+    playerIndex: number;
+    darts: Dart[];
+    prevProgress: number;
+    prevDarts: number;
+    prevHits: number;
+  }[]>([]);
+
+  const autoConfirmRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Build target list
+  const targets: Target[] = useMemo(() => {
+    const nums = direction === 'ascending'
+      ? Array.from({ length: 20 }, (_, i) => i + 1)
+      : Array.from({ length: 20 }, (_, i) => 20 - i);
+
+    const multiplier = variant === 'doubles' ? 2 : variant === 'triples' ? 3 : 1;
+    const prefix = variant === 'doubles' ? 'D' : variant === 'triples' ? 'T' : '';
+
+    const result: Target[] = nums.map(n => ({
+      label: `${prefix}${n}`,
+      shortLabel: `${prefix}${n}`,
+      segment: n,
+      multiplier,
+    }));
+
+    if (bullMode === 'standard') {
+      result.push({ label: 'Bull', shortLabel: 'B', segment: 25, multiplier: 1 });
+    } else if (bullMode === 'split') {
+      result.push({ label: 'Outer Bull', shortLabel: 'OB', segment: 25, multiplier: 1 });
+      result.push({ label: 'Inner Bull', shortLabel: 'IB', segment: 25, multiplier: 2 });
+    }
+
+    return result;
+  }, [direction, variant, bullMode]);
 
   const currentPlayer = useMemo(() => {
     return selectedPlayers[currentPlayerIndex];
   }, [selectedPlayers, currentPlayerIndex]);
 
+  // Effective progress = committed + pending hits in current turn
+  const getEffectiveProgress = useCallback((playerId: string) => {
+    const committed = playerProgress[playerId] || 0;
+    if (currentPlayer?.id !== playerId) return committed;
+    const pendingHits = currentDarts.filter(d => d.bed !== 'miss').length;
+    return Math.min(committed + pendingHits, targets.length);
+  }, [playerProgress, currentPlayer, currentDarts, targets.length]);
+
+  const currentTargetIdx = useMemo(() => {
+    if (!currentPlayer) return 0;
+    return getEffectiveProgress(currentPlayer.id);
+  }, [currentPlayer, getEffectiveProgress]);
+
   const currentTarget = useMemo(() => {
-    if (!currentPlayer) return 1;
-    return targetNumbers[playerProgress[currentPlayer.id] || 0] || 'Done';
-  }, [currentPlayer, playerProgress, targetNumbers]);
+    return targets[currentTargetIdx] || null;
+  }, [targets, currentTargetIdx]);
 
   // Timer
   useEffect(() => {
@@ -67,106 +122,231 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
 
   const handleStartGame = () => {
     if (selectedPlayers.length < 1) return;
-    
+
     const initialProgress: Record<string, number> = {};
     const initialDarts: Record<string, number> = {};
+    const initialHits: Record<string, number> = {};
     selectedPlayers.forEach(p => {
       initialProgress[p.id] = 0;
       initialDarts[p.id] = 0;
+      initialHits[p.id] = 0;
     });
-    
+
     setPlayerProgress(initialProgress);
     setPlayerDarts(initialDarts);
+    setPlayerHits(initialHits);
     setCurrentPlayerIndex(0);
     setCurrentDarts([]);
+    setTurnHistory([]);
     setGameStartTime(Date.now());
     setShowSetup(false);
   };
 
-  const handleDartHit = (segment: number, multiplier: 1 | 2 | 3) => {
+  const confirmThrow = useCallback(() => {
+    if (!currentPlayer || currentDarts.length === 0) return;
+
+    const playerId = currentPlayer.id;
+    const prevProgress = playerProgress[playerId] || 0;
+    const prevDartsUsed = playerDarts[playerId] || 0;
+    const prevHits = playerHits[playerId] || 0;
+
+    // Save snapshot for undo
+    setTurnHistory(prev => [...prev, {
+      playerId,
+      playerIndex: currentPlayerIndex,
+      darts: [...currentDarts],
+      prevProgress,
+      prevDarts: prevDartsUsed,
+      prevHits,
+    }]);
+
+    let progress = prevProgress;
+    let dartsUsed = prevDartsUsed;
+    let hits = prevHits;
+
+    currentDarts.forEach(dart => {
+      dartsUsed++;
+      if (dart.bed !== 'miss') {
+        hits++;
+        if (progress < targets.length) {
+          progress++;
+        }
+      }
+    });
+
+    setPlayerProgress(prev => ({ ...prev, [playerId]: progress }));
+    setPlayerDarts(prev => ({ ...prev, [playerId]: dartsUsed }));
+    setPlayerHits(prev => ({ ...prev, [playerId]: hits }));
+
+    if (progress >= targets.length) {
+      setWinner(currentPlayer);
+      setShowWinner(true);
+      audioSystem.playSound('/sounds/OMNI/pop-success.mp3', true);
+      confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+    } else {
+      setCurrentDarts([]);
+      setCurrentPlayerIndex(prev => (prev + 1) % selectedPlayers.length);
+    }
+  }, [currentPlayer, currentDarts, playerProgress, playerDarts, playerHits, targets, selectedPlayers, currentPlayerIndex]);
+
+  // Auto-confirm after 3 darts
+  useEffect(() => {
+    if (currentDarts.length === 3) {
+      autoConfirmRef.current = setTimeout(() => {
+        confirmThrow();
+      }, 300);
+      return () => {
+        if (autoConfirmRef.current) clearTimeout(autoConfirmRef.current);
+      };
+    }
+  }, [currentDarts.length, confirmThrow]);
+
+  const handleHit = () => {
     if (!currentPlayer || currentDarts.length >= 3) return;
-    
+
+    const target = targets[(playerProgress[currentPlayer.id] || 0) +
+      currentDarts.filter(d => d.bed !== 'miss').length];
+
+    if (!target) {
+      handleMiss();
+      return;
+    }
+
     const dart: Dart = {
-      segment,
-      multiplier,
-      score: segment * multiplier,
-      bed: multiplier === 3 ? 'triple' : multiplier === 2 ? 'double' : segment === 25 ? 'bull' : 'single'
+      segment: target.segment,
+      multiplier: target.multiplier as 0 | 1 | 2 | 3,
+      score: target.segment * target.multiplier,
+      bed: target.multiplier === 3 ? 'triple' : target.multiplier === 2 ? 'double' : target.segment === 25 ? 'bull' : 'single',
     };
-    
+
     setCurrentDarts(prev => [...prev, dart]);
+    audioSystem.playSound('/sounds/OMNI/pop-success.mp3');
   };
 
   const handleMiss = () => {
     if (currentDarts.length >= 3) return;
-    
+
     const dart: Dart = {
       segment: 0,
-      multiplier: 0 as any,
+      multiplier: 0 as 0 | 1 | 2 | 3,
       score: 0,
-      bed: 'miss'
+      bed: 'miss',
     };
-    
+
     setCurrentDarts(prev => [...prev, dart]);
+    audioSystem.playSound('/sounds/OMNI/pop-success.mp3');
   };
 
-  const handleConfirmThrow = () => {
-    if (!currentPlayer || currentDarts.length === 0) return;
-    
-    const playerId = currentPlayer.id;
-    let progress = playerProgress[playerId] || 0;
-    let dartsUsed = playerDarts[playerId] || 0;
-    
-    // Check each dart
-    currentDarts.forEach(dart => {
-      if (progress >= targetNumbers.length) return;
-      
-      const target = targetNumbers[progress];
-      let hit = false;
-      
-      if (dart.segment === target) {
-        // Check multiplier requirements
-        if (includeDoubles && includeTriples) {
-          hit = dart.multiplier >= 1; // Any hit counts
-        } else if (includeDoubles) {
-          hit = dart.multiplier === 2 || dart.multiplier === 1;
-        } else if (includeTriples) {
-          hit = dart.multiplier === 3 || dart.multiplier === 1;
-        } else {
-          hit = dart.multiplier === 1 || (dart.segment === 25 && dart.multiplier <= 2);
-        }
-        
-        if (hit) {
-          progress++;
-        }
-      }
-      
-      dartsUsed++;
-    });
-    
-    setPlayerProgress(prev => ({ ...prev, [playerId]: progress }));
-    setPlayerDarts(prev => ({ ...prev, [playerId]: dartsUsed }));
-    
-    // Check for winner
-    if (progress >= targetNumbers.length) {
-      setWinner(currentPlayer);
-      setShowWinner(true);
-      confetti({
-        particleCount: 150,
-        spread: 80,
-        origin: { y: 0.6 }
-      });
-    } else {
-      // Next player
-      setCurrentDarts([]);
-      setCurrentPlayerIndex((prev) => (prev + 1) % selectedPlayers.length);
+  const cancelAutoConfirm = () => {
+    if (autoConfirmRef.current) {
+      clearTimeout(autoConfirmRef.current);
+      autoConfirmRef.current = null;
     }
   };
 
   const handleUndo = () => {
     if (currentDarts.length > 0) {
+      // Step 1: Remove last dart from current throw
+      cancelAutoConfirm();
       setCurrentDarts(prev => prev.slice(0, -1));
+    } else if (turnHistory.length > 0) {
+      // Step 2: Restore previous confirmed throw (may switch player)
+      const last = turnHistory[turnHistory.length - 1];
+      setTurnHistory(prev => prev.slice(0, -1));
+      setPlayerProgress(prev => ({ ...prev, [last.playerId]: last.prevProgress }));
+      setPlayerDarts(prev => ({ ...prev, [last.playerId]: last.prevDarts }));
+      setPlayerHits(prev => ({ ...prev, [last.playerId]: last.prevHits }));
+      setCurrentPlayerIndex(last.playerIndex);
+      setCurrentDarts(last.darts);
     }
   };
+
+  // Tap player card → undo back to that player's last turn
+  const handleSwitchToPlayer = (targetIdx: number) => {
+    if (targetIdx === currentPlayerIndex && currentDarts.length === 0) return;
+    cancelAutoConfirm();
+
+    // Tapping current player: just discard unconfirmed darts
+    if (targetIdx === currentPlayerIndex) {
+      setCurrentDarts([]);
+      return;
+    }
+
+    // Discard current unconfirmed darts
+    const targetPlayerId = selectedPlayers[targetIdx].id;
+    let history = [...turnHistory];
+
+    // Walk backwards through history, undoing each turn until we find target player
+    const progressUpdates: Record<string, number> = {};
+    const dartsUpdates: Record<string, number> = {};
+    const hitsUpdates: Record<string, number> = {};
+    let restoredDarts: Dart[] = [];
+    let found = false;
+
+    while (history.length > 0) {
+      const last = history[history.length - 1];
+      history = history.slice(0, -1);
+
+      // Restore this player's state to before their throw
+      progressUpdates[last.playerId] = last.prevProgress;
+      dartsUpdates[last.playerId] = last.prevDarts;
+      hitsUpdates[last.playerId] = last.prevHits;
+
+      if (last.playerId === targetPlayerId) {
+        // Found target player's turn — load their darts for editing
+        restoredDarts = last.darts;
+        found = true;
+        break;
+      }
+    }
+
+    if (found) {
+      setTurnHistory(history);
+      setPlayerProgress(prev => ({ ...prev, ...progressUpdates }));
+      setPlayerDarts(prev => ({ ...prev, ...dartsUpdates }));
+      setPlayerHits(prev => ({ ...prev, ...hitsUpdates }));
+      setCurrentPlayerIndex(targetIdx);
+      setCurrentDarts(restoredDarts);
+    }
+  };
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      window.location.href = '/';
+    }
+  };
+
+  // Segmented button component with descriptions
+  const SegmentedButtons = ({ options, value, onChange }: {
+    options: { value: string; label: string; desc?: string }[];
+    value: string;
+    onChange: (v: string) => void;
+  }) => (
+    <div>
+      <div className="flex rounded-xl overflow-hidden border border-dark-600">
+        {options.map(opt => (
+          <button
+            key={opt.value}
+            onClick={() => onChange(opt.value)}
+            className={`flex-1 py-2.5 px-3 text-sm font-medium transition-all ${
+              value === opt.value
+                ? 'bg-primary-500 text-white'
+                : 'bg-dark-800 text-gray-400 hover:text-white'
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+      {options.find(o => o.value === value)?.desc && (
+        <p className="text-xs text-gray-500 mt-1.5 ml-1">
+          {options.find(o => o.value === value)?.desc}
+        </p>
+      )}
+    </div>
+  );
 
   // Setup screen
   if (showSetup) {
@@ -174,7 +354,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-4xl mx-auto">
           <button
-            onClick={onBack || (() => { window.location.href = '/'; })}
+            onClick={handleBack}
             className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
           >
             <ArrowLeft size={20} />
@@ -182,44 +362,53 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
           </button>
 
           <div className="glass-card rounded-2xl p-6">
-            <h1 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-6 flex items-center gap-3">
               <Clock className="text-primary-400" />
-              Around the Clock
+              {t('atc.title')}
             </h1>
 
-            {/* Options */}
-            <div className="mb-6 space-y-3">
-              <h2 className="text-lg font-semibold text-white mb-3">Optionen</h2>
-              
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={includeBull}
-                  onChange={(e) => setIncludeBull(e.target.checked)}
-                  className="w-5 h-5 rounded border-gray-600 bg-dark-700 text-primary-500 focus:ring-primary-500"
+            {/* Settings */}
+            <div className="mb-6 space-y-4">
+              {/* Bull Mode */}
+              <div>
+                <label className="text-sm font-medium text-gray-400 mb-2 block">{t('atc.bull_mode')}</label>
+                <SegmentedButtons
+                  options={[
+                    { value: 'off', label: t('atc.bull_off'), desc: t('atc.bull_off_desc') },
+                    { value: 'standard', label: t('atc.bull_standard'), desc: t('atc.bull_standard_desc') },
+                    { value: 'split', label: t('atc.bull_split'), desc: t('atc.bull_split_desc') },
+                  ]}
+                  value={bullMode}
+                  onChange={v => setBullMode(v as BullMode)}
                 />
-                <span className="text-white">Bull einschließen (1-20 + Bull)</span>
-              </label>
-              
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={includeDoubles}
-                  onChange={(e) => setIncludeDoubles(e.target.checked)}
-                  className="w-5 h-5 rounded border-gray-600 bg-dark-700 text-primary-500 focus:ring-primary-500"
+              </div>
+
+              {/* Direction */}
+              <div>
+                <label className="text-sm font-medium text-gray-400 mb-2 block">{t('atc.direction')}</label>
+                <SegmentedButtons
+                  options={[
+                    { value: 'ascending', label: t('atc.ascending') },
+                    { value: 'descending', label: t('atc.descending') },
+                  ]}
+                  value={direction}
+                  onChange={v => setDirection(v as Direction)}
                 />
-                <span className="text-white">Doubles erlaubt</span>
-              </label>
-              
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={includeTriples}
-                  onChange={(e) => setIncludeTriples(e.target.checked)}
-                  className="w-5 h-5 rounded border-gray-600 bg-dark-700 text-primary-500 focus:ring-primary-500"
+              </div>
+
+              {/* Variant */}
+              <div>
+                <label className="text-sm font-medium text-gray-400 mb-2 block">{t('atc.variant')}</label>
+                <SegmentedButtons
+                  options={[
+                    { value: 'standard', label: t('atc.variant_standard'), desc: t('atc.variant_standard_desc') },
+                    { value: 'doubles', label: t('atc.variant_doubles'), desc: t('atc.variant_doubles_desc') },
+                    { value: 'triples', label: t('atc.variant_triples'), desc: t('atc.variant_triples_desc') },
+                  ]}
+                  value={variant}
+                  onChange={v => setVariant(v as Variant)}
                 />
-                <span className="text-white">Triples erlaubt</span>
-              </label>
+              </div>
             </div>
 
             {/* Player Selection */}
@@ -245,19 +434,22 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
                     <div className="flex justify-center mb-1">
                       <PlayerAvatar avatar={player.avatar} name={player.name} size="sm" />
                     </div>
-                    <div className="text-sm font-medium text-white text-center">{player.name}</div>
+                    <div className="text-sm font-medium text-white text-center truncate">{player.name}</div>
                   </button>
                 ))}
               </div>
             </div>
 
+            {/* Rules */}
             <div className="bg-dark-800 rounded-xl p-4 mb-6">
-              <h3 className="text-white font-semibold mb-2">🕐 Spielregeln:</h3>
+              <h3 className="text-white font-semibold mb-2">{t('atc.rules_title')}</h3>
               <ul className="text-gray-400 text-sm space-y-1">
-                <li>• Triff die Zahlen 1-20 der Reihe nach</li>
-                <li>• {includeBull ? 'Bull (25) ist das letzte Ziel' : 'Kein Bull'}</li>
-                <li>• {includeDoubles || includeTriples ? 'Singles/Doubles/Triples zählen' : 'Nur Singles zählen'}</li>
-                <li>• Wer zuerst alle Zahlen trifft, gewinnt!</li>
+                <li>• {t('atc.rules_hit_targets')}</li>
+                <li>• {bullMode !== 'off' ? t('atc.rules_bull') : t('atc.rules_no_bull')}</li>
+                {variant === 'standard' && <li>• {t('atc.rules_standard_all_count')}</li>}
+                {variant === 'doubles' && <li>• {t('atc.rules_doubles_only')}</li>}
+                {variant === 'triples' && <li>• {t('atc.rules_triples_only')}</li>}
+                <li>• {t('atc.rules_first_wins')}</li>
               </ul>
             </div>
 
@@ -270,9 +462,9 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
                   : 'bg-dark-700 text-gray-500 cursor-not-allowed'
               }`}
             >
-              {selectedPlayers.length < 1 
-                ? `${t('game.select_players')} (min. 1)`
-                : 'Spiel starten 🕐'
+              {selectedPlayers.length < 1
+                ? t('atc.select_min')
+                : t('atc.start_game')
               }
             </button>
           </div>
@@ -281,9 +473,21 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
     );
   }
 
+  // Compute dart slot display for current throw
+  const getDartSlotContent = (idx: number) => {
+    const dart = currentDarts[idx];
+    if (!dart) return null;
+    if (dart.bed === 'miss') return { hit: false, label: 'X' };
+
+    const hitTargetIdx = (playerProgress[currentPlayer?.id || ''] || 0) +
+      currentDarts.slice(0, idx).filter(d => d.bed !== 'miss').length;
+    const hitTarget = targets[hitTargetIdx];
+    return { hit: true, label: hitTarget?.shortLabel || '?' };
+  };
+
   // Game screen
   return (
-    <div className="min-h-dvh p-4 gradient-mesh">
+    <div className="min-h-dvh p-2 sm:p-4 gradient-mesh">
       {/* Winner Modal */}
       <AnimatePresence>
         {showWinner && winner && (
@@ -291,32 +495,56 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
           >
             <motion.div
               initial={{ scale: 0.5 }}
               animate={{ scale: 1 }}
-              className="glass-card rounded-2xl p-8 text-center max-w-md"
+              className="glass-card rounded-2xl p-6 sm:p-8 text-center max-w-md w-full"
             >
-              <Trophy className="w-20 h-20 text-yellow-400 mx-auto mb-4" />
-              <h2 className="text-3xl font-bold text-white mb-2">
-                {winner.name} gewinnt!
+              <Trophy className="w-16 h-16 sm:w-20 sm:h-20 text-yellow-400 mx-auto mb-4" />
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+                {t('atc.winner_title', { name: winner.name })}
               </h2>
-              <p className="text-gray-400 mb-2">
-                Around the Clock in {formatTime(elapsedTime)}
+              <p className="text-gray-400 mb-4">
+                {t('atc.winner_time', { time: formatTime(elapsedTime) })}
               </p>
-              <p className="text-primary-400 mb-6">
-                {playerDarts[winner.id]} Darts benötigt
-              </p>
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                <div className="bg-dark-800 rounded-xl p-3">
+                  <p className="text-2xl font-bold text-primary-400">{playerDarts[winner.id]}</p>
+                  <p className="text-xs text-gray-400">{t('game.darts')}</p>
+                </div>
+                <div className="bg-dark-800 rounded-xl p-3">
+                  <p className="text-2xl font-bold text-green-400">
+                    {playerDarts[winner.id] > 0
+                      ? Math.round((playerHits[winner.id] / playerDarts[winner.id]) * 100)
+                      : 0}%
+                  </p>
+                  <p className="text-xs text-gray-400">{t('training.accuracy')}</p>
+                </div>
+                <div className="bg-dark-800 rounded-xl p-3">
+                  <p className="text-2xl font-bold text-yellow-400">{formatTime(elapsedTime)}</p>
+                  <p className="text-xs text-gray-400">{t('training.duration')}</p>
+                </div>
+                <div className="bg-dark-800 rounded-xl p-3">
+                  <p className="text-2xl font-bold text-accent-400">
+                    {targets.length > 0
+                      ? (playerDarts[winner.id] / targets.length).toFixed(1)
+                      : '0'}
+                  </p>
+                  <p className="text-xs text-gray-400">{t('game.darts')}/{t('atc.current_target').toLowerCase()}</p>
+                </div>
+              </div>
               <button
                 onClick={() => {
                   setShowWinner(false);
                   setShowSetup(true);
                   setWinner(null);
+                  setCurrentDarts([]);
                 }}
-                className="px-8 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-semibold"
+                className="w-full px-8 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-semibold"
               >
-                Neues Spiel
+                {t('atc.new_game')}
               </button>
             </motion.div>
           </motion.div>
@@ -324,43 +552,47 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
       </AnimatePresence>
 
       {/* Header */}
-      <div className="max-w-4xl mx-auto mb-4">
+      <div className="max-w-4xl mx-auto mb-3">
         <div className="flex items-center justify-between">
           <button
-            onClick={onBack || (() => navigate('/'))}
-            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+            onClick={handleBack}
+            className="flex items-center gap-2 glass-card px-3 py-2 rounded-lg text-gray-400 hover:text-white transition-colors"
           >
             <ArrowLeft size={20} />
           </button>
           <div className="text-center">
-            <h1 className="text-xl font-bold text-white">🕐 Around the Clock</h1>
+            <h1 className="text-lg sm:text-xl font-bold text-white">{t('atc.title')}</h1>
             <p className="text-primary-400 text-sm">{formatTime(elapsedTime)}</p>
           </div>
-          <div className="w-10" />
+          <div className="w-12" />
         </div>
       </div>
 
-      {/* Progress */}
-      <div className="max-w-4xl mx-auto mb-4">
-        <div className="glass-card rounded-xl p-4">
-          <div className="flex flex-wrap gap-2 justify-center">
-            {targetNumbers.map((num, idx) => {
-              const progress = playerProgress[currentPlayer?.id || ''] || 0;
-              const isPast = idx < progress;
-              const isCurrent = idx === progress;
-              
+      {/* Progress Track — wrapping grid, no scroll */}
+      <div className="max-w-4xl mx-auto mb-3">
+        <div className="glass-card rounded-xl p-3">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center">
+            {targets.map((target, idx) => {
+              const effectiveProgress = getEffectiveProgress(currentPlayer?.id || '');
+              const committedProgress = playerProgress[currentPlayer?.id || ''] || 0;
+              const isPast = idx < committedProgress;
+              const isPending = idx >= committedProgress && idx < effectiveProgress;
+              const isCurrent = idx === effectiveProgress;
+
               return (
                 <div
-                  key={num}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ${
+                  key={`${target.label}-${idx}`}
+                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition-all ${
                     isPast
                       ? 'bg-green-500 text-white'
+                      : isPending
+                      ? 'bg-green-500/60 text-white ring-1 ring-green-400'
                       : isCurrent
                       ? 'bg-primary-500 text-white ring-2 ring-primary-300 animate-pulse'
                       : 'bg-dark-700 text-gray-500'
                   }`}
                 >
-                  {num === 25 ? 'B' : num}
+                  {target.shortLabel}
                 </div>
               );
             })}
@@ -368,141 +600,136 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
         </div>
       </div>
 
-      {/* Player Standings */}
-      <div className="max-w-4xl mx-auto mb-4">
-        <div className="glass-card rounded-xl p-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {selectedPlayers.map((player, idx) => {
-              const progress = playerProgress[player.id] || 0;
-              const darts = playerDarts[player.id] || 0;
-              const isActive = idx === currentPlayerIndex;
-              
-              return (
-                <div
-                  key={player.id}
-                  className={`p-3 rounded-xl text-center transition-all ${
-                    isActive ? 'bg-primary-500/20 ring-2 ring-primary-500' : 'bg-dark-800'
-                  }`}
-                >
-                  <PlayerAvatar avatar={player.avatar} name={player.name} size="sm" />
-                  <p className="text-white font-medium text-sm mt-1">{player.name}</p>
-                  <p className="text-primary-400 text-xs">
-                    {progress}/{targetNumbers.length} • {darts} Darts
-                  </p>
-                </div>
-              );
-            })}
+      {/* Player Cards — tappable, show current target prominently */}
+      {selectedPlayers.length > 1 && (
+        <div className="max-w-4xl mx-auto mb-3">
+          <div className="glass-card rounded-xl p-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+              {selectedPlayers.map((player, idx) => {
+                const effectiveProgress = getEffectiveProgress(player.id);
+                const darts = playerDarts[player.id] || 0;
+                const isActive = idx === currentPlayerIndex;
+                const playerTarget = targets[effectiveProgress];
+
+                return (
+                  <button
+                    key={player.id}
+                    onClick={() => handleSwitchToPlayer(idx)}
+                    className={`p-2.5 sm:p-3 rounded-xl text-center transition-all ${
+                      isActive
+                        ? 'bg-primary-500/20 ring-2 ring-primary-500'
+                        : 'bg-dark-800 hover:bg-dark-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <PlayerAvatar avatar={player.avatar} name={player.name} size="sm" />
+                      <div className="flex-1 text-left min-w-0">
+                        <p className="text-white font-semibold text-sm sm:text-base truncate">{player.name}</p>
+                        <p className="text-gray-400 text-xs">
+                          {effectiveProgress}/{targets.length} • {darts} Darts
+                        </p>
+                      </div>
+                      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center font-bold text-sm sm:text-base flex-shrink-0 ${
+                        isActive ? 'bg-primary-500 text-white' : 'bg-dark-600 text-gray-300'
+                      }`}>
+                        {playerTarget ? playerTarget.shortLabel : <Check size={16} />}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Current Target */}
-      <div className="max-w-4xl mx-auto mb-4">
-        <div className="glass-card rounded-xl p-6 text-center">
-          <p className="text-gray-400 mb-2">Aktuelles Ziel</p>
-          <div className="text-6xl font-bold text-primary-400">
-            {currentTarget === 25 ? 'Bull' : currentTarget}
+      <div className="max-w-4xl mx-auto mb-3">
+        <div className="glass-card rounded-xl p-4 sm:p-6 text-center">
+          <p className="text-gray-400 text-sm mb-1">{t('atc.current_target')}</p>
+          <div className="text-5xl sm:text-6xl font-bold text-primary-400 mb-1">
+            {currentTarget ? currentTarget.label : '—'}
           </div>
-          <p className="text-white mt-2">{currentPlayer?.name}</p>
+          <p className="text-white text-sm">{currentPlayer?.name}</p>
+          <p className="text-gray-500 text-xs mt-1">
+            {t('atc.targets_progress', {
+              done: getEffectiveProgress(currentPlayer?.id || ''),
+              total: targets.length,
+            })}
+          </p>
         </div>
       </div>
 
-      {/* Current Throw */}
-      <div className="max-w-4xl mx-auto mb-4">
-        <div className="glass-card rounded-xl p-4">
+      {/* Dart Slots + Input */}
+      <div className="max-w-4xl mx-auto mb-3">
+        <div className="glass-card rounded-xl p-3 sm:p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-white font-semibold">Wurf ({currentDarts.length}/3)</h3>
+            <h3 className="text-white font-semibold text-sm sm:text-base">
+              {t('atc.throw_count', { current: currentDarts.length })}
+            </h3>
             <button
               onClick={handleUndo}
-              disabled={currentDarts.length === 0}
+              disabled={currentDarts.length === 0 && turnHistory.length === 0}
               className="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 text-gray-400 disabled:opacity-50"
             >
               <RotateCcw size={18} />
             </button>
           </div>
-          
-          <div className="flex gap-3 mb-4">
+
+          <div className="flex gap-2 sm:gap-3 mb-4">
             {[0, 1, 2].map(idx => {
-              const dart = currentDarts[idx];
-              const isHit = dart && dart.segment === currentTarget;
-              
+              const slot = getDartSlotContent(idx);
+
               return (
                 <div
                   key={idx}
-                  className={`flex-1 h-14 rounded-xl flex items-center justify-center text-lg font-bold ${
-                    dart
-                      ? isHit
+                  className={`flex-1 h-12 sm:h-14 rounded-xl flex items-center justify-center text-base sm:text-lg font-bold ${
+                    slot
+                      ? slot.hit
                         ? 'bg-green-500/20 text-green-400 border-2 border-green-500'
                         : 'bg-red-500/20 text-red-400 border-2 border-red-500'
                       : 'bg-dark-800 text-gray-600 border-2 border-dashed border-dark-600'
                   }`}
                 >
-                  {dart ? (
-                    dart.segment === 0 ? 'Miss' : 
-                    `${dart.multiplier === 3 ? 'T' : dart.multiplier === 2 ? 'D' : ''}${dart.segment === 25 ? 'Bull' : dart.segment}`
-                  ) : '-'}
+                  {slot ? (slot.hit ? <Check size={20} /> : <X size={20} />) : '—'}
                 </div>
               );
             })}
           </div>
 
+          {/* Hit / Miss Buttons */}
+          <div className="flex gap-3 mb-3">
+            <button
+              onClick={handleHit}
+              disabled={currentDarts.length >= 3 || !currentTarget}
+              className="flex-1 py-6 sm:py-8 rounded-xl font-bold text-xl sm:text-2xl transition-all flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 text-white disabled:opacity-40 disabled:hover:bg-green-600 active:scale-95"
+            >
+              <Check size={28} />
+              {t('atc.hit')}
+            </button>
+            <button
+              onClick={handleMiss}
+              disabled={currentDarts.length >= 3}
+              className="flex-1 py-6 sm:py-8 rounded-xl font-bold text-xl sm:text-2xl transition-all flex items-center justify-center gap-2 bg-red-600 hover:bg-red-500 text-white disabled:opacity-40 disabled:hover:bg-red-600 active:scale-95"
+            >
+              <X size={28} />
+              {t('atc.miss')}
+            </button>
+          </div>
+
+          {/* Confirm */}
           <button
-            onClick={handleConfirmThrow}
+            onClick={confirmThrow}
             disabled={currentDarts.length === 0}
             className={`w-full py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
               currentDarts.length > 0
-                ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
+                ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white hover:from-primary-600 hover:to-accent-600'
                 : 'bg-dark-700 text-gray-500 cursor-not-allowed'
             }`}
           >
             <Check size={20} />
-            Bestätigen
+            {t('common.confirm')}
           </button>
-        </div>
-      </div>
-
-      {/* Input Buttons */}
-      <div className="max-w-4xl mx-auto">
-        <div className="glass-card rounded-xl p-4">
-          <div className="grid grid-cols-7 gap-2 mb-3">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map(num => (
-              <button
-                key={num}
-                onClick={() => handleDartHit(num, 1)}
-                disabled={currentDarts.length >= 3}
-                className={`py-3 rounded-lg font-bold transition-all disabled:opacity-50 ${
-                  num === currentTarget
-                    ? 'bg-primary-500 text-white ring-2 ring-primary-300'
-                    : 'bg-dark-700 hover:bg-dark-600 text-white'
-                }`}
-              >
-                {num}
-              </button>
-            ))}
-          </div>
-          
-          <div className="flex gap-2">
-            {includeBull && (
-              <button
-                onClick={() => handleDartHit(25, 1)}
-                disabled={currentDarts.length >= 3}
-                className={`flex-1 py-3 rounded-lg font-bold transition-all disabled:opacity-50 ${
-                  currentTarget === 25
-                    ? 'bg-primary-500 text-white ring-2 ring-primary-300'
-                    : 'bg-green-600 hover:bg-green-500 text-white'
-                }`}
-              >
-                Bull
-              </button>
-            )}
-            <button
-              onClick={handleMiss}
-              disabled={currentDarts.length >= 3}
-              className="flex-1 py-3 rounded-lg bg-dark-800 hover:bg-dark-700 text-gray-400 font-bold disabled:opacity-50"
-            >
-              <X size={20} className="mx-auto" />
-            </button>
-          </div>
         </div>
       </div>
     </div>

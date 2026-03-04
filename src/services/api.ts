@@ -12,6 +12,8 @@ import type {
   SettingUpdateRequest,
   BugReportCreateRequest,
 } from '../types/api';
+import type { DebugFlagCreateRequest } from '../types/debugFlag';
+import { logBuffer } from '../utils/logBuffer';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
@@ -31,10 +33,15 @@ export const removeAuthToken = () => {
   localStorage.removeItem('auth_token');
 };
 
-// API client with auth header
+// API client with auth header and ring buffer instrumentation
 const apiClient = async (endpoint: string, options: RequestInit = {}) => {
+  const method = options.method || 'GET';
+  const start = Date.now();
+
+  logBuffer.log('info', 'api_request', `${method} ${endpoint}`);
+
   const token = getAuthToken();
-  
+
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
@@ -49,14 +56,22 @@ const apiClient = async (endpoint: string, options: RequestInit = {}) => {
     headers,
   });
 
+  const duration = Date.now() - start;
+
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Request failed' }));
     // Include status code in error message for proper error handling
-    const statusText = response.status === 429 ? 'Too Many Requests' : 
+    const statusText = response.status === 429 ? 'Too Many Requests' :
                        response.status === 401 ? 'Unauthorized' :
                        response.status === 403 ? 'Forbidden' : '';
-    throw new Error(error.error || `HTTP ${response.status}${statusText ? ` ${statusText}` : ''}`);
+    const errorMsg = error.error || `HTTP ${response.status}${statusText ? ` ${statusText}` : ''}`;
+
+    logBuffer.log('error', 'api_error', `${method} ${endpoint} ${response.status} (${duration}ms)`, { error: errorMsg });
+
+    throw new Error(errorMsg);
   }
+
+  logBuffer.log('info', 'api_response', `${method} ${endpoint} ${response.status} (${duration}ms)`);
 
   return response.json();
 };
@@ -409,6 +424,41 @@ export const api = {
       apiClient('/api/contact', {
         method: 'POST',
         body: JSON.stringify(data),
+      }),
+  },
+
+  // Debug Flags (admin only)
+  debugFlags: {
+    create: (data: DebugFlagCreateRequest) =>
+      apiClient('/api/debug-flags', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+
+    getAll: (filters?: { status?: string }) => {
+      const params = new URLSearchParams();
+      if (filters?.status) params.append('status', filters.status);
+      const queryString = params.toString();
+      return apiClient(`/api/debug-flags${queryString ? `?${queryString}` : ''}`);
+    },
+
+    getById: (id: string) => apiClient(`/api/debug-flags/${id}`),
+
+    updateStatus: (id: string, status: string) =>
+      apiClient(`/api/debug-flags/${id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      }),
+
+    updateNotes: (id: string, notes: string) =>
+      apiClient(`/api/debug-flags/${id}/notes`, {
+        method: 'PATCH',
+        body: JSON.stringify({ notes }),
+      }),
+
+    delete: (id: string) =>
+      apiClient(`/api/debug-flags/${id}`, {
+        method: 'DELETE',
       }),
   },
 };

@@ -4,7 +4,7 @@ import { X, Star } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useAchievements } from '../../context/AchievementContext';
 import { usePlayer } from '../../context/PlayerContext';
-import { AchievementTier, AchievementNotification as AchievementNotificationType, getTierColor, getRarityColor, ACHIEVEMENTS } from '../../types/achievements';
+import { AchievementTier, AchievementNotification as AchievementNotificationType, getTierColor, getRarityColor, getAchievementScope, getScopeColor, ACHIEVEMENTS } from '../../types/achievements';
 import { audioSystem } from '../../utils/audio';
 
 const TIER_CONFETTI_COUNT: Record<AchievementTier, number> = {
@@ -240,6 +240,22 @@ const NotificationCard: React.FC<{
                 {achievement.rarity.toUpperCase()}
               </span>
             )}
+            {(() => {
+              const scope = getAchievementScope(achievement);
+              const sc = getScopeColor(scope);
+              return (
+                <span
+                  className="px-2 py-0.5 rounded-md text-xs font-bold tracking-wider"
+                  style={{
+                    backgroundColor: sc + '25',
+                    color: sc,
+                    border: `1px solid ${sc}30`,
+                  }}
+                >
+                  {scope.toUpperCase()}
+                </span>
+              );
+            })()}
             <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-white/5 text-gray-400 flex items-center gap-1 border border-white/10">
               <Star size={10} />
               {achievement.points} Pkt.

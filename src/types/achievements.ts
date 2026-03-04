@@ -16,6 +16,8 @@ export type AchievementCategory =
 
 export type AchievementTier = 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond';
 
+export type AchievementScope = 'round' | 'leg' | 'match' | 'career' | 'training' | 'event' | 'meta';
+
 export interface Achievement {
   id: string;
   name: string;
@@ -32,6 +34,7 @@ export interface Achievement {
   };
   hidden?: boolean; // Hidden until unlocked
   rarity?: 'common' | 'rare' | 'epic' | 'legendary';
+  scope?: AchievementScope; // Explicit override; computed by getAchievementScope() when absent
 }
 
 export interface UnlockedAchievement {
@@ -5369,4 +5372,277 @@ export const getRarityColor = (rarity: 'common' | 'rare' | 'epic' | 'legendary')
     legendary: '#F59E0B', // amber
   };
   return colors[rarity];
+};
+
+// ===== Achievement Scope System =====
+
+/**
+ * Maps each metric to its base scope (the context in which the achievement triggers).
+ * Used by getAchievementScope() — explicit `scope` on Achievement overrides this.
+ */
+export const METRIC_BASE_SCOPE: Record<string, AchievementScope> = {
+  // --- round (~30 metrics): Single 3-dart visit ---
+  exact_score: 'round',
+  perfect_180: 'round',
+  three_triples: 'round',
+  robin_hood: 'round',
+  same_segment: 'round',
+  shanghai: 'round',
+  three_ones: 'round',
+  two_doubles_visit: 'round',
+  triple_single_double: 'round',
+  consecutive_180: 'round',
+  triple_consecutive_180: 'round',
+  visit_under_10: 'round',
+  three_miss_visit: 'round',
+  visit_starts_with_miss: 'round',
+  descending_darts: 'round',
+  three_different_low: 'round',
+  visit_score_3: 'round',
+  crash_after_high: 'round',
+  consecutive_misses: 'round',
+  score_180: 'round',
+  score_100_plus: 'round',
+  score_60_plus: 'round',
+  score_80_plus: 'round',
+  score_150_plus: 'round',
+  three_low_visits_row: 'round',
+  three_same_number: 'round',
+  three_ones_fail: 'round',
+  visit_under_10_fail: 'round',
+  worst_visit_under_5: 'round',
+  zero_first_visit: 'round',
+  exact_visits: 'round',
+  consecutive_60_plus: 'round',
+
+  // --- leg (~40 metrics): Result of a single leg ---
+  leg_darts: 'leg',
+  leg_301_darts: 'leg',
+  leg_701_darts: 'leg',
+  leg_average: 'leg',
+  leg_no_bust: 'leg',
+  shutout_leg: 'leg',
+  legs_under_15_darts: 'leg',
+  leg_visits_min: 'leg',
+  leg_comeback_points: 'leg',
+  avg_darts_per_leg_max: 'leg',
+  checkout_value: 'leg',
+  checkout_value_min: 'leg',
+  checkout_darts_max: 'leg',
+  perfect_checkout: 'leg',
+  checkout_d1: 'leg',
+  checkout_d12: 'leg',
+  checkout_d16: 'leg',
+  checkout_d18: 'leg',
+  checkout_d20: 'leg',
+  checkout_bullseye: 'leg',
+  checkout_one_dart: 'leg',
+  checkout_two_dart: 'leg',
+  clutch_checkout: 'leg',
+  first_visit_checkout: 'leg',
+  pressure_checkout: 'leg',
+  impossible_checkout: 'leg',
+  checkout_after_180: 'leg',
+  checkout_after_misses: 'leg',
+  first_dart_checkout: 'leg',
+  three_dart_checkout: 'leg',
+  leg_checkout: 'leg',
+  mirror_score: 'leg',
+  double_bust_leg: 'leg',
+  triple_bust_leg: 'leg',
+  legs_lost: 'leg',
+  legs_lost_on_checkout: 'leg',
+  bust_on_checkout_attempt: 'leg',
+  miss_on_checkout_attempt: 'leg',
+  three_checkout_attempts_no_hit: 'leg',
+  five_checkout_attempts_no_hit: 'leg',
+  bust_on_high_score: 'leg',
+  bust_on_low_score: 'leg',
+  bust_on_2: 'leg',
+  bust_after_180: 'leg',
+  busts: 'leg',
+
+  // --- match (~40 metrics): Result of a single match ---
+  match_average: 'match',
+  exact_average: 'match',
+  checkout_percentage: 'match',
+  match_180_count: 'match',
+  tons_in_match: 'match',
+  busts_in_match: 'match',
+  zero_visits_in_match: 'match',
+  match_no_bust: 'match',
+  game_time_max: 'match',
+  game_time_min: 'match',
+  whitewash: 'match',
+  close_win: 'match',
+  comeback_win: 'match',
+  comeback_one_leg: 'match',
+  comeback_points: 'match',
+  reverse_sweep: 'match',
+  flawless_match: 'match',
+  perfect_501_match: 'match',
+  decider_wins: 'match',
+  first_leg_wins: 'match',
+  last_leg_wins: 'match',
+  lead_blown: 'match',
+  missed_match_dart: 'match',
+  games_played: 'match',
+  wins: 'match',
+  matches_lost: 'match',
+  matches_lost_whitewash: 'match',
+  bot_wins: 'match',
+  human_wins: 'match',
+  close_wins: 'match',
+  comeback_wins: 'match',
+  best_of_five_wins: 'match',
+  whitewash_wins: 'match',
+  last_place_multi: 'match',
+  lost_to_easy_bot: 'match',
+  lost_with_higher_average: 'match',
+  lost_big_avg_diff: 'match',
+  lost_more_legs: 'match',
+  no_60_plus_match: 'match',
+  checkout_pct_under_10: 'match',
+  match_average_under_15: 'match',
+  match_average_under_20: 'match',
+  match_average_under_30: 'match',
+  game_180: 'match',
+  legs_no_bust: 'match',
+
+  // --- career (~30 metrics): Accumulated across all games ---
+  unique_checkout_values: 'career',
+  unique_opponents: 'career',
+  unique_doubles: 'career',
+  same_double: 'career',
+  all_triples: 'career',
+  unique_play_days: 'career',
+  unique_win_days: 'career',
+  days_since_first_game: 'career',
+  wins_100_days: 'career',
+  daily_play: 'career',
+  daily_win_month: 'career',
+  daily_three_wins: 'career',
+  all_modes_played: 'career',
+  all_modes_tried: 'career',
+  wins_all_modes: 'career',
+  triples_hit: 'career',
+  doubles_hit: 'career',
+  singles_hit: 'career',
+  bullseye_hit: 'career',
+  single_bull_hit: 'career',
+  outer_bull_hit: 'career',
+  triple_20_hit: 'career',
+  triple_19_hit: 'career',
+  triple_18_hit: 'career',
+  triple_17_hit: 'career',
+  single_1_hit: 'career',
+  missed_board: 'career',
+  missed_checkouts: 'career',
+  checkouts: 'career',
+  weekend_games: 'career',
+  weekend_wins: 'career',
+  late_night_games: 'career',
+  early_morning_wins: 'career',
+  lunch_games: 'career',
+  same_low_score_streak: 'career',
+  losses: 'career',
+  average_40_plus: 'career',
+  average_50_plus: 'career',
+  score_45_plus: 'career',
+  weekend_training: 'career',
+
+  // --- training (~21 metrics): Training mode specific ---
+  training_completed: 'training',
+  training_all_modes: 'training',
+  training_all_numbers: 'training',
+  training_perfect: 'training',
+  training_early: 'training',
+  training_late: 'training',
+  training_morning: 'training',
+  training_one_day: 'training',
+  training_doubles_percent: 'training',
+  training_scoring_100: 'training',
+  training_scoring_avg: 'training',
+  training_checkout_percent: 'training',
+  training_around_clock: 'training',
+  training_improvement: 'training',
+  training_triples: 'training',
+  training_80_percent: 'training',
+  training_100_triples: 'training',
+  training_fast_good: 'training',
+  all_training_types: 'training',
+  all_training_90: 'training',
+  daily_training: 'training',
+
+  // --- event (6 metrics): Calendar/time-based ---
+  game_midnight: 'event',
+  midnight_win: 'event',
+  new_year_game: 'event',
+  christmas_game: 'event',
+  halloween_game: 'event',
+  valentines_win: 'event',
+
+  // --- meta (7 metrics): About achievements themselves ---
+  achievement_points: 'meta',
+  achievements_unlocked: 'meta',
+  gold_all_categories: 'meta',
+  all_diamond_unlocked: 'meta',
+  legendary_achievements: 'meta',
+  first_all_categories: 'meta',
+  fail_achievements_unlocked: 'meta',
+};
+
+/**
+ * Computes the scope of an achievement deterministically from its definition.
+ *
+ * Rules (in priority order):
+ * 1. Explicit `scope` field on achievement → use it
+ * 2. type === 'streak' → 'career'
+ * 3. Metric in training/event/meta domain → stays in that domain regardless of type/target
+ * 4. type === 'count' && target > 1 → 'career' (accumulated counts)
+ * 5. Metric in METRIC_BASE_SCOPE → use mapped scope
+ * 6. Fallback → 'career'
+ */
+export const getAchievementScope = (achievement: Achievement): AchievementScope => {
+  // 1. Explicit override
+  if (achievement.scope) return achievement.scope;
+
+  const { type, target, metric } = achievement.requirement;
+  const baseScope = METRIC_BASE_SCOPE[metric];
+
+  // 2. Streaks are always career
+  if (type === 'streak') return 'career';
+
+  // 3. Domain-locked scopes stay regardless of count/target
+  if (baseScope === 'training' || baseScope === 'event' || baseScope === 'meta') {
+    return baseScope;
+  }
+
+  // 4. Counting multiple occurrences → career
+  if (type === 'count' && target > 1) return 'career';
+
+  // 5. Use base scope from metric map
+  if (baseScope) return baseScope;
+
+  // 6. Fallback
+  return 'career';
+};
+
+/** Returns the display color (hex) for a scope */
+export const getScopeColor = (scope: AchievementScope): string => {
+  const colors: Record<AchievementScope, string> = {
+    round: '#22D3EE',    // cyan-400
+    leg: '#34D399',      // emerald-400
+    match: '#60A5FA',    // blue-400
+    career: '#F59E0B',   // amber-500
+    training: '#A78BFA', // violet-400
+    event: '#FB923C',    // orange-400
+    meta: '#EC4899',     // pink-500
+  };
+  return colors[scope];
+};
+
+/** Returns all achievements matching a given scope */
+export const getAchievementsByScope = (scope: AchievementScope): Achievement[] => {
+  return ACHIEVEMENTS.filter(a => getAchievementScope(a) === scope);
 };

@@ -55,7 +55,8 @@
       "Bash(do echo \"=== $file ===\" grep -B 1 -A 1 \"ArrowLeft\" \"$file\")",
       "mcp__plugin_serena_serena__insert_before_symbol",
       "mcp__plugin_serena_serena__insert_after_symbol",
-      "mcp__plugin_serena_serena__find_symbol"
+      "mcp__plugin_serena_serena__find_symbol",
+      "mcp__plugin_serena_serena__create_text_file"
     ],
     "deny": [],
     "ask": []

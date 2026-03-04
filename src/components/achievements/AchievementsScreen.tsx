@@ -7,9 +7,12 @@ import { usePlayer } from '../../context/PlayerContext';
 import {
   Achievement,
   AchievementCategory,
+  AchievementScope,
   getCategoryName,
   getTierColor,
   getRarityColor,
+  getAchievementScope,
+  getScopeColor,
   ACHIEVEMENTS,
 } from '../../types/achievements';
 import { formatDate } from '../../utils/dateUtils';
@@ -29,6 +32,7 @@ const AchievementsScreen: React.FC = () => {
     players.length > 0 ? players[0].id : ''
   );
   const [filterCategory, setFilterCategory] = useState<AchievementCategory | 'all'>('all');
+  const [filterScope, setFilterScope] = useState<AchievementScope | 'all'>('all');
   const [showOnlyUnlocked, setShowOnlyUnlocked] = useState(false);
 
   const playerProgress = useMemo(() => {
@@ -65,8 +69,12 @@ const AchievementsScreen: React.FC = () => {
       achievements = achievements.filter(a => a.category === filterCategory);
     }
 
+    if (filterScope !== 'all') {
+      achievements = achievements.filter(a => getAchievementScope(a) === filterScope);
+    }
+
     return achievements;
-  }, [showOnlyUnlocked, unlockedAchievements, filterCategory]);
+  }, [showOnlyUnlocked, unlockedAchievements, filterCategory, filterScope]);
 
   const categories: Array<AchievementCategory | 'all'> = [
     'all',
@@ -77,6 +85,10 @@ const AchievementsScreen: React.FC = () => {
     'consistency',
     'special',
     'fail',
+  ];
+
+  const scopes: Array<AchievementScope | 'all'> = [
+    'all', 'round', 'leg', 'match', 'career', 'training', 'event', 'meta',
   ];
 
   const completionPercentage = useMemo(() => {
@@ -156,6 +168,21 @@ const AchievementsScreen: React.FC = () => {
                 {achievement.rarity.toUpperCase()}
               </span>
             )}
+            {(() => {
+              const scope = getAchievementScope(achievement);
+              const scopeColor = getScopeColor(scope);
+              return (
+                <span
+                  className="px-2 py-1 rounded font-semibold"
+                  style={{
+                    backgroundColor: scopeColor + '33',
+                    color: scopeColor,
+                  }}
+                >
+                  {t(`achievements.scope_${scope}`)}
+                </span>
+              );
+            })()}
           </div>
           <div className="flex items-center gap-1 text-accent-400 font-bold">
             <Star size={14} />
@@ -309,6 +336,30 @@ const AchievementsScreen: React.FC = () => {
                 {cat === 'all' ? 'Alle' : getCategoryName(cat)}
               </button>
             ))}
+          </div>
+
+          {/* Scope Filter */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            {scopes.map((scope) => {
+              const isActive = filterScope === scope;
+              const color = scope === 'all' ? undefined : getScopeColor(scope);
+              return (
+                <button
+                  key={scope}
+                  onClick={() => setFilterScope(scope)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                    isActive
+                      ? scope === 'all'
+                        ? 'bg-primary-500 text-white'
+                        : 'text-white'
+                      : 'bg-dark-800 text-dark-300 hover:bg-dark-700'
+                  }`}
+                  style={isActive && color ? { backgroundColor: color + '40', color } : undefined}
+                >
+                  {t(`achievements.scope_${scope}`)}
+                </button>
+              );
+            })}
           </div>
 
           {/* Show Only Unlocked Toggle */}

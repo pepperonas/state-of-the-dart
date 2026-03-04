@@ -12,7 +12,17 @@
  * - CUMULATIVE_METRICS completeness
  */
 import { describe, it, expect } from 'vitest';
-import { ACHIEVEMENTS, Achievement, AchievementCategory, AchievementTier } from '../../types/achievements';
+import {
+  ACHIEVEMENTS,
+  Achievement,
+  AchievementCategory,
+  AchievementTier,
+  AchievementScope,
+  getAchievementScope,
+  getScopeColor,
+  getAchievementsByScope,
+  METRIC_BASE_SCOPE,
+} from '../../types/achievements';
 
 // Import CUMULATIVE_METRICS by reading the source (we can't import it directly since it's a const in context)
 // Instead we define the expected set and verify against it
@@ -498,5 +508,125 @@ describe('Per-Category Achievement Validation', () => {
         expect(checkoutMetrics.has(m), `checkout category should include metric '${m}'`).toBe(true);
       });
     });
+  });
+});
+
+describe('Achievement Scope System', () => {
+  const ALL_SCOPES: AchievementScope[] = ['round', 'leg', 'match', 'career', 'training', 'event', 'meta'];
+
+  it('every achievement should resolve to a valid scope', () => {
+    ACHIEVEMENTS.forEach(a => {
+      const scope = getAchievementScope(a);
+      expect(ALL_SCOPES, `${a.id} resolved to invalid scope: ${scope}`).toContain(scope);
+    });
+  });
+
+  it('all 7 scopes should have at least one achievement', () => {
+    ALL_SCOPES.forEach(scope => {
+      const count = ACHIEVEMENTS.filter(a => getAchievementScope(a) === scope).length;
+      expect(count, `Scope '${scope}' has no achievements`).toBeGreaterThan(0);
+    });
+  });
+
+  it('streak-type achievements should always resolve to career', () => {
+    const streakAchievements = ACHIEVEMENTS.filter(a => a.requirement.type === 'streak');
+    expect(streakAchievements.length).toBeGreaterThan(0);
+    streakAchievements.forEach(a => {
+      expect(getAchievementScope(a), `${a.id} (streak) should be career`).toBe('career');
+    });
+  });
+
+  it('training-metric achievements should resolve to training', () => {
+    const trainingMetrics = Object.entries(METRIC_BASE_SCOPE)
+      .filter(([, scope]) => scope === 'training')
+      .map(([metric]) => metric);
+    const trainingAchievements = ACHIEVEMENTS.filter(a =>
+      trainingMetrics.includes(a.requirement.metric) && a.requirement.type !== 'streak'
+    );
+    expect(trainingAchievements.length).toBeGreaterThan(0);
+    trainingAchievements.forEach(a => {
+      expect(getAchievementScope(a), `${a.id} (training metric) should be training`).toBe('training');
+    });
+  });
+
+  it('meta-metric achievements should resolve to meta', () => {
+    const metaMetrics = Object.entries(METRIC_BASE_SCOPE)
+      .filter(([, scope]) => scope === 'meta')
+      .map(([metric]) => metric);
+    const metaAchievements = ACHIEVEMENTS.filter(a =>
+      metaMetrics.includes(a.requirement.metric) && a.requirement.type !== 'streak'
+    );
+    expect(metaAchievements.length).toBeGreaterThan(0);
+    metaAchievements.forEach(a => {
+      expect(getAchievementScope(a), `${a.id} (meta metric) should be meta`).toBe('meta');
+    });
+  });
+
+  it('event-metric achievements should resolve to event', () => {
+    const eventMetrics = Object.entries(METRIC_BASE_SCOPE)
+      .filter(([, scope]) => scope === 'event')
+      .map(([metric]) => metric);
+    const eventAchievements = ACHIEVEMENTS.filter(a =>
+      eventMetrics.includes(a.requirement.metric) && a.requirement.type !== 'streak'
+    );
+    expect(eventAchievements.length).toBeGreaterThan(0);
+    eventAchievements.forEach(a => {
+      expect(getAchievementScope(a), `${a.id} (event metric) should be event`).toBe('event');
+    });
+  });
+
+  it('count with target > 1 on round/leg/match metrics should resolve to career', () => {
+    const countMultiAchievements = ACHIEVEMENTS.filter(a =>
+      a.requirement.type === 'count' &&
+      a.requirement.target > 1 &&
+      ['round', 'leg', 'match'].includes(METRIC_BASE_SCOPE[a.requirement.metric] || '')
+    );
+    expect(countMultiAchievements.length).toBeGreaterThan(0);
+    countMultiAchievements.forEach(a => {
+      expect(getAchievementScope(a), `${a.id} (count target=${a.requirement.target}) should be career`).toBe('career');
+    });
+  });
+
+  it('explicit scope override should take precedence', () => {
+    const testAchievement: Achievement = {
+      id: 'test_override',
+      name: 'Test',
+      description: 'Test',
+      category: 'scoring',
+      tier: 'bronze',
+      icon: '🎯',
+      points: 10,
+      requirement: { type: 'count', target: 1, metric: 'score_180' },
+      scope: 'event', // Override: score_180 would normally be round
+    };
+    expect(getAchievementScope(testAchievement)).toBe('event');
+  });
+
+  it('getScopeColor should return valid hex for all scopes', () => {
+    ALL_SCOPES.forEach(scope => {
+      const color = getScopeColor(scope);
+      expect(color, `${scope} should have a valid hex color`).toMatch(/^#[0-9A-Fa-f]{6}$/);
+    });
+  });
+
+  it('getAchievementsByScope should return correct achievements', () => {
+    ALL_SCOPES.forEach(scope => {
+      const byScope = getAchievementsByScope(scope);
+      byScope.forEach(a => {
+        expect(getAchievementScope(a), `${a.id} should match scope ${scope}`).toBe(scope);
+      });
+    });
+  });
+
+  it('scope distribution should cover all achievements', () => {
+    const distribution: Record<string, number> = {};
+    let total = 0;
+    ALL_SCOPES.forEach(scope => {
+      const count = getAchievementsByScope(scope).length;
+      distribution[scope] = count;
+      total += count;
+    });
+    expect(total).toBe(ACHIEVEMENTS.length);
+    console.log('Scope distribution:', distribution);
   });
 });
