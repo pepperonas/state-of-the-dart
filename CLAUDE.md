@@ -122,7 +122,7 @@ Express routes in `server/src/routes/`, registered in `server/src/index.ts`:
 ## Critical Patterns & Pitfalls
 
 ### Achievement System Persistence
-- 466 achievements defined in `src/types/achievements.ts` (frontend is source of truth for definitions)
+- 464 achievements defined in `src/types/achievements.ts` (frontend is source of truth for definitions)
 - DB table `player_achievements` stores unlock records and progress (no FK to legacy achievements table)
 - Achievement IDs use underscores (`first_180`, `ten_180s`) — legacy DB had dashes (`first-180`), don't mix
 - `AchievementContext` unlock flow: save to localStorage immediately, then API call with retry (2 attempts + pending queue)
@@ -131,6 +131,15 @@ Express routes in `server/src/routes/`, registered in `server/src/index.ts`:
 - **CRITICAL**: Progress endpoint must NOT overwrite already-unlocked achievements (checks `unlocked_at IS NOT NULL`)
 - Notification cards are manually dismissed (no auto-dismiss), multiple stack vertically
 - `dismissNotification(index)` — index 0 = currentNotification, index 1+ = queue items
+
+### Achievement Scope System
+Each achievement has a computed **scope** (round/leg/match/career/training/event/meta) indicating its trigger context:
+- Scope is NOT stored on each achievement object — computed by `getAchievementScope()` from `METRIC_BASE_SCOPE` map
+- `METRIC_BASE_SCOPE` in `src/types/achievements.ts` maps ~167 metrics to their base scope
+- Priority: explicit `scope` field → streak type = career → domain-locked (training/event/meta) → count with target > 1 = career → base scope → fallback career
+- `getScopeColor()` returns hex colors, `getAchievementsByScope()` filters by scope
+- UI: scope filter buttons + colored scope badges on AchievementsScreen and AchievementNotification
+- Self-referencing achievements (metric `achievements_unlocked`, type `special`) have target dynamically patched to `ACHIEVEMENTS.length` after array definition
 
 ### Bot System
 - Bot players stored in DB like regular players (`is_bot`, `bot_level` 1-10 columns)
