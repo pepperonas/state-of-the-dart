@@ -10,7 +10,7 @@
 
 [![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green?style=for-the-badge)](https://stateofthedart.com)
 [![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-purple?style=for-the-badge)](https://stateofthedart.celox.io)
-![Version](https://img.shields.io/badge/Version-0.8.4-blue?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-0.8.5-blue?style=for-the-badge)
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -29,7 +29,7 @@
 ![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
 ![Stripe](https://img.shields.io/badge/Stripe-Payments-635BFF?logo=stripe&logoColor=white)
 
-![Achievements](https://img.shields.io/badge/Achievements-464-gold)
+![Achievements](https://img.shields.io/badge/Achievements-463-gold)
 ![Game Modes](https://img.shields.io/badge/Game_Modes-6-orange)
 ![Audio Files](https://img.shields.io/badge/Audio_Files-400+-red)
 ![Tests](https://img.shields.io/badge/Tests-294_passing-brightgreen)
@@ -691,6 +691,13 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.8.5 (14. März 2026) - Achievement Fixes
+
+#### 🔧 Verbesserungen
+- **Comeback King korrigiert** - Beschreibung von "nach 0:2 Rückstand" zu "nach Rückstand in Legs" geändert (entsprach der tatsächlichen Logik), Tier von Gold auf Silver angepasst
+- **Marathon-Match Duplikat entfernt** - Redundantes Achievement `marathon_match_30` entfernt (identisch mit `marathon_man`)
+- Achievement-Anzahl: 464 → 463
 
 ### v0.8.4 (4. März 2026) - Game State Persistence, SpinnerWheel & UX
 
