@@ -4,15 +4,14 @@
 set -e
 
 # VPS Configuration
-VPS_IP="69.62.121.168"
-VPS_USER="root"
+VPS_HOST="celox"
 FRONTEND_PATH="/var/www/stateofthedart"
 BACKEND_PATH="/var/www/stateofthedart-backend"
 PM2_NAME="stateofthedart-backend"
 
 echo "========================================"
 echo "  State of the Dart - Deployment"
-echo "  VPS: ${VPS_USER}@${VPS_IP}"
+echo "  VPS: ${VPS_HOST}"
 echo "========================================"
 echo ""
 
@@ -34,7 +33,7 @@ echo "   Frontend gebaut"
 # SCHRITT 2: Frontend deployen
 # ============================================
 echo "2/5 Frontend deployen..."
-rsync -avz --delete dist/ ${VPS_USER}@${VPS_IP}:${FRONTEND_PATH}/
+rsync -avz --delete dist/ ${VPS_HOST}:${FRONTEND_PATH}/
 echo "   Frontend deployed"
 
 # ============================================
@@ -55,9 +54,9 @@ rsync -avz \
   --exclude='scripts' \
   --exclude='.env' \
   --exclude='env.example' \
-  server/dist/ ${VPS_USER}@${VPS_IP}:${BACKEND_PATH}/dist/
+  server/dist/ ${VPS_HOST}:${BACKEND_PATH}/dist/
 
-rsync -avz server/package*.json ${VPS_USER}@${VPS_IP}:${BACKEND_PATH}/
+rsync -avz server/package*.json ${VPS_HOST}:${BACKEND_PATH}/
 
 echo "   ⚠️  HINWEIS: .env wird NICHT deployed (Production-Secrets!)"
 
@@ -69,13 +68,13 @@ echo "   Backend deployed"
 echo "4/5 Backup-Scripts deployen..."
 
 # Backup- und Restore-Scripts auf VPS aktualisieren
-scp -q scripts/backup-db.sh scripts/restore-db.sh ${VPS_USER}@${VPS_IP}:${BACKEND_PATH}/
-ssh ${VPS_USER}@${VPS_IP} "chmod +x ${BACKEND_PATH}/backup-db.sh ${BACKEND_PATH}/restore-db.sh && mkdir -p ${BACKEND_PATH}/backups"
+scp -q scripts/backup-db.sh scripts/restore-db.sh ${VPS_HOST}:${BACKEND_PATH}/
+ssh ${VPS_HOST} "chmod +x ${BACKEND_PATH}/backup-db.sh ${BACKEND_PATH}/restore-db.sh && mkdir -p ${BACKEND_PATH}/backups"
 echo "   Backup-Scripts deployed"
 
 # Pre-Deployment Backup erstellen
 echo "   Erstelle Pre-Deployment Backup..."
-ssh ${VPS_USER}@${VPS_IP} "${BACKEND_PATH}/backup-db.sh" || echo "   Backup fehlgeschlagen (DB evtl. noch nicht vorhanden)"
+ssh ${VPS_HOST} "${BACKEND_PATH}/backup-db.sh" || echo "   Backup fehlgeschlagen (DB evtl. noch nicht vorhanden)"
 
 # ============================================
 # SCHRITT 5: Server neu starten
@@ -91,7 +90,7 @@ REQUIRED_VARS="GOOGLE_CALLBACK_URL APP_URL API_URL CORS_ORIGINS"
 MISSING_VARS=""
 
 for var in $REQUIRED_VARS; do
-  if ! ssh ${VPS_USER}@${VPS_IP} "grep -q '^${var}=' ${BACKEND_PATH}/.env" 2>/dev/null; then
+  if ! ssh ${VPS_HOST} "grep -q '^${var}=' ${BACKEND_PATH}/.env" 2>/dev/null; then
     MISSING_VARS="$MISSING_VARS $var"
   fi
 done
@@ -114,7 +113,7 @@ if [ -n "$MISSING_VARS" ]; then
 fi
 
 # Prüfe ob GOOGLE_CALLBACK_URL auf Production zeigt
-CALLBACK_URL=$(ssh ${VPS_USER}@${VPS_IP} "grep '^GOOGLE_CALLBACK_URL=' ${BACKEND_PATH}/.env | cut -d'=' -f2")
+CALLBACK_URL=$(ssh ${VPS_HOST} "grep '^GOOGLE_CALLBACK_URL=' ${BACKEND_PATH}/.env | cut -d'=' -f2")
 if [[ "$CALLBACK_URL" == *"localhost"* ]]; then
   echo ""
   echo "========================================"
@@ -129,7 +128,7 @@ fi
 
 echo "   VPS .env OK ✓"
 
-ssh ${VPS_USER}@${VPS_IP} << ENDSSH
+ssh ${VPS_HOST} << ENDSSH
   cd ${BACKEND_PATH}
 
   # Nginx: client_max_body_size auf 10m setzen (für Screenshot-Uploads)
@@ -163,8 +162,8 @@ echo "  Frontend: https://stateofthedart.com"
 echo "  Backend:  https://api.stateofthedart.com"
 echo ""
 echo "Status pruefen:"
-echo "  ssh ${VPS_USER}@${VPS_IP} 'pm2 status'"
+echo "  ssh ${VPS_HOST} 'pm2 status'"
 echo ""
 echo "Logs:"
-echo "  ssh ${VPS_USER}@${VPS_IP} 'pm2 logs ${PM2_NAME}'"
+echo "  ssh ${VPS_HOST} 'pm2 logs ${PM2_NAME}'"
 echo ""
