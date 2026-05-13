@@ -61,6 +61,10 @@ server/dist/
 /playwright-report/
 /playwright/.cache/
 
+# E2E test database
+server/data/e2e-test.db
+server/data/e2e-test.db-*
+
 # Database
 *.sqlite
 *.db

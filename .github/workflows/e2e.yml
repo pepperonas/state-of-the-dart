@@ -23,14 +23,22 @@ jobs:
           node-version: 20.x
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: Install frontend dependencies
         run: npm ci
+
+      - name: Install backend dependencies
+        run: npm ci
+        working-directory: server
+
+      - name: Build backend
+        run: npm run build
+        working-directory: server
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
-      - name: Build production
-        run: npm run build
+      # Frontend is rebuilt by globalSetup with VITE_API_URL pointing at the
+      # E2E backend on localhost:3001, so no separate build step here.
 
       - name: Run E2E tests
         run: npm run test:e2e

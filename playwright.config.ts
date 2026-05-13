@@ -1,12 +1,21 @@
 import { defineConfig, devices } from '@playwright/test';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const TEST_DB_PATH = path.resolve(__dirname, 'server', 'data', 'e2e-test.db');
+const FRONTEND_PORT = 4173;
+const BACKEND_PORT = 3001;
 
 /**
- * Playwright config — frontend E2E against the production preview build.
- * Backend is not started by these tests; flows that need /api/* should
- * route-mock or run against a dedicated test backend.
+ * Playwright config — frontend E2E against the production preview build
+ * with a real (isolated) backend on :3001 seeded by global-setup.
  */
 export default defineConfig({
   testDir: './e2e',
+  globalSetup: './e2e/global-setup.ts',
+  // Exclude helper modules from being treated as tests
+  testIgnore: ['**/fixtures.ts', '**/global-setup.ts'],
   // Tests share a single `vite preview` server. Parallel workers occasionally
   // race against each other for the in-flight asset requests, producing flaky
   // network-assertions. Suite is small, serial costs ~1s.
@@ -35,10 +44,34 @@ export default defineConfig({
     },
   ],
 
-  webServer: {
-    command: 'npm run preview',
-    url: 'http://localhost:4173',
-    reuseExistingServer: !process.env.CI,
-    timeout: 60_000,
-  },
+  webServer: [
+    {
+      // Frontend preview
+      command: 'npm run preview',
+      url: `http://localhost:${FRONTEND_PORT}`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 60_000,
+    },
+    {
+      // Isolated backend pointing at the test DB seeded in globalSetup
+      command: 'node dist/index.js',
+      cwd: path.resolve(__dirname, 'server'),
+      url: `http://localhost:${BACKEND_PORT}/health`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 60_000,
+      env: {
+        NODE_ENV: 'test',
+        PORT: String(BACKEND_PORT),
+        DATABASE_PATH: TEST_DB_PATH,
+        JWT_SECRET: 'e2e-test-jwt-secret',
+        SESSION_SECRET: 'e2e-test-session-secret',
+        CORS_ORIGINS: `http://localhost:${FRONTEND_PORT},http://localhost:5173,http://localhost:3000`,
+        APP_URL: `http://localhost:${FRONTEND_PORT}`,
+        // Dummy values so passport-google-oauth20 doesn't crash at import.
+        // No OAuth flow is exercised in tests; password login only.
+        GOOGLE_CLIENT_ID: 'e2e-dummy-client-id',
+        GOOGLE_CLIENT_SECRET: 'e2e-dummy-secret',
+      },
+    },
+  ],
 });

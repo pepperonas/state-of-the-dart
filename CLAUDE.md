@@ -238,7 +238,7 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 ## Testing
 
 - **Unit/Integration**: Vitest + React Testing Library in `src/tests/`. Setup in `src/tests/setup.ts`. 294 tests.
-- **E2E**: Playwright in `e2e/` against the production preview build. Config `playwright.config.ts` auto-starts `vite preview` on :4173 and blocks the PWA service worker (it'd skew network assertions). Workers are pinned to 1 — `vite preview` races under parallel load. Currently 6 tests: smoke, asset-count regression guard, no-eager-heavy-chunks guard, login page.
+- **E2E**: Playwright in `e2e/` against the production preview build PLUS an isolated backend on :3001 with its own SQLite test DB (`server/data/e2e-test.db`). Config `playwright.config.ts` runs two web servers and blocks the PWA service worker (it'd skew network assertions). Workers are pinned to 1 — `vite preview` races under parallel load. `e2e/global-setup.ts` rebuilds the frontend with `VITE_API_URL=http://localhost:3001` (the checked-in `.env` points at production) and seeds the test user via `server/scripts/seed-test-user.ts`. Currently 8 tests: smoke, asset-count regression guard, no-eager-heavy-chunks guard, login page, real auth flow (success + failure).
 - **CI**: `.github/workflows/test.yml` runs Vitest + lint + build; `.github/workflows/e2e.yml` runs the Playwright suite and uploads the HTML report as an artifact.
 
 ## Deployment
