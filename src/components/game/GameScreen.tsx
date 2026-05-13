@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, RotateCcw, X, Bot, ChevronDown, ChevronUp, AlertTriangle, Smile, Flame } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 const Confetti = lazy(() => import('react-confetti'));
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+const ThrowChart = lazy(() => import('./ThrowChart'));
 import { useGame } from '../../context/GameContext';
 import { usePlayer } from '../../context/PlayerContext';
 import { useSettings } from '../../context/SettingsContext';
@@ -1655,161 +1655,30 @@ const GameScreen: React.FC = () => {
               ? currentLeg.throws
               : state.currentMatch.legs.flatMap(l => l.throws);
             return (
-            <div className="glass-card rounded-xl p-6 mt-2 animate-fade-in">
-              {/* Leg/Match Toggle */}
-              <div className="flex gap-2 mb-4">
-                <button
-                  onClick={() => setStatsView('leg')}
-                  className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-all ${
-                    statsView === 'leg' ? 'bg-primary-500 text-white' : 'bg-dark-800 text-dark-400 hover:bg-dark-700'
-                  }`}
-                >
-                  Aktuelles Leg
-                </button>
-                <button
-                  onClick={() => setStatsView('match')}
-                  className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-all ${
-                    statsView === 'match' ? 'bg-primary-500 text-white' : 'bg-dark-800 text-dark-400 hover:bg-dark-700'
-                  }`}
-                >
-                  Gesamtes Spiel
-                </button>
-              </div>
-              {/* Score Chart */}
-              <div className="mb-8">
-                <h4 className="text-white font-bold mb-4">Geworfene Punkte pro Aufnahme</h4>
-                <div className="h-[220px] sm:h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={(() => {
-                    // Build chart data
-                    const maxThrows = Math.max(
-                      ...state.currentMatch.players.map(p =>
-                        chartThrows.filter(t => t.playerId === p.playerId).length
-                      )
-                    );
-
-                    const chartData = [];
-                    for (let i = 0; i < maxThrows; i++) {
-                      const dataPoint: any = { throwNumber: i + 1 };
-
-                      state.currentMatch.players.forEach(player => {
-                        const playerThrows = chartThrows.filter(t => t.playerId === player.playerId);
-                        const throwData = playerThrows[i];
-                        dataPoint[player.name] = throwData ? throwData.score : null;
-                      });
-
-                      chartData.push(dataPoint);
-                    }
-
-                    return chartData;
-                  })()}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis
-                      dataKey="throwNumber"
-                      stroke="#9ca3af"
-                      label={{ value: 'Aufnahme', position: 'insideBottom', offset: -5, fill: '#9ca3af' }}
-                    />
-                    <YAxis
-                      stroke="#9ca3af"
-                      label={{ value: 'Punkte', angle: -90, position: 'insideLeft', fill: '#9ca3af' }}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#1f2937',
-                        border: '1px solid #374151',
-                        borderRadius: '8px',
-                        color: '#fff'
-                      }}
-                    />
-                    <Legend />
-                    {state.currentMatch.players.map((player, index) => {
-                      const colors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'];
-                      return (
-                        <Line
-                          key={player.playerId}
-                          type="monotone"
-                          dataKey={player.name}
-                          stroke={colors[index % colors.length]}
-                          strokeWidth={2}
-                          dot={{ r: 4 }}
-                          activeDot={{ r: 6 }}
-                          connectNulls
-                        />
-                      );
-                    })}
-                  </LineChart>
-                </ResponsiveContainer>
+              <div className="glass-card rounded-xl p-6 mt-2 animate-fade-in">
+                {/* Leg/Match Toggle */}
+                <div className="flex gap-2 mb-4">
+                  <button
+                    onClick={() => setStatsView('leg')}
+                    className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-all ${
+                      statsView === 'leg' ? 'bg-primary-500 text-white' : 'bg-dark-800 text-dark-400 hover:bg-dark-700'
+                    }`}
+                  >
+                    Aktuelles Leg
+                  </button>
+                  <button
+                    onClick={() => setStatsView('match')}
+                    className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-all ${
+                      statsView === 'match' ? 'bg-primary-500 text-white' : 'bg-dark-800 text-dark-400 hover:bg-dark-700'
+                    }`}
+                  >
+                    Gesamtes Spiel
+                  </button>
                 </div>
+                <Suspense fallback={<div className="h-[600px] flex items-center justify-center text-dark-400">Lade Chart…</div>}>
+                  <ThrowChart players={state.currentMatch.players} chartThrows={chartThrows} />
+                </Suspense>
               </div>
-
-              {/* Remaining Chart */}
-              <div>
-                <h4 className="text-white font-bold mb-4">Verbleibende Punkte</h4>
-                <div className="h-[220px] sm:h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={(() => {
-                    // Build remaining chart data
-                    const maxThrows = Math.max(
-                      ...state.currentMatch.players.map(p =>
-                        chartThrows.filter(t => t.playerId === p.playerId).length
-                      )
-                    );
-
-                    const chartData = [];
-                    for (let i = 0; i < maxThrows; i++) {
-                      const dataPoint: any = { throwNumber: i + 1 };
-
-                      state.currentMatch.players.forEach(player => {
-                        const playerThrows = chartThrows.filter(t => t.playerId === player.playerId);
-                        const throwData = playerThrows[i];
-                        dataPoint[player.name] = throwData ? throwData.remaining : null;
-                      });
-
-                      chartData.push(dataPoint);
-                    }
-
-                    return chartData;
-                  })()}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis
-                      dataKey="throwNumber"
-                      stroke="#9ca3af"
-                      label={{ value: 'Aufnahme', position: 'insideBottom', offset: -5, fill: '#9ca3af' }}
-                    />
-                    <YAxis
-                      stroke="#9ca3af"
-                      label={{ value: 'Verbleibend', angle: -90, position: 'insideLeft', fill: '#9ca3af' }}
-                      reversed
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#1f2937',
-                        border: '1px solid #374151',
-                        borderRadius: '8px',
-                        color: '#fff'
-                      }}
-                    />
-                    <Legend />
-                    {state.currentMatch.players.map((player, index) => {
-                      const colors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'];
-                      return (
-                        <Line
-                          key={player.playerId}
-                          type="monotone"
-                          dataKey={player.name}
-                          stroke={colors[index % colors.length]}
-                          strokeWidth={2}
-                          dot={{ r: 4 }}
-                          activeDot={{ r: 6 }}
-                          connectNulls
-                        />
-                      );
-                    })}
-                  </LineChart>
-                </ResponsiveContainer>
-                </div>
-              </div>
-            </div>
             );
           })()}
         </div>
