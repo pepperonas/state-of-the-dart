@@ -110,4 +110,4 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
   );
 };
 
-export default PlayerScore;
+export default React.memo(PlayerScore);

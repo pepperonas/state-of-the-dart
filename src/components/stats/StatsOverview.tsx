@@ -289,16 +289,24 @@ const StatsOverview: React.FC = () => {
     setShowExportMenu(false);
   };
   
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (!selectedPlayer) return;
-    exportMatchHistoryExcel(playerMatches, selectedPlayer.name);
     setShowExportMenu(false);
+    try {
+      await exportMatchHistoryExcel(playerMatches, selectedPlayer.name);
+    } catch (error) {
+      console.error(error);
+    }
   };
-  
-  const handleExportPDF = () => {
+
+  const handleExportPDF = async () => {
     if (!selectedPlayer) return;
-    exportMatchHistoryPDF(playerMatches, selectedPlayer.name);
     setShowExportMenu(false);
+    try {
+      await exportMatchHistoryPDF(playerMatches, selectedPlayer.name);
+    } catch (error) {
+      console.error(error);
+    }
   };
   
   if (players.length === 0) {

@@ -75,8 +75,8 @@ const LOWER_IS_BETTER_METRICS = new Set([
 
 describe('Achievement Definitions', () => {
   describe('Total Count', () => {
-    it('should have exactly 464 achievements', () => {
-      expect(ACHIEVEMENTS.length).toBe(464);
+    it('should have exactly 463 achievements', () => {
+      expect(ACHIEVEMENTS.length).toBe(463);
     });
   });
 

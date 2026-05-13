@@ -3,9 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, RotateCcw, Trophy, Clock, Check, X } from 'lucide-react';
 import { usePlayer } from '../../context/PlayerContext';
+import { useSettings } from '../../context/SettingsContext';
 import { Player, Dart } from '../../types/index';
 import PlayerAvatar from '../player/PlayerAvatar';
-import confetti from 'canvas-confetti';
+import { celebrate as confetti } from '../../utils/celebration';
 import audioSystem from '../../utils/audio';
 import { saveGameState, loadGameState, clearGameState, STORAGE_KEYS, ATCSavedState } from '../../utils/gameStorage';
 import { SpinnerWheel } from './SpinnerWheel';
@@ -28,6 +29,14 @@ interface Target {
 const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
   const { t } = useTranslation();
   const { players } = usePlayer();
+  const { settings } = useSettings();
+
+  // Wire up audio volume from settings
+  useEffect(() => {
+    audioSystem.setEnabled(settings.soundVolume > 0 || (settings.callerVolume ?? 0) > 0 || (settings.effectsVolume ?? 0) > 0);
+    audioSystem.setCallerVolume(settings.callerVolume ?? settings.soundVolume);
+    audioSystem.setEffectsVolume(settings.effectsVolume ?? settings.soundVolume);
+  }, [settings.soundVolume, settings.callerVolume, settings.effectsVolume]);
 
   // Setup state
   const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
@@ -220,6 +229,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
     setTurnHistory([]);
     setGameStartTime(Date.now());
     setShowSetup(false);
+    audioSystem.playSound('/sounds/texts/gameon.mp3', true);
   };
 
   const handleSpinnerComplete = (startingPlayerIndex: number) => {
@@ -274,7 +284,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
       clearGameState(STORAGE_KEYS.ATC);
       setWinner(currentPlayer);
       setShowWinner(true);
-      audioSystem.playSound('/sounds/OMNI/pop-success.mp3', true);
+      audioSystem.playSound('/sounds/texts/gameshot.mp3', true);
       confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
     } else {
       setCurrentDarts([]);
@@ -317,7 +327,8 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
     };
 
     setCurrentDarts(prev => [...prev, dart]);
-    audioSystem.playSound('/sounds/OMNI/pop-success.mp3');
+    // Announce the target number that was hit (caller says "One!", "Two!", ..., "Twenty!", "Twenty-five!")
+    audioSystem.announceScore(target.segment);
   };
 
   const handleMiss = () => {
@@ -331,7 +342,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
     };
 
     setCurrentDarts(prev => [...prev, dart]);
-    audioSystem.playSound('/sounds/OMNI/pop-success.mp3');
+    audioSystem.playSound('/sounds/OMNI/pop.mp3');
   };
 
   const cancelAutoConfirm = () => {

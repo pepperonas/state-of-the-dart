@@ -6,7 +6,7 @@ import { ArrowLeft, RotateCcw, Trophy, Zap, Check, X } from 'lucide-react';
 import { usePlayer } from '../../context/PlayerContext';
 import { Player, Dart } from '../../types/index';
 import PlayerAvatar from '../player/PlayerAvatar';
-import confetti from 'canvas-confetti';
+import { celebrate as confetti } from '../../utils/celebration';
 import { saveGameState, loadGameState, clearGameState, STORAGE_KEYS, ShanghaiSavedState } from '../../utils/gameStorage';
 import { SpinnerWheel } from './SpinnerWheel';
 

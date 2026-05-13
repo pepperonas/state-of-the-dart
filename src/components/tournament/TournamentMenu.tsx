@@ -6,7 +6,7 @@ import { usePlayer } from '../../context/PlayerContext';
 import { Player, Tournament, TournamentSettings, TournamentParticipant, TournamentMatch } from '../../types/index';
 import PlayerAvatar from '../player/PlayerAvatar';
 import { v4 as uuidv4 } from 'uuid';
-import confetti from 'canvas-confetti';
+import { celebrate as confetti } from '../../utils/celebration';
 
 type TournamentType = 'knockout' | 'round-robin';
 

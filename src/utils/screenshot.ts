@@ -1,5 +1,3 @@
-import html2canvas from 'html2canvas';
-
 /**
  * Captures a screenshot of the current page
  * Excludes modals and overlays (elements with z-50 or higher)
@@ -7,6 +5,7 @@ import html2canvas from 'html2canvas';
  */
 export async function captureScreenshot(): Promise<string | null> {
   try {
+    const { default: html2canvas } = await import('html2canvas');
     const canvas = await html2canvas(document.body, {
       ignoreElements: (element) => {
         // Ignore modals, overlays, and high z-index elements

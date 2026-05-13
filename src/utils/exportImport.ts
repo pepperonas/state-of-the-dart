@@ -2,9 +2,6 @@
 
 import { TenantStorage } from './storage';
 import { ExportData, Match, MatchPlayer } from '../types';
-import * as XLSX from 'xlsx';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { formatDate } from './dateUtils';
 
 /**
@@ -192,8 +189,9 @@ export const exportMatchHistoryCSV = (matches: Match[], playerName: string): voi
 /**
  * Export match history to Excel
  */
-export const exportMatchHistoryExcel = (matches: Match[], playerName: string): void => {
+export const exportMatchHistoryExcel = async (matches: Match[], playerName: string): Promise<void> => {
   try {
+    const XLSX = await import('xlsx');
     // Prepare data
     const headers = [
       'Date',
@@ -312,8 +310,12 @@ export const exportMatchHistoryExcel = (matches: Match[], playerName: string): v
 /**
  * Export match history to PDF
  */
-export const exportMatchHistoryPDF = (matches: Match[], playerName: string): void => {
+export const exportMatchHistoryPDF = async (matches: Match[], playerName: string): Promise<void> => {
   try {
+    const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+      import('jspdf'),
+      import('jspdf-autotable'),
+    ]);
     const doc = new jsPDF();
     
     // Add title

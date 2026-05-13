@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Star } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { celebrate as confetti } from '../../utils/celebration';
 import { useAchievements } from '../../context/AchievementContext';
 import { usePlayer } from '../../context/PlayerContext';
 import { AchievementTier, AchievementNotification as AchievementNotificationType, getTierColor, getRarityColor, getAchievementScope, getScopeColor, ACHIEVEMENTS } from '../../types/achievements';

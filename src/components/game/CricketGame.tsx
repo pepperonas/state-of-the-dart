@@ -7,7 +7,7 @@ import { useGame } from '../../context/GameContext';
 import { usePlayer } from '../../context/PlayerContext';
 import { Player, CricketState, Dart } from '../../types/index';
 import PlayerAvatar from '../player/PlayerAvatar';
-import confetti from 'canvas-confetti';
+import { celebrate as confetti } from '../../utils/celebration';
 import { saveGameState, loadGameState, clearGameState, STORAGE_KEYS, CricketSavedState } from '../../utils/gameStorage';
 import { SpinnerWheel } from './SpinnerWheel';
 

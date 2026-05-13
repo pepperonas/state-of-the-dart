@@ -182,4 +182,4 @@ const Dartboard: React.FC<DartboardProps> = ({
   );
 };
 
-export default Dartboard;
+export default React.memo(Dartboard);

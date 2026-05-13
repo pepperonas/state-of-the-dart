@@ -94,7 +94,7 @@ Express routes in `server/src/routes/`, registered in `server/src/index.ts`:
 ### Key Business Logic
 - Scoring: `src/utils/scoring.ts` (calculateThrowScore, isBust, calculateAverage)
 - Checkout suggestions: `src/data/checkoutTable.ts`
-- Bot AI: `src/utils/botAI.ts` (10 difficulty levels)
+- Bot AI: `src/utils/botLogic.ts` (10 difficulty levels)
 - Audio: `src/utils/audio.ts` (dart caller, 400+ sound files)
 - Heatmaps: `src/utils/heatmap.ts`
 - Export: `src/utils/exportImport.ts` (CSV, XLSX, PDF, JSON)
@@ -125,7 +125,7 @@ All game modes except Online Multiplayer persist state to localStorage and appea
 ## Critical Patterns & Pitfalls
 
 ### Achievement System Persistence
-- 464 achievements defined in `src/types/achievements.ts` (frontend is source of truth for definitions)
+- 463 achievements defined in `src/types/achievements.ts` (frontend is source of truth for definitions)
 - DB table `player_achievements` stores unlock records and progress (no FK to legacy achievements table)
 - Achievement IDs use underscores (`first_180`, `ten_180s`) — legacy DB had dashes (`first-180`), don't mix
 - `AchievementContext` unlock flow: save to localStorage immediately, then API call with retry (2 attempts + pending queue)

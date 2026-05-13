@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, Suspense, lazy } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, RotateCcw, X, Bot, ChevronDown, ChevronUp, AlertTriangle, Smile, Flame } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import Confetti from 'react-confetti';
+const Confetti = lazy(() => import('react-confetti'));
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useGame } from '../../context/GameContext';
 import { usePlayer } from '../../context/PlayerContext';
@@ -598,7 +598,7 @@ const GameScreen: React.FC = () => {
     setPendingGameStart(null);
   };
   
-  const handleDartHit = (dart: Dart) => {
+  const handleDartHit = React.useCallback((dart: Dart) => {
     // If a dart is selected for editing, replace it
     if (editingDartIndex !== null) {
       dispatch({ type: 'REPLACE_DART', payload: { index: editingDartIndex, dart } });
@@ -608,7 +608,7 @@ const GameScreen: React.FC = () => {
     }
     // Play a subtle click sound for dart hit feedback
     audioSystem.playSound('/sounds/OMNI/pop.mp3', false);
-  };
+  }, [editingDartIndex, dispatch]);
 
   // Define handleConfirmThrow with useCallback BEFORE useEffects that use it
   const handleConfirmThrow = React.useCallback(() => {
@@ -780,6 +780,11 @@ const GameScreen: React.FC = () => {
   }, [state.currentThrow.length, isEditingThrow]);
 
   // Detect checkout state for pulsing button (when < 3 darts produce a valid checkout)
+  const dartboardHighlights = useMemo(
+    () => state.checkoutSuggestion || [],
+    [state.checkoutSuggestion]
+  );
+
   const isEarlyCheckout = useMemo(() => {
     if (!state.currentMatch || state.currentThrow.length === 0 || state.currentThrow.length >= 3) return false;
     if (isEditingThrow) return false;
@@ -891,13 +896,13 @@ const GameScreen: React.FC = () => {
     dispatch({ type: 'UNDO_THROW' });
   };
   
-  const handleRemoveDart = () => {
+  const handleRemoveDart = React.useCallback(() => {
     dispatch({ type: 'REMOVE_DART' });
-  };
-  
-  const handleClearThrow = () => {
+  }, [dispatch]);
+
+  const handleClearThrow = React.useCallback(() => {
     dispatch({ type: 'CLEAR_THROW' });
-  };
+  }, [dispatch]);
   
   const handleBackToMenu = () => {
     if (state.currentMatch?.status === 'in-progress') {
@@ -1270,7 +1275,9 @@ const GameScreen: React.FC = () => {
     return (
       <div className="min-h-dvh p-4 gradient-mesh flex items-center justify-center">
         <div className="fixed inset-0 pointer-events-none z-0">
-          <Confetti recycle={true} numberOfPieces={200} gravity={0.15} />
+          <Suspense fallback={null}>
+            <Confetti recycle={true} numberOfPieces={200} gravity={0.15} />
+          </Suspense>
         </div>
         <div className="max-w-4xl w-full relative z-10">
           <div className="glass-card-gold p-12 text-center">
@@ -1351,7 +1358,11 @@ const GameScreen: React.FC = () => {
   
   return (
     <div className="min-h-dvh p-4 md:p-8 gradient-mesh overflow-x-hidden">
-      {showConfetti && <Confetti recycle={false} numberOfPieces={300} gravity={0.3} />}
+      {showConfetti && (
+        <Suspense fallback={null}>
+          <Confetti recycle={false} numberOfPieces={300} gravity={0.3} />
+        </Suspense>
+      )}
 
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
@@ -1420,7 +1431,7 @@ const GameScreen: React.FC = () => {
               <div className="w-full max-w-lg space-y-3">
                 <Dartboard
                   onDartHit={handleDartHit}
-                  highlightedSegments={state.checkoutSuggestion || []}
+                  highlightedSegments={dartboardHighlights}
                   size={480}
                 />
                 {/* Miss Button */}

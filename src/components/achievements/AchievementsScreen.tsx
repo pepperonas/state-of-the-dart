@@ -95,120 +95,6 @@ const AchievementsScreen: React.FC = () => {
     return Math.round((unlockedAchievements.length / ACHIEVEMENTS.length) * 100);
   }, [unlockedAchievements]);
 
-  const renderAchievementCard = (achievement: Achievement) => {
-    const unlocked = isAchievementUnlocked(selectedPlayerId, achievement.id);
-    const progress = playerProgress?.progress[achievement.id];
-    const isHidden = achievement.hidden && !unlocked;
-
-    return (
-      <div
-        key={achievement.id}
-        className={`glass-card p-4 transition-all hover:scale-105 ${
-          unlocked ? 'border-2 border-primary-500' : 'opacity-75'
-        }`}
-      >
-        {/* Achievement Icon & Name */}
-        <div className="flex items-start gap-3 mb-3">
-          <div
-            className={`text-4xl flex-shrink-0 ${unlocked ? '' : 'grayscale opacity-50'}`}
-            title={achievement.tier}
-          >
-            {isHidden ? '❓' : achievement.icon}
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-white text-lg flex items-center gap-2 truncate">
-              <span className="truncate">{isHidden ? '???' : achievement.name}</span>
-              {unlocked && <Award size={16} className="text-primary-400 flex-shrink-0" />}
-            </h3>
-            <p className="text-sm text-dark-400 mt-1 line-clamp-2">
-              {isHidden ? t('achievements.hidden_achievement') : achievement.description}
-            </p>
-          </div>
-        </div>
-
-        {/* Progress Bar (if not unlocked and has progress) */}
-        {!unlocked && progress && (
-          <div className="mb-3">
-            <div className="flex justify-between text-xs text-dark-400 mb-1">
-              <span>{t('achievements.progress')}</span>
-              <span>
-                {progress.current}/{progress.target}
-              </span>
-            </div>
-            <div className="w-full bg-dark-800 rounded-full h-2">
-              <div
-                className="bg-primary-500 h-2 rounded-full transition-all"
-                style={{ width: `${progress.percentage}%` }}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Achievement Meta Info */}
-        <div className="flex items-center justify-between text-xs flex-wrap gap-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span
-              className="px-2 py-1 rounded font-semibold"
-              style={{
-                backgroundColor: getTierColor(achievement.tier) + '33',
-                color: getTierColor(achievement.tier),
-              }}
-            >
-              {achievement.tier.toUpperCase()}
-            </span>
-            {achievement.rarity && (
-              <span
-                className="px-2 py-1 rounded font-semibold"
-                style={{
-                  backgroundColor: getRarityColor(achievement.rarity) + '33',
-                  color: getRarityColor(achievement.rarity),
-                }}
-              >
-                {achievement.rarity.toUpperCase()}
-              </span>
-            )}
-            {(() => {
-              const scope = getAchievementScope(achievement);
-              const scopeColor = getScopeColor(scope);
-              return (
-                <span
-                  className="px-2 py-1 rounded font-semibold"
-                  style={{
-                    backgroundColor: scopeColor + '33',
-                    color: scopeColor,
-                  }}
-                >
-                  {t(`achievements.scope_${scope}`)}
-                </span>
-              );
-            })()}
-          </div>
-          <div className="flex items-center gap-1 text-accent-400 font-bold">
-            <Star size={14} />
-            {achievement.points}
-          </div>
-        </div>
-
-        {/* Unlocked Badge */}
-        {unlocked && (
-          <div className="mt-3 pt-3 border-t border-dark-700">
-            <div className="flex items-center justify-between text-xs text-dark-400">
-              <span className="flex items-center gap-1">
-                <Trophy size={12} className="text-primary-400" />
-                {t('achievements.unlocked')}
-              </span>
-              <span>
-                {formatDate(
-                  playerProgress?.unlockedAchievements.find(u => u.achievementId === achievement.id)
-                    ?.unlockedAt
-                )}
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
 
   if (players.length === 0) {
     return (
@@ -376,7 +262,17 @@ const AchievementsScreen: React.FC = () => {
         {/* Achievements Grid */}
         {filteredAchievements.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredAchievements.map((achievement) => renderAchievementCard(achievement))}
+            {filteredAchievements.map((achievement) => (
+              <AchievementCard
+                key={achievement.id}
+                achievement={achievement}
+                unlocked={isAchievementUnlocked(selectedPlayerId, achievement.id)}
+                progress={playerProgress?.progress[achievement.id]}
+                unlockedAt={
+                  playerProgress?.unlockedAchievements.find(u => u.achievementId === achievement.id)?.unlockedAt
+                }
+              />
+            ))}
           </div>
         ) : (
           <div className="glass-card p-8 text-center">
@@ -390,5 +286,112 @@ const AchievementsScreen: React.FC = () => {
     </div>
   );
 };
+
+interface AchievementCardProps {
+  achievement: Achievement;
+  unlocked: boolean;
+  progress: { current: number; target: number; percentage: number } | undefined;
+  unlockedAt: Date | string | undefined;
+}
+
+const AchievementCard = React.memo<AchievementCardProps>(({ achievement, unlocked, progress, unlockedAt }) => {
+  const { t } = useTranslation();
+  const isHidden = achievement.hidden && !unlocked;
+  const scope = getAchievementScope(achievement);
+  const scopeColor = getScopeColor(scope);
+
+  return (
+    <div
+      className={`glass-card p-4 transition-all hover:scale-105 ${
+        unlocked ? 'border-2 border-primary-500' : 'opacity-75'
+      }`}
+    >
+      <div className="flex items-start gap-3 mb-3">
+        <div
+          className={`text-4xl flex-shrink-0 ${unlocked ? '' : 'grayscale opacity-50'}`}
+          title={achievement.tier}
+        >
+          {isHidden ? '❓' : achievement.icon}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-bold text-white text-lg flex items-center gap-2 truncate">
+            <span className="truncate">{isHidden ? '???' : achievement.name}</span>
+            {unlocked && <Award size={16} className="text-primary-400 flex-shrink-0" />}
+          </h3>
+          <p className="text-sm text-dark-400 mt-1 line-clamp-2">
+            {isHidden ? t('achievements.hidden_achievement') : achievement.description}
+          </p>
+        </div>
+      </div>
+
+      {!unlocked && progress && (
+        <div className="mb-3">
+          <div className="flex justify-between text-xs text-dark-400 mb-1">
+            <span>{t('achievements.progress')}</span>
+            <span>
+              {progress.current}/{progress.target}
+            </span>
+          </div>
+          <div className="w-full bg-dark-800 rounded-full h-2">
+            <div
+              className="bg-primary-500 h-2 rounded-full transition-all"
+              style={{ width: `${progress.percentage}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between text-xs flex-wrap gap-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span
+            className="px-2 py-1 rounded font-semibold"
+            style={{
+              backgroundColor: getTierColor(achievement.tier) + '33',
+              color: getTierColor(achievement.tier),
+            }}
+          >
+            {achievement.tier.toUpperCase()}
+          </span>
+          {achievement.rarity && (
+            <span
+              className="px-2 py-1 rounded font-semibold"
+              style={{
+                backgroundColor: getRarityColor(achievement.rarity) + '33',
+                color: getRarityColor(achievement.rarity),
+              }}
+            >
+              {achievement.rarity.toUpperCase()}
+            </span>
+          )}
+          <span
+            className="px-2 py-1 rounded font-semibold"
+            style={{
+              backgroundColor: scopeColor + '33',
+              color: scopeColor,
+            }}
+          >
+            {t(`achievements.scope_${scope}`)}
+          </span>
+        </div>
+        <div className="flex items-center gap-1 text-accent-400 font-bold">
+          <Star size={14} />
+          {achievement.points}
+        </div>
+      </div>
+
+      {unlocked && (
+        <div className="mt-3 pt-3 border-t border-dark-700">
+          <div className="flex items-center justify-between text-xs text-dark-400">
+            <span className="flex items-center gap-1">
+              <Trophy size={12} className="text-primary-400" />
+              {t('achievements.unlocked')}
+            </span>
+            <span>{formatDate(unlockedAt)}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+});
 
 export default AchievementsScreen;
