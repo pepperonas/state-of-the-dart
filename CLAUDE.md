@@ -18,6 +18,9 @@ npm run lint         # ESLint
 npm run test:run     # Run tests once
 npm test             # Vitest in watch mode
 npm test -- src/tests/utils/scoring.test.ts  # Single test file
+npm run test:e2e     # Playwright E2E (auto-starts vite preview on :4173)
+npm run test:e2e:ui  # Playwright UI mode for debugging
+ANALYZE=true npm run build  # Build + emit dist/bundle-stats.html
 ```
 
 ### Backend (server/ directory)
@@ -234,7 +237,9 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 
 ## Testing
 
-Tests in `src/tests/` using Vitest + React Testing Library. Setup in `src/tests/setup.ts`.
+- **Unit/Integration**: Vitest + React Testing Library in `src/tests/`. Setup in `src/tests/setup.ts`. 294 tests.
+- **E2E**: Playwright in `e2e/` against the production preview build. Config `playwright.config.ts` auto-starts `vite preview` on :4173 and blocks the PWA service worker (it'd skew network assertions). Workers are pinned to 1 — `vite preview` races under parallel load. Currently 6 tests: smoke, asset-count regression guard, no-eager-heavy-chunks guard, login page.
+- **CI**: `.github/workflows/test.yml` runs Vitest + lint + build; `.github/workflows/e2e.yml` runs the Playwright suite and uploads the HTML report as an artifact.
 
 ## Deployment
 

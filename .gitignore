@@ -56,6 +56,11 @@ website/dist/
 # Backend build output
 server/dist/
 
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
 # Database
 *.sqlite
 *.db
