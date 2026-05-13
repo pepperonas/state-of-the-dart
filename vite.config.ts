@@ -44,7 +44,9 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,jpg,jpeg,mp3,woff,woff2}'],
+        // mp3 deliberately excluded — runtimeCaching below handles audio lazily.
+        // Precaching all 609 sound files (~33 MB) would inflate SW install.
+        globPatterns: ['**/*.{js,css,html,svg,png,jpg,jpeg,woff,woff2}'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
         runtimeCaching: [
