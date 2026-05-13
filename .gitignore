@@ -53,6 +53,9 @@ CLAUDE.md
 # Website build output
 website/dist/
 
+# Backend build output
+server/dist/
+
 # Database
 *.sqlite
 *.db
