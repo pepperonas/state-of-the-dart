@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, Suspense, lazy } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, Target, Award, ChevronDown, ChevronUp, TrendingUp, Loader, Search, ChevronLeft, ChevronRight, Clock, Users, Filter } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Match, Throw } from '../../types';
 import { formatDate, getTimestampForSort } from '../../utils/dateUtils';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { api } from '../../services/api';
+
+const MatchChart = lazy(() => import('./MatchChart'));
 import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
 import PlayerAvatar from '../player/PlayerAvatar';
 
@@ -409,29 +410,9 @@ const MatchHistoryPage: React.FC = () => {
                                   <TrendingUp size={16} className="text-primary-400" />
                                   {t('match_history.round_chart', 'Runden-Verlauf')}
                                 </h4>
-                                <div className="h-[180px] sm:h-[250px]"><ResponsiveContainer width="100%" height="100%">
-                                  <LineChart data={chartData}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
-                                    <XAxis dataKey="round" stroke="#737373" style={{ fontSize: '11px' }} />
-                                    <YAxis stroke="#737373" style={{ fontSize: '11px' }} />
-                                    <Tooltip
-                                      contentStyle={{ backgroundColor: '#0a0a0a', border: '1px solid #404040', borderRadius: '8px', padding: '8px' }}
-                                      labelStyle={{ color: '#fff', fontWeight: 'bold', fontSize: '12px' }}
-                                    />
-                                    <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '12px' }} iconType="line" />
-                                    {(detail.players || players).map((p: any, idx: number) => (
-                                      <Line
-                                        key={p.playerId}
-                                        type="monotone"
-                                        dataKey={p.playerId}
-                                        stroke={['#0ea5e9', '#a855f7', '#f59e0b', '#ef4444'][idx % 4]}
-                                        strokeWidth={2}
-                                        dot={{ r: 3 }}
-                                        name={p.name}
-                                      />
-                                    ))}
-                                  </LineChart>
-                                </ResponsiveContainer></div>
+                                <Suspense fallback={<div className="h-[180px] sm:h-[250px] flex items-center justify-center text-dark-400 text-sm">Lade…</div>}>
+                                  <MatchChart data={chartData} players={detail.players || players} />
+                                </Suspense>
                               </div>
                             );
                           })()}
@@ -510,6 +491,49 @@ const ThrowHistory: React.FC<{ detail: any; players: any[] }> = ({ detail, playe
   const legs = detail.legs || [];
   if (legs.length === 0) return null;
 
+  // Get unique player IDs in throw order
+  const playerIds: string[] = [];
+  for (const leg of legs) {
+    for (const thr of (leg.throws || [])) {
+      if (!playerIds.includes(thr.playerId)) {
+        playerIds.push(thr.playerId);
+      }
+    }
+  }
+
+  const getPlayerName = (pid: string) => {
+    const p = players.find((pl: any) => pl.playerId === pid);
+    return p?.name || '?';
+  };
+
+  // Group throws into rounds (one throw per player per round)
+  const groupIntoRounds = (throws: any[]) => {
+    const rounds: any[][] = [];
+    let currentRound: any[] = [];
+    let seenInRound = new Set<string>();
+
+    for (const thr of throws) {
+      if (seenInRound.has(thr.playerId)) {
+        rounds.push(currentRound);
+        currentRound = [thr];
+        seenInRound = new Set([thr.playerId]);
+      } else {
+        currentRound.push(thr);
+        seenInRound.add(thr.playerId);
+      }
+    }
+    if (currentRound.length > 0) rounds.push(currentRound);
+    return rounds;
+  };
+
+  const formatDarts = (darts: any[]) => {
+    return (darts || []).map((d: any) => {
+      if (d.score === 0 && d.multiplier === 0) return 'S0';
+      const prefix = d.multiplier === 3 ? 'T' : d.multiplier === 2 ? 'D' : 'S';
+      return `${prefix}${d.segment}`;
+    }).join(' ');
+  };
+
   return (
     <div className="bg-dark-800/50 rounded-xl overflow-hidden">
       <button
@@ -520,32 +544,51 @@ const ThrowHistory: React.FC<{ detail: any; players: any[] }> = ({ detail, playe
         {open ? <ChevronUp size={16} className="text-dark-400" /> : <ChevronDown size={16} className="text-dark-400" />}
       </button>
       {open && (
-        <div className="px-4 pb-4 space-y-4">
-          {legs.map((leg: any, legIdx: number) => (
-            <div key={leg.id || legIdx}>
-              <div className="text-xs text-dark-400 font-semibold mb-2">{t('match_history.leg_number', { number: legIdx + 1 })}</div>
-              <div className="space-y-1">
-                {(leg.throws || []).map((t: any, tIdx: number) => {
-                  const p = players.find((pl: any) => pl.playerId === t.playerId);
-                  return (
-                    <div key={tIdx} className="flex items-center gap-3 text-xs">
-                      <span className="text-dark-500 w-16 truncate">{p?.name || '?'}</span>
-                      <span className="text-dark-400 font-mono w-24">
-                        {(t.darts || []).map((d: any) => {
-                          const prefix = d.multiplier === 3 ? 'T' : d.multiplier === 2 ? 'D' : 'S';
-                          return `${prefix}${d.segment}`;
-                        }).join(' ')}
-                      </span>
-                      <span className={`font-bold w-8 text-right ${t.isBust ? 'text-red-400' : 'text-white'}`}>
-                        {t.isBust ? '0' : t.score}
-                      </span>
-                      <span className="text-dark-500">&rarr; {t.remaining}</span>
-                    </div>
-                  );
-                })}
+        <div className="px-2 sm:px-4 pb-4 space-y-4">
+          {legs.map((leg: any, legIdx: number) => {
+            const rounds = groupIntoRounds(leg.throws || []);
+            return (
+              <div key={leg.id || legIdx}>
+                <div className="text-xs text-dark-400 font-semibold mb-2">{t('match_history.leg_number', { number: legIdx + 1 })}</div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b border-dark-600">
+                        <th className="text-dark-500 text-left py-1 pr-1 w-6">#</th>
+                        {playerIds.map(pid => (
+                          <th key={pid} className="text-white font-bold text-center py-1 px-1 truncate max-w-[120px]">
+                            {getPlayerName(pid)}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rounds.map((round, rIdx) => (
+                        <tr key={rIdx} className="border-b border-dark-700/30">
+                          <td className="text-dark-600 py-1 pr-1 align-top">{rIdx + 1}</td>
+                          {playerIds.map(pid => {
+                            const thr = round.find((r: any) => r.playerId === pid);
+                            if (!thr) return <td key={pid} className="py-1 px-1"></td>;
+                            return (
+                              <td key={pid} className="py-1 px-1 text-center">
+                                <div className="font-mono text-dark-400 text-[11px]">{formatDarts(thr.darts)}</div>
+                                <div className="flex items-center justify-center gap-1">
+                                  <span className={`font-bold ${thr.isBust ? 'text-red-400' : thr.score >= 100 ? 'text-blue-400' : 'text-white'}`}>
+                                    {thr.isBust ? '0' : thr.score}
+                                  </span>
+                                  <span className="text-dark-500">→{thr.remaining}</span>
+                                </div>
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
