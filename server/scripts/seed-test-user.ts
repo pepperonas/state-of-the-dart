@@ -32,6 +32,8 @@ db.exec(schema);
 const now = Date.now();
 const trialEnd = now + 30 * 24 * 60 * 60 * 1000;
 const passwordHash = bcrypt.hashSync(password, 10);
+const userId = uuidv4();
+const tenantId = uuidv4();
 
 db.prepare(
   `INSERT INTO users (
@@ -39,8 +41,14 @@ db.prepare(
     subscription_status, trial_ends_at,
     created_at, last_active
   ) VALUES (?, ?, ?, ?, 1, 'trial', ?, ?, ?)`
-).run(uuidv4(), email, passwordHash, name, trialEnd, now, now);
+).run(userId, email, passwordHash, name, trialEnd, now, now);
+
+// The auth middleware refuses any /api/* call without a tenant; create one.
+db.prepare(
+  `INSERT INTO tenants (id, user_id, name, avatar, created_at, last_active)
+   VALUES (?, ?, ?, '👤', ?, ?)`
+).run(tenantId, userId, name, now, now);
 
 db.close();
 
-console.log(JSON.stringify({ email, password, name, dbPath }));
+console.log(JSON.stringify({ email, password, name, userId, tenantId, dbPath }));
