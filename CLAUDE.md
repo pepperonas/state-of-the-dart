@@ -209,10 +209,10 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - Keys organized by feature: `common`, `auth`, `menu`, `game`, `players`, `stats`, `training`, `settings`, `achievements`, `resume`, `contact`, `debug`, `atc`, `online`
 
 ### UI Conventions
-- Back buttons: `glass-card` style with `<ArrowLeft size={20} />` and `t('common.back')`
-- Player selection cards: centered avatar (`PlayerAvatar size="sm"`), centered name, green border when selected (`border-success-500`), container `max-w-4xl`
-- Themes: `'modern'` (dark, default) and `'modern-light'` (light). Legacy themes auto-mapped to `'modern'`
-- Screenshots: html2canvas excludes elements with z-index >= 50
+- **Back buttons**: use the `<BackButton>` component (`src/components/common/BackButton.tsx`). It encapsulates the canonical `glass-card px-4 py-2 rounded-lg` style + `<ArrowLeft size={20} />` + `t('common.back')`. Pass `label` for custom text, `inline` for centered/narrow layouts. **Do not** inline a new back button — that's how style drift happens. Exception: in-game back buttons in ATC/Shanghai/Cricket are intentionally smaller (`px-3 py-2`) and stay inline.
+- **Active/selected state token**: use `success-*` (semantic), not raw `green-*`. Player selection cards: centered avatar (`PlayerAvatar size="sm"`), centered name, `border-success-500` when selected, container `max-w-4xl`. PlayerScore active ring: `ring-4 ring-success-500`. Raw `green-*` is reserved for status badges that mean "resolved/done".
+- **Themes**: `'modern'` (dark, default) and `'modern-light'` (light). Legacy themes auto-mapped to `'modern'`
+- **Screenshots**: html2canvas excludes elements with z-index >= 50
 
 ### Mobile & Tablet Optimization
 - **Horizontal scroll**: `overflow-x: hidden` on `html, body` in `index.css` — prevents any horizontal scroll globally

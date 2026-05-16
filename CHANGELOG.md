@@ -44,6 +44,21 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - `server/dist/` aus Git entfernt (Build-Artefakte gehören nicht ins Repo)
 - Achievement-Count-Test korrigiert (463 statt 464)
 
+### 🎨 UI-Konsistenz
+
+#### `<BackButton>` Component (`src/components/common/BackButton.tsx`)
+- 29 inline `<button>+<ArrowLeft>+t('common.back')` Blöcke ersetzt durch einheitliche Komponente
+- Single Source of Truth für den Style — keine zukünftige Drift mehr möglich
+- Props: `onClick`, optional `label` (default: `t('common.back')`), `inline` für zentrierte Layouts
+- 2 OnlineMultiplayer-Outlier (`text-gray-400`-Style statt glass-card) auf Konvention korrigiert
+- Netto: 29 Dateien, **+120 / -247 Zeilen** (Deduplizierung)
+- Ausnahme: ATC/Shanghai/Cricket In-Game-Back-Buttons (`px-3 py-2`) bleiben inline — bewusst kompakter
+
+#### Token-Normalisierung `green-*` → `success-*`
+- `PlayerScore` active ring: `ring-green-500` → `ring-success-500`
+- ATC Hit-Indicator + Completed-Slot-Badge: `green-500/*` → `success-500/*`
+- Status-Badges ("resolved") bleiben raw green — semantisch korrekt
+
 ## [0.3.1] - 2026-02-01
 
 ### 🐛 Behoben
