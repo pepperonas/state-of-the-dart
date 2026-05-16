@@ -26,16 +26,22 @@ ANALYZE=true npm run build  # Build + emit dist/bundle-stats.html
 ### Backend (server/ directory)
 ```bash
 cd server
-npm run dev          # Start with nodemon (localhost:3002)
-npm run build        # Compile TypeScript
-npm start            # Run compiled server
-npm run create:admin # Create admin account
-npm run seed:demo    # Generate demo data
+npm run dev               # Start with nodemon (localhost:3001 by default; production PM2 sets 3002)
+npm run build             # Compile TypeScript
+npm start                 # Run compiled server
+npm run create:admin      # Create admin account
+npm run seed:demo         # Generate demo data
+npx ts-node --transpile-only scripts/seed-test-user.ts  # E2E seed (needs DATABASE_PATH env)
 ```
 
 ### Deployment
 ```bash
 bash scripts/deploy.sh  # Full deploy: build frontend + backend, scp to VPS, PM2 restart
+```
+
+### Bundle analysis
+```bash
+ANALYZE=true npm run build   # Emits dist/bundle-stats.html (rollup-plugin-visualizer)
 ```
 
 ## Architecture
@@ -100,13 +106,25 @@ Express routes in `server/src/routes/`, registered in `server/src/index.ts`:
 - Bot AI: `src/utils/botLogic.ts` (10 difficulty levels)
 - Audio: `src/utils/audio.ts` (dart caller, 400+ sound files)
 - Heatmaps: `src/utils/heatmap.ts`
-- Export: `src/utils/exportImport.ts` (CSV, XLSX, PDF, JSON)
-- Screenshots: `src/utils/screenshot.ts` (html2canvas, excludes z-50+ modals)
+- Export: `src/utils/exportImport.ts` (CSV, XLSX, PDF, JSON). `exportMatchHistoryExcel` and `exportMatchHistoryPDF` are **async** — they `await import('xlsx')` / `import('jspdf')` internally so the libs only download on user action
+- Screenshots: `src/utils/screenshot.ts` (html2canvas dynamically imported on first call; excludes z-50+ modals)
+- Celebration: `src/utils/celebration.ts` (lazy-import wrapper around `canvas-confetti`; call `celebrate({ … })` — module fetches on first call, cached thereafter)
 - Match reconstruction: `src/utils/matchReconstruction.ts` (rebuilds Match from API)
 - Match naming: `src/utils/matchNames.ts` (deterministic names from UUID)
 - Logger: `src/utils/logger.ts` (production: errors only; dev: all levels)
 - Log buffer: `src/utils/logBuffer.ts` (in-memory ring buffer, 1000 entries, always active)
 - Debug export: `src/utils/debugExport.ts` (formats debug flags as structured text for AI analysis)
+
+### Shared UI Components (`src/components/common/`)
+- `BackButton.tsx` — canonical back button. **Always use this** for screen-level back navigation. Style is fixed (`glass-card px-4 py-2 …`); override only via `label` (custom text) or `inline` (centered/narrow layouts). In-game back buttons in ATC/Shanghai/Cricket are the deliberate exception — they stay inline with `px-3 py-2`.
+
+### Lazy-Loaded Heavy Modules
+These modules used to ship eagerly and were extracted into their own chunks during the Sprint 1 bundle pass. Anyone touching them: keep them lazy.
+- `xlsx`, `jspdf`, `jspdf-autotable` — dynamic-imported inside `exportImport.ts`
+- `html2canvas` — dynamic-imported inside `screenshot.ts`
+- `canvas-confetti` — dynamic-imported via `celebration.ts`
+- `react-confetti` — `React.lazy` + `<Suspense>` in `GameScreen.tsx`
+- `recharts` — extracted into `src/components/game/ThrowChart.tsx` (lazy in `GameScreen`) and `src/components/stats/MatchChart.tsx` (lazy in `MatchHistoryPage`)
 
 ### Type System
 - Core types: `src/types/index.ts` (Match, Player, Dart, Throw, GameSettings, BugReport)
@@ -237,9 +255,28 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 
 ## Testing
 
-- **Unit/Integration**: Vitest + React Testing Library in `src/tests/`. Setup in `src/tests/setup.ts`. 294 tests.
-- **E2E**: Playwright in `e2e/` against the production preview build PLUS an isolated backend on :3001 with its own SQLite test DB (`server/data/e2e-test.db`). Config `playwright.config.ts` runs two web servers and blocks the PWA service worker (it'd skew network assertions). Workers are pinned to 1 — `vite preview` races under parallel load. `e2e/global-setup.ts` rebuilds the frontend with `VITE_API_URL=http://localhost:3001` (the checked-in `.env` points at production) and seeds the test user via `server/scripts/seed-test-user.ts`. Currently 8 tests: smoke, asset-count regression guard, no-eager-heavy-chunks guard, login page, real auth flow (success + failure).
-- **CI**: `.github/workflows/test.yml` runs Vitest + lint + build; `.github/workflows/e2e.yml` runs the Playwright suite and uploads the HTML report as an artifact.
+### Unit / Integration (Vitest + React Testing Library)
+- Specs in `src/tests/`. Setup `src/tests/setup.ts`. **294 tests**.
+- Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
+
+### E2E (Playwright)
+- Specs in `e2e/`. **10 tests** currently:
+  - `smoke.spec.ts` — load redirect, asset-count regression guard, no-heavy-chunks-eager guard
+  - `login-page.spec.ts` — form render, empty-submit validation, version footer
+  - `auth.spec.ts` — real login against backend (200 + JWT), wrong password (401)
+  - `main-menu.spec.ts` — post-login menu tiles, `/game?new=1` lazy-load smoke
+- Runs against `vite preview` (:4173) **plus** an isolated backend (:3001) with its own SQLite DB at `server/data/e2e-test.db`. Both started by `playwright.config.ts` `webServer[]`.
+- `e2e/global-setup.ts`:
+  1. Rebuilds the frontend with `VITE_API_URL=http://localhost:3001` (the checked-in `.env` points at production, which would let test browsers hit the live API)
+  2. Runs `server/scripts/seed-test-user.ts` — wipes the test DB, creates the verified test user **plus a tenant** (the auth middleware refuses any `/api/*` without one)
+- Reusable helper: `e2e/helpers/login.ts` — `await login(page)` does the form-submit dance and waits for the 200 response.
+- Workers are pinned to 1 — `vite preview` races under parallel load and the regression guards become flaky. Service workers are blocked (`serviceWorkers: 'block'`); the PWA SW would otherwise intercept requests and skew network assertions.
+- Test fixtures + DB paths centralized in `e2e/fixtures.ts`.
+
+### CI
+- `.github/workflows/test.yml` — lint → Vitest (JUnit reporter) → build
+- `.github/workflows/e2e.yml` — installs frontend + backend deps, builds backend, runs `npm run test:e2e`, uploads `playwright-report/` as artifact (7-day retention)
+- `.github/workflows/version.yml` — manual trigger for version bumping
 
 ## Deployment
 
@@ -256,13 +293,25 @@ See `docs/DEPLOYMENT_VPS.md` and `docs/ARCHITECTURE.md` for details.
 ## CI/CD
 
 GitHub Actions in `.github/workflows/`:
-- `test.yml` — Runs on push/PR to main: lint → test (Vitest + JUnit reporter) → build
+- `test.yml` — Lint + Vitest + build on every push/PR to `main`/`master`/`develop`
+- `e2e.yml` — Playwright suite against frontend preview + isolated backend; uploads HTML report as artifact
 - `version.yml` — Manual trigger for version bumping
 
-## Build Notes
+## Build & Performance
 
-- PWA config in `vite.config.ts` with Workbox caching
-- Terser minification configured (`drop_console` toggle in `vite.config.ts`)
-- Manual chunk splitting: react-vendor, charts, utils, icons
-- Audio cached 30 days, fonts 1 year
-- Version bump: manually edit `"version"` in `package.json` (`npm run version:bump` is broken — ESM/CJS conflict). Display: `npm run version:show`
+### Vite config (`vite.config.ts`)
+- PWA via `vite-plugin-pwa` + Workbox
+  - **Precache**: `**/*.{js,css,html,svg,png,jpg,jpeg,woff,woff2}` — **mp3 deliberately excluded** (~33 MB of audio would otherwise inflate SW install). Runtime cache handles audio with CacheFirst + 30-day TTL.
+  - Runtime cache rules: fonts (1 year), audio (30 days, 500 entries), `/api/players` + `/api/matches` + `/api/settings` (NetworkFirst with short timeouts)
+- Terser minification (`drop_console` toggle)
+- Manual chunks: `react-vendor`, `charts`, `utils`, `icons`
+- Bundle analyzer: `ANALYZE=true npm run build` → `dist/bundle-stats.html` (treemap; uses gzip + brotli sizes)
+
+### Initial bundle baseline (post Sprint 1)
+- Main `index-*.js`: **~147 KB gz** (was 198 KB before Sprint 1)
+- Initial wire payload (JS + CSS): **~218 KB gz**
+- These are guarded by E2E regression tests (`asset-count is bounded`, `no heavy lazy chunks load on the login page`). Don't undo them — re-introducing an eager `recharts` / `xlsx` / `jspdf` / `html2canvas` / `canvas-confetti` import will fail CI.
+
+### Versioning
+- Manually edit `"version"` in `package.json` (`npm run version:bump` is broken — ESM/CJS conflict)
+- Display current version: `npm run version:show`

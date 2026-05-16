@@ -146,7 +146,7 @@
 - **Automatische Synchronisation** - Stats werden automatisch nach jedem Match aktualisiert
 
 ### 🏆 Achievements & Gamification (Komplett-Rewrite in v0.4.0)
-- **464 Achievements** - In 8 Kategorien (Erste Schritte, Scoring, Checkout, Training, Konsistenz, Spezial, Meisterschaft, Fails)
+- **463 Achievements** - In 8 Kategorien (Erste Schritte, Scoring, Checkout, Training, Konsistenz, Spezial, Meisterschaft, Fails)
 - **Achievement-Synchronisation** - Achievements werden automatisch in der Datenbank gespeichert und bleiben erhalten
 - **Tier-System** - Bronze, Silber, Gold, Platin, Diamant
 - **Seltenheitsstufen** - Common, Rare, Epic, Legendary Achievements
@@ -436,7 +436,7 @@ state-of-the-dart/
 
 ### 5. Achievements freischalten
 - Spiele Matches um Achievements zu verdienen
-- 464 Achievements in 8 Kategorien
+- 463 Achievements in 8 Kategorien
 - Erhalte Hinweise, wenn du kurz vor einem Achievement stehst
 
 ---
@@ -486,7 +486,7 @@ Alle Charts werden mit der Recharts-Library erstellt.
 
 ## 🏆 Achievement-System
 
-464 Achievements in 8 Kategorien und 7 Scopes:
+463 Achievements in 8 Kategorien und 7 Scopes:
 
 ### Kategorien
 1. **Erste Schritte** (15+) - Rookie bis Millennium
@@ -658,7 +658,7 @@ Siehe [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) für Details.
 - [x] Erweiterte Statistiken mit 10+ Charts
 - [x] Export/Import (JSON/CSV)
 - [x] PWA mit Offline-Support
-- [x] Achievement-System (464 Achievements, AAA-Notifications)
+- [x] Achievement-System (463 Achievements, AAA-Notifications)
 - [x] Spielerprofile & Personal Bests
 - [x] Bestenlisten
 - [x] Spielervergleich (bis zu 4 Spieler)
