@@ -560,15 +560,32 @@ Die App kann auf Desktop (Chrome/Edge), iOS (Safari) und Android (Chrome) instal
 
 ## ⚡ Performance-Optimierungen
 
-- **Code-Splitting**: ~70% kleinerer Initial-Bundle
-- **Lazy Loading**: Route-basierte Component-Lazy-Loading
-- **Image Optimization**: WebP + Responsive Images
-- **Service Worker**: Intelligentes Caching
-- **Tree Shaking**: Unbenutzter Code wird entfernt
-- **Minification**: CSS/JS komprimiert
-- **Gzip Compression**: ~70% kleinere Assets
+### Bundle (Initial, gzipped)
+- **Main-Bundle**: 198 KB → **147 KB** (-26 %)
+- **Settings/Stats eager**: -688 KB durch dynamisches Laden von `xlsx` + `jspdf`
+- **GameScreen mit Charts**: -108 KB durch lazy `ThrowChart.tsx`
+- **MatchHistoryPage**: 27.4 KB → 14.95 KB (-45 %) durch lazy `MatchChart.tsx`
 
-Google PageSpeed Insights Score: **95-100/100**
+### Lazy-loaded on-Demand
+- `xlsx`, `jspdf`, `jspdf-autotable` — nur beim Export-Klick
+- `html2canvas` — nur beim Bug-Report / Debug-Flag
+- `canvas-confetti` — beim ersten Sieg/Achievement (zentralisiert in `src/utils/celebration.ts`)
+- `react-confetti` — beim X01-Sieg via `React.lazy`
+- `recharts` — beim Öffnen von Wurf-Chart oder Match-Detail-Chart
+
+### React-Memo
+- `Dartboard`, `PlayerScore` als `React.memo`
+- 463 Achievement-Cards einzeln memoized (`AchievementCard`)
+- Hot-Path-Handler in `GameScreen` mit `useCallback`/`useMemo`
+
+### Service Worker
+- **Precache**: 33 MB → 3.7 MB (-89 %) durch Entfernen von `.mp3` aus `globPatterns`
+- Audio über `runtimeCaching` (CacheFirst, 30 Tage TTL)
+
+### Bundle-Analyse
+```bash
+ANALYZE=true npm run build  # emittet dist/bundle-stats.html
+```
 
 PWA-Konfiguration in `vite.config.ts`.
 
@@ -576,13 +593,9 @@ PWA-Konfiguration in `vite.config.ts`.
 
 ## 🧪 Testing
 
-### Unit Tests
-- Utils (Scoring, Storage)
-- Components
-- Hooks
-- Context
+### Unit-Tests (Vitest + React Testing Library)
+**294 Tests** in `src/tests/` — Scoring, Achievement-Definitionen, Match-Reconstruction, Hooks, Context.
 
-### Test-Befehle
 ```bash
 npm test              # Watch-Modus
 npm run test:run      # Einmalig
@@ -590,10 +603,25 @@ npm run test:ui       # Mit UI
 npm run coverage      # Coverage-Report
 ```
 
+### E2E-Tests (Playwright)
+**10 Tests** in `e2e/` gegen `vite preview` + isoliertes Backend mit eigener SQLite-DB.
+
+```bash
+npm run test:e2e       # Headless
+npm run test:e2e:ui    # Mit UI
+npm run test:e2e:report # Letzten HTML-Report öffnen
+```
+
+Was die Suite abdeckt:
+- Smoke (Login redirect, no console errors)
+- Asset-Count + No-Heavy-Chunks-Eager Regression-Guards
+- Login-Form (Render, leere Submission, Version-Footer)
+- Echter Login-Flow gegen seeded Backend (200 + JWT, 401 bei wrong password)
+- Main-Menu nach Login + Game-Route Lazy-Load
+
 ### CI/CD
-- GitHub Actions läuft automatisch bei Push
-- Lint + Tests + Build
-- Badge im README
+- `.github/workflows/test.yml` — Lint + Vitest + Build
+- `.github/workflows/e2e.yml` — Playwright + HTML-Report-Artifact
 
 ---
 

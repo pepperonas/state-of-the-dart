@@ -7,6 +7,43 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### ⚡ Performance
+
+#### Initial Bundle (gz): 198 KB → 147 KB (-26 %)
+- `xlsx`, `jspdf`, `jspdf-autotable` werden dynamisch geladen — Settings + StatsOverview ziehen nicht mehr 688 KB transitiv
+- `html2canvas` (71 KB gz) jetzt on-demand beim Bug-Report / Debug-Flag
+- `canvas-confetti` zentralisiert in `src/utils/celebration.ts` (lazy)
+- `react-confetti` via `React.lazy` + `<Suspense>` (lädt nur beim Sieg)
+
+#### Recharts on-Demand
+- `GameScreen` lädt **108 KB gz Recharts nicht mehr eager** — Chart erscheint erst beim Toggle "Wurf-Statistik" via neues `ThrowChart.tsx`
+- `MatchHistoryPage`: gleiches Pattern via `MatchChart.tsx`, Chunk -45 % (27.4 → 14.95 KB)
+
+#### PWA Precache: 33 MB → 3.7 MB (-89 %)
+- `.mp3` aus `globPatterns` entfernt — Audio läuft weiter über `runtimeCaching` (CacheFirst, 30 Tage)
+
+#### React-Memo-Pässe
+- `Dartboard`, `PlayerScore` mit `React.memo`
+- `GameScreen` Handler (`handleDartHit`, `handleRemoveDart`, `handleClearThrow`) mit `useCallback`
+- `dartboardHighlights` als stabile `useMemo`-Referenz
+- `AchievementsScreen`: inline `renderAchievementCard` → `React.memo`'d `AchievementCard` (463 Karten skippen Re-Render bei stabilen Props)
+
+### 🧪 Testing
+
+#### Playwright E2E Framework (`e2e/`)
+- 10 Tests / ~26 s end-to-end gegen `vite preview` + isoliertes Backend (`server/data/e2e-test.db`)
+- `global-setup` rebuildet Frontend mit `VITE_API_URL=http://localhost:3001` und seedet Test-User + Tenant
+- Workers serial, Service Worker geblockt (verfälscht Network-Assertions)
+- CI-Workflow `.github/workflows/e2e.yml` mit HTML-Report-Artifact (7 Tage)
+- Regression-Guards: Asset-Count-Limit + No-Heavy-Chunks-Eager schützen die Bundle-Wins
+
+### 🔧 Geändert
+- Vitest excludiert `e2e/**` (Playwright owns es)
+- `npm run test:e2e` / `:ui` / `:report` Scripts hinzugefügt
+- `ANALYZE=true npm run build` emittet `dist/bundle-stats.html` (`rollup-plugin-visualizer`)
+- `server/dist/` aus Git entfernt (Build-Artefakte gehören nicht ins Repo)
+- Achievement-Count-Test korrigiert (463 statt 464)
+
 ## [0.3.1] - 2026-02-01
 
 ### 🐛 Behoben
