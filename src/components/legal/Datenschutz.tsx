@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import BackButton from '../common/BackButton';
 
 const Datenschutz: React.FC = () => {
   const navigate = useNavigate();
@@ -10,13 +11,7 @@ const Datenschutz: React.FC = () => {
   return (
     <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-4xl mx-auto">
-        <button
-          onClick={() => navigate(-1)}
-          className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-        >
-          <ArrowLeft size={20} />
-          {t('common.back')}
-        </button>
+        <BackButton onClick={() => navigate(-1)} />
 
         <h1 className="text-3xl font-bold text-white mb-8">
           Datenschutzerkl&auml;rung

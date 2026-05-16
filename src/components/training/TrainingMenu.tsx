@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Target, Crosshair, Clock, TrendingUp, Award, Zap, BarChart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import BackButton from '../common/BackButton';
 
 const TrainingMenu: React.FC = () => {
   const { t } = useTranslation();
@@ -56,13 +57,7 @@ const TrainingMenu: React.FC = () => {
     <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-          >
-            <ArrowLeft size={20} />
-            {t('common.back')}
-          </button>
+          <BackButton onClick={() => navigate('/')} className="" />
           <button
             onClick={() => navigate('/training-stats')}
             className="flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"

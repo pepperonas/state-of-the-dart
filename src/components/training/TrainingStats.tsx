@@ -8,6 +8,7 @@ import { useTenant } from '../../context/TenantContext';
 import { LineChart, Line, BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { api } from '../../services/api';
 import { toDateOrNow, formatDateTime, formatDateShort } from '../../utils/dateUtils';
+import BackButton from '../common/BackButton';
 
 const TrainingStats: React.FC = () => {
   const { t } = useTranslation();
@@ -147,13 +148,7 @@ const TrainingStats: React.FC = () => {
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-6xl mx-auto">
           {/* Back Button */}
-          <button
-            onClick={() => navigate('/training')}
-            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-          >
-            <ArrowLeft size={20} />
-            {t('common.back')}
-          </button>
+          <BackButton onClick={() => navigate('/training')} />
 
           <div className="glass-card p-8">
             <h2 className="text-2xl font-bold text-white mb-4 text-center">Training Statistiken</h2>
@@ -200,13 +195,7 @@ const TrainingStats: React.FC = () => {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={() => navigate('/training')}
-            className="flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-          >
-            <ArrowLeft size={20} />
-            {t('common.back')}
-          </button>
+          <BackButton onClick={() => navigate('/training')} className="" />
           <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2">
             <BarChart size={32} />
             Training Statistiken

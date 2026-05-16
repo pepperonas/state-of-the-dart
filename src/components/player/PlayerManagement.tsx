@@ -6,6 +6,7 @@ import { usePlayer } from '../../context/PlayerContext';
 import { api } from '../../services/api';
 import PlayerAvatar from './PlayerAvatar';
 import EmojiPicker from './EmojiPicker';
+import BackButton from '../common/BackButton';
 
 const PlayerManagement: React.FC = () => {
   const { t } = useTranslation();
@@ -121,13 +122,7 @@ const PlayerManagement: React.FC = () => {
   return (
     <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-4xl mx-auto">
-        <button
-          onClick={() => navigate('/')}
-          className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-        >
-          <ArrowLeft size={20} />
-          {t('common.back')}
-        </button>
+        <BackButton onClick={() => navigate('/')} />
         
         <div className="glass-card rounded-xl shadow-lg p-6 md:p-8">
           <div className="flex items-center justify-between mb-6">

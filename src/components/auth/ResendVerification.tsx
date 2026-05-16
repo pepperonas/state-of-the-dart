@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Mail, ArrowLeft, AlertCircle, Loader, CheckCircle } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Mail, AlertCircle, Loader, CheckCircle } from 'lucide-react';
 import api from '../../services/api';
+import BackButton from '../common/BackButton';
 
 const ResendVerification: React.FC = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -62,13 +64,7 @@ const ResendVerification: React.FC = () => {
         </div>
 
         <div className="glass-card p-8 rounded-2xl shadow-2xl">
-          <Link
-            to="/login"
-            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all inline-flex w-fit"
-          >
-            <ArrowLeft size={20} />
-            Zurück zum Login
-          </Link>
+          <BackButton onClick={() => navigate('/login')} label="Zurück zum Login" inline />
 
           <p className="text-sm text-dark-300 mb-6">
             Email nicht erhalten? Gib deine Email-Adresse ein und wir senden dir einen neuen Verification-Link.

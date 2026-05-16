@@ -16,6 +16,7 @@ import {
 } from '../../types/achievements';
 import { formatDate } from '../../utils/dateUtils';
 import logger from '../../utils/logger';
+import BackButton from '../common/BackButton';
 
 const AchievementsScreen: React.FC = () => {
   const { t } = useTranslation();
@@ -100,13 +101,7 @@ const AchievementsScreen: React.FC = () => {
     return (
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-6xl mx-auto">
-          <button
-            onClick={() => navigate('/')}
-            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-          >
-            <ArrowLeft size={20} />
-            {t('common.back')}
-          </button>
+          <BackButton onClick={() => navigate('/')} />
 
           <div className="glass-card p-8 text-center">
             <Trophy size={64} className="mx-auto mb-4 text-dark-600" />
@@ -124,13 +119,7 @@ const AchievementsScreen: React.FC = () => {
     <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <button
-          onClick={() => navigate('/')}
-          className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-        >
-          <ArrowLeft size={20} />
-          {t('common.back')}
-        </button>
+        <BackButton onClick={() => navigate('/')} />
 
         <div className="glass-card p-6 mb-6">
           <div className="flex items-center gap-3 mb-6">

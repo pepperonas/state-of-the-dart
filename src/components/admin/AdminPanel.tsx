@@ -8,6 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import type { BugReport } from '../../types';
 import type { DebugFlag } from '../../types/debugFlag';
 import { formatDebugFlagForAI } from '../../utils/debugExport';
+import BackButton from '../common/BackButton';
 
 interface AdminUser {
   id: string;
@@ -344,13 +345,7 @@ const AdminPanel: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <button
-            onClick={() => navigate('/')}
-            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-          >
-            <ArrowLeft size={20} />
-            {t('common.back')}
-          </button>
+          <BackButton onClick={() => navigate('/')} />
 
           <div className="flex items-center gap-4 mb-2">
             <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 shadow-lg">

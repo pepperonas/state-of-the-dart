@@ -7,6 +7,7 @@ import { Player, Tournament, TournamentSettings, TournamentParticipant, Tourname
 import PlayerAvatar from '../player/PlayerAvatar';
 import { v4 as uuidv4 } from 'uuid';
 import { celebrate as confetti } from '../../utils/celebration';
+import BackButton from '../common/BackButton';
 
 type TournamentType = 'knockout' | 'round-robin';
 
@@ -472,13 +473,7 @@ const TournamentMenu: React.FC = () => {
     return (
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-2xl mx-auto">
-          <button
-            onClick={() => setShowCreate(false)}
-            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-          >
-            <ArrowLeft size={20} />
-            {t('common.back')}
-          </button>
+          <BackButton onClick={() => setShowCreate(false)} />
 
           <div className="glass-card rounded-xl p-6">
             <h2 className="text-2xl font-bold text-white mb-6">Neues Turnier erstellen</h2>
@@ -597,13 +592,7 @@ const TournamentMenu: React.FC = () => {
   return (
     <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-4xl mx-auto">
-        <button
-          onClick={() => navigate('/')}
-          className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-        >
-          <ArrowLeft size={20} />
-          {t('common.back')}
-        </button>
+        <BackButton onClick={() => navigate('/')} />
 
         <div className="glass-card rounded-xl shadow-lg p-6 md:p-8 border border-white/5">
           <div className="flex items-center gap-4 mb-6">

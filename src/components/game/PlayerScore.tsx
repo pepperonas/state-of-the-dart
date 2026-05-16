@@ -37,7 +37,7 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
       transition={{ duration: 0.3 }}
       className={`glass-card rounded-xl shadow-lg p-4 transition-all ${
         isActive
-          ? 'ring-4 ring-green-500'
+          ? 'ring-4 ring-success-500'
           : ''
       }`}
     >

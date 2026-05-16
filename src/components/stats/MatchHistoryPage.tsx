@@ -9,6 +9,7 @@ import { api } from '../../services/api';
 const MatchChart = lazy(() => import('./MatchChart'));
 import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
 import PlayerAvatar from '../player/PlayerAvatar';
+import BackButton from '../common/BackButton';
 
 const MatchHistoryPage: React.FC = () => {
   const { t } = useTranslation();
@@ -186,13 +187,7 @@ const MatchHistoryPage: React.FC = () => {
     <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-5xl mx-auto">
         {/* Back button */}
-        <button
-          onClick={() => { window.location.href = '/'; }}
-          className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-        >
-          <ArrowLeft size={20} />
-          {t('common.back')}
-        </button>
+        <BackButton onClick={() => { window.location.href = '/'; }} />
 
         <h1 className="text-3xl font-bold text-white mb-6">{t('match_history.title', 'Spielhistorie')}</h1>
 

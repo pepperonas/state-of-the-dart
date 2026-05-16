@@ -27,6 +27,7 @@ import { PersonalBests, createEmptyPersonalBests, updatePersonalBests } from '..
 import audioSystem from '../../utils/audio';
 import { api } from '../../services/api';
 import { createAdaptiveBotPlayer, getAdaptiveBotConfigs, generateBotTurn, AdaptiveBotCategory } from '../../utils/botLogic';
+import BackButton from '../common/BackButton';
 
 const GameScreen: React.FC = () => {
   const { t } = useTranslation();
@@ -948,17 +949,11 @@ const GameScreen: React.FC = () => {
     return (
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-4xl mx-auto">
-          <button
-            onClick={() => {
+          <BackButton onClick={() => {
               forceNewGameRef.current = false;
               isNavigatingAwayRef.current = true;
               window.location.href = '/';
-            }}
-            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-          >
-            <ArrowLeft size={20} />
-            {t('common.back')}
-          </button>
+            }} />
           
           <div className="glass-card rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-3xl font-bold mb-6 text-white">{t('game.game_setup')}</h2>
@@ -1366,13 +1361,7 @@ const GameScreen: React.FC = () => {
 
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={handleBackToMenu}
-            className="flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-          >
-            <ArrowLeft size={20} />
-            {t('common.back')}
-          </button>
+          <BackButton onClick={handleBackToMenu} className="" />
           
           <div className="flex gap-2">
             <button

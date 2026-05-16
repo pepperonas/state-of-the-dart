@@ -13,6 +13,7 @@ import { calculateAccuracyStats } from '../../utils/heatmap';
 import { formatDate } from '../../utils/dateUtils';
 import { ACHIEVEMENTS } from '../../types/achievements';
 import PlayerAvatar from './PlayerAvatar';
+import BackButton from '../common/BackButton';
 
 const PlayerProfile: React.FC = () => {
   const { t } = useTranslation();
@@ -165,13 +166,7 @@ const PlayerProfile: React.FC = () => {
     return (
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-6xl mx-auto">
-          <button
-            onClick={() => navigate('/players')}
-            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-          >
-            <ArrowLeft size={20} />
-            {t('common.back')}
-          </button>
+          <BackButton onClick={() => navigate('/players')} />
           <div className="glass-card p-8 text-center">
             <h2 className="text-2xl font-bold text-white mb-2">Spieler nicht gefunden</h2>
           </div>
@@ -188,13 +183,7 @@ const PlayerProfile: React.FC = () => {
     <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <button
-          onClick={() => navigate('/players')}
-          className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-        >
-          <ArrowLeft size={20} />
-          {t('common.back')}
-        </button>
+        <BackButton onClick={() => navigate('/players')} />
 
         {/* Player Info Card */}
         <div className="glass-card p-6 md:p-8 mb-6">

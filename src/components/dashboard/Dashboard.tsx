@@ -12,6 +12,7 @@ import { api } from '../../services/api';
 import { formatDate, formatDateTime } from '../../utils/dateUtils';
 import { Match } from '../../types';
 import MatchDetailModal from './MatchDetailModal';
+import BackButton from '../common/BackButton';
 
 interface RecentActivity {
   id: string;
@@ -291,13 +292,7 @@ const Dashboard: React.FC = () => {
     <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-7xl mx-auto">
         {/* Back Button */}
-        <button
-          onClick={() => navigate('/')}
-          className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-        >
-          <ArrowLeft size={20} />
-          {t('common.back')}
-        </button>
+        <BackButton onClick={() => navigate('/')} />
 
         {/* Header */}
         <div className="mb-8">

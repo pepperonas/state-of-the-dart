@@ -10,6 +10,7 @@ import { celebrate as confetti } from '../../utils/celebration';
 import audioSystem from '../../utils/audio';
 import { saveGameState, loadGameState, clearGameState, STORAGE_KEYS, ATCSavedState } from '../../utils/gameStorage';
 import { SpinnerWheel } from './SpinnerWheel';
+import BackButton from '../common/BackButton';
 
 interface AroundTheClockGameProps {
   onBack?: () => void;
@@ -492,13 +493,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
     return (
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-4xl mx-auto">
-          <button
-            onClick={handleBack}
-            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-          >
-            <ArrowLeft size={20} />
-            {t('common.back')}
-          </button>
+          <BackButton onClick={handleBack} />
 
           <div className="glass-card rounded-2xl p-6">
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-6 flex items-center gap-3">
@@ -772,7 +767,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
                     isPast
                       ? 'bg-green-500 text-white'
                       : isPending
-                      ? 'bg-green-500/60 text-white ring-1 ring-green-400'
+                      ? 'bg-success-500/60 text-white ring-1 ring-success-400'
                       : isCurrent
                       ? 'bg-primary-500 text-white ring-2 ring-primary-300 animate-pulse'
                       : 'bg-dark-700 text-gray-500'
@@ -872,7 +867,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
                   className={`flex-1 h-12 sm:h-14 rounded-xl flex items-center justify-center text-base sm:text-lg font-bold ${
                     slot
                       ? slot.hit
-                        ? 'bg-green-500/20 text-green-400 border-2 border-green-500'
+                        ? 'bg-success-500/20 text-success-400 border-2 border-success-500'
                         : 'bg-red-500/20 text-red-400 border-2 border-red-500'
                       : 'bg-dark-800 text-gray-600 border-2 border-dashed border-dark-600'
                   }`}

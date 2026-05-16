@@ -10,6 +10,7 @@ import { io, Socket } from 'socket.io-client';
 import { usePlayer } from '../../context/PlayerContext';
 import { useAuth } from '../../context/AuthContext';
 import PlayerAvatar from '../player/PlayerAvatar';
+import BackButton from '../common/BackButton';
 
 interface OnlinePlayer {
   id: string;
@@ -365,13 +366,7 @@ const OnlineMultiplayer: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
-          >
-            <ArrowLeft size={20} />
-            {t('common.back')}
-          </button>
+          <BackButton onClick={() => navigate('/')} />
           <div className="flex items-center gap-2">
             {connected ? (
               <span className="flex items-center gap-1 text-green-400 text-sm">

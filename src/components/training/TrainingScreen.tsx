@@ -11,6 +11,7 @@ import { usePlayer } from '../../context/PlayerContext';
 import { useTenant } from '../../context/TenantContext';
 import { api } from '../../services/api';
 import { useGameAchievements } from '../../hooks/useGameAchievements';
+import BackButton from '../common/BackButton';
 
 interface TrainingState {
   currentTarget: number;
@@ -520,13 +521,7 @@ const TrainingScreen: React.FC = () => {
     return (
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-2xl mx-auto">
-          <button
-            onClick={() => navigate('/training')}
-            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-          >
-            <ArrowLeft size={20} />
-            {t('common.back')}
-          </button>
+          <BackButton onClick={() => navigate('/training')} />
 
           <div className="glass-card rounded-2xl p-8">
             <h2 className="text-3xl font-bold text-white mb-2">
@@ -594,13 +589,7 @@ const TrainingScreen: React.FC = () => {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={() => navigate('/training')}
-            className="flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-          >
-            <ArrowLeft size={20} />
-            {t('common.back')}
-          </button>
+          <BackButton onClick={() => navigate('/training')} className="" />
           <h1 className="text-2xl md:text-3xl font-bold text-white">{getTrainingTitle()}</h1>
           <button
             onClick={handleRestart}

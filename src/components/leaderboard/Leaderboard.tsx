@@ -8,6 +8,7 @@ import { useTenant } from '../../context/TenantContext';
 import { api } from '../../services/api';
 import { PersonalBests, createEmptyPersonalBests } from '../../types/personalBests';
 import { ACHIEVEMENTS } from '../../types/achievements';
+import BackButton from '../common/BackButton';
 
 type LeaderboardCategory = 
   | 'average'
@@ -176,13 +177,7 @@ const Leaderboard: React.FC = () => {
     <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <button
-          onClick={() => navigate('/')}
-          className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-        >
-          <ArrowLeft size={20} />
-          {t('common.back')}
-        </button>
+        <BackButton onClick={() => navigate('/')} />
 
         <div className="glass-card p-6 md:p-8">
           <div className="flex items-center gap-3 mb-6">

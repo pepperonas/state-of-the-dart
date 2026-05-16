@@ -8,6 +8,7 @@ import { useGame } from '../../context/GameContext';
 import { generateMatchName } from '../../utils/matchNames';
 import { reconstructMatch } from '../../utils/matchReconstruction';
 import { getLocalGameSummaries, clearGameState, LocalGameSummary } from '../../utils/gameStorage';
+import BackButton from '../common/BackButton';
 
 interface ResumableMatch {
   id: string;
@@ -157,13 +158,7 @@ const ResumeGameScreen: React.FC = () => {
   return (
     <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-2xl mx-auto">
-        <button
-          onClick={() => navigate('/')}
-          className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-        >
-          <ArrowLeft size={20} />
-          {t('common.back')}
-        </button>
+        <BackButton onClick={() => navigate('/')} />
 
         <h1 className="text-3xl font-bold text-white mb-6">
           {t('resume.title')}

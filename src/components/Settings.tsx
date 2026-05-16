@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Moon, Sun, Volume2, Bell, Globe, LogOut, User, Play, Download, Upload, Smartphone, Palette, Check, Sparkles, AlertCircle, X, ChevronDown } from 'lucide-react';
+import { Moon, Sun, Volume2, Bell, Globe, LogOut, User, Play, Download, Upload, Smartphone, Palette, Check, Sparkles, AlertCircle, X, ChevronDown } from 'lucide-react';
+import BackButton from './common/BackButton';
 import { useTranslation } from 'react-i18next';
 import { useSettings } from '../context/SettingsContext';
 import { useTenant } from '../context/TenantContext';
@@ -151,13 +152,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
   return (
     <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-4xl mx-auto">
-        <button
-          onClick={() => navigate('/')}
-          className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-        >
-          <ArrowLeft size={20} />
-          {t('menu.back_to_menu')}
-        </button>
+        <BackButton onClick={() => navigate('/')} label={t('menu.back_to_menu')} />
         
         <div className="glass-card rounded-xl shadow-lg p-6 md:p-8">
           <h2 className="text-3xl font-bold mb-6 text-white">{t('settings.settings')}</h2>

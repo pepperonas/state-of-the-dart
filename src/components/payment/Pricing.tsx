@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, Crown, Zap, ArrowLeft, Loader, AlertCircle } from 'lucide-react';
+import { Check, Crown, Zap, Loader, AlertCircle } from 'lucide-react';
+import BackButton from '../common/BackButton';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 
@@ -41,13 +42,10 @@ const Pricing: React.FC = () => {
     <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <button
+        <BackButton
           onClick={() => navigate(user ? '/' : '/login')}
-          className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-        >
-          <ArrowLeft size={20} />
-          {user ? 'Zurück' : 'Zum Login'}
-        </button>
+          label={user ? 'Zurück' : 'Zum Login'}
+        />
 
         {/* Title */}
         <div className="text-center mb-12">
