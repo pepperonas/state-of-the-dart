@@ -266,9 +266,19 @@ class AudioSystem {
     }
   }
 
-  announceBust() {
-    // Play bust sound - HIGH PRIORITY
-    this.playSound('/sounds/caller/0.mp3', true); // Priority sound!
+  async announceBust(thrownScore?: number) {
+    // Clear queue so the bust sequence isn't preceded by stale queued sounds
+    this.soundQueue = [];
+    this.isPlaying = false;
+    try {
+      if (typeof thrownScore === 'number' && thrownScore > 0 && thrownScore <= 180) {
+        await this.playSoundImmediate(`/sounds/caller/${thrownScore}.mp3`);
+        await new Promise(resolve => setTimeout(resolve, 250));
+      }
+      await this.playSoundImmediate('/sounds/caller/0.mp3');
+    } catch (error) {
+      console.warn('Failed to play bust announcement:', error);
+    }
   }
 
   setEnabled(enabled: boolean) {

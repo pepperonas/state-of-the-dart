@@ -35,6 +35,13 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   const setEditingDartIndex = onSetEditingDartIndex;
   const confirmBtnRef = useRef<HTMLButtonElement>(null);
 
+  // Pending-confirm flag for "type total + Enter = commit throw" in numpad mode.
+  // addScore dispatches ADD_DART asynchronously, so we can't call onConfirm directly
+  // after it. Instead: arm the flag, then a useEffect watches currentThrow.length and
+  // fires onConfirm once the dispatches have flushed.
+  const [pendingConfirm, setPendingConfirm] = useState(false);
+  const prevLengthRef = useRef(currentThrow.length);
+
   const currentScore = calculateThrowScore(currentThrow);
 
   // Auto-scroll confirm button into view on early checkout
@@ -43,6 +50,15 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
       confirmBtnRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }, [isCheckout]);
+
+  // Auto-confirm once the dispatched darts have landed in currentThrow
+  useEffect(() => {
+    if (pendingConfirm && currentThrow.length > prevLengthRef.current) {
+      setPendingConfirm(false);
+      onConfirm();
+    }
+    prevLengthRef.current = currentThrow.length;
+  }, [currentThrow.length, pendingConfirm, onConfirm]);
   
   // Keyboard support
   useEffect(() => {
@@ -85,22 +101,40 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   const allScores = Array.from({ length: 181 }, (_, i) => i);
   
   const handleNumpadClick = (value: string) => {
-    if (currentThrow.length >= 3) return;
-    
     if (value === 'clear') {
       setCurrentInput('');
-    } else if (value === 'enter') {
-      // If no input, treat as 0 (no score)
+      return;
+    }
+
+    if (value === 'enter') {
+      // Edit mode: replace the selected dart, do NOT commit the whole throw
+      if (editingDartIndex !== null) {
+        const score = currentInput ? parseInt(currentInput) : 0;
+        if (score >= 0 && score <= 180) addScore(score);
+        return;
+      }
+
+      // Already 3 darts entered? Just commit.
+      if (currentThrow.length >= 3) {
+        onConfirm();
+        return;
+      }
+
+      // Empty input + Enter = treat as 0 (miss / no score) and commit
       const score = currentInput ? parseInt(currentInput) : 0;
-      if (score >= 0 && score <= 180) {
-        addScore(score);
-      }
-    } else {
-      const newInput = currentInput + value;
-      const num = parseInt(newInput);
-      if (num <= 180) {
-        setCurrentInput(newInput);
-      }
+      if (score < 0 || score > 180) return;
+
+      addScore(score);
+      setPendingConfirm(true);
+      return;
+    }
+
+    if (currentThrow.length >= 3) return;
+
+    const newInput = currentInput + value;
+    const num = parseInt(newInput);
+    if (num <= 180) {
+      setCurrentInput(newInput);
     }
   };
   
@@ -271,17 +305,22 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
             <button
               onClick={() => handleNumpadClick('enter')}
               className="p-4 text-lg font-bold rounded-lg bg-success-500/60 hover:bg-success-600 text-white transition-all"
+              title={editingDartIndex !== null ? 'Dart ersetzen' : 'Wurf-Summe übernehmen und bestätigen'}
             >
-              Enter
+              {editingDartIndex !== null ? 'Set' : 'OK'}
             </button>
           </div>
-          
+
           {/* Current Input Display */}
           <div className="mb-4 p-4 bg-dark-900/50 rounded-lg text-center border-2 border-dark-700">
             {currentInput ? (
               <span className="text-3xl font-bold text-white">{currentInput}</span>
             ) : (
-              <span className="text-dark-600">Type score...</span>
+              <span className="text-dark-600">
+                {editingDartIndex !== null
+                  ? 'Neuer Dart-Wert...'
+                  : 'Wurf-Summe (0–180) eintippen und OK'}
+              </span>
             )}
           </div>
         </>

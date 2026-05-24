@@ -288,8 +288,8 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         // Don't announce leg checkout here - will be announced later
         // (either as 'leg' if match continues, or 'match' if match is won)
       } else if (bustOccurred) {
-        // Announce bust
-        audioSystem.announceBust();
+        // Announce bust — read the thrown score first, then "No score"
+        audioSystem.announceBust(currentThrowScore);
       }
       
       // Update match — deep copy players and legs to avoid mutations
