@@ -1414,8 +1414,30 @@ const GameScreen: React.FC = () => {
             ))}
           </div>
           
-          {/* Center Section - Dartboard and Input */}
+          {/* Center Section - Input first, then optional Dartboard helper */}
           <div className="lg:col-span-1 flex flex-col items-center space-y-6">
+            <ScoreInput
+              currentThrow={state.currentThrow}
+              onAddDart={handleDartHit}
+              onRemoveDart={handleRemoveDart}
+              onClearThrow={handleClearThrow}
+              onConfirm={handleConfirmThrow}
+              onReplaceDart={(index, dart) => dispatch({ type: 'REPLACE_DART', payload: { index, dart } })}
+              editingDartIndex={editingDartIndex}
+              onSetEditingDartIndex={setEditingDartIndex}
+              isEditingThrow={isEditingThrow}
+              remaining={remaining}
+              isCheckout={isEarlyCheckout}
+            />
+
+            {state.checkoutSuggestion && (
+              <CheckoutSuggestion
+                suggestion={state.checkoutSuggestion}
+                alternatives={getCheckoutAlternatives(remaining, 3 - state.currentThrow.length, state.currentMatch?.settings.doubleOut ?? true)}
+                remaining={remaining}
+              />
+            )}
+
             {settings.showDartboardHelper && (
               <div className="w-full max-w-lg space-y-3">
                 <Dartboard
@@ -1434,28 +1456,6 @@ const GameScreen: React.FC = () => {
                 </button>
               </div>
             )}
-            
-            {state.checkoutSuggestion && (
-              <CheckoutSuggestion
-                suggestion={state.checkoutSuggestion}
-                alternatives={getCheckoutAlternatives(remaining, 3 - state.currentThrow.length, state.currentMatch?.settings.doubleOut ?? true)}
-                remaining={remaining}
-              />
-            )}
-            
-            <ScoreInput
-              currentThrow={state.currentThrow}
-              onAddDart={handleDartHit}
-              onRemoveDart={handleRemoveDart}
-              onClearThrow={handleClearThrow}
-              onConfirm={handleConfirmThrow}
-              onReplaceDart={(index, dart) => dispatch({ type: 'REPLACE_DART', payload: { index, dart } })}
-              editingDartIndex={editingDartIndex}
-              onSetEditingDartIndex={setEditingDartIndex}
-              isEditingThrow={isEditingThrow}
-              remaining={remaining}
-              isCheckout={isEarlyCheckout}
-            />
           </div>
           
           {/* Stats Section - Collapsible */}
