@@ -104,7 +104,7 @@ Express routes in `server/src/routes/`, registered in `server/src/index.ts`:
 - Scoring: `src/utils/scoring.ts` (calculateThrowScore, isBust, calculateAverage)
 - Checkout suggestions: `src/data/checkoutTable.ts`
 - Bot AI: `src/utils/botLogic.ts` (10 difficulty levels)
-- Audio: `src/utils/audio.ts` (dart caller, 400+ sound files)
+- Audio: `src/utils/audio.ts` (dart caller, 400+ sound files). **Gotcha**: `announceCheckout(legOrSetNumber, finishType)` expects the **match-scoped leg/set sequence** (1, 2, 3 …), **not** the checkout score — `gameshot/legs/{N}.mp3` says "and the Nth leg". For `'match'` the number is ignored; only `texts/gameshotandthematch.mp3` plays. `announceBust(thrownScore?)` plays the thrown score first (`caller/{N}.mp3`) and then `caller/0.mp3` ("No score").
 - Heatmaps: `src/utils/heatmap.ts`
 - Export: `src/utils/exportImport.ts` (CSV, XLSX, PDF, JSON). `exportMatchHistoryExcel` and `exportMatchHistoryPDF` are **async** — they `await import('xlsx')` / `import('jspdf')` internally so the libs only download on user action
 - Screenshots: `src/utils/screenshot.ts` (html2canvas dynamically imported on first call; excludes z-50+ modals)
@@ -132,6 +132,11 @@ These modules used to ship eagerly and were extracted into their own chunks duri
 - Achievements: `src/types/achievements.ts`
 - Personal bests: `src/types/personalBests.ts`
 - Debug flags: `src/types/debugFlag.ts`
+
+### X01 Numpad Input (`src/components/game/ScoreInput.tsx`)
+- Numpad-Modus: Zahl tippen + **Enter** = Wurf-Total übernehmen UND committen in einem Schritt (kein extra OK-Klick). Race-sicher via `pendingConfirm`-Flag + `useEffect` auf `currentThrow.length` (dispatches sind async, direkter `onConfirm()`-Call würde stale state lesen).
+- Edit-Modus (Dart-Slot angeklickt): Enter wird zu "Set", ersetzt nur den gewählten Dart, **kein** Auto-Commit.
+- ScoreInput rendert in `GameScreen.tsx` **über** Dartboard-Helper + CheckoutSuggestion — Eingabe oberhalb sichtbar ohne Scroll.
 
 ### Game Modes
 - **X01** (301/501/701) - `GameScreen.tsx` (main game screen, persisted via GameContext + API)
@@ -280,13 +285,24 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 
 ## Deployment
 
-- **VPS**: `ssh root@69.62.121.168`
+- **VPS**: `ssh root@69.62.121.168` (alias `celox`)
 - **Frontend**: `/var/www/stateofthedart` (stateofthedart.com)
 - **Backend**: `/var/www/stateofthedart-backend` (api.stateofthedart.com, port 3002)
 - **PM2 Process**: `stateofthedart-backend`
 - **DB**: `/var/www/stateofthedart-backend/data/state-of-the-dart.db`
 - **Backups**: Daily at 3 AM, 7-day retention, script in `backup-db.sh`
 - Deploy script creates a backup before PM2 restart
+- **Frontend-only quick deploy** (when only the SPA changed, e.g. UI/audio fixes):
+  ```bash
+  npm run build && rsync -avz --delete dist/ celox:/var/www/stateofthedart/
+  ```
+  Avoids deploying uncommitted backend WIP that `scripts/deploy.sh` would pick up.
+
+### nginx caching strategy (`/etc/nginx/sites-available/stateofthedart`)
+- `/assets/*` (Vite hashed chunks/CSS) → `public, max-age=31536000, immutable` — safe forever, the hash IS the cache key.
+- `/index.html` and SPA fallback `/` → `no-cache, no-store, must-revalidate` — browser always revalidates so deployed asset hashes are picked up.
+- `/sw.js` + `workbox-*.js` → `no-cache` — SW updates propagate without delay.
+- Previously the config had three contradictory `Cache-Control` headers on assets and **none** on HTML, which caused 404 errors on stale chunk references after deploys.
 
 See `docs/DEPLOYMENT_VPS.md` and `docs/ARCHITECTURE.md` for details.
 

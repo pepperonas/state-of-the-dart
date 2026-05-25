@@ -7,6 +7,37 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 🔊 Audio
+
+#### Leg/Match-Ansage war pseudo-"global gezählt"
+- `audioSystem.announceCheckout` bekam bisher den **Checkout-Score** als ersten Parameter und spielte daraus `gameshot/legs/{N}.mp3` ab — diese Dateien sagen aber "and the **Nth** leg", nicht den Score. Resultat: 100-Checkout → "and the **100th** leg".
+- Parameter umbenannt zu `legOrSetNumber`. `GameContext` übergibt jetzt die Leg-Sequenz innerhalb des aktuellen Matches (`updatedMatch.legs.length`) bzw. die Set-Sequenz.
+- Für `'match'` wird die Nummer komplett ignoriert — nur `texts/gameshotandthematch.mp3` läuft (vorher zusätzlich ein redundantes `gameshot.mp3`).
+- Fallback: fehlt `legs/{N}.mp3` (z. B. N > 30), läuft die generische `texts/gameshot.mp3`.
+
+#### Bust mit Score-Ansage
+- `announceBust(thrownScore?)`: spielt jetzt zuerst die geworfene Summe (`caller/{N}.mp3`) und dann `caller/0.mp3` ("No score"). Vorher war der Wurfwert auf Bust akustisch verschluckt.
+
+### 🎯 X01-Eingabe
+
+#### Numpad Enter = Wurf bestätigen
+- Im Numpad-Modus: Zahl tippen + Enter füllt die Dart-Slots **und** commitet den Wurf in einem Schritt. Vorher: Enter + extra OK-Klick.
+- Edit-Modus (Slot anklicken) bleibt unverändert — Enter heisst dort "Set" und ersetzt nur den ausgewählten Dart.
+- Race-Sicher implementiert via `pendingConfirm`-State + `useEffect` auf `currentThrow.length` (kein `setTimeout(0)`-Hack).
+
+#### ScoreInput über dem Dartboard
+- Numpad-Eingabe steht jetzt zuoberst in der Mittel-Spalte. Dartboard-Helper rutscht unter Checkout-Suggestion.
+
+### 🌐 Infrastruktur
+
+#### nginx-Cache-Header für stateofthedart.com
+- Bisherige Config hatte 3 widersprüchliche `Cache-Control`-Header für JS/CSS und gar keinen für `index.html` → Browser cachte HTML mit alten Asset-Hashes → 404s auf gelöschte Chunks nach Deploy.
+- Neue Regel:
+  - `/assets/*` (hashed) → `public, max-age=31536000, immutable`
+  - `/index.html` und `/` → `no-cache, no-store, must-revalidate`
+  - `/sw.js` und `workbox-*.js` → `no-cache`
+- Damit holt der Browser nach jedem Deploy frisches HTML mit korrekten Asset-Refs.
+
 ### ⚡ Performance
 
 #### Initial Bundle (gz): 198 KB → 147 KB (-26 %)
