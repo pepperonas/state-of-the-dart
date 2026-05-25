@@ -332,6 +332,11 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         updatedPlayer.legsWon++;
         updatedPlayer.checkoutsHit++;
 
+        // Match-scoped leg sequence number (1 = first leg of THIS match).
+        // updatedMatch.legs still has the just-won leg as the last entry;
+        // the new leg gets appended below.
+        const legNumberInMatch = updatedMatch.legs.length;
+
         // Check for set/match win
         const legsToWin = state.currentMatch.settings.legsToWin || 3;
         if (updatedPlayer.legsWon >= legsToWin) {
@@ -340,17 +345,19 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
           updatedMatch.status = 'completed';
           updatedMatch.completedAt = new Date();
 
-          // Announce set or match win
+          // Announce set or match win — passes the sequence # (not the
+          // checkout score). For 'match' the number is ignored entirely.
           if (state.currentMatch.settings.setsToWin && state.currentMatch.settings.setsToWin > 1) {
-            audioSystem.announceCheckout(currentThrowScore, 'set');
+            const setNumberInMatch = (updatedMatch.currentSetIndex ?? 0) + 1;
+            audioSystem.announceCheckout(setNumberInMatch, 'set');
           } else {
-            audioSystem.announceCheckout(currentThrowScore, 'match');
+            audioSystem.announceCheckout(0, 'match');
           }
         } else {
           // Leg won but match not over - start new leg
 
-          // Announce leg checkout
-          audioSystem.announceCheckout(currentThrowScore, 'leg');
+          // Announce leg win — leg # within THIS match (not the checkout score)
+          audioSystem.announceCheckout(legNumberInMatch, 'leg');
 
           // Alternate starting player for new leg
           const previousStartPlayer = updatedMatch.legStartPlayerIndex ?? 0;

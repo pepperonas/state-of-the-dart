@@ -235,32 +235,39 @@ class AudioSystem {
     this.playSound(soundPath, false);
   }
 
-  async announceCheckout(score: number, finishType: 'leg' | 'set' | 'match' = 'leg') {
-    // Clear queue and play checkout sequence
+  /**
+   * Announce a leg / set / match win.
+   *
+   * IMPORTANT: `legOrSetNumber` is the **sequence number within the current match**
+   * (e.g. 1, 2, 3 …), NOT the checkout score. The numbered files in
+   * `/sounds/gameshot/legs/` and `/sounds/gameshot/sets/` say "and the Nth leg"
+   * — passing a checkout score here would make the caller announce nonsense
+   * like "and the 100th leg".
+   *
+   * For `match`, no number is used — just the generic
+   * `texts/gameshotandthematch.mp3` file. The leg/set numbered file already
+   * contains the full "Yes, game shot and the Nth leg" phrase, so we do NOT
+   * chain a second `gameshot.mp3` after it.
+   */
+  async announceCheckout(legOrSetNumber: number, finishType: 'leg' | 'set' | 'match' = 'leg') {
     this.soundQueue = [];
     this.isPlaying = false;
-    
-    // Play checkout sound based on finish type
-    const scorePath = finishType === 'leg' 
-      ? `/sounds/gameshot/legs/${score}.mp3`
-      : finishType === 'set'
-      ? `/sounds/gameshot/sets/${score}.mp3`
-      : `/sounds/gameshot/legs/${score}.mp3`; // Fallback to legs sound
-    
-    // Determine finish announcement
-    const finishPath = finishType === 'match'
-      ? '/sounds/texts/gameshotandthematch.mp3'
-      : finishType === 'set'
-      ? '/sounds/texts/gameshot.mp3'
-      : '/sounds/texts/gameshot.mp3';
-    
+
     try {
-      // Play score first (e.g. "Forty", "One Hundred and Twenty")
-      await this.playSoundImmediate(scorePath);
-      // Small delay between sounds
-      await new Promise(resolve => setTimeout(resolve, 400));
-      // Then play "Game Shot" announcement
-      await this.playSoundImmediate(finishPath);
+      if (finishType === 'match') {
+        await this.playSoundImmediate('/sounds/texts/gameshotandthematch.mp3');
+        return;
+      }
+
+      const folder = finishType === 'set' ? 'sets' : 'legs';
+      const numberedPath = `/sounds/gameshot/${folder}/${legOrSetNumber}.mp3`;
+
+      try {
+        await this.playSoundImmediate(numberedPath);
+      } catch {
+        // Numbered file missing (e.g. leg # > 30) — fall back to generic phrase
+        await this.playSoundImmediate('/sounds/texts/gameshot.mp3');
+      }
     } catch (error) {
       console.warn('Failed to play checkout announcement:', error);
     }
