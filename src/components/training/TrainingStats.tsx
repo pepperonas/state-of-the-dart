@@ -6,8 +6,10 @@ import { TrainingSession, TrainingType } from '../../types';
 import { usePlayer } from '../../context/PlayerContext';
 import { useTenant } from '../../context/TenantContext';
 import { LineChart, Line, BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { motion } from 'framer-motion';
 import { api } from '../../services/api';
 import { toDateOrNow, formatDateTime, formatDateShort } from '../../utils/dateUtils';
+import { staggerChild } from '../../utils/motion';
 import { BackButton, Button, Card } from '../common';
 
 const TrainingStats: React.FC = () => {
@@ -256,27 +258,36 @@ const TrainingStats: React.FC = () => {
 
         {/* Summary Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <Card variant="filled" className="p-4 text-center">
-            <div className="m3-headline-small text-on-surface">{stats.totalSessions}</div>
-            <div className="m3-label-large text-on-surface-variant">Sessions</div>
-          </Card>
-          <Card variant="filled" className="p-4 text-center">
-            <div className="m3-headline-small text-success">{stats.averageScore.toFixed(0)}</div>
-            <div className="m3-label-large text-on-surface-variant">Ø Score</div>
-          </Card>
-          <Card variant="filled" className="p-4 text-center">
-            <div className="m3-headline-small text-primary">{stats.averageAccuracy.toFixed(1)}%</div>
-            <div className="m3-label-large text-on-surface-variant">Ø Genauigkeit</div>
-          </Card>
-          <Card variant="filled" className="p-4 text-center">
-            <div className="m3-headline-small text-tertiary">{stats.personalBests}</div>
-            <div className="m3-label-large text-on-surface-variant">Personal Bests</div>
-          </Card>
+          <motion.div {...staggerChild(0)}>
+            <Card variant="filled" className="p-4 text-center">
+              <div className="m3-headline-small text-on-surface">{stats.totalSessions}</div>
+              <div className="m3-label-large text-on-surface-variant">Sessions</div>
+            </Card>
+          </motion.div>
+          <motion.div {...staggerChild(1)}>
+            <Card variant="filled" className="p-4 text-center">
+              <div className="m3-headline-small text-success">{stats.averageScore.toFixed(0)}</div>
+              <div className="m3-label-large text-on-surface-variant">Ø Score</div>
+            </Card>
+          </motion.div>
+          <motion.div {...staggerChild(2)}>
+            <Card variant="filled" className="p-4 text-center">
+              <div className="m3-headline-small text-primary">{stats.averageAccuracy.toFixed(1)}%</div>
+              <div className="m3-label-large text-on-surface-variant">Ø Genauigkeit</div>
+            </Card>
+          </motion.div>
+          <motion.div {...staggerChild(3)}>
+            <Card variant="filled" className="p-4 text-center">
+              <div className="m3-headline-small text-tertiary">{stats.personalBests}</div>
+              <div className="m3-label-large text-on-surface-variant">Personal Bests</div>
+            </Card>
+          </motion.div>
         </div>
 
         {performanceData.length > 0 && (
           <div className="grid md:grid-cols-2 gap-6 mb-6">
             {/* Performance Chart */}
+            <motion.div {...staggerChild(4)}>
             <Card variant="filled" className="p-6">
               <h3 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
                 <TrendingUp size={20} />
@@ -302,9 +313,11 @@ const TrainingStats: React.FC = () => {
                 </ResponsiveContainer></div>
               </div>
             </Card>
+            </motion.div>
 
             {/* Training Type Distribution */}
             {typeDistribution.length > 0 && (
+              <motion.div {...staggerChild(5)}>
               <Card variant="filled" className="p-6">
                 <h3 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
                   <Target size={20} />
@@ -338,6 +351,7 @@ const TrainingStats: React.FC = () => {
                   </ResponsiveContainer></div>
                 </div>
               </Card>
+              </motion.div>
             )}
           </div>
         )}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Edit2, Trash2, User, Eye, Crown, BarChart3, Smile, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +8,7 @@ import { api } from '../../services/api';
 import PlayerAvatar from './PlayerAvatar';
 import EmojiPicker from './EmojiPicker';
 import { BackButton, Button, TextField, Card, IconButton } from '../common';
+import { staggerChild } from '../../utils/motion';
 
 const PlayerManagement: React.FC = () => {
   const { t } = useTranslation();
@@ -215,9 +217,9 @@ const PlayerManagement: React.FC = () => {
                 </p>
               </div>
             ) : (
-              paginatedPlayers.map((player) => (
+              paginatedPlayers.map((player, index) => (
+                <motion.div key={player.id} {...staggerChild(Math.min(index, 10))}>
                 <Card
-                  key={player.id}
                   variant="filled"
                   className="flex items-center justify-between p-4"
                 >
@@ -334,6 +336,7 @@ const PlayerManagement: React.FC = () => {
                     </IconButton>
                   </div>
                 </Card>
+                </motion.div>
               ))
             )}
           </div>

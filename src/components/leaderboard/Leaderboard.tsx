@@ -9,6 +9,8 @@ import { api } from '../../services/api';
 import { PersonalBests, createEmptyPersonalBests } from '../../types/personalBests';
 import { ACHIEVEMENTS } from '../../types/achievements';
 import { BackButton, Card, Chip } from '../common';
+import { motion } from 'framer-motion';
+import { staggerChild } from '../../utils/motion';
 
 type LeaderboardCategory = 
   | 'average'
@@ -213,8 +215,9 @@ const Leaderboard: React.FC = () => {
               {sortedData.map((player, index) => {
                 const rank = index + 1;
                 return (
-                  <div
+                  <motion.div
                     key={player.id}
+                    {...staggerChild(Math.min(index, 12))}
                     onClick={() => navigate(`/players/${player.id}`)}
                     className={`flex items-center justify-between p-4 border-2 rounded-m3-lg transition-all cursor-pointer hover:scale-[1.02] ${getRankColor(
                       rank
@@ -247,7 +250,7 @@ const Leaderboard: React.FC = () => {
                         {categories.find((c) => c.id === category)?.name}
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>

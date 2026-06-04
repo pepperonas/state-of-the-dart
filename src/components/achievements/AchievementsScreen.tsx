@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Trophy, Lock, Star, Award, Filter } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { staggerChild } from '../../utils/motion';
 import { useAchievements } from '../../context/AchievementContext';
 import { usePlayer } from '../../context/PlayerContext';
 import {
@@ -197,31 +199,33 @@ const AchievementsScreen: React.FC = () => {
 
           {/* Category Filter */}
           <div className="flex flex-wrap gap-2 mb-4">
-            {categories.map((cat) => (
-              <Chip
-                key={cat}
-                selected={filterCategory === cat}
-                onClick={() => setFilterCategory(cat)}
-              >
-                {cat === 'all' ? t('achievements.all') : t(`achievements.category_${cat}`)}
-              </Chip>
+            {categories.map((cat, i) => (
+              <motion.div key={cat} {...staggerChild(Math.min(i, 8))}>
+                <Chip
+                  selected={filterCategory === cat}
+                  onClick={() => setFilterCategory(cat)}
+                >
+                  {cat === 'all' ? t('achievements.all') : t(`achievements.category_${cat}`)}
+                </Chip>
+              </motion.div>
             ))}
           </div>
 
           {/* Scope Filter */}
           <div className="flex flex-wrap gap-2 mb-4">
-            {scopes.map((scope) => {
+            {scopes.map((scope, i) => {
               const isActive = filterScope === scope;
               const color = scope === 'all' ? undefined : getScopeColor(scope);
               return (
-                <Chip
-                  key={scope}
-                  selected={isActive}
-                  onClick={() => setFilterScope(scope)}
-                  style={isActive && color ? { backgroundColor: color + '40', color, borderColor: color } : undefined}
-                >
-                  {t(`achievements.scope_${scope}`)}
-                </Chip>
+                <motion.div key={scope} {...staggerChild(Math.min(i, 8))}>
+                  <Chip
+                    selected={isActive}
+                    onClick={() => setFilterScope(scope)}
+                    style={isActive && color ? { backgroundColor: color + '40', color, borderColor: color } : undefined}
+                  >
+                    {t(`achievements.scope_${scope}`)}
+                  </Chip>
+                </motion.div>
               );
             })}
           </div>
@@ -241,16 +245,17 @@ const AchievementsScreen: React.FC = () => {
         {/* Achievements Grid */}
         {filteredAchievements.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredAchievements.map((achievement) => (
-              <AchievementCard
-                key={achievement.id}
-                achievement={achievement}
-                unlocked={isAchievementUnlocked(selectedPlayerId, achievement.id)}
-                progress={playerProgress?.progress[achievement.id]}
-                unlockedAt={
-                  playerProgress?.unlockedAchievements.find(u => u.achievementId === achievement.id)?.unlockedAt
-                }
-              />
+            {filteredAchievements.map((achievement, index) => (
+              <motion.div key={achievement.id} {...staggerChild(Math.min(index, 10))}>
+                <AchievementCard
+                  achievement={achievement}
+                  unlocked={isAchievementUnlocked(selectedPlayerId, achievement.id)}
+                  progress={playerProgress?.progress[achievement.id]}
+                  unlockedAt={
+                    playerProgress?.unlockedAchievements.find(u => u.achievementId === achievement.id)?.unlockedAt
+                  }
+                />
+              </motion.div>
             ))}
           </div>
         ) : (

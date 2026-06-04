@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, Suspense, lazy } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, Target, Award, ChevronDown, ChevronUp, TrendingUp, Loader, Search, ChevronLeft, ChevronRight, Clock, Users, Filter } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +11,7 @@ const MatchChart = lazy(() => import('./MatchChart'));
 import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
 import PlayerAvatar from '../player/PlayerAvatar';
 import { BackButton, Card, Chip, TextField, IconButton, Button } from '../common';
+import { staggerChild } from '../../utils/motion';
 
 const MatchHistoryPage: React.FC = () => {
   const { t } = useTranslation();
@@ -282,7 +284,7 @@ const MatchHistoryPage: React.FC = () => {
           </Card>
         ) : (
           <div className="space-y-3">
-            {paginatedMatches.map((match) => {
+            {paginatedMatches.map((match, index) => {
               const players = match.players || [];
               const isExpanded = expandedMatch === match.id;
               const detail = matchDetails[match.id];
@@ -290,7 +292,8 @@ const MatchHistoryPage: React.FC = () => {
               const winnerPlayer = players.find(p => p.playerId === match.winner);
 
               return (
-                <Card key={match.id} variant="elevated" className="overflow-hidden">
+                <motion.div key={match.id} {...staggerChild(Math.min(index, 12))}>
+                <Card variant="elevated" className="overflow-hidden">
                   {/* Match summary row */}
                   <button
                     onClick={() => toggleMatch(match.id)}
@@ -462,6 +465,7 @@ const MatchHistoryPage: React.FC = () => {
                     </div>
                   )}
                 </Card>
+                </motion.div>
               );
             })}
           </div>

@@ -4,6 +4,8 @@ import { Trophy, TrendingUp, Target, Award, Loader, RefreshCw } from 'lucide-rea
 import api from '../../services/api';
 import { BackButton, Card, Chip, Button, IconButton } from '../common';
 import { useAuth } from '../../context/AuthContext';
+import { motion } from 'framer-motion';
+import { staggerChild } from '../../utils/motion';
 
 interface LeaderboardEntry {
   playerId: string;
@@ -159,9 +161,10 @@ const GlobalLeaderboard: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-2">
-                {data.entries.map((entry) => (
-                  <div
+                {data.entries.map((entry, index) => (
+                  <motion.div
                     key={entry.playerId}
+                    {...staggerChild(Math.min(index, 12))}
                     className={`flex items-center gap-4 p-4 rounded-m3-md transition-all ${
                       entry.rank <= 3
                         ? 'bg-primary-container text-on-primary-container border border-outline-variant'
@@ -205,7 +208,7 @@ const GlobalLeaderboard: React.FC = () => {
                         {entry.gamesPlayed} Spiele
                       </p>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             )}

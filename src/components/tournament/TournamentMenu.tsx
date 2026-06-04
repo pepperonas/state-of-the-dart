@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, Users, Calendar, Star, Play, Plus, Minus, Trash2, Settings, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +9,7 @@ import PlayerAvatar from '../player/PlayerAvatar';
 import { v4 as uuidv4 } from 'uuid';
 import { celebrate as confetti } from '../../utils/celebration';
 import { Button, Card, TextField, Chip, IconButton, BackButton } from '../common';
+import { staggerChild } from '../../utils/motion';
 
 type TournamentType = 'knockout' | 'round-robin';
 
@@ -515,11 +517,11 @@ const TournamentMenu: React.FC = () => {
                 Spieler ({selectedPlayers.length}/{selectedType?.maxPlayers || 8})
               </label>
               <div className="grid grid-cols-3 gap-3 max-h-64 overflow-y-auto">
-                {players.filter(p => !p.isBot).map(player => {
+                {players.filter(p => !p.isBot).map((player, index) => {
                   const isSelected = !!selectedPlayers.find(p => p.id === player.id);
                   return (
+                    <motion.div key={player.id} {...staggerChild(Math.min(index, 10))}>
                     <Card
-                      key={player.id}
                       variant={isSelected ? 'filled' : 'outlined'}
                       interactive
                       onClick={() => {
@@ -534,6 +536,7 @@ const TournamentMenu: React.FC = () => {
                       <PlayerAvatar avatar={player.avatar} name={player.name} size="sm" />
                       <p className="text-on-surface m3-body-small mt-1 truncate">{player.name}</p>
                     </Card>
+                    </motion.div>
                   );
                 })}
               </div>
@@ -593,11 +596,11 @@ const TournamentMenu: React.FC = () => {
           <h3 className="m3-title-medium text-on-surface mb-4">Verfügbare Modi</h3>
 
           <div className="space-y-4">
-            {tournamentTypes.map((type) => {
+            {tournamentTypes.map((type, index) => {
               const Icon = type.icon;
               return (
+                <motion.div key={type.title} {...staggerChild(index)}>
                 <Card
-                  key={type.title}
                   variant="outlined"
                   interactive
                   onClick={() => {
@@ -618,6 +621,7 @@ const TournamentMenu: React.FC = () => {
                     <ChevronRight className="text-on-surface-variant" />
                   </div>
                 </Card>
+                </motion.div>
               );
             })}
           </div>

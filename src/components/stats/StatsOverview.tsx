@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Activity, TrendingUp, TrendingDown, Minus, Download, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +23,7 @@ import { Flame, FileSpreadsheet, FileText } from 'lucide-react';
 import { api } from '../../services/api';
 import { formatDate, getTimestampForSort } from '../../utils/dateUtils';
 import BackButton from '../common/BackButton';
+import { staggerChild } from '../../utils/motion';
 import { Card, Button, Chip } from '../common';
 
 const VALID_TABS = ['overview', 'progress', 'history', 'compare', 'heatmap'] as const;
@@ -469,26 +471,50 @@ const StatsOverview: React.FC = () => {
               <div className="space-y-6">
                 {/* Stats Grid */}
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <StatCard label="Spiele" value={selectedPlayer.stats.gamesPlayed} />
-                  <StatCard label="Gewonnen" value={selectedPlayer.stats.gamesWon} color="green" />
-                  <StatCard 
-                    label="Win Rate" 
-                    value={
-                      selectedPlayer.stats.gamesPlayed > 0
-                        ? `${((selectedPlayer.stats.gamesWon / selectedPlayer.stats.gamesPlayed) * 100).toFixed(1)}%`
-                        : '0%'
-                    }
-                    color="blue"
-                  />
-                  <StatCard label="Durchschnitt" value={selectedPlayer.stats.averageOverall.toFixed(2)} color="purple" />
-                  <StatCard label="Bester Avg" value={selectedPlayer.stats.bestAverage.toFixed(2)} color="yellow" />
-                  <StatCard label="180s" value={selectedPlayer.stats.total180s} icon="🎯" />
-                  <StatCard label="High Checkout" value={selectedPlayer.stats.highestCheckout || '-'} />
-                  <StatCard label="Checkout %" value={`${selectedPlayer.stats.checkoutPercentage.toFixed(1)}%`} />
-                  <StatCard label="140+ Scores" value={selectedPlayer.stats.total140Plus} />
-                  <StatCard label="100+ Scores" value={selectedPlayer.stats.total100Plus} />
-                  <StatCard label="60+ Scores" value={selectedPlayer.stats.total60Plus} />
-                  <StatCard label="9-Darters" value={selectedPlayer.stats.nineDartFinishes} icon="⭐" />
+                  <motion.div {...staggerChild(0)}>
+                    <StatCard label="Spiele" value={selectedPlayer.stats.gamesPlayed} />
+                  </motion.div>
+                  <motion.div {...staggerChild(1)}>
+                    <StatCard label="Gewonnen" value={selectedPlayer.stats.gamesWon} color="green" />
+                  </motion.div>
+                  <motion.div {...staggerChild(2)}>
+                    <StatCard
+                      label="Win Rate"
+                      value={
+                        selectedPlayer.stats.gamesPlayed > 0
+                          ? `${((selectedPlayer.stats.gamesWon / selectedPlayer.stats.gamesPlayed) * 100).toFixed(1)}%`
+                          : '0%'
+                      }
+                      color="blue"
+                    />
+                  </motion.div>
+                  <motion.div {...staggerChild(3)}>
+                    <StatCard label="Durchschnitt" value={selectedPlayer.stats.averageOverall.toFixed(2)} color="purple" />
+                  </motion.div>
+                  <motion.div {...staggerChild(4)}>
+                    <StatCard label="Bester Avg" value={selectedPlayer.stats.bestAverage.toFixed(2)} color="yellow" />
+                  </motion.div>
+                  <motion.div {...staggerChild(5)}>
+                    <StatCard label="180s" value={selectedPlayer.stats.total180s} icon="🎯" />
+                  </motion.div>
+                  <motion.div {...staggerChild(6)}>
+                    <StatCard label="High Checkout" value={selectedPlayer.stats.highestCheckout || '-'} />
+                  </motion.div>
+                  <motion.div {...staggerChild(7)}>
+                    <StatCard label="Checkout %" value={`${selectedPlayer.stats.checkoutPercentage.toFixed(1)}%`} />
+                  </motion.div>
+                  <motion.div {...staggerChild(8)}>
+                    <StatCard label="140+ Scores" value={selectedPlayer.stats.total140Plus} />
+                  </motion.div>
+                  <motion.div {...staggerChild(9)}>
+                    <StatCard label="100+ Scores" value={selectedPlayer.stats.total100Plus} />
+                  </motion.div>
+                  <motion.div {...staggerChild(10)}>
+                    <StatCard label="60+ Scores" value={selectedPlayer.stats.total60Plus} />
+                  </motion.div>
+                  <motion.div {...staggerChild(11)}>
+                    <StatCard label="9-Darters" value={selectedPlayer.stats.nineDartFinishes} icon="⭐" />
+                  </motion.div>
                 </div>
 
                 {/* Charts Section */}
@@ -1108,32 +1134,40 @@ const StatsOverview: React.FC = () => {
                   <div className="space-y-6">
                     {/* Stats Cards */}
                     <div className="grid md:grid-cols-4 gap-4">
-                      <Card variant="filled" className="p-6">
-                        <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">Total Würfe</div>
-                        <div className="m3-headline-medium font-bold text-on-surface">{heatmapData.totalDarts}</div>
-                        <div className="m3-body-small text-on-surface-variant mt-2">Alle aufgezeichneten Darts</div>
-                      </Card>
-                      <Card variant="filled" className="p-6">
-                        <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">Segments getroffen</div>
-                        <div className="m3-headline-medium font-bold text-on-surface">
-                          {Object.keys(heatmapData.segments || {}).length}
-                        </div>
-                        <div className="m3-body-small text-on-surface-variant mt-2">Unterschiedliche Felder</div>
-                      </Card>
-                      <Card variant="filled" className="p-6">
-                        <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">Präzision</div>
-                        <div className="m3-headline-medium font-bold text-on-surface">
-                          {selectedPlayer ? selectedPlayer.stats.checkoutPercentage.toFixed(1) : 0}%
-                        </div>
-                        <div className="m3-body-small text-on-surface-variant mt-2">Checkout Rate</div>
-                      </Card>
-                      <Card variant="filled" className="p-6">
-                        <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">180s</div>
-                        <div className="m3-headline-medium font-bold text-on-surface">
-                          {selectedPlayer?.stats.total180s || 0}
-                        </div>
-                        <div className="m3-body-small text-on-surface-variant mt-2">Maximum Scores</div>
-                      </Card>
+                      <motion.div {...staggerChild(0)}>
+                        <Card variant="filled" className="p-6">
+                          <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">Total Würfe</div>
+                          <div className="m3-headline-medium font-bold text-on-surface">{heatmapData.totalDarts}</div>
+                          <div className="m3-body-small text-on-surface-variant mt-2">Alle aufgezeichneten Darts</div>
+                        </Card>
+                      </motion.div>
+                      <motion.div {...staggerChild(1)}>
+                        <Card variant="filled" className="p-6">
+                          <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">Segments getroffen</div>
+                          <div className="m3-headline-medium font-bold text-on-surface">
+                            {Object.keys(heatmapData.segments || {}).length}
+                          </div>
+                          <div className="m3-body-small text-on-surface-variant mt-2">Unterschiedliche Felder</div>
+                        </Card>
+                      </motion.div>
+                      <motion.div {...staggerChild(2)}>
+                        <Card variant="filled" className="p-6">
+                          <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">Präzision</div>
+                          <div className="m3-headline-medium font-bold text-on-surface">
+                            {selectedPlayer ? selectedPlayer.stats.checkoutPercentage.toFixed(1) : 0}%
+                          </div>
+                          <div className="m3-body-small text-on-surface-variant mt-2">Checkout Rate</div>
+                        </Card>
+                      </motion.div>
+                      <motion.div {...staggerChild(3)}>
+                        <Card variant="filled" className="p-6">
+                          <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">180s</div>
+                          <div className="m3-headline-medium font-bold text-on-surface">
+                            {selectedPlayer?.stats.total180s || 0}
+                          </div>
+                          <div className="m3-body-small text-on-surface-variant mt-2">Maximum Scores</div>
+                        </Card>
+                      </motion.div>
                     </div>
 
                     {/* Heatmap Visualization */}
