@@ -68,7 +68,19 @@ const apiClient = async (endpoint: string, options: RequestInit = {}) => {
 
     logBuffer.log('error', 'api_error', `${method} ${endpoint} ${response.status} (${duration}ms)`, { error: errorMsg });
 
-    throw new Error(errorMsg);
+    // Session expired / unauthorized on an AUTHENTICATED request → trigger a global
+    // logout so the user isn't left silently failing every write. Skip auth endpoints
+    // themselves (a wrong-password 401 on /api/auth/login carries no token).
+    if (response.status === 401 && token && !endpoint.includes('/api/auth/')) {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+      }
+    }
+
+    // Attach the HTTP status so callers can branch (e.g. 409 conflict handling).
+    const err = new Error(errorMsg) as Error & { status?: number };
+    err.status = response.status;
+    throw err;
   }
 
   logBuffer.log('info', 'api_response', `${method} ${endpoint} ${response.status} (${duration}ms)`);

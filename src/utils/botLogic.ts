@@ -1,4 +1,5 @@
 import { Dart, Player, PlayerStats } from '../types';
+import { isBogeyNumber } from './scoring';
 
 /**
  * Bot difficulty presets
@@ -523,9 +524,17 @@ export function generateBotThrow(botLevel: number, remaining: number, dartsLeft:
       score = target.target * target.multiplier;
     }
 
-    // Check for bust
+    // Check for bust — match the game's isBust() rule (incl. bogey-number leaves,
+    // which the app counts as a bust under double-out). Without the bogey check the
+    // bot could intentionally leave itself an impossible finish that the game then
+    // voids as a bust.
     const newRemaining = remaining - score;
-    if (newRemaining < 0 || newRemaining === 1 || (newRemaining === 0 && target.multiplier !== 2)) {
+    if (
+      newRemaining < 0 ||
+      newRemaining === 1 ||
+      (newRemaining === 0 && target.multiplier !== 2) ||
+      isBogeyNumber(newRemaining)
+    ) {
       // Would bust, so we miss instead (smart bot)
       return generateMiss(target.target, target.multiplier, preset.accuracy);
     }

@@ -73,11 +73,19 @@ router.post('/player/:playerId/unlock', authenticateTenant, (req: AuthRequest, r
     // Achievement definitions are managed by the frontend (247 achievements).
     // We just store the unlock record without validating against the legacy achievements table.
 
-    // Unlock achievement
+    // Unlock achievement.
+    // Use an upsert that PRESERVES the original unlocked_at: the retry/pending-sync
+    // queue re-POSTs unlocks repeatedly, and the old `INSERT OR REPLACE` reset
+    // unlocked_at to "now" each time, corrupting achievement chronology. COALESCE
+    // keeps the existing timestamp (only sets it on first unlock) while still
+    // refreshing progress.
     const unlockTime = Date.now();
     db.prepare(`
-      INSERT OR REPLACE INTO player_achievements (id, player_id, achievement_id, unlocked_at, progress)
+      INSERT INTO player_achievements (id, player_id, achievement_id, unlocked_at, progress)
       VALUES (?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        unlocked_at = COALESCE(player_achievements.unlocked_at, excluded.unlocked_at),
+        progress = excluded.progress
     `).run(
       `${playerId}-${achievementId}`,
       playerId,

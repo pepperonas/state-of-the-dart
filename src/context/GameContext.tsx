@@ -763,8 +763,10 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           } catch (createError: any) {
             // If aborted, exit silently
             if (createError.name === 'AbortError' || !isMounted) return;
-            // If it already exists, mark as created and continue
-            if (createError?.response?.status === 409) {
+            // If it already exists (409 conflict), mark as created and continue.
+            // apiClient attaches `status` to the thrown error; older code checked the
+            // non-existent `.response.status`, so this branch never ran.
+            if (createError?.status === 409 || /\b409\b/.test(createError?.message ?? '')) {
               matchCreatedRef.current = matchId;
             } else {
               logger.warn('Match create failed:', createError);

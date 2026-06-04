@@ -308,7 +308,10 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
       setRoundScores(last.prevRoundScores);
       setCurrentRound(last.prevRound);
       setCurrentPlayerIndex(last.playerIndex);
-      restoringRef.current = true;
+      // Only suppress auto-confirm when restoring a FULL 3-dart turn — otherwise the
+      // flag stays stuck true (the length===3 effect that clears it never runs) and
+      // swallows the next legitimate auto-confirm.
+      restoringRef.current = last.darts.length === 3;
       setCurrentDarts(last.darts);
     }
   };

@@ -16,6 +16,14 @@ const SEGMENTS = [20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9
 const RADIAL_BINS = 20; // Number of concentric rings
 const ANGULAR_BINS = 72; // Number of angular sectors (5 degrees each)
 
+// Deterministic [0,1) pseudo-random from an integer seed. Used for the scatter
+// fallback so the heatmap stays stable across re-renders — calling Math.random()
+// inside the dartPoints useMemo is impure and made the dots visibly jump.
+const seededRand = (seed: number): number => {
+  const x = Math.sin(seed * 12.9898) * 43758.5453;
+  return x - Math.floor(x);
+};
+
 export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
   heatmapData,
   size = 600,
@@ -131,9 +139,11 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
 
           // Generate points with realistic scatter pattern
           for (let i = 0; i < hitCount; i++) {
-            // Use Gaussian-like distribution for scatter
-            const angleVariation = (Math.random() - 0.5) * 6 + (Math.random() - 0.5) * 4; // ±5° with Gaussian shape
-            const radiusVariation = 1 + (Math.random() - 0.5) * 0.08 + (Math.random() - 0.5) * 0.04; // ±6%
+            // Deterministic Gaussian-like scatter, seeded by segment+multiplier+i, so the
+            // heatmap doesn't reshuffle on every recompute (Math.random in a useMemo is impure).
+            const seed = segment * 7919 + multiplier * 311 + i * 4;
+            const angleVariation = (seededRand(seed) - 0.5) * 6 + (seededRand(seed + 1) - 0.5) * 4; // ±5°
+            const radiusVariation = 1 + (seededRand(seed + 2) - 0.5) * 0.08 + (seededRand(seed + 3) - 0.5) * 0.04; // ±6%
             
             const finalAngle = angleRad + (angleVariation * Math.PI / 180);
             const finalRadius = radius * radiusVariation;

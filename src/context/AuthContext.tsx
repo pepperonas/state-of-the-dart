@@ -42,6 +42,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     loadUser();
   }, []);
 
+  // Global "session expired" handler. apiClient dispatches `auth:unauthorized` on a
+  // 401 for an AUTHENTICATED request — previously the token would expire mid-session
+  // and every write silently failed with the user none the wiser. Now we log out and
+  // send them to login so they re-authenticate instead of losing data into the void.
+  useEffect(() => {
+    const onUnauthorized = () => {
+      if (!localStorage.getItem('auth_token')) return; // already logged out
+      logBuffer.log('info', 'state_change', 'Session expired (401) — logging out');
+      removeAuthToken();
+      setUser(null);
+      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+        window.location.href = '/login';
+      }
+    };
+    window.addEventListener('auth:unauthorized', onUnauthorized);
+    return () => window.removeEventListener('auth:unauthorized', onUnauthorized);
+  }, []);
+
   const loadUser = async () => {
     const token = localStorage.getItem('auth_token');
     if (!token) {

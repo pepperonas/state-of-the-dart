@@ -367,7 +367,10 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
       setPlayerDarts(prev => ({ ...prev, [last.playerId]: last.prevDarts }));
       setPlayerHits(prev => ({ ...prev, [last.playerId]: last.prevHits }));
       setCurrentPlayerIndex(last.playerIndex);
-      restoringRef.current = true;
+      // Only suppress auto-confirm when restoring a FULL 3-dart turn. If we set this
+      // for a shorter turn, the length===3 effect that clears it never runs → the flag
+      // stays stuck true and silently swallows the next legitimate auto-confirm.
+      restoringRef.current = last.darts.length === 3;
       setCurrentDarts(last.darts);
     }
   };
@@ -417,7 +420,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
       setPlayerDarts(prev => ({ ...prev, ...dartsUpdates }));
       setPlayerHits(prev => ({ ...prev, ...hitsUpdates }));
       setCurrentPlayerIndex(targetIdx);
-      restoringRef.current = true;
+      restoringRef.current = restoredDarts.length === 3;
       setCurrentDarts(restoredDarts);
     }
   };

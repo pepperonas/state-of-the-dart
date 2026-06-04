@@ -96,7 +96,10 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
     
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [currentInput, currentThrow, inputMode, onConfirm, onRemoveDart, onClearThrow]);
+    // editingDartIndex must be a dep: it changes when a dart slot is clicked WITHOUT
+    // currentThrow/currentInput changing, so the listener would otherwise close over a
+    // stale value and route keyboard-Enter to the wrong branch (commit vs. replace-dart).
+  }, [currentInput, currentThrow, inputMode, editingDartIndex, onConfirm, onRemoveDart, onClearThrow]);
   // Most common scores - prominently displayed
   const commonScores = [0, 26, 41, 45, 60, 81, 85, 100, 121, 140, 180];
   
