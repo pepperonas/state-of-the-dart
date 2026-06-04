@@ -33,6 +33,21 @@ App-weiter Animations-Pass auf Basis des Motion-Systems (`src/utils/motion.ts`).
 - **State-Layer vs. absolute Kinder**: `.m3-state-layer > * { position: relative }` überschrieb (gleiche Spezifität, später geladen) Tailwinds `.absolute` → absolut positionierte Kinder (z. B. das MainMenu „10"-Badge auf der *Spiel-fortsetzen*-Kachel) wurden zu `position: relative` + `flex` und zogen sich auf volle Breite. Fix: Selektor in `:where(.m3-state-layer) > *` gewrappt (Spezifität 0) → Positions-Utilities am Kind gewinnen, statischer Content wird weiterhin über das Overlay gehoben. Global für alle Karten/Buttons/Chips.
 - **Zurück-Button-Abstand vereinheitlicht**: `BackButton` umschließt sich im Block-Modus (Default) mit `mb-6`, sodass der Abstand zur Überschrift auf allen Screens gleich ist; Flex-Header-Zeilen nutzen den neuen `inline`-Prop (kein Wrapper, Abstand kommt von der Zeile). Vorher: Standalone-Buttons ohne Abstand, Header-Zeilen mit `mb-6` → inkonsistent.
 
+### 🐛 Bugfixes (Code-Review)
+
+Echte Bugs aus einem Code-Review behoben (Stabilität, Scoring, Sync). Build auf Baseline (~148 KB gz), 294 Tests grün, Frontend- + Server-tsc sauber.
+
+- **Error Boundary**: Top-Level-`ErrorBoundary` umschließt `<App>` (`main.tsx`). Vorher führte jeder Render-Fehler (kaputtes `JSON.parse` bei Match-Reconstruction, fehlgeschlagener Lazy-Chunk) zum **Weißen Bildschirm** ohne Recovery — jetzt M3-Recovery-Screen mit Neu-laden/Hauptmenü.
+- **Session-Ablauf**: `apiClient` hängt jetzt den HTTP-`status` an geworfene Errors und feuert bei **401 auf authentifizierte Requests** ein globales `auth:unauthorized`-Event → `AuthContext` loggt aus + leitet zum Login. Vorher konnte das Token mitten in der Session ablaufen und **alle** Schreibvorgänge schlugen still fehl.
+- **GameContext 409-Erkennung war tot**: prüfte das nicht existierende `.response.status` → griff nie. Liest jetzt `err.status` → kein POST-Thrash mehr beim Match-Anlegen.
+- **ScoreInput Keyboard-Stale-Closure**: `editingDartIndex` fehlte in den Effect-Deps → Keyboard-Enter im Edit-Modus konnte den falschen Zweig treffen. Dep ergänzt.
+- **ATC/Shanghai Undo**: `restoringRef` blieb auf `true` hängen, wenn eine Runde mit < 3 Darts wiederhergestellt wurde → der nächste echte 3-Dart-Wurf wurde nicht auto-bestätigt. Flag wird jetzt nur bei vollem 3-Dart-Restore gesetzt.
+- **Bot-Bust-Logik**: berücksichtigt jetzt auch Bogey-Zahlen (169/168/166/165/163/162/159) wie `isBust()` → Bot stellt sich nicht mehr auf einen unmöglichen Finish, den das Spiel dann als Bust voidet.
+- **Heatmap-Streuung deterministisch**: `Math.random()` in einem `useMemo` (unrein) ließ die Punkte bei jedem Re-Render neu „springen" → jetzt seed-basierter PRNG (`segment+multiplier+i`).
+- **Achievement-Zeitstempel** (Server): Unlock-Upsert nutzt `ON CONFLICT … COALESCE(unlocked_at, …)` statt `INSERT OR REPLACE` → der ursprüngliche `unlocked_at` wird beim Re-Sync nicht mehr auf „jetzt" überschrieben. *(Server-Change — geht erst mit dem nächsten Server-Deploy live.)*
+
+**Bewusst aufgeschoben (kein Crash-Bug):** Offline-Schreibqueue ist toter Code (Banner „lokal gespeichert" stimmt nicht — Feature-/UX-Entscheidung); Set-Modus ist latent kaputt (kein UI, `setsToWin` hart auf 1).
+
 ### 🔊 Audio
 
 #### Leg/Match-Ansage war pseudo-"global gezählt"

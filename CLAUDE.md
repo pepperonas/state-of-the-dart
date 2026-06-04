@@ -133,6 +133,7 @@ M3 primitive library (barrel `src/components/common/index.ts`). **Prefer these o
 - `Chip` — filter/assist chip (`selected`, `icon`).
 - `Dialog` — scrim + spring-animated container (`open`, `onClose`, `title`, `actions`, `widthClassName`, `hideClose`); closes on scrim/Escape.
 - `AnimatedNumber` — spring number transition (overdamped → no overshoot/jitter), reduced-motion aware; "tallies" to its new value. Used for in-game scores (`PlayerScore`, `ScoreInput`) and Dashboard KPIs (counts up as async data loads).
+- `ErrorBoundary` — top-level React error boundary. Wraps `<App>` in `main.tsx` so a render-time throw (bad `JSON.parse` in match reconstruction, failed lazy chunk, etc.) shows an M3 recovery screen (reload / back-to-menu) instead of white-screening the PWA. The `window.error`/`unhandledrejection` handlers in `App.tsx` only log — they do NOT catch render errors, so don't remove the boundary.
 - `BackButton.tsx` — canonical back button. **Always use this** for screen-level back navigation. An M3 **tonal** button with a leading `<ArrowLeft>`. In **block mode (default)** it wraps itself in a `mb-6` block so the gap to the page heading is uniform across all screens; pass **`inline`** when it sits in a flex header row / form (opts out of the wrapper — the row/form controls spacing). Override text via `label`.
 
 ### Lazy-Loaded Heavy Modules
@@ -208,7 +209,7 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - Undo with no current darts: pops last entry from `turnHistory`, restores player state, re-loads darts into slots
 - Undo button enabled: `disabled={currentDarts.length === 0 && turnHistory.length === 0}`
 - Auto-confirm (300ms after 3rd dart) uses `useRef` timeout, cancelable by undo
-- **CRITICAL**: `restoringRef` flag prevents auto-confirm from re-confirming restored darts. When undo restores 3 darts from turnHistory, set `restoringRef.current = true` BEFORE `setCurrentDarts(last.darts)`. Auto-confirm useEffect checks and resets it.
+- **CRITICAL**: `restoringRef` flag prevents auto-confirm from re-confirming restored darts. When undo restores a turn from turnHistory, set `restoringRef.current = last.darts.length === 3` (NOT unconditionally `true`) BEFORE `setCurrentDarts(last.darts)`. The flag is only cleared inside the `currentDarts.length === 3` effect — setting it while restoring a shorter turn leaves it **stuck true** and silently swallows the player's next legitimate auto-confirm.
 
 ### Standalone Game Common Features (ATC, Shanghai, Cricket)
 - **SpinnerWheel**: All 3 modes show `SpinnerWheel` for random starting player when 2+ players selected. `handleStartGame` → `setPendingGamePlayers` + `setShowSpinner(true)` → `handleSpinnerComplete` reorders players → `initGame(reordered)`
@@ -235,7 +236,7 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - In-memory ring buffer (`logBuffer`) captures ALL logs regardless of environment (production included)
 - Console output remains environment-gated via `logger.ts`; ring buffer is independent
 - Admin users see a floating Flag button (`DebugFlagButton`) — creates a snapshot: log buffer + screenshot + browser info + game state + route
-- `api.ts` `apiClient()` automatically logs all API requests/responses/errors with duration (no body logging for security)
+- `api.ts` `apiClient()` automatically logs all API requests/responses/errors with duration (no body logging for security). Thrown errors carry the HTTP `status` (use `err.status === 409` etc., NOT `err.response.status` which doesn't exist). On a **401 for an authenticated request** it dispatches a global `auth:unauthorized` event; `AuthContext` listens → `logout()` + redirect to `/login`, so an expired token doesn't leave the user silently failing every write.
 - Global error handlers in `App.tsx` capture `window.error` and `unhandledrejection` events
 - Route changes logged as `navigation` category via `RouteLogger` component
 - Game events (ADD_DART, CONFIRM_THROW, etc.), achievements, and auth state changes also feed the buffer
