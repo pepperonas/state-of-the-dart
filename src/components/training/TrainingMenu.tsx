@@ -65,7 +65,7 @@ const TrainingMenu: React.FC = () => {
     <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <BackButton onClick={() => navigate('/')} />
+          <BackButton onClick={() => navigate('/')} inline />
           <Button
             variant="tonal"
             icon={<BarChart size={20} />}

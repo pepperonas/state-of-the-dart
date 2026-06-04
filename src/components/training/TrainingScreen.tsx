@@ -589,7 +589,7 @@ const TrainingScreen: React.FC = () => {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <BackButton onClick={() => navigate('/training')} className="" />
+          <BackButton onClick={() => navigate('/training')} inline />
           <h1 className="m3-headline-small text-on-surface">{getTrainingTitle()}</h1>
           <Button variant="filled" onClick={handleRestart}>
             Neustart

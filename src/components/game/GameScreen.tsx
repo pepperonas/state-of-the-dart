@@ -1373,7 +1373,7 @@ const GameScreen: React.FC = () => {
 
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <BackButton onClick={handleBackToMenu} className="" />
+          <BackButton onClick={handleBackToMenu} inline />
           
           <div className="flex gap-2">
             <IconButton

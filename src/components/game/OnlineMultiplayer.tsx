@@ -193,7 +193,7 @@ const OnlineMultiplayer: React.FC = () => {
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <BackButton onClick={handleLeaveRoom} label="Raum verlassen" />
+            <BackButton onClick={handleLeaveRoom} label="Raum verlassen" inline />
             <div className="flex items-center gap-2">
               {connected ? (
                 <span className="flex items-center gap-1 px-3 py-1.5 rounded-m3-full bg-success-container text-on-success-container m3-label-large">
@@ -352,7 +352,7 @@ const OnlineMultiplayer: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <BackButton onClick={() => navigate('/')} />
+          <BackButton onClick={() => navigate('/')} inline />
           <div className="flex items-center gap-2">
             {connected ? (
               <span className="flex items-center gap-1 px-3 py-1.5 rounded-m3-full bg-success-container text-on-success-container m3-label-large">
