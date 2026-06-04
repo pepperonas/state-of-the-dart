@@ -6,7 +6,7 @@ import { usePlayer } from '../../context/PlayerContext';
 import { api } from '../../services/api';
 import PlayerAvatar from './PlayerAvatar';
 import EmojiPicker from './EmojiPicker';
-import BackButton from '../common/BackButton';
+import { BackButton, Button, TextField, Card, IconButton } from '../common';
 
 const PlayerManagement: React.FC = () => {
   const { t } = useTranslation();
@@ -124,22 +124,22 @@ const PlayerManagement: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         <BackButton onClick={() => navigate('/')} />
         
-        <div className="glass-card rounded-xl shadow-lg p-6 md:p-8">
+        <Card variant="elevated" className="p-6 md:p-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-3xl font-bold text-white">{t('players.title')}</h2>
-            <button
+            <h2 className="m3-headline-small text-on-surface">{t('players.title')}</h2>
+            <Button
+              variant="filled"
+              icon={<Plus size={20} />}
               onClick={() => setShowAddPlayer(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white rounded-lg font-semibold transition-all"
             >
-              <Plus size={20} />
               {t('players.add_player')}
-            </button>
+            </Button>
           </div>
           
           {showAddPlayer && (
-            <div className="mb-6 p-4 bg-dark-900/50 rounded-lg border border-dark-700">
+            <Card variant="filled" className="mb-6 p-4">
               <div className="mb-4">
-                <label className="block text-sm font-medium text-white mb-2">
+                <label className="block m3-label-large text-on-surface mb-2">
                   Emoji auswählen (optional - lässt den Anfangsbuchstaben ersetzen)
                 </label>
                 <div className="flex items-center gap-3">
@@ -147,70 +147,68 @@ const PlayerManagement: React.FC = () => {
                     {newPlayerAvatar ? (
                       <div className="flex items-center gap-3">
                         <div className="text-4xl">{newPlayerAvatar}</div>
-                        <button
+                        <Button
+                          variant="danger"
+                          size="sm"
                           onClick={() => setNewPlayerAvatar(undefined)}
-                          className="text-sm px-3 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-all"
                         >
                           Entfernen
-                        </button>
+                        </Button>
                       </div>
                     ) : (
-                      <div className="text-dark-400 text-sm">Kein Emoji ausgewählt</div>
+                      <div className="text-on-surface-variant m3-body-medium">Kein Emoji ausgewählt</div>
                     )}
                   </div>
-                  <button
+                  <Button
+                    variant="tonal"
+                    icon={<Smile size={18} />}
                     onClick={() => setShowEmojiPicker('new')}
-                    className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-semibold transition-all flex items-center gap-2"
                   >
-                    <Smile size={18} />
                     Emoji wählen
-                  </button>
+                  </Button>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <input
+              <div className="flex items-end gap-2">
+                <TextField
+                  className="flex-1"
                   type="text"
                   value={newPlayerName}
                   onChange={(e) => setNewPlayerName(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleAddPlayer()}
                   placeholder={t('players.enter_player_name')}
-                  className="flex-1 px-3 py-2 rounded-lg border border-dark-700 bg-dark-800 text-white placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
                   autoFocus
                 />
-                <button
-                  onClick={handleAddPlayer}
-                  className="px-4 py-2 bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white rounded-lg font-semibold transition-all"
-                >
+                <Button variant="filled" onClick={handleAddPlayer}>
                   {t('players.add')}
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="text"
                   onClick={() => {
                     setShowAddPlayer(false);
                     setNewPlayerName('');
                     setNewPlayerAvatar(undefined);
                   }}
-                  className="px-4 py-2 bg-dark-700 hover:bg-dark-600 text-white rounded-lg font-semibold transition-all"
                 >
                   {t('common.cancel')}
-                </button>
+                </Button>
               </div>
-            </div>
+            </Card>
           )}
           
           <div className="space-y-3">
             {loading ? (
               <div className="text-center py-12">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-500 mx-auto mb-4"></div>
-                <p className="text-white text-lg font-semibold">{t('players.loading_players')}</p>
+                <p className="text-on-surface m3-title-medium">{t('players.loading_players')}</p>
               </div>
             ) : filteredPlayers.length === 0 ? (
               <div className="text-center py-12">
-                <User size={64} className="mx-auto text-dark-600 mb-4" />
-                <p className="text-white text-lg font-semibold">
+                <User size={64} className="mx-auto text-on-surface-variant mb-4" />
+                <p className="text-on-surface m3-title-medium">
                   {searchQuery ? 'Keine Spieler gefunden' : t('players.no_players_yet')}
                 </p>
-                <p className="text-sm text-dark-400 mt-2">
-                  {searchQuery 
+                <p className="m3-body-medium text-on-surface-variant mt-2">
+                  {searchQuery
                     ? `Keine Spieler gefunden für "${searchQuery}"`
                     : t('players.add_first_player')
                   }
@@ -218,9 +216,10 @@ const PlayerManagement: React.FC = () => {
               </div>
             ) : (
               paginatedPlayers.map((player) => (
-                <div
+                <Card
                   key={player.id}
-                  className="flex items-center justify-between p-4 bg-dark-900/50 border border-dark-700 rounded-lg hover:border-dark-600 transition-all"
+                  variant="filled"
+                  className="flex items-center justify-between p-4"
                 >
                   <div 
                     className="flex items-center gap-3 flex-1 cursor-pointer"
@@ -241,7 +240,7 @@ const PlayerManagement: React.FC = () => {
                       </div>
                     </div>
                     {editingPlayer === player.id ? (
-                      <input
+                      <TextField
                         type="text"
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
@@ -250,20 +249,19 @@ const PlayerManagement: React.FC = () => {
                         }}
                         onBlur={() => handleEditPlayer(player.id)}
                         onClick={(e) => e.stopPropagation()}
-                        className="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                         autoFocus
                       />
                     ) : (
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                        <h3 className="m3-title-medium text-on-surface flex items-center gap-2">
                           <span className="truncate">{player.name}</span>
                           {mainPlayerId === player.id && (
                             <span title="Haupt-Profil">
-                              <Crown size={18} className="text-amber-400" />
+                              <Crown size={18} className="text-tertiary" />
                             </span>
                           )}
                         </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                        <p className="m3-body-medium text-on-surface-variant">
                           {t('players.games')}: {player.stats.gamesPlayed} | {t('players.avg')}: {player.stats.averageOverall.toFixed(2)}
                         </p>
                       </div>
@@ -271,53 +269,55 @@ const PlayerManagement: React.FC = () => {
                   </div>
                   
                   <div className="flex items-center gap-1 sm:gap-2">
-                    <button
+                    <IconButton
+                      label={t('players.view_profile')}
+                      className="text-primary"
                       onClick={(e) => {
                         e.stopPropagation();
                         navigate(`/players/${player.id}`);
                       }}
-                      className="p-1.5 sm:p-2 text-primary-400 hover:bg-primary-500/20 rounded-lg transition-colors"
-                      title={t('players.view_profile')}
                     >
                       <Eye size={18} />
-                    </button>
-                    <button
+                    </IconButton>
+                    <IconButton
+                      label="Statistiken anzeigen"
+                      className="text-success-400"
                       onClick={(e) => {
                         e.stopPropagation();
                         // Set player as selected and navigate to stats
                         localStorage.setItem('stats_selected_player_id', player.id);
                         navigate('/stats');
                       }}
-                      className="p-1.5 sm:p-2 text-green-400 hover:bg-green-500/20 rounded-lg transition-colors"
-                      title="Statistiken anzeigen"
                     >
                       <BarChart3 size={18} />
-                    </button>
+                    </IconButton>
                     {mainPlayerId !== player.id && (
-                      <button
+                      <IconButton
+                        label="Als Haupt-Profil setzen"
+                        className="text-tertiary"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleSetMainPlayer(player.id);
                         }}
-                        className="p-1.5 sm:p-2 text-amber-400 hover:bg-amber-500/20 rounded-lg transition-colors"
-                        title="Als Haupt-Profil setzen"
                       >
                         <Crown size={18} />
-                      </button>
+                      </IconButton>
                     )}
-                    <button
+                    <IconButton
+                      label={t('players.edit_name')}
+                      className="text-secondary"
                       onClick={(e) => {
                         e.stopPropagation();
                         setEditingPlayer(player.id);
                         setEditName(player.name);
                         setEditAvatar(player.avatar);
                       }}
-                      className="p-1.5 sm:p-2 text-accent-400 hover:bg-accent-500/20 rounded-lg transition-colors"
-                      title={t('players.edit_name')}
                     >
                       <Edit2 size={18} />
-                    </button>
-                    <button
+                    </IconButton>
+                    <IconButton
+                      label={t('players.delete_player')}
+                      className="text-error"
                       onClick={async (e) => {
                         e.stopPropagation();
                         if (confirm(`${t('players.delete_confirm')} "${player.name}"?`)) {
@@ -329,17 +329,15 @@ const PlayerManagement: React.FC = () => {
                           }
                         }
                       }}
-                      className="p-1.5 sm:p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
-                      title={t('players.delete_player')}
                     >
                       <Trash2 size={18} />
-                    </button>
+                    </IconButton>
                   </div>
-                </div>
+                </Card>
               ))
             )}
           </div>
-        </div>
+        </Card>
       </div>
 
       {/* Emoji Picker Modal */}

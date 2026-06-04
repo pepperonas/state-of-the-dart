@@ -165,17 +165,18 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   };
   
   return (
-    <div className="glass-card rounded-xl shadow-lg p-4 md:p-6 w-full max-w-md">
+    <div className="m3-card m3-elevated rounded-m3-lg p-4 md:p-6 w-full max-w-md">
       {/* Header with Remaining Score */}
       <div className="mb-4 text-center">
-        <div className="text-sm text-dark-400 mb-1">Remaining</div>
-        <div className={`text-5xl font-bold ${
-          remaining <= 170 ? 'text-primary-400 neon-primary' : 'text-white'
-        }`}>
+        <div className="m3-label-medium text-on-surface-variant mb-1 uppercase tracking-wide">Remaining</div>
+        <div
+          className="text-5xl font-bold"
+          style={{ color: remaining <= 170 ? 'var(--m3-primary)' : 'var(--m3-on-surface)' }}
+        >
           {remaining}
         </div>
       </div>
-      
+
       {/* Current Throw Display */}
       <div className="flex gap-2 mb-4">
         {[0, 1, 2].map((index) => (
@@ -186,37 +187,37 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
                 setEditingDartIndex(editingDartIndex === index ? null : index);
               }
             }}
-            className={`flex-1 h-16 rounded-lg border-2 flex items-center justify-center transition-all ${
+            className={`flex-1 h-16 rounded-m3-md border flex items-center justify-center transition-all ${
               editingDartIndex === index
-                ? 'border-accent-500 bg-accent-500/20 ring-2 ring-accent-500/50'
+                ? 'border-tertiary bg-tertiary-container ring-2 ring-[var(--m3-tertiary)]'
                 : currentThrow[index]
-                ? 'border-primary-500 bg-primary-500/10 cursor-pointer hover:bg-primary-500/20'
-                : 'border-dark-700 bg-dark-900/50'
+                ? 'bg-secondary-container cursor-pointer ring-1 ring-[var(--m3-primary)]'
+                : 'border-outline-variant bg-surface-container'
             }`}
           >
             {currentThrow[index] ? (
-              <span className="font-bold text-2xl text-white">
+              <span className="font-bold text-2xl text-on-secondary-container">
                 {currentThrow[index].score}
               </span>
             ) : (
-              <span className="text-dark-600 text-xl">-</span>
+              <span className="text-on-surface-variant text-xl opacity-50">-</span>
             )}
           </div>
         ))}
-        <div className="flex flex-col justify-center items-center bg-accent-500/10 border-2 border-accent-500/30 rounded-lg px-3">
-          <span className="text-xs text-dark-400">Total</span>
-          <span className="text-2xl font-bold text-white">{currentScore}</span>
+        <div className="flex flex-col justify-center items-center bg-tertiary-container rounded-m3-md px-3">
+          <span className="m3-label-small text-on-tertiary-container opacity-80">Total</span>
+          <span className="text-2xl font-bold text-on-tertiary-container">{currentScore}</span>
         </div>
       </div>
-      
-      {/* Mode Switcher */}
-      <div className="flex gap-2 mb-4">
+
+      {/* Mode Switcher (M3 segmented) */}
+      <div className="flex gap-1 mb-4 p-1 bg-surface-container rounded-m3-full">
         <button
           onClick={() => setInputMode('numpad')}
-          className={`flex-1 py-2 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
+          className={`flex-1 py-2 rounded-m3-full m3-label-large transition-all flex items-center justify-center gap-2 ${
             inputMode === 'numpad'
-              ? 'bg-primary-500 text-white'
-              : 'bg-dark-800 text-dark-400 hover:bg-dark-700'
+              ? 'bg-secondary-container text-on-secondary-container'
+              : 'text-on-surface-variant hover:bg-surface-container-high'
           }`}
         >
           <Keyboard size={16} />
@@ -224,16 +225,16 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
         </button>
         <button
           onClick={() => setInputMode('quick')}
-          className={`flex-1 py-2 rounded-lg font-semibold transition-all ${
+          className={`flex-1 py-2 rounded-m3-full m3-label-large transition-all ${
             inputMode === 'quick'
-              ? 'bg-primary-500 text-white'
-              : 'bg-dark-800 text-dark-400 hover:bg-dark-700'
+              ? 'bg-secondary-container text-on-secondary-container'
+              : 'text-on-surface-variant hover:bg-surface-container-high'
           }`}
         >
           Quick Scores
         </button>
       </div>
-      
+
       {inputMode === 'quick' ? (
         <>
           {/* Common Scores - Large Buttons */}
@@ -243,21 +244,21 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
                 key={score}
                 onClick={() => handleQuickScore(score)}
                 disabled={currentThrow.length >= 3}
-                className={`p-2 sm:p-3 text-lg font-bold rounded-lg transition-all min-h-[44px] disabled:opacity-30 disabled:cursor-not-allowed ${
-                  score === 180 
-                    ? 'bg-accent-500/80 hover:bg-accent-600 text-white'
+                className={`p-2 sm:p-3 text-lg font-bold rounded-m3-md transition-all min-h-[44px] disabled:opacity-30 disabled:cursor-not-allowed ${
+                  score === 180
+                    ? 'bg-tertiary-container text-on-tertiary-container'
                     : score >= 100
-                    ? 'bg-primary-500/60 hover:bg-primary-600 text-white'
+                    ? 'bg-primary-container text-on-primary-container'
                     : score === 0
-                    ? 'bg-dark-700/60 hover:bg-dark-600 text-white'
-                    : 'bg-success-500/60 hover:bg-success-600 text-white'
+                    ? 'bg-surface-container-high text-on-surface'
+                    : 'bg-success-container text-on-success-container'
                 }`}
               >
                 {score}
               </button>
             ))}
           </div>
-          
+
           {/* All Scores Dropdown */}
           <select
             onChange={(e) => {
@@ -268,7 +269,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
               }
             }}
             disabled={currentThrow.length >= 3}
-            className="w-full p-3 mb-4 rounded-lg bg-dark-800 border-2 border-dark-700 text-white font-semibold disabled:opacity-30"
+            className="w-full p-3 mb-4 rounded-m3-sm bg-surface-container border border-outline-variant text-on-surface font-semibold disabled:opacity-30"
             value=""
           >
             <option value="">More Scores (0-180)...</option>
@@ -285,26 +286,26 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
               <button
                 key={num}
                 onClick={() => handleNumpadClick(num.toString())}
-                className="p-4 text-xl font-bold rounded-lg bg-dark-800 hover:bg-dark-700 text-white transition-all"
+                className="p-4 text-xl font-bold rounded-m3-md bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition-all"
               >
                 {num}
               </button>
             ))}
             <button
               onClick={() => handleNumpadClick('clear')}
-              className="p-4 text-lg font-bold rounded-lg bg-red-600/40 hover:bg-red-600/60 text-white transition-all"
+              className="p-4 text-lg font-bold rounded-m3-md bg-error-container text-on-error-container transition-all"
             >
               Clear
             </button>
             <button
               onClick={() => handleNumpadClick('0')}
-              className="p-4 text-xl font-bold rounded-lg bg-dark-800 hover:bg-dark-700 text-white transition-all"
+              className="p-4 text-xl font-bold rounded-m3-md bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition-all"
             >
               0
             </button>
             <button
               onClick={() => handleNumpadClick('enter')}
-              className="p-4 text-lg font-bold rounded-lg bg-success-500/60 hover:bg-success-600 text-white transition-all"
+              className="p-4 text-lg font-bold rounded-m3-md bg-primary-container text-on-primary-container transition-all"
               title={editingDartIndex !== null ? 'Dart ersetzen' : 'Wurf-Summe übernehmen und bestätigen'}
             >
               {editingDartIndex !== null ? 'Set' : 'OK'}
@@ -312,11 +313,11 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
           </div>
 
           {/* Current Input Display */}
-          <div className="mb-4 p-4 bg-dark-900/50 rounded-lg text-center border-2 border-dark-700">
+          <div className="mb-4 p-4 bg-surface-container rounded-m3-md text-center border border-outline-variant">
             {currentInput ? (
-              <span className="text-3xl font-bold text-white">{currentInput}</span>
+              <span className="text-3xl font-bold text-on-surface">{currentInput}</span>
             ) : (
-              <span className="text-dark-600">
+              <span className="text-on-surface-variant opacity-70">
                 {editingDartIndex !== null
                   ? 'Neuer Dart-Wert...'
                   : 'Wurf-Summe (0–180) eintippen und OK'}
@@ -325,46 +326,46 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
           </div>
         </>
       )}
-      
+
       {/* Action Buttons */}
       <div className="grid grid-cols-3 gap-2">
         <button
           onClick={onRemoveDart}
           disabled={currentThrow.length === 0}
-          className="flex items-center justify-center gap-1 p-3 rounded-lg bg-dark-700 hover:bg-dark-600 text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
+          className="flex items-center justify-center gap-1 p-3 rounded-m3-full bg-surface-container-high hover:bg-surface-container-highest text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
         >
           <Delete size={18} />
           <span className="hidden sm:inline">Undo</span>
         </button>
-        
+
         <button
           onClick={onClearThrow}
           disabled={currentThrow.length === 0}
-          className="flex items-center justify-center gap-1 p-3 rounded-lg bg-red-600 hover:bg-red-500 text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
+          className="flex items-center justify-center gap-1 p-3 rounded-m3-full bg-error-container text-on-error-container disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
         >
           <X size={18} />
           <span className="hidden sm:inline">Clear</span>
         </button>
-        
+
         <button
           ref={confirmBtnRef}
           onClick={onConfirm}
           disabled={currentThrow.length === 0}
-          className={`flex items-center justify-center gap-1 p-3 rounded-lg text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold shadow-lg ${
+          className={`flex items-center justify-center gap-1 p-3 rounded-m3-full disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold shadow-m3-1 ${
             isCheckout
-              ? 'bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 animate-pulse ring-2 ring-amber-400 ring-offset-2 ring-offset-dark-900'
+              ? 'bg-success text-on-success animate-pulse ring-2 ring-[var(--m3-success)] ring-offset-2 ring-offset-surface'
               : isEditingThrow
-                ? 'bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 col-span-1'
-                : 'bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700'
+                ? 'bg-tertiary text-on-tertiary col-span-1'
+                : 'bg-primary text-on-primary'
           }`}
         >
           <Check size={20} />
           <span>{isCheckout ? 'Checkout!' : isEditingThrow ? 'Korrektur' : 'OK'}</span>
         </button>
       </div>
-      
+
       {/* Keyboard Shortcuts Hint */}
-      <div className="mt-3 text-center text-xs text-dark-500">
+      <div className="mt-3 text-center m3-body-small text-on-surface-variant">
         ⌨️ Keyboard: 0-9 to type, Enter to confirm, Backspace to undo, Esc to clear
       </div>
     </div>

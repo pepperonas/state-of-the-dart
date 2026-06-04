@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ArrowLeft, Users, Plus, Play, RefreshCw, Send,
+  Users, Plus, Play, RefreshCw, Send,
   Globe, Lock, Wifi, WifiOff, Crown, MessageCircle, Copy, Check, LogIn
 } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { usePlayer } from '../../context/PlayerContext';
 import { useAuth } from '../../context/AuthContext';
 import PlayerAvatar from '../player/PlayerAvatar';
-import BackButton from '../common/BackButton';
+import { Button, Card, TextField, Dialog, IconButton, Chip, BackButton } from '../common';
 
 interface OnlinePlayer {
   id: string;
@@ -194,20 +193,14 @@ const OnlineMultiplayer: React.FC = () => {
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <button
-              onClick={handleLeaveRoom}
-              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
-            >
-              <ArrowLeft size={20} />
-              Raum verlassen
-            </button>
+            <BackButton onClick={handleLeaveRoom} label="Raum verlassen" />
             <div className="flex items-center gap-2">
               {connected ? (
-                <span className="flex items-center gap-1 text-green-400 text-sm">
+                <span className="flex items-center gap-1 px-3 py-1.5 rounded-m3-full bg-success-container text-on-success-container m3-label-large">
                   <Wifi size={16} /> Online
                 </span>
               ) : (
-                <span className="flex items-center gap-1 text-red-400 text-sm">
+                <span className="flex items-center gap-1 px-3 py-1.5 rounded-m3-full bg-error-container text-on-error-container m3-label-large">
                   <WifiOff size={16} /> Offline
                 </span>
               )}
@@ -215,146 +208,139 @@ const OnlineMultiplayer: React.FC = () => {
           </div>
 
           {/* Room Info */}
-          <div className="glass-card rounded-2xl p-6 mb-6">
+          <Card variant="elevated" className="p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-                  {currentRoom.settings.isPrivate && <Lock size={20} className="text-yellow-400" />}
+                <h1 className="m3-headline-small text-on-surface flex items-center gap-2">
+                  {currentRoom.settings.isPrivate && <Lock size={20} className="text-tertiary" />}
                   {currentRoom.name}
                 </h1>
-                <p className="text-gray-400">
+                <p className="text-on-surface-variant">
                   {currentRoom.settings.startScore} • Best of {currentRoom.settings.legsToWin * 2 - 1}
                 </p>
                 {currentRoom.settings.isPrivate && (
-                  <button
-                    onClick={handleCopyRoomId}
-                    className="mt-2 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-dark-800 hover:bg-dark-700 text-sm transition-colors"
-                  >
-                    <span className="text-gray-400">{t('online.room_id')}:</span>
-                    <code className="text-primary-400 font-mono">{currentRoom.id}</code>
-                    {copiedRoomId ? (
-                      <Check size={14} className="text-green-400" />
-                    ) : (
-                      <Copy size={14} className="text-gray-500" />
-                    )}
-                  </button>
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="text-on-surface-variant m3-body-small">{t('online.room_id')}:</span>
+                    <code className="text-primary font-mono">{currentRoom.id}</code>
+                    <IconButton variant="tonal" label="Copy room ID" onClick={handleCopyRoomId}>
+                      {copiedRoomId ? (
+                        <Check size={16} className="text-success" />
+                      ) : (
+                        <Copy size={16} />
+                      )}
+                    </IconButton>
+                  </div>
                 )}
               </div>
-              <div className={`px-4 py-2 rounded-full text-sm font-medium ${
-                currentRoom.status === 'waiting' 
-                  ? 'bg-yellow-500/20 text-yellow-400'
+              <div className={`px-4 py-2 rounded-m3-full m3-label-large ${
+                currentRoom.status === 'waiting'
+                  ? 'bg-tertiary-container text-on-tertiary-container'
                   : currentRoom.status === 'playing'
-                  ? 'bg-green-500/20 text-green-400'
-                  : 'bg-gray-500/20 text-gray-400'
+                  ? 'bg-success-container text-on-success-container'
+                  : 'bg-surface-container-high text-on-surface-variant'
               }`}>
-                {currentRoom.status === 'waiting' ? 'Wartet...' : 
+                {currentRoom.status === 'waiting' ? 'Wartet...' :
                  currentRoom.status === 'playing' ? 'Läuft' : 'Beendet'}
               </div>
             </div>
 
             {/* Players */}
-            <h3 className="text-white font-semibold mb-3">Spieler ({currentRoom.players.length}/4)</h3>
+            <h3 className="text-on-surface m3-title-small mb-3">Spieler ({currentRoom.players.length}/4)</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
               {currentRoom.players.map((player, idx) => (
                 <div
                   key={player.socketId}
-                  className={`p-4 rounded-xl text-center ${
-                    player.socketId === currentRoom.host 
-                      ? 'bg-yellow-500/20 ring-2 ring-yellow-500' 
-                      : 'bg-dark-800'
+                  className={`p-4 rounded-m3-lg text-center ${
+                    player.socketId === currentRoom.host
+                      ? 'bg-tertiary-container ring-2 ring-tertiary'
+                      : 'bg-surface-container-high'
                   }`}
                 >
                   <div className="relative inline-block">
-                    <div className="w-12 h-12 rounded-full bg-primary-500 flex items-center justify-center text-white text-xl font-bold">
+                    <div className="w-12 h-12 rounded-m3-full bg-primary flex items-center justify-center text-on-primary text-xl font-bold">
                       {player.name.charAt(0).toUpperCase()}
                     </div>
                     {player.socketId === currentRoom.host && (
-                      <Crown size={16} className="absolute -top-1 -right-1 text-yellow-400" />
+                      <Crown size={16} className="absolute -top-1 -right-1 text-tertiary" />
                     )}
                   </div>
-                  <p className="text-white font-medium mt-2 text-sm truncate">{player.name}</p>
+                  <p className="text-on-surface font-medium mt-2 text-sm truncate">{player.name}</p>
                   {currentRoom.gameState && (
-                    <p className="text-primary-400 text-xl font-bold">
+                    <p className="text-primary text-xl font-bold">
                       {currentRoom.gameState.scores[player.socketId]}
                     </p>
                   )}
                 </div>
               ))}
-              
+
               {/* Empty slots */}
               {Array.from({ length: 4 - currentRoom.players.length }).map((_, idx) => (
                 <div
                   key={`empty-${idx}`}
-                  className="p-4 rounded-xl text-center bg-dark-800/50 border-2 border-dashed border-dark-600"
+                  className="p-4 rounded-m3-lg text-center bg-surface-container border-2 border-dashed border-outline-variant"
                 >
-                  <div className="w-12 h-12 rounded-full bg-dark-700 flex items-center justify-center mx-auto">
-                    <Users size={20} className="text-gray-600" />
+                  <div className="w-12 h-12 rounded-m3-full bg-surface-container-high flex items-center justify-center mx-auto">
+                    <Users size={20} className="text-on-surface-variant" />
                   </div>
-                  <p className="text-gray-600 mt-2 text-sm">Leer</p>
+                  <p className="text-on-surface-variant mt-2 text-sm">Leer</p>
                 </div>
               ))}
             </div>
 
             {/* Start Button (Host only) */}
             {currentRoom.status === 'waiting' && isHost && (
-              <button
+              <Button
+                variant="success"
+                size="lg"
+                fullWidth
                 onClick={handleStartGame}
                 disabled={currentRoom.players.length < 2}
-                className={`w-full py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 ${
-                  currentRoom.players.length >= 2
-                    ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
-                    : 'bg-dark-700 text-gray-500 cursor-not-allowed'
-                }`}
+                icon={<Play size={24} />}
               >
-                <Play size={24} />
                 Spiel starten
-              </button>
+              </Button>
             )}
 
             {currentRoom.status === 'waiting' && !isHost && (
-              <p className="text-center text-gray-400">
+              <p className="text-center text-on-surface-variant">
                 Warte auf Host zum Starten...
               </p>
             )}
-          </div>
+          </Card>
 
           {/* Chat */}
-          <div className="glass-card rounded-2xl p-4">
-            <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+          <Card variant="elevated" className="p-4">
+            <h3 className="text-on-surface m3-title-small mb-3 flex items-center gap-2">
               <MessageCircle size={18} />
               Chat
             </h3>
-            
-            <div className="h-48 overflow-y-auto mb-3 space-y-2 bg-dark-900 rounded-lg p-3">
+
+            <div className="h-48 overflow-y-auto mb-3 space-y-2 bg-surface-container rounded-m3-md p-3">
               {chatMessages.length === 0 ? (
-                <p className="text-gray-600 text-center text-sm">Noch keine Nachrichten</p>
+                <p className="text-on-surface-variant text-center text-sm">Noch keine Nachrichten</p>
               ) : (
                 chatMessages.map((msg, idx) => (
                   <div key={idx} className="text-sm">
-                    <span className="text-primary-400 font-medium">{msg.from}:</span>
-                    <span className="text-gray-300 ml-2">{msg.message}</span>
+                    <span className="text-primary font-medium">{msg.from}:</span>
+                    <span className="text-on-surface-variant ml-2">{msg.message}</span>
                   </div>
                 ))
               )}
             </div>
-            
-            <div className="flex gap-2">
-              <input
-                type="text"
+
+            <div className="flex gap-2 items-end">
+              <TextField
+                className="flex-1"
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSendChat()}
                 placeholder="Nachricht..."
-                className="flex-1 px-4 py-2 rounded-lg bg-dark-800 border border-dark-600 text-white placeholder-gray-500 focus:border-primary-500 focus:outline-none"
               />
-              <button
-                onClick={handleSendChat}
-                className="px-4 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 text-white"
-              >
+              <IconButton variant="filled" label="Send message" onClick={handleSendChat}>
                 <Send size={18} />
-              </button>
+              </IconButton>
             </div>
-          </div>
+          </Card>
         </div>
       </div>
     );
@@ -369,202 +355,168 @@ const OnlineMultiplayer: React.FC = () => {
           <BackButton onClick={() => navigate('/')} />
           <div className="flex items-center gap-2">
             {connected ? (
-              <span className="flex items-center gap-1 text-green-400 text-sm">
+              <span className="flex items-center gap-1 px-3 py-1.5 rounded-m3-full bg-success-container text-on-success-container m3-label-large">
                 <Wifi size={16} /> {onlinePlayers.length} Online
               </span>
             ) : (
-              <span className="flex items-center gap-1 text-red-400 text-sm">
+              <span className="flex items-center gap-1 px-3 py-1.5 rounded-m3-full bg-error-container text-on-error-container m3-label-large">
                 <WifiOff size={16} /> Verbinde...
               </span>
             )}
           </div>
         </div>
 
-        <div className="glass-card rounded-2xl p-6 mb-6">
-          <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
-            <Globe className="text-primary-400" />
+        <Card variant="elevated" className="p-6 mb-6">
+          <h1 className="m3-headline-medium text-on-surface mb-2 flex items-center gap-3">
+            <Globe className="text-primary" />
             Online Multiplayer
           </h1>
-          <p className="text-gray-400">Spiele gegen andere Spieler in Echtzeit</p>
-        </div>
+          <p className="text-on-surface-variant">Spiele gegen andere Spieler in Echtzeit</p>
+        </Card>
 
         {/* Create Room Button */}
-        <button
+        <Button
+          variant="filled"
+          size="lg"
+          fullWidth
           onClick={() => setShowCreateRoom(true)}
-          className="w-full mb-6 py-4 rounded-xl bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white font-bold text-lg flex items-center justify-center gap-3 transition-all"
+          icon={<Plus size={24} />}
+          className="mb-6"
         >
-          <Plus size={24} />
           Raum erstellen
-        </button>
+        </Button>
 
         {/* Join Private Room by Code */}
-        <div className="glass-card rounded-2xl p-4 mb-6">
-          <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+        <Card variant="elevated" className="p-4 mb-6">
+          <h3 className="text-on-surface m3-title-small mb-3 flex items-center gap-2">
             <LogIn size={18} />
             {t('online.join_private')}
           </h3>
-          <div className="flex gap-2">
-            <input
-              type="text"
+          <div className="flex gap-2 items-end">
+            <TextField
+              className="flex-1"
               value={joinRoomId}
               onChange={(e) => setJoinRoomId(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleJoinByCode()}
               placeholder={t('online.enter_room_id')}
-              className="flex-1 px-4 py-3 rounded-xl bg-dark-800 border border-dark-600 text-white placeholder-gray-500 focus:border-primary-500 focus:outline-none font-mono"
             />
-            <button
+            <Button
+              variant="filled"
               onClick={handleJoinByCode}
               disabled={!joinRoomId.trim()}
-              className="px-6 py-3 rounded-xl bg-primary-500 hover:bg-primary-600 text-white font-medium disabled:opacity-50 transition-all"
             >
               {t('online.join')}
-            </button>
+            </Button>
           </div>
-        </div>
+        </Card>
 
         {/* Create Room Modal */}
-        <AnimatePresence>
-          {showCreateRoom && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
-            >
-              <motion.div
-                initial={{ scale: 0.9 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0.9 }}
-                className="glass-card rounded-2xl p-6 w-full max-w-md"
-              >
-                <h2 className="text-2xl font-bold text-white mb-6">Raum erstellen</h2>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-gray-400 mb-2">Raumname</label>
-                    <input
-                      type="text"
-                      value={roomName}
-                      onChange={(e) => setRoomName(e.target.value)}
-                      placeholder="z.B. Freitagsrunde"
-                      className="w-full px-4 py-3 rounded-xl bg-dark-800 border border-dark-600 text-white placeholder-gray-500 focus:border-primary-500 focus:outline-none"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-gray-400 mb-2">Startscore</label>
-                    <div className="flex gap-2">
-                      {[301, 501, 701].map(score => (
-                        <button
-                          key={score}
-                          onClick={() => setStartScore(score)}
-                          className={`flex-1 py-2 rounded-lg font-medium transition-all ${
-                            startScore === score
-                              ? 'bg-primary-500 text-white'
-                              : 'bg-dark-700 text-gray-400 hover:bg-dark-600'
-                          }`}
-                        >
-                          {score}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-gray-400 mb-2">Legs zum Gewinnen</label>
-                    <div className="flex gap-2">
-                      {[2, 3, 4, 5].map(legs => (
-                        <button
-                          key={legs}
-                          onClick={() => setLegsToWin(legs)}
-                          className={`flex-1 py-2 rounded-lg font-medium transition-all ${
-                            legsToWin === legs
-                              ? 'bg-primary-500 text-white'
-                              : 'bg-dark-700 text-gray-400 hover:bg-dark-600'
-                          }`}
-                        >
-                          {legs}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={isPrivate}
-                      onChange={(e) => setIsPrivate(e.target.checked)}
-                      className="w-5 h-5 rounded border-gray-600 bg-dark-700 text-primary-500 focus:ring-primary-500"
-                    />
-                    <span className="text-white flex items-center gap-2">
-                      <Lock size={16} />
-                      Privater Raum
-                    </span>
-                  </label>
-                </div>
-                
-                <div className="flex gap-3 mt-6">
-                  <button
-                    onClick={() => setShowCreateRoom(false)}
-                    className="flex-1 py-3 rounded-xl bg-dark-700 hover:bg-dark-600 text-white font-medium"
+        <Dialog
+          open={showCreateRoom}
+          onClose={() => setShowCreateRoom(false)}
+          title="Raum erstellen"
+          actions={
+            <>
+              <Button variant="text" onClick={() => setShowCreateRoom(false)}>
+                Abbrechen
+              </Button>
+              <Button variant="filled" onClick={handleCreateRoom} disabled={!roomName.trim()}>
+                Erstellen
+              </Button>
+            </>
+          }
+        >
+          <div className="space-y-4">
+            <TextField
+              label="Raumname"
+              value={roomName}
+              onChange={(e) => setRoomName(e.target.value)}
+              placeholder="z.B. Freitagsrunde"
+            />
+
+            <div>
+              <label className="block text-on-surface-variant m3-label-large mb-2">Startscore</label>
+              <div className="flex gap-2">
+                {[301, 501, 701].map(score => (
+                  <Chip
+                    key={score}
+                    selected={startScore === score}
+                    onClick={() => setStartScore(score)}
+                    className="flex-1 justify-center"
                   >
-                    Abbrechen
-                  </button>
-                  <button
-                    onClick={handleCreateRoom}
-                    disabled={!roomName.trim()}
-                    className="flex-1 py-3 rounded-xl bg-primary-500 hover:bg-primary-600 text-white font-medium disabled:opacity-50"
+                    {score}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-on-surface-variant m3-label-large mb-2">Legs zum Gewinnen</label>
+              <div className="flex gap-2">
+                {[2, 3, 4, 5].map(legs => (
+                  <Chip
+                    key={legs}
+                    selected={legsToWin === legs}
+                    onClick={() => setLegsToWin(legs)}
+                    className="flex-1 justify-center"
                   >
-                    Erstellen
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                    {legs}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isPrivate}
+                onChange={(e) => setIsPrivate(e.target.checked)}
+                className="w-5 h-5 rounded border-outline-variant bg-surface-container-high text-primary focus:ring-primary"
+              />
+              <span className="text-on-surface flex items-center gap-2">
+                <Lock size={16} />
+                Privater Raum
+              </span>
+            </label>
+          </div>
+        </Dialog>
 
         {/* Available Rooms */}
-        <div className="glass-card rounded-2xl p-6">
+        <Card variant="elevated" className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-white">Verfügbare Räume</h2>
-            <button
-              onClick={() => socket?.emit('rooms:refresh')}
-              className="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 text-gray-400"
-            >
+            <h2 className="m3-title-large text-on-surface">Verfügbare Räume</h2>
+            <IconButton variant="tonal" label="Refresh rooms" onClick={() => socket?.emit('rooms:refresh')}>
               <RefreshCw size={18} />
-            </button>
+            </IconButton>
           </div>
-          
+
           {rooms.length === 0 ? (
             <div className="text-center py-12">
-              <Users size={48} className="mx-auto text-gray-600 mb-4" />
-              <p className="text-gray-400">Keine offenen Räume verfügbar</p>
-              <p className="text-gray-500 text-sm">Erstelle einen neuen Raum!</p>
+              <Users size={48} className="mx-auto text-on-surface-variant mb-4" />
+              <p className="text-on-surface-variant">Keine offenen Räume verfügbar</p>
+              <p className="text-on-surface-variant text-sm">Erstelle einen neuen Raum!</p>
             </div>
           ) : (
             <div className="space-y-3">
               {rooms.map(room => (
                 <div
                   key={room.id}
-                  className="flex items-center justify-between p-4 rounded-xl bg-dark-800 hover:bg-dark-700 transition-all"
+                  className="flex items-center justify-between p-4 rounded-m3-lg bg-surface-container-high"
                 >
                   <div>
-                    <h3 className="text-white font-semibold">{room.name}</h3>
-                    <p className="text-gray-400 text-sm">
+                    <h3 className="text-on-surface m3-title-small">{room.name}</h3>
+                    <p className="text-on-surface-variant text-sm">
                       {room.settings.startScore} • {room.players.length}/4 Spieler
                     </p>
                   </div>
-                  <button
-                    onClick={() => handleJoinRoom(room.id)}
-                    className="px-4 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 text-white font-medium"
-                  >
+                  <Button variant="filled" size="sm" onClick={() => handleJoinRoom(room.id)}>
                     Beitreten
-                  </button>
+                  </Button>
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </Card>
       </div>
     </div>
   );

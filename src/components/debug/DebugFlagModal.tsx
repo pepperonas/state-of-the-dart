@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { XCircle, Flag, Loader2 } from 'lucide-react';
+import { Flag } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { captureScreenshot, getBrowserInfo } from '../../utils/screenshot';
 import { logBuffer } from '../../utils/logBuffer';
 import { api } from '../../services/api';
+import { Button, Dialog } from '../common';
 
 interface DebugFlagModalProps {
   onClose: () => void;
@@ -94,85 +95,81 @@ const DebugFlagModal: React.FC<DebugFlagModalProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="glass-card rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-amber-500/20">
-              <Flag size={24} className="text-amber-400" />
-            </div>
-            <h3 className="text-xl font-bold text-white">{t('debug.title')}</h3>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-dark-700/50 rounded-lg transition-colors"
-          >
-            <XCircle size={24} className="text-gray-400" />
-          </button>
+    <Dialog
+      open
+      onClose={onClose}
+      widthClassName="max-w-2xl"
+      title={
+        <span className="flex items-center gap-3">
+          <span className="p-2 rounded-m3-md bg-tertiary-container text-tertiary">
+            <Flag size={24} />
+          </span>
+          {t('debug.title')}
+        </span>
+      }
+      actions={
+        success ? undefined : (
+          <>
+            <Button variant="text" onClick={onClose}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="filled"
+              icon={<Flag size={18} />}
+              loading={submitting}
+              disabled={submitting || !comment.trim()}
+              onClick={handleSubmit}
+            >
+              {t('debug.submit')}
+            </Button>
+          </>
+        )
+      }
+    >
+      {success ? (
+        <div className="text-center py-8">
+          <div className="text-success m3-title-medium mb-2">{t('debug.created_success')}</div>
+          <p className="text-on-surface-variant m3-body-small">{t('debug.created_hint')}</p>
         </div>
-
-        {success ? (
-          <div className="text-center py-8">
-            <div className="text-green-400 text-lg font-semibold mb-2">{t('debug.created_success')}</div>
-            <p className="text-dark-400 text-sm">{t('debug.created_hint')}</p>
+      ) : (
+        <div className="space-y-4">
+          <div>
+            <label className="block m3-label-large text-on-surface-variant mb-2">
+              {t('debug.comment_label')} *
+            </label>
+            <textarea
+              value={comment}
+              onChange={e => setComment(e.target.value)}
+              className="w-full px-4 py-3 bg-surface-container-low border border-outline-variant rounded-m3-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary resize-none"
+              rows={4}
+              placeholder={t('debug.comment_placeholder')}
+              autoFocus
+            />
           </div>
-        ) : (
-          <div className="space-y-4">
+
+          {screenshotUrl && (
             <div>
-              <label className="block text-sm font-semibold text-dark-300 mb-2">
-                {t('debug.comment_label')} *
-              </label>
-              <textarea
-                value={comment}
-                onChange={e => setComment(e.target.value)}
-                className="w-full px-4 py-3 bg-dark-800/50 border border-dark-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 resize-none"
-                rows={4}
-                placeholder={t('debug.comment_placeholder')}
-                autoFocus
+              <label className="block m3-label-large text-on-surface-variant mb-2">{t('debug.screenshot_preview')}</label>
+              <img
+                src={screenshotUrl}
+                alt="Screenshot"
+                className="w-full rounded-m3-sm border border-outline-variant max-h-40 object-cover"
               />
             </div>
+          )}
 
-            {screenshotUrl && (
-              <div>
-                <label className="block text-sm font-semibold text-dark-300 mb-2">{t('debug.screenshot_preview')}</label>
-                <img
-                  src={screenshotUrl}
-                  alt="Screenshot"
-                  className="w-full rounded-lg border border-dark-700 max-h-40 object-cover"
-                />
-              </div>
-            )}
-
-            <div className="text-xs text-dark-500 space-y-1">
-              <p>{t('debug.auto_capture_info')}</p>
-            </div>
-
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-red-400 text-sm">
-                {error}
-              </div>
-            )}
-
-            <div className="flex gap-3 pt-2">
-              <button
-                onClick={onClose}
-                className="flex-1 px-6 py-3 bg-dark-700 hover:bg-dark-600 text-white rounded-lg font-semibold transition-all"
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={submitting || !comment.trim()}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:opacity-50 text-white rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
-              >
-                {submitting ? <Loader2 size={18} className="animate-spin" /> : <Flag size={18} />}
-                {t('debug.submit')}
-              </button>
-            </div>
+          <div className="m3-body-small text-on-surface-variant space-y-1">
+            <p>{t('debug.auto_capture_info')}</p>
           </div>
-        )}
-      </div>
-    </div>
+
+          {error && (
+            <div className="bg-error-container border border-outline-variant rounded-m3-sm p-3 text-error m3-body-small">
+              {error}
+            </div>
+          )}
+        </div>
+      )}
+    </Dialog>
   );
 };
 

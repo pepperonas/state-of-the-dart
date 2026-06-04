@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, BarChart, TrendingUp, Target, Calendar, Filter, Trophy } from 'lucide-react';
+import { BarChart, TrendingUp, Target, Calendar, Filter, Trophy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { TrainingSession, TrainingType } from '../../types';
 import { usePlayer } from '../../context/PlayerContext';
@@ -8,7 +8,7 @@ import { useTenant } from '../../context/TenantContext';
 import { LineChart, Line, BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { api } from '../../services/api';
 import { toDateOrNow, formatDateTime, formatDateShort } from '../../utils/dateUtils';
-import BackButton from '../common/BackButton';
+import { BackButton, Button, Card } from '../common';
 
 const TrainingStats: React.FC = () => {
   const { t } = useTranslation();
@@ -150,29 +150,26 @@ const TrainingStats: React.FC = () => {
           {/* Back Button */}
           <BackButton onClick={() => navigate('/training')} />
 
-          <div className="glass-card p-8">
-            <h2 className="text-2xl font-bold text-white mb-4 text-center">Training Statistiken</h2>
-            <p className="text-dark-400 mb-6 text-center">Bitte wähle einen Spieler aus, um Trainingsstatistiken anzuzeigen.</p>
+          <Card variant="elevated" className="p-8">
+            <h2 className="m3-headline-small text-on-surface mb-4 text-center">Training Statistiken</h2>
+            <p className="m3-body-large text-on-surface-variant mb-6 text-center">Bitte wähle einen Spieler aus, um Trainingsstatistiken anzuzeigen.</p>
 
             {players.length === 0 ? (
               <div className="text-center">
-                <p className="text-dark-400 mb-4">Noch keine Spieler vorhanden.</p>
-                <button
-                  onClick={() => navigate('/players')}
-                  className="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-semibold transition-all"
-                >
+                <p className="m3-body-medium text-on-surface-variant mb-4">Noch keine Spieler vorhanden.</p>
+                <Button variant="filled" onClick={() => navigate('/players')}>
                   Spieler erstellen
-                </button>
+                </Button>
               </div>
             ) : (
               <div className="max-w-md mx-auto">
-                <label className="block text-white font-medium mb-2">Spieler auswählen:</label>
+                <label className="block m3-label-large text-on-surface mb-2">Spieler auswählen:</label>
                 <select
                   onChange={(e) => {
                     const player = players.find(p => p.id === e.target.value);
                     setCurrentPlayer(player || null);
                   }}
-                  className="w-full px-4 py-3 bg-dark-800 text-white rounded-lg border border-dark-600 focus:border-primary-500 outline-none text-lg"
+                  className="w-full px-4 py-3 bg-surface-container-high text-on-surface rounded-m3-md border border-outline-variant focus:border-primary outline-none text-lg"
                   defaultValue=""
                 >
                   <option value="" disabled>Wähle einen Spieler...</option>
@@ -184,7 +181,7 @@ const TrainingStats: React.FC = () => {
                 </select>
               </div>
             )}
-          </div>
+          </Card>
         </div>
       </div>
     );
@@ -195,8 +192,8 @@ const TrainingStats: React.FC = () => {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <BackButton onClick={() => navigate('/training')} className="" />
-          <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2">
+          <BackButton onClick={() => navigate('/training')} />
+          <h1 className="m3-headline-small text-on-surface flex items-center gap-2">
             <BarChart size={32} />
             Training Statistiken
           </h1>
@@ -204,18 +201,18 @@ const TrainingStats: React.FC = () => {
         </div>
 
         {/* Filters */}
-        <div className="glass-card p-4 mb-6">
+        <Card variant="filled" className="p-4 mb-6">
           <div className="flex flex-wrap gap-4 items-center">
             {/* Player Selector */}
             <div className="flex items-center gap-2">
-              <span className="text-white font-medium">Spieler:</span>
+              <span className="m3-label-large text-on-surface">Spieler:</span>
               <select
                 value={currentPlayer?.id || ''}
                 onChange={(e) => {
                   const player = players.find(p => p.id === e.target.value);
                   setCurrentPlayer(player || null);
                 }}
-                className="px-4 py-2 bg-dark-800 text-white rounded-lg border border-dark-600 focus:border-primary-500 outline-none"
+                className="px-4 py-2 bg-surface-container-high text-on-surface rounded-m3-md border border-outline-variant focus:border-primary outline-none"
               >
                 {players.map(player => (
                   <option key={player.id} value={player.id}>
@@ -226,13 +223,13 @@ const TrainingStats: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              <Filter size={20} className="text-primary-400" />
-              <span className="text-white font-medium">Filter:</span>
+              <Filter size={20} className="text-primary" />
+              <span className="m3-label-large text-on-surface">Filter:</span>
             </div>
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value as TrainingType | 'all')}
-              className="px-4 py-2 bg-dark-800 text-white rounded-lg border border-dark-600 focus:border-primary-500 outline-none"
+              className="px-4 py-2 bg-surface-container-high text-on-surface rounded-m3-md border border-outline-variant focus:border-primary outline-none"
             >
               <option value="all">Alle Modi</option>
               <option value="doubles">Doubles</option>
@@ -243,11 +240,11 @@ const TrainingStats: React.FC = () => {
               <option value="score-training">Score Training</option>
             </select>
             <div className="flex items-center gap-2 ml-auto">
-              <span className="text-white font-medium">Sortieren:</span>
+              <span className="m3-label-large text-on-surface">Sortieren:</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as 'date' | 'score' | 'accuracy')}
-                className="px-4 py-2 bg-dark-800 text-white rounded-lg border border-dark-600 focus:border-primary-500 outline-none"
+                className="px-4 py-2 bg-surface-container-high text-on-surface rounded-m3-md border border-outline-variant focus:border-primary outline-none"
               >
                 <option value="date">Datum</option>
                 <option value="score">Score</option>
@@ -255,37 +252,37 @@ const TrainingStats: React.FC = () => {
               </select>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Summary Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div className="glass-card p-4 text-center">
-            <div className="text-3xl font-bold text-white">{stats.totalSessions}</div>
-            <div className="text-sm text-dark-400">Sessions</div>
-          </div>
-          <div className="glass-card p-4 text-center">
-            <div className="text-3xl font-bold text-success-400">{stats.averageScore.toFixed(0)}</div>
-            <div className="text-sm text-dark-400">Ø Score</div>
-          </div>
-          <div className="glass-card p-4 text-center">
-            <div className="text-3xl font-bold text-primary-400">{stats.averageAccuracy.toFixed(1)}%</div>
-            <div className="text-sm text-dark-400">Ø Genauigkeit</div>
-          </div>
-          <div className="glass-card p-4 text-center">
-            <div className="text-3xl font-bold text-amber-400">{stats.personalBests}</div>
-            <div className="text-sm text-dark-400">Personal Bests</div>
-          </div>
+          <Card variant="filled" className="p-4 text-center">
+            <div className="m3-headline-small text-on-surface">{stats.totalSessions}</div>
+            <div className="m3-label-large text-on-surface-variant">Sessions</div>
+          </Card>
+          <Card variant="filled" className="p-4 text-center">
+            <div className="m3-headline-small text-success">{stats.averageScore.toFixed(0)}</div>
+            <div className="m3-label-large text-on-surface-variant">Ø Score</div>
+          </Card>
+          <Card variant="filled" className="p-4 text-center">
+            <div className="m3-headline-small text-primary">{stats.averageAccuracy.toFixed(1)}%</div>
+            <div className="m3-label-large text-on-surface-variant">Ø Genauigkeit</div>
+          </Card>
+          <Card variant="filled" className="p-4 text-center">
+            <div className="m3-headline-small text-tertiary">{stats.personalBests}</div>
+            <div className="m3-label-large text-on-surface-variant">Personal Bests</div>
+          </Card>
         </div>
 
         {performanceData.length > 0 && (
           <div className="grid md:grid-cols-2 gap-6 mb-6">
             {/* Performance Chart */}
-            <div className="glass-card p-6">
-              <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <Card variant="filled" className="p-6">
+              <h3 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
                 <TrendingUp size={20} />
                 Performance Verlauf
               </h3>
-              <div className="bg-dark-900 rounded-lg p-4">
+              <div className="bg-surface-container-low rounded-m3-md p-4">
                 <div className="h-[180px] sm:h-[250px]"><ResponsiveContainer width="100%" height="100%">
                   <LineChart data={performanceData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
@@ -304,16 +301,16 @@ const TrainingStats: React.FC = () => {
                   </LineChart>
                 </ResponsiveContainer></div>
               </div>
-            </div>
+            </Card>
 
             {/* Training Type Distribution */}
             {typeDistribution.length > 0 && (
-              <div className="glass-card p-6">
-                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <Card variant="filled" className="p-6">
+                <h3 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
                   <Target size={20} />
                   Training Modi Verteilung
                 </h3>
-                <div className="bg-dark-900 rounded-lg p-4">
+                <div className="bg-surface-container-low rounded-m3-md p-4">
                   <div className="h-[180px] sm:h-[250px]"><ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
@@ -340,90 +337,89 @@ const TrainingStats: React.FC = () => {
                     </PieChart>
                   </ResponsiveContainer></div>
                 </div>
-              </div>
+              </Card>
             )}
           </div>
         )}
 
         {/* Session History */}
-        <div className="glass-card p-6">
-          <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+        <Card variant="filled" className="p-6">
+          <h3 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
             <Calendar size={20} />
             Session Historie
           </h3>
-          
+
           {sortedSessions.length === 0 ? (
             <div className="text-center py-12">
-              <Target size={64} className="mx-auto mb-4 text-dark-600" />
-              <p className="text-dark-400 text-lg">Noch keine Training Sessions</p>
-              <button
-                onClick={() => navigate('/training')}
-                className="mt-4 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-semibold transition-all"
-              >
-                Training starten
-              </button>
+              <Target size={64} className="mx-auto mb-4 text-on-surface-variant" />
+              <p className="m3-body-large text-on-surface-variant">Noch keine Training Sessions</p>
+              <div className="mt-4">
+                <Button variant="filled" onClick={() => navigate('/training')}>
+                  Training starten
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="space-y-3 max-h-[600px] overflow-y-auto">
-              {sortedSessions.map((session, index) => (
+              {sortedSessions.map((session) => (
                 <div
                   key={session.id}
-                  className={`p-4 rounded-lg border-2 transition-all ${
+                  className={`p-4 rounded-m3-md border-2 transition-all ${
                     session.personalBest
-                      ? 'bg-amber-500/10 border-amber-500/30'
-                      : 'bg-dark-900/50 border-dark-700'
+                      ? 'bg-tertiary-container/40 border-tertiary'
+                      : 'bg-surface-container-low border-outline-variant'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
                       {session.personalBest && (
-                        <Trophy size={20} className="text-amber-400" />
+                        <Trophy size={20} className="text-tertiary" />
                       )}
                       <div>
-                        <div className="font-bold text-white flex items-center gap-2">
+                        <div className="m3-title-medium text-on-surface flex items-center gap-2">
                           {formatTrainingType(session.type)}
                           {session.personalBest && (
-                            <span className="text-xs px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded-full">
+                            <span className="m3-label-medium px-2 py-0.5 bg-tertiary-container text-on-tertiary-container rounded-m3-full">
                               PB
                             </span>
                           )}
                         </div>
-                        <div className="text-xs text-dark-400">
+                        <div className="m3-label-medium text-on-surface-variant">
                           {formatDateTime(session.startedAt)}
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-success-400">{session.score || 0}</div>
-                      <div className="text-xs text-dark-400">Score</div>
+                      <div className="m3-title-large text-success">{session.score || 0}</div>
+                      <div className="m3-label-medium text-on-surface-variant">Score</div>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-4 gap-3 text-center">
-                    <div className="bg-dark-800 rounded p-2">
-                      <div className="text-sm font-bold text-white">{session.totalAttempts || 0}</div>
-                      <div className="text-xs text-dark-400">Versuche</div>
+                    <div className="bg-surface-container-high rounded-m3-sm p-2">
+                      <div className="m3-title-medium text-on-surface">{session.totalAttempts || 0}</div>
+                      <div className="m3-label-medium text-on-surface-variant">Versuche</div>
                     </div>
-                    <div className="bg-dark-800 rounded p-2">
-                      <div className="text-sm font-bold text-success-400">{session.totalHits || 0}</div>
-                      <div className="text-xs text-dark-400">Treffer</div>
+                    <div className="bg-surface-container-high rounded-m3-sm p-2">
+                      <div className="m3-title-medium text-success">{session.totalHits || 0}</div>
+                      <div className="m3-label-medium text-on-surface-variant">Treffer</div>
                     </div>
-                    <div className="bg-dark-800 rounded p-2">
-                      <div className="text-sm font-bold text-primary-400">{(session.hitRate || 0).toFixed(1)}%</div>
-                      <div className="text-xs text-dark-400">Genauigkeit</div>
+                    <div className="bg-surface-container-high rounded-m3-sm p-2">
+                      <div className="m3-title-medium text-primary">{(session.hitRate || 0).toFixed(1)}%</div>
+                      <div className="m3-label-medium text-on-surface-variant">Genauigkeit</div>
                     </div>
-                    <div className="bg-dark-800 rounded p-2">
-                      <div className="text-sm font-bold text-amber-400">
+                    <div className="bg-surface-container-high rounded-m3-sm p-2">
+                      <div className="m3-title-medium text-tertiary">
                         {session.duration ? formatDuration(session.duration) : '-'}
                       </div>
-                      <div className="text-xs text-dark-400">Zeit</div>
+                      <div className="m3-label-medium text-on-surface-variant">Zeit</div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </Card>
       </div>
     </div>
   );

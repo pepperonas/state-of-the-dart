@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, RotateCcw, Trophy, Target, X, Check } from 'lucide-react';
 import { useGame } from '../../context/GameContext';
 import { usePlayer } from '../../context/PlayerContext';
@@ -10,7 +9,7 @@ import PlayerAvatar from '../player/PlayerAvatar';
 import { celebrate as confetti } from '../../utils/celebration';
 import { saveGameState, loadGameState, clearGameState, STORAGE_KEYS, CricketSavedState } from '../../utils/gameStorage';
 import { SpinnerWheel } from './SpinnerWheel';
-import BackButton from '../common/BackButton';
+import { BackButton, Button, IconButton, Card, Dialog } from '../common';
 
 // Cricket numbers: 20, 19, 18, 17, 16, 15, Bull
 const CRICKET_NUMBERS = [20, 19, 18, 17, 16, 15, 25];
@@ -266,9 +265,9 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
   };
 
   const getMarkColor = (marks: number) => {
-    if (marks === 0) return 'text-gray-600';
+    if (marks === 0) return 'text-on-surface-variant/40';
     if (marks < 3) return 'text-yellow-400';
-    return 'text-green-400';
+    return 'text-success-400';
   };
 
   const handleBack = () => {
@@ -313,14 +312,14 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
         <div className="max-w-4xl mx-auto">
           <BackButton onClick={onBack || (() => { window.location.href = '/'; })} />
 
-          <div className="glass-card rounded-2xl p-6">
-            <h1 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
-              <Target className="text-primary-400" />
+          <Card variant="elevated" className="rounded-m3-lg p-6">
+            <h1 className="m3-headline-medium text-on-surface mb-6 flex items-center gap-3">
+              <Target style={{ color: 'var(--m3-primary)' }} />
               Cricket
             </h1>
 
             <div className="mb-6">
-              <h2 className="text-lg font-semibold text-white mb-3">{t('game.select_players')}</h2>
+              <h2 className="m3-title-medium text-on-surface mb-3">{t('game.select_players')}</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {players.filter(p => !p.isBot).map(player => (
                   <button
@@ -332,24 +331,24 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
                         setSelectedPlayers(prev => [...prev, player]);
                       }
                     }}
-                    className={`p-3 rounded-lg border-2 transition-all ${
+                    className={`p-3 rounded-m3-md transition-all ${
                       selectedPlayers.find(p => p.id === player.id)
-                        ? 'border-success-500 bg-success-500/20 shadow-lg'
-                        : 'border-dark-700 hover:border-dark-600'
+                        ? 'bg-surface-container-high ring-2 ring-[var(--m3-primary)] shadow-m3-1'
+                        : 'bg-surface-container border border-outline-variant hover:bg-surface-container-high'
                     }`}
                   >
                     <div className="flex justify-center mb-1">
                       <PlayerAvatar avatar={player.avatar} name={player.name} size="sm" />
                     </div>
-                    <div className="text-sm font-medium text-white text-center">{player.name}</div>
+                    <div className="m3-label-large text-on-surface text-center">{player.name}</div>
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="bg-dark-800 rounded-xl p-4 mb-6">
-              <h3 className="text-white font-semibold mb-2">🎯 Cricket Regeln:</h3>
-              <ul className="text-gray-400 text-sm space-y-1">
+            <div className="bg-surface-container rounded-m3-md p-4 mb-6">
+              <h3 className="m3-title-small text-on-surface mb-2">🎯 Cricket Regeln:</h3>
+              <ul className="text-on-surface-variant text-sm space-y-1">
                 <li>• Zahlen 15-20 und Bull müssen 3x getroffen werden</li>
                 <li>• Triple = 3 Marks, Double = 2 Marks, Single = 1 Mark</li>
                 <li>• Nach dem Schließen: Punkte sammeln (solange Gegner offen)</li>
@@ -357,21 +356,19 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
               </ul>
             </div>
 
-            <button
+            <Button
+              variant="filled"
+              size="lg"
+              fullWidth
               onClick={handleStartGame}
               disabled={selectedPlayers.length < 2}
-              className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
-                selectedPlayers.length >= 2
-                  ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white hover:from-primary-600 hover:to-accent-600'
-                  : 'bg-dark-700 text-gray-500 cursor-not-allowed'
-              }`}
             >
-              {selectedPlayers.length < 2 
+              {selectedPlayers.length < 2
                 ? `${t('game.select_players')} (${selectedPlayers.length}/2)`
                 : 'Cricket starten 🎯'
               }
-            </button>
-          </div>
+            </Button>
+          </Card>
         </div>
       </div>
     );
@@ -381,127 +378,102 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
   return (
     <div className="min-h-dvh p-4 gradient-mesh">
       {/* Winner Modal */}
-      <AnimatePresence>
-        {showWinner && currentPlayer && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+      <Dialog
+        open={showWinner && !!currentPlayer}
+        onClose={() => {
+          setShowWinner(false);
+          setShowSetup(true);
+          setCricketState({});
+        }}
+        hideClose
+        widthClassName="max-w-md"
+      >
+        <div className="text-center">
+          <Trophy className="w-20 h-20 text-yellow-400 mx-auto mb-4" />
+          <h2 className="m3-headline-small text-on-surface mb-2">
+            {currentPlayer?.name} gewinnt!
+          </h2>
+          <p className="text-on-surface-variant mb-6">
+            Cricket Match beendet
+          </p>
+          <Button
+            variant="filled"
+            size="lg"
+            onClick={() => {
+              setShowWinner(false);
+              setShowSetup(true);
+              setCricketState({});
+            }}
           >
-            <motion.div
-              initial={{ scale: 0.5 }}
-              animate={{ scale: 1 }}
-              className="glass-card rounded-2xl p-8 text-center max-w-md"
-            >
-              <Trophy className="w-20 h-20 text-yellow-400 mx-auto mb-4" />
-              <h2 className="text-3xl font-bold text-white mb-2">
-                {currentPlayer.name} gewinnt!
-              </h2>
-              <p className="text-gray-400 mb-6">
-                Cricket Match beendet
-              </p>
-              <button
-                onClick={() => {
-                  setShowWinner(false);
-                  setShowSetup(true);
-                  setCricketState({});
-                }}
-                className="px-8 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-semibold"
-              >
-                Neues Spiel
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            Neues Spiel
+          </Button>
+        </div>
+      </Dialog>
 
       {/* Back Confirmation Dialog */}
-      <AnimatePresence>
-        {showBackConfirm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="glass-card rounded-2xl p-6 max-w-sm w-full text-center"
-            >
-              <h3 className="text-xl font-bold text-white mb-3">
-                {t('resume.pause_title')}
-              </h3>
-              <p className="text-gray-400 mb-6">
-                {t('resume.pause_message')}
-              </p>
-              <div className="flex flex-col gap-3">
-                <button
-                  onClick={handleConfirmBack}
-                  className="w-full py-3 rounded-xl bg-primary-500 text-white font-semibold hover:bg-primary-600"
-                >
-                  {t('resume.pause_and_leave')}
-                </button>
-                <button
-                  onClick={handleEndGame}
-                  className="w-full py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-500"
-                >
-                  {t('resume.end_game')}
-                </button>
-                <button
-                  onClick={() => setShowBackConfirm(false)}
-                  className="w-full py-3 rounded-xl bg-dark-700 text-white font-semibold hover:bg-dark-600"
-                >
-                  {t('common.cancel')}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Dialog
+        open={showBackConfirm}
+        onClose={() => setShowBackConfirm(false)}
+        title={t('resume.pause_title')}
+        widthClassName="max-w-sm"
+      >
+        <p className="text-on-surface-variant mb-6">
+          {t('resume.pause_message')}
+        </p>
+        <div className="flex flex-col gap-3">
+          <Button variant="filled" fullWidth onClick={handleConfirmBack}>
+            {t('resume.pause_and_leave')}
+          </Button>
+          <Button variant="danger" fullWidth onClick={handleEndGame}>
+            {t('resume.end_game')}
+          </Button>
+          <Button variant="tonal" fullWidth onClick={() => setShowBackConfirm(false)}>
+            {t('common.cancel')}
+          </Button>
+        </div>
+      </Dialog>
 
       {/* Header */}
       <div className="max-w-4xl mx-auto mb-6">
         <div className="flex items-center justify-between">
-          <button
+          <Button
+            variant="tonal"
+            size="sm"
+            icon={<ArrowLeft size={18} />}
             onClick={handleBack}
-            className="flex items-center gap-2 glass-card px-3 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
           >
-            <ArrowLeft size={20} />
             {t('common.back')}
-          </button>
-          <h1 className="text-2xl font-bold text-white">🎯 Cricket</h1>
+          </Button>
+          <h1 className="m3-title-large text-on-surface">🎯 Cricket</h1>
           <div className="w-10" />
         </div>
       </div>
 
       {/* Scoreboard */}
       <div className="max-w-4xl mx-auto">
-        <div className="glass-card rounded-2xl p-4 mb-6">
+        <Card variant="elevated" className="rounded-m3-lg p-4 mb-6">
           {/* Cricket Grid */}
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr>
-                  <th className="text-left text-gray-400 p-2 w-20">Zahl</th>
+                  <th className="text-left text-on-surface-variant p-2 w-20">Zahl</th>
                   {state.currentMatch?.players.map((player, idx) => (
-                    <th 
+                    <th
                       key={player.playerId}
                       className={`text-center p-2 ${
-                        idx === state.currentPlayerIndex 
-                          ? 'bg-primary-500/20 rounded-t-lg' 
+                        idx === state.currentPlayerIndex
+                          ? 'bg-primary-container rounded-t-m3-md'
                           : ''
                       }`}
                     >
                       <div className="flex flex-col items-center">
-                        <PlayerAvatar 
-                          avatar={players.find(p => p.id === player.playerId)?.avatar || ''} 
-                          name={player.name} 
-                          size="sm" 
+                        <PlayerAvatar
+                          avatar={players.find(p => p.id === player.playerId)?.avatar || ''}
+                          name={player.name}
+                          size="sm"
                         />
-                        <span className="text-white font-medium text-sm mt-1">
+                        <span className="text-on-surface font-medium text-sm mt-1">
                           {player.name}
                         </span>
                       </div>
@@ -511,18 +483,18 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
               </thead>
               <tbody>
                 {CRICKET_NUMBERS.map(num => (
-                  <tr key={num} className="border-t border-dark-700">
-                    <td className="text-white font-bold p-3 text-lg">
+                  <tr key={num} className="border-t border-outline-variant">
+                    <td className="text-on-surface font-bold p-3 text-lg">
                       {num === 25 ? 'Bull' : num}
                     </td>
                     {state.currentMatch?.players.map((player, idx) => {
                       const marks = cricketState[player.playerId]?.[num.toString()] || 0;
                       return (
-                        <td 
+                        <td
                           key={player.playerId}
                           className={`text-center p-3 ${
-                            idx === state.currentPlayerIndex 
-                              ? 'bg-primary-500/10' 
+                            idx === state.currentPlayerIndex
+                              ? 'bg-primary-container/40'
                               : ''
                           }`}
                         >
@@ -535,18 +507,18 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
                   </tr>
                 ))}
                 {/* Points row */}
-                <tr className="border-t-2 border-primary-500">
-                  <td className="text-primary-400 font-bold p-3">Punkte</td>
+                <tr className="border-t-2 border-[var(--m3-primary)]">
+                  <td className="font-bold p-3" style={{ color: 'var(--m3-primary)' }}>Punkte</td>
                   {state.currentMatch?.players.map((player, idx) => (
-                    <td 
+                    <td
                       key={player.playerId}
                       className={`text-center p-3 ${
-                        idx === state.currentPlayerIndex 
-                          ? 'bg-primary-500/10' 
+                        idx === state.currentPlayerIndex
+                          ? 'bg-primary-container/40'
                           : ''
                       }`}
                     >
-                      <span className="text-2xl font-bold text-white">
+                      <span className="text-2xl font-bold text-on-surface">
                         {cricketState[player.playerId]?.points || 0}
                       </span>
                     </td>
@@ -555,31 +527,32 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
               </tbody>
             </table>
           </div>
-        </div>
+        </Card>
 
         {/* Current Throw Display */}
-        <div className="glass-card rounded-2xl p-4 mb-6">
+        <Card variant="elevated" className="rounded-m3-lg p-4 mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-white font-semibold">
+            <h3 className="m3-title-small text-on-surface">
               {currentPlayer?.name}'s Wurf ({currentDarts.length}/3)
             </h3>
-            <button
+            <IconButton
+              variant="tonal"
+              label="Undo"
               onClick={handleUndo}
               disabled={currentDarts.length === 0}
-              className="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 text-gray-400 disabled:opacity-50"
             >
               <RotateCcw size={18} />
-            </button>
+            </IconButton>
           </div>
-          
+
           <div className="flex gap-4 mb-4">
             {[0, 1, 2].map(idx => (
               <div
                 key={idx}
-                className={`flex-1 h-16 rounded-xl flex items-center justify-center text-xl font-bold ${
+                className={`flex-1 h-16 rounded-m3-md flex items-center justify-center text-xl font-bold ${
                   currentDarts[idx]
-                    ? 'bg-primary-500/20 text-white border-2 border-primary-500'
-                    : 'bg-dark-800 text-gray-600 border-2 border-dashed border-dark-600'
+                    ? 'bg-primary-container text-on-primary-container border-2 border-[var(--m3-primary)]'
+                    : 'bg-surface-container text-on-surface-variant/40 border-2 border-dashed border-outline-variant'
                 }`}
               >
                 {currentDarts[idx] ? (
@@ -594,72 +567,76 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
             ))}
           </div>
 
-          <button
+          <Button
+            variant="success"
+            size="lg"
+            fullWidth
+            icon={<Check size={24} />}
             onClick={handleConfirmThrow}
             disabled={currentDarts.length === 0}
-            className={`w-full py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 ${
-              currentDarts.length > 0
-                ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
-                : 'bg-dark-700 text-gray-500 cursor-not-allowed'
-            }`}
           >
-            <Check size={24} />
             Wurf bestätigen
-          </button>
-        </div>
+          </Button>
+        </Card>
 
         {/* Cricket Dartboard Input */}
-        <div className="glass-card rounded-2xl p-4">
-          <h3 className="text-white font-semibold mb-4 text-center">Treffer eingeben</h3>
-          
+        <Card variant="elevated" className="rounded-m3-lg p-4">
+          <h3 className="m3-title-small text-on-surface mb-4 text-center">Treffer eingeben</h3>
+
           {/* Quick buttons for cricket numbers */}
           <div className="grid grid-cols-4 gap-3">
             {CRICKET_NUMBERS.map(num => (
               <div key={num} className="space-y-2">
-                <div className="text-center text-gray-400 text-sm font-medium">
+                <div className="text-center text-on-surface-variant text-sm font-medium">
                   {num === 25 ? 'Bull' : num}
                 </div>
                 <div className="flex flex-col gap-1">
-                  <button
+                  <Button
+                    variant="tonal"
+                    size="sm"
+                    fullWidth
                     onClick={() => handleDartHit(num, 1)}
                     disabled={currentDarts.length >= 3}
-                    className="py-2 rounded-lg bg-dark-700 hover:bg-dark-600 text-white font-medium disabled:opacity-50"
                   >
                     S
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="success"
+                    size="sm"
+                    fullWidth
                     onClick={() => handleDartHit(num, 2)}
                     disabled={currentDarts.length >= 3}
-                    className="py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white font-medium disabled:opacity-50"
                   >
                     D
-                  </button>
+                  </Button>
                   {num !== 25 && (
-                    <button
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      fullWidth
                       onClick={() => handleDartHit(num, 3)}
                       disabled={currentDarts.length >= 3}
-                      className="py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-medium disabled:opacity-50"
                     >
                       T
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
             ))}
-            
+
             {/* Miss button */}
             <div className="space-y-2">
-              <div className="text-center text-gray-400 text-sm font-medium">Miss</div>
+              <div className="text-center text-on-surface-variant text-sm font-medium">Miss</div>
               <button
                 onClick={() => handleDartHit(0, 0 as any)}
                 disabled={currentDarts.length >= 3}
-                className="w-full py-8 rounded-lg bg-dark-800 hover:bg-dark-700 text-gray-400 font-medium disabled:opacity-50"
+                className="w-full py-8 rounded-m3-md bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-medium disabled:opacity-50"
               >
                 <X size={24} className="mx-auto" />
               </button>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );

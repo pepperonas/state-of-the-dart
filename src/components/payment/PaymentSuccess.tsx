@@ -1,6 +1,9 @@
 import React, { useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Home } from 'lucide-react';
+import { Card, Button } from '../common';
+import { enterPop } from '../../utils/motion';
 import { useAuth } from '../../context/AuthContext';
 
 const PaymentSuccess: React.FC = () => {
@@ -15,42 +18,46 @@ const PaymentSuccess: React.FC = () => {
   return (
     <div className="min-h-dvh flex items-center justify-center gradient-mesh p-4">
       <div className="w-full max-w-md">
-        <div className="glass-card p-8 rounded-2xl shadow-2xl text-center">
-          <div className="w-20 h-20 bg-success-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="text-success-400" size={48} />
-          </div>
-          
-          <h1 className="text-3xl font-bold text-white mb-4">
-            Zahlung erfolgreich! 🎉
-          </h1>
-          
-          <p className="text-dark-300 mb-8">
-            Vielen Dank für dein Vertrauen! Dein Abo ist jetzt aktiv und du hast vollen Zugriff auf alle Features.
-          </p>
+        <motion.div {...enterPop}>
+          <Card variant="elevated" className="p-8 shadow-m3-3 text-center">
+            <div className="w-20 h-20 bg-success-container rounded-m3-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="text-success" size={48} />
+            </div>
 
-          <div className="space-y-3">
-            <button
-              onClick={() => navigate('/')}
-              className="w-full py-3 bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition-all"
-            >
-              <Home size={20} />
-              Zur App
-            </button>
-            
-            <button
-              onClick={() => navigate('/settings')}
-              className="w-full py-3 text-primary-400 hover:text-primary-300 transition-colors"
-            >
-              Zu den Einstellungen
-            </button>
-          </div>
+            <h1 className="m3-headline-medium text-on-surface mb-4">
+              Zahlung erfolgreich! 🎉
+            </h1>
 
-          <div className="mt-8 p-4 bg-primary-500/10 rounded-lg border border-primary-500/30">
-            <p className="text-sm text-primary-400">
-              💡 Tipp: Du kannst dein Abo jederzeit in den Einstellungen verwalten.
+            <p className="m3-body-medium text-on-surface-variant mb-8">
+              Vielen Dank für dein Vertrauen! Dein Abo ist jetzt aktiv und du hast vollen Zugriff auf alle Features.
             </p>
-          </div>
-        </div>
+
+            <div className="space-y-3">
+              <Button
+                variant="filled"
+                fullWidth
+                icon={<Home size={20} />}
+                onClick={() => navigate('/')}
+              >
+                Zur App
+              </Button>
+
+              <Button
+                variant="text"
+                fullWidth
+                onClick={() => navigate('/settings')}
+              >
+                Zu den Einstellungen
+              </Button>
+            </div>
+
+            <div className="mt-8 p-4 bg-primary-container text-on-primary-container rounded-m3-md">
+              <p className="m3-body-small">
+                💡 Tipp: Du kannst dein Abo jederzeit in den Einstellungen verwalten.
+              </p>
+            </div>
+          </Card>
+        </motion.div>
       </div>
     </div>
   );

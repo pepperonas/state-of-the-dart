@@ -1,41 +1,29 @@
 import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import Button from './Button';
 
 interface BackButtonProps {
   onClick: () => void;
   /** Override the default "common.back" label */
   label?: string;
-  /** Append extra utility classes (e.g. positioning). The button's visual style
-   *  is fixed; only layout-related additions should go here. */
+  /** Append extra utility classes (e.g. positioning). */
   className?: string;
-  /** Render as inline-flex for centered layouts. Default is block-level. */
+  /** Retained for API compatibility; M3 back button is already inline-flex. */
   inline?: boolean;
 }
 
-const BASE_CLASSES =
-  'flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all';
-
 /**
- * Canonical back button. Style is fixed across the app per the convention
- * documented in CLAUDE.md ("Back buttons: glass-card style with
- * <ArrowLeft size={20} /> and t('common.back')").
+ * Canonical back button — now a Material 3 Expressive tonal button with a
+ * leading arrow. Style is centralised here per the CLAUDE.md convention; pass
+ * `label` for custom text.
  */
-const BackButton: React.FC<BackButtonProps> = ({ onClick, label, className = '', inline = false }) => {
+const BackButton: React.FC<BackButtonProps> = ({ onClick, label, className = '' }) => {
   const { t } = useTranslation();
-  const classes = [
-    BASE_CLASSES,
-    inline ? 'inline-flex w-fit' : '',
-    className,
-  ]
-    .filter(Boolean)
-    .join(' ');
-
   return (
-    <button onClick={onClick} className={classes}>
-      <ArrowLeft size={20} />
+    <Button variant="tonal" size="sm" onClick={onClick} className={className} icon={<ArrowLeft size={18} />}>
       {label ?? t('common.back')}
-    </button>
+    </Button>
   );
 };
 

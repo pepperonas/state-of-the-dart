@@ -35,74 +35,74 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
         opacity: isActive ? 1 : 0.75,
       }}
       transition={{ duration: 0.3 }}
-      className={`glass-card rounded-xl shadow-lg p-4 transition-all ${
+      className={`m3-card m3-elevated p-4 transition-all ${
         isActive
-          ? 'ring-4 ring-success-500'
-          : ''
+          ? 'ring-4 ring-[var(--m3-primary)] bg-surface-container-high'
+          : 'bg-surface-container'
       }`}
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <PlayerAvatar avatar={fullPlayer?.avatar} name={player.name} size="md" />
-          <h3 className="text-lg font-bold text-white">
+          <h3 className="m3-title-large text-on-surface">
             {player.name}
           </h3>
         </div>
         {isActive && (
-          <Target className="text-green-500 animate-pulse" size={24} />
+          <Target className="text-primary animate-pulse" size={24} />
         )}
       </div>
-      
+
       <motion.div
         key={remaining}
         initial={{ scale: 1.2, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.3 }}
         className={`text-4xl font-bold text-center mb-3 ${
-          remaining <= 170 ? 'text-success-400 neon-success' : 'text-white'
+          remaining <= 170 ? 'text-primary' : 'text-on-surface'
         }`}
       >
         {remaining}
       </motion.div>
-      
+
       <div className="grid grid-cols-2 gap-2 text-sm">
-        <div className="bg-gray-700/50 rounded-lg p-2">
-          <div className="text-gray-400 text-xs">Average</div>
-          <div className="font-semibold text-white">{average.toFixed(2)}</div>
+        <div className="bg-surface-container-highest rounded-m3-sm p-2">
+          <div className="text-on-surface-variant text-xs">Average</div>
+          <div className="font-semibold text-on-surface">{average.toFixed(2)}</div>
         </div>
-        
-        <div className="bg-gray-700/50 rounded-lg p-2">
-          <div className="text-gray-400 text-xs">Legs</div>
-          <div className="font-semibold text-white flex items-center gap-1">
+
+        <div className="bg-surface-container-highest rounded-m3-sm p-2">
+          <div className="text-on-surface-variant text-xs">Legs</div>
+          <div className="font-semibold text-on-surface flex items-center gap-1">
             {legsWon}
-            <Trophy size={14} className="text-yellow-500" />
+            <Trophy size={14} className="text-tertiary" />
           </div>
         </div>
       </div>
-      
+
       <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
         {player.match180s > 0 && (
-          <div className="bg-red-500/20 rounded p-1 text-center">
-            <span className="font-bold text-red-400">180</span>
-            <span className="text-gray-400"> ×{player.match180s}</span>
+          <div className="bg-error-container text-on-error-container rounded-m3-sm p-1 text-center">
+            <span className="font-bold">180</span>
+            <span className="opacity-70"> ×{player.match180s}</span>
           </div>
         )}
         {player.match140Plus > 0 && (
-          <div className="bg-orange-500/20 rounded p-1 text-center">
-            <span className="font-bold text-orange-400">140+</span>
-            <span className="text-gray-400"> ×{player.match140Plus}</span>
+          <div className="bg-tertiary-container text-on-tertiary-container rounded-m3-sm p-1 text-center">
+            <span className="font-bold">140+</span>
+            <span className="opacity-70"> ×{player.match140Plus}</span>
           </div>
         )}
         {player.match100Plus > 0 && (
-          <div className="bg-yellow-500/20 rounded p-1 text-center">
-            <span className="font-bold text-yellow-400">100+</span>
-            <span className="text-gray-400"> ×{player.match100Plus}</span>
+          <div className="bg-secondary-container text-on-secondary-container rounded-m3-sm p-1 text-center">
+            <span className="font-bold">100+</span>
+            <span className="opacity-70"> ×{player.match100Plus}</span>
           </div>
         )}
         {player.matchHighestScore > 0 && (
-          <div className="bg-blue-500/20 rounded p-1 text-center">
-            <span className="font-bold text-blue-400">High</span>
-            <span className="text-gray-400"> {player.matchHighestScore}</span>
+          <div className="bg-primary-container text-on-primary-container rounded-m3-sm p-1 text-center">
+            <span className="font-bold">High</span>
+            <span className="opacity-70"> {player.matchHighestScore}</span>
           </div>
         )}
       </div>

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, Link, useNavigate } from 'react-router-dom';
-import { CheckCircle, AlertCircle, Loader } from 'lucide-react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import api from '../../services/api';
+import { Card, Button } from '../common';
 
 const VerifyEmail: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -40,15 +41,15 @@ const VerifyEmail: React.FC = () => {
     return (
       <div className="min-h-dvh flex items-center justify-center gradient-mesh p-4">
         <div className="w-full max-w-md">
-          <div className="glass-card p-8 rounded-2xl shadow-2xl text-center">
-            <Loader className="animate-spin text-primary-400 mx-auto mb-4" size={48} />
-            <h2 className="text-2xl font-bold text-white mb-2">
+          <Card variant="elevated" className="p-8 text-center">
+            <Loader2 className="animate-spin text-primary mx-auto mb-4" size={48} />
+            <h2 className="m3-headline-small text-on-surface mb-2">
               Verifiziere Email...
             </h2>
-            <p className="text-dark-300">
+            <p className="m3-body-medium text-on-surface-variant">
               Bitte warte einen Moment
             </p>
-          </div>
+          </Card>
         </div>
       </div>
     );
@@ -58,26 +59,23 @@ const VerifyEmail: React.FC = () => {
     return (
       <div className="min-h-dvh flex items-center justify-center gradient-mesh p-4">
         <div className="w-full max-w-md">
-          <div className="glass-card p-8 rounded-2xl shadow-2xl text-center">
-            <div className="w-16 h-16 bg-success-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="text-success-400" size={32} />
+          <Card variant="elevated" className="p-8 text-center">
+            <div className="w-16 h-16 bg-success-container rounded-m3-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="text-success" size={32} />
             </div>
-            <h2 className="text-2xl font-bold text-white mb-4">
+            <h2 className="m3-headline-small text-on-surface mb-4">
               Email erfolgreich verifiziert! 🎉
             </h2>
-            <p className="text-dark-300 mb-6">
+            <p className="m3-body-medium text-on-surface-variant mb-6">
               Dein 30-Tage-Trial hat begonnen! Du kannst dich jetzt anmelden und loslegen.
             </p>
-            <Link
-              to="/login"
-              className="block w-full py-3 bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white rounded-lg font-semibold transition-all"
-            >
+            <Button variant="success" fullWidth onClick={() => navigate('/login')}>
               Jetzt anmelden
-            </Link>
-            <p className="text-xs text-dark-400 mt-4">
+            </Button>
+            <p className="m3-body-small text-on-surface-variant mt-4">
               Du wirst automatisch weitergeleitet...
             </p>
-          </div>
+          </Card>
         </div>
       </div>
     );
@@ -86,29 +84,25 @@ const VerifyEmail: React.FC = () => {
   return (
     <div className="min-h-dvh flex items-center justify-center gradient-mesh p-4">
       <div className="w-full max-w-md">
-        <div className="glass-card p-8 rounded-2xl shadow-2xl text-center">
-          <AlertCircle className="text-error-400 mx-auto mb-4" size={48} />
-          <h2 className="text-2xl font-bold text-white mb-4">
+        <Card variant="elevated" className="p-8 text-center">
+          <div className="w-16 h-16 bg-error-container rounded-m3-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="text-error" size={32} />
+          </div>
+          <h2 className="m3-headline-small text-on-surface mb-4">
             Verification fehlgeschlagen
           </h2>
-          <p className="text-dark-300 mb-6">
+          <p className="m3-body-medium text-on-surface-variant mb-6">
             {error || 'Der Verification-Link ist ungültig oder abgelaufen.'}
           </p>
           <div className="space-y-3">
-            <Link
-              to="/resend-verification"
-              className="block w-full py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg font-semibold transition-all"
-            >
+            <Button variant="filled" fullWidth onClick={() => navigate('/resend-verification')}>
               Neuen Link anfordern
-            </Link>
-            <Link
-              to="/login"
-              className="block w-full py-3 text-primary-400 hover:text-primary-300 transition-colors"
-            >
+            </Button>
+            <Button variant="text" fullWidth onClick={() => navigate('/login')}>
               Zum Login
-            </Link>
+            </Button>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );

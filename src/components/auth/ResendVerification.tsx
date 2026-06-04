@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Mail, AlertCircle, Loader, CheckCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Mail, AlertCircle, CheckCircle } from 'lucide-react';
 import api from '../../services/api';
 import BackButton from '../common/BackButton';
+import { Card, Button, TextField } from '../common';
 
 const ResendVerification: React.FC = () => {
   const navigate = useNavigate();
@@ -30,24 +31,21 @@ const ResendVerification: React.FC = () => {
     return (
       <div className="min-h-dvh flex items-center justify-center gradient-mesh p-4">
         <div className="w-full max-w-md">
-          <div className="glass-card p-8 rounded-2xl shadow-2xl text-center">
-            <div className="w-16 h-16 bg-success-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="text-success-400" size={32} />
+          <Card variant="elevated" className="p-8 text-center">
+            <div className="w-16 h-16 bg-success-container rounded-m3-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="text-success" size={32} />
             </div>
-            <h2 className="text-2xl font-bold text-white mb-4">
+            <h2 className="m3-headline-small text-on-surface mb-4">
               Email gesendet! 📧
             </h2>
-            <p className="text-dark-300 mb-6">
-              Wir haben dir eine neue Verification-Email an <strong className="text-white">{email}</strong> gesendet.
+            <p className="m3-body-medium text-on-surface-variant mb-6">
+              Wir haben dir eine neue Verification-Email an <strong className="text-on-surface">{email}</strong> gesendet.
               Bitte überprüfe deinen Posteingang.
             </p>
-            <Link
-              to="/login"
-              className="block w-full py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg font-semibold transition-all"
-            >
+            <Button variant="filled" fullWidth onClick={() => navigate('/login')}>
               Zum Login
-            </Link>
-          </div>
+            </Button>
+          </Card>
         </div>
       </div>
     );
@@ -58,66 +56,56 @@ const ResendVerification: React.FC = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="text-6xl mb-4">📧</div>
-          <h1 className="text-4xl font-bold text-white mb-2">
+          <h1 className="m3-display-small text-on-surface mb-2">
             Verification-Email erneut senden
           </h1>
         </div>
 
-        <div className="glass-card p-8 rounded-2xl shadow-2xl">
+        <Card variant="elevated" className="p-8">
           <BackButton onClick={() => navigate('/login')} label="Zurück zum Login" inline />
 
-          <p className="text-sm text-dark-300 mb-6">
+          <p className="m3-body-medium text-on-surface-variant mb-6">
             Email nicht erhalten? Gib deine Email-Adresse ein und wir senden dir einen neuen Verification-Link.
           </p>
 
           {error && (
-            <div className={`mb-4 p-4 rounded-lg flex items-center gap-3 ${
-              error.includes('already verified') 
-                ? 'bg-primary-500/20 border-2 border-primary-500 text-white shadow-lg shadow-primary-500/20'
-                : 'bg-red-500/20 border-2 border-red-500 text-white shadow-lg shadow-red-500/20'
-            }`}>
-              <AlertCircle size={24} className={error.includes('already verified') ? 'text-primary-400 flex-shrink-0' : 'text-red-400 flex-shrink-0'} />
-              <span className="font-semibold text-base">{error}</span>
+            <div
+              className={`mb-4 p-4 rounded-m3-md flex items-center gap-3 ${
+                error.includes('already verified')
+                  ? 'bg-primary-container text-on-primary-container'
+                  : 'bg-error-container text-on-error-container'
+              }`}
+            >
+              <AlertCircle
+                size={24}
+                className={error.includes('already verified') ? 'text-primary flex-shrink-0' : 'text-error flex-shrink-0'}
+              />
+              <span className="m3-label-large">{error}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">
-                Email
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400" size={20} />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="deine@email.de"
-                  className="w-full pl-10 pr-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  required
-                />
-              </div>
-            </div>
+            <TextField
+              type="email"
+              label="Email"
+              icon={<Mail size={20} />}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="deine@email.de"
+              required
+            />
 
-            <button
+            <Button
               type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="filled"
+              fullWidth
+              loading={loading}
+              icon={!loading ? <Mail size={20} /> : undefined}
             >
-              {loading ? (
-                <>
-                  <Loader className="animate-spin" size={20} />
-                  Sende Email...
-                </>
-              ) : (
-                <>
-                  <Mail size={20} />
-                  Erneut senden
-                </>
-              )}
-            </button>
+              {loading ? 'Sende Email...' : 'Erneut senden'}
+            </Button>
           </form>
-        </div>
+        </Card>
       </div>
     </div>
   );

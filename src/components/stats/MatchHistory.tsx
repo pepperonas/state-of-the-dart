@@ -4,6 +4,7 @@ import { Calendar, Target, Award, ChevronDown, ChevronUp, TrendingUp, Loader, Se
 import { formatDate, getTimestampForSort } from '../../utils/dateUtils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { api } from '../../services/api';
+import { Card, TextField, IconButton, Button } from '../common';
 
 interface MatchHistoryProps {
   matches: Match[];
@@ -164,35 +165,32 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
       {sortedMatches.length > 0 && (
         <div className="mb-4 space-y-4">
           {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400" size={20} />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Nach Gegner, Datum oder Spieltyp suchen..."
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-dark-700 bg-dark-800 text-white placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
-          </div>
+          <TextField
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Nach Gegner, Datum oder Spieltyp suchen..."
+            icon={<Search size={20} />}
+          />
 
           {/* Items per page and pagination info */}
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-dark-400">Zeige:</span>
+              <span className="m3-body-small text-on-surface-variant">Zeige:</span>
               <select
                 value={itemsPerPage}
                 onChange={(e) => {
                   setItemsPerPage(Number(e.target.value));
                   setCurrentPage(1);
                 }}
-                className="px-3 py-1 rounded-lg border border-dark-700 bg-dark-800 text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="px-3 py-1 rounded-m3-sm border border-outline-variant bg-surface-container text-on-surface m3-body-small focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value={10}>10</option>
                 <option value={20}>20</option>
                 <option value={50}>50</option>
                 <option value={100}>100</option>
               </select>
-              <span className="text-sm text-dark-400">
+              <span className="m3-body-small text-on-surface-variant">
                 von {filteredMatches.length} Match{filteredMatches.length !== 1 ? 'es' : ''}
               </span>
             </div>
@@ -200,14 +198,15 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center gap-2">
-                <button
+                <IconButton
+                  variant="outlined"
+                  label="Vorherige Seite"
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="p-2 rounded-lg border border-dark-700 bg-dark-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-dark-700 transition-colors"
                 >
                   <ChevronLeft size={18} />
-                </button>
-                
+                </IconButton>
+
                 <div className="flex items-center gap-1">
                   {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
                     let pageNum;
@@ -220,30 +219,28 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                     } else {
                       pageNum = currentPage - 1 + i;
                     }
-                    
+
                     return (
-                      <button
+                      <Button
                         key={pageNum}
+                        size="sm"
+                        variant={currentPage === pageNum ? 'tonal' : 'text'}
                         onClick={() => handlePageChange(pageNum)}
-                        className={`px-3 py-1 rounded-lg text-sm font-semibold transition-colors ${
-                          currentPage === pageNum
-                            ? 'bg-primary-500 text-white'
-                            : 'bg-dark-800 text-white hover:bg-dark-700 border border-dark-700'
-                        }`}
                       >
                         {pageNum}
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
 
-                <button
+                <IconButton
+                  variant="outlined"
+                  label="Nächste Seite"
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="p-2 rounded-lg border border-dark-700 bg-dark-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-dark-700 transition-colors"
                 >
                   <ChevronRight size={18} />
-                </button>
+                </IconButton>
               </div>
             )}
           </div>
@@ -251,11 +248,11 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
       )}
 
       {filteredMatches.length === 0 ? (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+        <div className="text-center py-8 text-on-surface-variant">
           <Target size={48} className="mx-auto mb-2 opacity-50" />
-          <p>{searchQuery ? 'Keine Matches gefunden' : 'Noch keine Spiele gespielt'}</p>
+          <p className="m3-body-large">{searchQuery ? 'Keine Matches gefunden' : 'Noch keine Spiele gespielt'}</p>
           {searchQuery && (
-            <p className="text-sm mt-2">Keine Matches gefunden für "{searchQuery}"</p>
+            <p className="m3-body-small mt-2">Keine Matches gefunden für "{searchQuery}"</p>
           )}
         </div>
       ) : (
@@ -270,35 +267,32 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
           if (matchPlayers.length === 0 || !player) return null;
           
           return (
-            <div 
+            <Card
               key={match.id}
-              className={`border rounded-lg overflow-hidden transition-all ${
-                isWin 
-                  ? 'border-green-500/30 bg-green-500/5' 
-                  : 'border-red-500/30 bg-red-500/5'
-              }`}
+              variant="elevated"
+              className="overflow-hidden"
             >
               {/* Match Summary */}
               <button
                 onClick={() => toggleMatch(match.id)}
-                className="w-full p-4 flex items-center justify-between hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                className="m3-state-layer w-full p-4 flex items-center justify-between text-left"
               >
                 <div className="flex items-center gap-4 flex-1">
                   {/* Result Badge */}
-                  <div className={`px-3 py-1 rounded-full text-sm font-bold ${
-                    isWin 
-                      ? 'bg-green-500 text-white' 
-                      : 'bg-red-500 text-white'
+                  <div className={`px-3 py-1 rounded-m3-full m3-label-large font-bold ${
+                    isWin
+                      ? 'bg-success-container text-on-success-container'
+                      : 'bg-error-container text-on-error-container'
                   }`}>
                     {isWin ? 'WIN' : 'LOSS'}
                   </div>
-                  
+
                   {/* Match Info */}
                   <div className="flex-1 text-left">
-                    <div className="font-bold text-gray-800 dark:text-white">
+                    <div className="m3-title-medium font-bold text-on-surface">
                       {player.name} vs {opponent?.name || 'Unbekannt'}
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-3">
+                    <div className="m3-body-small text-on-surface-variant flex items-center gap-3">
                       <span className="flex items-center gap-1">
                         <Calendar size={14} />
                         {formatDate(match.startedAt)}
@@ -307,43 +301,43 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                       <span>Avg: {(player.matchAverage ?? 0).toFixed(2)}</span>
                     </div>
                   </div>
-                  
+
                   {/* Quick Stats */}
-                  <div className="hidden md:flex items-center gap-4 text-sm">
+                  <div className="hidden md:flex items-center gap-4 m3-body-small">
                     {player.match180s > 0 && (
-                      <div className="flex items-center gap-1 text-yellow-500">
+                      <div className="flex items-center gap-1 text-tertiary">
                         <Award size={16} />
                         <span>{player.match180s}×180</span>
                       </div>
                     )}
                     {player.matchHighestScore > 0 && (
-                      <div className="text-gray-600 dark:text-gray-400">
+                      <div className="text-on-surface-variant">
                         High: {player.matchHighestScore}
                       </div>
                     )}
                   </div>
                 </div>
-                
+
                 {/* Expand Icon */}
-                {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                {isExpanded ? <ChevronUp size={20} className="text-on-surface-variant" /> : <ChevronDown size={20} className="text-on-surface-variant" />}
               </button>
               
               {/* Expanded Details */}
               {isExpanded && (
-                <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-white/50 dark:bg-gray-800/50 space-y-6">
+                <div className="border-t border-outline-variant p-4 bg-surface-container-low space-y-6">
                   {/* Round-by-Round Chart */}
-                  <div className="glass-card p-6 rounded-xl">
-                    <h4 className="font-bold text-white mb-4 flex items-center gap-2">
-                      <TrendingUp size={20} className="text-primary-400" />
+                  <Card variant="filled" className="p-6">
+                    <h4 className="m3-title-medium font-bold text-on-surface mb-4 flex items-center gap-2">
+                      <TrendingUp size={20} className="text-primary" />
                       Runden-Verlauf
                     </h4>
                     {loadingDetails[match.id] ? (
-                      <div className="bg-dark-900 rounded-lg p-12 text-center">
-                        <Loader className="mx-auto mb-4 text-primary-400 animate-spin" size={48} />
-                        <p className="text-dark-400 font-medium">Lade Match-Details...</p>
+                      <div className="bg-surface-container-high rounded-m3-md p-12 text-center">
+                        <Loader className="mx-auto mb-4 text-primary animate-spin" size={48} />
+                        <p className="text-on-surface-variant m3-body-medium">Lade Match-Details...</p>
                       </div>
                     ) : matchDetails[match.id] ? (
-                      <div className="bg-dark-900 rounded-lg p-4">
+                      <div className="bg-surface-container-high rounded-m3-md p-4">
                         {prepareRoundData(matchDetails[match.id]).length > 0 ? (
                           <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                             <LineChart data={prepareRoundData(matchDetails[match.id])}>
@@ -389,27 +383,27 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                         </LineChart>
                       </ResponsiveContainer></div>
                         ) : (
-                          <div className="bg-dark-900 rounded-lg p-8 text-center">
-                            <TrendingUp size={48} className="mx-auto mb-3 text-dark-600 opacity-30" />
-                            <p className="text-dark-400 font-medium">Keine Runden-Daten verfügbar</p>
-                            <p className="text-dark-500 text-sm mt-2">
+                          <div className="bg-surface-container-high rounded-m3-md p-8 text-center">
+                            <TrendingUp size={48} className="mx-auto mb-3 text-on-surface-variant opacity-30" />
+                            <p className="text-on-surface-variant m3-body-medium">Keine Runden-Daten verfügbar</p>
+                            <p className="text-on-surface-variant opacity-70 m3-body-small mt-2">
                               Dieses Match wurde möglicherweise vor dem Tracking-Update gespielt
                             </p>
                           </div>
                         )}
                       </div>
                     ) : (
-                      <div className="bg-dark-900 rounded-lg p-8 text-center">
-                        <TrendingUp size={48} className="mx-auto mb-3 text-dark-600 opacity-30" />
-                        <p className="text-dark-400 font-medium">Keine Runden-Daten verfügbar</p>
+                      <div className="bg-surface-container-high rounded-m3-md p-8 text-center">
+                        <TrendingUp size={48} className="mx-auto mb-3 text-on-surface-variant opacity-30" />
+                        <p className="text-on-surface-variant m3-body-medium">Keine Runden-Daten verfügbar</p>
                       </div>
                     )}
-                  </div>
+                  </Card>
 
                   <div className={`grid ${opponent ? 'md:grid-cols-2' : 'md:grid-cols-1'} gap-6`}>
                     {/* Player Stats */}
                     <div>
-                      <h4 className="font-bold text-gray-800 dark:text-white mb-3">
+                      <h4 className="m3-title-medium font-bold text-on-surface mb-3">
                         {player.name}
                       </h4>
                       <div className="grid grid-cols-2 gap-3">
@@ -432,7 +426,7 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                     {/* Opponent Stats - only show if opponent exists */}
                     {opponent && (
                       <div>
-                        <h4 className="font-bold text-gray-800 dark:text-white mb-3">
+                        <h4 className="m3-title-medium font-bold text-on-surface mb-3">
                           {opponent.name}
                         </h4>
                         <div className="grid grid-cols-2 gap-3">
@@ -456,18 +450,18 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                   
                   {/* Leg-by-Leg Breakdown */}
                   {match.legs && match.legs.length > 0 && (
-                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                      <h5 className="font-semibold text-sm text-gray-700 dark:text-gray-300 mb-2">
+                    <div className="mt-4 pt-4 border-t border-outline-variant">
+                      <h5 className="m3-label-large font-semibold text-on-surface-variant mb-2">
                         Leg Details
                       </h5>
                       <div className="flex gap-2 flex-wrap">
                         {match.legs.map((leg, index) => (
                           <div
                             key={leg.id}
-                            className={`px-3 py-1 rounded text-sm ${
+                            className={`px-3 py-1 rounded-m3-sm m3-body-small ${
                               leg.winner === playerId
-                                ? 'bg-green-500/20 text-green-700 dark:text-green-300'
-                                : 'bg-red-500/20 text-red-700 dark:text-red-300'
+                                ? 'bg-success-container text-on-success-container'
+                                : 'bg-error-container text-on-error-container'
                             }`}
                           >
                             Leg {index + 1}: {leg.winner === playerId ? '✓' : '✗'}
@@ -478,7 +472,7 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                   )}
                 </div>
               )}
-            </div>
+            </Card>
           );
         })
       )}
@@ -487,9 +481,9 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
 };
 
 const StatBox: React.FC<{ label: string; value: string | number }> = ({ label, value }) => (
-  <div className="bg-gray-100 dark:bg-gray-700 rounded p-2">
-    <div className="text-xs text-gray-600 dark:text-gray-400">{label}</div>
-    <div className="text-lg font-bold text-gray-800 dark:text-white">{value}</div>
+  <div className="bg-surface-container-highest rounded-m3-sm p-2">
+    <div className="m3-body-small text-on-surface-variant">{label}</div>
+    <div className="m3-title-medium font-bold text-on-surface">{value}</div>
   </div>
 );
 

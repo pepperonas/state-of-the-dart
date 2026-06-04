@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useMemo } from 'react';
 import { HeatmapData } from '../../types';
 import { Flame, Target, TrendingUp, Crosshair, CircleDot, Percent } from 'lucide-react';
 import { formatSegmentName } from '../../utils/heatmap';
+import Card from '../common/Card';
 
 interface DartboardHeatmapBlurProps {
   heatmapData: HeatmapData;
@@ -575,102 +576,102 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
       {/* Statistics Cards */}
       {heatmapStats && !compact && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="glass-card p-4 rounded-xl border border-blue-500/30">
+          <Card variant="filled" className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <Crosshair size={18} className="text-blue-400" />
-              <span className="text-xs text-blue-300 font-medium">Cluster-Zentrum</span>
+              <Crosshair size={18} className="text-primary" />
+              <span className="m3-label-medium text-on-surface-variant">Cluster-Zentrum</span>
             </div>
-            <div className="text-lg font-bold text-white">
-              {heatmapStats.scatterRadiusPercent < 15 ? '🎯 Sehr präzise' : 
+            <div className="m3-title-medium text-on-surface">
+              {heatmapStats.scatterRadiusPercent < 15 ? '🎯 Sehr präzise' :
                heatmapStats.scatterRadiusPercent < 25 ? '✓ Präzise' : '↔ Gestreut'}
             </div>
-          </div>
+          </Card>
 
-          <div className="glass-card p-4 rounded-xl border border-purple-500/30">
+          <Card variant="filled" className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <CircleDot size={18} className="text-purple-400" />
-              <span className="text-xs text-purple-300 font-medium">Streuungsradius</span>
+              <CircleDot size={18} className="text-tertiary" />
+              <span className="m3-label-medium text-on-surface-variant">Streuungsradius</span>
             </div>
-            <div className="text-lg font-bold text-white">
+            <div className="m3-title-medium text-on-surface">
               {heatmapStats.scatterRadiusPercent.toFixed(1)}%
             </div>
-            <div className="text-xs text-gray-400">vom Scheibendurchmesser</div>
-          </div>
+            <div className="m3-body-small text-on-surface-variant">vom Scheibendurchmesser</div>
+          </Card>
 
-          <div className="glass-card p-4 rounded-xl border border-red-500/30">
+          <Card variant="filled" className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <Target size={18} className="text-red-400" />
-              <span className="text-xs text-red-300 font-medium">Triple-Rate</span>
+              <Target size={18} className="text-error" />
+              <span className="m3-label-medium text-on-surface-variant">Triple-Rate</span>
             </div>
-            <div className="text-lg font-bold text-white">
+            <div className="m3-title-medium text-on-surface">
               {heatmapStats.tripleRate.toFixed(1)}%
             </div>
-          </div>
+          </Card>
 
-          <div className="glass-card p-4 rounded-xl border border-green-500/30">
+          <Card variant="filled" className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <Percent size={18} className="text-green-400" />
-              <span className="text-xs text-green-300 font-medium">Double-Rate</span>
+              <Percent size={18} className="text-success" />
+              <span className="m3-label-medium text-on-surface-variant">Double-Rate</span>
             </div>
-            <div className="text-lg font-bold text-white">
+            <div className="m3-title-medium text-on-surface">
               {heatmapStats.doubleRate.toFixed(1)}%
             </div>
-          </div>
+          </Card>
         </div>
       )}
 
       {/* Bull Rate Card (wenn nicht compact) */}
       {heatmapStats && heatmapStats.bullRate > 0 && !compact && (
-        <div className="glass-card p-4 rounded-xl border border-yellow-500/30">
+        <Card variant="filled" className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-green-500 flex items-center justify-center">
                 <CircleDot size={24} className="text-white" />
               </div>
               <div>
-                <div className="text-sm text-yellow-300 font-medium">Bull & Outer Bull</div>
-                <div className="text-2xl font-bold text-white">{heatmapStats.bullRate.toFixed(1)}%</div>
+                <div className="m3-label-medium text-on-surface-variant">Bull & Outer Bull</div>
+                <div className="m3-title-medium text-on-surface">{heatmapStats.bullRate.toFixed(1)}%</div>
               </div>
             </div>
             <div className="text-right">
-              <div className="text-xs text-gray-400">Inner Bull</div>
-              <div className="text-lg font-bold text-red-400">{heatmapStats.innerBullRate.toFixed(1)}%</div>
+              <div className="m3-body-small text-on-surface-variant">Inner Bull</div>
+              <div className="m3-title-small text-error">{heatmapStats.innerBullRate.toFixed(1)}%</div>
             </div>
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Color Legend */}
-      <div className="glass-card p-4 rounded-xl border border-primary-500/20">
-        <h4 className="font-bold text-white mb-3 flex items-center gap-2 text-lg">
-          <Flame size={20} className="text-orange-400" />
+      <Card variant="filled" className="p-4">
+        <h4 className="font-bold text-on-surface mb-3 flex items-center gap-2 m3-title-medium">
+          <Flame size={20} className="text-tertiary" />
           Heatmap Legende
         </h4>
         <div className="flex items-center justify-between gap-2">
           <div className="flex flex-col items-center">
             <div className="w-10 h-10 rounded-full bg-blue-500 shadow-lg" style={{ boxShadow: '0 0 15px #3b82f680' }} />
-            <span className="text-xs text-white font-semibold mt-2">Kalt</span>
-            <span className="text-[10px] text-gray-400">Selten</span>
+            <span className="m3-label-medium text-on-surface font-semibold mt-2">Kalt</span>
+            <span className="text-[10px] text-on-surface-variant">Selten</span>
           </div>
-          <div className="flex-1 h-6 rounded-lg" style={{
+          <div className="flex-1 h-6 rounded-m3-sm" style={{
             background: 'linear-gradient(to right, #3b82f6, #06b6d4, #22c55e, #eab308, #f97316, #ef4444)'
           }} />
           <div className="flex flex-col items-center">
             <div className="w-10 h-10 rounded-full bg-red-500 shadow-lg" style={{ boxShadow: '0 0 15px #ef444480' }} />
-            <span className="text-xs text-white font-semibold mt-2">Heiß</span>
-            <span className="text-[10px] text-gray-400">Häufig</span>
+            <span className="m3-label-medium text-on-surface font-semibold mt-2">Heiß</span>
+            <span className="text-[10px] text-on-surface-variant">Häufig</span>
           </div>
         </div>
-        <div className="mt-3 text-xs text-gray-400 text-center">
+        <div className="mt-3 m3-body-small text-on-surface-variant text-center">
           ⊕ Fadenkreuz = Schwerpunkt der Würfe · ○ Gestrichelter Kreis = Streuungsradius
         </div>
-      </div>
+      </Card>
 
       {/* Top Segments */}
       {topSegments.length > 0 && (
-        <div className="glass-card p-4 rounded-xl border border-primary-500/20">
-          <h4 className="font-bold text-white mb-4 flex items-center gap-2 text-lg">
-            <TrendingUp size={20} className="text-primary-400" />
+        <Card variant="filled" className="p-4">
+          <h4 className="font-bold text-on-surface mb-4 flex items-center gap-2 m3-title-medium">
+            <TrendingUp size={20} className="text-primary" />
             Top {compact ? 3 : 5} Hotspots
           </h4>
           <div className="space-y-2">
@@ -678,25 +679,25 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
               const percentage = (seg.count / heatmapData.totalDarts) * 100;
               const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6'];
               const color = colors[index];
-              
+
               return (
                 <div
                   key={`${seg.segment}-${seg.multiplier}`}
-                  className="relative overflow-hidden rounded-xl"
+                  className="relative overflow-hidden rounded-m3-md"
                 >
-                  <div 
+                  <div
                     className="absolute inset-0 opacity-20"
                     style={{
                       background: `linear-gradient(to right, ${color}, transparent)`,
                       width: `${Math.min(100, percentage * 10)}%`
                     }}
                   />
-                  
-                  <div className="relative flex items-center justify-between p-3 bg-dark-800/80 backdrop-blur-sm">
+
+                  <div className="relative flex items-center justify-between p-3 bg-surface-container-high">
                     <div className="flex items-center gap-3">
-                      <div 
+                      <div
                         className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-lg"
-                        style={{ 
+                        style={{
                           backgroundColor: color,
                           boxShadow: `0 0 15px ${color}80`
                         }}
@@ -704,15 +705,15 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
                         #{index + 1}
                       </div>
                       <div>
-                        <div className="font-bold text-white">
+                        <div className="font-bold text-on-surface">
                           {formatSegmentName(seg.segment, seg.multiplier)}
                         </div>
-                        <div className="text-xs text-gray-400">
+                        <div className="m3-body-small text-on-surface-variant">
                           {seg.count} Treffer · {percentage.toFixed(1)}%
                         </div>
                       </div>
                     </div>
-                    <div className="text-2xl font-bold text-white">
+                    <div className="text-2xl font-bold text-on-surface">
                       {seg.count}
                     </div>
                   </div>
@@ -720,7 +721,7 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
               );
             })}
           </div>
-        </div>
+        </Card>
       )}
     </div>
   );

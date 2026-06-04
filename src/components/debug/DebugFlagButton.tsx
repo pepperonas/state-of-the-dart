@@ -14,10 +14,10 @@ const DebugFlagButton: React.FC = () => {
     <>
       <button
         onClick={() => setShowModal(true)}
-        className="fixed bottom-20 left-4 z-40 w-10 h-10 rounded-full bg-amber-500/30 hover:bg-amber-500/50 backdrop-blur-sm border border-amber-500/30 flex items-center justify-center transition-all"
+        className="fixed bottom-20 left-4 z-40 w-10 h-10 rounded-m3-full bg-tertiary-container text-tertiary shadow-m3-3 hover:shadow-m3-4 flex items-center justify-center transition-all"
         title="Debug Flag"
       >
-        <Flag size={18} className="text-amber-400" />
+        <Flag size={18} />
       </button>
       {showModal && <DebugFlagModal onClose={() => setShowModal(false)} />}
     </>

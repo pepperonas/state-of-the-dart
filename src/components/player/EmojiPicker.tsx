@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Search } from 'lucide-react';
+import { IconButton, Chip, Button, TextField } from '../common';
 
 interface EmojiPickerProps {
   onSelect: (emoji: string) => void;
@@ -33,48 +34,39 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onSelect, onClose, currentEmo
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-      <div className="glass-card rounded-2xl shadow-2xl w-full max-w-md md:max-w-lg h-[600px] flex flex-col border-2 border-primary-500/30">
+      <div className="bg-surface-container-high rounded-m3-lg border border-outline-variant shadow-m3-2 w-full max-w-md md:max-w-lg h-[600px] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-dark-700">
-          <h3 className="text-xl font-bold text-white">Emoji auswählen</h3>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
-          >
-            <X size={20} className="text-white" />
-          </button>
+        <div className="flex items-center justify-between p-4 border-b border-outline-variant">
+          <h3 className="m3-title-large text-on-surface">Emoji auswählen</h3>
+          <IconButton label="Schließen" onClick={onClose}>
+            <X size={20} />
+          </IconButton>
         </div>
 
         {/* Search */}
-        <div className="p-4 border-b border-dark-700">
-          <div className="relative">
-            <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Emoji suchen..."
-              className="w-full pl-10 pr-4 py-2 rounded-lg bg-dark-800 border border-dark-700 text-white placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
-          </div>
+        <div className="p-4 border-b border-outline-variant">
+          <TextField
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Emoji suchen..."
+            icon={<Search size={18} />}
+          />
         </div>
 
         {/* Categories */}
         {!searchQuery && (
-          <div className="flex items-center gap-1 p-2 border-b border-dark-700 overflow-x-auto scrollbar-hide">
+          <div className="flex items-center gap-1 p-2 border-b border-outline-variant overflow-x-auto scrollbar-hide">
             {EMOJI_CATEGORIES.map((category, index) => (
-              <button
+              <Chip
                 key={index}
+                selected={selectedCategory === index}
                 onClick={() => setSelectedCategory(index)}
-                className={`flex-shrink-0 px-3 py-2 rounded-lg transition-all ${
-                  selectedCategory === index
-                    ? 'bg-primary-500 text-white'
-                    : 'hover:bg-dark-700 text-dark-400'
-                }`}
                 title={category.name}
+                className="flex-shrink-0"
               >
                 <span className="text-xl">{category.icon}</span>
-              </button>
+              </Chip>
             ))}
           </div>
         )}
@@ -82,7 +74,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onSelect, onClose, currentEmo
         {/* Emoji Grid */}
         <div className="flex-1 overflow-y-auto p-4">
           {searchQuery && (
-            <div className="mb-4 text-sm text-dark-400">
+            <div className="mb-4 m3-body-small text-on-surface-variant">
               {filteredEmojis.length} Emoji{filteredEmojis.length !== 1 ? 's' : ''} gefunden
             </div>
           )}
@@ -94,8 +86,8 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onSelect, onClose, currentEmo
                   onSelect(emoji);
                   onClose();
                 }}
-                className={`text-2xl p-2 rounded-lg transition-all hover:bg-primary-500/20 hover:scale-110 ${
-                  currentEmoji === emoji ? 'bg-primary-500 scale-110 ring-2 ring-primary-400' : ''
+                className={`text-2xl p-2 rounded-m3-sm transition-all hover:bg-surface-container-highest hover:scale-110 ${
+                  currentEmoji === emoji ? 'bg-primary-container scale-110 ring-2 ring-primary' : ''
                 }`}
               >
                 {emoji}
@@ -105,19 +97,20 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onSelect, onClose, currentEmo
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-dark-700 flex items-center justify-between">
-          <div className="text-sm text-dark-400">
+        <div className="p-4 border-t border-outline-variant flex items-center justify-between">
+          <div className="m3-body-small text-on-surface-variant">
             {!searchQuery && EMOJI_CATEGORIES[selectedCategory].name}
           </div>
-          <button
+          <Button
+            variant="danger"
+            size="sm"
             onClick={() => {
               onSelect('');
               onClose();
             }}
-            className="text-sm px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-all"
           >
             Entfernen
-          </button>
+          </Button>
         </div>
       </div>
     </div>

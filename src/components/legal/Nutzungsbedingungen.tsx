@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import BackButton from '../common/BackButton';
+import Card from '../common/Card';
 
 const Nutzungsbedingungen: React.FC = () => {
   const navigate = useNavigate();
@@ -13,16 +14,16 @@ const Nutzungsbedingungen: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         <BackButton onClick={() => navigate(-1)} />
 
-        <h1 className="text-3xl font-bold text-white mb-8">
+        <h1 className="m3-headline-medium text-on-surface mb-8">
           Allgemeine Nutzungsbedingungen
         </h1>
 
         {/* 1. Geltungsbereich */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">
             1. Geltungsbereich
           </h2>
-          <div className="text-dark-300 space-y-3">
+          <div className="m3-body-medium text-on-surface-variant space-y-3">
             <p>
               Diese Allgemeinen Nutzungsbedingungen (nachfolgend
               &bdquo;Nutzungsbedingungen&ldquo;) regeln die Nutzung der
@@ -33,7 +34,8 @@ const Nutzungsbedingungen: React.FC = () => {
                 href="https://stateofthedart.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary-400 hover:text-primary-300 transition-colors"
+                className="transition-colors"
+                style={{ color: 'var(--m3-primary)' }}
               >
                 https://stateofthedart.com
               </a>
@@ -48,7 +50,8 @@ const Nutzungsbedingungen: React.FC = () => {
                 E-Mail:{' '}
                 <a
                   href="mailto:martin.pfeffer@celox.io"
-                  className="text-primary-400 hover:text-primary-300 transition-colors"
+                  className="transition-colors"
+                  style={{ color: 'var(--m3-primary)' }}
                 >
                   martin.pfeffer@celox.io
                 </a>
@@ -61,14 +64,14 @@ const Nutzungsbedingungen: React.FC = () => {
               nicht nutzen.
             </p>
           </div>
-        </div>
+        </Card>
 
         {/* 2. Leistungsbeschreibung */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">
             2. Leistungsbeschreibung
           </h2>
-          <div className="text-dark-300 space-y-3">
+          <div className="m3-body-medium text-on-surface-variant space-y-3">
             <p>
               &bdquo;State of the Dart&ldquo; ist eine Progressive Web App (PWA)
               zur professionellen Erfassung und Auswertung von Dart-Spielen. Die
@@ -91,21 +94,21 @@ const Nutzungsbedingungen: React.FC = () => {
               einzuschr&auml;nken.
             </p>
           </div>
-        </div>
+        </Card>
 
         {/* 3. Registrierung und Konto */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">
             3. Registrierung und Benutzerkonto
           </h2>
-          <div className="text-dark-300 space-y-3">
+          <div className="m3-body-medium text-on-surface-variant space-y-3">
             <p>
               Die Nutzung der Anwendung erfordert eine Registrierung. Die
               Registrierung ist &uuml;ber E-Mail oder Google OAuth m&ouml;glich.
             </p>
             <ul className="list-disc list-inside space-y-2 ml-2">
               <li>
-                Sie m&uuml;ssen mindestens <strong className="text-white">16 Jahre</strong> alt sein, um die Anwendung nutzen zu d&uuml;rfen.
+                Sie m&uuml;ssen mindestens <strong className="text-on-surface">16 Jahre</strong> alt sein, um die Anwendung nutzen zu d&uuml;rfen.
               </li>
               <li>
                 Sie sind verpflichtet, bei der Registrierung wahrheitsgem&auml;&szlig;e
@@ -125,16 +128,16 @@ const Nutzungsbedingungen: React.FC = () => {
               </li>
             </ul>
           </div>
-        </div>
+        </Card>
 
         {/* 4. Kostenlose Testphase und Abonnement */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">
             4. Kostenlose Testphase und Abonnement
           </h2>
-          <div className="text-dark-300 space-y-4">
+          <div className="m3-body-medium text-on-surface-variant space-y-4">
             <div>
-              <h3 className="text-lg font-medium text-white mb-2">
+              <h3 className="m3-title-medium text-on-surface mb-2">
                 4.1 Kostenlose Testphase
               </h3>
               <p>
@@ -146,7 +149,7 @@ const Nutzungsbedingungen: React.FC = () => {
             </div>
 
             <div>
-              <h3 className="text-lg font-medium text-white mb-2">
+              <h3 className="m3-title-medium text-on-surface mb-2">
                 4.2 Kostenpflichtiges Abonnement
               </h3>
               <p>
@@ -158,18 +161,19 @@ const Nutzungsbedingungen: React.FC = () => {
             </div>
 
             <div>
-              <h3 className="text-lg font-medium text-white mb-2">
+              <h3 className="m3-title-medium text-on-surface mb-2">
                 4.3 Zahlungsabwicklung
               </h3>
               <p>
                 Die Zahlungsabwicklung erfolgt &uuml;ber den Drittanbieter{' '}
-                <strong className="text-white">Stripe, Inc.</strong> Es gelten
+                <strong className="text-on-surface">Stripe, Inc.</strong> Es gelten
                 zus&auml;tzlich die{' '}
                 <a
                   href="https://stripe.com/de/legal/consumer"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary-400 hover:text-primary-300 transition-colors"
+                  className="transition-colors"
+                  style={{ color: 'var(--m3-primary)' }}
                 >
                   Nutzungsbedingungen von Stripe
                 </a>
@@ -178,7 +182,7 @@ const Nutzungsbedingungen: React.FC = () => {
             </div>
 
             <div>
-              <h3 className="text-lg font-medium text-white mb-2">
+              <h3 className="m3-title-medium text-on-surface mb-2">
                 4.4 Widerrufsrecht
               </h3>
               <p>
@@ -189,7 +193,8 @@ const Nutzungsbedingungen: React.FC = () => {
                 Widerrufsrecht auszu&uuml;ben, informieren Sie uns per E-Mail an{' '}
                 <a
                   href="mailto:martin.pfeffer@celox.io"
-                  className="text-primary-400 hover:text-primary-300 transition-colors"
+                  className="transition-colors"
+                  style={{ color: 'var(--m3-primary)' }}
                 >
                   martin.pfeffer@celox.io
                 </a>
@@ -197,14 +202,14 @@ const Nutzungsbedingungen: React.FC = () => {
               </p>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* 5. Pflichten des Nutzers */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">
             5. Pflichten des Nutzers
           </h2>
-          <div className="text-dark-300 space-y-3">
+          <div className="m3-body-medium text-on-surface-variant space-y-3">
             <p>Der Nutzer verpflichtet sich:</p>
             <ul className="list-disc list-inside space-y-2 ml-2">
               <li>
@@ -235,14 +240,14 @@ const Nutzungsbedingungen: React.FC = () => {
               </li>
             </ul>
           </div>
-        </div>
+        </Card>
 
         {/* 6. Geistiges Eigentum */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">
             6. Geistiges Eigentum und Urheberrecht
           </h2>
-          <div className="text-dark-300 space-y-3">
+          <div className="m3-body-medium text-on-surface-variant space-y-3">
             <p>
               Alle Inhalte der Anwendung, einschlie&szlig;lich aber nicht
               beschr&auml;nkt auf Texte, Grafiken, Logos, Icons, Audiodateien,
@@ -267,14 +272,14 @@ const Nutzungsbedingungen: React.FC = () => {
               verwenden.
             </p>
           </div>
-        </div>
+        </Card>
 
         {/* 7. Verfuegbarkeit und Gew&auml;hrleistung */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">
             7. Verf&uuml;gbarkeit und Gew&auml;hrleistung
           </h2>
-          <div className="text-dark-300 space-y-3">
+          <div className="m3-body-medium text-on-surface-variant space-y-3">
             <p>
               Der Betreiber bem&uuml;ht sich, die Anwendung m&ouml;glichst
               unterbrechungsfrei zur Verf&uuml;gung zu stellen. Ein Anspruch auf
@@ -294,14 +299,14 @@ const Nutzungsbedingungen: React.FC = () => {
               Anwendung angezeigten Daten.
             </p>
           </div>
-        </div>
+        </Card>
 
         {/* 8. Haftungsbeschraenkung */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">
             8. Haftungsbeschr&auml;nkung
           </h2>
-          <div className="text-dark-300 space-y-3">
+          <div className="m3-body-medium text-on-surface-variant space-y-3">
             <p>
               Der Betreiber haftet unbeschr&auml;nkt f&uuml;r Sch&auml;den aus der
               Verletzung des Lebens, des K&ouml;rpers oder der Gesundheit sowie
@@ -338,16 +343,16 @@ const Nutzungsbedingungen: React.FC = () => {
               zugunsten der Erf&uuml;llungsgehilfen des Betreibers.
             </p>
           </div>
-        </div>
+        </Card>
 
         {/* 9. Sperrung und Kuendigung */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">
             9. Sperrung und K&uuml;ndigung
           </h2>
-          <div className="text-dark-300 space-y-4">
+          <div className="m3-body-medium text-on-surface-variant space-y-4">
             <div>
-              <h3 className="text-lg font-medium text-white mb-2">
+              <h3 className="m3-title-medium text-on-surface mb-2">
                 9.1 K&uuml;ndigung durch den Nutzer
               </h3>
               <p>
@@ -355,7 +360,8 @@ const Nutzungsbedingungen: React.FC = () => {
                 Kontoeinstellungen l&ouml;schen oder uns per E-Mail an{' '}
                 <a
                   href="mailto:martin.pfeffer@celox.io"
-                  className="text-primary-400 hover:text-primary-300 transition-colors"
+                  className="transition-colors"
+                  style={{ color: 'var(--m3-primary)' }}
                 >
                   martin.pfeffer@celox.io
                 </a>{' '}
@@ -365,7 +371,7 @@ const Nutzungsbedingungen: React.FC = () => {
             </div>
 
             <div>
-              <h3 className="text-lg font-medium text-white mb-2">
+              <h3 className="m3-title-medium text-on-surface mb-2">
                 9.2 Sperrung und K&uuml;ndigung durch den Betreiber
               </h3>
               <p>
@@ -388,7 +394,7 @@ const Nutzungsbedingungen: React.FC = () => {
             </div>
 
             <div>
-              <h3 className="text-lg font-medium text-white mb-2">
+              <h3 className="m3-title-medium text-on-surface mb-2">
                 9.3 Folgen der K&uuml;ndigung
               </h3>
               <p>
@@ -396,7 +402,8 @@ const Nutzungsbedingungen: React.FC = () => {
                 werden s&auml;mtliche Nutzerdaten gem&auml;&szlig; unserer{' '}
                 <Link
                   to="/datenschutz"
-                  className="text-primary-400 hover:text-primary-300 transition-colors"
+                  className="transition-colors"
+                  style={{ color: 'var(--m3-primary)' }}
                 >
                   Datenschutzerkl&auml;rung
                 </Link>{' '}
@@ -405,33 +412,34 @@ const Nutzungsbedingungen: React.FC = () => {
               </p>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* 10. Datenschutz */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">
             10. Datenschutz
           </h2>
-          <p className="text-dark-300">
+          <p className="m3-body-medium text-on-surface-variant">
             Die Verarbeitung personenbezogener Daten erfolgt gem&auml;&szlig;
             unserer{' '}
             <Link
               to="/datenschutz"
-              className="text-primary-400 hover:text-primary-300 transition-colors"
+              className="transition-colors"
+              style={{ color: 'var(--m3-primary)' }}
             >
               Datenschutzerkl&auml;rung
             </Link>
             , die Bestandteil dieser Nutzungsbedingungen ist. Mit der Nutzung der
             Anwendung nehmen Sie die Datenschutzerkl&auml;rung zur Kenntnis.
           </p>
-        </div>
+        </Card>
 
         {/* 11. Aenderung der Nutzungsbedingungen */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">
             11. &Auml;nderung der Nutzungsbedingungen
           </h2>
-          <div className="text-dark-300 space-y-3">
+          <div className="m3-body-medium text-on-surface-variant space-y-3">
             <p>
               Der Betreiber beh&auml;lt sich vor, diese Nutzungsbedingungen
               jederzeit zu &auml;ndern. &Uuml;ber wesentliche &Auml;nderungen
@@ -444,14 +452,14 @@ const Nutzungsbedingungen: React.FC = () => {
               Konto zu l&ouml;schen.
             </p>
           </div>
-        </div>
+        </Card>
 
         {/* 12. Anwendbares Recht und Gerichtsstand */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">
             12. Anwendbares Recht und Gerichtsstand
           </h2>
-          <div className="text-dark-300 space-y-3">
+          <div className="m3-body-medium text-on-surface-variant space-y-3">
             <p>
               Es gilt das Recht der Bundesrepublik Deutschland unter
               Ausschluss des UN-Kaufrechts (CISG).
@@ -469,14 +477,14 @@ const Nutzungsbedingungen: React.FC = () => {
               ausschlie&szlig;licher Gerichtsstand gesetzlich vorgeschrieben ist.
             </p>
           </div>
-        </div>
+        </Card>
 
         {/* 13. Salvatorische Klausel */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">
             13. Salvatorische Klausel
           </h2>
-          <div className="text-dark-300 space-y-3">
+          <div className="m3-body-medium text-on-surface-variant space-y-3">
             <p>
               Sollten einzelne Bestimmungen dieser Nutzungsbedingungen unwirksam
               oder undurchf&uuml;hrbar sein oder nach Vertragsschluss unwirksam
@@ -491,12 +499,12 @@ const Nutzungsbedingungen: React.FC = () => {
               undurchf&uuml;hrbaren Bestimmung verfolgt haben.
             </p>
           </div>
-        </div>
+        </Card>
 
         {/* 14. Kontakt */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">14. Kontakt</h2>
-          <div className="text-dark-300 space-y-2">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">14. Kontakt</h2>
+          <div className="m3-body-medium text-on-surface-variant space-y-2">
             <p>
               Bei Fragen zu diesen Nutzungsbedingungen wenden Sie sich bitte an:
             </p>
@@ -504,15 +512,16 @@ const Nutzungsbedingungen: React.FC = () => {
               E-Mail:{' '}
               <a
                 href="mailto:martin.pfeffer@celox.io"
-                className="text-primary-400 hover:text-primary-300 transition-colors"
+                className="transition-colors"
+                style={{ color: 'var(--m3-primary)' }}
               >
                 martin.pfeffer@celox.io
               </a>
             </p>
           </div>
-        </div>
+        </Card>
 
-        <div className="text-center text-dark-500 text-sm mt-8 mb-4">
+        <div className="text-center m3-label-large text-on-surface-variant mt-8 mb-4">
           Stand: Februar 2026
         </div>
       </div>

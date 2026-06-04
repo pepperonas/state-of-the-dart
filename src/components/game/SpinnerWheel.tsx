@@ -206,8 +206,8 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
 
   return (
     <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
-      <div className="flex flex-col items-center gap-6 p-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-white text-center">
+      <div className="flex flex-col items-center gap-6 p-8 bg-surface-container rounded-m3-lg shadow-m3-3">
+        <h2 className="m3-headline-small text-on-surface text-center">
           Wer wirft zuerst?
         </h2>
 
@@ -256,10 +256,10 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
         {showResult && winner && (
           <div className="animate-bounce-in text-center">
             <div className="text-5xl mb-2">{winner.avatar || '🎯'}</div>
-            <div className="text-2xl font-bold text-yellow-400">
+            <div className="m3-title-large text-tertiary">
               {winner.name}
             </div>
-            <div className="text-lg text-gray-300 mt-1">
+            <div className="m3-body-large text-on-surface-variant mt-1">
               wirft zuerst!
             </div>
           </div>
@@ -267,7 +267,7 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
 
         {/* Loading indicator */}
         {isSpinning && (
-          <div className="text-gray-400 animate-pulse">
+          <div className="m3-body-medium text-on-surface-variant animate-pulse">
             Das Rad dreht sich...
           </div>
         )}

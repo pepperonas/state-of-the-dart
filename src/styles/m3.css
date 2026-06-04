@@ -1,0 +1,561 @@
+/* ============================================================================
+   MATERIAL 3 EXPRESSIVE — Design Token Layer + Component Primitives
+   ----------------------------------------------------------------------------
+   This file is the single source of truth for the M3 Expressive look:
+   color roles, shape scale, elevation, motion springs/easing, state layers,
+   the type scale, and the styling for the `src/components/common` primitives.
+
+   It is imported AFTER `index.css` (see main.tsx) so component selectors win
+   ties against the legacy `.modern-light` element-level overrides during the
+   incremental migration.
+
+   Color roles follow the M3 naming (primary / secondary / tertiary / error +
+   surface containers + on-* + outline). Brand identity is preserved:
+   blue primary, vibrant purple tertiary — the M3-Expressive accent pop.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   1. COLOR ROLES — DARK SCHEME (default / `.modern`)
+   -------------------------------------------------------------------------- */
+:root,
+.modern {
+  /* Primary — blue */
+  --m3-primary: #8ed0ff;
+  --m3-on-primary: #00344e;
+  --m3-primary-container: #004c6e;
+  --m3-on-primary-container: #c9e6ff;
+
+  /* Secondary — desaturated steel blue */
+  --m3-secondary: #b6c9d8;
+  --m3-on-secondary: #21333e;
+  --m3-secondary-container: #374955;
+  --m3-on-secondary-container: #d2e5f5;
+
+  /* Tertiary — vibrant purple (the expressive accent) */
+  --m3-tertiary: #d6bbfb;
+  --m3-on-tertiary: #3b2459;
+  --m3-tertiary-container: #523a70;
+  --m3-on-tertiary-container: #ecdcff;
+
+  /* Error */
+  --m3-error: #ffb4ab;
+  --m3-on-error: #690005;
+  --m3-error-container: #93000a;
+  --m3-on-error-container: #ffdad6;
+
+  /* Success — semantic (resolved/done, checkout, win states) */
+  --m3-success: #7edb97;
+  --m3-on-success: #00391d;
+  --m3-success-container: #00522e;
+  --m3-on-success-container: #99f7b1;
+
+  /* Surfaces (cool-tinted neutrals) */
+  --m3-background: #101418;
+  --m3-on-background: #e1e2e8;
+  --m3-surface: #101418;
+  --m3-surface-dim: #101418;
+  --m3-surface-bright: #36393e;
+  --m3-surface-container-lowest: #0b0e12;
+  --m3-surface-container-low: #181c20;
+  --m3-surface-container: #1c2024;
+  --m3-surface-container-high: #272a2f;
+  --m3-surface-container-highest: #31353a;
+  --m3-on-surface: #e1e2e8;
+  --m3-on-surface-variant: #c0c7ce;
+
+  /* Outlines */
+  --m3-outline: #8a9197;
+  --m3-outline-variant: #41474d;
+
+  /* Inverse / scrim */
+  --m3-inverse-surface: #e1e2e8;
+  --m3-inverse-on-surface: #2e3135;
+  --m3-inverse-primary: #00658c;
+  --m3-scrim: #000000;
+
+  /* Elevation (dark: soft shadows; surfaces also tint via container tokens) */
+  --m3-elevation-0: none;
+  --m3-elevation-1: 0px 1px 2px rgba(0, 0, 0, 0.30), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+  --m3-elevation-2: 0px 1px 2px rgba(0, 0, 0, 0.30), 0px 2px 6px 2px rgba(0, 0, 0, 0.15);
+  --m3-elevation-3: 0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px rgba(0, 0, 0, 0.30);
+  --m3-elevation-4: 0px 6px 10px 4px rgba(0, 0, 0, 0.15), 0px 2px 3px rgba(0, 0, 0, 0.30);
+  --m3-elevation-5: 0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px rgba(0, 0, 0, 0.30);
+}
+
+/* ----------------------------------------------------------------------------
+   2. COLOR ROLES — LIGHT SCHEME (`.modern-light`)
+   -------------------------------------------------------------------------- */
+.modern-light {
+  --m3-primary: #00658c;
+  --m3-on-primary: #ffffff;
+  --m3-primary-container: #c9e6ff;
+  --m3-on-primary-container: #001e2e;
+
+  --m3-secondary: #4f616e;
+  --m3-on-secondary: #ffffff;
+  --m3-secondary-container: #d2e5f5;
+  --m3-on-secondary-container: #0b1d29;
+
+  --m3-tertiary: #6b538b;
+  --m3-on-tertiary: #ffffff;
+  --m3-tertiary-container: #ecdcff;
+  --m3-on-tertiary-container: #251431;
+
+  --m3-error: #ba1a1a;
+  --m3-on-error: #ffffff;
+  --m3-error-container: #ffdad6;
+  --m3-on-error-container: #410002;
+
+  --m3-success: #006d3c;
+  --m3-on-success: #ffffff;
+  --m3-success-container: #99f7b1;
+  --m3-on-success-container: #00210f;
+
+  --m3-background: #f6fafe;
+  --m3-on-background: #181c20;
+  --m3-surface: #f6fafe;
+  --m3-surface-dim: #d6dade;
+  --m3-surface-bright: #f6fafe;
+  --m3-surface-container-lowest: #ffffff;
+  --m3-surface-container-low: #f0f4f8;
+  --m3-surface-container: #eaeef2;
+  --m3-surface-container-high: #e4e9ed;
+  --m3-surface-container-highest: #dee3e7;
+  --m3-on-surface: #181c20;
+  --m3-on-surface-variant: #41474d;
+
+  --m3-outline: #71787e;
+  --m3-outline-variant: #c0c7ce;
+
+  --m3-inverse-surface: #2d3135;
+  --m3-inverse-on-surface: #eef1f5;
+  --m3-inverse-primary: #8ed0ff;
+  --m3-scrim: #000000;
+
+  --m3-elevation-0: none;
+  --m3-elevation-1: 0px 1px 2px rgba(0, 0, 0, 0.10), 0px 1px 3px 1px rgba(0, 0, 0, 0.06);
+  --m3-elevation-2: 0px 1px 2px rgba(0, 0, 0, 0.10), 0px 2px 6px 2px rgba(0, 0, 0, 0.06);
+  --m3-elevation-3: 0px 4px 8px 3px rgba(0, 0, 0, 0.08), 0px 1px 3px rgba(0, 0, 0, 0.10);
+  --m3-elevation-4: 0px 6px 10px 4px rgba(0, 0, 0, 0.08), 0px 2px 3px rgba(0, 0, 0, 0.10);
+  --m3-elevation-5: 0px 8px 12px 6px rgba(0, 0, 0, 0.08), 0px 4px 4px rgba(0, 0, 0, 0.10);
+}
+
+/* ----------------------------------------------------------------------------
+   3. SHAPE, MOTION & STATE-LAYER TOKENS (scheme-independent)
+   -------------------------------------------------------------------------- */
+:root {
+  /* Shape scale (M3 corner radii + expressive "increased" steps) */
+  --m3-shape-none: 0px;
+  --m3-shape-xs: 4px;
+  --m3-shape-sm: 8px;
+  --m3-shape-md: 12px;
+  --m3-shape-lg: 16px;
+  --m3-shape-lg-increased: 20px;
+  --m3-shape-xl: 28px;
+  --m3-shape-2xl: 32px;
+  --m3-shape-full: 9999px;
+
+  /* Motion — easing (legacy curves, used for hover/color/effects) */
+  --m3-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --m3-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --m3-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --m3-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+
+  /* Motion — durations */
+  --m3-duration-short: 200ms;
+  --m3-duration-medium: 300ms;
+  --m3-duration-long: 500ms;
+
+  /* State-layer opacities */
+  --m3-state-hover: 0.08;
+  --m3-state-focus: 0.10;
+  --m3-state-pressed: 0.10;
+  --m3-state-dragged: 0.16;
+}
+
+/* ----------------------------------------------------------------------------
+   4. BASE — drive the document surface from tokens
+   -------------------------------------------------------------------------- */
+html,
+#root {
+  background-color: var(--m3-surface);
+}
+body {
+  background-color: var(--m3-surface);
+  color: var(--m3-on-surface);
+  font-family: 'Inter', 'Roboto Flex', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Tokenised ambient background — subtle primary/tertiary radial bloom */
+.gradient-mesh {
+  background:
+    radial-gradient(at 0% 0%, color-mix(in srgb, var(--m3-primary) 10%, transparent) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, color-mix(in srgb, var(--m3-tertiary) 12%, transparent) 0px, transparent 55%),
+    var(--m3-surface);
+}
+.modern-light .gradient-mesh {
+  background:
+    radial-gradient(at 0% 0%, color-mix(in srgb, var(--m3-primary) 8%, transparent) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, color-mix(in srgb, var(--m3-tertiary) 8%, transparent) 0px, transparent 55%),
+    var(--m3-surface);
+}
+
+/* Tokenised scrollbar */
+::-webkit-scrollbar-thumb {
+  background: var(--m3-outline-variant);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--m3-outline);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ----------------------------------------------------------------------------
+   5. TYPE SCALE (M3) — utility classes
+   -------------------------------------------------------------------------- */
+.m3-display-large   { font-size: 3.5625rem; line-height: 4rem;    font-weight: 400; letter-spacing: -0.015625rem; }
+.m3-display-medium  { font-size: 2.8125rem; line-height: 3.25rem; font-weight: 400; letter-spacing: 0; }
+.m3-display-small   { font-size: 2.25rem;   line-height: 2.75rem; font-weight: 400; letter-spacing: 0; }
+.m3-headline-large  { font-size: 2rem;      line-height: 2.5rem;  font-weight: 600; letter-spacing: 0; }
+.m3-headline-medium { font-size: 1.75rem;   line-height: 2.25rem; font-weight: 600; letter-spacing: 0; }
+.m3-headline-small  { font-size: 1.5rem;    line-height: 2rem;    font-weight: 600; letter-spacing: 0; }
+.m3-title-large     { font-size: 1.375rem;  line-height: 1.75rem; font-weight: 600; letter-spacing: 0; }
+.m3-title-medium    { font-size: 1rem;      line-height: 1.5rem;  font-weight: 600; letter-spacing: 0.009375rem; }
+.m3-title-small     { font-size: 0.875rem;  line-height: 1.25rem; font-weight: 600; letter-spacing: 0.00625rem; }
+.m3-body-large      { font-size: 1rem;      line-height: 1.5rem;  font-weight: 400; letter-spacing: 0.03125rem; }
+.m3-body-medium     { font-size: 0.875rem;  line-height: 1.25rem; font-weight: 400; letter-spacing: 0.015625rem; }
+.m3-body-small      { font-size: 0.75rem;   line-height: 1rem;    font-weight: 400; letter-spacing: 0.025rem; }
+.m3-label-large     { font-size: 0.875rem;  line-height: 1.25rem; font-weight: 600; letter-spacing: 0.00625rem; }
+.m3-label-medium    { font-size: 0.75rem;   line-height: 1rem;    font-weight: 600; letter-spacing: 0.03125rem; }
+.m3-label-small     { font-size: 0.6875rem; line-height: 1rem;    font-weight: 600; letter-spacing: 0.03125rem; }
+
+/* ----------------------------------------------------------------------------
+   6. STATE LAYER — shared overlay used by interactive components
+   A `::before` overlay tinted with currentColor; opacity ramps on hover/press.
+   -------------------------------------------------------------------------- */
+.m3-state-layer {
+  position: relative;
+  isolation: isolate;
+}
+.m3-state-layer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-color: currentColor;
+  opacity: 0;
+  transition: opacity var(--m3-duration-short) var(--m3-easing-standard);
+  pointer-events: none;
+  z-index: 0;
+}
+.m3-state-layer:hover::before { opacity: var(--m3-state-hover); }
+.m3-state-layer:focus-visible::before { opacity: var(--m3-state-focus); }
+.m3-state-layer:active::before { opacity: var(--m3-state-pressed); }
+.m3-state-layer > * { position: relative; z-index: 1; }
+
+/* ============================================================================
+   7. COMPONENT PRIMITIVES
+   The light-theme legacy overrides target bare `button`/`input`; the resets
+   below neutralise them for M3 components, then the component rules apply.
+   ========================================================================== */
+
+/* Reset legacy `.modern-light button {…}` bleed onto M3 components */
+button.m3-button,
+button.m3-icon-button,
+button.m3-fab,
+button.m3-chip {
+  border: none;
+  background: none;
+  color: inherit;
+  font-family: inherit;
+}
+.modern-light button.m3-button,
+.modern-light button.m3-icon-button,
+.modern-light button.m3-fab,
+.modern-light button.m3-chip {
+  border: none;
+  background: none;
+}
+
+/* ---- 7a. BUTTON ---------------------------------------------------------- */
+.m3-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 2.5rem;            /* 40px standard */
+  padding: 0 1.5rem;
+  border-radius: var(--m3-shape-full);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.00625rem;
+  line-height: 1.25rem;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition:
+    box-shadow var(--m3-duration-short) var(--m3-easing-standard),
+    background-color var(--m3-duration-short) var(--m3-easing-standard),
+    border-radius var(--m3-duration-medium) var(--m3-easing-emphasized),
+    transform var(--m3-duration-short) var(--m3-easing-standard);
+}
+.m3-button:disabled {
+  cursor: not-allowed;
+  opacity: 1;
+}
+/* Pressed: morph toward a less-round shape (expressive shape change) */
+.m3-button:active:not(:disabled) { border-radius: var(--m3-shape-sm); }
+
+.m3-button.m3-size-sm { height: 2rem; padding: 0 1rem; }
+.m3-button.m3-size-lg { height: 3.5rem; padding: 0 2rem; font-size: 1rem; }
+.m3-button.m3-full { width: 100%; }
+
+/* Filled */
+.m3-button.m3-filled { background-color: var(--m3-primary); color: var(--m3-on-primary); }
+.m3-button.m3-filled:hover:not(:disabled) { box-shadow: var(--m3-elevation-1); }
+.m3-button.m3-filled:disabled {
+  background-color: color-mix(in srgb, var(--m3-on-surface) 12%, transparent);
+  color: color-mix(in srgb, var(--m3-on-surface) 38%, transparent);
+}
+/* Tonal */
+.m3-button.m3-tonal { background-color: var(--m3-secondary-container); color: var(--m3-on-secondary-container); }
+.m3-button.m3-tonal:hover:not(:disabled) { box-shadow: var(--m3-elevation-1); }
+.m3-button.m3-tonal:disabled {
+  background-color: color-mix(in srgb, var(--m3-on-surface) 12%, transparent);
+  color: color-mix(in srgb, var(--m3-on-surface) 38%, transparent);
+}
+/* Tertiary-tonal (expressive accent) */
+.m3-button.m3-accent { background-color: var(--m3-tertiary-container); color: var(--m3-on-tertiary-container); }
+.m3-button.m3-accent:hover:not(:disabled) { box-shadow: var(--m3-elevation-1); }
+/* Elevated */
+.m3-button.m3-elevated {
+  background-color: var(--m3-surface-container-low);
+  color: var(--m3-primary);
+  box-shadow: var(--m3-elevation-1);
+}
+.m3-button.m3-elevated:hover:not(:disabled) { box-shadow: var(--m3-elevation-2); }
+/* Outlined */
+.m3-button.m3-outlined {
+  background-color: transparent;
+  color: var(--m3-primary);
+  border: 1px solid var(--m3-outline-variant);
+}
+.m3-button.m3-outlined:disabled {
+  color: color-mix(in srgb, var(--m3-on-surface) 38%, transparent);
+  border-color: color-mix(in srgb, var(--m3-on-surface) 12%, transparent);
+}
+/* Text */
+.m3-button.m3-text {
+  background-color: transparent;
+  color: var(--m3-primary);
+  padding: 0 0.75rem;
+}
+/* Danger filled */
+.m3-button.m3-danger { background-color: var(--m3-error); color: var(--m3-on-error); }
+.m3-button.m3-danger:hover:not(:disabled) { box-shadow: var(--m3-elevation-1); }
+/* Success filled */
+.m3-button.m3-success { background-color: var(--m3-success); color: var(--m3-on-success); }
+.m3-button.m3-success:hover:not(:disabled) { box-shadow: var(--m3-elevation-1); }
+
+/* ---- 7b. ICON BUTTON ----------------------------------------------------- */
+.m3-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--m3-shape-full);
+  color: var(--m3-on-surface-variant);
+  cursor: pointer;
+  transition: background-color var(--m3-duration-short) var(--m3-easing-standard),
+              color var(--m3-duration-short) var(--m3-easing-standard);
+}
+.m3-icon-button.m3-filled { background-color: var(--m3-primary); color: var(--m3-on-primary); }
+.m3-icon-button.m3-tonal { background-color: var(--m3-secondary-container); color: var(--m3-on-secondary-container); }
+.m3-icon-button.m3-outlined { border: 1px solid var(--m3-outline-variant); }
+.m3-icon-button:disabled { cursor: not-allowed; color: color-mix(in srgb, var(--m3-on-surface) 38%, transparent); }
+
+/* ---- 7c. FAB ------------------------------------------------------------- */
+.m3-fab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-width: 3.5rem;
+  height: 3.5rem;
+  padding: 0 1rem;
+  border-radius: var(--m3-shape-lg);
+  background-color: var(--m3-tertiary-container);
+  color: var(--m3-on-tertiary-container);
+  box-shadow: var(--m3-elevation-3);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: box-shadow var(--m3-duration-short) var(--m3-easing-standard),
+              border-radius var(--m3-duration-medium) var(--m3-easing-emphasized);
+}
+.m3-fab:hover { box-shadow: var(--m3-elevation-4); }
+.m3-fab.m3-fab-lg { height: 6rem; min-width: 6rem; border-radius: var(--m3-shape-xl); }
+.m3-fab.m3-primary { background-color: var(--m3-primary-container); color: var(--m3-on-primary-container); }
+
+/* ---- 7d. CARD ------------------------------------------------------------ */
+.m3-card {
+  border-radius: var(--m3-shape-lg);
+  background-color: var(--m3-surface-container-low);
+  color: var(--m3-on-surface);
+  transition: box-shadow var(--m3-duration-medium) var(--m3-easing-standard),
+              transform var(--m3-duration-medium) var(--m3-easing-emphasized),
+              background-color var(--m3-duration-short) var(--m3-easing-standard);
+}
+.m3-card.m3-elevated { box-shadow: var(--m3-elevation-1); }
+.m3-card.m3-filled { background-color: var(--m3-surface-container-highest); }
+.m3-card.m3-outlined { background-color: var(--m3-surface); border: 1px solid var(--m3-outline-variant); }
+.m3-card.m3-interactive { cursor: pointer; }
+.m3-card.m3-interactive:hover { box-shadow: var(--m3-elevation-2); }
+.m3-card.m3-interactive:active { transform: scale(0.985); }
+
+/* ---- 7e. TEXT FIELD (outlined) ------------------------------------------- */
+.m3-field { position: relative; display: flex; flex-direction: column; gap: 0.375rem; }
+.m3-field-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--m3-on-surface-variant);
+}
+.m3-field-input-wrap { position: relative; display: flex; align-items: center; }
+.m3-field-icon {
+  position: absolute;
+  left: 0.875rem;
+  display: flex;
+  color: var(--m3-on-surface-variant);
+  pointer-events: none;
+}
+.m3-text-field {
+  width: 100%;
+  height: 3.5rem;
+  padding: 0 1rem;
+  border-radius: var(--m3-shape-xs);
+  background-color: transparent;
+  color: var(--m3-on-surface);
+  border: 1px solid var(--m3-outline);
+  outline: none;
+  font-size: 1rem;
+  transition: border-color var(--m3-duration-short) var(--m3-easing-standard),
+              box-shadow var(--m3-duration-short) var(--m3-easing-standard);
+}
+.m3-text-field.m3-has-icon { padding-left: 2.75rem; }
+.m3-text-field::placeholder { color: var(--m3-on-surface-variant); opacity: 0.7; }
+.m3-text-field:hover { border-color: var(--m3-on-surface); }
+.m3-text-field:focus {
+  border-color: var(--m3-primary);
+  box-shadow: inset 0 0 0 1px var(--m3-primary);
+}
+.m3-field.m3-error .m3-text-field { border-color: var(--m3-error); }
+.m3-field.m3-error .m3-field-label { color: var(--m3-error); }
+/* Light theme: bare-input override from index.css would re-add a border colour;
+   ensure our token border wins (selector specificity 0,2,0 > legacy 0,1,1). */
+.modern-light .m3-text-field { background-color: transparent; border-color: var(--m3-outline); }
+.modern-light .m3-text-field:focus { border-color: var(--m3-primary); }
+
+/* ---- 7f. CHIP ------------------------------------------------------------ */
+.m3-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2rem;
+  padding: 0 1rem;
+  border-radius: var(--m3-shape-sm);
+  border: 1px solid var(--m3-outline-variant);
+  background-color: transparent;
+  color: var(--m3-on-surface-variant);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--m3-duration-short) var(--m3-easing-standard),
+              border-color var(--m3-duration-short) var(--m3-easing-standard),
+              color var(--m3-duration-short) var(--m3-easing-standard);
+}
+.m3-chip.m3-selected {
+  background-color: var(--m3-secondary-container);
+  color: var(--m3-on-secondary-container);
+  border-color: transparent;
+}
+
+/* ---- 7g. SWITCH ---------------------------------------------------------- */
+.m3-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 3.25rem;
+  height: 2rem;
+  border-radius: var(--m3-shape-full);
+  background-color: var(--m3-surface-container-highest);
+  border: 2px solid var(--m3-outline);
+  cursor: pointer;
+  transition: background-color var(--m3-duration-short) var(--m3-easing-standard),
+              border-color var(--m3-duration-short) var(--m3-easing-standard);
+  flex-shrink: 0;
+}
+.m3-switch-thumb {
+  position: absolute;
+  left: 0.375rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: var(--m3-shape-full);
+  background-color: var(--m3-outline);
+  transition: transform var(--m3-duration-medium) var(--m3-easing-emphasized),
+              width var(--m3-duration-short) var(--m3-easing-standard),
+              height var(--m3-duration-short) var(--m3-easing-standard),
+              background-color var(--m3-duration-short) var(--m3-easing-standard);
+}
+.m3-switch.m3-on {
+  background-color: var(--m3-primary);
+  border-color: var(--m3-primary);
+}
+.m3-switch.m3-on .m3-switch-thumb {
+  transform: translateX(1.25rem);
+  width: 1.5rem;
+  height: 1.5rem;
+  left: 0.125rem;
+  background-color: var(--m3-on-primary);
+}
+
+/* ---- 7h. DIALOG ---------------------------------------------------------- */
+.m3-scrim {
+  position: fixed;
+  inset: 0;
+  background-color: color-mix(in srgb, var(--m3-scrim) 50%, transparent);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 50;
+}
+.m3-dialog {
+  width: 100%;
+  max-width: 28rem;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: var(--m3-shape-xl);
+  background-color: var(--m3-surface-container-high);
+  color: var(--m3-on-surface);
+  box-shadow: var(--m3-elevation-3);
+  padding: 1.5rem;
+}
+
+/* ---- 7i. ELEVATION utility classes -------------------------------------- */
+.m3-e0 { box-shadow: var(--m3-elevation-0); }
+.m3-e1 { box-shadow: var(--m3-elevation-1); }
+.m3-e2 { box-shadow: var(--m3-elevation-2); }
+.m3-e3 { box-shadow: var(--m3-elevation-3); }
+.m3-e4 { box-shadow: var(--m3-elevation-4); }
+.m3-e5 { box-shadow: var(--m3-elevation-5); }
+
+/* Honour reduced-motion: drop the expressive shape morph + transforms */
+@media (prefers-reduced-motion: reduce) {
+  .m3-button:active:not(:disabled) { border-radius: var(--m3-shape-full); }
+}

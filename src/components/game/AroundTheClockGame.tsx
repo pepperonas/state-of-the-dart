@@ -11,6 +11,7 @@ import audioSystem from '../../utils/audio';
 import { saveGameState, loadGameState, clearGameState, STORAGE_KEYS, ATCSavedState } from '../../utils/gameStorage';
 import { SpinnerWheel } from './SpinnerWheel';
 import BackButton from '../common/BackButton';
+import { Button, Card } from '../common';
 
 interface AroundTheClockGameProps {
   onBack?: () => void;
@@ -453,15 +454,15 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
     onChange: (v: string) => void;
   }) => (
     <div>
-      <div className="flex rounded-xl overflow-hidden border border-dark-600">
+      <div className="flex rounded-m3-full overflow-hidden border border-outline-variant">
         {options.map(opt => (
           <button
             key={opt.value}
             onClick={() => onChange(opt.value)}
-            className={`flex-1 py-2.5 px-3 text-sm font-medium transition-all ${
+            className={`flex-1 py-2.5 px-3 m3-label-large transition-all ${
               value === opt.value
-                ? 'bg-primary-500 text-white'
-                : 'bg-dark-800 text-gray-400 hover:text-white'
+                ? 'bg-secondary-container text-on-secondary-container'
+                : 'bg-surface-container text-on-surface-variant hover:text-on-surface'
             }`}
           >
             {opt.label}
@@ -469,7 +470,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
         ))}
       </div>
       {options.find(o => o.value === value)?.desc && (
-        <p className="text-xs text-gray-500 mt-1.5 ml-1">
+        <p className="m3-body-small text-on-surface-variant mt-1.5 ml-1">
           {options.find(o => o.value === value)?.desc}
         </p>
       )}
@@ -495,9 +496,9 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
         <div className="max-w-4xl mx-auto">
           <BackButton onClick={handleBack} />
 
-          <div className="glass-card rounded-2xl p-6">
-            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-6 flex items-center gap-3">
-              <Clock className="text-primary-400" />
+          <Card variant="elevated" className="p-6">
+            <h1 className="m3-headline-medium text-on-surface mb-6 flex items-center gap-3">
+              <Clock style={{ color: 'var(--m3-primary)' }} />
               {t('atc.title')}
             </h1>
 
@@ -505,7 +506,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
             <div className="mb-6 space-y-4">
               {/* Bull Mode */}
               <div>
-                <label className="text-sm font-medium text-gray-400 mb-2 block">{t('atc.bull_mode')}</label>
+                <label className="m3-label-large text-on-surface-variant mb-2 block">{t('atc.bull_mode')}</label>
                 <SegmentedButtons
                   options={[
                     { value: 'off', label: t('atc.bull_off'), desc: t('atc.bull_off_desc') },
@@ -519,7 +520,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
 
               {/* Direction */}
               <div>
-                <label className="text-sm font-medium text-gray-400 mb-2 block">{t('atc.direction')}</label>
+                <label className="m3-label-large text-on-surface-variant mb-2 block">{t('atc.direction')}</label>
                 <SegmentedButtons
                   options={[
                     { value: 'ascending', label: t('atc.ascending') },
@@ -532,7 +533,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
 
               {/* Variant */}
               <div>
-                <label className="text-sm font-medium text-gray-400 mb-2 block">{t('atc.variant')}</label>
+                <label className="m3-label-large text-on-surface-variant mb-2 block">{t('atc.variant')}</label>
                 <SegmentedButtons
                   options={[
                     { value: 'standard', label: t('atc.variant_standard'), desc: t('atc.variant_standard_desc') },
@@ -547,7 +548,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
 
             {/* Player Selection */}
             <div className="mb-6">
-              <h2 className="text-lg font-semibold text-white mb-3">{t('game.select_players')}</h2>
+              <h2 className="m3-title-large text-on-surface mb-3">{t('game.select_players')}</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {players.filter(p => !p.isBot).map(player => (
                   <button
@@ -559,25 +560,25 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
                         setSelectedPlayers(prev => [...prev, player]);
                       }
                     }}
-                    className={`p-3 rounded-lg border-2 transition-all ${
+                    className={`p-3 rounded-m3-lg border transition-all ${
                       selectedPlayers.find(p => p.id === player.id)
-                        ? 'border-success-500 bg-success-500/20 shadow-lg'
-                        : 'border-dark-700 hover:border-dark-600'
+                        ? 'border-success-500 bg-surface-container-high ring-2 ring-success-500 shadow-m3-1'
+                        : 'border-outline-variant bg-surface-container hover:bg-surface-container-high'
                     }`}
                   >
                     <div className="flex justify-center mb-1">
                       <PlayerAvatar avatar={player.avatar} name={player.name} size="sm" />
                     </div>
-                    <div className="text-sm font-medium text-white text-center truncate">{player.name}</div>
+                    <div className="m3-label-large text-on-surface text-center truncate">{player.name}</div>
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Rules */}
-            <div className="bg-dark-800 rounded-xl p-4 mb-6">
-              <h3 className="text-white font-semibold mb-2">{t('atc.rules_title')}</h3>
-              <ul className="text-gray-400 text-sm space-y-1">
+            <div className="bg-surface-container rounded-m3-lg p-4 mb-6">
+              <h3 className="m3-title-small text-on-surface mb-2">{t('atc.rules_title')}</h3>
+              <ul className="text-on-surface-variant m3-body-medium space-y-1">
                 <li>• {t('atc.rules_hit_targets')}</li>
                 <li>• {bullMode !== 'off' ? t('atc.rules_bull') : t('atc.rules_no_bull')}</li>
                 {variant === 'standard' && <li>• {t('atc.rules_standard_all_count')}</li>}
@@ -587,21 +588,19 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
               </ul>
             </div>
 
-            <button
+            <Button
+              variant="filled"
+              size="lg"
+              fullWidth
               onClick={handleStartGame}
               disabled={selectedPlayers.length < 1}
-              className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
-                selectedPlayers.length >= 1
-                  ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white hover:from-primary-600 hover:to-accent-600'
-                  : 'bg-dark-700 text-gray-500 cursor-not-allowed'
-              }`}
             >
               {selectedPlayers.length < 1
                 ? t('atc.select_min')
                 : t('atc.start_game')
               }
-            </button>
-          </div>
+            </Button>
+          </Card>
         </div>
       </div>
     );
@@ -629,57 +628,58 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_70%,transparent)] flex items-center justify-center z-50 p-4"
           >
             <motion.div
               initial={{ scale: 0.5 }}
               animate={{ scale: 1 }}
-              className="glass-card rounded-2xl p-6 sm:p-8 text-center max-w-md w-full"
+              className="m3-dialog rounded-m3-xl p-6 sm:p-8 text-center max-w-md w-full"
             >
-              <Trophy className="w-16 h-16 sm:w-20 sm:h-20 text-yellow-400 mx-auto mb-4" />
-              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+              <Trophy className="w-16 h-16 sm:w-20 sm:h-20 text-tertiary mx-auto mb-4" />
+              <h2 className="m3-headline-medium text-on-surface mb-2">
                 {t('atc.winner_title', { name: winner.name })}
               </h2>
-              <p className="text-gray-400 mb-4">
+              <p className="text-on-surface-variant mb-4">
                 {t('atc.winner_time', { time: formatTime(elapsedTime) })}
               </p>
               <div className="grid grid-cols-2 gap-3 mb-6">
-                <div className="bg-dark-800 rounded-xl p-3">
-                  <p className="text-2xl font-bold text-primary-400">{playerDarts[winner.id]}</p>
-                  <p className="text-xs text-gray-400">{t('game.darts')}</p>
+                <div className="bg-surface-container rounded-m3-lg p-3">
+                  <p className="m3-title-large" style={{ color: 'var(--m3-primary)' }}>{playerDarts[winner.id]}</p>
+                  <p className="m3-body-small text-on-surface-variant">{t('game.darts')}</p>
                 </div>
-                <div className="bg-dark-800 rounded-xl p-3">
-                  <p className="text-2xl font-bold text-green-400">
+                <div className="bg-surface-container rounded-m3-lg p-3">
+                  <p className="m3-title-large text-success-400">
                     {playerDarts[winner.id] > 0
                       ? Math.round((playerHits[winner.id] / playerDarts[winner.id]) * 100)
                       : 0}%
                   </p>
-                  <p className="text-xs text-gray-400">{t('training.accuracy')}</p>
+                  <p className="m3-body-small text-on-surface-variant">{t('training.accuracy')}</p>
                 </div>
-                <div className="bg-dark-800 rounded-xl p-3">
-                  <p className="text-2xl font-bold text-yellow-400">{formatTime(elapsedTime)}</p>
-                  <p className="text-xs text-gray-400">{t('training.duration')}</p>
+                <div className="bg-surface-container rounded-m3-lg p-3">
+                  <p className="m3-title-large text-tertiary">{formatTime(elapsedTime)}</p>
+                  <p className="m3-body-small text-on-surface-variant">{t('training.duration')}</p>
                 </div>
-                <div className="bg-dark-800 rounded-xl p-3">
-                  <p className="text-2xl font-bold text-accent-400">
+                <div className="bg-surface-container rounded-m3-lg p-3">
+                  <p className="m3-title-large text-accent-400">
                     {targets.length > 0
                       ? (playerDarts[winner.id] / targets.length).toFixed(1)
                       : '0'}
                   </p>
-                  <p className="text-xs text-gray-400">{t('game.darts')}/{t('atc.current_target').toLowerCase()}</p>
+                  <p className="m3-body-small text-on-surface-variant">{t('game.darts')}/{t('atc.current_target').toLowerCase()}</p>
                 </div>
               </div>
-              <button
+              <Button
+                variant="filled"
+                fullWidth
                 onClick={() => {
                   setShowWinner(false);
                   setShowSetup(true);
                   setWinner(null);
                   setCurrentDarts([]);
                 }}
-                className="w-full px-8 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-semibold"
               >
                 {t('atc.new_game')}
-              </button>
+              </Button>
             </motion.div>
           </motion.div>
         )}
@@ -692,39 +692,30 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_70%,transparent)] flex items-center justify-center z-50 p-4"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="glass-card rounded-2xl p-6 max-w-sm w-full text-center"
+              className="m3-dialog rounded-m3-xl p-6 max-w-sm w-full text-center"
             >
-              <h3 className="text-xl font-bold text-white mb-3">
+              <h3 className="m3-title-large text-on-surface mb-3">
                 {t('resume.pause_title')}
               </h3>
-              <p className="text-gray-400 mb-6">
+              <p className="text-on-surface-variant mb-6">
                 {t('resume.pause_message')}
               </p>
               <div className="flex flex-col gap-3">
-                <button
-                  onClick={handleConfirmBack}
-                  className="w-full py-3 rounded-xl bg-primary-500 text-white font-semibold hover:bg-primary-600"
-                >
+                <Button variant="filled" fullWidth onClick={handleConfirmBack}>
                   {t('resume.pause_and_leave')}
-                </button>
-                <button
-                  onClick={handleEndGame}
-                  className="w-full py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-500"
-                >
+                </Button>
+                <Button variant="danger" fullWidth onClick={handleEndGame}>
                   {t('resume.end_game')}
-                </button>
-                <button
-                  onClick={() => setShowBackConfirm(false)}
-                  className="w-full py-3 rounded-xl bg-dark-700 text-white font-semibold hover:bg-dark-600"
-                >
+                </Button>
+                <Button variant="tonal" fullWidth onClick={() => setShowBackConfirm(false)}>
                   {t('common.cancel')}
-                </button>
+                </Button>
               </div>
             </motion.div>
           </motion.div>
@@ -734,16 +725,17 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
       {/* Header */}
       <div className="max-w-4xl mx-auto mb-3">
         <div className="flex items-center justify-between">
-          <button
+          <Button
+            variant="tonal"
+            size="sm"
+            icon={<ArrowLeft size={18} />}
             onClick={handleBack}
-            className="flex items-center gap-2 glass-card px-3 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
           >
-            <ArrowLeft size={20} />
             {t('common.back')}
-          </button>
+          </Button>
           <div className="text-center">
-            <h1 className="text-lg sm:text-xl font-bold text-white">{t('atc.title')}</h1>
-            <p className="text-primary-400 text-sm">{formatTime(elapsedTime)}</p>
+            <h1 className="m3-title-large text-on-surface">{t('atc.title')}</h1>
+            <p className="m3-body-medium" style={{ color: 'var(--m3-primary)' }}>{formatTime(elapsedTime)}</p>
           </div>
           <div className="w-12" />
         </div>
@@ -751,7 +743,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
 
       {/* Progress Track — wrapping grid, no scroll */}
       <div className="max-w-4xl mx-auto mb-3">
-        <div className="glass-card rounded-xl p-3">
+        <Card variant="elevated" className="p-3">
           <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center">
             {targets.map((target, idx) => {
               const effectiveProgress = getEffectiveProgress(currentPlayer?.id || '');
@@ -763,14 +755,14 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
               return (
                 <div
                   key={`${target.label}-${idx}`}
-                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition-all ${
+                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-m3-full flex items-center justify-center font-bold text-xs sm:text-sm transition-all ${
                     isPast
-                      ? 'bg-green-500 text-white'
+                      ? 'bg-success-500 text-white'
                       : isPending
-                      ? 'bg-success-500/60 text-white ring-1 ring-success-400'
+                      ? 'bg-success-container text-on-success-container ring-1 ring-success-400'
                       : isCurrent
-                      ? 'bg-primary-500 text-white ring-2 ring-primary-300 animate-pulse'
-                      : 'bg-dark-700 text-gray-500'
+                      ? 'bg-primary-container text-on-primary-container ring-2 ring-[var(--m3-primary)] animate-pulse'
+                      : 'bg-surface-container text-on-surface-variant'
                   }`}
                 >
                   {target.shortLabel}
@@ -778,13 +770,13 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
               );
             })}
           </div>
-        </div>
+        </Card>
       </div>
 
       {/* Player Cards — tappable, show current target prominently */}
       {selectedPlayers.length > 1 && (
         <div className="max-w-4xl mx-auto mb-3">
-          <div className="glass-card rounded-xl p-3">
+          <Card variant="elevated" className="p-3">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
               {selectedPlayers.map((player, idx) => {
                 const effectiveProgress = getEffectiveProgress(player.id);
@@ -796,22 +788,22 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
                   <button
                     key={player.id}
                     onClick={() => handleSwitchToPlayer(idx)}
-                    className={`p-2.5 sm:p-3 rounded-xl text-center transition-all ${
+                    className={`p-2.5 sm:p-3 rounded-m3-lg text-center transition-all ${
                       isActive
-                        ? 'bg-primary-500/20 ring-2 ring-primary-500'
-                        : 'bg-dark-800 hover:bg-dark-700'
+                        ? 'bg-surface-container-high ring-2 ring-[var(--m3-primary)]'
+                        : 'bg-surface-container border border-outline-variant hover:bg-surface-container-high'
                     }`}
                   >
                     <div className="flex items-center gap-2 sm:gap-3">
                       <PlayerAvatar avatar={player.avatar} name={player.name} size="sm" />
                       <div className="flex-1 text-left min-w-0">
-                        <p className="text-white font-semibold text-sm sm:text-base truncate">{player.name}</p>
-                        <p className="text-gray-400 text-xs">
+                        <p className="text-on-surface m3-title-small truncate">{player.name}</p>
+                        <p className="text-on-surface-variant m3-body-small">
                           {effectiveProgress}/{targets.length} • {darts} Darts
                         </p>
                       </div>
-                      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center font-bold text-sm sm:text-base flex-shrink-0 ${
-                        isActive ? 'bg-primary-500 text-white' : 'bg-dark-600 text-gray-300'
+                      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-m3-md flex items-center justify-center font-bold text-sm sm:text-base flex-shrink-0 ${
+                        isActive ? 'bg-primary-container text-on-primary-container' : 'bg-surface-container-highest text-on-surface-variant'
                       }`}>
                         {playerTarget ? playerTarget.shortLabel : <Check size={16} />}
                       </div>
@@ -820,38 +812,38 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
                 );
               })}
             </div>
-          </div>
+          </Card>
         </div>
       )}
 
       {/* Current Target */}
       <div className="max-w-4xl mx-auto mb-3">
-        <div className="glass-card rounded-xl p-4 sm:p-6 text-center">
-          <p className="text-gray-400 text-sm mb-1">{t('atc.current_target')}</p>
-          <div className="text-5xl sm:text-6xl font-bold text-primary-400 mb-1">
+        <Card variant="elevated" className="p-4 sm:p-6 text-center">
+          <p className="text-on-surface-variant m3-body-medium mb-1">{t('atc.current_target')}</p>
+          <div className="text-5xl sm:text-6xl font-bold mb-1" style={{ color: 'var(--m3-primary)' }}>
             {currentTarget ? currentTarget.label : '—'}
           </div>
-          <p className="text-white text-sm">{currentPlayer?.name}</p>
-          <p className="text-gray-500 text-xs mt-1">
+          <p className="text-on-surface m3-body-medium">{currentPlayer?.name}</p>
+          <p className="text-on-surface-variant m3-body-small mt-1">
             {t('atc.targets_progress', {
               done: getEffectiveProgress(currentPlayer?.id || ''),
               total: targets.length,
             })}
           </p>
-        </div>
+        </Card>
       </div>
 
       {/* Dart Slots + Input */}
       <div className="max-w-4xl mx-auto mb-3">
-        <div className="glass-card rounded-xl p-3 sm:p-4">
+        <Card variant="elevated" className="p-3 sm:p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-white font-semibold text-sm sm:text-base">
+            <h3 className="text-on-surface m3-title-small">
               {t('atc.throw_count', { current: currentDarts.length })}
             </h3>
             <button
               onClick={handleUndo}
               disabled={currentDarts.length === 0 && turnHistory.length === 0}
-              className="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 text-gray-400 disabled:opacity-50"
+              className="p-2 rounded-m3-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant disabled:opacity-50"
             >
               <RotateCcw size={18} />
             </button>
@@ -864,12 +856,12 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
               return (
                 <div
                   key={idx}
-                  className={`flex-1 h-12 sm:h-14 rounded-xl flex items-center justify-center text-base sm:text-lg font-bold ${
+                  className={`flex-1 h-12 sm:h-14 rounded-m3-md flex items-center justify-center text-base sm:text-lg font-bold ${
                     slot
                       ? slot.hit
-                        ? 'bg-success-500/20 text-success-400 border-2 border-success-500'
-                        : 'bg-red-500/20 text-red-400 border-2 border-red-500'
-                      : 'bg-dark-800 text-gray-600 border-2 border-dashed border-dark-600'
+                        ? 'bg-success-container text-on-success-container border-2 border-success-500'
+                        : 'bg-error-container text-on-error-container border-2 border-error-500'
+                      : 'bg-surface-container text-on-surface-variant border-2 border-dashed border-outline-variant'
                   }`}
                 >
                   {slot ? (slot.hit ? <Check size={20} /> : <X size={20} />) : '—'}
@@ -880,38 +872,39 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
 
           {/* Hit / Miss Buttons */}
           <div className="flex gap-3 mb-3">
-            <button
+            <Button
+              variant="success"
+              size="lg"
               onClick={handleHit}
               disabled={currentDarts.length >= 3 || !currentTarget}
-              className="flex-1 py-6 sm:py-8 rounded-xl font-bold text-xl sm:text-2xl transition-all flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 text-white disabled:opacity-40 disabled:hover:bg-green-600 active:scale-95"
+              icon={<Check size={28} />}
+              className="flex-1 py-6 sm:py-8 text-xl sm:text-2xl active:scale-95"
             >
-              <Check size={28} />
               {t('atc.hit')}
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="danger"
+              size="lg"
               onClick={handleMiss}
               disabled={currentDarts.length >= 3}
-              className="flex-1 py-6 sm:py-8 rounded-xl font-bold text-xl sm:text-2xl transition-all flex items-center justify-center gap-2 bg-red-600 hover:bg-red-500 text-white disabled:opacity-40 disabled:hover:bg-red-600 active:scale-95"
+              icon={<X size={28} />}
+              className="flex-1 py-6 sm:py-8 text-xl sm:text-2xl active:scale-95"
             >
-              <X size={28} />
               {t('atc.miss')}
-            </button>
+            </Button>
           </div>
 
           {/* Confirm */}
-          <button
+          <Button
+            variant="filled"
+            fullWidth
             onClick={confirmThrow}
             disabled={currentDarts.length === 0}
-            className={`w-full py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
-              currentDarts.length > 0
-                ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white hover:from-primary-600 hover:to-accent-600'
-                : 'bg-dark-700 text-gray-500 cursor-not-allowed'
-            }`}
+            icon={<Check size={20} />}
           >
-            <Check size={20} />
             {t('common.confirm')}
-          </button>
-        </div>
+          </Button>
+        </Card>
       </div>
     </div>
   );

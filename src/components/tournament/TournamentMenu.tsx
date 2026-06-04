@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trophy, Users, Calendar, Star, Play, Plus, Trash2, Settings, ChevronRight } from 'lucide-react';
+import { Trophy, Users, Calendar, Star, Play, Plus, Minus, Trash2, Settings, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { usePlayer } from '../../context/PlayerContext';
 import { Player, Tournament, TournamentSettings, TournamentParticipant, TournamentMatch } from '../../types/index';
 import PlayerAvatar from '../player/PlayerAvatar';
 import { v4 as uuidv4 } from 'uuid';
 import { celebrate as confetti } from '../../utils/celebration';
-import BackButton from '../common/BackButton';
+import { Button, Card, TextField, Chip, IconButton, BackButton } from '../common';
 
 type TournamentType = 'knockout' | 'round-robin';
 
@@ -282,27 +282,21 @@ const TournamentMenu: React.FC = () => {
     return (
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-4xl mx-auto">
-          <button
-            onClick={() => setActiveTournament(null)}
-            className="mb-6 flex items-center gap-2 glass-card px-4 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
-          >
-            <ArrowLeft size={20} />
-            Turnier beenden
-          </button>
+          <BackButton onClick={() => setActiveTournament(null)} label="Turnier beenden" />
 
-          <div className="glass-card rounded-xl p-6 mb-6">
+          <Card variant="elevated" className="p-6 mb-6 mt-6">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-2xl font-bold text-white">{activeTournament.name}</h2>
-                <p className="text-gray-400">
-                  {activeTournament.type === 'knockout' ? 'Knockout' : 'Round Robin'} • 
+                <h2 className="m3-title-large text-on-surface">{activeTournament.name}</h2>
+                <p className="m3-body-medium text-on-surface-variant">
+                  {activeTournament.type === 'knockout' ? 'Knockout' : 'Round Robin'} •
                   Best of {legsToWin * 2 - 1}
                 </p>
               </div>
-              <div className={`px-4 py-2 rounded-full text-sm font-medium ${
-                activeTournament.status === 'completed' 
-                  ? 'bg-green-500/20 text-green-400' 
-                  : 'bg-primary-500/20 text-primary-400'
+              <div className={`px-4 py-2 rounded-m3-full m3-label-large ${
+                activeTournament.status === 'completed'
+                  ? 'bg-success-container text-on-success-container'
+                  : 'bg-primary-container text-on-primary-container'
               }`}>
                 {activeTournament.status === 'completed' ? '✅ Beendet' : '🎯 Läuft'}
               </div>
@@ -310,14 +304,14 @@ const TournamentMenu: React.FC = () => {
 
             {/* Winner Banner */}
             {activeTournament.status === 'completed' && winnerPlayer && (
-              <div className="bg-gradient-to-r from-yellow-500/20 to-amber-500/20 rounded-xl p-6 mb-6 border border-yellow-500/30">
+              <div className="bg-tertiary-container text-on-tertiary-container rounded-m3-lg p-6 mb-6 border border-outline-variant">
                 <div className="flex items-center gap-4">
-                  <Trophy className="w-12 h-12 text-yellow-400" />
+                  <Trophy className="w-12 h-12 text-tertiary" />
                   <div>
-                    <p className="text-yellow-400 font-medium">Turniersieger</p>
+                    <p className="m3-label-large">Turniersieger</p>
                     <div className="flex items-center gap-3">
                       <PlayerAvatar avatar={winnerPlayer.avatar} name={winnerPlayer.name} size="lg" />
-                      <span className="text-2xl font-bold text-white">{winnerPlayer.name}</span>
+                      <span className="m3-title-large">{winnerPlayer.name}</span>
                     </div>
                   </div>
                 </div>
@@ -325,16 +319,16 @@ const TournamentMenu: React.FC = () => {
             )}
 
             {/* Standings */}
-            <h3 className="text-lg font-semibold text-white mb-3">Tabelle</h3>
-            <div className="bg-dark-800 rounded-lg overflow-hidden mb-6">
+            <h3 className="m3-title-medium text-on-surface mb-3">Tabelle</h3>
+            <div className="bg-surface-container rounded-m3-md overflow-hidden mb-6">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-dark-700">
-                    <th className="text-left p-3 text-gray-400">#</th>
-                    <th className="text-left p-3 text-gray-400">Spieler</th>
-                    <th className="text-center p-3 text-gray-400">S</th>
-                    <th className="text-center p-3 text-gray-400">N</th>
-                    <th className="text-center p-3 text-gray-400">Legs</th>
+                  <tr className="border-b border-outline-variant">
+                    <th className="text-left p-3 m3-label-large text-on-surface-variant">#</th>
+                    <th className="text-left p-3 m3-label-large text-on-surface-variant">Spieler</th>
+                    <th className="text-center p-3 m3-label-large text-on-surface-variant">S</th>
+                    <th className="text-center p-3 m3-label-large text-on-surface-variant">N</th>
+                    <th className="text-center p-3 m3-label-large text-on-surface-variant">Legs</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -343,19 +337,19 @@ const TournamentMenu: React.FC = () => {
                     .map((p, idx) => {
                       const player = players.find(pl => pl.id === p.playerId);
                       return (
-                        <tr key={p.id} className="border-b border-dark-700 last:border-0">
-                          <td className="p-3 text-white font-bold">
+                        <tr key={p.id} className="border-b border-outline-variant last:border-0">
+                          <td className="p-3 text-on-surface font-bold">
                             {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}
                           </td>
                           <td className="p-3">
                             <div className="flex items-center gap-2">
                               <PlayerAvatar avatar={player?.avatar || ''} name={player?.name || ''} size="sm" />
-                              <span className="text-white">{player?.name}</span>
+                              <span className="text-on-surface">{player?.name}</span>
                             </div>
                           </td>
-                          <td className="p-3 text-center text-green-400 font-semibold">{p.wins}</td>
-                          <td className="p-3 text-center text-red-400 font-semibold">{p.losses}</td>
-                          <td className="p-3 text-center text-gray-300">{p.legsFor}:{p.legsAgainst}</td>
+                          <td className="p-3 text-center text-success font-semibold">{p.wins}</td>
+                          <td className="p-3 text-center text-error font-semibold">{p.losses}</td>
+                          <td className="p-3 text-center text-on-surface-variant">{p.legsFor}:{p.legsAgainst}</td>
                         </tr>
                       );
                     })}
@@ -365,104 +359,90 @@ const TournamentMenu: React.FC = () => {
 
             {/* Current Match */}
             {currentMatch && activeTournament.status !== 'completed' && (
-              <div className="bg-dark-800 rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-white mb-4 text-center">Aktuelles Match</h3>
-                
+              <div className="bg-surface-container rounded-m3-lg p-6">
+                <h3 className="m3-title-medium text-on-surface mb-4 text-center">Aktuelles Match</h3>
+
                 <div className="flex items-center justify-center gap-8 mb-6">
                   {/* Player 1 */}
                   <div className="text-center">
-                    <PlayerAvatar 
-                      avatar={getParticipantPlayer(currentMatch.participant1Id)?.avatar || ''} 
-                      name={getParticipantName(currentMatch.participant1Id)} 
-                      size="xl" 
+                    <PlayerAvatar
+                      avatar={getParticipantPlayer(currentMatch.participant1Id)?.avatar || ''}
+                      name={getParticipantName(currentMatch.participant1Id)}
+                      size="xl"
                     />
-                    <p className="text-white font-semibold mt-2">{getParticipantName(currentMatch.participant1Id)}</p>
+                    <p className="text-on-surface font-semibold mt-2">{getParticipantName(currentMatch.participant1Id)}</p>
                     <div className="flex items-center justify-center gap-2 mt-3">
-                      <button
-                        onClick={() => handleScoreChange(currentMatch.id, 'p1', -1)}
-                        className="w-10 h-10 rounded-full bg-dark-700 hover:bg-dark-600 text-white text-xl"
-                      >
-                        -
-                      </button>
-                      <span className="text-4xl font-bold text-white w-16 text-center">
+                      <IconButton variant="tonal" label="Minus" onClick={() => handleScoreChange(currentMatch.id, 'p1', -1)}>
+                        <Minus size={20} />
+                      </IconButton>
+                      <span className="text-4xl font-bold text-on-surface w-16 text-center">
                         {matchScores[currentMatch.id]?.p1 || 0}
                       </span>
-                      <button
-                        onClick={() => handleScoreChange(currentMatch.id, 'p1', 1)}
-                        className="w-10 h-10 rounded-full bg-primary-500 hover:bg-primary-600 text-white text-xl"
-                      >
-                        +
-                      </button>
+                      <IconButton variant="filled" label="Plus" onClick={() => handleScoreChange(currentMatch.id, 'p1', 1)}>
+                        <Plus size={20} />
+                      </IconButton>
                     </div>
                   </div>
 
-                  <div className="text-4xl font-bold text-gray-500">vs</div>
+                  <div className="text-4xl font-bold text-on-surface-variant">vs</div>
 
                   {/* Player 2 */}
                   <div className="text-center">
-                    <PlayerAvatar 
-                      avatar={getParticipantPlayer(currentMatch.participant2Id)?.avatar || ''} 
-                      name={getParticipantName(currentMatch.participant2Id)} 
-                      size="xl" 
+                    <PlayerAvatar
+                      avatar={getParticipantPlayer(currentMatch.participant2Id)?.avatar || ''}
+                      name={getParticipantName(currentMatch.participant2Id)}
+                      size="xl"
                     />
-                    <p className="text-white font-semibold mt-2">{getParticipantName(currentMatch.participant2Id)}</p>
+                    <p className="text-on-surface font-semibold mt-2">{getParticipantName(currentMatch.participant2Id)}</p>
                     <div className="flex items-center justify-center gap-2 mt-3">
-                      <button
-                        onClick={() => handleScoreChange(currentMatch.id, 'p2', -1)}
-                        className="w-10 h-10 rounded-full bg-dark-700 hover:bg-dark-600 text-white text-xl"
-                      >
-                        -
-                      </button>
-                      <span className="text-4xl font-bold text-white w-16 text-center">
+                      <IconButton variant="tonal" label="Minus" onClick={() => handleScoreChange(currentMatch.id, 'p2', -1)}>
+                        <Minus size={20} />
+                      </IconButton>
+                      <span className="text-4xl font-bold text-on-surface w-16 text-center">
                         {matchScores[currentMatch.id]?.p2 || 0}
                       </span>
-                      <button
-                        onClick={() => handleScoreChange(currentMatch.id, 'p2', 1)}
-                        className="w-10 h-10 rounded-full bg-primary-500 hover:bg-primary-600 text-white text-xl"
-                      >
-                        +
-                      </button>
+                      <IconButton variant="filled" label="Plus" onClick={() => handleScoreChange(currentMatch.id, 'p2', 1)}>
+                        <Plus size={20} />
+                      </IconButton>
                     </div>
                   </div>
                 </div>
 
-                <p className="text-center text-gray-400 mb-4">First to {legsToWin} Legs</p>
+                <p className="text-center m3-body-medium text-on-surface-variant mb-4">First to {legsToWin} Legs</p>
 
-                <button
+                <Button
+                  variant="success"
+                  fullWidth
+                  size="lg"
                   onClick={handleConfirmMatch}
                   disabled={(matchScores[currentMatch.id]?.p1 || 0) !== legsToWin && (matchScores[currentMatch.id]?.p2 || 0) !== legsToWin}
-                  className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
-                    (matchScores[currentMatch.id]?.p1 || 0) === legsToWin || (matchScores[currentMatch.id]?.p2 || 0) === legsToWin
-                      ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
-                      : 'bg-dark-700 text-gray-500 cursor-not-allowed'
-                  }`}
                 >
                   Match bestätigen
-                </button>
+                </Button>
               </div>
             )}
 
             {/* Match History */}
             <div className="mt-6">
-              <h3 className="text-lg font-semibold text-white mb-3">Gespielte Matches</h3>
+              <h3 className="m3-title-medium text-on-surface mb-3">Gespielte Matches</h3>
               <div className="space-y-2">
                 {activeTournament.matches.filter(m => m.winner).map(match => (
-                  <div key={match.id} className="bg-dark-800 rounded-lg p-3 flex items-center justify-between">
+                  <div key={match.id} className="bg-surface-container rounded-m3-md p-3 flex items-center justify-between border border-outline-variant">
                     <div className="flex items-center gap-2">
-                      <span className={match.winner === match.participant1Id ? 'text-green-400 font-bold' : 'text-gray-400'}>
+                      <span className={match.winner === match.participant1Id ? 'text-success font-bold' : 'text-on-surface-variant'}>
                         {getParticipantName(match.participant1Id)}
                       </span>
-                      <span className="text-gray-500">vs</span>
-                      <span className={match.winner === match.participant2Id ? 'text-green-400 font-bold' : 'text-gray-400'}>
+                      <span className="text-on-surface-variant">vs</span>
+                      <span className={match.winner === match.participant2Id ? 'text-success font-bold' : 'text-on-surface-variant'}>
                         {getParticipantName(match.participant2Id)}
                       </span>
                     </div>
-                    <Trophy size={16} className="text-yellow-400" />
+                    <Trophy size={16} className="text-tertiary" />
                   </div>
                 ))}
               </div>
             </div>
-          </div>
+          </Card>
         </div>
       </div>
     );
@@ -475,41 +455,38 @@ const TournamentMenu: React.FC = () => {
         <div className="max-w-2xl mx-auto">
           <BackButton onClick={() => setShowCreate(false)} />
 
-          <div className="glass-card rounded-xl p-6">
-            <h2 className="text-2xl font-bold text-white mb-6">Neues Turnier erstellen</h2>
+          <Card variant="elevated" className="p-6 mt-6">
+            <h2 className="m3-title-large text-on-surface mb-6">Neues Turnier erstellen</h2>
 
             {/* Tournament Name */}
             <div className="mb-6">
-              <label className="block text-gray-400 mb-2">Turniername</label>
-              <input
+              <TextField
+                label="Turniername"
                 type="text"
                 value={tournamentName}
                 onChange={(e) => setTournamentName(e.target.value)}
                 placeholder="z.B. Freitagsturnier"
-                className="w-full px-4 py-3 rounded-xl bg-dark-800 border border-dark-600 text-white placeholder-gray-500 focus:border-primary-500 focus:outline-none"
               />
             </div>
 
             {/* Tournament Type */}
             <div className="mb-6">
-              <label className="block text-gray-400 mb-2">Turnier-Modus</label>
+              <label className="block m3-label-large text-on-surface-variant mb-2">Turnier-Modus</label>
               <div className="grid grid-cols-2 gap-3">
                 {tournamentTypes.map(type => {
                   const Icon = type.icon;
                   return (
-                    <button
+                    <Card
                       key={type.id}
+                      variant={tournamentType === type.id ? 'filled' : 'outlined'}
+                      interactive
                       onClick={() => setTournamentType(type.id)}
-                      className={`p-4 rounded-xl border-2 transition-all text-left ${
-                        tournamentType === type.id
-                          ? 'border-primary-500 bg-primary-500/20'
-                          : 'border-dark-600 bg-dark-800 hover:border-dark-500'
-                      }`}
+                      className={`p-4 text-left ${tournamentType === type.id ? 'ring-2 ring-primary' : ''}`}
                     >
-                      <Icon size={24} className="text-primary-400 mb-2" />
-                      <p className="text-white font-medium">{type.title}</p>
-                      <p className="text-gray-500 text-sm">{type.description}</p>
-                    </button>
+                      <Icon size={24} className="text-primary mb-2" />
+                      <p className="text-on-surface font-medium">{type.title}</p>
+                      <p className="m3-body-small text-on-surface-variant">{type.description}</p>
+                    </Card>
                   );
                 })}
               </div>
@@ -517,72 +494,68 @@ const TournamentMenu: React.FC = () => {
 
             {/* Legs to Win */}
             <div className="mb-6">
-              <label className="block text-gray-400 mb-2">Legs zum Gewinnen</label>
+              <label className="block m3-label-large text-on-surface-variant mb-2">Legs zum Gewinnen</label>
               <div className="flex gap-2">
                 {[2, 3, 4, 5].map(num => (
-                  <button
+                  <Chip
                     key={num}
+                    selected={legsToWin === num}
                     onClick={() => setLegsToWin(num)}
-                    className={`flex-1 py-3 rounded-xl font-medium transition-all ${
-                      legsToWin === num
-                        ? 'bg-primary-500 text-white'
-                        : 'bg-dark-800 text-gray-400 hover:bg-dark-700'
-                    }`}
+                    className="flex-1 justify-center"
                   >
                     {num}
-                  </button>
+                  </Chip>
                 ))}
               </div>
             </div>
 
             {/* Player Selection */}
             <div className="mb-6">
-              <label className="block text-gray-400 mb-2">
+              <label className="block m3-label-large text-on-surface-variant mb-2">
                 Spieler ({selectedPlayers.length}/{selectedType?.maxPlayers || 8})
               </label>
               <div className="grid grid-cols-3 gap-3 max-h-64 overflow-y-auto">
-                {players.filter(p => !p.isBot).map(player => (
-                  <button
-                    key={player.id}
-                    onClick={() => {
-                      if (selectedPlayers.find(p => p.id === player.id)) {
-                        setSelectedPlayers(prev => prev.filter(p => p.id !== player.id));
-                      } else if (selectedPlayers.length < (selectedType?.maxPlayers || 8)) {
-                        setSelectedPlayers(prev => [...prev, player]);
-                      }
-                    }}
-                    className={`p-3 rounded-xl border-2 transition-all ${
-                      selectedPlayers.find(p => p.id === player.id)
-                        ? 'border-primary-500 bg-primary-500/20'
-                        : 'border-dark-600 bg-dark-800 hover:border-dark-500'
-                    }`}
-                  >
-                    <PlayerAvatar avatar={player.avatar} name={player.name} size="sm" />
-                    <p className="text-white text-sm mt-1 truncate">{player.name}</p>
-                  </button>
-                ))}
+                {players.filter(p => !p.isBot).map(player => {
+                  const isSelected = !!selectedPlayers.find(p => p.id === player.id);
+                  return (
+                    <Card
+                      key={player.id}
+                      variant={isSelected ? 'filled' : 'outlined'}
+                      interactive
+                      onClick={() => {
+                        if (selectedPlayers.find(p => p.id === player.id)) {
+                          setSelectedPlayers(prev => prev.filter(p => p.id !== player.id));
+                        } else if (selectedPlayers.length < (selectedType?.maxPlayers || 8)) {
+                          setSelectedPlayers(prev => [...prev, player]);
+                        }
+                      }}
+                      className={`p-3 text-center ${isSelected ? 'ring-2 ring-primary' : ''}`}
+                    >
+                      <PlayerAvatar avatar={player.avatar} name={player.name} size="sm" />
+                      <p className="text-on-surface m3-body-small mt-1 truncate">{player.name}</p>
+                    </Card>
+                  );
+                })}
               </div>
               {selectedPlayers.length < (selectedType?.minPlayers || 2) && (
-                <p className="text-amber-400 text-sm mt-2">
+                <p className="text-tertiary m3-body-small mt-2">
                   Mindestens {selectedType?.minPlayers || 2} Spieler benötigt
                 </p>
               )}
             </div>
 
             {/* Start Button */}
-            <button
+            <Button
+              variant="filled"
+              fullWidth
+              size="lg"
+              icon={<Play size={24} />}
               onClick={handleCreateTournament}
               disabled={!canStart}
-              className={`w-full py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 ${
-                canStart
-                  ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white hover:from-primary-600 hover:to-accent-600'
-                  : 'bg-dark-700 text-gray-500 cursor-not-allowed'
-              }`}
             >
-              <Play size={24} />
               Turnier starten
-            </button>
-          </div>
+            </Button>
+          </Card>
         </div>
       </div>
     );
@@ -594,56 +567,61 @@ const TournamentMenu: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         <BackButton onClick={() => navigate('/')} />
 
-        <div className="glass-card rounded-xl shadow-lg p-6 md:p-8 border border-white/5">
+        <Card variant="elevated" className="p-6 md:p-8 mt-6">
           <div className="flex items-center gap-4 mb-6">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-accent-500 to-accent-600 shadow-lg">
-              <Trophy size={32} className="text-white" />
+            <div className="p-3 rounded-m3-lg bg-tertiary-container shadow-m3-1">
+              <Trophy size={32} className="text-on-tertiary-container" />
             </div>
             <div>
-              <h2 className="text-3xl font-bold text-white">Turniere</h2>
-              <p className="text-dark-400">Organisiere Dart-Wettbewerbe</p>
+              <h2 className="m3-headline-small text-on-surface">Turniere</h2>
+              <p className="m3-body-medium text-on-surface-variant">Organisiere Dart-Wettbewerbe</p>
             </div>
           </div>
 
           {/* Create Tournament Button */}
-          <button
+          <Button
+            variant="filled"
+            fullWidth
+            size="lg"
+            icon={<Plus size={28} />}
             onClick={() => setShowCreate(true)}
-            className="w-full mb-8 py-6 rounded-xl bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white font-bold text-lg flex items-center justify-center gap-3 transition-all"
+            className="mb-8"
           >
-            <Plus size={28} />
             Neues Turnier erstellen
-          </button>
+          </Button>
 
-          <h3 className="text-lg font-semibold text-white mb-4">Verfügbare Modi</h3>
+          <h3 className="m3-title-medium text-on-surface mb-4">Verfügbare Modi</h3>
 
           <div className="space-y-4">
             {tournamentTypes.map((type) => {
               const Icon = type.icon;
               return (
-                <div
+                <Card
                   key={type.title}
-                  className="border border-dark-700 rounded-lg p-4 bg-dark-900/30 hover:bg-dark-800/50 transition-all cursor-pointer"
+                  variant="outlined"
+                  interactive
                   onClick={() => {
                     setTournamentType(type.id);
                     setShowCreate(true);
                   }}
+                  className="p-4"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="p-3 bg-gradient-to-br from-primary-500 to-accent-500 rounded-lg">
-                      <Icon size={24} className="text-white" />
+                    <div className="p-3 bg-primary-container rounded-m3-md">
+                      <Icon size={24} className="text-on-primary-container" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-bold text-white mb-1">{type.title}</h3>
-                      <p className="text-sm text-dark-400 mb-2">{type.description}</p>
-                      <p className="text-xs text-primary-400">{type.minPlayers}-{type.maxPlayers} Spieler</p>
+                      <h3 className="m3-title-small text-on-surface mb-1">{type.title}</h3>
+                      <p className="m3-body-small text-on-surface-variant mb-2">{type.description}</p>
+                      <p className="m3-label-medium text-primary">{type.minPlayers}-{type.maxPlayers} Spieler</p>
                     </div>
-                    <ChevronRight className="text-gray-500" />
+                    <ChevronRight className="text-on-surface-variant" />
                   </div>
-                </div>
+                </Card>
               );
             })}
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );

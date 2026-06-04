@@ -77,10 +77,10 @@ const OfflineIndicator: React.FC = () => {
             initial={{ y: -100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -100, opacity: 0 }}
-            className={`fixed top-0 left-0 right-0 z-50 p-3 text-center font-medium ${
-              isOnline 
-                ? 'bg-green-500 text-white' 
-                : 'bg-amber-500 text-white'
+            className={`fixed top-0 left-0 right-0 z-50 p-3 text-center m3-label-large ${
+              isOnline
+                ? 'bg-success-container text-success'
+                : 'bg-tertiary-container text-tertiary'
             }`}
           >
             <div className="flex items-center justify-center gap-2">
@@ -110,10 +110,10 @@ const OfflineIndicator: React.FC = () => {
           <button
             onClick={handleSync}
             disabled={!isOnline || isSyncing}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full shadow-lg transition-all ${
-              isOnline 
-                ? 'bg-primary-500 hover:bg-primary-600 text-white' 
-                : 'bg-amber-500 text-white'
+            className={`flex items-center gap-2 px-4 py-2 rounded-m3-full shadow-m3-2 border border-outline-variant transition-all disabled:opacity-60 ${
+              isOnline
+                ? 'bg-surface-container-high text-on-surface hover:shadow-m3-3'
+                : 'bg-tertiary-container text-tertiary'
             }`}
           >
             {isSyncing ? (
@@ -125,13 +125,13 @@ const OfflineIndicator: React.FC = () => {
             )}
             
             {pendingCount > 0 && (
-              <span className="text-sm font-medium">
+              <span className="m3-label-medium">
                 {pendingCount} ausstehend
               </span>
             )}
-            
+
             {!isOnline && pendingCount === 0 && (
-              <span className="text-sm font-medium">Offline</span>
+              <span className="m3-label-medium">Offline</span>
             )}
           </button>
         </motion.div>

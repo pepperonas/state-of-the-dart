@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  User, Mail, Trash2, Save, AlertCircle, Loader,
-  CheckCircle, ArrowLeft, Lock, CreditCard
+  User, Mail, Trash2, Save, AlertCircle,
+  CheckCircle, Lock, CreditCard
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
-import BackButton from '../common/BackButton';
+import { BackButton, Button, Card, TextField } from '../common';
 
 const AVATAR_EMOJIS = ['👤', '🎯', '🎲', '🎮', '🏆', '⚡', '🔥', '💎', '🎪', '🎭', '🎨', '🎸', '🎹', '🎺', '🎻', '🥁', '🎤', '🎧', '🎬', '🎯', '🏹', '⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏉', '🥏', '🎱', '🏓', '🏸', '🏒', '🏑', '🥍', '🏏', '🥊', '🥋', '🥅', '⛳', '⛸️', '🎿', '🛷', '🏂'];
 
@@ -146,27 +146,27 @@ const UserSettings: React.FC = () => {
         {/* Header */}
         <BackButton onClick={() => navigate(-1)} />
 
-        <h1 className="text-4xl font-bold text-white mb-8">Account Einstellungen</h1>
+        <h1 className="m3-headline-medium text-on-surface mb-8">Account Einstellungen</h1>
 
         {/* Success/Error Messages */}
         {success && (
-          <div className="mb-6 p-4 bg-success-500/10 border border-success-500/30 rounded-lg flex items-center gap-2 text-success-400">
+          <div className="mb-6 p-4 bg-success-container text-on-success-container rounded-m3-md flex items-center gap-2">
             <CheckCircle size={20} />
-            <span>{success}</span>
+            <span className="m3-body-medium">{success}</span>
           </div>
         )}
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/20 border-2 border-red-500 rounded-lg flex items-center gap-3 shadow-lg">
-            <AlertCircle size={24} className="text-red-500 flex-shrink-0" />
-            <span className="text-white font-semibold">{error}</span>
+          <div className="mb-6 p-4 bg-error-container text-on-error-container rounded-m3-md flex items-center gap-3 shadow-m3-1">
+            <AlertCircle size={24} className="flex-shrink-0" />
+            <span className="m3-body-medium font-semibold">{error}</span>
           </div>
         )}
 
         <div className="space-y-6">
           {/* Profile Section */}
-          <div className="glass-card p-6 rounded-xl">
-            <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+          <Card variant="elevated" className="p-6">
+            <h2 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
               <User size={24} />
               Profil
             </h2>
@@ -174,20 +174,20 @@ const UserSettings: React.FC = () => {
             <form onSubmit={handleUpdateProfile} className="space-y-4">
               {/* Avatar Picker */}
               <div>
-                <label className="block text-sm font-medium text-white mb-2">
+                <label className="block m3-label-large text-on-surface mb-2">
                   Avatar
                 </label>
                 <div className="flex items-center gap-4">
                   <button
                     type="button"
                     onClick={() => !isAvatarUrl(avatar) && setShowAvatarPicker(!showAvatarPicker)}
-                    className={`w-16 h-16 text-4xl bg-dark-800 border border-dark-600 rounded-lg transition-colors flex items-center justify-center ${
-                      isAvatarUrl(avatar) ? 'cursor-default' : 'hover:bg-dark-700'
+                    className={`w-16 h-16 text-4xl bg-surface-container border border-outline-variant rounded-m3-md transition-colors flex items-center justify-center ${
+                      isAvatarUrl(avatar) ? 'cursor-default' : 'hover:bg-surface-container-high'
                     }`}
                   >
                     {renderAvatar(avatar, 'md')}
                   </button>
-                  <span className="text-dark-400 text-sm">
+                  <span className="text-on-surface-variant m3-body-small">
                     {isAvatarUrl(avatar)
                       ? 'Google Avatar (kann nicht geändert werden)'
                       : 'Klicke um Avatar zu ändern'}
@@ -195,7 +195,7 @@ const UserSettings: React.FC = () => {
                 </div>
 
                 {showAvatarPicker && (
-                  <div className="mt-4 p-4 bg-dark-800 rounded-lg border border-dark-600 grid grid-cols-8 sm:grid-cols-12 gap-2 max-h-64 overflow-y-auto">
+                  <div className="mt-4 p-4 bg-surface-container rounded-m3-md border border-outline-variant grid grid-cols-8 sm:grid-cols-12 gap-2 max-h-64 overflow-y-auto">
                     {AVATAR_EMOJIS.map((emoji) => (
                       <button
                         key={emoji}
@@ -204,8 +204,8 @@ const UserSettings: React.FC = () => {
                           setAvatar(emoji);
                           setShowAvatarPicker(false);
                         }}
-                        className={`w-10 h-10 text-2xl rounded-lg hover:bg-dark-700 transition-colors ${
-                          avatar === emoji ? 'bg-primary-500/20 ring-2 ring-primary-500' : ''
+                        className={`w-10 h-10 text-2xl rounded-m3-md hover:bg-surface-container-high transition-colors ${
+                          avatar === emoji ? 'bg-primary-container ring-2 ring-primary' : ''
                         }`}
                       >
                         {emoji}
@@ -216,217 +216,175 @@ const UserSettings: React.FC = () => {
               </div>
 
               {/* Name */}
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  required
-                />
-              </div>
+              <TextField
+                label="Name"
+                icon={<User size={20} />}
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
 
               {/* Current Email (read-only) */}
               <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Email
-                </label>
-                <input
+                <TextField
+                  label="Email"
+                  icon={<Mail size={20} />}
                   type="email"
                   value={user.email}
                   disabled
-                  className="w-full px-4 py-3 bg-dark-900 border border-dark-700 rounded-lg text-dark-400 cursor-not-allowed"
                 />
-                <p className="text-xs text-dark-400 mt-1">
+                <p className="m3-body-small text-on-surface-variant mt-1">
                   Um deine Email zu ändern, nutze den Bereich weiter unten
                 </p>
               </div>
 
-              <button
+              <Button
                 type="submit"
-                disabled={loading === 'profile'}
-                className="w-full py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                variant="filled"
+                fullWidth
+                loading={loading === 'profile'}
+                icon={<Save size={20} />}
               >
-                {loading === 'profile' ? (
-                  <>
-                    <Loader className="animate-spin" size={20} />
-                    Speichern...
-                  </>
-                ) : (
-                  <>
-                    <Save size={20} />
-                    Speichern
-                  </>
-                )}
-              </button>
+                {loading === 'profile' ? 'Speichern...' : 'Speichern'}
+              </Button>
             </form>
-          </div>
+          </Card>
 
           {/* Subscription Management - only show for active subscriptions (monthly) */}
           {/* Lifetime users don't need portal access as they have no recurring billing */}
           {user.subscriptionStatus === 'active' && (
-            <div className="glass-card p-6 rounded-xl">
-              <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+            <Card variant="elevated" className="p-6">
+              <h2 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
                 <CreditCard size={24} />
                 Abonnement verwalten
               </h2>
-              <p className="text-white mb-4 font-medium">
+              <p className="text-on-surface m3-body-medium mb-4">
                 Verwalte dein Abo, ändere Zahlungsmethoden oder kündige.
               </p>
-              <button
+              <Button
                 onClick={handleManageSubscription}
-                disabled={loading === 'subscription'}
-                className="w-full py-3 bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                variant="accent"
+                fullWidth
+                loading={loading === 'subscription'}
+                icon={<CreditCard size={20} />}
               >
-                {loading === 'subscription' ? (
-                  <>
-                    <Loader className="animate-spin" size={20} />
-                    Öffne Portal...
-                  </>
-                ) : (
-                  <>
-                    <CreditCard size={20} />
-                    Kundenportal öffnen
-                  </>
-                )}
-              </button>
-            </div>
+                {loading === 'subscription' ? 'Öffne Portal...' : 'Kundenportal öffnen'}
+              </Button>
+            </Card>
           )}
 
           {/* Change Email */}
-          <div className="glass-card p-6 rounded-xl">
-            <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+          <Card variant="elevated" className="p-6">
+            <h2 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
               <Mail size={24} />
               Email ändern
             </h2>
 
             <form onSubmit={handleUpdateEmail} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Neue Email
-                </label>
-                <input
-                  type="email"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  placeholder="neue@email.de"
-                  className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  required
-                />
-              </div>
+              <TextField
+                label="Neue Email"
+                icon={<Mail size={20} />}
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="neue@email.de"
+                required
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Passwort bestätigen
-                </label>
-                <input
-                  type="password"
-                  value={emailPassword}
-                  onChange={(e) => setEmailPassword(e.target.value)}
-                  placeholder="Dein aktuelles Passwort"
-                  className="w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  required
-                />
-              </div>
+              <TextField
+                label="Passwort bestätigen"
+                icon={<Lock size={20} />}
+                type="password"
+                value={emailPassword}
+                onChange={(e) => setEmailPassword(e.target.value)}
+                placeholder="Dein aktuelles Passwort"
+                required
+              />
 
-              <div className="p-4 bg-yellow-500/20 border-2 border-yellow-500 rounded-lg">
-                <p className="text-yellow-200 text-sm font-semibold flex items-center gap-2">
+              <div className="p-4 bg-tertiary-container text-on-tertiary-container rounded-m3-md">
+                <p className="m3-body-small font-semibold flex items-center gap-2">
                   <AlertCircle size={18} />
                   ⚠️ Du wirst ausgeloggt und musst deine neue Email-Adresse verifizieren.
                 </p>
               </div>
 
-              <button
+              <Button
                 type="submit"
-                disabled={loading === 'email'}
-                className="w-full py-3 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 text-white rounded-lg font-semibold flex items-center justify-center gap-2 shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                variant="tonal"
+                fullWidth
+                loading={loading === 'email'}
+                icon={<Mail size={20} />}
               >
-                {loading === 'email' ? (
-                  <>
-                    <Loader className="animate-spin" size={20} />
-                    Aktualisieren...
-                  </>
-                ) : (
-                  <>
-                    <Mail size={20} />
-                    Email ändern
-                  </>
-                )}
-              </button>
+                {loading === 'email' ? 'Aktualisieren...' : 'Email ändern'}
+              </Button>
             </form>
-          </div>
+          </Card>
 
           {/* Danger Zone */}
-          <div className="glass-card p-6 rounded-xl border-2 border-error-500/50 bg-red-500/5">
-            <h2 className="text-2xl font-bold text-red-400 mb-4 flex items-center gap-2 drop-shadow-[0_2px_4px_rgba(239,68,68,0.5)]">
-              <Trash2 size={24} className="text-red-500" />
-              <span className="text-white">🚨 Gefahrenzone</span>
+          <Card variant="outlined" className="p-6 border-error">
+            <h2 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
+              <Trash2 size={24} className="text-error" />
+              <span>🚨 Gefahrenzone</span>
             </h2>
 
-            <p className="text-white mb-4 text-base font-medium">
-              Wenn du deinen Account löschst, werden <strong className="text-red-400 bg-red-500/20 px-2 py-1 rounded">alle deine Daten unwiderruflich gelöscht</strong>.
+            <p className="text-on-surface mb-4 m3-body-medium">
+              Wenn du deinen Account löschst, werden <strong className="text-on-error-container bg-error-container px-2 py-1 rounded-m3-sm">alle deine Daten unwiderruflich gelöscht</strong>.
               Dies beinhaltet: Matches, Stats, Achievements, Personal Bests, Tenants und Spieler.
             </p>
 
             {!confirmDelete ? (
-              <button
+              <Button
                 onClick={() => setConfirmDelete(true)}
-                className="w-full py-3 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all border-2 border-red-500"
+                variant="outlined"
+                fullWidth
+                icon={<Trash2 size={20} />}
+                className="text-error border-error"
               >
-                <Trash2 size={20} />
                 Account löschen
-              </button>
+              </Button>
             ) : (
               <div className="space-y-4">
-                <div className="p-4 bg-red-600/20 border-2 border-red-500 rounded-lg">
-                  <p className="text-red-200 text-sm font-bold flex items-center gap-2">
+                <div className="p-4 bg-error-container text-on-error-container rounded-m3-md">
+                  <p className="m3-body-small font-bold flex items-center gap-2">
                     <AlertCircle size={20} className="flex-shrink-0" />
                     ⚠️ WARNUNG: Diese Aktion kann nicht rückgängig gemacht werden!
                   </p>
                 </div>
 
-                <input
+                <TextField
+                  icon={<Lock size={20} />}
                   type="password"
                   value={deletePassword}
                   onChange={(e) => setDeletePassword(e.target.value)}
                   placeholder="Passwort zur Bestätigung"
-                  className="w-full px-4 py-3 bg-dark-800 border border-error-500 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-error-500"
                 />
 
                 <div className="flex gap-3">
-                  <button
+                  <Button
                     onClick={() => {
                       setConfirmDelete(false);
                       setDeletePassword('');
                     }}
-                    className="flex-1 py-3 bg-dark-800 hover:bg-dark-700 text-white rounded-lg font-semibold transition-all"
+                    variant="text"
+                    className="flex-1"
                   >
                     Abbrechen
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={handleDeleteAccount}
                     disabled={loading === 'delete' || !deletePassword}
-                    className="flex-1 py-3 bg-gradient-to-r from-error-500 to-error-600 hover:from-error-600 hover:to-error-700 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    variant="danger"
+                    className="flex-1"
+                    loading={loading === 'delete'}
+                    icon={<Trash2 size={20} />}
                   >
-                    {loading === 'delete' ? (
-                      <>
-                        <Loader className="animate-spin" size={20} />
-                        Lösche...
-                      </>
-                    ) : (
-                      <>
-                        <Trash2 size={20} />
-                        Endgültig löschen
-                      </>
-                    )}
-                  </button>
+                    {loading === 'delete' ? 'Lösche...' : 'Endgültig löschen'}
+                  </Button>
                 </div>
               </div>
             )}
-          </div>
+          </Card>
         </div>
       </div>
     </div>

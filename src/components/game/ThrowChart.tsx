@@ -68,8 +68,8 @@ const ThrowChart: React.FC<ThrowChartProps> = ({ players, chartThrows }) => {
 
   return (
     <>
-      <div className="mb-8">
-        <h4 className="text-white font-bold mb-4">Geworfene Punkte pro Aufnahme</h4>
+      <div className="mb-8 bg-surface-container rounded-m3-md p-4">
+        <h4 className="m3-title-small text-on-surface mb-4">Geworfene Punkte pro Aufnahme</h4>
         <div className="h-[220px] sm:h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={scoreData}>
@@ -91,8 +91,8 @@ const ThrowChart: React.FC<ThrowChartProps> = ({ players, chartThrows }) => {
         </div>
       </div>
 
-      <div>
-        <h4 className="text-white font-bold mb-4">Verbleibende Punkte</h4>
+      <div className="bg-surface-container rounded-m3-md p-4">
+        <h4 className="m3-title-small text-on-surface mb-4">Verbleibende Punkte</h4>
         <div className="h-[220px] sm:h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={remainingData}>

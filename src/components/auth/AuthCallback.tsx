@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Loader } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { setAuthToken } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
@@ -47,21 +47,21 @@ const AuthCallback: React.FC = () => {
       <div className="text-center">
         {error ? (
           <>
-            <div className="text-error-400 text-5xl mb-4">!</div>
-            <h2 className="text-2xl font-bold text-white mb-2">
+            <div className="text-error text-5xl mb-4">!</div>
+            <h2 className="m3-headline-small text-on-surface mb-2">
               Fehler
             </h2>
-            <p className="text-error-400">
+            <p className="m3-body-large text-error">
               {error}
             </p>
           </>
         ) : (
           <>
-            <Loader className="animate-spin text-primary-400 mx-auto mb-4" size={48} />
-            <h2 className="text-2xl font-bold text-white mb-2">
+            <Loader2 className="animate-spin text-primary mx-auto mb-4" size={48} />
+            <h2 className="m3-headline-small text-on-surface mb-2">
               Anmeldung läuft...
             </h2>
-            <p className="text-dark-300">
+            <p className="m3-body-medium text-on-surface-variant">
               Du wirst weitergeleitet
             </p>
           </>

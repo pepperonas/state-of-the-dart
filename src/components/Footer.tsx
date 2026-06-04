@@ -7,14 +7,14 @@ const Footer: React.FC = () => {
   return (
     <footer className="mt-auto pt-8 pb-4">
       <div className="max-w-6xl mx-auto px-4 text-center space-y-3">
-        <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-dark-400">
+        <div className="flex flex-wrap items-center justify-center gap-3 m3-body-small text-on-surface-variant">
           <span>&copy; 2026 Martin Pfeffer</span>
           <span className="hidden sm:inline">&bull;</span>
           <a
             href="https://celox.io"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary-400 hover:text-primary-300 transition-colors flex items-center gap-1"
+            className="text-primary hover:opacity-80 transition-opacity flex items-center gap-1"
           >
             <Globe size={14} />
             celox.io
@@ -24,42 +24,33 @@ const Footer: React.FC = () => {
             href="https://github.com/pepperonas/state-of-the-dart"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary-400 hover:text-primary-300 transition-colors flex items-center gap-1"
+            className="text-primary hover:opacity-80 transition-opacity flex items-center gap-1"
           >
             <Github size={14} />
             GitHub
           </a>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-dark-500">
-          <Link
-            to="/impressum"
-            className="hover:text-dark-400 transition-colors"
-          >
+        <div className="flex flex-wrap items-center justify-center gap-3 m3-label-medium text-on-surface-variant">
+          <Link to="/impressum" className="hover:text-on-surface transition-colors">
             Impressum
           </Link>
           <span className="hidden sm:inline">&bull;</span>
-          <Link
-            to="/datenschutz"
-            className="hover:text-dark-400 transition-colors"
-          >
+          <Link to="/datenschutz" className="hover:text-on-surface transition-colors">
             Datenschutz
           </Link>
           <span className="hidden sm:inline">&bull;</span>
-          <Link
-            to="/nutzungsbedingungen"
-            className="hover:text-dark-400 transition-colors"
-          >
+          <Link to="/nutzungsbedingungen" className="hover:text-on-surface transition-colors">
             AGB
           </Link>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-dark-500">
+        <div className="flex flex-wrap items-center justify-center gap-3 m3-label-medium text-on-surface-variant">
           <a
             href="https://www.linkedin.com/in/martin-pfeffer-020831134/"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-primary-400 transition-colors flex items-center gap-1"
+            className="hover:text-primary transition-colors flex items-center gap-1"
           >
             <Linkedin size={14} />
             LinkedIn
@@ -69,14 +60,14 @@ const Footer: React.FC = () => {
             href="https://github.com/pepperonas"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-primary-400 transition-colors flex items-center gap-1"
+            className="hover:text-primary transition-colors flex items-center gap-1"
           >
             <Github size={14} />
             GitHub Profil
           </a>
         </div>
 
-        <p className="text-xs text-dark-600">
+        <p className="m3-label-medium text-on-surface-variant opacity-70">
           Version {packageJson.version}
         </p>
       </div>

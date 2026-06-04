@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, Crown, Zap, Clock, XCircle, Shield, Trash2, UserMinus, UserPlus, AlertCircle, Eye, Edit, CheckCircle, Copy, ChevronDown, Flag, Search } from 'lucide-react';
+import { Users, Crown, Zap, Clock, XCircle, Shield, Trash2, UserMinus, UserPlus, AlertCircle, Eye, Edit, CheckCircle, Copy, ChevronDown, Flag, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import type { BugReport } from '../../types';
 import type { DebugFlag } from '../../types/debugFlag';
 import { formatDebugFlagForAI } from '../../utils/debugExport';
-import BackButton from '../common/BackButton';
+import { BackButton, Button, Card, Chip, IconButton, Dialog } from '../common';
+import { staggerChild } from '../../utils/motion';
 
 interface AdminUser {
   id: string;
@@ -295,7 +296,7 @@ const AdminPanel: React.FC = () => {
       case 'expired':
         return 'bg-gradient-to-r from-red-500 to-rose-600 text-white';
       default:
-        return 'bg-dark-700 text-dark-200';
+        return 'bg-surface-container-highest text-on-surface-variant';
     }
   };
 
@@ -317,7 +318,7 @@ const AdminPanel: React.FC = () => {
       <div className="min-h-dvh flex items-center justify-center gradient-mesh">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-primary-500 mx-auto mb-4"></div>
-          <p className="text-dark-300">{t('admin.loading_panel')}</p>
+          <p className="text-on-surface-variant">{t('admin.loading_panel')}</p>
         </div>
       </div>
     );
@@ -326,12 +327,12 @@ const AdminPanel: React.FC = () => {
   if (error) {
     return (
       <div className="min-h-dvh flex items-center justify-center gradient-mesh">
-        <div className="glass-card p-8 text-center">
-          <p className="text-red-400 text-xl mb-4">{error}</p>
-          <button onClick={loadData} className="px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl font-semibold transition-all">
+        <Card variant="elevated" className="p-8 text-center">
+          <p className="text-error-500 text-xl mb-4">{error}</p>
+          <Button variant="filled" onClick={loadData}>
             {t('admin.retry')}
-          </button>
-        </div>
+          </Button>
+        </Card>
       </div>
     );
   }
@@ -352,8 +353,8 @@ const AdminPanel: React.FC = () => {
               <Shield size={32} className="text-white" />
             </div>
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-white">{t('admin.admin_panel')}</h1>
-              <p className="text-dark-300">{t('admin.subtitle')}</p>
+              <h1 className="text-3xl md:text-4xl font-bold text-on-surface">{t('admin.admin_panel')}</h1>
+              <p className="text-on-surface-variant">{t('admin.subtitle')}</p>
             </div>
           </div>
         </motion.div>
@@ -366,51 +367,51 @@ const AdminPanel: React.FC = () => {
             transition={{ delay: 0.1 }}
             className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8"
           >
-            <div className="glass-card p-4 md:p-6 rounded-xl border border-white/5">
+            <Card variant="elevated" className="p-4 md:p-6">
               <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-lg bg-primary-500/20">
-                  <Users size={20} className="text-primary-400" />
+                <div className="p-2 rounded-m3-md bg-primary-container text-on-primary-container">
+                  <Users size={20} />
                 </div>
-                <p className="text-2xl md:text-3xl font-bold text-white">{stats.totalUsers}</p>
+                <p className="text-2xl md:text-3xl font-bold text-on-surface">{stats.totalUsers}</p>
               </div>
-              <p className="text-dark-400 text-sm">{t('admin.total')}</p>
-            </div>
-            <div className="glass-card p-4 md:p-6 rounded-xl border border-white/5">
+              <p className="text-on-surface-variant text-sm">{t('admin.total')}</p>
+            </Card>
+            <Card variant="elevated" className="p-4 md:p-6">
               <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-lg bg-success-500/20">
-                  <Zap size={20} className="text-success-400" />
+                <div className="p-2 rounded-m3-md bg-success-container text-on-success-container">
+                  <Zap size={20} />
                 </div>
-                <p className="text-2xl md:text-3xl font-bold text-success-400">{stats.activeSubscriptions}</p>
+                <p className="text-2xl md:text-3xl font-bold text-success-500">{stats.activeSubscriptions}</p>
               </div>
-              <p className="text-dark-400 text-sm">{t('admin.active_subscriptions')}</p>
-            </div>
-            <div className="glass-card p-4 md:p-6 rounded-xl border border-white/5">
+              <p className="text-on-surface-variant text-sm">{t('admin.active_subscriptions')}</p>
+            </Card>
+            <Card variant="elevated" className="p-4 md:p-6">
               <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-lg bg-amber-500/20">
-                  <Crown size={20} className="text-amber-400" />
+                <div className="p-2 rounded-m3-md bg-tertiary-container text-on-tertiary-container">
+                  <Crown size={20} />
                 </div>
-                <p className="text-2xl md:text-3xl font-bold text-amber-400">{stats.lifetimeSubscriptions}</p>
+                <p className="text-2xl md:text-3xl font-bold text-tertiary">{stats.lifetimeSubscriptions}</p>
               </div>
-              <p className="text-dark-400 text-sm">{t('admin.lifetime')}</p>
-            </div>
-            <div className="glass-card p-4 md:p-6 rounded-xl border border-white/5">
+              <p className="text-on-surface-variant text-sm">{t('admin.lifetime')}</p>
+            </Card>
+            <Card variant="elevated" className="p-4 md:p-6">
               <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-lg bg-blue-500/20">
-                  <Clock size={20} className="text-blue-400" />
+                <div className="p-2 rounded-m3-md bg-secondary-container text-on-secondary-container">
+                  <Clock size={20} />
                 </div>
-                <p className="text-2xl md:text-3xl font-bold text-blue-400">{stats.trialUsers}</p>
+                <p className="text-2xl md:text-3xl font-bold text-on-surface">{stats.trialUsers}</p>
               </div>
-              <p className="text-dark-400 text-sm">{t('admin.trial')}</p>
-            </div>
-            <div className="glass-card p-4 md:p-6 rounded-xl border border-white/5 col-span-2 sm:col-span-1">
+              <p className="text-on-surface-variant text-sm">{t('admin.trial')}</p>
+            </Card>
+            <Card variant="elevated" className="p-4 md:p-6 col-span-2 sm:col-span-1">
               <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-lg bg-red-500/20">
-                  <XCircle size={20} className="text-red-400" />
+                <div className="p-2 rounded-m3-md bg-error-container text-on-error-container">
+                  <XCircle size={20} />
                 </div>
-                <p className="text-2xl md:text-3xl font-bold text-red-400">{stats.expiredUsers}</p>
+                <p className="text-2xl md:text-3xl font-bold text-error-500">{stats.expiredUsers}</p>
               </div>
-              <p className="text-dark-400 text-sm">{t('admin.expired')}</p>
-            </div>
+              <p className="text-on-surface-variant text-sm">{t('admin.expired')}</p>
+            </Card>
           </motion.div>
         )}
 
@@ -419,50 +420,27 @@ const AdminPanel: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="glass-card p-4 mb-6 rounded-xl border border-white/5"
+          className="mb-6"
         >
+          <Card variant="elevated" className="p-4">
           <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                filter === 'all' ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg' : 'bg-dark-700/50 text-dark-200 hover:bg-dark-600/50'
-              }`}
-            >
+            <Chip selected={filter === 'all'} onClick={() => setFilter('all')}>
               {t('admin.filter_all')}
-            </button>
-            <button
-              onClick={() => setFilter('lifetime')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                filter === 'lifetime' ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg' : 'bg-dark-700/50 text-dark-200 hover:bg-dark-600/50'
-              }`}
-            >
+            </Chip>
+            <Chip selected={filter === 'lifetime'} onClick={() => setFilter('lifetime')}>
               {t('admin.filter_lifetime')}
-            </button>
-            <button
-              onClick={() => setFilter('active')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                filter === 'active' ? 'bg-gradient-to-r from-success-500 to-success-600 text-white shadow-lg' : 'bg-dark-700/50 text-dark-200 hover:bg-dark-600/50'
-              }`}
-            >
+            </Chip>
+            <Chip selected={filter === 'active'} onClick={() => setFilter('active')}>
               {t('admin.filter_active')}
-            </button>
-            <button
-              onClick={() => setFilter('trial')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                filter === 'trial' ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg' : 'bg-dark-700/50 text-dark-200 hover:bg-dark-600/50'
-              }`}
-            >
+            </Chip>
+            <Chip selected={filter === 'trial'} onClick={() => setFilter('trial')}>
               {t('admin.filter_trial')}
-            </button>
-            <button
-              onClick={() => setFilter('expired')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                filter === 'expired' ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg' : 'bg-dark-700/50 text-dark-200 hover:bg-dark-600/50'
-              }`}
-            >
+            </Chip>
+            <Chip selected={filter === 'expired'} onClick={() => setFilter('expired')}>
               {t('admin.filter_expired')}
-            </button>
+            </Chip>
           </div>
+          </Card>
         </motion.div>
 
         {/* Users Table */}
@@ -470,27 +448,25 @@ const AdminPanel: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="glass-card overflow-hidden rounded-xl border border-white/5"
         >
+          <Card variant="elevated" className="overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-dark-800/80">
+              <thead className="bg-surface-container-high">
                 <tr className="text-left">
-                  <th className="px-6 py-4 font-semibold text-dark-300 text-sm uppercase tracking-wide">{t('admin.table_user')}</th>
-                  <th className="px-6 py-4 font-semibold text-dark-300 text-sm uppercase tracking-wide">{t('admin.table_status')}</th>
-                  <th className="px-6 py-4 font-semibold text-dark-300 text-sm uppercase tracking-wide hidden md:table-cell">{t('admin.table_plan')}</th>
-                  <th className="px-6 py-4 font-semibold text-dark-300 text-sm uppercase tracking-wide hidden lg:table-cell">{t('admin.table_created')}</th>
-                  <th className="px-6 py-4 font-semibold text-dark-300 text-sm uppercase tracking-wide">{t('admin.table_actions')}</th>
+                  <th className="px-6 py-4 font-semibold text-on-surface-variant text-sm uppercase tracking-wide">{t('admin.table_user')}</th>
+                  <th className="px-6 py-4 font-semibold text-on-surface-variant text-sm uppercase tracking-wide">{t('admin.table_status')}</th>
+                  <th className="px-6 py-4 font-semibold text-on-surface-variant text-sm uppercase tracking-wide hidden md:table-cell">{t('admin.table_plan')}</th>
+                  <th className="px-6 py-4 font-semibold text-on-surface-variant text-sm uppercase tracking-wide hidden lg:table-cell">{t('admin.table_created')}</th>
+                  <th className="px-6 py-4 font-semibold text-on-surface-variant text-sm uppercase tracking-wide">{t('admin.table_actions')}</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredUsers.map((u, index) => (
                   <motion.tr
                     key={u.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 + index * 0.03 }}
-                    className="border-t border-dark-700/50 hover:bg-dark-800/30 transition-colors"
+                    {...staggerChild(index)}
+                    className="border-t border-outline-variant hover:bg-surface-container transition-colors"
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -507,15 +483,15 @@ const AdminPanel: React.FC = () => {
                           </div>
                         )}
                         <div>
-                          <p className="font-semibold text-white flex items-center gap-2">
+                          <p className="font-semibold text-on-surface flex items-center gap-2">
                             {u.name}
                             {u.is_admin === 1 && (
-                              <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs rounded-full font-medium flex items-center gap-1">
+                              <span className="px-2 py-0.5 bg-tertiary-container text-on-tertiary-container text-xs rounded-m3-full font-medium flex items-center gap-1">
                                 <Crown size={10} /> Admin
                               </span>
                             )}
                           </p>
-                          <p className="text-sm text-dark-400">{u.email}</p>
+                          <p className="text-sm text-on-surface-variant">{u.email}</p>
                         </div>
                       </div>
                     </td>
@@ -527,60 +503,56 @@ const AdminPanel: React.FC = () => {
                          u.subscription_status === 'expired' ? t('admin.status_expired') : u.subscription_status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-dark-300 hidden md:table-cell">
+                    <td className="px-6 py-4 text-on-surface-variant hidden md:table-cell">
                       {u.subscription_plan || '-'}
                     </td>
-                    <td className="px-6 py-4 text-dark-300 hidden lg:table-cell">
+                    <td className="px-6 py-4 text-on-surface-variant hidden lg:table-cell">
                       {formatDate(u.created_at)}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-wrap gap-2">
-                        <button
+                        <IconButton
+                          variant="tonal"
                           onClick={() => handleOpenEditModal(u)}
-                          className="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors"
-                          title={t('admin.edit_subscription')}
+                          label={t('admin.edit_subscription')}
                         >
                           <Edit size={16} />
-                        </button>
+                        </IconButton>
                         {u.subscription_status !== 'lifetime' && (
-                          <button
+                          <IconButton
+                            variant="tonal"
                             onClick={() => handleGrantLifetime(u.id)}
-                            className="p-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 rounded-lg transition-colors"
-                            title={t('admin.grant_lifetime')}
+                            label={t('admin.grant_lifetime')}
                           >
                             <Crown size={16} />
-                          </button>
+                          </IconButton>
                         )}
                         {u.subscription_status !== 'expired' && (
-                          <button
+                          <IconButton
                             onClick={() => handleRevokeAccess(u.id)}
-                            className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors"
-                            title={t('admin.revoke_access')}
+                            className="text-error-500"
+                            label={t('admin.revoke_access')}
                           >
                             <XCircle size={16} />
-                          </button>
+                          </IconButton>
                         )}
                         {u.id !== user?.id && (
-                          <button
+                          <IconButton
+                            variant={u.is_admin === 1 ? 'standard' : 'tonal'}
                             onClick={() => handleToggleAdmin(u.id, u.is_admin === 1)}
-                            className={`p-2 rounded-lg transition-colors ${
-                              u.is_admin === 1
-                                ? 'bg-dark-600/50 hover:bg-dark-600 text-dark-300'
-                                : 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-400'
-                            }`}
-                            title={u.is_admin === 1 ? t('admin.remove_admin') : t('admin.make_admin')}
+                            label={u.is_admin === 1 ? t('admin.remove_admin') : t('admin.make_admin')}
                           >
                             {u.is_admin === 1 ? <UserMinus size={16} /> : <UserPlus size={16} />}
-                          </button>
+                          </IconButton>
                         )}
                         {u.id !== user?.id && (
-                          <button
+                          <IconButton
                             onClick={() => handleDeleteUser(u.id)}
-                            className="p-2 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 rounded-lg transition-colors"
-                            title={t('admin.delete_user')}
+                            className="text-error-500"
+                            label={t('admin.delete_user')}
                           >
                             <Trash2 size={16} />
-                          </button>
+                          </IconButton>
                         )}
                       </div>
                     </td>
@@ -589,13 +561,14 @@ const AdminPanel: React.FC = () => {
               </tbody>
             </table>
           </div>
+          </Card>
         </motion.div>
 
         {filteredUsers.length === 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-center py-12 text-dark-400"
+            className="text-center py-12 text-on-surface-variant"
           >
             {t('admin.no_users_found', { filter })}
           </motion.div>
@@ -606,67 +579,68 @@ const AdminPanel: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="glass-card rounded-2xl p-6 mt-8"
+          className="mt-8"
         >
+          <Card variant="elevated" className="p-6">
           <button
             onClick={() => setBugReportsOpen(!bugReportsOpen)}
             className="w-full flex items-center justify-between"
           >
             <div className="flex items-center gap-3">
-              <AlertCircle className="text-warning-400" size={28} />
-              <h2 className="text-2xl font-bold text-white">{t('admin.bug_reports')}</h2>
+              <AlertCircle className="text-tertiary" size={28} />
+              <h2 className="text-2xl font-bold text-on-surface">{t('admin.bug_reports')}</h2>
               {bugReports.length > 0 && (
-                <span className="text-sm bg-dark-700 text-dark-300 px-2.5 py-0.5 rounded-full">{bugReports.length}</span>
+                <span className="text-sm bg-surface-container-highest text-on-surface-variant px-2.5 py-0.5 rounded-m3-full">{bugReports.length}</span>
               )}
             </div>
-            <ChevronDown size={24} className={`text-dark-400 transform transition-transform ${bugReportsOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown size={24} className={`text-on-surface-variant transform transition-transform ${bugReportsOpen ? 'rotate-180' : ''}`} />
           </button>
 
           {bugReportsOpen && <div className="mt-6">
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700">
+            <div className="bg-surface-container rounded-m3-md p-4 border border-outline-variant">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-500/20 rounded-lg">
-                  <AlertCircle className="text-blue-400" size={20} />
+                <div className="p-2 bg-secondary-container text-on-secondary-container rounded-m3-md">
+                  <AlertCircle size={20} />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-white">{bugReports.length}</p>
-                  <p className="text-sm text-dark-300">{t('admin.total_reports')}</p>
+                  <p className="text-2xl font-bold text-on-surface">{bugReports.length}</p>
+                  <p className="text-sm text-on-surface-variant">{t('admin.total_reports')}</p>
                 </div>
               </div>
             </div>
-            <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700">
+            <div className="bg-surface-container rounded-m3-md p-4 border border-outline-variant">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-red-500/20 rounded-lg">
-                  <XCircle className="text-red-400" size={20} />
+                <div className="p-2 bg-error-container text-on-error-container rounded-m3-md">
+                  <XCircle size={20} />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-white">{bugReports.filter(r => r.status === 'open').length}</p>
-                  <p className="text-sm text-dark-300">{t('admin.open')}</p>
+                  <p className="text-2xl font-bold text-on-surface">{bugReports.filter(r => r.status === 'open').length}</p>
+                  <p className="text-sm text-on-surface-variant">{t('admin.open')}</p>
                 </div>
               </div>
             </div>
-            <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700">
+            <div className="bg-surface-container rounded-m3-md p-4 border border-outline-variant">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-500/20 rounded-lg">
-                  <Edit className="text-blue-400" size={20} />
+                <div className="p-2 bg-secondary-container text-on-secondary-container rounded-m3-md">
+                  <Edit size={20} />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-white">{bugReports.filter(r => r.status === 'in_progress').length}</p>
-                  <p className="text-sm text-dark-300">{t('admin.in_progress')}</p>
+                  <p className="text-2xl font-bold text-on-surface">{bugReports.filter(r => r.status === 'in_progress').length}</p>
+                  <p className="text-sm text-on-surface-variant">{t('admin.in_progress')}</p>
                 </div>
               </div>
             </div>
-            <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700">
+            <div className="bg-surface-container rounded-m3-md p-4 border border-outline-variant">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-500/20 rounded-lg">
-                  <CheckCircle className="text-green-400" size={20} />
+                <div className="p-2 bg-success-container text-on-success-container rounded-m3-md">
+                  <CheckCircle size={20} />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-white">{bugReports.filter(r => r.status === 'resolved').length}</p>
-                  <p className="text-sm text-dark-300">{t('admin.resolved')}</p>
+                  <p className="text-2xl font-bold text-on-surface">{bugReports.filter(r => r.status === 'resolved').length}</p>
+                  <p className="text-sm text-on-surface-variant">{t('admin.resolved')}</p>
                 </div>
               </div>
             </div>
@@ -675,11 +649,11 @@ const AdminPanel: React.FC = () => {
           {/* Filters */}
           <div className="flex gap-4 mb-6">
             <div>
-              <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.status_label')}</label>
+              <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.status_label')}</label>
               <select
                 value={bugFilter}
                 onChange={(e) => setBugFilter(e.target.value)}
-                className="px-4 py-2 bg-dark-800/50 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-warning-500"
+                className="px-4 py-2 bg-surface-container border border-outline-variant rounded-m3-md text-on-surface focus:outline-none focus:border-primary-500"
               >
                 <option value="all">{t('admin.select_all')}</option>
                 <option value="open">{t('admin.select_open')}</option>
@@ -689,11 +663,11 @@ const AdminPanel: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.severity_label')}</label>
+              <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.severity_label')}</label>
               <select
                 value={bugSeverityFilter}
                 onChange={(e) => setBugSeverityFilter(e.target.value)}
-                className="px-4 py-2 bg-dark-800/50 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-warning-500"
+                className="px-4 py-2 bg-surface-container border border-outline-variant rounded-m3-md text-on-surface focus:outline-none focus:border-primary-500"
               >
                 <option value="all">{t('admin.select_all')}</option>
                 <option value="critical">{t('admin.select_critical')}</option>
@@ -706,21 +680,21 @@ const AdminPanel: React.FC = () => {
 
           {/* Bug Reports Table */}
           {bugLoading ? (
-            <div className="text-center py-12 text-dark-400">
+            <div className="text-center py-12 text-on-surface-variant">
               {t('admin.loading_bug_reports')}
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-dark-700">
-                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('admin.table_title')}</th>
-                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('admin.table_reporter')}</th>
-                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('admin.table_severity')}</th>
-                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('admin.table_bug_status')}</th>
-                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('admin.table_category')}</th>
-                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('admin.table_date')}</th>
-                    <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('admin.table_actions')}</th>
+                  <tr className="border-b border-outline-variant">
+                    <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('admin.table_title')}</th>
+                    <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('admin.table_reporter')}</th>
+                    <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('admin.table_severity')}</th>
+                    <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('admin.table_bug_status')}</th>
+                    <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('admin.table_category')}</th>
+                    <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('admin.table_date')}</th>
+                    <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('admin.table_actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -736,21 +710,21 @@ const AdminPanel: React.FC = () => {
                     .map((report) => (
                       <tr
                         key={report.id}
-                        className="border-b border-dark-700/50 hover:bg-dark-700/30 transition-colors"
+                        className="border-b border-outline-variant hover:bg-surface-container transition-colors"
                       >
-                        <td className="py-3 px-4 text-white font-medium">{report.title}</td>
+                        <td className="py-3 px-4 text-on-surface font-medium">{report.title}</td>
                         <td className="py-3 px-4">
                           <div className="text-sm">
-                            <p className="text-white">{report.userName}</p>
-                            <p className="text-dark-400 text-xs">{report.userEmail}</p>
+                            <p className="text-on-surface">{report.userName}</p>
+                            <p className="text-on-surface-variant text-xs">{report.userEmail}</p>
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                            report.severity === 'critical' ? 'bg-red-600/20 text-red-400' :
-                            report.severity === 'high' ? 'bg-orange-600/20 text-orange-400' :
-                            report.severity === 'medium' ? 'bg-yellow-600/20 text-yellow-400' :
-                            'bg-blue-600/20 text-blue-400'
+                          <span className={`px-2 py-1 rounded-m3-sm text-xs font-semibold ${
+                            report.severity === 'critical' ? 'bg-error-container text-on-error-container' :
+                            report.severity === 'high' ? 'bg-tertiary-container text-on-tertiary-container' :
+                            report.severity === 'medium' ? 'bg-secondary-container text-on-secondary-container' :
+                            'bg-surface-container-highest text-on-surface-variant'
                           }`}>
                             {report.severity.toUpperCase()}
                           </span>
@@ -759,11 +733,11 @@ const AdminPanel: React.FC = () => {
                           <select
                             value={report.status}
                             onChange={(e) => handleUpdateBugStatus(report.id, e.target.value)}
-                            className={`px-2 py-1 rounded text-xs font-semibold border-none cursor-pointer outline-none ${
-                              report.status === 'open' ? 'bg-red-500/20 text-red-400' :
-                              report.status === 'in_progress' ? 'bg-blue-500/20 text-blue-400' :
-                              report.status === 'resolved' ? 'bg-green-500/20 text-green-400' :
-                              'bg-gray-700 text-gray-300'
+                            className={`px-2 py-1 rounded-m3-sm text-xs font-semibold border-none cursor-pointer outline-none ${
+                              report.status === 'open' ? 'bg-error-container text-on-error-container' :
+                              report.status === 'in_progress' ? 'bg-secondary-container text-on-secondary-container' :
+                              report.status === 'resolved' ? 'bg-success-container text-on-success-container' :
+                              'bg-surface-container-highest text-on-surface-variant'
                             }`}
                           >
                             <option value="open">{t('admin.status_open')}</option>
@@ -772,20 +746,21 @@ const AdminPanel: React.FC = () => {
                             <option value="closed">{t('admin.status_closed')}</option>
                           </select>
                         </td>
-                        <td className="py-3 px-4 text-dark-300 capitalize">{report.category}</td>
-                        <td className="py-3 px-4 text-dark-400 text-sm">
+                        <td className="py-3 px-4 text-on-surface-variant capitalize">{report.category}</td>
+                        <td className="py-3 px-4 text-on-surface-variant text-sm">
                           {new Date(report.createdAt).toLocaleDateString()}
                         </td>
                         <td className="py-3 px-4">
                           <div className="flex gap-2">
-                            <button
+                            <IconButton
+                              variant="tonal"
                               onClick={() => setSelectedBugReport(report)}
-                              className="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors"
-                              title={t('admin.view_details')}
+                              label={t('admin.view_details')}
                             >
                               <Eye size={16} />
-                            </button>
-                            <button
+                            </IconButton>
+                            <IconButton
+                              variant="tonal"
                               onClick={() => {
                                 const text = [
                                   `Bug Report: ${report.title}`,
@@ -799,18 +774,17 @@ const AdminPanel: React.FC = () => {
                                 ].filter(Boolean).join('\n');
                                 navigator.clipboard.writeText(text);
                               }}
-                              className="p-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-lg transition-colors"
-                              title={t('admin.copy_clipboard')}
+                              label={t('admin.copy_clipboard')}
                             >
                               <Copy size={16} />
-                            </button>
-                            <button
+                            </IconButton>
+                            <IconButton
                               onClick={() => handleDeleteBugReport(report.id)}
-                              className="p-2 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 rounded-lg transition-colors"
-                              title={t('common.delete')}
+                              className="text-error-500"
+                              label={t('common.delete')}
                             >
                               <Trash2 size={16} />
-                            </button>
+                            </IconButton>
                           </div>
                         </td>
                       </tr>
@@ -820,6 +794,7 @@ const AdminPanel: React.FC = () => {
             </div>
           )}
           </div>}
+          </Card>
         </motion.div>
 
         {/* Debug Flags Section */}
@@ -827,66 +802,67 @@ const AdminPanel: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="glass-card rounded-2xl p-6 mt-8"
+          className="mt-8"
         >
+          <Card variant="elevated" className="p-6">
           <button
             onClick={() => setDebugFlagsOpen(!debugFlagsOpen)}
             className="w-full flex items-center justify-between"
           >
             <div className="flex items-center gap-3">
-              <Flag className="text-amber-400" size={28} />
-              <h2 className="text-2xl font-bold text-white">{t('debug.debug_flags')}</h2>
+              <Flag className="text-tertiary" size={28} />
+              <h2 className="text-2xl font-bold text-on-surface">{t('debug.debug_flags')}</h2>
               {debugFlags.length > 0 && (
-                <span className="text-sm bg-dark-700 text-dark-300 px-2.5 py-0.5 rounded-full">{debugFlags.length}</span>
+                <span className="text-sm bg-surface-container-highest text-on-surface-variant px-2.5 py-0.5 rounded-m3-full">{debugFlags.length}</span>
               )}
             </div>
-            <ChevronDown size={24} className={`text-dark-400 transform transition-transform ${debugFlagsOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown size={24} className={`text-on-surface-variant transform transition-transform ${debugFlagsOpen ? 'rotate-180' : ''}`} />
           </button>
 
           {debugFlagsOpen && <div className="mt-6">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700">
+              <div className="bg-surface-container rounded-m3-md p-4 border border-outline-variant">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-amber-500/20 rounded-lg">
-                    <Flag className="text-amber-400" size={20} />
+                  <div className="p-2 bg-tertiary-container text-on-tertiary-container rounded-m3-md">
+                    <Flag size={20} />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-white">{debugFlags.length}</p>
-                    <p className="text-sm text-dark-300">{t('debug.total_flags')}</p>
+                    <p className="text-2xl font-bold text-on-surface">{debugFlags.length}</p>
+                    <p className="text-sm text-on-surface-variant">{t('debug.total_flags')}</p>
                   </div>
                 </div>
               </div>
-              <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700">
+              <div className="bg-surface-container rounded-m3-md p-4 border border-outline-variant">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-red-500/20 rounded-lg">
-                    <XCircle className="text-red-400" size={20} />
+                  <div className="p-2 bg-error-container text-on-error-container rounded-m3-md">
+                    <XCircle size={20} />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-white">{debugFlags.filter(f => f.status === 'open').length}</p>
-                    <p className="text-sm text-dark-300">{t('admin.open')}</p>
+                    <p className="text-2xl font-bold text-on-surface">{debugFlags.filter(f => f.status === 'open').length}</p>
+                    <p className="text-sm text-on-surface-variant">{t('admin.open')}</p>
                   </div>
                 </div>
               </div>
-              <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700">
+              <div className="bg-surface-container rounded-m3-md p-4 border border-outline-variant">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-500/20 rounded-lg">
-                    <Search className="text-blue-400" size={20} />
+                  <div className="p-2 bg-secondary-container text-on-secondary-container rounded-m3-md">
+                    <Search size={20} />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-white">{debugFlags.filter(f => f.status === 'investigating').length}</p>
-                    <p className="text-sm text-dark-300">{t('debug.investigating')}</p>
+                    <p className="text-2xl font-bold text-on-surface">{debugFlags.filter(f => f.status === 'investigating').length}</p>
+                    <p className="text-sm text-on-surface-variant">{t('debug.investigating')}</p>
                   </div>
                 </div>
               </div>
-              <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700">
+              <div className="bg-surface-container rounded-m3-md p-4 border border-outline-variant">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-500/20 rounded-lg">
-                    <CheckCircle className="text-green-400" size={20} />
+                  <div className="p-2 bg-success-container text-on-success-container rounded-m3-md">
+                    <CheckCircle size={20} />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-white">{debugFlags.filter(f => f.status === 'resolved').length}</p>
-                    <p className="text-sm text-dark-300">{t('admin.resolved')}</p>
+                    <p className="text-2xl font-bold text-on-surface">{debugFlags.filter(f => f.status === 'resolved').length}</p>
+                    <p className="text-sm text-on-surface-variant">{t('admin.resolved')}</p>
                   </div>
                 </div>
               </div>
@@ -894,11 +870,11 @@ const AdminPanel: React.FC = () => {
 
             {/* Filter */}
             <div className="mb-6">
-              <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.status_label')}</label>
+              <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.status_label')}</label>
               <select
                 value={debugFilter}
                 onChange={(e) => setDebugFilter(e.target.value)}
-                className="px-4 py-2 bg-dark-800/50 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-amber-500"
+                className="px-4 py-2 bg-surface-container border border-outline-variant rounded-m3-md text-on-surface focus:outline-none focus:border-primary-500"
               >
                 <option value="all">{t('debug.select_all')}</option>
                 <option value="open">{t('debug.select_open')}</option>
@@ -910,17 +886,17 @@ const AdminPanel: React.FC = () => {
 
             {/* Debug Flags Table */}
             {debugLoading ? (
-              <div className="text-center py-12 text-dark-400">{t('debug.loading_flags')}</div>
+              <div className="text-center py-12 text-on-surface-variant">{t('debug.loading_flags')}</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-dark-700">
-                      <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('debug.table_comment')}</th>
-                      <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('debug.table_route')}</th>
-                      <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('debug.table_status')}</th>
-                      <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('debug.table_date')}</th>
-                      <th className="text-left py-3 px-4 text-dark-300 font-semibold text-sm">{t('debug.table_actions')}</th>
+                    <tr className="border-b border-outline-variant">
+                      <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('debug.table_comment')}</th>
+                      <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('debug.table_route')}</th>
+                      <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('debug.table_status')}</th>
+                      <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('debug.table_date')}</th>
+                      <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('debug.table_actions')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -933,18 +909,18 @@ const AdminPanel: React.FC = () => {
                         return b.createdAt - a.createdAt;
                       })
                       .map(flag => (
-                        <tr key={flag.id} className="border-b border-dark-700/50 hover:bg-dark-700/30 transition-colors">
-                          <td className="py-3 px-4 text-white font-medium max-w-xs truncate">{flag.comment}</td>
-                          <td className="py-3 px-4 text-dark-400 font-mono text-sm">{flag.route || '-'}</td>
+                        <tr key={flag.id} className="border-b border-outline-variant hover:bg-surface-container transition-colors">
+                          <td className="py-3 px-4 text-on-surface font-medium max-w-xs truncate">{flag.comment}</td>
+                          <td className="py-3 px-4 text-on-surface-variant font-mono text-sm">{flag.route || '-'}</td>
                           <td className="py-3 px-4">
                             <select
                               value={flag.status}
                               onChange={(e) => handleUpdateDebugStatus(flag.id, e.target.value)}
-                              className={`px-2 py-1 rounded text-xs font-semibold border-none cursor-pointer outline-none ${
-                                flag.status === 'open' ? 'bg-red-500/20 text-red-400' :
-                                flag.status === 'investigating' ? 'bg-blue-500/20 text-blue-400' :
-                                flag.status === 'resolved' ? 'bg-green-500/20 text-green-400' :
-                                'bg-gray-700 text-gray-300'
+                              className={`px-2 py-1 rounded-m3-sm text-xs font-semibold border-none cursor-pointer outline-none ${
+                                flag.status === 'open' ? 'bg-error-container text-on-error-container' :
+                                flag.status === 'investigating' ? 'bg-secondary-container text-on-secondary-container' :
+                                flag.status === 'resolved' ? 'bg-success-container text-on-success-container' :
+                                'bg-surface-container-highest text-on-surface-variant'
                               }`}
                             >
                               <option value="open">{t('debug.status_open')}</option>
@@ -953,36 +929,33 @@ const AdminPanel: React.FC = () => {
                               <option value="dismissed">{t('debug.status_dismissed')}</option>
                             </select>
                           </td>
-                          <td className="py-3 px-4 text-dark-400 text-sm">
+                          <td className="py-3 px-4 text-on-surface-variant text-sm">
                             {new Date(flag.createdAt).toLocaleDateString()}
                           </td>
                           <td className="py-3 px-4">
                             <div className="flex gap-2">
-                              <button
+                              <IconButton
+                                variant="tonal"
                                 onClick={() => setSelectedDebugFlag(flag)}
-                                className="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors"
-                                title={t('admin.view_details')}
+                                label={t('admin.view_details')}
                               >
                                 <Eye size={16} />
-                              </button>
-                              <button
+                              </IconButton>
+                              <IconButton
+                                variant="tonal"
                                 onClick={() => handleCopyForAI(flag)}
-                                className={`p-2 rounded-lg transition-colors ${
-                                  copiedFlagId === flag.id
-                                    ? 'bg-green-500/30 text-green-400'
-                                    : 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-400'
-                                }`}
-                                title={t('debug.copy_for_ai')}
+                                className={copiedFlagId === flag.id ? 'text-success-500' : 'text-tertiary'}
+                                label={t('debug.copy_for_ai')}
                               >
                                 <Copy size={16} />
-                              </button>
-                              <button
+                              </IconButton>
+                              <IconButton
                                 onClick={() => handleDeleteDebugFlag(flag.id)}
-                                className="p-2 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 rounded-lg transition-colors"
-                                title={t('common.delete')}
+                                className="text-error-500"
+                                label={t('common.delete')}
                               >
                                 <Trash2 size={16} />
-                              </button>
+                              </IconButton>
                             </div>
                           </td>
                         </tr>
@@ -992,40 +965,35 @@ const AdminPanel: React.FC = () => {
               </div>
             )}
           </div>}
+          </Card>
         </motion.div>
 
         {/* Debug Flag Details Modal */}
         {selectedDebugFlag && (
-          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-            <div className="glass-card rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="m3-scrim">
+            <div className="m3-dialog max-w-4xl w-full max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-white">{t('debug.flag_details')}</h3>
+                <h3 className="text-2xl font-bold text-on-surface">{t('debug.flag_details')}</h3>
                 <div className="flex items-center gap-2">
-                  <button
+                  <Button
+                    size="sm"
+                    variant={copiedFlagId === selectedDebugFlag.id ? 'success' : 'tonal'}
+                    icon={<Copy size={16} />}
                     onClick={() => handleCopyForAI(selectedDebugFlag)}
-                    className={`px-4 py-2 rounded-lg font-semibold text-sm transition-colors flex items-center gap-2 ${
-                      copiedFlagId === selectedDebugFlag.id
-                        ? 'bg-green-500/30 text-green-400'
-                        : 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-400'
-                    }`}
                   >
-                    <Copy size={16} />
                     {copiedFlagId === selectedDebugFlag.id ? t('debug.copied') : t('debug.copy_for_ai')}
-                  </button>
-                  <button
-                    onClick={() => setSelectedDebugFlag(null)}
-                    className="p-2 hover:bg-dark-700/50 rounded-lg transition-colors"
-                  >
-                    <XCircle size={24} className="text-gray-400" />
-                  </button>
+                  </Button>
+                  <IconButton label={t('common.close')} onClick={() => setSelectedDebugFlag(null)}>
+                    <XCircle size={24} />
+                  </IconButton>
                 </div>
               </div>
 
               <div className="space-y-6">
                 {/* Comment */}
                 <div>
-                  <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.description')}</label>
-                  <p className="text-white bg-dark-800/50 rounded-lg p-4 border border-dark-700 whitespace-pre-wrap">
+                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.description')}</label>
+                  <p className="text-on-surface bg-surface-container rounded-m3-md p-4 border border-outline-variant whitespace-pre-wrap">
                     {selectedDebugFlag.comment}
                   </p>
                 </div>
@@ -1033,11 +1001,11 @@ const AdminPanel: React.FC = () => {
                 {/* Screenshot */}
                 {selectedDebugFlag.screenshotUrl && (
                   <div>
-                    <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.screenshot')}</label>
+                    <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.screenshot')}</label>
                     <img
                       src={selectedDebugFlag.screenshotUrl}
                       alt="Debug screenshot"
-                      className="w-full rounded-lg border border-dark-700 cursor-pointer hover:border-amber-500 transition-colors"
+                      className="w-full rounded-m3-md border border-outline-variant cursor-pointer hover:border-primary-500 transition-colors"
                       onClick={() => window.open(selectedDebugFlag.screenshotUrl, '_blank')}
                     />
                   </div>
@@ -1046,11 +1014,11 @@ const AdminPanel: React.FC = () => {
                 {/* Browser Info */}
                 {selectedDebugFlag.browserInfo && (
                   <div>
-                    <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.browser_info')}</label>
-                    <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700 text-sm">
-                      <p className="text-dark-400 mb-1"><span className="text-white font-medium">{t('admin.user_agent')}:</span> {selectedDebugFlag.browserInfo.userAgent}</p>
-                      <p className="text-dark-400 mb-1"><span className="text-white font-medium">{t('admin.screen')}:</span> {selectedDebugFlag.browserInfo.screenResolution}</p>
-                      <p className="text-dark-400"><span className="text-white font-medium">{t('admin.viewport')}:</span> {selectedDebugFlag.browserInfo.viewport}</p>
+                    <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.browser_info')}</label>
+                    <div className="bg-surface-container rounded-m3-md p-4 border border-outline-variant text-sm">
+                      <p className="text-on-surface-variant mb-1"><span className="text-on-surface font-medium">{t('admin.user_agent')}:</span> {selectedDebugFlag.browserInfo.userAgent}</p>
+                      <p className="text-on-surface-variant mb-1"><span className="text-on-surface font-medium">{t('admin.screen')}:</span> {selectedDebugFlag.browserInfo.screenResolution}</p>
+                      <p className="text-on-surface-variant"><span className="text-on-surface font-medium">{t('admin.viewport')}:</span> {selectedDebugFlag.browserInfo.viewport}</p>
                     </div>
                   </div>
                 )}
@@ -1058,8 +1026,8 @@ const AdminPanel: React.FC = () => {
                 {/* Route */}
                 {selectedDebugFlag.route && (
                   <div>
-                    <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.route')}</label>
-                    <p className="text-white bg-dark-800/50 rounded-lg p-3 border border-dark-700 font-mono text-sm">
+                    <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.route')}</label>
+                    <p className="text-on-surface bg-surface-container rounded-m3-md p-3 border border-outline-variant font-mono text-sm">
                       {selectedDebugFlag.route}
                     </p>
                   </div>
@@ -1068,8 +1036,8 @@ const AdminPanel: React.FC = () => {
                 {/* Game State */}
                 {!!selectedDebugFlag.gameState && (
                   <div>
-                    <label className="block text-sm font-semibold text-dark-300 mb-2">{t('debug.game_state')}</label>
-                    <pre className="text-white bg-dark-800/50 rounded-lg p-4 border border-dark-700 font-mono text-xs overflow-x-auto">
+                    <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('debug.game_state')}</label>
+                    <pre className="text-on-surface bg-surface-container rounded-m3-md p-4 border border-outline-variant font-mono text-xs overflow-x-auto">
                       {JSON.stringify(selectedDebugFlag.gameState, null, 2)}
                     </pre>
                   </div>
@@ -1077,31 +1045,31 @@ const AdminPanel: React.FC = () => {
 
                 {/* Log Entries */}
                 <div>
-                  <label className="block text-sm font-semibold text-dark-300 mb-2">
+                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">
                     {t('debug.log_entries')} ({selectedDebugFlag.logEntries?.length || 0})
                   </label>
                   {selectedDebugFlag.logEntries && selectedDebugFlag.logEntries.length > 0 ? (
-                    <div className="bg-dark-900/80 rounded-lg border border-dark-700 max-h-80 overflow-y-auto p-3 font-mono text-xs">
+                    <div className="bg-surface-container-low rounded-m3-md border border-outline-variant max-h-80 overflow-y-auto p-3 font-mono text-xs">
                       {selectedDebugFlag.logEntries.map((entry, i) => (
                         <div key={i} className={`py-0.5 ${
-                          entry.level === 'error' ? 'text-red-400' :
-                          entry.level === 'warn' ? 'text-yellow-400' :
-                          'text-dark-300'
+                          entry.level === 'error' ? 'text-error-500' :
+                          entry.level === 'warn' ? 'text-tertiary' :
+                          'text-on-surface-variant'
                         }`}>
-                          <span className="text-dark-500">[{entry.timestamp.split('T')[1]?.slice(0, 12)}]</span>
+                          <span className="text-on-surface-variant/60">[{entry.timestamp.split('T')[1]?.slice(0, 12)}]</span>
                           {' '}
                           <span className={`font-semibold ${
-                            entry.level === 'error' ? 'text-red-400' :
-                            entry.level === 'warn' ? 'text-yellow-400' :
-                            entry.level === 'info' ? 'text-blue-400' :
-                            'text-dark-500'
+                            entry.level === 'error' ? 'text-error-500' :
+                            entry.level === 'warn' ? 'text-tertiary' :
+                            entry.level === 'info' ? 'text-primary' :
+                            'text-on-surface-variant/60'
                           }`}>{entry.level.toUpperCase().padEnd(5)}</span>
                           {' '}
-                          <span className="text-amber-400/70">[{entry.category}]</span>
+                          <span className="text-tertiary/70">[{entry.category}]</span>
                           {' '}
                           {entry.message}
                           {entry.data != null && (
-                            <div className="text-dark-500 pl-4 break-all">
+                            <div className="text-on-surface-variant/60 pl-4 break-all">
                               {String(JSON.stringify(entry.data)).slice(0, 200)}
                             </div>
                           )}
@@ -1109,17 +1077,17 @@ const AdminPanel: React.FC = () => {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-dark-500 text-sm">{t('debug.no_logs')}</p>
+                    <p className="text-on-surface-variant text-sm">{t('debug.no_logs')}</p>
                   )}
                 </div>
 
                 {/* Admin Notes */}
                 <div>
-                  <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.admin_notes')}</label>
+                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.admin_notes')}</label>
                   <textarea
                     defaultValue={selectedDebugFlag.adminNotes || ''}
                     onBlur={(e) => handleUpdateDebugNotes(selectedDebugFlag.id, e.target.value)}
-                    className="w-full px-4 py-3 bg-dark-800/50 border border-dark-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 resize-none"
+                    className="w-full px-4 py-3 bg-surface-container border border-outline-variant rounded-m3-md text-on-surface placeholder-on-surface-variant focus:outline-none focus:border-primary-500 resize-none"
                     rows={3}
                     placeholder={t('admin.admin_notes_placeholder')}
                   />
@@ -1127,23 +1095,18 @@ const AdminPanel: React.FC = () => {
 
                 {/* Status Update */}
                 <div>
-                  <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.update_status')}</label>
+                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.update_status')}</label>
                   <div className="flex gap-2">
                     {(['open', 'investigating', 'resolved', 'dismissed'] as const).map(status => (
-                      <button
+                      <Button
                         key={status}
+                        fullWidth
+                        size="sm"
+                        variant={selectedDebugFlag.status === status ? 'filled' : 'tonal'}
                         onClick={() => handleUpdateDebugStatus(selectedDebugFlag.id, status)}
-                        className={`flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-colors ${
-                          selectedDebugFlag.status === status
-                            ? status === 'open' ? 'bg-red-500/30 text-red-400 border border-red-500'
-                            : status === 'investigating' ? 'bg-blue-500/30 text-blue-400 border border-blue-500'
-                            : status === 'resolved' ? 'bg-green-500/30 text-green-400 border border-green-500'
-                            : 'bg-gray-700/50 text-gray-300 border border-gray-600'
-                            : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
-                        }`}
                       >
                         {t(`debug.status_${status}`)}
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 </div>
@@ -1154,27 +1117,31 @@ const AdminPanel: React.FC = () => {
 
         {/* Subscription Edit Modal */}
         {editingUser && (
-          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-            <div className="glass-card rounded-2xl p-6 max-w-2xl w-full">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-white">{t('admin.edit_subscription_title')}</h3>
-                <button
-                  onClick={() => setEditingUser(null)}
-                  className="p-2 hover:bg-dark-700/50 rounded-lg transition-colors"
-                >
-                  <XCircle size={24} className="text-gray-400" />
-                </button>
-              </div>
-
+          <Dialog
+            open={!!editingUser}
+            onClose={() => setEditingUser(null)}
+            title={t('admin.edit_subscription_title')}
+            widthClassName="max-w-2xl"
+            actions={
+              <>
+                <Button variant="text" onClick={() => setEditingUser(null)}>
+                  {t('common.cancel')}
+                </Button>
+                <Button variant="filled" onClick={handleUpdateSubscription}>
+                  {t('common.save')}
+                </Button>
+              </>
+            }
+          >
               <div className="space-y-4">
                 {/* User Info */}
-                <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700">
+                <div className="bg-surface-container rounded-m3-md p-4 border border-outline-variant">
                   <div className="flex items-center gap-3 mb-2">
                     {editingUser.avatar?.startsWith('http') ? (
                       <img
                         src={editingUser.avatar}
                         alt={editingUser.name}
-                        className="w-12 h-12 rounded-full object-cover ring-2 ring-white/10"
+                        className="w-12 h-12 rounded-full object-cover ring-2 ring-outline-variant"
                       />
                     ) : (
                       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-xl font-bold text-white">
@@ -1182,21 +1149,21 @@ const AdminPanel: React.FC = () => {
                       </div>
                     )}
                     <div>
-                      <p className="font-semibold text-white">{editingUser.name}</p>
-                      <p className="text-sm text-dark-400">{editingUser.email}</p>
+                      <p className="font-semibold text-on-surface">{editingUser.name}</p>
+                      <p className="text-sm text-on-surface-variant">{editingUser.email}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Status */}
                 <div>
-                  <label className="block text-sm font-semibold text-dark-300 mb-2">
+                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">
                     {t('admin.status_required')}
                   </label>
                   <select
                     value={editFormData.subscriptionStatus}
                     onChange={(e) => setEditFormData({ ...editFormData, subscriptionStatus: e.target.value })}
-                    className="w-full px-4 py-3 bg-dark-800/50 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                    className="w-full px-4 py-3 bg-surface-container border border-outline-variant rounded-m3-md text-on-surface focus:outline-none focus:border-primary-500"
                   >
                     <option value="expired">{t('admin.option_expired')}</option>
                     <option value="trial">{t('admin.option_trial')}</option>
@@ -1207,13 +1174,13 @@ const AdminPanel: React.FC = () => {
 
                 {/* Plan */}
                 <div>
-                  <label className="block text-sm font-semibold text-dark-300 mb-2">
+                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">
                     {t('admin.plan_label')}
                   </label>
                   <select
                     value={editFormData.subscriptionPlan}
                     onChange={(e) => setEditFormData({ ...editFormData, subscriptionPlan: e.target.value })}
-                    className="w-full px-4 py-3 bg-dark-800/50 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                    className="w-full px-4 py-3 bg-surface-container border border-outline-variant rounded-m3-md text-on-surface focus:outline-none focus:border-primary-500"
                   >
                     <option value="">{t('admin.plan_none')}</option>
                     <option value="monthly">{t('admin.plan_monthly')}</option>
@@ -1224,52 +1191,32 @@ const AdminPanel: React.FC = () => {
 
                 {/* Ends At */}
                 <div>
-                  <label className="block text-sm font-semibold text-dark-300 mb-2">
+                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">
                     {t('admin.expiry_date')}
                   </label>
                   <input
                     type="datetime-local"
                     value={editFormData.subscriptionEndsAt}
                     onChange={(e) => setEditFormData({ ...editFormData, subscriptionEndsAt: e.target.value })}
-                    className="w-full px-4 py-3 bg-dark-800/50 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-primary-500"
+                    className="w-full px-4 py-3 bg-surface-container border border-outline-variant rounded-m3-md text-on-surface focus:outline-none focus:border-primary-500"
                   />
-                  <p className="text-xs text-dark-400 mt-1">
+                  <p className="text-xs text-on-surface-variant mt-1">
                     {t('admin.expiry_hint')}
                   </p>
                 </div>
-
-                {/* Actions */}
-                <div className="flex gap-3 pt-4">
-                  <button
-                    onClick={() => setEditingUser(null)}
-                    className="flex-1 px-6 py-3 bg-dark-700 hover:bg-dark-600 text-white rounded-lg font-semibold transition-all"
-                  >
-                    {t('common.cancel')}
-                  </button>
-                  <button
-                    onClick={handleUpdateSubscription}
-                    className="flex-1 px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg font-semibold transition-all"
-                  >
-                    {t('common.save')}
-                  </button>
-                </div>
               </div>
-            </div>
-          </div>
+          </Dialog>
         )}
 
         {/* Bug Report Details Modal */}
         {selectedBugReport && (
-          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-            <div className="glass-card rounded-2xl p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="m3-scrim">
+            <div className="m3-dialog max-w-3xl w-full max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-white">{t('admin.bug_report_details')}</h3>
-                <button
-                  onClick={() => setSelectedBugReport(null)}
-                  className="p-2 hover:bg-dark-700/50 rounded-lg transition-colors"
-                >
-                  <XCircle size={24} className="text-gray-400" />
-                </button>
+                <h3 className="text-2xl font-bold text-on-surface">{t('admin.bug_report_details')}</h3>
+                <IconButton label={t('common.close')} onClick={() => setSelectedBugReport(null)}>
+                  <XCircle size={24} />
+                </IconButton>
               </div>
 
               <div className="space-y-6">
@@ -1277,24 +1224,24 @@ const AdminPanel: React.FC = () => {
                 <div>
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <h4 className="text-xl font-bold text-white mb-2">{selectedBugReport.title}</h4>
-                      <p className="text-dark-400 text-sm">
+                      <h4 className="text-xl font-bold text-on-surface mb-2">{selectedBugReport.title}</h4>
+                      <p className="text-on-surface-variant text-sm">
                         {t('admin.reported_by')} {selectedBugReport.userName} ({selectedBugReport.userEmail})
                       </p>
-                      <p className="text-dark-400 text-sm">
+                      <p className="text-on-surface-variant text-sm">
                         {new Date(selectedBugReport.createdAt).toLocaleString()}
                       </p>
                     </div>
                     <div className="flex gap-2">
-                      <span className={`px-3 py-1 rounded font-semibold text-sm ${
-                        selectedBugReport.severity === 'critical' ? 'bg-red-600/20 text-red-400' :
-                        selectedBugReport.severity === 'high' ? 'bg-orange-600/20 text-orange-400' :
-                        selectedBugReport.severity === 'medium' ? 'bg-yellow-600/20 text-yellow-400' :
-                        'bg-blue-600/20 text-blue-400'
+                      <span className={`px-3 py-1 rounded-m3-sm font-semibold text-sm ${
+                        selectedBugReport.severity === 'critical' ? 'bg-error-container text-on-error-container' :
+                        selectedBugReport.severity === 'high' ? 'bg-tertiary-container text-on-tertiary-container' :
+                        selectedBugReport.severity === 'medium' ? 'bg-secondary-container text-on-secondary-container' :
+                        'bg-surface-container-highest text-on-surface-variant'
                       }`}>
                         {selectedBugReport.severity.toUpperCase()}
                       </span>
-                      <span className="px-3 py-1 rounded font-semibold text-sm bg-dark-700 text-dark-300 capitalize">
+                      <span className="px-3 py-1 rounded-m3-sm font-semibold text-sm bg-surface-container-highest text-on-surface-variant capitalize">
                         {selectedBugReport.category}
                       </span>
                     </div>
@@ -1303,8 +1250,8 @@ const AdminPanel: React.FC = () => {
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.description')}</label>
-                  <p className="text-white bg-dark-800/50 rounded-lg p-4 border border-dark-700 whitespace-pre-wrap">
+                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.description')}</label>
+                  <p className="text-on-surface bg-surface-container rounded-m3-md p-4 border border-outline-variant whitespace-pre-wrap">
                     {selectedBugReport.description}
                   </p>
                 </div>
@@ -1312,19 +1259,19 @@ const AdminPanel: React.FC = () => {
                 {/* Screenshot */}
                 {selectedBugReport.screenshotUrl && (
                   <div>
-                    <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.screenshot')}</label>
+                    <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.screenshot')}</label>
                     <div className="relative group">
                       <img
                         src={selectedBugReport.screenshotUrl}
                         alt="Bug screenshot"
-                        className="w-full rounded-lg border border-dark-700 cursor-pointer hover:border-warning-500 transition-colors"
+                        className="w-full rounded-m3-md border border-outline-variant cursor-pointer hover:border-primary-500 transition-colors"
                         onClick={() => window.open(selectedBugReport.screenshotUrl, '_blank')}
                       />
                       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <a
                           href={selectedBugReport.screenshotUrl}
                           download={`bug-report-${selectedBugReport.id}.png`}
-                          className="px-3 py-1 bg-dark-900/90 hover:bg-dark-800 text-white text-sm rounded-lg transition-colors"
+                          className="px-3 py-1 bg-surface-container-highest hover:bg-surface-container-high text-on-surface text-sm rounded-m3-md transition-colors"
                           onClick={(e) => e.stopPropagation()}
                         >
                           {t('admin.download')}
@@ -1337,11 +1284,11 @@ const AdminPanel: React.FC = () => {
                 {/* Browser Info */}
                 {selectedBugReport.browserInfo && (
                   <div>
-                    <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.browser_info')}</label>
-                    <div className="bg-dark-800/50 rounded-lg p-4 border border-dark-700 text-sm">
-                      <p className="text-dark-400 mb-1"><span className="text-white font-medium">{t('admin.user_agent')}:</span> {selectedBugReport.browserInfo.userAgent}</p>
-                      <p className="text-dark-400 mb-1"><span className="text-white font-medium">{t('admin.screen')}:</span> {selectedBugReport.browserInfo.screenResolution}</p>
-                      <p className="text-dark-400"><span className="text-white font-medium">{t('admin.viewport')}:</span> {selectedBugReport.browserInfo.viewport}</p>
+                    <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.browser_info')}</label>
+                    <div className="bg-surface-container rounded-m3-md p-4 border border-outline-variant text-sm">
+                      <p className="text-on-surface-variant mb-1"><span className="text-on-surface font-medium">{t('admin.user_agent')}:</span> {selectedBugReport.browserInfo.userAgent}</p>
+                      <p className="text-on-surface-variant mb-1"><span className="text-on-surface font-medium">{t('admin.screen')}:</span> {selectedBugReport.browserInfo.screenResolution}</p>
+                      <p className="text-on-surface-variant"><span className="text-on-surface font-medium">{t('admin.viewport')}:</span> {selectedBugReport.browserInfo.viewport}</p>
                     </div>
                   </div>
                 )}
@@ -1349,8 +1296,8 @@ const AdminPanel: React.FC = () => {
                 {/* Route */}
                 {selectedBugReport.route && (
                   <div>
-                    <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.route')}</label>
-                    <p className="text-white bg-dark-800/50 rounded-lg p-3 border border-dark-700 font-mono text-sm">
+                    <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.route')}</label>
+                    <p className="text-on-surface bg-surface-container rounded-m3-md p-3 border border-outline-variant font-mono text-sm">
                       {selectedBugReport.route}
                     </p>
                   </div>
@@ -1358,11 +1305,11 @@ const AdminPanel: React.FC = () => {
 
                 {/* Admin Notes */}
                 <div>
-                  <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.admin_notes')}</label>
+                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.admin_notes')}</label>
                   <textarea
                     defaultValue={selectedBugReport.adminNotes || ''}
                     onBlur={(e) => handleUpdateBugNotes(selectedBugReport.id, e.target.value)}
-                    className="w-full px-4 py-3 bg-dark-800/50 border border-dark-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-warning-500 resize-none"
+                    className="w-full px-4 py-3 bg-surface-container border border-outline-variant rounded-m3-md text-on-surface placeholder-on-surface-variant focus:outline-none focus:border-primary-500 resize-none"
                     rows={4}
                     placeholder={t('admin.admin_notes_placeholder')}
                   />
@@ -1370,48 +1317,40 @@ const AdminPanel: React.FC = () => {
 
                 {/* Status Update */}
                 <div>
-                  <label className="block text-sm font-semibold text-dark-300 mb-2">{t('admin.update_status')}</label>
+                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.update_status')}</label>
                   <div className="flex gap-2">
-                    <button
+                    <Button
+                      fullWidth
+                      size="sm"
+                      variant={selectedBugReport.status === 'open' ? 'filled' : 'tonal'}
                       onClick={() => handleUpdateBugStatus(selectedBugReport.id, 'open')}
-                      className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-colors ${
-                        selectedBugReport.status === 'open'
-                          ? 'bg-red-500/30 text-red-400 border border-red-500'
-                          : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
-                      }`}
                     >
                       {t('admin.status_open')}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      fullWidth
+                      size="sm"
+                      variant={selectedBugReport.status === 'in_progress' ? 'filled' : 'tonal'}
                       onClick={() => handleUpdateBugStatus(selectedBugReport.id, 'in_progress')}
-                      className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-colors ${
-                        selectedBugReport.status === 'in_progress'
-                          ? 'bg-blue-500/30 text-blue-400 border border-blue-500'
-                          : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
-                      }`}
                     >
                       {t('admin.status_in_progress')}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      fullWidth
+                      size="sm"
+                      variant={selectedBugReport.status === 'resolved' ? 'filled' : 'tonal'}
                       onClick={() => handleUpdateBugStatus(selectedBugReport.id, 'resolved')}
-                      className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-colors ${
-                        selectedBugReport.status === 'resolved'
-                          ? 'bg-green-500/30 text-green-400 border border-green-500'
-                          : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
-                      }`}
                     >
                       {t('admin.status_resolved')}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      fullWidth
+                      size="sm"
+                      variant={selectedBugReport.status === 'closed' ? 'filled' : 'tonal'}
                       onClick={() => handleUpdateBugStatus(selectedBugReport.id, 'closed')}
-                      className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-colors ${
-                        selectedBugReport.status === 'closed'
-                          ? 'bg-gray-700/50 text-gray-300 border border-gray-600'
-                          : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
-                      }`}
                     >
                       {t('admin.status_closed')}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>

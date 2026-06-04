@@ -10,9 +10,9 @@ const TenantSelector: React.FC = () => {
   const [newTenantName, setNewTenantName] = useState('');
   const [newTenantAvatar, setNewTenantAvatar] = useState('👤');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
-  
+
   const avatarOptions = ['👤', '🎯', '🏆', '👑', '🔥', '⭐', '💪', '🎪', '🦅', '🚀', '💎', '🎨'];
-  
+
   const handleAddTenant = () => {
     if (newTenantName.trim()) {
       const tenant = addTenant(newTenantName.trim(), newTenantAvatar);
@@ -22,22 +22,22 @@ const TenantSelector: React.FC = () => {
       setShowNewTenant(false);
     }
   };
-  
+
   const handleDeleteTenant = (id: string) => {
     deleteTenant(id);
     setShowDeleteConfirm(null);
   };
-  
+
   if (currentTenant) {
     return null; // Don't show selector when a tenant is active
   }
-  
+
   return (
     <div className="min-h-dvh flex items-center justify-center p-4 gradient-mesh">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="max-w-2xl w-full glass-card rounded-xl shadow-2xl p-8 md:p-10"
+        className="max-w-2xl w-full m3-card m3-elevated rounded-m3-xl shadow-m3-3 p-8 md:p-10"
       >
         <div className="text-center mb-10">
           <motion.div
@@ -46,26 +46,34 @@ const TenantSelector: React.FC = () => {
             transition={{ duration: 0.8, ease: "easeInOut" }}
             className="inline-block mb-6"
           >
-            <div className="p-4 bg-gradient-to-br from-primary-500 to-accent-500 rounded-2xl shadow-lg">
-              <Users size={64} className="text-white" />
+            <div className="p-4 bg-primary-container rounded-m3-lg shadow-m3-1">
+              <Users size={64} className="text-on-primary-container" />
             </div>
           </motion.div>
-          <h1 className="text-5xl font-extrabold mb-3 bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent">
+          <h1
+            className="m3-display-small font-extrabold mb-3"
+            style={{
+              background: 'linear-gradient(135deg, var(--m3-primary), var(--m3-tertiary))',
+              WebkitBackgroundClip: 'text',
+              backgroundClip: 'text',
+              color: 'transparent',
+            }}
+          >
             Wähle dein Profil
           </h1>
-          <p className="text-dark-300 text-lg">
+          <p className="text-on-surface-variant m3-body-large">
             Deine Statistiken und Spiele werden separat gespeichert
           </p>
         </div>
-        
+
         <div className="space-y-4 mb-8">
           {tenants.length === 0 ? (
-            <div className="text-center py-12 glass-card rounded-xl border border-dark-700">
-              <div className="inline-block p-4 bg-dark-800 rounded-full mb-4">
-                <Users size={48} className="text-dark-600" />
+            <div className="text-center py-12 bg-surface-container rounded-m3-lg border border-outline-variant">
+              <div className="inline-block p-4 bg-surface-container-high rounded-m3-full mb-4">
+                <Users size={48} className="text-on-surface-variant" />
               </div>
-              <p className="text-white font-semibold text-lg">Noch keine Profile vorhanden</p>
-              <p className="text-dark-400 text-sm mt-2">Erstelle dein erstes Profil um zu starten</p>
+              <p className="text-on-surface font-semibold m3-title-medium">Noch keine Profile vorhanden</p>
+              <p className="text-on-surface-variant m3-body-small mt-2">Erstelle dein erstes Profil um zu starten</p>
             </div>
           ) : (
             tenants.map((tenant) => (
@@ -79,32 +87,32 @@ const TenantSelector: React.FC = () => {
               >
                 <button
                   onClick={() => setCurrentTenant(tenant)}
-                  className="w-full flex items-center gap-5 p-5 glass-card hover:glass-card-hover rounded-xl transition-all border-2 border-dark-700 hover:border-primary-500 shadow-lg"
+                  className="w-full flex items-center gap-5 p-5 bg-surface-container hover:bg-surface-container-high rounded-m3-lg transition-all border border-outline-variant hover:border-[var(--m3-primary)] shadow-m3-1"
                 >
-                  <div className="w-20 h-20 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center text-4xl shadow-lg">
+                  <div className="w-20 h-20 bg-primary-container rounded-m3-full flex items-center justify-center text-4xl shadow-m3-1">
                     {tenant.avatar}
                   </div>
                   <div className="flex-1 text-left">
-                    <h3 className="text-2xl font-bold text-white mb-1">{tenant.name}</h3>
-                    <p className="text-sm text-dark-400 flex items-center gap-2">
-                      <span className="w-2 h-2 bg-primary-500 rounded-full animate-pulse"></span>
+                    <h3 className="m3-title-large font-bold text-on-surface mb-1">{tenant.name}</h3>
+                    <p className="m3-body-small text-on-surface-variant flex items-center gap-2">
+                      <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
                       Zuletzt aktiv: {formatDate(tenant.lastActive)}
                     </p>
                   </div>
-                  <LogIn size={28} className="text-dark-500 group-hover:text-primary-400 transition-colors" />
+                  <LogIn size={28} className="text-on-surface-variant group-hover:text-primary transition-colors" />
                 </button>
-                
+
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowDeleteConfirm(tenant.id);
                   }}
-                  className="absolute top-3 right-3 p-2.5 bg-red-500/20 hover:bg-red-500/30 rounded-lg opacity-0 group-hover:opacity-100 transition-all border border-red-500/30 hover:border-red-500/50"
+                  className="absolute top-3 right-3 p-2.5 bg-error-container hover:opacity-90 rounded-m3-md opacity-0 group-hover:opacity-100 transition-all"
                   title="Profil löschen"
                 >
-                  <Trash2 size={18} className="text-red-400" />
+                  <Trash2 size={18} className="text-on-error-container" />
                 </button>
-                
+
                 {/* Delete Confirmation */}
                 <AnimatePresence>
                   {showDeleteConfirm === tenant.id && (
@@ -112,29 +120,29 @@ const TenantSelector: React.FC = () => {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="absolute inset-0 bg-dark-900/95 backdrop-blur-md rounded-xl flex items-center justify-center p-6 z-10"
+                      className="absolute inset-0 bg-surface-container-highest rounded-m3-lg flex items-center justify-center p-6 z-10"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div className="text-center">
-                        <div className="inline-block p-3 bg-red-500/20 rounded-full mb-4">
-                          <Trash2 size={32} className="text-red-400" />
+                        <div className="inline-block p-3 bg-error-container rounded-m3-full mb-4">
+                          <Trash2 size={32} className="text-on-error-container" />
                         </div>
-                        <p className="text-white font-bold text-lg mb-2">
+                        <p className="text-on-surface font-bold m3-title-medium mb-2">
                           Profil "{tenant.name}" wirklich löschen?
                         </p>
-                        <p className="text-red-400 text-sm mb-6">
+                        <p className="text-error m3-body-small mb-6">
                           ⚠️ Alle Daten gehen unwiderruflich verloren!
                         </p>
                         <div className="flex gap-3 justify-center">
                           <button
                             onClick={() => handleDeleteTenant(tenant.id)}
-                            className="px-6 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg font-semibold transition-all shadow-lg"
+                            className="px-6 py-2.5 bg-error hover:opacity-90 text-on-error rounded-m3-full font-semibold transition-all shadow-m3-1"
                           >
                             Löschen
                           </button>
                           <button
                             onClick={() => setShowDeleteConfirm(null)}
-                            className="px-6 py-2.5 bg-dark-700 hover:bg-dark-600 text-white rounded-lg font-semibold transition-all"
+                            className="px-6 py-2.5 bg-surface-container-high hover:bg-surface-container-highest text-on-surface rounded-m3-full font-semibold transition-all"
                           >
                             Abbrechen
                           </button>
@@ -147,13 +155,13 @@ const TenantSelector: React.FC = () => {
             ))
           )}
         </div>
-        
+
         {!showNewTenant ? (
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setShowNewTenant(true)}
-            className="w-full py-5 bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all shadow-lg"
+            className="w-full py-5 bg-primary hover:opacity-90 text-on-primary rounded-m3-full font-bold text-lg flex items-center justify-center gap-3 transition-all shadow-m3-1"
           >
             <Plus size={28} />
             Neues Profil erstellen
@@ -163,24 +171,24 @@ const TenantSelector: React.FC = () => {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             transition={{ duration: 0.3 }}
-            className="glass-card rounded-xl p-6 space-y-5 border border-dark-700"
+            className="bg-surface-container rounded-m3-lg p-6 space-y-5 border border-outline-variant"
           >
             <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold text-white">Neues Profil</h3>
+              <h3 className="m3-title-large font-bold text-on-surface">Neues Profil</h3>
               <button
                 onClick={() => {
                   setShowNewTenant(false);
                   setNewTenantName('');
                   setNewTenantAvatar('👤');
                 }}
-                className="p-2 text-dark-400 hover:text-white hover:bg-dark-700 rounded-lg transition-all"
+                className="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-m3-md transition-all"
               >
                 <X size={22} />
               </button>
             </div>
-            
+
             <div>
-              <label className="block text-sm font-semibold text-white mb-3">
+              <label className="block m3-label-large font-semibold text-on-surface mb-3">
                 Avatar wählen
               </label>
               <div className="grid grid-cols-6 gap-3">
@@ -190,10 +198,10 @@ const TenantSelector: React.FC = () => {
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setNewTenantAvatar(avatar)}
-                    className={`p-4 text-3xl rounded-xl transition-all ${
+                    className={`p-4 text-3xl rounded-m3-md transition-all ${
                       newTenantAvatar === avatar
-                        ? 'bg-gradient-to-br from-primary-500 to-accent-500 shadow-lg ring-2 ring-primary-400'
-                        : 'bg-dark-800 hover:bg-dark-700 border border-dark-700'
+                        ? 'bg-primary-container shadow-m3-1 ring-2 ring-[var(--m3-primary)]'
+                        : 'bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant'
                     }`}
                   >
                     {avatar}
@@ -201,9 +209,9 @@ const TenantSelector: React.FC = () => {
                 ))}
               </div>
             </div>
-            
+
             <div>
-              <label className="block text-sm font-semibold text-white mb-3">
+              <label className="block m3-label-large font-semibold text-on-surface mb-3">
                 Profilname
               </label>
               <input
@@ -214,17 +222,17 @@ const TenantSelector: React.FC = () => {
                   if (e.key === 'Enter') handleAddTenant();
                 }}
                 placeholder="Dein Name..."
-                className="w-full px-4 py-3 bg-dark-800 border-2 border-dark-700 rounded-lg text-white placeholder-dark-500 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+                className="w-full px-4 py-3 bg-surface-container-high border border-outline rounded-m3-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-[var(--m3-primary)] transition-all"
                 autoFocus
               />
             </div>
-            
+
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleAddTenant}
               disabled={!newTenantName.trim()}
-              className="w-full py-4 bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 disabled:from-dark-700 disabled:to-dark-800 disabled:cursor-not-allowed text-white rounded-xl font-bold text-lg transition-all shadow-lg disabled:shadow-none"
+              className="w-full py-4 bg-success hover:opacity-90 disabled:bg-surface-container-high disabled:text-on-surface-variant disabled:cursor-not-allowed text-on-success rounded-m3-full font-bold text-lg transition-all shadow-m3-1 disabled:shadow-none"
             >
               Profil erstellen
             </motion.button>

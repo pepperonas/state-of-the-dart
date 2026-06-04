@@ -8,7 +8,7 @@ import { useGame } from '../../context/GameContext';
 import { generateMatchName } from '../../utils/matchNames';
 import { reconstructMatch } from '../../utils/matchReconstruction';
 import { getLocalGameSummaries, clearGameState, LocalGameSummary } from '../../utils/gameStorage';
-import BackButton from '../common/BackButton';
+import { BackButton, Button, Card } from '../common';
 
 interface ResumableMatch {
   id: string;
@@ -160,19 +160,19 @@ const ResumeGameScreen: React.FC = () => {
       <div className="max-w-2xl mx-auto">
         <BackButton onClick={() => navigate('/')} />
 
-        <h1 className="text-3xl font-bold text-white mb-6">
+        <h1 className="m3-headline-medium text-on-surface mb-6">
           {t('resume.title')}
         </h1>
 
         {loading ? (
           <div className="flex justify-center py-16">
-            <Loader2 className="animate-spin text-white" size={40} />
+            <Loader2 className="animate-spin text-on-surface" size={40} />
           </div>
         ) : isEmpty ? (
-          <div className="glass-card rounded-2xl p-8 text-center">
-            <Target size={48} className="text-dark-400 mx-auto mb-4" />
-            <p className="text-dark-300 text-lg">{t('resume.no_matches')}</p>
-          </div>
+          <Card variant="filled" className="p-8 text-center">
+            <Target size={48} className="text-on-surface-variant mx-auto mb-4" />
+            <p className="m3-body-large text-on-surface-variant">{t('resume.no_matches')}</p>
+          </Card>
         ) : (
           <AnimatePresence mode="popLayout">
             {allItems.map((item, index) => {
@@ -186,19 +186,20 @@ const ResumeGameScreen: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, x: -100 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
-                    className="glass-card rounded-2xl p-5 mb-4 border border-white/5"
+                    className="mb-4"
                   >
+                    <Card variant="elevated" className="p-5">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
-                          <h3 className="text-lg font-semibold text-white truncate">
+                          <h3 className="m3-title-medium text-on-surface truncate">
                             {generateMatchName(match.id)}
                           </h3>
                           <span
-                            className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${
+                            className={`m3-label-large text-xs px-2 py-0.5 rounded-m3-full shrink-0 ${
                               match.status === 'paused'
-                                ? 'bg-amber-500/20 text-amber-400'
-                                : 'bg-primary-500/20 text-primary-400'
+                                ? 'bg-tertiary-container text-on-tertiary-container'
+                                : 'bg-primary-container text-on-primary-container'
                             }`}
                           >
                             {match.status === 'paused'
@@ -207,14 +208,14 @@ const ResumeGameScreen: React.FC = () => {
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-1.5 text-dark-300 text-sm mb-1">
+                        <div className="flex items-center gap-1.5 text-on-surface-variant m3-body-medium mb-1">
                           <Users size={14} />
                           <span>
                             {match.players.map((p) => p.name).join(' vs ')}
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-1.5 text-dark-400 text-sm mb-1">
+                        <div className="flex items-center gap-1.5 text-on-surface-variant m3-body-medium mb-1">
                           <Target size={14} />
                           <span>
                             {match.settings.startScore || 501}
@@ -224,53 +225,57 @@ const ResumeGameScreen: React.FC = () => {
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-1.5 text-dark-400 text-sm">
+                        <div className="flex items-center gap-1.5 text-on-surface-variant m3-body-medium">
                           <Clock size={14} />
                           <span>{formatDate(match.startedAt)}</span>
                         </div>
                       </div>
 
                       <div className="flex flex-col gap-2 shrink-0">
-                        <button
+                        <Button
+                          variant="filled"
+                          size="sm"
                           onClick={() => handleResume(match.id)}
                           disabled={loadingMatchId === match.id}
-                          className="flex items-center gap-1.5 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                          loading={loadingMatchId === match.id}
+                          icon={<Play size={16} />}
                         >
-                          {loadingMatchId === match.id ? (
-                            <Loader2 size={16} className="animate-spin" />
-                          ) : (
-                            <Play size={16} />
-                          )}
                           {t('resume.continue')}
-                        </button>
+                        </Button>
 
                         {confirmDeleteId === match.id ? (
                           <div className="flex gap-1">
-                            <button
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              fullWidth
                               onClick={() => handleDelete(match.id)}
                               disabled={deletingMatchId === match.id}
-                              className="flex-1 px-2 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded text-xs font-medium transition-colors disabled:opacity-50"
+                              loading={deletingMatchId === match.id}
                             >
-                              {deletingMatchId === match.id ? '...' : t('resume.confirm_delete')}
-                            </button>
-                            <button
+                              {t('resume.confirm_delete')}
+                            </Button>
+                            <Button
+                              variant="text"
+                              size="sm"
                               onClick={() => setConfirmDeleteId(null)}
-                              className="px-2 py-1.5 bg-dark-600 hover:bg-dark-500 text-white rounded text-xs transition-colors"
                             >
                               {t('common.cancel')}
-                            </button>
+                            </Button>
                           </div>
                         ) : (
-                          <button
+                          <Button
+                            variant="danger"
+                            size="sm"
                             onClick={() => setConfirmDeleteId(match.id)}
-                            className="flex items-center justify-center gap-1.5 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400/70 hover:text-red-400 rounded-lg text-sm transition-colors"
+                            icon={<Trash2 size={16} />}
                           >
-                            <Trash2 size={16} />
                             {t('resume.delete')}
-                          </button>
+                          </Button>
                         )}
                       </div>
                     </div>
+                    </Card>
                   </motion.div>
                 );
               }
@@ -287,72 +292,79 @@ const ResumeGameScreen: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -100 }}
                   transition={{ duration: 0.3, delay: index * 0.05 }}
-                  className="glass-card rounded-2xl p-5 mb-4 border border-white/5"
+                  className="mb-4"
                 >
+                  <Card variant="elevated" className="p-5">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-lg font-semibold text-white truncate">
+                        <h3 className="m3-title-medium text-on-surface truncate">
                           {getGameTypeLabel(game.gameType)}
                         </h3>
-                        <span className="text-xs px-2 py-0.5 rounded-full font-medium shrink-0 bg-cyan-500/20 text-cyan-400">
+                        <span className="m3-label-large text-xs px-2 py-0.5 rounded-m3-full shrink-0 bg-secondary-container text-on-secondary-container">
                           {t('resume.local_game')}
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-1.5 text-dark-300 text-sm mb-1">
+                      <div className="flex items-center gap-1.5 text-on-surface-variant m3-body-medium mb-1">
                         <Users size={14} />
                         <span>{game.players.join(' vs ')}</span>
                       </div>
 
                       {game.progressText && (
-                        <div className="flex items-center gap-1.5 text-dark-400 text-sm mb-1">
+                        <div className="flex items-center gap-1.5 text-on-surface-variant m3-body-medium mb-1">
                           <Target size={14} />
                           <span>{getProgressText(game)}</span>
                         </div>
                       )}
 
-                      <div className="flex items-center gap-1.5 text-dark-400 text-sm">
+                      <div className="flex items-center gap-1.5 text-on-surface-variant m3-body-medium">
                         <Clock size={14} />
                         <span>{formatDate(game.savedAt)}</span>
                       </div>
                     </div>
 
                     <div className="flex flex-col gap-2 shrink-0">
-                      <button
+                      <Button
+                        variant="filled"
+                        size="sm"
                         onClick={() => handleResumeLocal(game)}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-sm font-medium transition-colors"
+                        icon={<Play size={16} />}
                       >
-                        <Play size={16} />
                         {t('resume.continue')}
-                      </button>
+                      </Button>
 
                       {confirmDeleteId === deleteKey ? (
                         <div className="flex gap-1">
-                          <button
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            fullWidth
                             onClick={() => handleDeleteLocal(game.storageKey)}
-                            className="flex-1 px-2 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded text-xs font-medium transition-colors"
                           >
                             {t('resume.confirm_delete')}
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            variant="text"
+                            size="sm"
                             onClick={() => setConfirmDeleteId(null)}
-                            className="px-2 py-1.5 bg-dark-600 hover:bg-dark-500 text-white rounded text-xs transition-colors"
                           >
                             {t('common.cancel')}
-                          </button>
+                          </Button>
                         </div>
                       ) : (
-                        <button
+                        <Button
+                          variant="danger"
+                          size="sm"
                           onClick={() => setConfirmDeleteId(deleteKey)}
-                          className="flex items-center justify-center gap-1.5 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400/70 hover:text-red-400 rounded-lg text-sm transition-colors"
+                          icon={<Trash2 size={16} />}
                         >
-                          <Trash2 size={16} />
                           {t('resume.delete')}
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>
+                  </Card>
                 </motion.div>
               );
             })}

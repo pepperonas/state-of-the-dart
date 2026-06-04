@@ -12,7 +12,7 @@ import { api } from '../../services/api';
 import { formatDate, formatDateTime } from '../../utils/dateUtils';
 import { Match } from '../../types';
 import MatchDetailModal from './MatchDetailModal';
-import BackButton from '../common/BackButton';
+import { BackButton, Button, Card } from '../common';
 
 interface RecentActivity {
   id: string;
@@ -283,7 +283,7 @@ const Dashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-dvh flex items-center justify-center gradient-mesh">
-        <Loader className="animate-spin text-primary-400" size={48} />
+        <Loader className="animate-spin text-primary" size={48} />
       </div>
     );
   }
@@ -296,14 +296,14 @@ const Dashboard: React.FC = () => {
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">
+          <h1 className="m3-headline-medium font-bold text-on-surface mb-2">
             Willkommen zurück, {user?.name}! 👋
           </h1>
-          <p className="text-dark-300">
+          <p className="text-on-surface-variant">
             {hasActiveSubscription ? (
               user?.subscriptionStatus === 'lifetime' ? (
                 <span className="flex items-center gap-2">
-                  <Trophy className="text-amber-400" size={18} />
+                  <Trophy className="text-tertiary" size={18} />
                   <span>Lifetime Member</span>
                 </span>
               ) : (
@@ -311,106 +311,109 @@ const Dashboard: React.FC = () => {
               )
             ) : (
               <span>
-                🎁 Noch <strong className="text-primary-400">{trialDaysLeft} Tage</strong> Trial
+                🎁 Noch <strong className="text-primary">{trialDaysLeft} Tage</strong> Trial
               </span>
             )}
           </p>
           {mainPlayerId && (
-            <p className="text-sm text-dark-400 mt-1 flex items-center gap-1">
-              <Crown size={16} className="text-amber-400" />
-              Statistiken für: <strong className="text-white">{players.find(p => p.id === mainPlayerId)?.name || 'Unbekannt'}</strong>
+            <p className="m3-body-small text-on-surface-variant mt-1 flex items-center gap-1">
+              <Crown size={16} className="text-tertiary" />
+              Statistiken für: <strong className="text-on-surface">{players.find(p => p.id === mainPlayerId)?.name || 'Unbekannt'}</strong>
             </p>
           )}
         </div>
 
         {/* Trial Banner */}
         {user?.subscriptionStatus === 'trial' && trialDaysLeft > 0 && (
-          <div className="mb-8 glass-card p-4 rounded-xl bg-gradient-to-r from-primary-900/30 to-accent-900/30 border border-primary-500/30">
+          <Card variant="filled" className="mb-8 p-4 bg-primary-container text-on-primary-container">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-primary-500/20 flex items-center justify-center">
-                  <Clock size={24} className="text-primary-400" />
+                <div className="w-12 h-12 rounded-m3-full bg-surface-container-highest flex items-center justify-center">
+                  <Clock size={24} className="text-primary" />
                 </div>
                 <div>
-                  <p className="font-bold text-white">
+                  <p className="m3-title-medium font-bold text-on-primary-container">
                     Premium-Trial: Noch {trialDaysLeft} {trialDaysLeft === 1 ? 'Tag' : 'Tage'}
                   </p>
-                  <p className="text-sm text-dark-300">
+                  <p className="m3-body-small text-on-primary-container">
                     Genieße alle Premium-Features während deiner Testphase
                   </p>
                 </div>
               </div>
-              <button
+              <Button
+                variant="filled"
                 onClick={() => navigate('/pricing')}
-                className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105"
+                icon={<Crown size={20} />}
+                className="w-full sm:w-auto"
               >
-                <Crown size={20} />
                 Jetzt upgraden
-              </button>
+              </Button>
             </div>
-          </div>
+          </Card>
         )}
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-          <div className="glass-card p-4 rounded-xl">
+          <Card variant="elevated" className="p-4">
             <div className="text-3xl mb-2">🎯</div>
-            <p className="text-2xl font-bold text-white">{stats.totalMatches}</p>
-            <p className="text-sm text-dark-400">Matches</p>
-          </div>
+            <p className="m3-headline-small font-bold text-on-surface">{stats.totalMatches}</p>
+            <p className="m3-body-small text-on-surface-variant">Matches</p>
+          </Card>
 
-          <div className="glass-card p-4 rounded-xl">
+          <Card variant="elevated" className="p-4">
             <div className="text-3xl mb-2">🏆</div>
-            <p className="text-2xl font-bold text-white">{stats.totalWins}</p>
-            <p className="text-sm text-dark-400">Siege</p>
-          </div>
+            <p className="m3-headline-small font-bold text-on-surface">{stats.totalWins}</p>
+            <p className="m3-body-small text-on-surface-variant">Siege</p>
+          </Card>
 
-          <div className="glass-card p-4 rounded-xl">
+          <Card variant="elevated" className="p-4">
             <div className="text-3xl mb-2">📊</div>
-            <p className="text-2xl font-bold text-white">{stats.winRate.toFixed(0)}%</p>
-            <p className="text-sm text-dark-400">Win Rate</p>
-          </div>
+            <p className="m3-headline-small font-bold text-on-surface">{stats.winRate.toFixed(0)}%</p>
+            <p className="m3-body-small text-on-surface-variant">Win Rate</p>
+          </Card>
 
-          <div className="glass-card p-4 rounded-xl">
+          <Card variant="elevated" className="p-4">
             <div className="text-3xl mb-2">🔥</div>
-            <p className="text-2xl font-bold text-white">{stats.currentStreak}</p>
-            <p className="text-sm text-dark-400">Streak</p>
-          </div>
+            <p className="m3-headline-small font-bold text-on-surface">{stats.currentStreak}</p>
+            <p className="m3-body-small text-on-surface-variant">Streak</p>
+          </Card>
 
-          <div className="glass-card p-4 rounded-xl">
+          <Card variant="elevated" className="p-4">
             <div className="text-3xl mb-2">📈</div>
-            <p className="text-2xl font-bold text-white">{stats.averageScore.toFixed(1)}</p>
-            <p className="text-sm text-dark-400">Average</p>
-          </div>
+            <p className="m3-headline-small font-bold text-on-surface">{stats.averageScore.toFixed(1)}</p>
+            <p className="m3-body-small text-on-surface-variant">Average</p>
+          </Card>
 
-          <div className="glass-card p-4 rounded-xl">
+          <Card variant="elevated" className="p-4">
             <div className="text-3xl mb-2">⚡</div>
-            <p className="text-2xl font-bold text-white">{stats.total180s}</p>
-            <p className="text-sm text-dark-400">180s</p>
-          </div>
+            <p className="m3-headline-small font-bold text-on-surface">{stats.total180s}</p>
+            <p className="m3-body-small text-on-surface-variant">180s</p>
+          </Card>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Recent Activity */}
           <div className="lg:col-span-2">
-            <div className="glass-card p-6 rounded-xl">
-              <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+            <Card variant="elevated" className="p-6">
+              <h2 className="m3-title-large font-bold text-on-surface mb-6 flex items-center gap-2">
                 <Calendar size={24} />
                 Letzte Aktivitäten
               </h2>
 
               {activities.length === 0 ? (
-                <div className="text-center py-12 text-dark-400">
+                <div className="text-center py-12 text-on-surface-variant">
                   <Target size={48} className="mx-auto mb-4 opacity-50" />
                   <p>Noch keine Aktivitäten</p>
-                  <p className="text-sm mt-2">Starte dein erstes Spiel!</p>
+                  <p className="m3-body-small mt-2">Starte dein erstes Spiel!</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {activities.map((activity) => (
-                    <div
+                    <Card
+                      variant="filled"
+                      interactive
                       key={activity.id}
-                      className="flex items-center gap-4 p-4 bg-dark-800 rounded-lg hover:bg-dark-700 transition-all cursor-pointer"
+                      className="flex items-center gap-4 p-4 cursor-pointer"
                       onClick={() => {
                         if (activity.type === 'match') {
                           handleMatchClick(activity.id);
@@ -419,55 +422,59 @@ const Dashboard: React.FC = () => {
                     >
                       <div className="text-3xl">{activity.icon}</div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-white font-semibold truncate">
+                        <p className="text-on-surface font-semibold truncate">
                           {activity.title}
                         </p>
-                        <p className="text-sm text-dark-400 truncate">
+                        <p className="m3-body-small text-on-surface-variant truncate">
                           {activity.description}
                         </p>
                       </div>
-                      <ArrowRight className="text-dark-500" size={20} />
-                    </div>
+                      <ArrowRight className="text-on-surface-variant" size={20} />
+                    </Card>
                   ))}
                 </div>
               )}
 
-              <button
+              <Button
+                variant="tonal"
+                fullWidth
                 onClick={() => navigate('/stats')}
-                className="w-full mt-4 py-3 bg-dark-800 hover:bg-dark-700 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition-all"
+                icon={<TrendingUp size={20} />}
+                className="mt-4"
               >
-                <TrendingUp size={20} />
                 Alle Statistiken anzeigen
-              </button>
-            </div>
+              </Button>
+            </Card>
           </div>
 
           {/* Quick Actions */}
           <div>
-            <div className="glass-card p-6 rounded-xl mb-6">
-              <h2 className="text-2xl font-bold text-white mb-4">Quick Actions</h2>
+            <Card variant="elevated" className="p-6 mb-6">
+              <h2 className="m3-title-large font-bold text-on-surface mb-4">Quick Actions</h2>
               <div className="space-y-3">
                 {quickActions.map((action, index) => {
                   const Icon = action.icon;
                   return (
-                    <button
+                    <Button
                       key={index}
+                      variant={index === 0 ? 'filled' : index === 1 ? 'accent' : 'success'}
+                      fullWidth
+                      size="lg"
                       onClick={action.onClick}
-                      className={`w-full py-4 bg-gradient-to-r ${action.gradient} hover:opacity-90 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition-all shadow-lg`}
+                      icon={<Icon size={20} />}
                     >
-                      <Icon size={20} />
                       {action.title}
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
-            </div>
+            </Card>
 
             {/* Motivation Card */}
-            <div className="glass-card p-6 rounded-xl bg-gradient-to-br from-primary-500/10 to-accent-500/10 border border-primary-500/30">
+            <Card variant="filled" className="p-6 bg-primary-container text-on-primary-container">
               <div className="text-center">
                 <div className="text-5xl mb-3">🎯</div>
-                <h3 className="text-xl font-bold text-white mb-2">
+                <h3 className="m3-title-medium font-bold text-on-primary-container mb-2">
                   {stats.currentStreak > 0 ? (
                     <>Du bist on fire! 🔥</>
                   ) : stats.totalMatches === 0 ? (
@@ -476,7 +483,7 @@ const Dashboard: React.FC = () => {
                     <>Keep going!</>
                   )}
                 </h3>
-                <p className="text-dark-300 text-sm">
+                <p className="text-on-primary-container m3-body-small">
                   {stats.currentStreak > 0
                     ? `${stats.currentStreak} Siege in Folge!`
                     : stats.totalMatches === 0
@@ -484,7 +491,7 @@ const Dashboard: React.FC = () => {
                     : 'Die nächste Serie wartet!'}
                 </p>
               </div>
-            </div>
+            </Card>
           </div>
         </div>
 
@@ -499,7 +506,7 @@ const Dashboard: React.FC = () => {
         {/* Loading Overlay for Match */}
         {loadingMatch && (
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-            <Loader className="animate-spin text-primary-400" size={48} />
+            <Loader className="animate-spin text-primary" size={48} />
           </div>
         )}
       </div>

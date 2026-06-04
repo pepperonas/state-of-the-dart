@@ -7,6 +7,17 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 🎨 Material 3 Expressive Redesign
+
+Komplette Umstellung der App auf **Material 3 Expressive** — neues Design-Token-Fundament + Primitiv-Bibliothek, alle ~60 Screens migriert.
+
+- **Token-Layer** (`src/styles/m3.css`): vollständige M3-Farbrollen (primary / secondary / **tertiary** = vibrantes Lila als Akzent / error / success + Surface-Container-Stufen + on-colors + outline) für Dark- und Light-Schema, Shape-Scale, 5-stufige Elevation, Motion-Springs/Easing, State-Layer-Opacitäten und die M3-Type-Scale. Eingebunden über `ThemeManager` (Klasse auf `<html>`/`<body>`).
+- **Tailwind-Tokens**: `bg-surface*`, `text-on-surface[-variant]`, `bg-*-container`/`text-on-*-container`, bare Roles (`bg-primary`/`bg-success`/`bg-tertiary`…), `border-outline[-variant]`, `rounded-m3-*`, `shadow-m3-1..5`. Type-Scale als CSS-Klassen (`m3-display/headline/title/body/label-*`). Inter-Font via Google Fonts geladen.
+- **Primitiv-Bibliothek** (`src/components/common/`): `Button` (7 Varianten, Pill + Press-Shape-Morph + State-Layer), `IconButton`, `Fab`, `Card`, `TextField`, `Switch`, `Chip`, `Dialog`. `BackButton` auf M3 (tonal) umgestellt.
+- **Motion** (`src/utils/motion.ts`): M3-Expressive Spring-Configs für framer-motion (Overshoot/Bounce) + Presets (`enterRise`, `staggerChild`, `pressable`, `dialogMotion`).
+- **App-Shell-Fix**: Root-Wrapper nutzte ein `dark:`-Gradient, aber das Theme-System setzt `.modern` (nie `.dark`) — alle `dark:`-Varianten waren wirkungslos. Shell jetzt token-basiert (`bg-surface`), `html`/`#root` ebenfalls token-getönt (kein weißer Rand mehr unter Vollbild-Screens).
+- Reine Präsentations-Migration: keine Logik-/Handler-/Reducer-Änderungen. Bundle bleibt auf Baseline (~147 KB gz), 294 Tests grün. Game-Logik (Bot-Refs, Undo-Timer, Dispatch-Reihenfolge, Navigation) byte-identisch.
+
 ### 🔊 Audio
 
 #### Leg/Match-Ansage war pseudo-"global gezählt"

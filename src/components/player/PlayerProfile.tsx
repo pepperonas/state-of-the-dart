@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Trophy, Target, TrendingUp, Award, Calendar, Zap, Star, Flame, Trash2, AlertTriangle, Loader } from 'lucide-react';
+import { Trophy, Target, TrendingUp, Award, Calendar, Zap, Star, Flame, Trash2, AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { usePlayer } from '../../context/PlayerContext';
 import { useAchievements } from '../../context/AchievementContext';
@@ -13,7 +13,7 @@ import { calculateAccuracyStats } from '../../utils/heatmap';
 import { formatDate } from '../../utils/dateUtils';
 import { ACHIEVEMENTS } from '../../types/achievements';
 import PlayerAvatar from './PlayerAvatar';
-import BackButton from '../common/BackButton';
+import { BackButton, Card, Button, Dialog } from '../common';
 
 const PlayerProfile: React.FC = () => {
   const { t } = useTranslation();
@@ -167,9 +167,9 @@ const PlayerProfile: React.FC = () => {
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-6xl mx-auto">
           <BackButton onClick={() => navigate('/players')} />
-          <div className="glass-card p-8 text-center">
-            <h2 className="text-2xl font-bold text-white mb-2">Spieler nicht gefunden</h2>
-          </div>
+          <Card variant="elevated" className="p-8 text-center">
+            <h2 className="m3-headline-small text-on-surface mb-2">Spieler nicht gefunden</h2>
+          </Card>
         </div>
       </div>
     );
@@ -186,138 +186,138 @@ const PlayerProfile: React.FC = () => {
         <BackButton onClick={() => navigate('/players')} />
 
         {/* Player Info Card */}
-        <div className="glass-card p-6 md:p-8 mb-6">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
           <div className="flex items-start gap-6">
             <PlayerAvatar avatar={player.avatar} name={player.name} size="xl" showBadge={true} />
             <div className="flex-1">
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">{player.name}</h1>
+              <h1 className="m3-headline-medium text-on-surface mb-2">{player.name}</h1>
               <div className="flex flex-wrap gap-3 mb-4">
-                <div className="flex items-center gap-2 text-primary-400">
+                <div className="flex items-center gap-2 text-primary">
                   <Trophy size={18} />
-                  <span className="font-semibold">{personalBests.totalWins} Siege</span>
+                  <span className="m3-label-large">{personalBests.totalWins} Siege</span>
                 </div>
-                <div className="flex items-center gap-2 text-accent-400">
+                <div className="flex items-center gap-2 text-tertiary">
                   <Star size={18} />
-                  <span className="font-semibold">{achievementProgress?.totalPoints || 0} Punkte</span>
+                  <span className="m3-label-large">{achievementProgress?.totalPoints || 0} Punkte</span>
                 </div>
-                <div className="flex items-center gap-2 text-success-400">
+                <div className="flex items-center gap-2 text-success-500">
                   <Award size={18} />
-                  <span className="font-semibold">{achievements.length}/{ACHIEVEMENTS.length} Achievements</span>
+                  <span className="m3-label-large">{achievements.length}/{ACHIEVEMENTS.length} Achievements</span>
                 </div>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-dark-900 rounded-lg p-3">
-                  <div className="text-xs text-dark-400 mb-1">Spiele</div>
-                  <div className="text-xl font-bold text-white">{personalBests.totalGamesPlayed}</div>
+                <div className="bg-surface-container rounded-m3-md p-3">
+                  <div className="m3-body-small text-on-surface-variant mb-1">Spiele</div>
+                  <div className="m3-title-large text-on-surface">{personalBests.totalGamesPlayed}</div>
                 </div>
-                <div className="bg-dark-900 rounded-lg p-3">
-                  <div className="text-xs text-dark-400 mb-1">Siegrate</div>
-                  <div className="text-xl font-bold text-success-400">{winRate.toFixed(1)}%</div>
+                <div className="bg-surface-container rounded-m3-md p-3">
+                  <div className="m3-body-small text-on-surface-variant mb-1">Siegrate</div>
+                  <div className="m3-title-large text-success-500">{winRate.toFixed(1)}%</div>
                 </div>
-                <div className="bg-dark-900 rounded-lg p-3">
-                  <div className="text-xs text-dark-400 mb-1">Best Avg</div>
-                  <div className="text-xl font-bold text-primary-400">
+                <div className="bg-surface-container rounded-m3-md p-3">
+                  <div className="m3-body-small text-on-surface-variant mb-1">Best Avg</div>
+                  <div className="m3-title-large text-primary">
                     {personalBests.bestAverage.value.toFixed(2)}
                   </div>
                 </div>
-                <div className="bg-dark-900 rounded-lg p-3">
-                  <div className="text-xs text-dark-400 mb-1">Total 180s</div>
-                  <div className="text-xl font-bold text-accent-400">{personalBests.total180s}</div>
+                <div className="bg-surface-container rounded-m3-md p-3">
+                  <div className="m3-body-small text-on-surface-variant mb-1">Total 180s</div>
+                  <div className="m3-title-large text-tertiary">{personalBests.total180s}</div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Personal Bests */}
-        <div className="glass-card p-6 mb-6">
-          <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-            <Zap className="text-amber-400" size={24} />
+        <Card variant="elevated" className="p-6 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
+            <Zap className="text-tertiary" size={24} />
             Personal Bests
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-dark-900 rounded-lg p-4 border-2 border-amber-500/30">
-              <div className="text-amber-400 text-sm mb-1">🎯 Höchster Score</div>
-              <div className="text-2xl font-bold text-white">{personalBests.highestScore.value}</div>
-              <div className="text-xs text-dark-500 mt-1">
+            <div className="bg-tertiary-container text-on-tertiary-container rounded-m3-md p-4">
+              <div className="m3-body-small mb-1">🎯 Höchster Score</div>
+              <div className="m3-title-large text-on-surface">{personalBests.highestScore.value}</div>
+              <div className="m3-body-small opacity-70 mt-1">
                 {formatDate(personalBests.highestScore.date)}
               </div>
             </div>
-            <div className="bg-dark-900 rounded-lg p-4 border-2 border-primary-500/30">
-              <div className="text-primary-400 text-sm mb-1">📊 Bester Average</div>
-              <div className="text-2xl font-bold text-white">
+            <div className="bg-primary-container text-on-primary-container rounded-m3-md p-4">
+              <div className="m3-body-small mb-1">📊 Bester Average</div>
+              <div className="m3-title-large text-on-surface">
                 {personalBests.bestAverage.value.toFixed(2)}
               </div>
-              <div className="text-xs text-dark-500 mt-1">
+              <div className="m3-body-small opacity-70 mt-1">
                 {formatDate(personalBests.bestAverage.date)}
               </div>
             </div>
-            <div className="bg-dark-900 rounded-lg p-4 border-2 border-accent-500/30">
-              <div className="text-accent-400 text-sm mb-1">🔥 Meiste 180s</div>
-              <div className="text-2xl font-bold text-white">{personalBests.most180s.value}</div>
-              <div className="text-xs text-dark-500 mt-1">
+            <div className="bg-tertiary-container text-on-tertiary-container rounded-m3-md p-4">
+              <div className="m3-body-small mb-1">🔥 Meiste 180s</div>
+              <div className="m3-title-large text-on-surface">{personalBests.most180s.value}</div>
+              <div className="m3-body-small opacity-70 mt-1">
                 {formatDate(personalBests.most180s.date)}
               </div>
             </div>
-            <div className="bg-dark-900 rounded-lg p-4 border-2 border-success-500/30">
-              <div className="text-success-400 text-sm mb-1">🎯 Höchster Checkout</div>
-              <div className="text-2xl font-bold text-white">{personalBests.highestCheckout.value}</div>
-              <div className="text-xs text-dark-500 mt-1">
+            <div className="bg-success-container text-on-success-container rounded-m3-md p-4">
+              <div className="m3-body-small mb-1">🎯 Höchster Checkout</div>
+              <div className="m3-title-large text-on-surface">{personalBests.highestCheckout.value}</div>
+              <div className="m3-body-small opacity-70 mt-1">
                 {personalBests.highestCheckout.value > 0
                   ? formatDate(personalBests.highestCheckout.date)
                   : '-'}
               </div>
             </div>
-            <div className="bg-dark-900 rounded-lg p-4 border-2 border-primary-500/30">
-              <div className="text-primary-400 text-sm mb-1">✅ Beste Checkout-Quote</div>
-              <div className="text-2xl font-bold text-white">
+            <div className="bg-primary-container text-on-primary-container rounded-m3-md p-4">
+              <div className="m3-body-small mb-1">✅ Beste Checkout-Quote</div>
+              <div className="m3-title-large text-on-surface">
                 {personalBests.bestCheckoutRate.value.toFixed(1)}%
               </div>
-              <div className="text-xs text-dark-500 mt-1">
+              <div className="m3-body-small opacity-70 mt-1">
                 {personalBests.bestCheckoutRate.value > 0
                   ? formatDate(personalBests.bestCheckoutRate.date)
                   : '-'}
               </div>
             </div>
-            <div className="bg-dark-900 rounded-lg p-4 border-2 border-amber-500/30">
-              <div className="text-amber-400 text-sm mb-1">⚡ Kürzestes Leg</div>
-              <div className="text-2xl font-bold text-white">
+            <div className="bg-tertiary-container text-on-tertiary-container rounded-m3-md p-4">
+              <div className="m3-body-small mb-1">⚡ Kürzestes Leg</div>
+              <div className="m3-title-large text-on-surface">
                 {personalBests.shortestLeg.darts < 999 ? `${personalBests.shortestLeg.darts} Darts` : '-'}
               </div>
-              <div className="text-xs text-dark-500 mt-1">
+              <div className="m3-body-small opacity-70 mt-1">
                 {personalBests.shortestLeg.darts < 999
                   ? formatDate(personalBests.shortestLeg.date)
                   : '-'}
               </div>
             </div>
-            <div className="bg-dark-900 rounded-lg p-4 border-2 border-success-500/30">
-              <div className="text-success-400 text-sm mb-1">🏆 Längste Siegesserie</div>
-              <div className="text-2xl font-bold text-white">{personalBests.longestWinningStreak.value}</div>
-              <div className="text-xs text-dark-500 mt-1">
+            <div className="bg-success-container text-on-success-container rounded-m3-md p-4">
+              <div className="m3-body-small mb-1">🏆 Längste Siegesserie</div>
+              <div className="m3-title-large text-on-surface">{personalBests.longestWinningStreak.value}</div>
+              <div className="m3-body-small opacity-70 mt-1">
                 {personalBests.longestWinningStreak.value > 0 ? 'Spiele' : '-'}
               </div>
             </div>
-            <div className="bg-dark-900 rounded-lg p-4 border-2 border-accent-500/30">
-              <div className="text-accent-400 text-sm mb-1">🎯 Meiste Legs gewonnen</div>
-              <div className="text-2xl font-bold text-white">{personalBests.mostLegsWon.value}</div>
-              <div className="text-xs text-dark-500 mt-1">
+            <div className="bg-tertiary-container text-on-tertiary-container rounded-m3-md p-4">
+              <div className="m3-body-small mb-1">🎯 Meiste Legs gewonnen</div>
+              <div className="m3-title-large text-on-surface">{personalBests.mostLegsWon.value}</div>
+              <div className="m3-body-small opacity-70 mt-1">
                 {personalBests.mostLegsWon.value > 0
                   ? formatDate(personalBests.mostLegsWon.date)
                   : '-'}
               </div>
             </div>
           </div>
-        </div>
+        </Card>
 
         <div className="grid md:grid-cols-2 gap-6 mb-6">
           {/* Performance Chart */}
-          <div className="glass-card p-6">
-            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+          <Card variant="elevated" className="p-6">
+            <h3 className="m3-title-medium text-on-surface mb-4 flex items-center gap-2">
               <TrendingUp size={20} />
               Performance Entwicklung
             </h3>
             {performanceData.length > 0 ? (
-              <div className="bg-dark-900 rounded-lg p-4">
+              <div className="bg-surface-container rounded-m3-md p-4">
                 <div className="h-[180px] sm:h-[250px]"><ResponsiveContainer width="100%" height="100%">
                   <LineChart data={performanceData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
@@ -343,17 +343,17 @@ const PlayerProfile: React.FC = () => {
                 </ResponsiveContainer></div>
               </div>
             ) : (
-              <div className="text-center text-dark-400 py-8">Noch keine Matches gespielt</div>
+              <div className="text-center text-on-surface-variant py-8">Noch keine Matches gespielt</div>
             )}
-          </div>
+          </Card>
 
           {/* Skills Radar */}
-          <div className="glass-card p-6">
-            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+          <Card variant="elevated" className="p-6">
+            <h3 className="m3-title-medium text-on-surface mb-4 flex items-center gap-2">
               <Target size={20} />
               Skill Profile
             </h3>
-            <div className="bg-dark-900 rounded-lg p-4">
+            <div className="bg-surface-container rounded-m3-md p-4">
               <div className="h-[180px] sm:h-[250px]"><ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="#404040" />
@@ -376,13 +376,13 @@ const PlayerProfile: React.FC = () => {
                 </RadarChart>
               </ResponsiveContainer></div>
             </div>
-          </div>
+          </Card>
         </div>
 
         {/* Heatmap Section - ALWAYS SHOW */}
-        <div className="glass-card p-6 mb-6">
-          <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-            <Flame className="text-primary-400" size={24} />
+        <Card variant="elevated" className="p-6 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
+            <Flame className="text-primary" size={24} />
             🎯 Wurf-Heatmap
           </h2>
           
@@ -391,33 +391,33 @@ const PlayerProfile: React.FC = () => {
               {/* Accuracy Stats */}
               {accuracyStats && (
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-                  <div className="bg-dark-900 rounded-lg p-3 text-center">
-                    <div className="text-sm text-dark-400 mb-1">Miss Rate</div>
-                    <div className="text-xl font-bold text-red-400">
+                  <div className="bg-surface-container rounded-m3-md p-3 text-center">
+                    <div className="m3-body-small text-on-surface-variant mb-1">Miss Rate</div>
+                    <div className="m3-title-large text-error">
                       {accuracyStats.missRate.toFixed(1)}%
                     </div>
                   </div>
-                  <div className="bg-dark-900 rounded-lg p-3 text-center">
-                    <div className="text-sm text-dark-400 mb-1">Triple Rate</div>
-                    <div className="text-xl font-bold text-success-400">
+                  <div className="bg-surface-container rounded-m3-md p-3 text-center">
+                    <div className="m3-body-small text-on-surface-variant mb-1">Triple Rate</div>
+                    <div className="m3-title-large text-success-500">
                       {accuracyStats.tripleRate.toFixed(1)}%
                     </div>
                   </div>
-                  <div className="bg-dark-900 rounded-lg p-3 text-center">
-                    <div className="text-sm text-dark-400 mb-1">Double Rate</div>
-                    <div className="text-xl font-bold text-primary-400">
+                  <div className="bg-surface-container rounded-m3-md p-3 text-center">
+                    <div className="m3-body-small text-on-surface-variant mb-1">Double Rate</div>
+                    <div className="m3-title-large text-primary">
                       {accuracyStats.doubleRate.toFixed(1)}%
                     </div>
                   </div>
-                  <div className="bg-dark-900 rounded-lg p-3 text-center">
-                    <div className="text-sm text-dark-400 mb-1">Lieblings-Feld</div>
-                    <div className="text-xl font-bold text-amber-400">
+                  <div className="bg-surface-container rounded-m3-md p-3 text-center">
+                    <div className="m3-body-small text-on-surface-variant mb-1">Lieblings-Feld</div>
+                    <div className="m3-title-large text-tertiary">
                       {accuracyStats.favoriteSegment || '-'}
                     </div>
                   </div>
-                  <div className="bg-dark-900 rounded-lg p-3 text-center">
-                    <div className="text-sm text-dark-400 mb-1">Total Darts</div>
-                    <div className="text-xl font-bold text-white">
+                  <div className="bg-surface-container rounded-m3-md p-3 text-center">
+                    <div className="m3-body-small text-on-surface-variant mb-1">Total Darts</div>
+                    <div className="m3-title-large text-on-surface">
                       {heatmapData.totalDarts}
                     </div>
                   </div>
@@ -427,77 +427,79 @@ const PlayerProfile: React.FC = () => {
               <DartboardHeatmapBlur heatmapData={heatmapData} size={500} />
             </>
           ) : (
-            <div className="bg-dark-900 rounded-lg p-8 text-center border-2 border-dashed border-dark-700">
+            <div className="bg-surface-container rounded-m3-md p-8 text-center border-2 border-dashed border-outline-variant">
               <div className="text-6xl mb-4">🎯</div>
-              <h3 className="text-xl font-bold text-white mb-2">Noch keine Wurf-Daten</h3>
-              <p className="text-dark-300 mb-4">
+              <h3 className="m3-title-medium text-on-surface mb-2">Noch keine Wurf-Daten</h3>
+              <p className="m3-body-medium text-on-surface-variant mb-4">
                 Spiele ein Match, um deine Wurf-Heatmap zu sehen!
               </p>
-              <p className="text-dark-400 text-sm">
+              <p className="m3-body-small text-on-surface-variant">
                 Die Heatmap zeigt dir, wo du am häufigsten triffst:
               </p>
-              <div className="flex items-center justify-center gap-4 mt-4 text-sm">
+              <div className="flex items-center justify-center gap-4 mt-4 m3-body-small">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 rounded bg-red-500"></div>
-                  <span className="text-dark-300">Hot-Zones (oft getroffen)</span>
+                  <span className="text-on-surface-variant">Hot-Zones (oft getroffen)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 rounded bg-blue-500"></div>
-                  <span className="text-dark-300">Cold-Zones (selten getroffen)</span>
+                  <span className="text-on-surface-variant">Cold-Zones (selten getroffen)</span>
                 </div>
               </div>
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Recent Achievements */}
         {achievements.length > 0 && (
-          <div className="glass-card p-6 mb-6">
-            <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-              <Award className="text-amber-400" size={24} />
+          <Card variant="elevated" className="p-6 mb-6">
+            <h2 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
+              <Award className="text-tertiary" size={24} />
               Neueste Achievements ({achievements.length}/{ACHIEVEMENTS.length})
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
               {achievements.slice(0, 10).map((achievement) => (
                 <div
                   key={achievement.id}
-                  className="bg-dark-900 rounded-lg p-3 text-center hover:bg-dark-800 transition-colors"
+                  className="bg-surface-container rounded-m3-md p-3 text-center hover:bg-surface-container-high transition-colors"
                 >
                   <div className="text-3xl mb-2">{achievement.icon}</div>
-                  <div className="text-sm font-semibold text-white mb-1">{achievement.name}</div>
-                  <div className="text-xs text-amber-400">+{achievement.points}</div>
+                  <div className="m3-body-medium text-on-surface mb-1">{achievement.name}</div>
+                  <div className="m3-body-small text-tertiary">+{achievement.points}</div>
                 </div>
               ))}
             </div>
             {achievements.length > 10 && (
-              <button
+              <Button
+                variant="text"
+                fullWidth
                 onClick={() => navigate('/achievements')}
-                className="mt-4 w-full py-2 text-primary-400 hover:text-primary-300 text-sm font-medium"
+                className="mt-4"
               >
                 Alle {achievements.length} Achievements anzeigen →
-              </button>
+              </Button>
             )}
-          </div>
+          </Card>
         )}
 
         {/* Career Timeline */}
         {personalBests.firstGameDate && (
-          <div className="glass-card p-6 mb-6">
-            <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+          <Card variant="elevated" className="p-6 mb-6">
+            <h2 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
               <Calendar size={24} />
               Karriere
             </h2>
-            <div className="flex items-center justify-between text-dark-300">
+            <div className="flex items-center justify-between text-on-surface-variant">
               <div>
-                <div className="text-sm text-dark-500">Erstes Spiel</div>
-                <div className="text-lg font-semibold text-white">
+                <div className="m3-body-small text-on-surface-variant">Erstes Spiel</div>
+                <div className="m3-title-medium text-on-surface">
                   {formatDate(personalBests.firstGameDate, { year: 'numeric', month: 'long', day: 'numeric' })}
                 </div>
               </div>
               <div className="flex-1 mx-4 h-1 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full" />
               <div className="text-right">
-                <div className="text-sm text-dark-500">Letztes Spiel</div>
-                <div className="text-lg font-semibold text-white">
+                <div className="m3-body-small text-on-surface-variant">Letztes Spiel</div>
+                <div className="m3-title-medium text-on-surface">
                   {personalBests.lastGameDate
                     ? formatDate(personalBests.lastGameDate, { year: 'numeric', month: 'long', day: 'numeric' })
                     : '-'}
@@ -506,92 +508,86 @@ const PlayerProfile: React.FC = () => {
             </div>
             <div className="mt-6 grid grid-cols-3 md:grid-cols-6 gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-white">{personalBests.totalGamesPlayed}</div>
-                <div className="text-xs text-dark-400 mt-1">Spiele</div>
+                <div className="m3-title-large text-on-surface">{personalBests.totalGamesPlayed}</div>
+                <div className="m3-body-small text-on-surface-variant mt-1">Spiele</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-success-400">{personalBests.totalWins}</div>
-                <div className="text-xs text-dark-400 mt-1">Siege</div>
+                <div className="m3-title-large text-success-500">{personalBests.totalWins}</div>
+                <div className="m3-body-small text-on-surface-variant mt-1">Siege</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-dark-400">{personalBests.totalLosses}</div>
-                <div className="text-xs text-dark-400 mt-1">Niederlagen</div>
+                <div className="m3-title-large text-on-surface-variant">{personalBests.totalLosses}</div>
+                <div className="m3-body-small text-on-surface-variant mt-1">Niederlagen</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary-400">{personalBests.totalLegsWon}</div>
-                <div className="text-xs text-dark-400 mt-1">Legs Gewonnen</div>
+                <div className="m3-title-large text-primary">{personalBests.totalLegsWon}</div>
+                <div className="m3-body-small text-on-surface-variant mt-1">Legs Gewonnen</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-accent-400">{personalBests.total180s}</div>
-                <div className="text-xs text-dark-400 mt-1">180s</div>
+                <div className="m3-title-large text-tertiary">{personalBests.total180s}</div>
+                <div className="m3-body-small text-on-surface-variant mt-1">180s</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-amber-400">{personalBests.totalCheckouts}</div>
-                <div className="text-xs text-dark-400 mt-1">Checkouts</div>
+                <div className="m3-title-large text-tertiary">{personalBests.totalCheckouts}</div>
+                <div className="m3-body-small text-on-surface-variant mt-1">Checkouts</div>
               </div>
             </div>
-          </div>
+          </Card>
         )}
 
         {/* Reset Stats */}
-        <div className="glass-card p-6 border border-red-500/20">
+        <Card variant="outlined" className="p-6 border-error-container">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-red-400 flex items-center gap-2">
+              <h3 className="m3-title-medium text-error flex items-center gap-2">
                 <AlertTriangle size={20} />
                 {t('players.reset_stats')}
               </h3>
-              <p className="text-sm text-dark-400 mt-1">
+              <p className="m3-body-small text-on-surface-variant mt-1">
                 {t('players.reset_stats_confirm_text', { name: player.name })}
               </p>
             </div>
-            <button
+            <Button
+              variant="danger"
+              icon={<Trash2 size={18} />}
               onClick={() => setShowResetConfirm(true)}
-              className="ml-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-400 rounded-lg font-semibold transition-all flex items-center gap-2 flex-shrink-0"
+              className="ml-4 flex-shrink-0"
             >
-              <Trash2 size={18} />
               {t('players.reset_stats')}
-            </button>
+            </Button>
           </div>
-        </div>
+        </Card>
 
         {/* Reset Confirmation Modal */}
-        {showResetConfirm && (
-          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={() => setShowResetConfirm(false)}>
-            <div className="glass-card p-6 rounded-2xl max-w-md w-full" onClick={e => e.stopPropagation()}>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">
-                  <AlertTriangle className="text-red-400" size={24} />
-                </div>
-                <h3 className="text-xl font-bold text-white">{t('players.reset_stats_confirm_title')}</h3>
-              </div>
-              <p className="text-dark-300 mb-6">
-                {t('players.reset_stats_confirm_text', { name: player.name })}
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowResetConfirm(false)}
-                  disabled={resetting}
-                  className="flex-1 px-4 py-3 bg-dark-700 hover:bg-dark-600 text-white rounded-lg font-semibold transition-all"
-                >
-                  {t('common.cancel')}
-                </button>
-                <button
-                  onClick={handleResetStats}
-                  disabled={resetting}
-                  className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-500 text-white rounded-lg font-semibold transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  {resetting ? (
-                    <Loader className="animate-spin" size={18} />
-                  ) : (
-                    <Trash2 size={18} />
-                  )}
-                  {resetting ? t('common.loading') : t('players.reset_stats')}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <Dialog
+          open={showResetConfirm}
+          onClose={() => setShowResetConfirm(false)}
+          title={t('players.reset_stats_confirm_title')}
+          actions={
+            <>
+              <Button
+                variant="text"
+                onClick={() => setShowResetConfirm(false)}
+                disabled={resetting}
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button
+                variant="danger"
+                onClick={handleResetStats}
+                disabled={resetting}
+                loading={resetting}
+                icon={<Trash2 size={18} />}
+              >
+                {resetting ? t('common.loading') : t('players.reset_stats')}
+              </Button>
+            </>
+          }
+        >
+          <p className="m3-body-medium text-on-surface-variant">
+            {t('players.reset_stats_confirm_text', { name: player.name })}
+          </p>
+        </Dialog>
       </div>
     </div>
   );

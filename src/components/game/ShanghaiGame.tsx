@@ -10,6 +10,7 @@ import { celebrate as confetti } from '../../utils/celebration';
 import { saveGameState, loadGameState, clearGameState, STORAGE_KEYS, ShanghaiSavedState } from '../../utils/gameStorage';
 import { SpinnerWheel } from './SpinnerWheel';
 import BackButton from '../common/BackButton';
+import { Button, Card, Dialog } from '../common';
 
 interface ShanghaiGameProps {
   onBack?: () => void;
@@ -360,27 +361,27 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
         <div className="max-w-4xl mx-auto">
           <BackButton onClick={onBack || (() => { window.location.href = '/'; })} />
 
-          <div className="glass-card rounded-2xl p-6">
-            <h1 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
-              <Zap className="text-yellow-400" />
+          <Card variant="elevated" className="p-6">
+            <h1 className="m3-headline-medium font-bold text-on-surface mb-6 flex items-center gap-3">
+              <Zap className="text-tertiary" />
               Shanghai
             </h1>
 
             {/* Options */}
             <div className="mb-6 space-y-4">
-              <h2 className="text-lg font-semibold text-white mb-3">Optionen</h2>
-              
+              <h2 className="m3-title-medium font-semibold text-on-surface mb-3">Optionen</h2>
+
               <div>
-                <label className="block text-gray-400 mb-2">Startnummer</label>
+                <label className="block text-on-surface-variant mb-2">Startnummer</label>
                 <div className="flex gap-2">
                   {[1, 5, 10, 15].map(num => (
                     <button
                       key={num}
                       onClick={() => setStartNumber(num)}
-                      className={`flex-1 py-2 rounded-lg font-medium transition-all ${
+                      className={`flex-1 py-2 rounded-m3-md font-medium transition-all ${
                         startNumber === num
-                          ? 'bg-primary-500 text-white'
-                          : 'bg-dark-700 text-gray-400 hover:bg-dark-600'
+                          ? 'bg-surface-container-high text-on-surface ring-2 ring-[var(--m3-primary)]'
+                          : 'bg-surface-container border border-outline-variant text-on-surface-variant hover:bg-surface-container-high'
                       }`}
                     >
                       {num}
@@ -388,25 +389,25 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
                   ))}
                 </div>
               </div>
-              
+
               <div>
-                <label className="block text-gray-400 mb-2">Runden</label>
+                <label className="block text-on-surface-variant mb-2">Runden</label>
                 <div className="flex gap-2">
                   {[5, 7, 10, 15, 20].map(num => (
                     <button
                       key={num}
                       onClick={() => setRounds(num)}
-                      className={`flex-1 py-2 rounded-lg font-medium transition-all ${
+                      className={`flex-1 py-2 rounded-m3-md font-medium transition-all ${
                         rounds === num
-                          ? 'bg-primary-500 text-white'
-                          : 'bg-dark-700 text-gray-400 hover:bg-dark-600'
+                          ? 'bg-surface-container-high text-on-surface ring-2 ring-[var(--m3-primary)]'
+                          : 'bg-surface-container border border-outline-variant text-on-surface-variant hover:bg-surface-container-high'
                       }`}
                     >
                       {num}
                     </button>
                   ))}
                 </div>
-                <p className="text-gray-500 text-sm mt-2">
+                <p className="text-on-surface-variant text-sm mt-2">
                   Spielt Zahlen {startNumber} bis {Math.min(startNumber + rounds - 1, 20)}
                 </p>
               </div>
@@ -414,7 +415,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
 
             {/* Player Selection */}
             <div className="mb-6">
-              <h2 className="text-lg font-semibold text-white mb-3">{t('game.select_players')}</h2>
+              <h2 className="m3-title-medium font-semibold text-on-surface mb-3">{t('game.select_players')}</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {players.filter(p => !p.isBot).map(player => (
                   <button
@@ -426,47 +427,45 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
                         setSelectedPlayers(prev => [...prev, player]);
                       }
                     }}
-                    className={`p-3 rounded-lg border-2 transition-all ${
+                    className={`p-3 rounded-m3-md border transition-all ${
                       selectedPlayers.find(p => p.id === player.id)
-                        ? 'border-success-500 bg-success-500/20 shadow-lg'
-                        : 'border-dark-700 hover:border-dark-600'
+                        ? 'border-success-500 bg-success-container shadow-m3-1'
+                        : 'border-outline-variant hover:border-outline'
                     }`}
                   >
                     <div className="flex justify-center mb-1">
                       <PlayerAvatar avatar={player.avatar} name={player.name} size="sm" />
                     </div>
-                    <div className="text-sm font-medium text-white text-center">{player.name}</div>
+                    <div className="text-sm font-medium text-on-surface text-center">{player.name}</div>
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="bg-dark-800 rounded-xl p-4 mb-6">
-              <h3 className="text-white font-semibold mb-2">⚡ Spielregeln:</h3>
-              <ul className="text-gray-400 text-sm space-y-1">
+            <div className="bg-surface-container rounded-m3-lg p-4 mb-6">
+              <h3 className="text-on-surface font-semibold mb-2">⚡ Spielregeln:</h3>
+              <ul className="text-on-surface-variant text-sm space-y-1">
                 <li>• Jede Runde zielt auf eine bestimmte Zahl</li>
                 <li>• Nur Treffer auf die Zielzahl zählen Punkte</li>
                 <li>• Single = Zahl × 1, Double = × 2, Triple = × 3</li>
-                <li>• <span className="text-yellow-400 font-semibold">SHANGHAI</span>: Single + Double + Triple = Sofortiger Sieg!</li>
+                <li>• <span className="text-tertiary font-semibold">SHANGHAI</span>: Single + Double + Triple = Sofortiger Sieg!</li>
                 <li>• Höchste Punktzahl am Ende gewinnt</li>
               </ul>
             </div>
 
-            <button
+            <Button
+              variant="filled"
+              size="lg"
+              fullWidth
               onClick={handleStartGame}
               disabled={selectedPlayers.length < 2}
-              className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
-                selectedPlayers.length >= 2
-                  ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white hover:from-yellow-600 hover:to-orange-600'
-                  : 'bg-dark-700 text-gray-500 cursor-not-allowed'
-              }`}
             >
-              {selectedPlayers.length < 2 
+              {selectedPlayers.length < 2
                 ? `${t('game.select_players')} (${selectedPlayers.length}/2)`
                 : 'Shanghai starten ⚡'
               }
-            </button>
-          </div>
+            </Button>
+          </Card>
         </div>
       </div>
     );
@@ -482,36 +481,36 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+            className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_50%,transparent)] flex items-center justify-center z-50"
           >
             <motion.div
               initial={{ scale: 0.5 }}
               animate={{ scale: 1 }}
-              className="glass-card rounded-2xl p-8 text-center max-w-md"
+              className="m3-dialog p-8 text-center max-w-md"
             >
-              <Trophy className="w-20 h-20 text-yellow-400 mx-auto mb-4" />
-              <h2 className="text-3xl font-bold text-white mb-2">
+              <Trophy className="w-20 h-20 text-tertiary mx-auto mb-4" />
+              <h2 className="m3-headline-medium font-bold text-on-surface mb-2">
                 {winner.name} gewinnt!
               </h2>
               {shanghaiWinner && (
-                <div className="bg-yellow-500/20 rounded-xl p-3 mb-4">
-                  <p className="text-yellow-400 font-bold text-xl">⚡ SHANGHAI! ⚡</p>
+                <div className="bg-tertiary-container rounded-m3-lg p-3 mb-4">
+                  <p className="text-on-tertiary-container font-bold text-xl">⚡ SHANGHAI! ⚡</p>
                 </div>
               )}
-              <p className="text-primary-400 text-2xl font-bold mb-6">
+              <p className="text-2xl font-bold mb-6" style={{ color: 'var(--m3-primary)' }}>
                 {playerScores[winner.id]} Punkte
               </p>
-              <button
+              <Button
+                variant="filled"
                 onClick={() => {
                   setShowWinner(false);
                   setShowSetup(true);
                   setWinner(null);
                   setShanghaiWinner(null);
                 }}
-                className="px-8 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-semibold"
               >
                 Neues Spiel
-              </button>
+              </Button>
             </motion.div>
           </motion.div>
         )}
@@ -524,39 +523,30 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_50%,transparent)] flex items-center justify-center z-50 p-4"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="glass-card rounded-2xl p-6 max-w-sm w-full text-center"
+              className="m3-dialog p-6 max-w-sm w-full text-center"
             >
-              <h3 className="text-xl font-bold text-white mb-3">
+              <h3 className="m3-title-large font-bold text-on-surface mb-3">
                 {t('resume.pause_title')}
               </h3>
-              <p className="text-gray-400 mb-6">
+              <p className="text-on-surface-variant mb-6">
                 {t('resume.pause_message')}
               </p>
               <div className="flex flex-col gap-3">
-                <button
-                  onClick={handleConfirmBack}
-                  className="w-full py-3 rounded-xl bg-primary-500 text-white font-semibold hover:bg-primary-600"
-                >
+                <Button variant="filled" fullWidth onClick={handleConfirmBack}>
                   {t('resume.pause_and_leave')}
-                </button>
-                <button
-                  onClick={handleEndGame}
-                  className="w-full py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-500"
-                >
+                </Button>
+                <Button variant="danger" fullWidth onClick={handleEndGame}>
                   {t('resume.end_game')}
-                </button>
-                <button
-                  onClick={() => setShowBackConfirm(false)}
-                  className="w-full py-3 rounded-xl bg-dark-700 text-white font-semibold hover:bg-dark-600"
-                >
+                </Button>
+                <Button variant="tonal" fullWidth onClick={() => setShowBackConfirm(false)}>
                   {t('common.cancel')}
-                </button>
+                </Button>
               </div>
             </motion.div>
           </motion.div>
@@ -566,16 +556,17 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
       {/* Header */}
       <div className="max-w-4xl mx-auto mb-4">
         <div className="flex items-center justify-between">
-          <button
+          <Button
+            variant="tonal"
+            size="sm"
+            icon={<ArrowLeft size={18} />}
             onClick={handleBack}
-            className="flex items-center gap-2 glass-card px-3 py-2 rounded-lg text-white hover:glass-card-hover transition-all"
           >
-            <ArrowLeft size={20} />
             {t('common.back')}
-          </button>
+          </Button>
           <div className="text-center">
-            <h1 className="text-xl font-bold text-white">⚡ Shanghai</h1>
-            <p className="text-gray-400 text-sm">Runde {currentRound + 1}/{rounds}</p>
+            <h1 className="m3-title-large font-bold text-on-surface">⚡ Shanghai</h1>
+            <p className="text-on-surface-variant text-sm">Runde {currentRound + 1}/{rounds}</p>
           </div>
           <div className="w-10" />
         </div>
@@ -583,53 +574,53 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
 
       {/* Current Target */}
       <div className="max-w-4xl mx-auto mb-4">
-        <div className="glass-card rounded-xl p-6 text-center">
-          <p className="text-gray-400 mb-2">Zielzahl</p>
-          <div className="text-7xl font-bold text-yellow-400">
+        <Card variant="elevated" className="p-6 text-center">
+          <p className="text-on-surface-variant mb-2">Zielzahl</p>
+          <div className="text-7xl font-bold text-tertiary">
             {currentTarget}
           </div>
-          <p className="text-white mt-2">{currentPlayer?.name} ist dran</p>
-        </div>
+          <p className="text-on-surface mt-2">{currentPlayer?.name} ist dran</p>
+        </Card>
       </div>
 
       {/* Scoreboard */}
       <div className="max-w-4xl mx-auto mb-4">
-        <div className="glass-card rounded-xl p-4">
-          <h3 className="text-white font-semibold mb-3">Punktestand</h3>
+        <Card variant="elevated" className="p-4">
+          <h3 className="text-on-surface font-semibold mb-3">Punktestand</h3>
           <div className="space-y-2">
             {getSortedPlayers().map((player, idx) => {
               const isActive = player.id === currentPlayer?.id;
               const score = playerScores[player.id] || 0;
-              
+
               return (
                 <div
                   key={player.id}
-                  className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
-                    isActive ? 'bg-primary-500/20 ring-2 ring-primary-500' : 'bg-dark-800'
+                  className={`flex items-center gap-3 p-3 rounded-m3-lg transition-all ${
+                    isActive ? 'bg-surface-container-high ring-2 ring-[var(--m3-primary)]' : 'bg-surface-container'
                   }`}
                 >
-                  <span className="text-lg font-bold text-gray-500 w-6">
+                  <span className="text-lg font-bold text-on-surface-variant w-6">
                     {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}
                   </span>
                   <PlayerAvatar avatar={player.avatar} name={player.name} size="sm" />
-                  <span className="text-white font-medium flex-1">{player.name}</span>
-                  <span className="text-2xl font-bold text-primary-400">{score}</span>
+                  <span className="text-on-surface font-medium flex-1">{player.name}</span>
+                  <span className="text-2xl font-bold" style={{ color: 'var(--m3-primary)' }}>{score}</span>
                 </div>
               );
             })}
           </div>
-        </div>
+        </Card>
       </div>
 
       {/* Current Throw */}
       <div className="max-w-4xl mx-auto mb-4">
-        <div className="glass-card rounded-xl p-4">
+        <Card variant="elevated" className="p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-white font-semibold">Wurf ({currentDarts.length}/3)</h3>
+            <h3 className="text-on-surface font-semibold">Wurf ({currentDarts.length}/3)</h3>
             <button
               onClick={handleUndo}
               disabled={currentDarts.length === 0 && turnHistory.length === 0}
-              className="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 text-gray-400 disabled:opacity-50"
+              className="p-2 rounded-m3-md bg-surface-container hover:bg-surface-container-high text-on-surface-variant disabled:opacity-50"
             >
               <RotateCcw size={18} />
             </button>
@@ -639,20 +630,20 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
             {[0, 1, 2].map(idx => {
               const dart = currentDarts[idx];
               const isTarget = dart && dart.segment === currentTarget;
-              
+
               return (
                 <div
                   key={idx}
-                  className={`flex-1 h-14 rounded-xl flex items-center justify-center text-lg font-bold ${
+                  className={`flex-1 h-14 rounded-m3-lg flex items-center justify-center text-lg font-bold ${
                     dart
                       ? isTarget
-                        ? 'bg-yellow-500/20 text-yellow-400 border-2 border-yellow-500'
-                        : 'bg-dark-700 text-gray-400 border-2 border-dark-600'
-                      : 'bg-dark-800 text-gray-600 border-2 border-dashed border-dark-600'
+                        ? 'bg-tertiary-container text-on-tertiary-container border-2 border-tertiary'
+                        : 'bg-surface-container text-on-surface-variant border-2 border-outline-variant'
+                      : 'bg-surface-container-low text-on-surface-variant border-2 border-dashed border-outline-variant'
                   }`}
                 >
                   {dart ? (
-                    dart.segment === 0 ? 'Miss' : 
+                    dart.segment === 0 ? 'Miss' :
                     `${dart.multiplier === 3 ? 'T' : dart.multiplier === 2 ? 'D' : ''}${dart.segment}`
                   ) : '-'}
                 </div>
@@ -660,59 +651,56 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
             })}
           </div>
 
-          <button
+          <Button
+            variant="success"
+            fullWidth
+            icon={<Check size={20} />}
             onClick={handleConfirmThrow}
             disabled={currentDarts.length === 0}
-            className={`w-full py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
-              currentDarts.length > 0
-                ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
-                : 'bg-dark-700 text-gray-500 cursor-not-allowed'
-            }`}
           >
-            <Check size={20} />
             Bestätigen
-          </button>
-        </div>
+          </Button>
+        </Card>
       </div>
 
       {/* Input for Target Number */}
       <div className="max-w-4xl mx-auto">
-        <div className="glass-card rounded-xl p-4">
-          <p className="text-gray-400 text-center mb-3">Ziel: <span className="text-yellow-400 font-bold">{currentTarget}</span></p>
-          
+        <Card variant="elevated" className="p-4">
+          <p className="text-on-surface-variant text-center mb-3">Ziel: <span className="text-tertiary font-bold">{currentTarget}</span></p>
+
           <div className="grid grid-cols-3 gap-2 mb-3">
             <button
               onClick={() => handleDartHit(currentTarget, 1)}
               disabled={currentDarts.length >= 3}
-              className="py-4 rounded-lg bg-dark-700 hover:bg-dark-600 text-white font-bold text-lg disabled:opacity-50"
+              className="py-4 rounded-m3-md bg-surface-container hover:bg-surface-container-high text-on-surface font-bold text-lg disabled:opacity-50"
             >
               Single {currentTarget}
             </button>
             <button
               onClick={() => handleDartHit(currentTarget, 2)}
               disabled={currentDarts.length >= 3}
-              className="py-4 rounded-lg bg-green-600 hover:bg-green-500 text-white font-bold text-lg disabled:opacity-50"
+              className="py-4 rounded-m3-md bg-success-container hover:brightness-110 text-on-success-container font-bold text-lg disabled:opacity-50"
             >
               Double {currentTarget}
             </button>
             <button
               onClick={() => handleDartHit(currentTarget, 3)}
               disabled={currentDarts.length >= 3}
-              className="py-4 rounded-lg bg-red-600 hover:bg-red-500 text-white font-bold text-lg disabled:opacity-50"
+              className="py-4 rounded-m3-md bg-error-container hover:brightness-110 text-on-error-container font-bold text-lg disabled:opacity-50"
             >
               Triple {currentTarget}
             </button>
           </div>
-          
+
           <button
             onClick={handleMiss}
             disabled={currentDarts.length >= 3}
-            className="w-full py-3 rounded-lg bg-dark-800 hover:bg-dark-700 text-gray-400 font-bold disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-m3-md bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-bold disabled:opacity-50 flex items-center justify-center gap-2"
           >
             <X size={20} />
             Miss / Andere Zahl
           </button>
-        </div>
+        </Card>
       </div>
     </div>
   );

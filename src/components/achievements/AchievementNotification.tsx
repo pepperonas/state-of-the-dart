@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Star } from 'lucide-react';
+import { IconButton } from '../common';
 import { celebrate as confetti } from '../../utils/celebration';
 import { useAchievements } from '../../context/AchievementContext';
 import { usePlayer } from '../../context/PlayerContext';
@@ -138,11 +139,7 @@ const NotificationCard: React.FC<{
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
     >
       <motion.div
-        className="relative overflow-hidden rounded-2xl"
-        style={{
-          background: 'linear-gradient(145deg, rgba(20, 20, 35, 0.95), rgba(10, 10, 25, 0.98))',
-          backdropFilter: 'blur(20px)',
-        }}
+        className="relative overflow-hidden rounded-m3-lg bg-surface-container-high shadow-m3-3 border border-outline-variant"
         animate={{
           boxShadow: [getTierGlow(tier), getTierGlowIntense(tier), getTierGlow(tier)],
         }}
@@ -150,7 +147,7 @@ const NotificationCard: React.FC<{
       >
         {/* Animated gradient border */}
         <motion.div
-          className="absolute inset-0 rounded-2xl pointer-events-none"
+          className="absolute inset-0 rounded-m3-lg pointer-events-none"
           style={{
             border: `2px solid ${tierColor}`,
             opacity: 0.6,
@@ -179,13 +176,13 @@ const NotificationCard: React.FC<{
             >
               {playerName} — Achievement Freigeschaltet
             </motion.span>
-            <button
+            <IconButton
               onClick={onDismiss}
-              className="text-gray-500 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/10 ml-2 flex-shrink-0"
-              aria-label="Schliessen"
+              label="Schliessen"
+              className="ml-2 flex-shrink-0"
             >
               <X size={18} />
-            </button>
+            </IconButton>
           </div>
 
           {/* Icon + Achievement Info */}
@@ -204,7 +201,7 @@ const NotificationCard: React.FC<{
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
-                <h4 className="text-white font-bold text-base truncate">{achievement.name}</h4>
+                <h4 className="text-on-surface m3-title-small truncate">{achievement.name}</h4>
                 <span
                   className="flex items-center gap-0.5 text-sm font-bold flex-shrink-0"
                   style={{ color: tierColor }}
@@ -212,7 +209,7 @@ const NotificationCard: React.FC<{
                   +{achievement.points} <Star size={12} fill={tierColor} />
                 </span>
               </div>
-              <p className="text-gray-400 text-sm line-clamp-2">{achievement.description}</p>
+              <p className="text-on-surface-variant m3-body-small line-clamp-2">{achievement.description}</p>
             </div>
           </div>
 
@@ -256,7 +253,7 @@ const NotificationCard: React.FC<{
                 </span>
               );
             })()}
-            <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-white/5 text-gray-400 flex items-center gap-1 border border-white/10">
+            <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-surface-container-highest text-on-surface-variant flex items-center gap-1 border border-outline-variant">
               <Star size={10} />
               {achievement.points} Pkt.
             </span>
@@ -265,12 +262,12 @@ const NotificationCard: React.FC<{
           {/* Achievement progress bar */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-gray-500">Fortschritt</span>
-              <span className="text-xs text-gray-400 font-medium">
+              <span className="m3-label-medium text-on-surface-variant">Fortschritt</span>
+              <span className="m3-label-medium text-on-surface-variant">
                 {unlockedCount}/{totalAchievements} Achievements
               </span>
             </div>
-            <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-surface-container-highest rounded-m3-full overflow-hidden">
               <motion.div
                 className="h-full rounded-full"
                 style={{ backgroundColor: tierColor }}
@@ -337,7 +334,7 @@ const AchievementNotification: React.FC = () => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             onClick={dismissAllNotifications}
-            className="self-end px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide text-gray-300 hover:text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all"
+            className="self-end px-3 py-1.5 rounded-m3-full text-xs font-bold tracking-wide text-on-surface-variant hover:text-on-surface bg-surface-container-high hover:bg-surface-container-highest backdrop-blur-sm border border-outline-variant transition-all"
           >
             Alle schließen ({allNotifications.length})
           </motion.button>

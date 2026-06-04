@@ -115,8 +115,23 @@ Express routes in `server/src/routes/`, registered in `server/src/index.ts`:
 - Log buffer: `src/utils/logBuffer.ts` (in-memory ring buffer, 1000 entries, always active)
 - Debug export: `src/utils/debugExport.ts` (formats debug flags as structured text for AI analysis)
 
+### Material 3 Expressive Design System
+The entire app is themed with a **Material 3 Expressive** token layer. **Use it for all new UI** — do not reintroduce `glass-card`, raw `bg-dark-*`/`text-white`/`text-dark-*`, or ad-hoc gradient buttons.
+- **Tokens**: `src/styles/m3.css` is the single source of truth — full M3 color roles (primary / secondary / **tertiary** = vibrant purple accent / error / success + the surface-container ramp + on-colors + outline), shape scale, 5-level elevation, motion springs/easing, state-layer opacities, and the M3 type scale. Dark (default `:root`/`.modern`) + light (`.modern-light`) schemes, applied via `ThemeManager` (class on `<html>`/`<body>`). Imported in `main.tsx` **after** `index.css` so component rules win specificity ties against legacy `.modern-light` overrides.
+- **Tailwind utilities** (token-backed, theme-aware): colors `bg-surface[-container[-low|-high|-highest]]`, `text-on-surface`, `text-on-surface-variant`, `bg-{primary|secondary|tertiary|success|error}-container` + `text-on-$-container`, bare roles `bg-primary`/`text-primary`/`bg-success`/`bg-tertiary`/`bg-error` (DEFAULTs added to legacy scales), `border-outline[-variant]`; radius `rounded-m3-{xs|sm|md|lg|xl|2xl|full}`; elevation `shadow-m3-{1..5}`. Type scale = **plain CSS classes** (`m3-display-*`, `m3-headline-*`, `m3-title-*`, `m3-body-*`, `m3-label-*`) — these are NOT Tailwind utilities, so `md:m3-...` responsive prefixes do NOT work.
+- **Motion**: `src/utils/motion.ts` exports M3-Expressive spring configs for framer-motion (`springSpatial*`, `effects*`) + presets (`enterRise`, `enterPop`, `enterDrop`, `staggerChild(i)`, `pressable`, `dialogMotion`).
+
 ### Shared UI Components (`src/components/common/`)
-- `BackButton.tsx` — canonical back button. **Always use this** for screen-level back navigation. Style is fixed (`glass-card px-4 py-2 …`); override only via `label` (custom text) or `inline` (centered/narrow layouts). In-game back buttons in ATC/Shanghai/Cricket are the deliberate exception — they stay inline with `px-3 py-2`.
+M3 primitive library (barrel `src/components/common/index.ts`). **Prefer these over ad-hoc styled elements.** Each carries an M3 state layer (`.m3-state-layer`) and token colors.
+- `Button` — `variant`: `filled|tonal|accent|elevated|outlined|text|danger|success`; `size`: `sm|md|lg`; `fullWidth`, `icon`, `loading`. Pill-shaped, morphs corner on press.
+- `IconButton` — `variant`: `standard|filled|tonal|outlined`; requires `label` (a11y). Children = the lucide icon.
+- `Fab` — extended/regular FAB (`icon`, `label?`, `color`, `size`).
+- `Card` — `variant`: `filled|elevated|outlined`; `interactive` for hover/press.
+- `TextField` — outlined field with `label`, leading `icon`, `error`.
+- `Switch` — M3 switch (`checked`, `onChange`), thumb grows when on.
+- `Chip` — filter/assist chip (`selected`, `icon`).
+- `Dialog` — scrim + spring-animated container (`open`, `onClose`, `title`, `actions`, `widthClassName`, `hideClose`); closes on scrim/Escape.
+- `BackButton.tsx` — canonical back button. **Always use this** for screen-level back navigation. Now an M3 **tonal** button (`<Button variant="tonal" size="sm">`) with a leading `<ArrowLeft>`; override only via `label`. (The `inline` prop is retained for API compat but is a no-op.)
 
 ### Lazy-Loaded Heavy Modules
 These modules used to ship eagerly and were extracted into their own chunks during the Sprint 1 bundle pass. Anyone touching them: keep them lazy.
@@ -232,8 +247,8 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - Keys organized by feature: `common`, `auth`, `menu`, `game`, `players`, `stats`, `training`, `settings`, `achievements`, `resume`, `contact`, `debug`, `atc`, `online`
 
 ### UI Conventions
-- **Back buttons**: use the `<BackButton>` component (`src/components/common/BackButton.tsx`). It encapsulates the canonical `glass-card px-4 py-2 rounded-lg` style + `<ArrowLeft size={20} />` + `t('common.back')`. Pass `label` for custom text, `inline` for centered/narrow layouts. **Do not** inline a new back button — that's how style drift happens. Exception: in-game back buttons in ATC/Shanghai/Cricket are intentionally smaller (`px-3 py-2`) and stay inline.
-- **Active/selected state token**: use `success-*` (semantic), not raw `green-*`. Player selection cards: centered avatar (`PlayerAvatar size="sm"`), centered name, `border-success-500` when selected, container `max-w-4xl`. PlayerScore active ring: `ring-4 ring-success-500`. Raw `green-*` is reserved for status badges that mean "resolved/done".
+- **Back buttons**: use the `<BackButton>` component (`src/components/common/BackButton.tsx`) — now an M3 tonal button with a leading `<ArrowLeft>` + `t('common.back')`. Pass `label` for custom text. **Do not** inline a new back button. For compact in-game back nav, a `<Button variant="tonal" size="sm" icon={<ArrowLeft size={18}/>}>` is the accepted inline form.
+- **Active/selected state**: selected/active surfaces use a **primary ring** — `ring-2 ring-[var(--m3-primary)]` (or `ring-4` for the in-game PlayerScore active player) on a `bg-surface-container-high`; unselected = `bg-surface-container border border-outline-variant`. (Pre-M3 this used `border-success-500`/`ring-success-500`.) `success`/`error` roles are reserved for win/loss + resolved/destructive status.
 - **Themes**: `'modern'` (dark, default) and `'modern-light'` (light). Legacy themes auto-mapped to `'modern'`
 - **Screenshots**: html2canvas excludes elements with z-index >= 50
 

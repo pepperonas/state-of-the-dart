@@ -8,7 +8,7 @@ import { useTenant } from '../../context/TenantContext';
 import { api } from '../../services/api';
 import { PersonalBests, createEmptyPersonalBests } from '../../types/personalBests';
 import { ACHIEVEMENTS } from '../../types/achievements';
-import BackButton from '../common/BackButton';
+import { BackButton, Card, Chip } from '../common';
 
 type LeaderboardCategory = 
   | 'average'
@@ -152,11 +152,11 @@ const Leaderboard: React.FC = () => {
       case 1:
         return <Trophy size={24} className="text-amber-400" />;
       case 2:
-        return <Medal size={24} className="text-gray-400" />;
+        return <Medal size={24} className="text-gray-300" />;
       case 3:
-        return <Medal size={24} className="text-amber-600" />;
+        return <Medal size={24} className="text-orange-500" />;
       default:
-        return <div className="text-lg font-bold text-dark-500">#{rank}</div>;
+        return <div className="text-lg font-bold text-on-surface-variant">#{rank}</div>;
     }
   };
 
@@ -165,11 +165,11 @@ const Leaderboard: React.FC = () => {
       case 1:
         return 'border-amber-400 bg-amber-500/10';
       case 2:
-        return 'border-gray-400 bg-gray-500/10';
+        return 'border-gray-300 bg-gray-400/10';
       case 3:
-        return 'border-amber-600 bg-amber-600/10';
+        return 'border-orange-500 bg-orange-500/10';
       default:
-        return 'border-dark-700 bg-dark-900/50';
+        return 'border-outline-variant bg-surface-container';
     }
   };
 
@@ -179,36 +179,32 @@ const Leaderboard: React.FC = () => {
         {/* Header */}
         <BackButton onClick={() => navigate('/')} />
 
-        <div className="glass-card p-6 md:p-8">
+        <Card variant="elevated" className="p-6 md:p-8">
           <div className="flex items-center gap-3 mb-6">
             <Trophy size={32} className="text-amber-400" />
-            <h1 className="text-3xl font-bold text-white">Leaderboard</h1>
+            <h1 className="m3-headline-medium text-on-surface">Leaderboard</h1>
           </div>
 
           {/* Category Selection */}
           <div className="flex flex-wrap gap-2 mb-6">
             {categories.map((cat) => (
-              <button
+              <Chip
                 key={cat.id}
+                selected={category === cat.id}
+                icon={cat.icon}
                 onClick={() => setCategory(cat.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                  category === cat.id
-                    ? `bg-${cat.color}-500 text-white shadow-lg scale-105`
-                    : 'bg-dark-800 text-dark-300 hover:bg-dark-700'
-                }`}
               >
-                {cat.icon}
-                <span>{cat.name}</span>
-              </button>
+                {cat.name}
+              </Chip>
             ))}
           </div>
 
           {/* Leaderboard List */}
           {sortedData.length === 0 ? (
             <div className="text-center py-12">
-              <Trophy size={64} className="mx-auto text-dark-600 mb-4" />
-              <p className="text-white text-lg font-semibold">Noch keine Daten</p>
-              <p className="text-dark-400 text-sm mt-2">
+              <Trophy size={64} className="mx-auto text-on-surface-variant mb-4" />
+              <p className="m3-title-medium text-on-surface">Noch keine Daten</p>
+              <p className="m3-body-medium text-on-surface-variant mt-2">
                 Spiele einige Matches, um im Leaderboard zu erscheinen!
               </p>
             </div>
@@ -220,7 +216,7 @@ const Leaderboard: React.FC = () => {
                   <div
                     key={player.id}
                     onClick={() => navigate(`/players/${player.id}`)}
-                    className={`flex items-center justify-between p-4 border-2 rounded-lg transition-all cursor-pointer hover:scale-[1.02] ${getRankColor(
+                    className={`flex items-center justify-between p-4 border-2 rounded-m3-lg transition-all cursor-pointer hover:scale-[1.02] ${getRankColor(
                       rank
                     )}`}
                   >
@@ -232,12 +228,12 @@ const Leaderboard: React.FC = () => {
 
                       {/* Avatar & Name */}
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center text-2xl shadow-lg">
+                        <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center text-2xl shadow-m3-1">
                           {player.avatar}
                         </div>
                         <div>
-                          <h3 className="font-bold text-white text-lg">{player.name}</h3>
-                          <p className="text-sm text-dark-400">
+                          <h3 className="m3-title-medium text-on-surface">{player.name}</h3>
+                          <p className="m3-body-medium text-on-surface-variant">
                             {player.gamesPlayed} {player.gamesPlayed === 1 ? 'Spiel' : 'Spiele'}
                           </p>
                         </div>
@@ -246,8 +242,8 @@ const Leaderboard: React.FC = () => {
 
                     {/* Value */}
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-white">{getValue(player)}</div>
-                      <div className="text-xs text-dark-400 mt-1">
+                      <div className="m3-title-large text-on-surface">{getValue(player)}</div>
+                      <div className="m3-label-large text-on-surface-variant mt-1">
                         {categories.find((c) => c.id === category)?.name}
                       </div>
                     </div>
@@ -259,34 +255,34 @@ const Leaderboard: React.FC = () => {
 
           {/* Stats Summary */}
           {sortedData.length > 0 && (
-            <div className="mt-8 pt-6 border-t border-dark-700">
+            <div className="mt-8 pt-6 border-t border-outline-variant">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-white">{sortedData.length}</div>
-                  <div className="text-xs text-dark-400 mt-1">Aktive Spieler</div>
+                  <div className="m3-title-large text-on-surface">{sortedData.length}</div>
+                  <div className="m3-label-large text-on-surface-variant mt-1">Aktive Spieler</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary-400">
+                  <div className="m3-title-large text-primary">
                     {(sortedData.reduce((sum, p) => sum + p.gamesPlayed, 0) / sortedData.length).toFixed(0)}
                   </div>
-                  <div className="text-xs text-dark-400 mt-1">Ø Spiele</div>
+                  <div className="m3-label-large text-on-surface-variant mt-1">Ø Spiele</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-amber-400">
+                  <div className="m3-title-large text-amber-400">
                     {sortedData.reduce((sum, p) => sum + p.total180s, 0)}
                   </div>
-                  <div className="text-xs text-dark-400 mt-1">Total 180s</div>
+                  <div className="m3-label-large text-on-surface-variant mt-1">Total 180s</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-accent-400">
+                  <div className="m3-title-large text-tertiary">
                     {sortedData.reduce((sum, p) => sum + p.achievementsCount, 0)}
                   </div>
-                  <div className="text-xs text-dark-400 mt-1">Total Achievements</div>
+                  <div className="m3-label-large text-on-surface-variant mt-1">Total Achievements</div>
                 </div>
               </div>
             </div>
           )}
-        </div>
+        </Card>
       </div>
     </div>
   );

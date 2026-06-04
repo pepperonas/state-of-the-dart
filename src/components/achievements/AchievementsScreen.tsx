@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trophy, Lock, Star, Award, Filter } from 'lucide-react';
+import { Trophy, Lock, Star, Award, Filter } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAchievements } from '../../context/AchievementContext';
 import { usePlayer } from '../../context/PlayerContext';
@@ -16,7 +16,7 @@ import {
 } from '../../types/achievements';
 import { formatDate } from '../../utils/dateUtils';
 import logger from '../../utils/logger';
-import BackButton from '../common/BackButton';
+import { BackButton, Card, Chip } from '../common';
 
 const AchievementsScreen: React.FC = () => {
   const { t } = useTranslation();
@@ -103,13 +103,13 @@ const AchievementsScreen: React.FC = () => {
         <div className="max-w-6xl mx-auto">
           <BackButton onClick={() => navigate('/')} />
 
-          <div className="glass-card p-8 text-center">
-            <Trophy size={64} className="mx-auto mb-4 text-dark-600" />
-            <h2 className="text-2xl font-bold text-white mb-2">{t('achievements.no_players')}</h2>
-            <p className="text-dark-400">
+          <Card variant="filled" className="p-8 text-center">
+            <Trophy size={64} className="mx-auto mb-4 text-on-surface-variant" />
+            <h2 className="m3-headline-small text-on-surface mb-2">{t('achievements.no_players')}</h2>
+            <p className="m3-body-medium text-on-surface-variant">
               {t('achievements.create_players_first')}
             </p>
-          </div>
+          </Card>
         </div>
       </div>
     );
@@ -121,19 +121,19 @@ const AchievementsScreen: React.FC = () => {
         {/* Header */}
         <BackButton onClick={() => navigate('/')} />
 
-        <div className="glass-card p-6 mb-6">
+        <Card variant="elevated" className="p-6 mb-6">
           <div className="flex items-center gap-3 mb-6">
-            <Trophy size={32} className="text-primary-400" />
-            <h1 className="text-3xl font-bold text-white">{t('achievements.achievements')}</h1>
+            <Trophy size={32} className="text-primary" />
+            <h1 className="m3-headline-small text-on-surface">{t('achievements.achievements')}</h1>
           </div>
 
           {/* Player Selection */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-dark-300 mb-2">{t('achievements.player')}</label>
+            <label className="block m3-label-large text-on-surface-variant mb-2">{t('achievements.player')}</label>
             <select
               value={selectedPlayerId}
               onChange={(e) => setSelectedPlayerId(e.target.value)}
-              className="w-full px-4 py-3 bg-dark-800 border border-dark-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-4 py-3 bg-surface-container-high border border-outline-variant rounded-m3-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
             >
               {players.map((player) => (
                 <option key={player.id} value={player.id}>
@@ -146,69 +146,65 @@ const AchievementsScreen: React.FC = () => {
           {/* Stats Overview */}
           {selectedPlayer && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-dark-900 rounded-lg p-4 text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-primary-400">
+              <div className="bg-surface-container-low rounded-m3-md p-4 text-center">
+                <div className="text-2xl sm:text-3xl font-bold text-primary">
                   {unlockedAchievements.length}
                 </div>
-                <div className="text-sm text-dark-400 mt-1">{t('achievements.unlocked')}</div>
+                <div className="m3-label-medium text-on-surface-variant mt-1">{t('achievements.unlocked')}</div>
               </div>
-              <div className="bg-dark-900 rounded-lg p-4 text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-dark-400">
+              <div className="bg-surface-container-low rounded-m3-md p-4 text-center">
+                <div className="text-2xl sm:text-3xl font-bold text-on-surface-variant">
                   {lockedAchievements.length}
                 </div>
-                <div className="text-sm text-dark-400 mt-1">{t('achievements.locked')}</div>
+                <div className="m3-label-medium text-on-surface-variant mt-1">{t('achievements.locked')}</div>
               </div>
-              <div className="bg-dark-900 rounded-lg p-4 text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-accent-400">
+              <div className="bg-surface-container-low rounded-m3-md p-4 text-center">
+                <div className="text-2xl sm:text-3xl font-bold text-tertiary">
                   {playerProgress?.totalPoints || 0}
                 </div>
-                <div className="text-sm text-dark-400 mt-1">{t('achievements.points')}</div>
+                <div className="m3-label-medium text-on-surface-variant mt-1">{t('achievements.points')}</div>
               </div>
-              <div className="bg-dark-900 rounded-lg p-4 text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-success-400">{completionPercentage}%</div>
-                <div className="text-sm text-dark-400 mt-1">{t('achievements.completed')}</div>
+              <div className="bg-surface-container-low rounded-m3-md p-4 text-center">
+                <div className="text-2xl sm:text-3xl font-bold text-success">{completionPercentage}%</div>
+                <div className="m3-label-medium text-on-surface-variant mt-1">{t('achievements.completed')}</div>
               </div>
             </div>
           )}
 
           {/* Progress Bar */}
           <div className="mt-6">
-            <div className="flex justify-between text-sm text-dark-400 mb-2">
+            <div className="flex justify-between m3-label-medium text-on-surface-variant mb-2">
               <span>{t('achievements.total_progress')}</span>
               <span>
                 {unlockedAchievements.length}/{ACHIEVEMENTS.length}
               </span>
             </div>
-            <div className="w-full bg-dark-800 rounded-full h-3">
+            <div className="w-full bg-surface-container-highest rounded-m3-full h-3">
               <div
-                className="bg-gradient-to-r from-primary-500 to-accent-500 h-3 rounded-full transition-all"
+                className="bg-primary h-3 rounded-m3-full transition-all"
                 style={{ width: `${completionPercentage}%` }}
               />
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Filters */}
-        <div className="glass-card p-4 mb-6">
-          <div className="flex items-center gap-2 mb-3 text-white">
+        <Card variant="filled" className="p-4 mb-6">
+          <div className="flex items-center gap-2 mb-3 text-on-surface">
             <Filter size={20} />
-            <span className="font-semibold">{t('achievements.filter')}</span>
+            <span className="m3-title-small">{t('achievements.filter')}</span>
           </div>
 
           {/* Category Filter */}
           <div className="flex flex-wrap gap-2 mb-4">
             {categories.map((cat) => (
-              <button
+              <Chip
                 key={cat}
+                selected={filterCategory === cat}
                 onClick={() => setFilterCategory(cat)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                  filterCategory === cat
-                    ? 'bg-primary-500 text-white'
-                    : 'bg-dark-800 text-dark-300 hover:bg-dark-700'
-                }`}
               >
                 {cat === 'all' ? t('achievements.all') : t(`achievements.category_${cat}`)}
-              </button>
+              </Chip>
             ))}
           </div>
 
@@ -218,20 +214,14 @@ const AchievementsScreen: React.FC = () => {
               const isActive = filterScope === scope;
               const color = scope === 'all' ? undefined : getScopeColor(scope);
               return (
-                <button
+                <Chip
                   key={scope}
+                  selected={isActive}
                   onClick={() => setFilterScope(scope)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                    isActive
-                      ? scope === 'all'
-                        ? 'bg-primary-500 text-white'
-                        : 'text-white'
-                      : 'bg-dark-800 text-dark-300 hover:bg-dark-700'
-                  }`}
-                  style={isActive && color ? { backgroundColor: color + '40', color } : undefined}
+                  style={isActive && color ? { backgroundColor: color + '40', color, borderColor: color } : undefined}
                 >
                   {t(`achievements.scope_${scope}`)}
-                </button>
+                </Chip>
               );
             })}
           </div>
@@ -244,9 +234,9 @@ const AchievementsScreen: React.FC = () => {
               onChange={(e) => setShowOnlyUnlocked(e.target.checked)}
               className="w-4 h-4 rounded"
             />
-            <span className="text-sm text-dark-300">{t('achievements.show_unlocked_only')}</span>
+            <span className="m3-body-medium text-on-surface-variant">{t('achievements.show_unlocked_only')}</span>
           </label>
-        </div>
+        </Card>
 
         {/* Achievements Grid */}
         {filteredAchievements.length > 0 ? (
@@ -264,12 +254,12 @@ const AchievementsScreen: React.FC = () => {
             ))}
           </div>
         ) : (
-          <div className="glass-card p-8 text-center">
-            <Lock size={48} className="mx-auto mb-4 text-dark-600" />
-            <p className="text-dark-400">
+          <Card variant="filled" className="p-8 text-center">
+            <Lock size={48} className="mx-auto mb-4 text-on-surface-variant" />
+            <p className="m3-body-medium text-on-surface-variant">
               {t('achievements.no_achievements_in_category')}
             </p>
-          </div>
+          </Card>
         )}
       </div>
     </div>
@@ -290,9 +280,10 @@ const AchievementCard = React.memo<AchievementCardProps>(({ achievement, unlocke
   const scopeColor = getScopeColor(scope);
 
   return (
-    <div
-      className={`glass-card p-4 transition-all hover:scale-105 ${
-        unlocked ? 'border-2 border-primary-500' : 'opacity-75'
+    <Card
+      variant={unlocked ? 'elevated' : 'filled'}
+      className={`p-4 transition-all hover:scale-105 ${
+        unlocked ? 'border-2 border-primary' : 'opacity-75'
       }`}
     >
       <div className="flex items-start gap-3 mb-3">
@@ -303,11 +294,11 @@ const AchievementCard = React.memo<AchievementCardProps>(({ achievement, unlocke
           {isHidden ? '❓' : achievement.icon}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-white text-lg flex items-center gap-2 truncate">
+          <h3 className="m3-title-medium text-on-surface flex items-center gap-2 truncate">
             <span className="truncate">{isHidden ? '???' : achievement.name}</span>
-            {unlocked && <Award size={16} className="text-primary-400 flex-shrink-0" />}
+            {unlocked && <Award size={16} className="text-primary flex-shrink-0" />}
           </h3>
-          <p className="text-sm text-dark-400 mt-1 line-clamp-2">
+          <p className="m3-body-medium text-on-surface-variant mt-1 line-clamp-2">
             {isHidden ? t('achievements.hidden_achievement') : achievement.description}
           </p>
         </div>
@@ -315,15 +306,15 @@ const AchievementCard = React.memo<AchievementCardProps>(({ achievement, unlocke
 
       {!unlocked && progress && (
         <div className="mb-3">
-          <div className="flex justify-between text-xs text-dark-400 mb-1">
+          <div className="flex justify-between m3-label-medium text-on-surface-variant mb-1">
             <span>{t('achievements.progress')}</span>
             <span>
               {progress.current}/{progress.target}
             </span>
           </div>
-          <div className="w-full bg-dark-800 rounded-full h-2">
+          <div className="w-full bg-surface-container-highest rounded-m3-full h-2">
             <div
-              className="bg-primary-500 h-2 rounded-full transition-all"
+              className="bg-primary h-2 rounded-m3-full transition-all"
               style={{ width: `${progress.percentage}%` }}
             />
           </div>
@@ -362,24 +353,24 @@ const AchievementCard = React.memo<AchievementCardProps>(({ achievement, unlocke
             {t(`achievements.scope_${scope}`)}
           </span>
         </div>
-        <div className="flex items-center gap-1 text-accent-400 font-bold">
+        <div className="flex items-center gap-1 text-tertiary font-bold">
           <Star size={14} />
           {achievement.points}
         </div>
       </div>
 
       {unlocked && (
-        <div className="mt-3 pt-3 border-t border-dark-700">
-          <div className="flex items-center justify-between text-xs text-dark-400">
+        <div className="mt-3 pt-3 border-t border-outline-variant">
+          <div className="flex items-center justify-between m3-label-medium text-on-surface-variant">
             <span className="flex items-center gap-1">
-              <Trophy size={12} className="text-primary-400" />
+              <Trophy size={12} className="text-primary" />
               {t('achievements.unlocked')}
             </span>
             <span>{formatDate(unlockedAt)}</span>
           </div>
         </div>
       )}
-    </div>
+    </Card>
   );
 });
 

@@ -22,6 +22,7 @@ import { Flame, FileSpreadsheet, FileText } from 'lucide-react';
 import { api } from '../../services/api';
 import { formatDate, getTimestampForSort } from '../../utils/dateUtils';
 import BackButton from '../common/BackButton';
+import { Card, Button, Chip } from '../common';
 
 const VALID_TABS = ['overview', 'progress', 'history', 'compare', 'heatmap'] as const;
 type TabType = typeof VALID_TABS[number];
@@ -315,22 +316,21 @@ const StatsOverview: React.FC = () => {
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-6xl mx-auto">
           <BackButton onClick={() => navigate('/')} />
-          
-          <div className="glass-card rounded-xl shadow-lg p-12">
+
+          <Card variant="elevated" className="p-12">
             <div className="text-center py-12">
-              <Activity size={64} className="mx-auto text-dark-600 mb-6" />
-              <p className="text-white text-2xl font-bold mb-2">Keine Statistiken verfügbar</p>
-              <p className="text-dark-400 text-lg mt-2">
+              <Activity size={64} className="mx-auto text-on-surface-variant mb-6" />
+              <p className="text-on-surface m3-headline-small mb-2">Keine Statistiken verfügbar</p>
+              <p className="text-on-surface-variant m3-body-large mt-2">
                 Erstelle einen Spieler und spiele einige Matches, um Statistiken zu sehen
               </p>
-              <button
-                onClick={() => navigate('/players')}
-                className="mt-6 px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg font-semibold transition-all"
-              >
-                Spieler erstellen
-              </button>
+              <div className="mt-6 flex justify-center">
+                <Button variant="filled" onClick={() => navigate('/players')}>
+                  Spieler erstellen
+                </Button>
+              </div>
             </div>
-          </div>
+          </Card>
         </div>
       </div>
     );
@@ -344,33 +344,33 @@ const StatsOverview: React.FC = () => {
           <BackButton onClick={() => navigate('/')} className="" />
           
           <div ref={exportMenuRef} className="relative">
-            <button
+            <Button
+              variant="filled"
+              icon={<Download size={18} />}
               onClick={() => setShowExportMenu(!showExportMenu)}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg transition-all font-semibold"
             >
-              <Download size={18} />
               Export
-            </button>
-            
+            </Button>
+
             {showExportMenu && (
-              <div className="absolute right-0 mt-2 w-48 glass-card rounded-lg shadow-xl z-50 overflow-hidden">
+              <div className="absolute right-0 mt-2 w-48 bg-surface-container-high rounded-m3-md shadow-m3-3 z-50 overflow-hidden border border-outline-variant">
                 <button
                   onClick={handleExportCSV}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-on-surface hover:bg-surface-container-highest transition-colors text-left"
                 >
                   <FileText size={18} />
                   <span>CSV Export</span>
                 </button>
                 <button
                   onClick={handleExportExcel}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-on-surface hover:bg-surface-container-highest transition-colors text-left"
                 >
                   <FileSpreadsheet size={18} />
                   <span>Excel Export</span>
                 </button>
                 <button
                   onClick={handleExportPDF}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-on-surface hover:bg-surface-container-highest transition-colors text-left"
                 >
                   <FileText size={18} />
                   <span>PDF Export</span>
@@ -381,13 +381,13 @@ const StatsOverview: React.FC = () => {
         </div>
 
         {/* Player Selector */}
-        <div className="glass-card p-4 mb-6">
+        <Card variant="elevated" className="p-4 mb-6">
           <div className="flex items-center gap-4">
-            <label className="text-white font-semibold">Spieler:</label>
+            <label className="text-on-surface m3-label-large">Spieler:</label>
             <select
               value={selectedPlayerId}
               onChange={(e) => setSelectedPlayerId(e.target.value)}
-              className="flex-1 max-w-xs px-4 py-2 bg-dark-800 text-white rounded-lg border border-dark-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+              className="flex-1 max-w-xs px-4 py-2 bg-surface-container border border-outline-variant text-on-surface rounded-m3-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all"
             >
               {players.map(player => (
                 <option key={player.id} value={player.id}>
@@ -396,103 +396,72 @@ const StatsOverview: React.FC = () => {
               ))}
             </select>
           </div>
-        </div>
+        </Card>
 
         {selectedPlayer && (
           <>
             {/* Improvement Banner */}
             {playerMatches.length >= 10 && (
-              <div className={`glass-card p-6 mb-6 border-2 ${
-                improvement.trend === 'improving' 
-                  ? 'border-success-500 bg-success-500/10' 
+              <Card variant="elevated" className={`p-6 mb-6 border-2 ${
+                improvement.trend === 'improving'
+                  ? 'border-success-500 bg-success-container'
                   : improvement.trend === 'declining'
-                  ? 'border-red-500 bg-red-500/10'
-                  : 'border-primary-500 bg-primary-500/10'
+                  ? 'border-error-500 bg-error-container'
+                  : 'border-primary-500 bg-primary-container'
               }`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     {improvement.trend === 'improving' ? (
-                      <TrendingUp size={36} className="text-success-400" />
+                      <TrendingUp size={36} className="text-success" />
                     ) : improvement.trend === 'declining' ? (
-                      <TrendingDown size={36} className="text-red-400" />
+                      <TrendingDown size={36} className="text-error" />
                     ) : (
-                      <Minus size={36} className="text-primary-400" />
+                      <Minus size={36} className="text-primary" />
                     )}
                     <div>
-                      <h3 className="text-2xl font-bold text-white">
+                      <h3 className="m3-title-large text-on-surface">
                         {improvement.trend === 'improving' && 'Du verbesserst dich! 📈'}
                         {improvement.trend === 'declining' && 'Leichter Rückgang 📉'}
                         {improvement.trend === 'stable' && 'Stabile Performance 📊'}
                       </h3>
-                      <p className="text-sm text-dark-300 mt-1">
-                        Aktuell: <span className="font-bold text-white">{improvement.recentAverage.toFixed(2)}</span> | 
-                        Historisch: <span className="font-bold text-white">{improvement.historicAverage.toFixed(2)}</span> | 
-                        Differenz: <span className={`font-bold ${improvement.averageImprovement > 0 ? 'text-success-400' : 'text-red-400'}`}>
+                      <p className="m3-body-small text-on-surface-variant mt-1">
+                        Aktuell: <span className="font-bold text-on-surface">{improvement.recentAverage.toFixed(2)}</span> |
+                        Historisch: <span className="font-bold text-on-surface">{improvement.historicAverage.toFixed(2)}</span> |
+                        Differenz: <span className={`font-bold ${improvement.averageImprovement > 0 ? 'text-success' : 'text-error'}`}>
                           {improvement.averageImprovement > 0 ? '+' : ''}{improvement.averageImprovement.toFixed(2)}
                         </span>
                       </p>
                     </div>
                   </div>
                 </div>
-              </div>
+              </Card>
             )}
 
             {/* Tabs */}
-            <div className="glass-card mb-6">
-              <div className="flex border-b border-dark-700">
-                <button
-                  onClick={() => setSelectedTab('overview')}
-                  className={`flex-1 px-6 py-3 font-semibold transition-all ${
-                    selectedTab === 'overview'
-                      ? 'text-white border-b-2 border-primary-500 bg-primary-500/5'
-                      : 'text-dark-400 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  Übersicht
-                </button>
-                <button
-                  onClick={() => setSelectedTab('progress')}
-                  className={`flex-1 px-6 py-3 font-semibold transition-all ${
-                    selectedTab === 'progress'
-                      ? 'text-white border-b-2 border-primary-500 bg-primary-500/5'
-                      : 'text-dark-400 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  Fortschritt
-                </button>
-                <button
-                  onClick={() => setSelectedTab('history')}
-                  className={`flex-1 px-6 py-3 font-semibold transition-all ${
-                    selectedTab === 'history'
-                      ? 'text-white border-b-2 border-primary-500 bg-primary-500/5'
-                      : 'text-dark-400 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  Verlauf ({playerMatches.length})
-                </button>
-                <button
-                  onClick={() => setSelectedTab('compare')}
-                  className={`flex-1 px-6 py-3 font-semibold transition-all ${
-                    selectedTab === 'compare'
-                      ? 'text-white border-b-2 border-primary-500 bg-primary-500/5'
-                      : 'text-dark-400 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <Users size={16} className="inline mr-2" />
-                  Vergleich
-                </button>
-                <button
-                  onClick={() => setSelectedTab('heatmap')}
-                  className={`flex-1 px-6 py-3 font-semibold transition-all ${
-                    selectedTab === 'heatmap'
-                      ? 'text-white border-b-2 border-primary-500 bg-primary-500/5'
-                      : 'text-dark-400 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <Flame size={16} className="inline mr-2" />
-                  Heatmap
-                </button>
-              </div>
+            <div className="flex flex-wrap gap-2 mb-6">
+              <Chip selected={selectedTab === 'overview'} onClick={() => setSelectedTab('overview')}>
+                Übersicht
+              </Chip>
+              <Chip selected={selectedTab === 'progress'} onClick={() => setSelectedTab('progress')}>
+                Fortschritt
+              </Chip>
+              <Chip selected={selectedTab === 'history'} onClick={() => setSelectedTab('history')}>
+                Verlauf ({playerMatches.length})
+              </Chip>
+              <Chip
+                selected={selectedTab === 'compare'}
+                icon={<Users size={16} />}
+                onClick={() => setSelectedTab('compare')}
+              >
+                Vergleich
+              </Chip>
+              <Chip
+                selected={selectedTab === 'heatmap'}
+                icon={<Flame size={16} />}
+                onClick={() => setSelectedTab('heatmap')}
+              >
+                Heatmap
+              </Chip>
             </div>
 
             {/* Tab Content */}
@@ -528,12 +497,12 @@ const StatsOverview: React.FC = () => {
                     {/* Performance Radar & Win/Loss Pie */}
                     <div className="grid md:grid-cols-2 gap-6">
                       {/* Performance Radar */}
-                      <div className="glass-card p-6">
-                        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                      <Card variant="elevated" className="p-6">
+                        <h3 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
                           <span className="text-2xl">⭐</span>
                           Performance-Profil
                         </h3>
-                        <div className="bg-dark-900 rounded-lg p-4">
+                        <div className="bg-surface-container rounded-m3-md p-4">
                           <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                             <RadarChart data={performanceRadar}>
                               <PolarGrid stroke="#404040" />
@@ -569,15 +538,15 @@ const StatsOverview: React.FC = () => {
                             </RadarChart>
                           </ResponsiveContainer></div>
                         </div>
-                      </div>
+                      </Card>
 
                       {/* Win/Loss Pie */}
-                      <div className="glass-card p-6">
-                        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                      <Card variant="elevated" className="p-6">
+                        <h3 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
                           <span className="text-2xl">🏆</span>
                           Sieg-Statistik
                         </h3>
-                        <div className="bg-dark-900 rounded-lg p-4">
+                        <div className="bg-surface-container rounded-m3-md p-4">
                           <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                               <Pie
@@ -606,17 +575,17 @@ const StatsOverview: React.FC = () => {
                             </PieChart>
                           </ResponsiveContainer></div>
                         </div>
-                      </div>
+                      </Card>
                     </div>
 
                     {/* Score Distribution */}
                     {scoreDistribution.length > 0 && (
-                      <div className="glass-card p-6">
-                        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                      <Card variant="elevated" className="p-6">
+                        <h3 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
                           <span className="text-2xl">🎯</span>
                           Score-Verteilung
                         </h3>
-                        <div className="bg-dark-900 rounded-lg p-4">
+                        <div className="bg-surface-container rounded-m3-md p-4">
                           <div className="h-[250px] sm:h-[350px]"><ResponsiveContainer width="100%" height="100%">
                             <BarChart 
                               data={scoreDistribution}
@@ -655,27 +624,27 @@ const StatsOverview: React.FC = () => {
                             </BarChart>
                           </ResponsiveContainer></div>
                         </div>
-                      </div>
+                      </Card>
                     )}
 
                     {/* Monthly Performance */}
                     {playerMatches.length > 0 && (
-                      <div className="glass-card p-6">
+                      <Card variant="elevated" className="p-6">
                         <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                          <h3 className="m3-title-large text-on-surface flex items-center gap-2">
                             <span className="text-2xl">📊</span>
                             Entwicklung im Zeitverlauf
                             {timeSeriesData.length === 1 && (
-                              <span className="text-sm text-amber-400 ml-2">(Nur 1 Datenpunkt - spiele mehr für Entwicklung!)</span>
+                              <span className="m3-body-small text-tertiary ml-2">(Nur 1 Datenpunkt - spiele mehr für Entwicklung!)</span>
                             )}
                             {timeSeriesData.length === 0 && playerMatches.length > 0 && (
-                              <span className="text-sm text-red-400 ml-2">(Keine gültigen Zeitstempel in Match-Daten)</span>
+                              <span className="m3-body-small text-error ml-2">(Keine gültigen Zeitstempel in Match-Daten)</span>
                             )}
                           </h3>
                           <select
                             value={timeInterval}
                             onChange={(e) => setTimeInterval(e.target.value as TimeInterval)}
-                            className="px-4 py-2 bg-dark-800 text-white rounded-lg border border-dark-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+                            className="px-4 py-2 bg-surface-container border border-outline-variant text-on-surface rounded-m3-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all"
                           >
                             <option value="daily">Täglich</option>
                             <option value="weekly">Wöchentlich</option>
@@ -684,7 +653,7 @@ const StatsOverview: React.FC = () => {
                           </select>
                         </div>
                         {timeSeriesData.length > 0 ? (
-                          <div className="bg-dark-900 rounded-lg p-4">
+                          <div className="bg-surface-container rounded-m3-md p-4">
                             <div className="h-[250px] sm:h-[350px]"><ResponsiveContainer width="100%" height="100%">
                               <ComposedChart data={timeSeriesData}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
@@ -742,25 +711,25 @@ const StatsOverview: React.FC = () => {
                             </ResponsiveContainer></div>
                           </div>
                         ) : (
-                          <div className="bg-dark-900 rounded-lg p-12 text-center">
-                            <Activity size={48} className="mx-auto mb-4 text-dark-600" />
-                            <p className="text-dark-400 text-lg font-semibold mb-2">Keine Zeitverlaufs-Daten verfügbar</p>
-                            <p className="text-dark-500 text-sm">
+                          <div className="bg-surface-container rounded-m3-md p-12 text-center">
+                            <Activity size={48} className="mx-auto mb-4 text-on-surface-variant" />
+                            <p className="text-on-surface m3-body-large font-semibold mb-2">Keine Zeitverlaufs-Daten verfügbar</p>
+                            <p className="text-on-surface-variant m3-body-small">
                               Die Match-Daten haben keine gültigen Zeitstempel. Neue Matches werden korrekt erfasst.
                             </p>
                           </div>
                         )}
-                      </div>
+                      </Card>
                     )}
                   </>
                 )}
 
                 {selectedPlayer.stats.gamesPlayed === 0 && (
-                  <div className="glass-card p-12 text-center">
-                    <Activity size={64} className="mx-auto mb-4 text-dark-600" />
-                    <p className="text-white text-xl font-semibold mb-2">Keine Spieldaten vorhanden</p>
-                    <p className="text-dark-400">Spiele einige Matches, um detaillierte Charts und Statistiken zu sehen</p>
-                  </div>
+                  <Card variant="elevated" className="p-12 text-center">
+                    <Activity size={64} className="mx-auto mb-4 text-on-surface-variant" />
+                    <p className="text-on-surface m3-title-medium font-semibold mb-2">Keine Spieldaten vorhanden</p>
+                    <p className="text-on-surface-variant">Spiele einige Matches, um detaillierte Charts und Statistiken zu sehen</p>
+                  </Card>
                 )}
               </div>
             )}
@@ -768,17 +737,17 @@ const StatsOverview: React.FC = () => {
             {selectedTab === 'progress' && (
               <div className="space-y-6">
                 {playerMatches.length === 0 ? (
-                  <div className="glass-card p-12 text-center">
-                    <Activity size={64} className="mx-auto mb-4 text-dark-600" />
-                    <p className="text-dark-400 text-lg font-semibold">Noch keine Spiele für diesen Spieler</p>
-                    <p className="text-dark-500 text-sm mt-2">Spiele einige Matches, um deine Fortschritte zu sehen</p>
-                  </div>
+                  <Card variant="elevated" className="p-12 text-center">
+                    <Activity size={64} className="mx-auto mb-4 text-on-surface-variant" />
+                    <p className="text-on-surface m3-body-large font-semibold">Noch keine Spiele für diesen Spieler</p>
+                    <p className="text-on-surface-variant m3-body-small mt-2">Spiele einige Matches, um deine Fortschritte zu sehen</p>
+                  </Card>
                 ) : (
                   <>
                     {/* Average Progress Chart */}
-                    <div className="glass-card p-6">
-                      <h3 className="text-xl font-bold text-white mb-4">📈 Average-Entwicklung</h3>
-                      <div className="bg-dark-900 rounded-lg p-4">
+                    <Card variant="elevated" className="p-6">
+                      <h3 className="m3-title-large text-on-surface mb-4">📈 Average-Entwicklung</h3>
+                      <div className="bg-surface-container rounded-m3-md p-4">
                         <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <LineChart data={progressData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
@@ -822,12 +791,12 @@ const StatsOverview: React.FC = () => {
                           </LineChart>
                         </ResponsiveContainer></div>
                       </div>
-                    </div>
+                    </Card>
 
                     {/* Checkout Percentage Chart */}
-                    <div className="glass-card p-6">
-                      <h3 className="text-xl font-bold text-white mb-4">🎯 Checkout-Quote</h3>
-                      <div className="bg-dark-900 rounded-lg p-4">
+                    <Card variant="elevated" className="p-6">
+                      <h3 className="m3-title-large text-on-surface mb-4">🎯 Checkout-Quote</h3>
+                      <div className="bg-surface-container rounded-m3-md p-4">
                         <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <LineChart data={progressData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
@@ -871,12 +840,12 @@ const StatsOverview: React.FC = () => {
                           </LineChart>
                         </ResponsiveContainer></div>
                       </div>
-                    </div>
+                    </Card>
 
                     {/* Score Distribution Chart */}
-                    <div className="glass-card p-6">
-                      <h3 className="text-xl font-bold text-white mb-4">🔥 Score-Verteilung pro Match</h3>
-                      <div className="bg-dark-900 rounded-lg p-4">
+                    <Card variant="elevated" className="p-6">
+                      <h3 className="m3-title-large text-on-surface mb-4">🔥 Score-Verteilung pro Match</h3>
+                      <div className="bg-surface-container rounded-m3-md p-4">
                         <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <BarChart data={progressData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
@@ -927,12 +896,12 @@ const StatsOverview: React.FC = () => {
                           </BarChart>
                         </ResponsiveContainer></div>
                       </div>
-                    </div>
+                    </Card>
 
                     {/* Legs Won/Lost Trend */}
-                    <div className="glass-card p-6">
-                      <h3 className="text-xl font-bold text-white mb-4">🎯 Legs Gewonnen vs. Verloren</h3>
-                      <div className="bg-dark-900 rounded-lg p-4">
+                    <Card variant="elevated" className="p-6">
+                      <h3 className="m3-title-large text-on-surface mb-4">🎯 Legs Gewonnen vs. Verloren</h3>
+                      <div className="bg-surface-container rounded-m3-md p-4">
                         <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={progressData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
@@ -982,12 +951,12 @@ const StatsOverview: React.FC = () => {
                           </AreaChart>
                         </ResponsiveContainer></div>
                       </div>
-                    </div>
+                    </Card>
 
                     {/* Highest Score per Match */}
-                    <div className="glass-card p-6">
-                      <h3 className="text-xl font-bold text-white mb-4">🚀 Höchste Scores</h3>
-                      <div className="bg-dark-900 rounded-lg p-4">
+                    <Card variant="elevated" className="p-6">
+                      <h3 className="m3-title-large text-on-surface mb-4">🚀 Höchste Scores</h3>
+                      <div className="bg-surface-container rounded-m3-md p-4">
                         <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <ComposedChart data={progressData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
@@ -1040,54 +1009,54 @@ const StatsOverview: React.FC = () => {
                           </ComposedChart>
                         </ResponsiveContainer></div>
                       </div>
-                    </div>
+                    </Card>
 
                     {/* Performance Improvement Summary */}
                     {improvement && (
-                      <div className="glass-card p-6">
-                        <h3 className="text-xl font-bold text-white mb-4">📈 Verbesserungs-Trend</h3>
+                      <Card variant="elevated" className="p-6">
+                        <h3 className="m3-title-large text-on-surface mb-4">📈 Verbesserungs-Trend</h3>
                         <div className="grid md:grid-cols-3 gap-4">
-                          <div className="bg-dark-900 rounded-lg p-4">
+                          <div className="bg-surface-container rounded-m3-md p-4">
                             <div className="flex items-center gap-2 mb-2">
                               {improvement.averageImprovement >= 0 ? (
-                                <TrendingUp size={20} className="text-success-500" />
+                                <TrendingUp size={20} className="text-success" />
                               ) : (
-                                <TrendingDown size={20} className="text-red-500" />
+                                <TrendingDown size={20} className="text-error" />
                               )}
-                              <span className="text-dark-400 text-sm">Average</span>
+                              <span className="text-on-surface-variant m3-body-small">Average</span>
                             </div>
-                            <div className={`text-2xl font-bold ${
-                              improvement.averageImprovement >= 0 ? 'text-success-500' : 'text-red-500'
+                            <div className={`m3-title-large font-bold ${
+                              improvement.averageImprovement >= 0 ? 'text-success' : 'text-error'
                             }`}>
                               {improvement.averageImprovement >= 0 ? '+' : ''}{improvement.averageImprovement.toFixed(2)}
                             </div>
                           </div>
-                          <div className="bg-dark-900 rounded-lg p-4">
+                          <div className="bg-surface-container rounded-m3-md p-4">
                             <div className="flex items-center gap-2 mb-2">
                               {improvement.checkoutImprovement >= 0 ? (
-                                <TrendingUp size={20} className="text-success-500" />
+                                <TrendingUp size={20} className="text-success" />
                               ) : (
-                                <TrendingDown size={20} className="text-red-500" />
+                                <TrendingDown size={20} className="text-error" />
                               )}
-                              <span className="text-dark-400 text-sm">Checkout %</span>
+                              <span className="text-on-surface-variant m3-body-small">Checkout %</span>
                             </div>
-                            <div className={`text-2xl font-bold ${
-                              improvement.checkoutImprovement >= 0 ? 'text-success-500' : 'text-red-500'
+                            <div className={`m3-title-large font-bold ${
+                              improvement.checkoutImprovement >= 0 ? 'text-success' : 'text-error'
                             }`}>
                               {improvement.checkoutImprovement >= 0 ? '+' : ''}{improvement.checkoutImprovement.toFixed(1)}%
                             </div>
                           </div>
-                          <div className="bg-dark-900 rounded-lg p-4">
+                          <div className="bg-surface-container rounded-m3-md p-4">
                             <div className="flex items-center gap-2 mb-2">
-                              <Activity size={20} className="text-primary-500" />
-                              <span className="text-dark-400 text-sm">Spiele</span>
+                              <Activity size={20} className="text-primary" />
+                              <span className="text-on-surface-variant m3-body-small">Spiele</span>
                             </div>
-                            <div className="text-2xl font-bold text-white">
+                            <div className="m3-title-large font-bold text-on-surface">
                               {playerMatches.length}
                             </div>
                           </div>
                         </div>
-                      </div>
+                      </Card>
                     )}
                   </>
                 )}
@@ -1095,18 +1064,18 @@ const StatsOverview: React.FC = () => {
             )}
 
             {selectedTab === 'history' && (
-              <div className="glass-card p-6">
-                <h3 className="text-xl font-bold text-white mb-4">📜 Match-Verlauf</h3>
+              <Card variant="elevated" className="p-6">
+                <h3 className="m3-title-large text-on-surface mb-4">📜 Match-Verlauf</h3>
                 {playerMatches.length === 0 ? (
                   <div className="text-center py-12">
-                    <Activity size={64} className="mx-auto mb-4 text-dark-600" />
-                    <p className="text-dark-400 text-lg font-semibold">Noch keine Matches gespielt</p>
-                    <p className="text-dark-500 text-sm mt-2">Starte ein Spiel, um deinen Verlauf zu sehen</p>
+                    <Activity size={64} className="mx-auto mb-4 text-on-surface-variant" />
+                    <p className="text-on-surface m3-body-large font-semibold">Noch keine Matches gespielt</p>
+                    <p className="text-on-surface-variant m3-body-small mt-2">Starte ein Spiel, um deinen Verlauf zu sehen</p>
                   </div>
                 ) : (
                   <MatchHistory matches={playerMatches} playerId={selectedPlayerId} />
                 )}
-              </div>
+              </Card>
             )}
 
             {selectedTab === 'compare' && (
@@ -1122,79 +1091,79 @@ const StatsOverview: React.FC = () => {
             {selectedTab === 'heatmap' && (
               <div className="space-y-6">
                 {/* Heatmap Header */}
-                <div className="glass-card p-6">
+                <Card variant="elevated" className="p-6">
                   <div className="flex items-center justify-between mb-2">
-                    <h2 className="text-3xl font-bold text-white flex items-center gap-3">
-                      <Flame size={32} className="text-orange-400" />
+                    <h2 className="m3-headline-small text-on-surface flex items-center gap-3">
+                      <Flame size={32} className="text-tertiary" />
                       🎯 Wurf-Heatmap
                     </h2>
                   </div>
-                  <p className="text-dark-300 text-lg">
-                    Visualisierung aller Würfe von <span className="font-bold text-primary-400">{selectedPlayer?.name}</span>
+                  <p className="text-on-surface-variant m3-body-large">
+                    Visualisierung aller Würfe von <span className="font-bold text-primary">{selectedPlayer?.name}</span>
                   </p>
-                </div>
+                </Card>
 
                 {/* Heatmap Content */}
                 {heatmapData && heatmapData.totalDarts > 0 ? (
                   <div className="space-y-6">
                     {/* Stats Cards */}
                     <div className="grid md:grid-cols-4 gap-4">
-                      <div className="glass-card p-6 border-2 border-blue-500/30">
-                        <div className="text-sm text-blue-300 mb-1 font-semibold">Total Würfe</div>
-                        <div className="text-4xl font-bold text-white">{heatmapData.totalDarts}</div>
-                        <div className="text-xs text-dark-400 mt-2">Alle aufgezeichneten Darts</div>
-                      </div>
-                      <div className="glass-card p-6 border-2 border-green-500/30">
-                        <div className="text-sm text-green-300 mb-1 font-semibold">Segments getroffen</div>
-                        <div className="text-4xl font-bold text-white">
+                      <Card variant="filled" className="p-6">
+                        <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">Total Würfe</div>
+                        <div className="m3-headline-medium font-bold text-on-surface">{heatmapData.totalDarts}</div>
+                        <div className="m3-body-small text-on-surface-variant mt-2">Alle aufgezeichneten Darts</div>
+                      </Card>
+                      <Card variant="filled" className="p-6">
+                        <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">Segments getroffen</div>
+                        <div className="m3-headline-medium font-bold text-on-surface">
                           {Object.keys(heatmapData.segments || {}).length}
                         </div>
-                        <div className="text-xs text-dark-400 mt-2">Unterschiedliche Felder</div>
-                      </div>
-                      <div className="glass-card p-6 border-2 border-orange-500/30">
-                        <div className="text-sm text-orange-300 mb-1 font-semibold">Präzision</div>
-                        <div className="text-4xl font-bold text-white">
+                        <div className="m3-body-small text-on-surface-variant mt-2">Unterschiedliche Felder</div>
+                      </Card>
+                      <Card variant="filled" className="p-6">
+                        <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">Präzision</div>
+                        <div className="m3-headline-medium font-bold text-on-surface">
                           {selectedPlayer ? selectedPlayer.stats.checkoutPercentage.toFixed(1) : 0}%
                         </div>
-                        <div className="text-xs text-dark-400 mt-2">Checkout Rate</div>
-                      </div>
-                      <div className="glass-card p-6 border-2 border-red-500/30">
-                        <div className="text-sm text-red-300 mb-1 font-semibold">180s</div>
-                        <div className="text-4xl font-bold text-white">
+                        <div className="m3-body-small text-on-surface-variant mt-2">Checkout Rate</div>
+                      </Card>
+                      <Card variant="filled" className="p-6">
+                        <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">180s</div>
+                        <div className="m3-headline-medium font-bold text-on-surface">
                           {selectedPlayer?.stats.total180s || 0}
                         </div>
-                        <div className="text-xs text-dark-400 mt-2">Maximum Scores</div>
-                      </div>
+                        <div className="m3-body-small text-on-surface-variant mt-2">Maximum Scores</div>
+                      </Card>
                     </div>
 
                     {/* Heatmap Visualization */}
-                    <div className="glass-card p-8 border-2 border-primary-500/20">
+                    <Card variant="elevated" className="p-8">
                       <DartboardHeatmapBlur heatmapData={heatmapData} size={600} />
-                    </div>
+                    </Card>
                   </div>
                 ) : (
-                  <div className="glass-card p-12 text-center border-2 border-dashed border-dark-700">
+                  <Card variant="outlined" className="p-12 text-center border-2 border-dashed border-outline-variant">
                     <div className="text-8xl mb-6">🎯</div>
-                    <h3 className="text-3xl font-bold text-white mb-4">Noch keine Wurf-Daten</h3>
-                    <p className="text-dark-300 text-xl mb-6">
+                    <h3 className="m3-headline-small text-on-surface mb-4">Noch keine Wurf-Daten</h3>
+                    <p className="text-on-surface-variant m3-body-large mb-6">
                       Spiele ein Match, um deine Wurf-Heatmap zu sehen!
                     </p>
-                    <p className="text-dark-400 mb-6">
+                    <p className="text-on-surface-variant mb-6">
                       Die Heatmap zeigt dir auf einen Blick, wo du am häufigsten triffst:
                     </p>
-                    <div className="flex items-center justify-center gap-6 text-lg">
+                    <div className="flex items-center justify-center gap-6 m3-body-large">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-red-500 shadow-lg" style={{ boxShadow: '0 0 20px #ef444480' }}></div>
-                        <span className="text-white font-semibold">Hot-Zones</span>
-                        <span className="text-dark-400">(oft getroffen)</span>
+                        <span className="text-on-surface font-semibold">Hot-Zones</span>
+                        <span className="text-on-surface-variant">(oft getroffen)</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-blue-500 shadow-lg" style={{ boxShadow: '0 0 20px #3b82f680' }}></div>
-                        <span className="text-white font-semibold">Cold-Zones</span>
-                        <span className="text-dark-400">(selten getroffen)</span>
+                        <span className="text-on-surface font-semibold">Cold-Zones</span>
+                        <span className="text-on-surface-variant">(selten getroffen)</span>
                       </div>
                     </div>
-                  </div>
+                  </Card>
                 )}
               </div>
             )}
@@ -1212,17 +1181,18 @@ const StatCard: React.FC<{ label: string; value: string | number; color?: string
   icon 
 }) => {
   const colorClasses = {
-    gray: 'from-dark-700 to-dark-800 border-dark-600',
-    green: 'from-success-600 to-success-700 border-success-500',
-    blue: 'from-primary-600 to-primary-700 border-primary-500',
-    purple: 'from-accent-600 to-accent-700 border-accent-500',
-    yellow: 'from-yellow-600 to-yellow-700 border-yellow-500',
+    gray: 'bg-surface-container-highest text-on-surface',
+    green: 'bg-success-container text-on-success-container',
+    blue: 'bg-primary-container text-on-primary-container',
+    purple: 'bg-tertiary-container text-on-tertiary-container',
+    yellow: 'bg-secondary-container text-on-secondary-container',
   };
+  const tone = colorClasses[color as keyof typeof colorClasses] || colorClasses.gray;
 
   return (
-    <div className={`glass-card p-6 bg-gradient-to-br ${colorClasses[color as keyof typeof colorClasses] || colorClasses.gray} border border-opacity-20`}>
-      <div className="text-sm text-dark-300 mb-2 font-medium">{label}</div>
-      <div className="text-3xl font-bold text-white flex items-center gap-2">
+    <div className={`rounded-m3-lg shadow-m3-1 p-6 ${tone}`}>
+      <div className="m3-label-large opacity-80 mb-2">{label}</div>
+      <div className="m3-headline-small font-bold flex items-center gap-2">
         {icon && <span className="text-2xl">{icon}</span>}
         {value}
       </div>
@@ -1315,19 +1285,19 @@ const PlayerComparisonView: React.FC<{
 
   if (players.length === 0) {
     return (
-      <div className="glass-card p-8 text-center">
-        <Users size={64} className="mx-auto mb-4 text-dark-600" />
-        <p className="text-dark-400 text-lg font-semibold">Keine Spieler vorhanden</p>
-        <p className="text-dark-500 text-sm mt-2">Erstelle Spieler, um sie zu vergleichen</p>
-      </div>
+      <Card variant="elevated" className="p-8 text-center">
+        <Users size={64} className="mx-auto mb-4 text-on-surface-variant" />
+        <p className="text-on-surface m3-body-large font-semibold">Keine Spieler vorhanden</p>
+        <p className="text-on-surface-variant m3-body-small mt-2">Erstelle Spieler, um sie zu vergleichen</p>
+      </Card>
     );
   }
 
   return (
     <div className="space-y-6">
       {/* Player Selection */}
-      <div className="glass-card p-6">
-        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+      <Card variant="elevated" className="p-6">
+        <h3 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
           <Users size={24} />
           Spieler auswählen (max. 4)
         </h3>
@@ -1337,10 +1307,10 @@ const PlayerComparisonView: React.FC<{
               key={player.id}
               onClick={() => togglePlayer(player.id)}
               disabled={!comparePlayerIds.includes(player.id) && comparePlayerIds.length >= 4}
-              className={`glass-card p-5 rounded-xl border-2 transition-all ${
+              className={`p-5 rounded-m3-lg border-2 transition-all ${
                 comparePlayerIds.includes(player.id)
-                  ? 'border-primary-500 bg-primary-500/10 shadow-lg'
-                  : 'border-dark-700 hover:border-dark-600 hover:bg-dark-800/50'
+                  ? 'border-success-500 bg-success-container shadow-m3-2'
+                  : 'border-outline-variant bg-surface-container hover:bg-surface-container-high'
               } ${
                 !comparePlayerIds.includes(player.id) && comparePlayerIds.length >= 4
                   ? 'opacity-50 cursor-not-allowed'
@@ -1348,28 +1318,28 @@ const PlayerComparisonView: React.FC<{
               }`}
             >
               <div className="text-4xl mb-3">{player.avatar}</div>
-              <div className="font-bold text-white text-base">{player.name}</div>
+              <div className="font-bold text-on-surface m3-body-large">{player.name}</div>
               {comparePlayerIds.includes(player.id) && (
-                <div className="text-xs text-primary-400 mt-2 font-semibold">✓ Ausgewählt</div>
+                <div className="m3-body-small text-primary mt-2 font-semibold">✓ Ausgewählt</div>
               )}
             </button>
           ))}
         </div>
-      </div>
+      </Card>
 
       {comparePlayerIds.length < 2 && (
-        <div className="glass-card p-8 text-center">
-          <p className="text-dark-400 text-lg font-semibold">Wähle mindestens 2 Spieler zum Vergleichen</p>
-          <p className="text-dark-500 text-sm mt-2">Klicke auf die Spieler oben, um sie auszuwählen</p>
-        </div>
+        <Card variant="elevated" className="p-8 text-center">
+          <p className="text-on-surface m3-body-large font-semibold">Wähle mindestens 2 Spieler zum Vergleichen</p>
+          <p className="text-on-surface-variant m3-body-small mt-2">Klicke auf die Spieler oben, um sie auszuwählen</p>
+        </Card>
       )}
 
       {comparisonData.length >= 2 && (
         <>
           {/* Radar Comparison */}
-          <div className="glass-card p-6">
-            <h3 className="text-xl font-bold text-white mb-4">📊 Leistungsvergleich</h3>
-            <div className="bg-dark-900 rounded-lg p-4">
+          <Card variant="elevated" className="p-6">
+            <h3 className="m3-title-large text-on-surface mb-4">📊 Leistungsvergleich</h3>
+            <div className="bg-surface-container rounded-m3-md p-4">
               <div className="h-[280px] sm:h-[400px]"><ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="#404040" />
@@ -1396,18 +1366,18 @@ const PlayerComparisonView: React.FC<{
                 </RadarChart>
               </ResponsiveContainer></div>
             </div>
-          </div>
+          </Card>
 
           {/* Stats Comparison Table */}
-          <div className="glass-card p-6">
-            <h3 className="text-xl font-bold text-white mb-4">📈 Statistik-Vergleich</h3>
+          <Card variant="elevated" className="p-6">
+            <h3 className="m3-title-large text-on-surface mb-4">📈 Statistik-Vergleich</h3>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[500px]">
                 <thead>
-                  <tr className="border-b border-dark-700">
-                    <th className="text-left p-3 text-dark-400 font-semibold">Kategorie</th>
+                  <tr className="border-b border-outline-variant">
+                    <th className="text-left p-3 text-on-surface-variant font-semibold">Kategorie</th>
                     {comparisonData.map((data, index) => (
-                      <th key={index} className="text-center p-3 text-white font-semibold">
+                      <th key={index} className="text-center p-3 text-on-surface font-semibold">
                         <div className="flex flex-col items-center gap-2">
                           <span className="text-2xl">{data!.player.avatar}</span>
                           <span>{data!.player.name}</span>
@@ -1417,58 +1387,58 @@ const PlayerComparisonView: React.FC<{
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b border-dark-800">
-                    <td className="p-3 text-dark-300">Spiele</td>
+                  <tr className="border-b border-outline-variant">
+                    <td className="p-3 text-on-surface-variant">Spiele</td>
                     {comparisonData.map((data, index) => (
-                      <td key={index} className="p-3 text-center text-white font-bold">
+                      <td key={index} className="p-3 text-center text-on-surface font-bold">
                         {data!.totalGames}
                       </td>
                     ))}
                   </tr>
-                  <tr className="border-b border-dark-800">
-                    <td className="p-3 text-dark-300">Siege</td>
+                  <tr className="border-b border-outline-variant">
+                    <td className="p-3 text-on-surface-variant">Siege</td>
                     {comparisonData.map((data, index) => (
-                      <td key={index} className="p-3 text-center text-success-400 font-bold">
+                      <td key={index} className="p-3 text-center text-success font-bold">
                         {data!.wins}
                       </td>
                     ))}
                   </tr>
-                  <tr className="border-b border-dark-800">
-                    <td className="p-3 text-dark-300">Siegrate</td>
+                  <tr className="border-b border-outline-variant">
+                    <td className="p-3 text-on-surface-variant">Siegrate</td>
                     {comparisonData.map((data, index) => (
-                      <td key={index} className="p-3 text-center text-primary-400 font-bold">
+                      <td key={index} className="p-3 text-center text-primary font-bold">
                         {data!.winRate.toFixed(1)}%
                       </td>
                     ))}
                   </tr>
-                  <tr className="border-b border-dark-800">
-                    <td className="p-3 text-dark-300">Durchschnitt</td>
+                  <tr className="border-b border-outline-variant">
+                    <td className="p-3 text-on-surface-variant">Durchschnitt</td>
                     {comparisonData.map((data, index) => (
-                      <td key={index} className="p-3 text-center text-white font-bold">
+                      <td key={index} className="p-3 text-center text-on-surface font-bold">
                         {data!.avgScore.toFixed(2)}
                       </td>
                     ))}
                   </tr>
-                  <tr className="border-b border-dark-800">
-                    <td className="p-3 text-dark-300">180s</td>
+                  <tr className="border-b border-outline-variant">
+                    <td className="p-3 text-on-surface-variant">180s</td>
                     {comparisonData.map((data, index) => (
-                      <td key={index} className="p-3 text-center text-accent-400 font-bold">
+                      <td key={index} className="p-3 text-center text-tertiary font-bold">
                         {data!.total180s}
                       </td>
                     ))}
                   </tr>
-                  <tr className="border-b border-dark-800">
-                    <td className="p-3 text-dark-300">Checkout-Quote</td>
+                  <tr className="border-b border-outline-variant">
+                    <td className="p-3 text-on-surface-variant">Checkout-Quote</td>
                     {comparisonData.map((data, index) => (
-                      <td key={index} className="p-3 text-center text-success-400 font-bold">
+                      <td key={index} className="p-3 text-center text-success font-bold">
                         {data!.checkoutRate.toFixed(1)}%
                       </td>
                     ))}
                   </tr>
                   <tr>
-                    <td className="p-3 text-dark-300">Höchster Score</td>
+                    <td className="p-3 text-on-surface-variant">Höchster Score</td>
                     {comparisonData.map((data, index) => (
-                      <td key={index} className="p-3 text-center text-amber-400 font-bold">
+                      <td key={index} className="p-3 text-center text-tertiary font-bold">
                         {data!.highestScore}
                       </td>
                     ))}
@@ -1476,12 +1446,12 @@ const PlayerComparisonView: React.FC<{
                 </tbody>
               </table>
             </div>
-          </div>
+          </Card>
 
           {/* Bar Chart Comparison */}
-          <div className="glass-card p-6">
-            <h3 className="text-xl font-bold text-white mb-4">📊 Direktvergleich</h3>
-            <div className="bg-dark-900 rounded-lg p-4">
+          <Card variant="elevated" className="p-6">
+            <h3 className="m3-title-large text-on-surface mb-4">📊 Direktvergleich</h3>
+            <div className="bg-surface-container rounded-m3-md p-4">
               <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={[
@@ -1522,7 +1492,7 @@ const PlayerComparisonView: React.FC<{
                 </BarChart>
               </ResponsiveContainer></div>
             </div>
-          </div>
+          </Card>
         </>
       )}
     </div>

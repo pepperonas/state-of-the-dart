@@ -28,6 +28,7 @@ import audioSystem from '../../utils/audio';
 import { api } from '../../services/api';
 import { createAdaptiveBotPlayer, getAdaptiveBotConfigs, generateBotTurn, AdaptiveBotCategory } from '../../utils/botLogic';
 import BackButton from '../common/BackButton';
+import { Button, IconButton, Card } from '../common';
 
 const GameScreen: React.FC = () => {
   const { t } = useTranslation();
@@ -955,20 +956,21 @@ const GameScreen: React.FC = () => {
               window.location.href = '/';
             }} />
           
-          <div className="glass-card rounded-xl shadow-lg p-6 md:p-8">
-            <h2 className="text-3xl font-bold mb-6 text-white">{t('game.game_setup')}</h2>
-            
+          <Card variant="elevated" className="p-6 md:p-8">
+            <h2 className="m3-headline-medium mb-6 text-on-surface">{t('game.game_setup')}</h2>
+
             <div className="mb-6">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-semibold text-white">{t('game.select_players')}</h3>
+                <h3 className="m3-title-medium text-on-surface">{t('game.select_players')}</h3>
                 {getLastPlayers().length > 0 && (
-                  <button
+                  <Button
+                    variant="tonal"
+                    size="sm"
                     onClick={loadLastPlayers}
-                    className="px-3 py-1.5 text-sm bg-primary-500/20 hover:bg-primary-500/30 text-primary-400 rounded-lg border border-primary-500/30 transition-all font-medium flex items-center gap-2"
+                    icon={<RotateCcw size={14} />}
                   >
-                    <RotateCcw size={14} />
                     {t('game.recent_players')}
-                  </button>
+                  </Button>
                 )}
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -983,16 +985,16 @@ const GameScreen: React.FC = () => {
                         setSelectedPlayers([...selectedPlayers, player]);
                       }
                     }}
-                    className={`p-3 rounded-lg border-2 transition-all ${
+                    className={`p-3 rounded-m3-lg border-2 transition-all ${
                       selectedPlayers.find(p => p.id === player.id)
-                        ? 'border-success-500 bg-success-500/20 shadow-lg'
-                        : 'border-dark-700 hover:border-dark-600'
+                        ? 'border-success-500 bg-success-container shadow-m3-1'
+                        : 'border-outline-variant hover:border-outline'
                     }`}
                   >
                     <div className="flex justify-center mb-1">
                       <PlayerAvatar avatar={player.avatar} name={player.name} size="sm" />
                     </div>
-                    <div className="text-sm font-medium text-white">{player.name}</div>
+                    <div className="m3-label-large text-on-surface">{player.name}</div>
                   </button>
                 ))}
                 {/* Show selected bots */}
@@ -1000,51 +1002,51 @@ const GameScreen: React.FC = () => {
                   <button
                     key={bot.id}
                     onClick={() => setSelectedPlayers(selectedPlayers.filter(p => p.id !== bot.id))}
-                    className="p-3 rounded-lg border-2 border-primary-500 bg-primary-500/20 shadow-lg relative group"
+                    className="p-3 rounded-m3-lg border-2 border-primary-500 bg-primary-container shadow-m3-1 relative group"
                     title="Klicken zum Entfernen"
                   >
-                    <div className="absolute top-1 right-1 text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute top-1 right-1 text-primary opacity-0 group-hover:opacity-100 transition-opacity">
                       <X size={14} />
                     </div>
                     <div className="flex justify-center mb-1">
                       <PlayerAvatar avatar={bot.avatar} name={bot.name} size="sm" />
                     </div>
-                    <div className="text-sm font-medium text-primary-300">{bot.name}</div>
+                    <div className="m3-label-large text-on-primary-container">{bot.name}</div>
                   </button>
                 ))}
                 {!showPlayerNameInput && !showBotSelector ? (
                   <>
                     <button
                       onClick={() => setShowPlayerNameInput(true)}
-                      className="p-3 rounded-lg border-2 border-dashed border-dark-700 hover:border-dark-600 transition-all"
+                      className="p-3 rounded-m3-lg border-2 border-dashed border-outline-variant hover:border-outline transition-all"
                     >
                       <div className="text-2xl mb-1">➕</div>
-                      <div className="text-sm font-medium text-white">{t('game.add_player')}</div>
+                      <div className="m3-label-large text-on-surface">{t('game.add_player')}</div>
                     </button>
                     <button
                       onClick={() => setShowBotSelector(true)}
-                      className="p-3 rounded-lg border-2 border-dashed border-primary-700 hover:border-primary-500 transition-all bg-primary-900/20"
+                      className="p-3 rounded-m3-lg border-2 border-dashed border-primary-700 hover:border-primary-500 transition-all bg-primary-container/40"
                     >
                       <div className="text-2xl mb-1">🤖</div>
-                      <div className="text-sm font-medium text-primary-400">{t('game.add_bot')}</div>
+                      <div className="m3-label-large text-primary">{t('game.add_bot')}</div>
                     </button>
                   </>
                 ) : showBotSelector ? (
-                  <div className="p-4 rounded-lg border-2 border-primary-500 bg-primary-500/20 col-span-2 md:col-span-3">
+                  <div className="p-4 rounded-m3-lg border-2 border-primary-500 bg-primary-container/40 col-span-2 md:col-span-3">
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-white font-medium flex items-center gap-2">
-                          <Bot size={18} className="text-primary-400" />
+                        <span className="text-on-surface m3-title-small flex items-center gap-2">
+                          <Bot size={18} className="text-primary" />
                           Bot-Gegner wählen
                         </span>
                         <button
                           onClick={() => setShowBotSelector(false)}
-                          className="text-gray-400 hover:text-white"
+                          className="text-on-surface-variant hover:text-on-surface"
                         >
                           <X size={18} />
                         </button>
                       </div>
-                      <p className="text-xs text-gray-400">
+                      <p className="m3-body-small text-on-surface-variant">
                         Die Schwierigkeit passt sich automatisch an dein Können an
                       </p>
                       <div className="grid grid-cols-3 gap-2">
@@ -1069,18 +1071,18 @@ const GameScreen: React.FC = () => {
 
                               setShowBotSelector(false);
                             }}
-                            className="p-3 rounded-lg bg-dark-700 hover:bg-dark-600 border-2 border-transparent hover:border-primary-500 transition-all text-center"
+                            className="p-3 rounded-m3-lg bg-surface-container-high hover:bg-surface-container-highest border-2 border-transparent hover:border-primary-500 transition-all text-center"
                           >
                             <div className="text-3xl mb-2">{config.icon}</div>
-                            <div className="text-sm font-semibold text-white">{config.nameDE}</div>
-                            <div className="text-xs text-gray-400 mt-1">{config.descriptionDE}</div>
+                            <div className="m3-label-large text-on-surface">{config.nameDE}</div>
+                            <div className="m3-body-small text-on-surface-variant mt-1">{config.descriptionDE}</div>
                           </button>
                         ))}
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="p-3 rounded-lg border-2 border-success-500 bg-success-500/20">
+                  <div className="p-3 rounded-m3-lg border-2 border-success-500 bg-success-container">
                     <div className="space-y-2">
                       <div className="flex items-center gap-3">
                         <div className="flex-1">
@@ -1089,22 +1091,23 @@ const GameScreen: React.FC = () => {
                               <span className="text-2xl">{newPlayerAvatar}</span>
                               <button
                                 onClick={() => setNewPlayerAvatar(undefined)}
-                                className="text-xs px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded transition-all"
+                                className="m3-label-medium px-2 py-1 bg-error-container hover:bg-error-container/80 text-on-error-container rounded-m3-sm transition-all"
                               >
                                 Entfernen
                               </button>
                             </div>
                           ) : (
-                            <div className="text-dark-400 text-sm">Kein Emoji ausgewählt</div>
+                            <div className="text-on-surface-variant m3-body-medium">Kein Emoji ausgewählt</div>
                           )}
                         </div>
-                        <button
+                        <Button
+                          variant="filled"
+                          size="sm"
                           onClick={() => setShowEmojiPicker(true)}
-                          className="px-3 py-1.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-sm font-semibold transition-all flex items-center gap-2"
+                          icon={<Smile size={16} />}
                         >
-                          <Smile size={16} />
                           Emoji
-                        </button>
+                        </Button>
                       </div>
                       <input
                         type="text"
@@ -1125,11 +1128,14 @@ const GameScreen: React.FC = () => {
                           }
                         }}
                         placeholder="Player name..."
-                        className="w-full px-2 py-1 rounded border border-dark-700 bg-dark-800 text-white placeholder-dark-500"
+                        className="w-full px-2 py-1 rounded-m3-sm border border-outline-variant bg-surface-container-high text-on-surface placeholder-on-surface-variant"
                         autoFocus
                       />
                       <div className="flex gap-2">
-                        <button
+                        <Button
+                          variant="success"
+                          size="sm"
+                          fullWidth
                           onClick={async () => {
                             if (newPlayerName.trim()) {
                               try {
@@ -1145,20 +1151,21 @@ const GameScreen: React.FC = () => {
                             }
                           }}
                           disabled={!newPlayerName.trim()}
-                          className="flex-1 py-1 px-2 bg-success-500 hover:bg-success-600 text-white rounded text-sm disabled:bg-dark-700 disabled:cursor-not-allowed transition-all"
                         >
                           Add
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          variant="tonal"
+                          size="sm"
+                          fullWidth
                           onClick={() => {
                             setShowPlayerNameInput(false);
                             setNewPlayerName('');
                               setNewPlayerAvatar(undefined);
                           }}
-                          className="flex-1 py-1 px-2 bg-dark-700 hover:bg-dark-600 text-white rounded text-sm transition-all"
                         >
                           Cancel
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -1168,13 +1175,13 @@ const GameScreen: React.FC = () => {
             
             <div className="grid md:grid-cols-2 gap-6 mb-6">
               <div>
-                <label className="block text-sm font-medium mb-2 text-white">
+                <label className="block m3-label-large mb-2 text-on-surface">
                   {t('game.starting_score')}
                 </label>
                 <select
                   value={gameSettings.startScore}
                   onChange={(e) => setGameSettings({ ...gameSettings, startScore: parseInt(e.target.value) })}
-                  className="w-full p-2 rounded-lg border border-gray-300/30 bg-white/10 backdrop-blur-sm text-white"
+                  className="w-full p-2 rounded-m3-lg border border-outline-variant bg-surface-container text-on-surface"
                 >
                   <option value={301}>301</option>
                   <option value={501}>501</option>
@@ -1184,13 +1191,13 @@ const GameScreen: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2 text-white">
+                <label className="block m3-label-large mb-2 text-on-surface">
                   {t('game.legs_to_win')}
                 </label>
                 <select
                   value={gameSettings.legsToWin}
                   onChange={(e) => setGameSettings({ ...gameSettings, legsToWin: parseInt(e.target.value) })}
-                  className="w-full p-2 rounded-lg border border-gray-300/30 bg-white/10 backdrop-blur-sm text-white"
+                  className="w-full p-2 rounded-m3-lg border border-outline-variant bg-surface-container text-on-surface"
                 >
                   <option value={1}>{t('game.first_to')} 1</option>
                   <option value={2}>{t('game.first_to')} 2</option>
@@ -1208,7 +1215,7 @@ const GameScreen: React.FC = () => {
                   onChange={(e) => setGameSettings({ ...gameSettings, doubleOut: e.target.checked })}
                   className="w-4 h-4"
                 />
-                <span className="text-gray-200">{t('game.double_out')}</span>
+                <span className="text-on-surface">{t('game.double_out')}</span>
               </label>
 
               <label className="flex items-center gap-3">
@@ -1218,18 +1225,20 @@ const GameScreen: React.FC = () => {
                   onChange={(e) => setGameSettings({ ...gameSettings, doubleIn: e.target.checked })}
                   className="w-4 h-4"
                 />
-                <span className="text-gray-200">{t('game.double_in')}</span>
+                <span className="text-on-surface">{t('game.double_in')}</span>
               </label>
             </div>
 
-            <button
+            <Button
+              variant="success"
+              size="lg"
+              fullWidth
               onClick={handleStartGame}
               disabled={selectedPlayers.length === 0}
-              className="w-full py-3 px-6 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
             >
               {t('game.start_game')}
-            </button>
-          </div>
+            </Button>
+          </Card>
         </div>
       </div>
     );
@@ -1249,13 +1258,13 @@ const GameScreen: React.FC = () => {
     return (
       <div className="min-h-dvh flex items-center justify-center">
         <div className="text-center">
-          <p className="text-xl text-gray-600 dark:text-gray-400 mb-4">No active game</p>
-          <button
+          <p className="m3-title-large text-on-surface-variant mb-4">No active game</p>
+          <Button
+            variant="filled"
             onClick={() => { window.location.href = '/'; }}
-            className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
           >
             {t('common.back')}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -1280,63 +1289,66 @@ const GameScreen: React.FC = () => {
               <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent mb-4 animate-bounce">
                 🏆
               </h1>
-              <h2 className="text-4xl md:text-6xl font-bold text-white mb-2">
+              <h2 className="text-4xl md:text-6xl font-bold text-on-surface mb-2">
                 {winner?.name} gewinnt!
               </h2>
-              <p className="text-2xl text-dark-300">
+              <p className="text-2xl text-on-surface-variant">
                 {winner?.legsWon} - {loser?.legsWon}
               </p>
             </div>
-            
+
             {/* Winner Stats */}
             <div className="grid md:grid-cols-3 gap-4 mb-8">
-              <div className="glass-card p-4">
-                <div className="text-dark-400 text-sm mb-1">Average</div>
-                <div className="text-3xl font-bold text-white">
+              <Card variant="filled" className="p-4">
+                <div className="text-on-surface-variant m3-body-small mb-1">Average</div>
+                <div className="text-3xl font-bold text-on-surface">
                   {winner?.matchAverage.toFixed(2)}
                 </div>
-              </div>
-              <div className="glass-card p-4">
-                <div className="text-dark-400 text-sm mb-1">Highest Score</div>
-                <div className="text-3xl font-bold text-white">
+              </Card>
+              <Card variant="filled" className="p-4">
+                <div className="text-on-surface-variant m3-body-small mb-1">Highest Score</div>
+                <div className="text-3xl font-bold text-on-surface">
                   {winner?.matchHighestScore}
                 </div>
-              </div>
-              <div className="glass-card p-4">
-                <div className="text-dark-400 text-sm mb-1">180s</div>
-                <div className="text-3xl font-bold text-white">
+              </Card>
+              <Card variant="filled" className="p-4">
+                <div className="text-on-surface-variant m3-body-small mb-1">180s</div>
+                <div className="text-3xl font-bold text-on-surface">
                   {winner?.match180s}
                 </div>
-              </div>
+              </Card>
             </div>
             
             <div className="flex flex-col md:flex-row gap-4 justify-center">
-              <button
+              <Button
+                variant="success"
+                size="lg"
                 onClick={() => {
                   dispatch({ type: 'START_MATCH', payload: {
-                    players: currentMatch.players.map(mp => 
+                    players: currentMatch.players.map(mp =>
                       players.find(p => p.id === mp.playerId)!
                     ),
                     settings: currentMatch.settings,
                     gameType: currentMatch.type
                   }});
                 }}
-                className="px-8 py-4 bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white rounded-xl font-bold text-lg transition-all shadow-lg"
               >
                 🔄 Rematch
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="filled"
+                size="lg"
                 onClick={() => navigate('/stats')}
-                className="px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl font-bold text-lg transition-all shadow-lg"
               >
                 📊 Statistiken
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="tonal"
+                size="lg"
                 onClick={() => navigate('/')}
-                className="px-8 py-4 bg-gradient-to-r from-dark-600 to-dark-700 hover:from-dark-700 hover:to-dark-800 text-white rounded-xl font-bold text-lg transition-all shadow-lg"
               >
                 🏠 Hauptmenü
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -1364,29 +1376,30 @@ const GameScreen: React.FC = () => {
           <BackButton onClick={handleBackToMenu} className="" />
           
           <div className="flex gap-2">
-            <button
+            <IconButton
+              variant="tonal"
+              label="Bug melden"
               onClick={() => setShowBugReportModal(true)}
-              className="glass-card p-3 rounded-lg hover:glass-card-hover text-white transition-all"
-              title="Bug melden"
             >
               <AlertTriangle size={20} />
-            </button>
+            </IconButton>
 
-            <button
+            <IconButton
+              variant="tonal"
+              label="Letzten Wurf rückgängig machen"
               onClick={handleUndoThrow}
-              className="glass-card p-3 rounded-lg hover:glass-card-hover text-white transition-all"
-              title="Letzten Wurf rückgängig machen"
             >
               <RotateCcw size={20} />
-            </button>
+            </IconButton>
 
-            <button
+            <IconButton
+              variant="filled"
+              label="Match beenden"
               onClick={handleEndMatch}
-              className="p-3 rounded-lg bg-red-600 hover:bg-red-500 text-white transition-all"
-              title="Match beenden"
+              style={{ backgroundColor: 'var(--m3-error)', color: 'var(--m3-on-error)' }}
             >
               <X size={20} />
-            </button>
+            </IconButton>
           </div>
         </div>
         
@@ -1446,14 +1459,15 @@ const GameScreen: React.FC = () => {
                   size={480}
                 />
                 {/* Miss Button */}
-                <button
+                <Button
+                  variant="outlined"
+                  fullWidth
                   onClick={() => handleDartHit({ segment: 0, multiplier: 0, score: 0 })}
                   disabled={state.currentThrow.length >= 3}
-                  className="w-full py-3 bg-dark-800 hover:bg-dark-700 disabled:bg-dark-900 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-all border-2 border-dark-600 hover:border-dark-500 disabled:border-dark-800 flex items-center justify-center gap-2"
+                  icon={<X size={20} />}
                 >
-                  <X size={20} />
                   Miss / No Score
-                </button>
+                </Button>
               </div>
             )}
           </div>
@@ -1464,38 +1478,38 @@ const GameScreen: React.FC = () => {
               <div>
                 <button
                   onClick={() => setShowMatchStats(!showMatchStats)}
-                  className="w-full glass-card rounded-xl p-4 flex items-center justify-between hover:glass-card-hover transition-all"
+                  className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition-all"
                 >
-                  <h3 className="text-lg font-bold text-white">Match Statistics</h3>
+                  <h3 className="m3-title-medium text-on-surface">Match Statistics</h3>
                   {showMatchStats ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
                 </button>
-                
+
                 {showMatchStats && (
-                  <div className="glass-card rounded-xl shadow-lg p-6 mt-2 animate-fade-in">
+                  <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 animate-fade-in">
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Average:</span>
-                        <span className="font-semibold text-white">{currentPlayer!.matchAverage.toFixed(2)}</span>
+                        <span className="text-on-surface-variant">Average:</span>
+                        <span className="font-semibold text-on-surface">{currentPlayer!.matchAverage.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Highest Score:</span>
-                        <span className="font-semibold text-white">{currentPlayer!.matchHighestScore}</span>
+                        <span className="text-on-surface-variant">Highest Score:</span>
+                        <span className="font-semibold text-on-surface">{currentPlayer!.matchHighestScore}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">180s:</span>
-                        <span className="font-semibold text-white">{currentPlayer!.match180s}</span>
+                        <span className="text-on-surface-variant">180s:</span>
+                        <span className="font-semibold text-on-surface">{currentPlayer!.match180s}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">140+:</span>
-                        <span className="font-semibold text-white">{currentPlayer!.match140Plus}</span>
+                        <span className="text-on-surface-variant">140+:</span>
+                        <span className="font-semibold text-on-surface">{currentPlayer!.match140Plus}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">100+:</span>
-                        <span className="font-semibold text-white">{currentPlayer!.match100Plus}</span>
+                        <span className="text-on-surface-variant">100+:</span>
+                        <span className="font-semibold text-on-surface">{currentPlayer!.match100Plus}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Checkout %:</span>
-                        <span className="font-semibold text-white">
+                        <span className="text-on-surface-variant">Checkout %:</span>
+                        <span className="font-semibold text-on-surface">
                           {currentPlayer!.checkoutAttempts > 0
                             ? ((currentPlayer!.checkoutsHit / currentPlayer!.checkoutAttempts) * 100).toFixed(1)
                             : '0.0'}%
@@ -1513,28 +1527,28 @@ const GameScreen: React.FC = () => {
         <div className="mt-6">
           <button
             onClick={() => setShowThrowHistory(!showThrowHistory)}
-            className="w-full glass-card rounded-xl p-4 flex items-center justify-between hover:glass-card-hover transition-all"
+            className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition-all"
           >
-            <h3 className="text-lg font-bold text-white">Wurf-Verlauf</h3>
+            <h3 className="m3-title-medium text-on-surface">Wurf-Verlauf</h3>
             {showThrowHistory ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
           </button>
 
           {showThrowHistory && (
-            <div className="glass-card rounded-xl p-6 mt-2 animate-fade-in">
+            <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 animate-fade-in">
               {/* Leg/Match Toggle */}
               <div className="flex gap-2 mb-4">
                 <button
                   onClick={() => setStatsView('leg')}
-                  className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-all ${
-                    statsView === 'leg' ? 'bg-primary-500 text-white' : 'bg-dark-800 text-dark-400 hover:bg-dark-700'
+                  className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm transition-all ${
+                    statsView === 'leg' ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
                   }`}
                 >
                   Aktuelles Leg
                 </button>
                 <button
                   onClick={() => setStatsView('match')}
-                  className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-all ${
-                    statsView === 'match' ? 'bg-primary-500 text-white' : 'bg-dark-800 text-dark-400 hover:bg-dark-700'
+                  className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm transition-all ${
+                    statsView === 'match' ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
                   }`}
                 >
                   Gesamtes Spiel
@@ -1548,44 +1562,44 @@ const GameScreen: React.FC = () => {
 
                 return (
                   <div key={player.playerId} className="mb-6 last:mb-0">
-                    <h4 className="text-white font-bold mb-3 flex items-center gap-2">
+                    <h4 className="text-on-surface font-bold mb-3 flex items-center gap-2">
                       <span>{player.name}</span>
-                      <span className="text-sm text-gray-400">
+                      <span className="text-sm text-on-surface-variant">
                         ({playerThrows.length} {playerThrows.length === 1 ? 'Wurf' : 'Würfe'})
                       </span>
                     </h4>
 
                     {playerThrows.length === 0 ? (
-                      <p className="text-gray-400 text-sm italic">Noch keine Würfe</p>
+                      <p className="text-on-surface-variant text-sm italic">Noch keine Würfe</p>
                     ) : (
                       <div className="space-y-2">
                         {playerThrows.map((throwData, index) => (
                           <div
                             key={throwData.id}
-                            className="bg-dark-800/50 rounded-lg p-3 border border-dark-600"
+                            className="bg-surface-container rounded-m3-lg p-3 border border-outline-variant"
                           >
                             <div className="flex items-center justify-between mb-2">
-                              <span className="text-gray-400 text-sm">
+                              <span className="text-on-surface-variant text-sm">
                                 Wurf #{index + 1}
                               </span>
                               <div className="flex items-center gap-3">
                                 {throwData.isBust && (
-                                  <span className="text-red-400 text-xs font-bold bg-red-500/20 px-2 py-1 rounded">
+                                  <span className="text-on-error-container text-xs font-bold bg-error-container px-2 py-1 rounded-m3-sm">
                                     BUST
                                   </span>
                                 )}
                                 <span className={`font-bold text-lg ${
                                   throwData.isBust
-                                    ? 'text-red-400 line-through'
+                                    ? 'text-error line-through'
                                     : throwData.score >= 140
                                       ? 'text-orange-400'
                                       : throwData.score >= 100
                                         ? 'text-blue-400'
-                                        : 'text-white'
+                                        : 'text-on-surface'
                                 }`}>
                                   {throwData.score}
                                 </span>
-                                <span className="text-gray-400 text-sm">
+                                <span className="text-on-surface-variant text-sm">
                                   → {throwData.remaining}
                                 </span>
                               </div>
@@ -1595,13 +1609,13 @@ const GameScreen: React.FC = () => {
                               {throwData.darts.map((dart, dartIndex) => (
                                 <div
                                   key={dartIndex}
-                                  className={`flex-1 text-center py-2 rounded ${
+                                  className={`flex-1 text-center py-2 rounded-m3-sm ${
                                     dart.multiplier === 3
                                       ? 'bg-green-500/20 text-green-400'
                                       : dart.multiplier === 2
                                         ? 'bg-red-500/20 text-red-400'
                                         : dart.score === 0
-                                          ? 'bg-gray-700/50 text-gray-500'
+                                          ? 'bg-surface-container-highest text-on-surface-variant'
                                           : 'bg-blue-500/20 text-blue-400'
                                   }`}
                                 >
@@ -1633,9 +1647,9 @@ const GameScreen: React.FC = () => {
         <div className="mt-6">
           <button
             onClick={() => setShowThrowChart(!showThrowChart)}
-            className="w-full glass-card rounded-xl p-4 flex items-center justify-between hover:glass-card-hover transition-all"
+            className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition-all"
           >
-            <h3 className="text-lg font-bold text-white">Wurf-Statistik (Chart)</h3>
+            <h3 className="m3-title-medium text-on-surface">Wurf-Statistik (Chart)</h3>
             {showThrowChart ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
           </button>
 
@@ -1644,27 +1658,27 @@ const GameScreen: React.FC = () => {
               ? currentLeg.throws
               : state.currentMatch.legs.flatMap(l => l.throws);
             return (
-              <div className="glass-card rounded-xl p-6 mt-2 animate-fade-in">
+              <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 animate-fade-in">
                 {/* Leg/Match Toggle */}
                 <div className="flex gap-2 mb-4">
                   <button
                     onClick={() => setStatsView('leg')}
-                    className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-all ${
-                      statsView === 'leg' ? 'bg-primary-500 text-white' : 'bg-dark-800 text-dark-400 hover:bg-dark-700'
+                    className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm transition-all ${
+                      statsView === 'leg' ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
                     }`}
                   >
                     Aktuelles Leg
                   </button>
                   <button
                     onClick={() => setStatsView('match')}
-                    className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-all ${
-                      statsView === 'match' ? 'bg-primary-500 text-white' : 'bg-dark-800 text-dark-400 hover:bg-dark-700'
+                    className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm transition-all ${
+                      statsView === 'match' ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
                     }`}
                   >
                     Gesamtes Spiel
                   </button>
                 </div>
-                <Suspense fallback={<div className="h-[600px] flex items-center justify-center text-dark-400">Lade Chart…</div>}>
+                <Suspense fallback={<div className="h-[600px] flex items-center justify-center text-on-surface-variant">Lade Chart…</div>}>
                   <ThrowChart players={state.currentMatch.players} chartThrows={chartThrows} />
                 </Suspense>
               </div>
@@ -1676,31 +1690,31 @@ const GameScreen: React.FC = () => {
         <div className="mt-6">
           <button
             onClick={() => setShowLiveHeatmap(!showLiveHeatmap)}
-            className="w-full glass-card rounded-xl p-4 flex items-center justify-between hover:glass-card-hover transition-all"
+            className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition-all"
           >
             <div className="flex items-center gap-3">
               <Flame size={24} className="text-orange-400" />
-              <h3 className="text-lg font-bold text-white">Live-Heatmap (aktuelles Spiel)</h3>
+              <h3 className="m3-title-medium text-on-surface">Live-Heatmap (aktuelles Spiel)</h3>
             </div>
             {showLiveHeatmap ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
           </button>
 
           {showLiveHeatmap && (
-            <div className="glass-card rounded-xl p-6 mt-2 animate-fade-in">
+            <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 animate-fade-in">
               {/* Leg/Match Toggle */}
               <div className="flex gap-2 mb-4">
                 <button
                   onClick={() => setHeatmapView('leg')}
-                  className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-all ${
-                    heatmapView === 'leg' ? 'bg-primary-500 text-white' : 'bg-dark-800 text-dark-400 hover:bg-dark-700'
+                  className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm transition-all ${
+                    heatmapView === 'leg' ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
                   }`}
                 >
                   Aktuelles Leg
                 </button>
                 <button
                   onClick={() => setHeatmapView('match')}
-                  className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-all ${
-                    heatmapView === 'match' ? 'bg-primary-500 text-white' : 'bg-dark-800 text-dark-400 hover:bg-dark-700'
+                  className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm transition-all ${
+                    heatmapView === 'match' ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
                   }`}
                 >
                   Gesamtes Spiel
@@ -1709,7 +1723,7 @@ const GameScreen: React.FC = () => {
               {/* Player Selector */}
               {state.currentMatch.players.length > 1 && (
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-dark-300 mb-2">Spieler auswählen</label>
+                  <label className="block m3-label-large text-on-surface-variant mb-2">Spieler auswählen</label>
                   <div className="flex flex-wrap gap-2">
                     {state.currentMatch.players.map(player => (
                       <button
@@ -1717,10 +1731,10 @@ const GameScreen: React.FC = () => {
                         onClick={() => setSelectedHeatmapPlayer(
                           selectedHeatmapPlayer === player.playerId ? null : player.playerId
                         )}
-                        className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
+                        className={`px-4 py-2 rounded-m3-lg font-medium transition-all flex items-center gap-2 ${
                           selectedHeatmapPlayer === player.playerId || (!selectedHeatmapPlayer && state.currentMatch!.players[0].playerId === player.playerId)
-                            ? 'bg-primary-500 text-white'
-                            : 'bg-dark-800 text-dark-300 hover:bg-dark-700'
+                            ? 'bg-primary text-on-primary'
+                            : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
                         }`}
                       >
                         <PlayerAvatar avatar={players.find(p => p.id === player.playerId)?.avatar} name={player.name} size="sm" />
@@ -1740,9 +1754,9 @@ const GameScreen: React.FC = () => {
                 if (!playerHeatmap || playerHeatmap.totalDarts === 0) {
                   return (
                     <div className="text-center py-12">
-                      <Flame size={48} className="mx-auto mb-4 text-dark-600" />
-                      <p className="text-dark-400 text-lg">Noch keine Wurf-Daten für {playerName}</p>
-                      <p className="text-dark-500 text-sm mt-2">Die Heatmap wird mit jedem Wurf aktualisiert</p>
+                      <Flame size={48} className="mx-auto mb-4 text-on-surface-variant" />
+                      <p className="text-on-surface-variant text-lg">Noch keine Wurf-Daten für {playerName}</p>
+                      <p className="text-on-surface-variant text-sm mt-2">Die Heatmap wird mit jedem Wurf aktualisiert</p>
                     </div>
                   );
                 }
@@ -1750,8 +1764,8 @@ const GameScreen: React.FC = () => {
                 return (
                   <div>
                     <div className="text-center mb-4">
-                      <span className="text-lg font-bold text-white">{playerName}</span>
-                      <span className="text-dark-400 ml-2">({playerHeatmap.totalDarts} Darts)</span>
+                      <span className="text-lg font-bold text-on-surface">{playerName}</span>
+                      <span className="text-on-surface-variant ml-2">({playerHeatmap.totalDarts} Darts)</span>
                     </div>
                     <DartboardHeatmapBlur 
                       heatmapData={playerHeatmap} 
@@ -1778,7 +1792,7 @@ const GameScreen: React.FC = () => {
 
       {/* Leg Won Animation Overlay */}
       {legWonAnimation?.show && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-fade-in">
+        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_80%,transparent)] flex items-center justify-center z-50 animate-fade-in">
           <div className="text-center animate-scale-in">
             {/* Confetti burst effect */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -1816,7 +1830,7 @@ const GameScreen: React.FC = () => {
             </div>
 
             {/* Winner name */}
-            <div className="text-3xl md:text-4xl font-bold text-white mb-4">
+            <div className="text-3xl md:text-4xl font-bold text-on-surface mb-4">
               {legWonAnimation.winnerName}
             </div>
 
@@ -1829,7 +1843,7 @@ const GameScreen: React.FC = () => {
                     className={`w-4 h-4 rounded-full transition-all ${
                       i < legWonAnimation.legsWon
                         ? 'bg-gradient-to-r from-yellow-400 to-amber-500 shadow-lg shadow-amber-500/50'
-                        : 'bg-dark-600'
+                        : 'bg-surface-container-highest'
                     }`}
                   />
                 ))}
@@ -1837,12 +1851,12 @@ const GameScreen: React.FC = () => {
             </div>
 
             {/* Progress text */}
-            <div className="text-xl text-gray-400">
+            <div className="text-xl text-on-surface-variant">
               {legWonAnimation.legsWon} / {legWonAnimation.legsTotal} Legs
             </div>
 
             {/* Next leg indicator */}
-            <div className="mt-6 text-lg text-primary-400 animate-pulse">
+            <div className="mt-6 text-lg text-primary animate-pulse">
               Nächstes Leg startet...
             </div>
           </div>
@@ -1851,32 +1865,34 @@ const GameScreen: React.FC = () => {
 
       {/* Back to Menu Confirmation Dialog */}
       {showBackConfirm && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={(e) => e.stopPropagation()}>
-          <div className="glass-card rounded-2xl p-6 max-w-md w-full">
-            <h3 className="text-xl font-bold text-white mb-4">Match verlassen?</h3>
-            <p className="text-gray-300 mb-2">
-              <strong className="text-primary-400">Pausieren & Verlassen:</strong> Dein Match wird gespeichert und kann jederzeit aus dem Hauptmenü fortgesetzt werden.
+        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_70%,transparent)] flex items-center justify-center z-50 p-4" onClick={(e) => e.stopPropagation()}>
+          <div className="m3-dialog max-w-md w-full">
+            <h3 className="m3-headline-small text-on-surface mb-4">Match verlassen?</h3>
+            <p className="text-on-surface-variant mb-2">
+              <strong className="text-primary">Pausieren & Verlassen:</strong> Dein Match wird gespeichert und kann jederzeit aus dem Hauptmenü fortgesetzt werden.
             </p>
-            <p className="text-gray-300 mb-6">
-              <strong className="text-gray-400">Abbrechen:</strong> Zurück zum laufenden Spiel.
+            <p className="text-on-surface-variant mb-6">
+              <strong className="text-on-surface">Abbrechen:</strong> Zurück zum laufenden Spiel.
             </p>
             <div className="flex gap-3">
-              <button
+              <Button
+                variant="tonal"
+                fullWidth
                 onClick={() => {
                   setShowBackConfirm(false);
                 }}
-                className="flex-1 px-4 py-3 bg-dark-700 hover:bg-dark-600 text-white rounded-xl font-semibold transition-all"
               >
                 Abbrechen
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="filled"
+                fullWidth
                 onClick={() => {
                   confirmBackToMenu();
                 }}
-                className="flex-1 px-4 py-3 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-semibold transition-all"
               >
                 Pausieren & Verlassen
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -1884,25 +1900,27 @@ const GameScreen: React.FC = () => {
 
       {/* End Match Confirmation Dialog */}
       {showEndConfirm && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="glass-card rounded-2xl p-6 max-w-md w-full">
-            <h3 className="text-xl font-bold text-white mb-4">❌ Match beenden?</h3>
-            <p className="text-gray-300 mb-6">
+        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_70%,transparent)] flex items-center justify-center z-50 p-4">
+          <div className="m3-dialog max-w-md w-full">
+            <h3 className="m3-headline-small text-on-surface mb-4">❌ Match beenden?</h3>
+            <p className="text-on-surface-variant mb-6">
               Das Match wird als abgebrochen markiert. Du kannst es später rückgängig machen.
             </p>
             <div className="flex gap-3">
-              <button
+              <Button
+                variant="tonal"
+                fullWidth
                 onClick={() => setShowEndConfirm(false)}
-                className="flex-1 px-4 py-3 bg-dark-700 hover:bg-dark-600 text-white rounded-xl font-semibold transition-all"
               >
                 Abbrechen
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="danger"
+                fullWidth
                 onClick={confirmEndMatch}
-                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl font-semibold transition-all"
               >
                 Match beenden
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -1911,14 +1929,14 @@ const GameScreen: React.FC = () => {
       {/* Undo End Match Button - Show when match is completed */}
       {state.currentMatch?.status === 'completed' && !state.currentMatch.winner && (
         <div className="fixed bottom-4 right-4 z-40">
-          <button
+          <Button
+            variant="elevated"
             onClick={handleUndoEndMatch}
-            className="glass-card p-4 rounded-xl hover:glass-card-hover text-white transition-all flex items-center gap-2 shadow-lg"
             title="Match-Ende rückgängig machen"
+            icon={<RotateCcw size={20} />}
           >
-            <RotateCcw size={20} />
-            <span className="font-semibold">Rückgängig</span>
-          </button>
+            Rückgängig
+          </Button>
         </div>
       )}
 

@@ -12,6 +12,7 @@ import { useTenant } from '../../context/TenantContext';
 import { api } from '../../services/api';
 import { useGameAchievements } from '../../hooks/useGameAchievements';
 import BackButton from '../common/BackButton';
+import { Button, Card } from '../common';
 
 interface TrainingState {
   currentTarget: number;
@@ -523,62 +524,61 @@ const TrainingScreen: React.FC = () => {
         <div className="max-w-2xl mx-auto">
           <BackButton onClick={() => navigate('/training')} />
 
-          <div className="glass-card rounded-2xl p-8">
-            <h2 className="text-3xl font-bold text-white mb-2">
+          <Card variant="elevated" className="p-8">
+            <h2 className="m3-headline-small text-on-surface mb-2">
               Wer trainiert?
             </h2>
-            <p className="text-dark-300 mb-6">
+            <p className="text-on-surface-variant mb-6">
               Wähle einen Spieler aus, um das Training zu starten. Deine Würfe werden in deiner Heatmap gespeichert.
             </p>
 
             {realPlayers.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-dark-400 mb-4">Noch keine Spieler vorhanden</p>
-                <button
-                  onClick={() => navigate('/players')}
-                  className="px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg font-semibold transition-all"
-                >
+                <p className="text-on-surface-variant mb-4">Noch keine Spieler vorhanden</p>
+                <Button variant="filled" onClick={() => navigate('/players')}>
                   Spieler erstellen
-                </button>
+                </Button>
               </div>
             ) : (
               <div className="grid gap-3">
                 {realPlayers.map((player) => (
-                  <button
+                  <Card
                     key={player.id}
+                    variant="filled"
+                    interactive
                     onClick={() => {
                       setCurrentPlayer(player);
                       setSelectedPlayerId(player.id);
                     }}
-                    className="glass-card p-4 rounded-xl hover:glass-card-hover transition-all text-left group"
+                    className="p-4 text-left group cursor-pointer"
                   >
                     <div className="flex items-center gap-4">
                       {player.avatar?.startsWith('http') ? (
                         <img
                           src={player.avatar}
                           alt={player.name}
-                          className="w-16 h-16 rounded-full object-cover ring-2 ring-white/10 group-hover:ring-primary-400"
+                          className="w-16 h-16 rounded-full object-cover ring-2 ring-outline-variant group-hover:ring-[var(--m3-primary)]"
                         />
                       ) : (
-                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-2xl font-bold text-white ring-2 ring-white/10 group-hover:ring-primary-400">
+                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-2xl font-bold text-on-primary ring-2 ring-outline-variant group-hover:ring-[var(--m3-primary)]">
                           {player.avatar || player.name.charAt(0).toUpperCase()}
                         </div>
                       )}
                       <div className="flex-1">
-                        <h3 className="text-xl font-bold text-white group-hover:text-primary-400 transition-colors">
+                        <h3 className="m3-title-large text-on-surface group-hover:text-primary transition-colors">
                           {player.name}
                         </h3>
-                        <p className="text-sm text-dark-400">
+                        <p className="text-sm text-on-surface-variant">
                           Average: {player.stats?.averageOverall?.toFixed(1) || '0.0'}
                         </p>
                       </div>
-                      <ArrowRight className="text-dark-500 group-hover:text-primary-400 transition-colors" size={24} />
+                      <ArrowRight className="text-on-surface-variant group-hover:text-primary transition-colors" size={24} />
                     </div>
-                  </button>
+                  </Card>
                 ))}
               </div>
             )}
-          </div>
+          </Card>
         </div>
       </div>
     );
@@ -590,76 +590,74 @@ const TrainingScreen: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <BackButton onClick={() => navigate('/training')} className="" />
-          <h1 className="text-2xl md:text-3xl font-bold text-white">{getTrainingTitle()}</h1>
-          <button
-            onClick={handleRestart}
-            className="px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg font-semibold transition-all"
-          >
+          <h1 className="m3-headline-small text-on-surface">{getTrainingTitle()}</h1>
+          <Button variant="filled" onClick={handleRestart}>
             Neustart
-          </button>
+          </Button>
         </div>
 
         {/* Training Info */}
-        <div className="glass-card p-4 mb-4">
-          <div className="flex items-center justify-between text-white">
+        <Card variant="elevated" className="p-4 mb-4">
+          <div className="flex items-center justify-between text-on-surface">
             <div className="flex-1">
-              <p className="text-xl md:text-2xl font-bold">{getTrainingDescription()}</p>
-              <p className="text-sm text-dark-400">
+              <p className="m3-title-large">{getTrainingDescription()}</p>
+              <p className="text-sm text-on-surface-variant">
                 {getProgressInfo()}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-3xl font-bold text-success-400">{trainingState.score}</p>
-              <p className="text-sm text-dark-400">Punkte</p>
+              <p className="m3-headline-small font-bold text-success-400">{trainingState.score}</p>
+              <p className="text-sm text-on-surface-variant">Punkte</p>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
-          <div className="glass-card p-2 sm:p-4 text-center">
-            <p className="text-xl sm:text-2xl font-bold text-white">{trainingState.attempts}</p>
-            <p className="text-xs sm:text-sm text-dark-400">Versuche</p>
-          </div>
-          <div className="glass-card p-2 sm:p-4 text-center">
+          <Card variant="elevated" className="p-2 sm:p-4 text-center">
+            <p className="text-xl sm:text-2xl font-bold text-on-surface">{trainingState.attempts}</p>
+            <p className="text-xs sm:text-sm text-on-surface-variant">Versuche</p>
+          </Card>
+          <Card variant="elevated" className="p-2 sm:p-4 text-center">
             <p className="text-xl sm:text-2xl font-bold text-success-400">{trainingState.hits}</p>
-            <p className="text-xs sm:text-sm text-dark-400">Treffer</p>
-          </div>
-          <div className="glass-card p-2 sm:p-4 text-center">
+            <p className="text-xs sm:text-sm text-on-surface-variant">Treffer</p>
+          </Card>
+          <Card variant="elevated" className="p-2 sm:p-4 text-center">
             <p className="text-xl sm:text-2xl font-bold text-primary-400">{accuracy}%</p>
-            <p className="text-xs sm:text-sm text-dark-400">Genauigkeit</p>
-          </div>
+            <p className="text-xs sm:text-sm text-on-surface-variant">Genauigkeit</p>
+          </Card>
         </div>
 
         {/* Main Content */}
         <div className="grid md:grid-cols-2 gap-6">
           {/* Dartboard */}
-          <div className="glass-card p-6 space-y-4">
+          <Card variant="elevated" className="p-6 space-y-4">
             <Dartboard
               onDartHit={handleDartHit}
               interactive={!trainingState.completed}
             />
             {/* Miss Button */}
-            <button
+            <Button
+              variant="outlined"
+              fullWidth
+              icon={<X size={20} />}
               onClick={() => handleDartHit({ segment: 0, multiplier: 0, score: 0 })}
               disabled={currentThrow.length >= 3 || trainingState.completed}
-              className="w-full py-3 bg-dark-800 hover:bg-dark-700 disabled:bg-dark-900 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-all border-2 border-dark-600 hover:border-dark-500 disabled:border-dark-800 flex items-center justify-center gap-2"
             >
-              <X size={20} />
               Verfehlt / Keine Punkte
-            </button>
-          </div>
+            </Button>
+          </Card>
 
           {/* Controls */}
           <div className="space-y-4">
             {/* Current Throw */}
-            <div className="glass-card p-6">
-              <h3 className="text-lg font-bold text-white mb-4">Aktueller Wurf</h3>
+            <Card variant="elevated" className="p-6">
+              <h3 className="m3-title-medium text-on-surface mb-4">Aktueller Wurf</h3>
               <div className="flex gap-2 mb-4">
                 {currentThrow.map((dart, index) => (
                   <div
                     key={index}
-                    className="flex-1 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-lg"
+                    className="flex-1 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-m3-md flex items-center justify-center text-on-primary font-bold text-xl shadow-m3-1"
                   >
                     {dart.score}
                   </div>
@@ -667,58 +665,58 @@ const TrainingScreen: React.FC = () => {
                 {[...Array(3 - currentThrow.length)].map((_, index) => (
                   <div
                     key={`empty-${index}`}
-                    className="flex-1 h-16 bg-dark-900/50 rounded-lg border-2 border-dashed border-dark-700"
+                    className="flex-1 h-16 bg-surface-container rounded-m3-md border-2 border-dashed border-outline-variant"
                   />
                 ))}
               </div>
 
               <div className="flex gap-2">
-                <button
+                <Button
+                  variant="success"
+                  fullWidth
+                  icon={<Check size={20} />}
                   onClick={handleConfirmThrow}
                   disabled={currentThrow.length === 0 || trainingState.completed}
-                  className="flex-1 py-3 bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 disabled:from-dark-700 disabled:to-dark-700 disabled:cursor-not-allowed text-white rounded-lg font-bold flex items-center justify-center gap-2 transition-all"
                 >
-                  <Check size={20} />
                   Bestätigen
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="tonal"
                   onClick={handleRemoveDart}
                   disabled={currentThrow.length === 0 || trainingState.completed}
-                  className="px-4 py-3 bg-dark-700 hover:bg-dark-600 disabled:bg-dark-800 disabled:cursor-not-allowed text-white rounded-lg transition-all"
                 >
                   Zurück
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="danger"
+                  icon={<X size={20} />}
                   onClick={handleClearThrow}
                   disabled={currentThrow.length === 0 || trainingState.completed}
-                  className="px-4 py-3 bg-red-600 hover:bg-red-500 disabled:bg-dark-800 disabled:cursor-not-allowed text-white rounded-lg transition-all"
-                >
-                  <X size={20} />
-                </button>
+                />
               </div>
-            </div>
+            </Card>
 
             {/* Completion Message */}
             {trainingState.completed && (
-              <div className="glass-card-gold p-6 border-2 border-primary-500">
-                <h3 className="text-3xl font-bold text-white mb-4 text-center">
+              <Card variant="elevated" className="glass-card-gold p-6 border-2 border-primary-500">
+                <h3 className="m3-headline-small text-on-surface mb-4 text-center">
                   Training Abgeschlossen! 🎯
                 </h3>
                 <div className="grid grid-cols-3 gap-4 mb-4">
-                  <div className="text-center glass-card p-3">
-                    <p className="text-2xl font-bold text-white">{trainingState.score}</p>
-                    <p className="text-xs text-dark-400">Endpunktzahl</p>
+                  <div className="text-center bg-surface-container-high rounded-m3-md p-3">
+                    <p className="text-2xl font-bold text-on-surface">{trainingState.score}</p>
+                    <p className="text-xs text-on-surface-variant">Endpunktzahl</p>
                   </div>
-                  <div className="text-center glass-card p-3">
+                  <div className="text-center bg-surface-container-high rounded-m3-md p-3">
                     <p className="text-2xl font-bold text-success-400">{trainingState.hits}</p>
-                    <p className="text-xs text-dark-400">Treffer</p>
+                    <p className="text-xs text-on-surface-variant">Treffer</p>
                   </div>
-                  <div className="text-center glass-card p-3">
+                  <div className="text-center bg-surface-container-high rounded-m3-md p-3">
                     <p className="text-2xl font-bold text-primary-400">{accuracy}%</p>
-                    <p className="text-xs text-dark-400">Genauigkeit</p>
+                    <p className="text-xs text-on-surface-variant">Genauigkeit</p>
                   </div>
                 </div>
-                <div className="text-sm text-dark-300 mb-4 text-center">
+                <div className="text-sm text-on-surface-variant mb-4 text-center">
                   {trainingState.hits} Treffer in {trainingState.attempts} Versuchen
                   {mode === 'doubles' && trainingState.currentTarget === 20 && trainingState.hits === 20 && (
                     <p className="text-success-400 font-bold mt-2">🏆 Perfekt! Alle Doppel getroffen!</p>
@@ -734,26 +732,20 @@ const TrainingScreen: React.FC = () => {
                   )}
                 </div>
                 <div className="flex gap-2">
-                  <button
-                    onClick={handleRestart}
-                    className="flex-1 py-3 bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white rounded-lg font-bold transition-all"
-                  >
+                  <Button variant="success" fullWidth onClick={handleRestart}>
                     Nochmal versuchen
-                  </button>
-                  <button
-                    onClick={() => navigate('/training')}
-                    className="flex-1 py-3 bg-gradient-to-r from-dark-600 to-dark-700 hover:from-dark-700 hover:to-dark-800 text-white rounded-lg font-bold transition-all"
-                  >
+                  </Button>
+                  <Button variant="tonal" fullWidth onClick={() => navigate('/training')}>
                     {t('common.back')}
-                  </button>
+                  </Button>
                 </div>
-              </div>
+              </Card>
             )}
 
             {/* Instructions */}
-            <div className="glass-card p-6">
-              <h3 className="text-lg font-bold text-white mb-2">Anleitung</h3>
-              <div className="text-sm text-dark-300 space-y-1">
+            <Card variant="elevated" className="p-6">
+              <h3 className="m3-title-medium text-on-surface mb-2">Anleitung</h3>
+              <div className="text-sm text-on-surface-variant space-y-1">
                 {mode === 'doubles' && (
                   <>
                     <p>• Triff alle Doppel von D1 bis D20</p>
@@ -798,7 +790,7 @@ const TrainingScreen: React.FC = () => {
                   </>
                 )}
               </div>
-            </div>
+            </Card>
           </div>
         </div>
       </div>

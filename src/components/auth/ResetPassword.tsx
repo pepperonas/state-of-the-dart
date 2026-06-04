@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { Lock, AlertCircle, Loader, CheckCircle } from 'lucide-react';
+import { Lock, AlertCircle, CheckCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
 import api from '../../services/api';
+import { Button, Card, TextField } from '../common';
+import { enterDrop, enterPop } from '../../utils/motion';
 
 const ResetPassword: React.FC = () => {
   const navigate = useNavigate();
@@ -50,21 +53,22 @@ const ResetPassword: React.FC = () => {
     return (
       <div className="min-h-dvh flex items-center justify-center gradient-mesh p-4">
         <div className="w-full max-w-md">
-          <div className="glass-card p-8 rounded-2xl shadow-2xl text-center">
-            <AlertCircle className="text-error-400 mx-auto mb-4" size={48} />
-            <h2 className="text-2xl font-bold text-white mb-4">
-              Ungültiger Link
-            </h2>
-            <p className="text-dark-300 mb-6">
-              Der Reset-Link ist ungültig oder abgelaufen.
-            </p>
-            <Link
-              to="/forgot-password"
-              className="block w-full py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg font-semibold transition-all"
-            >
-              Neuen Link anfordern
-            </Link>
-          </div>
+          <motion.div {...enterPop}>
+            <Card variant="elevated" className="p-8 text-center">
+              <AlertCircle className="text-error mx-auto mb-4" size={48} />
+              <h2 className="m3-headline-small font-bold text-on-surface mb-4">
+                Ungültiger Link
+              </h2>
+              <p className="m3-body-large text-on-surface-variant mb-6">
+                Der Reset-Link ist ungültig oder abgelaufen.
+              </p>
+              <Link to="/forgot-password">
+                <Button variant="filled" size="lg" fullWidth>
+                  Neuen Link anfordern
+                </Button>
+              </Link>
+            </Card>
+          </motion.div>
         </div>
       </div>
     );
@@ -74,23 +78,24 @@ const ResetPassword: React.FC = () => {
     return (
       <div className="min-h-dvh flex items-center justify-center gradient-mesh p-4">
         <div className="w-full max-w-md">
-          <div className="glass-card p-8 rounded-2xl shadow-2xl text-center">
-            <div className="w-16 h-16 bg-success-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="text-success-400" size={32} />
-            </div>
-            <h2 className="text-2xl font-bold text-white mb-4">
-              Passwort erfolgreich geändert! ✅
-            </h2>
-            <p className="text-dark-300 mb-6">
-              Du wirst automatisch zum Login weitergeleitet...
-            </p>
-            <Link
-              to="/login"
-              className="block w-full py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg font-semibold transition-all"
-            >
-              Jetzt anmelden
-            </Link>
-          </div>
+          <motion.div {...enterPop}>
+            <Card variant="elevated" className="p-8 text-center">
+              <div className="w-16 h-16 bg-success-container rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="text-on-success-container" size={32} />
+              </div>
+              <h2 className="m3-headline-small font-bold text-on-surface mb-4">
+                Passwort erfolgreich geändert! ✅
+              </h2>
+              <p className="m3-body-large text-on-surface-variant mb-6">
+                Du wirst automatisch zum Login weitergeleitet...
+              </p>
+              <Link to="/login">
+                <Button variant="filled" size="lg" fullWidth>
+                  Jetzt anmelden
+                </Button>
+              </Link>
+            </Card>
+          </motion.div>
         </div>
       </div>
     );
@@ -99,75 +104,49 @@ const ResetPassword: React.FC = () => {
   return (
     <div className="min-h-dvh flex items-center justify-center gradient-mesh p-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
+        <motion.div {...enterDrop} className="text-center mb-8">
           <div className="text-6xl mb-4">🔐</div>
-          <h1 className="text-4xl font-bold text-white mb-2">
+          <h1 className="m3-display-small font-bold text-on-surface mb-2">
             Neues Passwort setzen
           </h1>
-        </div>
+        </motion.div>
 
-        <div className="glass-card p-8 rounded-2xl shadow-2xl">
-          {error && (
-            <div className="mb-4 p-4 bg-error-500/10 border border-error-500/30 rounded-lg flex items-center gap-2 text-error-400">
-              <AlertCircle size={20} />
-              <span>{error}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">
-                Neues Passwort
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400" size={20} />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Mindestens 8 Zeichen"
-                  className="w-full pl-10 pr-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  required
-                />
+        <motion.div {...enterPop}>
+          <Card variant="elevated" className="p-8">
+            {error && (
+              <div className="mb-4 p-4 bg-error-container text-on-error-container rounded-m3-md flex items-center gap-3">
+                <AlertCircle size={22} className="flex-shrink-0" />
+                <span className="m3-body-medium font-semibold">{error}</span>
               </div>
-            </div>
+            )}
 
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">
-                Passwort bestätigen
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400" size={20} />
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Passwort wiederholen"
-                  className="w-full pl-10 pr-4 py-3 bg-dark-800 border border-dark-600 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  required
-                />
-              </div>
-            </div>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <TextField
+                type="password"
+                label="Neues Passwort"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Mindestens 8 Zeichen"
+                icon={<Lock size={20} />}
+                required
+              />
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <>
-                  <Loader className="animate-spin" size={20} />
-                  Speichern...
-                </>
-              ) : (
-                <>
-                  <Lock size={20} />
-                  Passwort ändern
-                </>
-              )}
-            </button>
-          </form>
-        </div>
+              <TextField
+                type="password"
+                label="Passwort bestätigen"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Passwort wiederholen"
+                icon={<Lock size={20} />}
+                required
+              />
+
+              <Button type="submit" variant="success" size="lg" fullWidth loading={loading} icon={<Lock size={20} />}>
+                {loading ? 'Speichern...' : 'Passwort ändern'}
+              </Button>
+            </form>
+          </Card>
+        </motion.div>
       </div>
     </div>
   );

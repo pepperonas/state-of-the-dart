@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, TrendingUp, Target, Award, Loader, RefreshCw } from 'lucide-react';
 import api from '../../services/api';
-import BackButton from '../common/BackButton';
+import { BackButton, Card, Chip, Button, IconButton } from '../common';
 import { useAuth } from '../../context/AuthContext';
 
 interface LeaderboardEntry {
@@ -64,9 +64,9 @@ const GlobalLeaderboard: React.FC = () => {
 
   const getRankColor = (rank: number) => {
     if (rank === 1) return 'text-amber-400';
-    if (rank === 2) return 'text-gray-400';
+    if (rank === 2) return 'text-gray-300';
     if (rank === 3) return 'text-orange-500';
-    return 'text-dark-400';
+    return 'text-on-surface-variant';
   };
 
   const getRankBadge = (rank: number) => {
@@ -88,91 +88,84 @@ const GlobalLeaderboard: React.FC = () => {
         />
 
         <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
+          <h1 className="m3-headline-medium md:m3-headline-large text-on-surface mb-2">
             🏆 Global Leaderboard
           </h1>
-          <p className="text-xl text-dark-300">
+          <p className="m3-title-medium text-on-surface-variant">
             Die besten Spieler weltweit
           </p>
         </div>
 
         {/* Metric Selector */}
-        <div className="glass-card p-4 rounded-xl mb-6">
+        <Card variant="elevated" className="p-4 mb-6">
           <div className="flex flex-wrap gap-2 justify-center">
             {metrics.map((m) => {
               const Icon = m.icon;
               return (
-                <button
+                <Chip
                   key={m.id}
+                  selected={metric === m.id}
+                  icon={<Icon size={18} />}
                   onClick={() => setMetric(m.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
-                    metric === m.id
-                      ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg'
-                      : 'bg-dark-800 text-dark-300 hover:bg-dark-700'
-                  }`}
                 >
-                  <Icon size={18} />
                   <span className="hidden sm:inline">{m.name}</span>
                   <span className="sm:hidden">{m.id === '180s' ? '180s' : m.name.split(' ')[0]}</span>
-                </button>
+                </Chip>
               );
             })}
           </div>
-        </div>
+        </Card>
 
         {/* Loading State */}
         {loading && (
           <div className="flex items-center justify-center py-20">
-            <Loader className="animate-spin text-primary-400" size={48} />
+            <Loader className="animate-spin text-primary" size={48} />
           </div>
         )}
 
         {/* Error State */}
         {error && (
-          <div className="glass-card p-8 rounded-xl text-center">
+          <Card variant="elevated" className="p-8 text-center">
             <p className="text-error-400 mb-4">{error}</p>
-            <button
+            <Button
+              variant="filled"
+              icon={<RefreshCw size={20} />}
               onClick={loadLeaderboard}
-              className="px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg font-semibold flex items-center justify-center gap-2 mx-auto transition-all"
+              className="mx-auto"
             >
-              <RefreshCw size={20} />
               Erneut versuchen
-            </button>
-          </div>
+            </Button>
+          </Card>
         )}
 
         {/* Leaderboard */}
         {!loading && !error && data && (
-          <div className="glass-card p-6 rounded-xl">
+          <Card variant="elevated" className="p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+              <h2 className="m3-title-large text-on-surface flex items-center gap-2">
                 {currentMetric && <currentMetric.icon size={24} />}
                 {currentMetric?.name}
               </h2>
-              <button
-                onClick={loadLeaderboard}
-                className="p-2 hover:bg-dark-800 rounded-lg transition-colors text-primary-400 hover:text-primary-300"
-                title="Aktualisieren"
-              >
+              <IconButton label="Aktualisieren" onClick={loadLeaderboard}>
                 <RefreshCw size={20} />
-              </button>
+              </IconButton>
             </div>
 
             {data.entries.length === 0 ? (
-              <div className="text-center py-12 text-dark-400">
+              <div className="text-center py-12 text-on-surface-variant">
                 <Trophy size={48} className="mx-auto mb-4 opacity-50" />
                 <p>Noch keine Einträge</p>
-                <p className="text-sm mt-2">Sei der Erste auf der Rangliste!</p>
+                <p className="m3-body-medium mt-2">Sei der Erste auf der Rangliste!</p>
               </div>
             ) : (
               <div className="space-y-2">
                 {data.entries.map((entry) => (
                   <div
                     key={entry.playerId}
-                    className={`flex items-center gap-4 p-4 rounded-lg transition-all ${
+                    className={`flex items-center gap-4 p-4 rounded-m3-md transition-all ${
                       entry.rank <= 3
-                        ? 'bg-gradient-to-r from-primary-500/10 to-accent-500/10 border border-primary-500/30'
-                        : 'bg-dark-800 hover:bg-dark-700'
+                        ? 'bg-primary-container text-on-primary-container border border-outline-variant'
+                        : 'bg-surface-container hover:bg-surface-container-high'
                     }`}
                   >
                     {/* Rank */}
@@ -184,10 +177,10 @@ const GlobalLeaderboard: React.FC = () => {
                     <div className="flex items-center gap-3 flex-1">
                       <div className="text-3xl">{entry.playerAvatar}</div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-white font-semibold truncate">
+                        <p className="m3-title-medium text-on-surface truncate">
                           {entry.playerName}
                         </p>
-                        <p className="text-sm text-dark-400 truncate flex items-center gap-1">
+                        <p className="m3-body-medium text-on-surface-variant truncate flex items-center gap-1">
                           {entry.userAvatar?.startsWith('http') ? (
                             <img
                               src={entry.userAvatar}
@@ -204,11 +197,11 @@ const GlobalLeaderboard: React.FC = () => {
 
                     {/* Stats */}
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-white">
+                      <p className="m3-title-large text-on-surface">
                         {metric === 'average' ? entry.value.toFixed(2) : entry.value}
                         {currentMetric?.suffix}
                       </p>
-                      <p className="text-sm text-dark-400">
+                      <p className="m3-body-medium text-on-surface-variant">
                         {entry.gamesPlayed} Spiele
                       </p>
                     </div>
@@ -218,37 +211,31 @@ const GlobalLeaderboard: React.FC = () => {
             )}
 
             {data.total > 0 && (
-              <div className="mt-6 text-center text-sm text-dark-400">
+              <div className="mt-6 text-center m3-body-medium text-on-surface-variant">
                 {data.total} {data.total === 1 ? 'Eintrag' : 'Einträge'}
               </div>
             )}
-          </div>
+          </Card>
         )}
 
         {/* Call to Action */}
         {!isAuthenticated && (
-          <div className="mt-8 glass-card p-8 rounded-xl text-center">
-            <h3 className="text-2xl font-bold text-white mb-4">
+          <Card variant="elevated" className="mt-8 p-8 text-center">
+            <h3 className="m3-title-large text-on-surface mb-4">
               Möchtest du auf der Rangliste erscheinen?
             </h3>
-            <p className="text-dark-300 mb-6">
+            <p className="m3-body-large text-on-surface-variant mb-6">
               Registriere dich kostenlos und starte deine 30-Tage-Testversion!
             </p>
             <div className="flex gap-4 justify-center">
-              <button
-                onClick={() => navigate('/register')}
-                className="px-8 py-3 bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white rounded-lg font-bold transition-all"
-              >
+              <Button variant="success" onClick={() => navigate('/register')}>
                 Jetzt registrieren
-              </button>
-              <button
-                onClick={() => navigate('/login')}
-                className="px-8 py-3 bg-dark-800 hover:bg-dark-700 text-white rounded-lg font-semibold transition-all"
-              >
+              </Button>
+              <Button variant="tonal" onClick={() => navigate('/login')}>
                 Anmelden
-              </button>
+              </Button>
             </div>
-          </div>
+          </Card>
         )}
       </div>
     </div>

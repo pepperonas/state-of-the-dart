@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, X } from 'lucide-react';
+import { IconButton } from '../common';
 import { AchievementHint as AchievementHintType } from '../../hooks/useAchievementHints';
 
 interface AchievementHintProps {
@@ -23,57 +24,53 @@ const AchievementHint: React.FC<AchievementHintProps> = ({ hints, onDismiss }) =
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-[9999]"
       >
-        <div className="glass-card p-4 shadow-2xl border-2 border-primary-500/50 bg-gradient-to-r from-primary-900/20 to-accent-900/20 relative overflow-hidden">
-          {/* Background Glow */}
-          <div className="absolute inset-0 bg-gradient-to-r from-primary-500/10 to-accent-500/10 opacity-50" />
-
+        <div className="p-4 rounded-m3-lg shadow-m3-3 border border-outline-variant bg-primary-container relative overflow-hidden">
           {/* Content */}
           <div className="relative z-10">
             {/* Header */}
             <div className="flex items-start justify-between mb-2">
               <div className="flex items-center gap-2">
-                <div className="bg-primary-500/20 p-2 rounded-lg">
-                  <TrendingUp size={20} className="text-primary-400" />
+                <div className="bg-surface-container-highest p-2 rounded-m3-sm">
+                  <TrendingUp size={20} className="text-primary" />
                 </div>
                 <div>
-                  <h4 className="text-white font-bold text-sm">Fast geschafft!</h4>
-                  <p className="text-primary-400 text-xs font-medium">Achievement in Reichweite</p>
+                  <h4 className="text-on-primary-container m3-title-small">Fast geschafft!</h4>
+                  <p className="text-on-primary-container/80 m3-label-medium">Achievement in Reichweite</p>
                 </div>
               </div>
-              <button
+              <IconButton
                 onClick={() => onDismiss(hint.achievementId)}
-                className="text-dark-400 hover:text-white transition-colors p-1 rounded-full hover:bg-dark-700"
-                aria-label="Close hint"
+                label="Close hint"
               >
                 <X size={18} />
-              </button>
+              </IconButton>
             </div>
 
             {/* Achievement Info */}
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 flex-shrink-0 bg-dark-800 rounded-full flex items-center justify-center text-2xl border border-dark-700 shadow-inner">
+              <div className="w-10 h-10 flex-shrink-0 bg-surface-container-highest rounded-m3-full flex items-center justify-center text-2xl border border-outline-variant shadow-inner">
                 {hint.achievementIcon}
               </div>
               <div className="flex-1">
-                <p className="text-white font-semibold text-sm">{hint.achievementName}</p>
-                <p className="text-dark-300 text-xs">{hint.message}</p>
+                <p className="text-on-primary-container m3-title-small">{hint.achievementName}</p>
+                <p className="text-on-primary-container/80 m3-body-small">{hint.message}</p>
               </div>
             </div>
 
             {/* Progress Bar */}
-            <div className="relative h-2 bg-dark-800 rounded-full overflow-hidden">
+            <div className="relative h-2 bg-surface-container-highest rounded-m3-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPercent}%` }}
                 transition={{ duration: 0.5, ease: 'easeOut' }}
-                className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full"
+                className="absolute inset-y-0 left-0 bg-primary rounded-m3-full"
               />
             </div>
             <div className="flex justify-between mt-1">
-              <span className="text-xs text-dark-400">
+              <span className="m3-label-medium text-on-primary-container/80">
                 {hint.progress.toFixed(1)} / {hint.target}
               </span>
-              <span className="text-xs text-primary-400 font-semibold">
+              <span className="m3-label-medium text-primary font-semibold">
                 {progressPercent.toFixed(0)}%
               </span>
             </div>

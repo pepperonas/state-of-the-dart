@@ -9,7 +9,7 @@ import { api } from '../../services/api';
 const MatchChart = lazy(() => import('./MatchChart'));
 import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
 import PlayerAvatar from '../player/PlayerAvatar';
-import BackButton from '../common/BackButton';
+import { BackButton, Card, Chip, TextField, IconButton, Button } from '../common';
 
 const MatchHistoryPage: React.FC = () => {
   const { t } = useTranslation();
@@ -178,7 +178,7 @@ const MatchHistoryPage: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh flex items-center justify-center">
-        <Loader className="animate-spin text-primary-400" size={48} />
+        <Loader className="animate-spin text-primary" size={48} />
       </div>
     );
   }
@@ -189,67 +189,61 @@ const MatchHistoryPage: React.FC = () => {
         {/* Back button */}
         <BackButton onClick={() => { window.location.href = '/'; }} />
 
-        <h1 className="text-3xl font-bold text-white mb-6">{t('match_history.title', 'Spielhistorie')}</h1>
+        <h1 className="m3-headline-medium font-bold text-on-surface mb-6">{t('match_history.title', 'Spielhistorie')}</h1>
 
         {/* Filters */}
         <div className="mb-6 space-y-3">
-          <div className="flex flex-wrap gap-3">
-            {/* Search */}
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-dark-400" size={18} />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t('match_history.search_placeholder', 'Spieler, Datum oder Spieltyp suchen...')}
-                className="w-full pl-10 pr-4 py-2 rounded-lg border border-dark-700 bg-dark-800 text-white placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
-              />
-            </div>
+          {/* Search */}
+          <TextField
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t('match_history.search_placeholder', 'Spieler, Datum oder Spieltyp suchen...')}
+            icon={<Search size={18} />}
+          />
 
-            {/* Game type filter */}
-            <div className="flex items-center gap-2">
-              <Filter size={16} className="text-dark-400" />
-              <select
-                value={gameTypeFilter}
-                onChange={(e) => setGameTypeFilter(e.target.value)}
-                className="px-3 py-2 rounded-lg border border-dark-700 bg-dark-800 text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+          {/* Game type filter */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <Filter size={16} className="text-on-surface-variant" />
+            {gameTypes.map(type => (
+              <Chip
+                key={type}
+                selected={gameTypeFilter === type}
+                onClick={() => setGameTypeFilter(type)}
               >
-                {gameTypes.map(type => (
-                  <option key={type} value={type}>
-                    {type === 'all' ? t('match_history.all_types', 'Alle Spieltypen') : getGameTypeLabel(type)}
-                  </option>
-                ))}
-              </select>
-            </div>
+                {type === 'all' ? t('match_history.all_types', 'Alle Spieltypen') : getGameTypeLabel(type)}
+              </Chip>
+            ))}
           </div>
 
           {/* Pagination controls */}
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-dark-400">{t('match_history.showing', 'Zeige')}:</span>
+              <span className="m3-body-small text-on-surface-variant">{t('match_history.showing', 'Zeige')}:</span>
               <select
                 value={itemsPerPage}
                 onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
-                className="px-2 py-1 rounded-lg border border-dark-700 bg-dark-800 text-white text-sm"
+                className="px-2 py-1 rounded-m3-sm border border-outline-variant bg-surface-container text-on-surface m3-body-small"
               >
                 <option value={10}>10</option>
                 <option value={20}>20</option>
                 <option value={50}>50</option>
               </select>
-              <span className="text-sm text-dark-400">
+              <span className="m3-body-small text-on-surface-variant">
                 {t('match_history.of', 'von')} {filteredMatches.length} {t('match_history.matches', 'Matches')}
               </span>
             </div>
 
             {totalPages > 1 && (
               <div className="flex items-center gap-1">
-                <button
+                <IconButton
+                  variant="outlined"
+                  label={t('common.previous', 'Zurück')}
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="p-1.5 rounded-lg border border-dark-700 bg-dark-800 text-white disabled:opacity-30 hover:bg-dark-700"
                 >
                   <ChevronLeft size={16} />
-                </button>
+                </IconButton>
                 {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
                   let pageNum;
                   if (totalPages <= 3) pageNum = i + 1;
@@ -257,26 +251,24 @@ const MatchHistoryPage: React.FC = () => {
                   else if (currentPage >= totalPages - 1) pageNum = totalPages - 2 + i;
                   else pageNum = currentPage - 1 + i;
                   return (
-                    <button
+                    <Button
                       key={pageNum}
+                      size="sm"
+                      variant={currentPage === pageNum ? 'tonal' : 'text'}
                       onClick={() => setCurrentPage(pageNum)}
-                      className={`px-2.5 py-1 rounded-lg text-sm font-semibold ${
-                        currentPage === pageNum
-                          ? 'bg-primary-500 text-white'
-                          : 'bg-dark-800 text-white hover:bg-dark-700 border border-dark-700'
-                      }`}
                     >
                       {pageNum}
-                    </button>
+                    </Button>
                   );
                 })}
-                <button
+                <IconButton
+                  variant="outlined"
+                  label={t('common.next', 'Weiter')}
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="p-1.5 rounded-lg border border-dark-700 bg-dark-800 text-white disabled:opacity-30 hover:bg-dark-700"
                 >
                   <ChevronRight size={16} />
-                </button>
+                </IconButton>
               </div>
             )}
           </div>
@@ -284,10 +276,10 @@ const MatchHistoryPage: React.FC = () => {
 
         {/* Match list */}
         {filteredMatches.length === 0 ? (
-          <div className="glass-card rounded-xl p-12 text-center">
-            <Target size={48} className="mx-auto mb-3 text-dark-600 opacity-30" />
-            <p className="text-dark-400">{searchQuery ? t('match_history.no_results', 'Keine Matches gefunden') : t('match_history.no_matches', 'Noch keine abgeschlossenen Spiele')}</p>
-          </div>
+          <Card variant="elevated" className="p-12 text-center">
+            <Target size={48} className="mx-auto mb-3 text-on-surface-variant opacity-30" />
+            <p className="text-on-surface-variant m3-body-large">{searchQuery ? t('match_history.no_results', 'Keine Matches gefunden') : t('match_history.no_matches', 'Noch keine abgeschlossenen Spiele')}</p>
+          </Card>
         ) : (
           <div className="space-y-3">
             {paginatedMatches.map((match) => {
@@ -298,23 +290,23 @@ const MatchHistoryPage: React.FC = () => {
               const winnerPlayer = players.find(p => p.playerId === match.winner);
 
               return (
-                <div key={match.id} className="glass-card rounded-xl overflow-hidden">
+                <Card key={match.id} variant="elevated" className="overflow-hidden">
                   {/* Match summary row */}
                   <button
                     onClick={() => toggleMatch(match.id)}
-                    className="w-full p-4 flex items-center gap-4 hover:bg-white/5 transition-colors text-left"
+                    className="m3-state-layer w-full p-4 flex items-center gap-4 text-left"
                   >
                     {/* Game type badge */}
-                    <div className="px-2.5 py-1 rounded-lg bg-primary-500/20 text-primary-300 text-xs font-bold flex-shrink-0">
+                    <div className="px-2.5 py-1 rounded-m3-sm bg-primary-container text-on-primary-container m3-label-large font-bold flex-shrink-0">
                       {getGameTypeLabel(match.type || 'x01')}
                     </div>
 
                     {/* Players */}
                     <div className="flex-1 min-w-0">
-                      <div className="font-bold text-white text-sm truncate">
+                      <div className="font-bold text-on-surface m3-title-medium truncate">
                         {players.map(p => p.name).join(' vs ')}
                       </div>
-                      <div className="text-xs text-dark-400 flex items-center gap-3 mt-0.5">
+                      <div className="m3-body-small text-on-surface-variant flex items-center gap-3 mt-0.5">
                         <span className="flex items-center gap-1">
                           <Calendar size={12} />
                           {formatDate(match.startedAt)}
@@ -333,11 +325,11 @@ const MatchHistoryPage: React.FC = () => {
                     </div>
 
                     {/* Score */}
-                    <div className="text-sm text-dark-300 flex-shrink-0 hidden sm:block">
+                    <div className="m3-body-medium text-on-surface-variant flex-shrink-0 hidden sm:block">
                       {players.map((p, i) => (
                         <span key={p.playerId}>
                           {i > 0 && ' : '}
-                          <span className={p.playerId === match.winner ? 'text-success-400 font-bold' : ''}>
+                          <span className={p.playerId === match.winner ? 'text-success font-bold' : ''}>
                             {p.legsWon}
                           </span>
                         </span>
@@ -346,33 +338,33 @@ const MatchHistoryPage: React.FC = () => {
 
                     {/* Winner badge */}
                     {winnerPlayer && (
-                      <div className="px-2 py-0.5 rounded bg-success-500/20 text-success-300 text-xs font-bold flex-shrink-0 hidden md:block">
+                      <div className="px-2 py-0.5 rounded-m3-sm bg-success-container text-on-success-container m3-label-large font-bold flex-shrink-0 hidden md:block">
                         {winnerPlayer.name}
                       </div>
                     )}
 
-                    {isExpanded ? <ChevronUp size={18} className="text-dark-400 flex-shrink-0" /> : <ChevronDown size={18} className="text-dark-400 flex-shrink-0" />}
+                    {isExpanded ? <ChevronUp size={18} className="text-on-surface-variant flex-shrink-0" /> : <ChevronDown size={18} className="text-on-surface-variant flex-shrink-0" />}
                   </button>
 
                   {/* Expanded detail */}
                   {isExpanded && (
-                    <div className="border-t border-dark-700 p-4 space-y-6">
+                    <div className="border-t border-outline-variant p-4 space-y-6">
                       {loadingDetails[match.id] ? (
                         <div className="flex items-center justify-center py-12">
-                          <Loader className="animate-spin text-primary-400" size={32} />
+                          <Loader className="animate-spin text-primary" size={32} />
                         </div>
                       ) : detail ? (
                         <>
                           {/* Player stats grid */}
                           <div className={`grid gap-4 ${{ 1: 'md:grid-cols-1', 2: 'md:grid-cols-2', 3: 'md:grid-cols-3' }[Math.min(players.length, 3)] || 'md:grid-cols-3'}`}>
                             {(detail.players || players).map((p: any) => (
-                              <div key={p.playerId} className={`rounded-xl p-4 ${p.playerId === match.winner ? 'bg-success-500/10 border border-success-500/30' : 'bg-dark-800/50 border border-dark-700'}`}>
+                              <div key={p.playerId} className={`rounded-m3-lg p-4 ${p.playerId === match.winner ? 'bg-success-container/40 border border-success' : 'bg-surface-container border border-outline-variant'}`}>
                                 <div className="flex items-center gap-2 mb-3">
                                   <PlayerAvatar avatar={p.avatar} name={p.name} size="sm" />
                                   <div>
-                                    <div className="font-bold text-white text-sm">{p.name}</div>
+                                    <div className="font-bold text-on-surface m3-title-medium">{p.name}</div>
                                     {p.playerId === match.winner && (
-                                      <span className="text-xs text-success-400 font-semibold">{t('match_history.winner')}</span>
+                                      <span className="m3-body-small text-success font-semibold">{t('match_history.winner')}</span>
                                     )}
                                   </div>
                                 </div>
@@ -400,15 +392,15 @@ const MatchHistoryPage: React.FC = () => {
                             const chartData = prepareChartData(detail);
                             if (chartData.length === 0) return null;
                             return (
-                              <div className="bg-dark-800/50 rounded-xl p-4">
-                                <h4 className="font-bold text-white mb-3 flex items-center gap-2 text-sm">
-                                  <TrendingUp size={16} className="text-primary-400" />
+                              <Card variant="filled" className="p-4">
+                                <h4 className="font-bold text-on-surface mb-3 flex items-center gap-2 m3-title-medium">
+                                  <TrendingUp size={16} className="text-primary" />
                                   {t('match_history.round_chart', 'Runden-Verlauf')}
                                 </h4>
-                                <Suspense fallback={<div className="h-[180px] sm:h-[250px] flex items-center justify-center text-dark-400 text-sm">Lade…</div>}>
+                                <Suspense fallback={<div className="h-[180px] sm:h-[250px] flex items-center justify-center text-on-surface-variant m3-body-small">Lade…</div>}>
                                   <MatchChart data={chartData} players={detail.players || players} />
                                 </Suspense>
-                              </div>
+                              </Card>
                             );
                           })()}
 
@@ -419,9 +411,9 @@ const MatchHistoryPage: React.FC = () => {
                               const totalDarts = Object.values(segments).reduce((s: number, v: any) => s + (v as number), 0);
                               if (totalDarts === 0) return null;
                               return (
-                                <div key={p.playerId} className="bg-dark-800/50 rounded-xl p-4">
-                                  <h4 className="font-bold text-white mb-3 text-sm flex items-center gap-2">
-                                    <Target size={16} className="text-primary-400" />
+                                <Card key={p.playerId} variant="filled" className="p-4">
+                                  <h4 className="font-bold text-on-surface mb-3 m3-title-medium flex items-center gap-2">
+                                    <Target size={16} className="text-primary" />
                                     {t('match_history.heatmap')} — {p.name}
                                   </h4>
                                   <div className="flex justify-center">
@@ -430,25 +422,25 @@ const MatchHistoryPage: React.FC = () => {
                                       size={220}
                                     />
                                   </div>
-                                </div>
+                                </Card>
                               );
                             })}
                           </div>
 
                           {/* Leg breakdown */}
                           {detail.legs && detail.legs.length > 0 && (
-                            <div className="bg-dark-800/50 rounded-xl p-4">
-                              <h4 className="font-bold text-white mb-3 text-sm">{t('match_history.leg_breakdown')}</h4>
+                            <Card variant="filled" className="p-4">
+                              <h4 className="font-bold text-on-surface mb-3 m3-title-medium">{t('match_history.leg_breakdown')}</h4>
                               <div className="flex gap-2 flex-wrap">
                                 {detail.legs.map((leg: any, idx: number) => {
                                   const legWinner = players.find((p: any) => p.playerId === leg.winner);
                                   return (
                                     <div
                                       key={leg.id || idx}
-                                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
+                                      className={`px-3 py-1.5 rounded-m3-sm m3-body-small font-semibold ${
                                         legWinner
-                                          ? 'bg-success-500/20 text-success-300 border border-success-500/30'
-                                          : 'bg-dark-700 text-dark-400'
+                                          ? 'bg-success-container text-on-success-container'
+                                          : 'bg-surface-container-highest text-on-surface-variant'
                                       }`}
                                     >
                                       {t('match_history.leg_number', { number: idx + 1 })}: {legWinner?.name || '?'}
@@ -456,20 +448,20 @@ const MatchHistoryPage: React.FC = () => {
                                   );
                                 })}
                               </div>
-                            </div>
+                            </Card>
                           )}
 
                           {/* Throw history (collapsible) */}
                           <ThrowHistory detail={detail} players={detail.players || players} />
                         </>
                       ) : (
-                        <div className="text-center py-8 text-dark-400">
+                        <div className="text-center py-8 text-on-surface-variant m3-body-medium">
                           {t('match_history.no_details', 'Details konnten nicht geladen werden')}
                         </div>
                       )}
                     </div>
                   )}
-                </div>
+                </Card>
               );
             })}
           </div>
@@ -530,13 +522,13 @@ const ThrowHistory: React.FC<{ detail: any; players: any[] }> = ({ detail, playe
   };
 
   return (
-    <div className="bg-dark-800/50 rounded-xl overflow-hidden">
+    <Card variant="filled" className="overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+        className="m3-state-layer w-full p-4 flex items-center justify-between"
       >
-        <span className="font-bold text-white text-sm">{t('match_history.throw_details')}</span>
-        {open ? <ChevronUp size={16} className="text-dark-400" /> : <ChevronDown size={16} className="text-dark-400" />}
+        <span className="font-bold text-on-surface m3-title-medium">{t('match_history.throw_details')}</span>
+        {open ? <ChevronUp size={16} className="text-on-surface-variant" /> : <ChevronDown size={16} className="text-on-surface-variant" />}
       </button>
       {open && (
         <div className="px-2 sm:px-4 pb-4 space-y-4">
@@ -544,14 +536,14 @@ const ThrowHistory: React.FC<{ detail: any; players: any[] }> = ({ detail, playe
             const rounds = groupIntoRounds(leg.throws || []);
             return (
               <div key={leg.id || legIdx}>
-                <div className="text-xs text-dark-400 font-semibold mb-2">{t('match_history.leg_number', { number: legIdx + 1 })}</div>
+                <div className="m3-body-small text-on-surface-variant font-semibold mb-2">{t('match_history.leg_number', { number: legIdx + 1 })}</div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="border-b border-dark-600">
-                        <th className="text-dark-500 text-left py-1 pr-1 w-6">#</th>
+                      <tr className="border-b border-outline-variant">
+                        <th className="text-on-surface-variant text-left py-1 pr-1 w-6">#</th>
                         {playerIds.map(pid => (
-                          <th key={pid} className="text-white font-bold text-center py-1 px-1 truncate max-w-[120px]">
+                          <th key={pid} className="text-on-surface font-bold text-center py-1 px-1 truncate max-w-[120px]">
                             {getPlayerName(pid)}
                           </th>
                         ))}
@@ -559,19 +551,19 @@ const ThrowHistory: React.FC<{ detail: any; players: any[] }> = ({ detail, playe
                     </thead>
                     <tbody>
                       {rounds.map((round, rIdx) => (
-                        <tr key={rIdx} className="border-b border-dark-700/30">
-                          <td className="text-dark-600 py-1 pr-1 align-top">{rIdx + 1}</td>
+                        <tr key={rIdx} className="border-b border-outline-variant/30">
+                          <td className="text-on-surface-variant py-1 pr-1 align-top">{rIdx + 1}</td>
                           {playerIds.map(pid => {
                             const thr = round.find((r: any) => r.playerId === pid);
                             if (!thr) return <td key={pid} className="py-1 px-1"></td>;
                             return (
                               <td key={pid} className="py-1 px-1 text-center">
-                                <div className="font-mono text-dark-400 text-[11px]">{formatDarts(thr.darts)}</div>
+                                <div className="font-mono text-on-surface-variant text-[11px]">{formatDarts(thr.darts)}</div>
                                 <div className="flex items-center justify-center gap-1">
-                                  <span className={`font-bold ${thr.isBust ? 'text-red-400' : thr.score >= 100 ? 'text-blue-400' : 'text-white'}`}>
+                                  <span className={`font-bold ${thr.isBust ? 'text-error' : thr.score >= 100 ? 'text-tertiary' : 'text-on-surface'}`}>
                                     {thr.isBust ? '0' : thr.score}
                                   </span>
-                                  <span className="text-dark-500">→{thr.remaining}</span>
+                                  <span className="text-on-surface-variant opacity-70">→{thr.remaining}</span>
                                 </div>
                               </td>
                             );
@@ -586,14 +578,14 @@ const ThrowHistory: React.FC<{ detail: any; players: any[] }> = ({ detail, playe
           })}
         </div>
       )}
-    </div>
+    </Card>
   );
 };
 
 const StatBox: React.FC<{ label: string; value: string | number }> = ({ label, value }) => (
-  <div className="bg-dark-900/50 rounded-lg p-2">
-    <div className="text-[10px] text-dark-500 uppercase tracking-wider">{label}</div>
-    <div className="text-sm font-bold text-white">{value}</div>
+  <div className="bg-surface-container-highest rounded-m3-sm p-2">
+    <div className="text-[10px] text-on-surface-variant uppercase tracking-wider">{label}</div>
+    <div className="m3-body-medium font-bold text-on-surface">{value}</div>
   </div>
 );
 

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import BackButton from '../common/BackButton';
+import Card from '../common/Card';
 
 const Impressum: React.FC = () => {
   const navigate = useNavigate();
@@ -13,30 +14,31 @@ const Impressum: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         <BackButton onClick={() => navigate(-1)} />
 
-        <h1 className="text-3xl font-bold text-white mb-8">Impressum</h1>
+        <h1 className="m3-headline-medium text-on-surface mb-8">Impressum</h1>
 
         {/* Angaben gemaess § 5 TMG */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">
             Angaben gem. &sect; 5 TMG
           </h2>
-          <div className="text-dark-300 space-y-2">
+          <div className="m3-body-medium text-on-surface-variant space-y-2">
             <p>celox</p>
             <p>Martin Pfeffer</p>
             <p>Flughafenstra&szlig;e 24</p>
             <p>12053 Berlin</p>
           </div>
-        </div>
+        </Card>
 
         {/* Kontakt */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">Kontakt</h2>
-          <div className="text-dark-300 space-y-2">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">Kontakt</h2>
+          <div className="m3-body-medium text-on-surface-variant space-y-2">
             <p>
               E-Mail:{' '}
               <a
                 href="mailto:martin.pfeffer@celox.io"
-                className="text-primary-400 hover:text-primary-300 transition-colors"
+                className="transition-colors"
+                style={{ color: 'var(--m3-primary)' }}
               >
                 martin.pfeffer@celox.io
               </a>
@@ -47,7 +49,8 @@ const Impressum: React.FC = () => {
                 href="https://celox.io"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary-400 hover:text-primary-300 transition-colors"
+                className="transition-colors"
+                style={{ color: 'var(--m3-primary)' }}
               >
                 https://celox.io
               </a>
@@ -58,20 +61,21 @@ const Impressum: React.FC = () => {
                 href="https://stateofthedart.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary-400 hover:text-primary-300 transition-colors"
+                className="transition-colors"
+                style={{ color: 'var(--m3-primary)' }}
               >
                 https://stateofthedart.com
               </a>
             </p>
           </div>
-        </div>
+        </Card>
 
         {/* Verantwortlich fuer den Inhalt */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">
             Verantwortlich f&uuml;r den Inhalt gem. &sect; 18 Abs. 2 MStV
           </h2>
-          <div className="text-dark-300 space-y-2">
+          <div className="m3-body-medium text-on-surface-variant space-y-2">
             <p>Martin Pfeffer</p>
             <p>Flughafenstra&szlig;e 24</p>
             <p>12053 Berlin</p>
@@ -79,20 +83,21 @@ const Impressum: React.FC = () => {
               E-Mail:{' '}
               <a
                 href="mailto:martin.pfeffer@celox.io"
-                className="text-primary-400 hover:text-primary-300 transition-colors"
+                className="transition-colors"
+                style={{ color: 'var(--m3-primary)' }}
               >
                 martin.pfeffer@celox.io
               </a>
             </p>
           </div>
-        </div>
+        </Card>
 
         {/* Datenschutzbeauftragter */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">
             Datenschutzbeauftragter
           </h2>
-          <div className="text-dark-300 space-y-2">
+          <div className="m3-body-medium text-on-surface-variant space-y-2">
             <p>Martin Pfeffer</p>
             <p>Flughafenstra&szlig;e 24</p>
             <p>12053 Berlin</p>
@@ -100,20 +105,21 @@ const Impressum: React.FC = () => {
               E-Mail:{' '}
               <a
                 href="mailto:martin.pfeffer@celox.io"
-                className="text-primary-400 hover:text-primary-300 transition-colors"
+                className="transition-colors"
+                style={{ color: 'var(--m3-primary)' }}
               >
                 martin.pfeffer@celox.io
               </a>
             </p>
           </div>
-        </div>
+        </Card>
 
         {/* EU-Streitschlichtung */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">
             EU-Streitschlichtung
           </h2>
-          <div className="text-dark-300 space-y-3">
+          <div className="m3-body-medium text-on-surface-variant space-y-3">
             <p>
               Die Europ&auml;ische Kommission stellt eine Plattform zur
               Online-Streitbeilegung (OS) bereit:{' '}
@@ -121,7 +127,8 @@ const Impressum: React.FC = () => {
                 href="https://ec.europa.eu/consumers/odr/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary-400 hover:text-primary-300 transition-colors break-all"
+                className="transition-colors break-all"
+                style={{ color: 'var(--m3-primary)' }}
               >
                 https://ec.europa.eu/consumers/odr/
               </a>
@@ -130,25 +137,25 @@ const Impressum: React.FC = () => {
               Unsere E-Mail-Adresse finden Sie oben im Impressum.
             </p>
           </div>
-        </div>
+        </Card>
 
         {/* Verbraucherstreitbeilegung */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">
             Verbraucherstreitbeilegung / Universalschlichtungsstelle
           </h2>
-          <p className="text-dark-300">
+          <p className="m3-body-medium text-on-surface-variant">
             Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren
             vor einer Verbraucherschlichtungsstelle teilzunehmen.
           </p>
-        </div>
+        </Card>
 
         {/* Haftung fuer Inhalte */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">
             Haftung f&uuml;r Inhalte
           </h2>
-          <div className="text-dark-300 space-y-3">
+          <div className="m3-body-medium text-on-surface-variant space-y-3">
             <p>
               Als Diensteanbieter sind wir gem&auml;&szlig; &sect; 7 Abs. 1 TMG
               f&uuml;r eigene Inhalte auf diesen Seiten nach den allgemeinen
@@ -167,14 +174,14 @@ const Impressum: React.FC = () => {
               Rechtsverletzungen werden wir diese Inhalte umgehend entfernen.
             </p>
           </div>
-        </div>
+        </Card>
 
         {/* Haftung fuer Links */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">
             Haftung f&uuml;r Links
           </h2>
-          <div className="text-dark-300 space-y-3">
+          <div className="m3-body-medium text-on-surface-variant space-y-3">
             <p>
               Unser Angebot enth&auml;lt Links zu externen Websites Dritter, auf
               deren Inhalte wir keinen Einfluss haben. Deshalb k&ouml;nnen wir
@@ -193,12 +200,12 @@ const Impressum: React.FC = () => {
               derartige Links umgehend entfernen.
             </p>
           </div>
-        </div>
+        </Card>
 
         {/* Urheberrecht */}
-        <div className="glass-card p-6 md:p-8 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">Urheberrecht</h2>
-          <div className="text-dark-300 space-y-3">
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">Urheberrecht</h2>
+          <div className="m3-body-medium text-on-surface-variant space-y-3">
             <p>
               Die durch den Seitenbetreiber erstellten Inhalte und Werke auf
               diesen Seiten unterliegen dem deutschen Urheberrecht. Die
@@ -217,9 +224,9 @@ const Impressum: React.FC = () => {
               Rechtsverletzungen werden wir derartige Inhalte umgehend entfernen.
             </p>
           </div>
-        </div>
+        </Card>
 
-        <div className="text-center text-dark-500 text-sm mt-8 mb-4">
+        <div className="text-center m3-label-large text-on-surface-variant mt-8 mb-4">
           Stand: Februar 2026
         </div>
       </div>
