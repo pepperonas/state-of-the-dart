@@ -12,7 +12,9 @@ import { api } from '../../services/api';
 import { formatDate, formatDateTime } from '../../utils/dateUtils';
 import { Match } from '../../types';
 import MatchDetailModal from './MatchDetailModal';
-import { BackButton, Button, Card } from '../common';
+import { motion } from 'framer-motion';
+import { BackButton, Button, Card, AnimatedNumber } from '../common';
+import { staggerChild } from '../../utils/motion';
 
 interface RecentActivity {
   id: string;
@@ -354,41 +356,53 @@ const Dashboard: React.FC = () => {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-          <Card variant="elevated" className="p-4">
-            <div className="text-3xl mb-2">🎯</div>
-            <p className="m3-headline-small font-bold text-on-surface">{stats.totalMatches}</p>
-            <p className="m3-body-small text-on-surface-variant">Matches</p>
-          </Card>
+          <motion.div {...staggerChild(0)}>
+            <Card variant="elevated" className="p-4">
+              <div className="text-3xl mb-2">🎯</div>
+              <p className="m3-headline-small font-bold text-on-surface"><AnimatedNumber value={stats.totalMatches} /></p>
+              <p className="m3-body-small text-on-surface-variant">Matches</p>
+            </Card>
+          </motion.div>
 
-          <Card variant="elevated" className="p-4">
-            <div className="text-3xl mb-2">🏆</div>
-            <p className="m3-headline-small font-bold text-on-surface">{stats.totalWins}</p>
-            <p className="m3-body-small text-on-surface-variant">Siege</p>
-          </Card>
+          <motion.div {...staggerChild(1)}>
+            <Card variant="elevated" className="p-4">
+              <div className="text-3xl mb-2">🏆</div>
+              <p className="m3-headline-small font-bold text-on-surface"><AnimatedNumber value={stats.totalWins} /></p>
+              <p className="m3-body-small text-on-surface-variant">Siege</p>
+            </Card>
+          </motion.div>
 
-          <Card variant="elevated" className="p-4">
-            <div className="text-3xl mb-2">📊</div>
-            <p className="m3-headline-small font-bold text-on-surface">{stats.winRate.toFixed(0)}%</p>
-            <p className="m3-body-small text-on-surface-variant">Win Rate</p>
-          </Card>
+          <motion.div {...staggerChild(2)}>
+            <Card variant="elevated" className="p-4">
+              <div className="text-3xl mb-2">📊</div>
+              <p className="m3-headline-small font-bold text-on-surface"><AnimatedNumber value={stats.winRate} />%</p>
+              <p className="m3-body-small text-on-surface-variant">Win Rate</p>
+            </Card>
+          </motion.div>
 
-          <Card variant="elevated" className="p-4">
-            <div className="text-3xl mb-2">🔥</div>
-            <p className="m3-headline-small font-bold text-on-surface">{stats.currentStreak}</p>
-            <p className="m3-body-small text-on-surface-variant">Streak</p>
-          </Card>
+          <motion.div {...staggerChild(3)}>
+            <Card variant="elevated" className="p-4">
+              <div className="text-3xl mb-2">🔥</div>
+              <p className="m3-headline-small font-bold text-on-surface"><AnimatedNumber value={stats.currentStreak} /></p>
+              <p className="m3-body-small text-on-surface-variant">Streak</p>
+            </Card>
+          </motion.div>
 
-          <Card variant="elevated" className="p-4">
-            <div className="text-3xl mb-2">📈</div>
-            <p className="m3-headline-small font-bold text-on-surface">{stats.averageScore.toFixed(1)}</p>
-            <p className="m3-body-small text-on-surface-variant">Average</p>
-          </Card>
+          <motion.div {...staggerChild(4)}>
+            <Card variant="elevated" className="p-4">
+              <div className="text-3xl mb-2">📈</div>
+              <p className="m3-headline-small font-bold text-on-surface"><AnimatedNumber value={stats.averageScore} decimals={1} /></p>
+              <p className="m3-body-small text-on-surface-variant">Average</p>
+            </Card>
+          </motion.div>
 
-          <Card variant="elevated" className="p-4">
-            <div className="text-3xl mb-2">⚡</div>
-            <p className="m3-headline-small font-bold text-on-surface">{stats.total180s}</p>
-            <p className="m3-body-small text-on-surface-variant">180s</p>
-          </Card>
+          <motion.div {...staggerChild(5)}>
+            <Card variant="elevated" className="p-4">
+              <div className="text-3xl mb-2">⚡</div>
+              <p className="m3-headline-small font-bold text-on-surface"><AnimatedNumber value={stats.total180s} /></p>
+              <p className="m3-body-small text-on-surface-variant">180s</p>
+            </Card>
+          </motion.div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">

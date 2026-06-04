@@ -4,6 +4,8 @@ import { Trophy, Target } from 'lucide-react';
 import { MatchPlayer } from '../../types/index';
 import PlayerAvatar from '../player/PlayerAvatar';
 import { usePlayer } from '../../context/PlayerContext';
+import AnimatedNumber from '../common/AnimatedNumber';
+import { springSpatialDefault } from '../../utils/motion';
 
 interface PlayerScoreProps {
   player: MatchPlayer;
@@ -34,8 +36,8 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
         scale: isActive ? 1.05 : 1,
         opacity: isActive ? 1 : 0.75,
       }}
-      transition={{ duration: 0.3 }}
-      className={`m3-card m3-elevated p-4 transition-all ${
+      transition={springSpatialDefault}
+      className={`m3-card m3-elevated p-4 ${
         isActive
           ? 'ring-4 ring-[var(--m3-primary)] bg-surface-container-high'
           : 'bg-surface-container'
@@ -53,17 +55,12 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
         )}
       </div>
 
-      <motion.div
-        key={remaining}
-        initial={{ scale: 1.2, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.3 }}
-        className={`text-4xl font-bold text-center mb-3 ${
+      <AnimatedNumber
+        value={remaining}
+        className={`block text-4xl font-bold text-center mb-3 ${
           remaining <= 170 ? 'text-primary' : 'text-on-surface'
         }`}
-      >
-        {remaining}
-      </motion.div>
+      />
 
       <div className="grid grid-cols-2 gap-2 text-sm">
         <div className="bg-surface-container-highest rounded-m3-sm p-2">

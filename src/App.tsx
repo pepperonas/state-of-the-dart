@@ -1,5 +1,6 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { MotionConfig } from 'framer-motion';
 import { AuthProvider } from './context/AuthContext';
 import { TenantProvider } from './context/TenantContext';
 import { GameProvider } from './context/GameContext';
@@ -162,6 +163,7 @@ function AppContent() {
             <PlayerProvider>
               <AchievementProvider>
                 <GameProvider>
+                  <MotionConfig reducedMotion="user">
                   <div className="min-h-dvh bg-surface text-on-surface flex flex-col">
                     <AchievementNotification />
                     <OfflineIndicator />
@@ -332,6 +334,7 @@ function AppContent() {
                     </div>
                     <Footer />
                   </div>
+                  </MotionConfig>
                 </GameProvider>
               </AchievementProvider>
             </PlayerProvider>

@@ -9,3 +9,4 @@ export { default as Switch } from './Switch';
 export { default as Chip } from './Chip';
 export { default as Dialog } from './Dialog';
 export { default as BackButton } from './BackButton';
+export { default as AnimatedNumber } from './AnimatedNumber';

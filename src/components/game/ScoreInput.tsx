@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Check, X, Delete, Keyboard } from 'lucide-react';
 import { Dart } from '../../types/index';
 import { calculateThrowScore, convertScoreToDarts } from '../../utils/scoring';
+import AnimatedNumber from '../common/AnimatedNumber';
 
 interface ScoreInputProps {
   currentThrow: Dart[];
@@ -169,12 +170,11 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
       {/* Header with Remaining Score */}
       <div className="mb-4 text-center">
         <div className="m3-label-medium text-on-surface-variant mb-1 uppercase tracking-wide">Remaining</div>
-        <div
-          className="text-5xl font-bold"
+        <AnimatedNumber
+          value={remaining}
+          className="block text-5xl font-bold"
           style={{ color: remaining <= 170 ? 'var(--m3-primary)' : 'var(--m3-on-surface)' }}
-        >
-          {remaining}
-        </div>
+        />
       </div>
 
       {/* Current Throw Display */}
