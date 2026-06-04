@@ -254,7 +254,11 @@ body {
 .m3-state-layer:hover::before { opacity: var(--m3-state-hover); }
 .m3-state-layer:focus-visible::before { opacity: var(--m3-state-focus); }
 .m3-state-layer:active::before { opacity: var(--m3-state-pressed); }
-.m3-state-layer > * { position: relative; z-index: 1; }
+/* Lift content above the ::before overlay. `:where()` gives this rule ZERO
+   specificity so any Tailwind position utility on a child (e.g. `absolute` on a
+   corner badge) still wins — otherwise absolutely-positioned children would be
+   forced back to `position: relative` and stretch full-width. */
+:where(.m3-state-layer) > * { position: relative; z-index: 1; }
 
 /* ============================================================================
    7. COMPONENT PRIMITIVES
