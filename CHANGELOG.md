@@ -18,6 +18,21 @@ Komplette Umstellung der App auf **Material 3 Expressive** — neues Design-Toke
 - **App-Shell-Fix**: Root-Wrapper nutzte ein `dark:`-Gradient, aber das Theme-System setzt `.modern` (nie `.dark`) — alle `dark:`-Varianten waren wirkungslos. Shell jetzt token-basiert (`bg-surface`), `html`/`#root` ebenfalls token-getönt (kein weißer Rand mehr unter Vollbild-Screens).
 - Reine Präsentations-Migration: keine Logik-/Handler-/Reducer-Änderungen. Bundle bleibt auf Baseline (~147 KB gz), 294 Tests grün. Game-Logik (Bot-Refs, Undo-Timer, Dispatch-Reihenfolge, Navigation) byte-identisch.
 
+### ✨ Material 3 Expressive Motion (Animationen)
+
+App-weiter Animations-Pass auf Basis des Motion-Systems (`src/utils/motion.ts`). Alles rein präsentational, Bundle weiter auf Baseline (~147 KB gz), 294 Tests grün.
+
+- **Global**: `<MotionConfig reducedMotion="user">` (`App.tsx`) → **jede** framer-motion-Animation respektiert `prefers-reduced-motion`.
+- **`AnimatedNumber`** (neues Primitiv): überdämpfte Spring-Zahl-Transition (kein Overshoot/Jitter), reduced-motion-aware — „tallyt" zum neuen Wert.
+- **Schnelles Match**: Darts poppen mit Spring in ihre Slots; Numpad-Tasten mit Tap-Feedback (active-scale); Restscore via `AnimatedNumber`; aktiver Spieler federt mit Expressive-Spatial-Spring (statt flachem Tween); Setup-Spielerkarten federn bei Hover/Tap; Winner-Screen (Gold-Panel-Entrance, Trophäen-Pop mit Rotation, gestaffelte Stat-Karten); CheckoutSuggestion gleitet/faded rein.
+- **Dashboard**: KPI-Zahlen zählen beim Laden hoch (async) + gestaffelte Karten-Entrance.
+- **Listen/Grids**: gestaffelte Entrance auf Achievements, Leaderboard, Global-Leaderboard, Spielerverwaltung, Statistiken, Training-Stats, Match-Historie, Turniere. Große Listen mit gedeckeltem Stagger-Delay (`Math.min(index, 10–12)`).
+
+### 🐞 Fixes (Redesign-Nacharbeiten)
+
+- **State-Layer vs. absolute Kinder**: `.m3-state-layer > * { position: relative }` überschrieb (gleiche Spezifität, später geladen) Tailwinds `.absolute` → absolut positionierte Kinder (z. B. das MainMenu „10"-Badge auf der *Spiel-fortsetzen*-Kachel) wurden zu `position: relative` + `flex` und zogen sich auf volle Breite. Fix: Selektor in `:where(.m3-state-layer) > *` gewrappt (Spezifität 0) → Positions-Utilities am Kind gewinnen, statischer Content wird weiterhin über das Overlay gehoben. Global für alle Karten/Buttons/Chips.
+- **Zurück-Button-Abstand vereinheitlicht**: `BackButton` umschließt sich im Block-Modus (Default) mit `mb-6`, sodass der Abstand zur Überschrift auf allen Screens gleich ist; Flex-Header-Zeilen nutzen den neuen `inline`-Prop (kein Wrapper, Abstand kommt von der Zeile). Vorher: Standalone-Buttons ohne Abstand, Header-Zeilen mit `mb-6` → inkonsistent.
+
 ### 🔊 Audio
 
 #### Leg/Match-Ansage war pseudo-"global gezählt"
