@@ -1,6 +1,8 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Target } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { springSpatialDefault } from '../../utils/motion';
 
 interface CheckoutSuggestionProps {
   suggestion: string[];
@@ -14,7 +16,12 @@ const CheckoutSuggestion: React.FC<CheckoutSuggestionProps> = ({ suggestion, alt
   if (!suggestion || suggestion.length === 0) return null;
 
   return (
-    <div className="space-y-2">
+    <motion.div
+      className="space-y-2"
+      initial={{ opacity: 0, y: 14, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={springSpatialDefault}
+    >
       {/* Primary suggestion */}
       <div className="bg-tertiary-container text-on-tertiary-container rounded-m3-lg p-3">
         <div className="flex items-center gap-2 mb-2">
@@ -66,7 +73,7 @@ const CheckoutSuggestion: React.FC<CheckoutSuggestionProps> = ({ suggestion, alt
           </div>
         </div>
       ))}
-    </div>
+    </motion.div>
   );
 };
 

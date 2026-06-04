@@ -28,7 +28,9 @@ import audioSystem from '../../utils/audio';
 import { api } from '../../services/api';
 import { createAdaptiveBotPlayer, getAdaptiveBotConfigs, generateBotTurn, AdaptiveBotCategory } from '../../utils/botLogic';
 import BackButton from '../common/BackButton';
+import { motion } from 'framer-motion';
 import { Button, IconButton, Card } from '../common';
+import { staggerChild, springSpatialDefault, springSpatialFast } from '../../utils/motion';
 
 const GameScreen: React.FC = () => {
   const { t } = useTranslation();
@@ -976,8 +978,11 @@ const GameScreen: React.FC = () => {
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {/* Show registered players */}
                 {players.map((player) => (
-                  <button
+                  <motion.button
                     key={player.id}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={springSpatialFast}
                     onClick={() => {
                       if (selectedPlayers.find(p => p.id === player.id)) {
                         setSelectedPlayers(selectedPlayers.filter(p => p.id !== player.id));
@@ -985,7 +990,7 @@ const GameScreen: React.FC = () => {
                         setSelectedPlayers([...selectedPlayers, player]);
                       }
                     }}
-                    className={`p-3 rounded-m3-lg border-2 transition-all ${
+                    className={`p-3 rounded-m3-lg border-2 transition-colors ${
                       selectedPlayers.find(p => p.id === player.id)
                         ? 'border-success-500 bg-success-container shadow-m3-1'
                         : 'border-outline-variant hover:border-outline'
@@ -995,7 +1000,7 @@ const GameScreen: React.FC = () => {
                       <PlayerAvatar avatar={player.avatar} name={player.name} size="sm" />
                     </div>
                     <div className="m3-label-large text-on-surface">{player.name}</div>
-                  </button>
+                  </motion.button>
                 ))}
                 {/* Show selected bots */}
                 {selectedPlayers.filter(p => p.isBot).map((bot) => (
@@ -1284,11 +1289,21 @@ const GameScreen: React.FC = () => {
           </Suspense>
         </div>
         <div className="max-w-4xl w-full relative z-10">
-          <div className="glass-card-gold p-12 text-center">
+          <motion.div
+            className="glass-card-gold p-12 text-center"
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={springSpatialDefault}
+          >
             <div className="mb-8">
-              <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent mb-4 animate-bounce">
+              <motion.h1
+                initial={{ scale: 0, rotate: -25 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ ...springSpatialDefault, delay: 0.15 }}
+                className="text-6xl md:text-8xl font-bold mb-4"
+              >
                 🏆
-              </h1>
+              </motion.h1>
               <h2 className="text-4xl md:text-6xl font-bold text-on-surface mb-2">
                 {winner?.name} gewinnt!
               </h2>
@@ -1299,24 +1314,30 @@ const GameScreen: React.FC = () => {
 
             {/* Winner Stats */}
             <div className="grid md:grid-cols-3 gap-4 mb-8">
-              <Card variant="filled" className="p-4">
-                <div className="text-on-surface-variant m3-body-small mb-1">Average</div>
-                <div className="text-3xl font-bold text-on-surface">
-                  {winner?.matchAverage.toFixed(2)}
-                </div>
-              </Card>
-              <Card variant="filled" className="p-4">
-                <div className="text-on-surface-variant m3-body-small mb-1">Highest Score</div>
-                <div className="text-3xl font-bold text-on-surface">
-                  {winner?.matchHighestScore}
-                </div>
-              </Card>
-              <Card variant="filled" className="p-4">
-                <div className="text-on-surface-variant m3-body-small mb-1">180s</div>
-                <div className="text-3xl font-bold text-on-surface">
-                  {winner?.match180s}
-                </div>
-              </Card>
+              <motion.div {...staggerChild(3)}>
+                <Card variant="filled" className="p-4">
+                  <div className="text-on-surface-variant m3-body-small mb-1">Average</div>
+                  <div className="text-3xl font-bold text-on-surface">
+                    {winner?.matchAverage.toFixed(2)}
+                  </div>
+                </Card>
+              </motion.div>
+              <motion.div {...staggerChild(4)}>
+                <Card variant="filled" className="p-4">
+                  <div className="text-on-surface-variant m3-body-small mb-1">Highest Score</div>
+                  <div className="text-3xl font-bold text-on-surface">
+                    {winner?.matchHighestScore}
+                  </div>
+                </Card>
+              </motion.div>
+              <motion.div {...staggerChild(5)}>
+                <Card variant="filled" className="p-4">
+                  <div className="text-on-surface-variant m3-body-small mb-1">180s</div>
+                  <div className="text-3xl font-bold text-on-surface">
+                    {winner?.match180s}
+                  </div>
+                </Card>
+              </motion.div>
             </div>
             
             <div className="flex flex-col md:flex-row gap-4 justify-center">
@@ -1350,7 +1371,7 @@ const GameScreen: React.FC = () => {
                 🏠 Hauptmenü
               </Button>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     );

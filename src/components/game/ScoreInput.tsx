@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Check, X, Delete, Keyboard } from 'lucide-react';
 import { Dart } from '../../types/index';
+import { motion } from 'framer-motion';
 import { calculateThrowScore, convertScoreToDarts } from '../../utils/scoring';
 import AnimatedNumber from '../common/AnimatedNumber';
+import { springSpatialFast } from '../../utils/motion';
 
 interface ScoreInputProps {
   currentThrow: Dart[];
@@ -196,9 +198,15 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
             }`}
           >
             {currentThrow[index] ? (
-              <span className="font-bold text-2xl text-on-secondary-container">
+              <motion.span
+                key={currentThrow[index].score}
+                initial={{ scale: 0.3, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={springSpatialFast}
+                className="font-bold text-2xl text-on-secondary-container"
+              >
                 {currentThrow[index].score}
-              </span>
+              </motion.span>
             ) : (
               <span className="text-on-surface-variant text-xl opacity-50">-</span>
             )}
@@ -286,26 +294,26 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
               <button
                 key={num}
                 onClick={() => handleNumpadClick(num.toString())}
-                className="p-4 text-xl font-bold rounded-m3-md bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition-all"
+                className="p-4 text-xl font-bold rounded-m3-md bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition-all active:scale-95"
               >
                 {num}
               </button>
             ))}
             <button
               onClick={() => handleNumpadClick('clear')}
-              className="p-4 text-lg font-bold rounded-m3-md bg-error-container text-on-error-container transition-all"
+              className="p-4 text-lg font-bold rounded-m3-md bg-error-container text-on-error-container transition-all active:scale-95"
             >
               Clear
             </button>
             <button
               onClick={() => handleNumpadClick('0')}
-              className="p-4 text-xl font-bold rounded-m3-md bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition-all"
+              className="p-4 text-xl font-bold rounded-m3-md bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition-all active:scale-95"
             >
               0
             </button>
             <button
               onClick={() => handleNumpadClick('enter')}
-              className="p-4 text-lg font-bold rounded-m3-md bg-primary-container text-on-primary-container transition-all"
+              className="p-4 text-lg font-bold rounded-m3-md bg-primary-container text-on-primary-container transition-all active:scale-95"
               title={editingDartIndex !== null ? 'Dart ersetzen' : 'Wurf-Summe übernehmen und bestätigen'}
             >
               {editingDartIndex !== null ? 'Set' : 'OK'}
