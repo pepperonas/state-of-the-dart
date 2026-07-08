@@ -1,6 +1,6 @@
 import express, { Response } from 'express';
 import { getDatabase } from '../database';
-import { AuthRequest, authenticateTenant } from '../middleware/auth';
+import { AuthRequest, authenticateTenant, authenticateToken } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -33,12 +33,17 @@ router.get('/:id', authenticateTenant, (req: AuthRequest, res: Response) => {
   }
 });
 
-// Get all tenants (for local profile selection)
-router.get('/', (req: AuthRequest, res: Response) => {
+// Get the authenticated user's tenants (profile selection).
+// Previously unauthenticated + returned EVERY tenant of EVERY user, leaking all
+// profile names/ids to anonymous visitors. Now requires auth and is scoped to
+// the caller's own user_id.
+router.get('/', authenticateToken, (req: AuthRequest, res: Response) => {
   const db = getDatabase();
 
   try {
-    const tenants = db.prepare('SELECT id, name, avatar, created_at, last_active FROM tenants ORDER BY last_active DESC').all();
+    const tenants = db.prepare(
+      'SELECT id, name, avatar, created_at, last_active FROM tenants WHERE user_id = ? ORDER BY last_active DESC'
+    ).all(req.user!.id);
     res.json(tenants);
   } catch (error) {
     console.error('Error fetching tenants:', error);

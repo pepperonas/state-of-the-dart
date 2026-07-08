@@ -25,6 +25,18 @@ router.get('/player/:playerId', authenticateTenant, (req: AuthRequest, res: Resp
   try {
     console.log(`[Achievements API] Fetching achievements for player ${playerId}, tenant ${req.tenantId}`);
 
+    // Tenant isolation: player_achievements has no tenant_id column, so verify the
+    // player belongs to the caller's tenant before returning any records. A player
+    // not owned by this tenant (or a local-only/bot player absent from the DB)
+    // yields [] — the same "nothing to load" result the client already handles,
+    // without leaking another tenant's unlocks/progress. (GET /api/leaderboard is
+    // unauthenticated and exposes every playerId, so an unscoped read here is a
+    // real cross-tenant leak.)
+    const owned = db.prepare('SELECT 1 FROM players WHERE id = ? AND tenant_id = ?').get(playerId, req.tenantId);
+    if (!owned) {
+      return res.json([]);
+    }
+
     // No JOIN with legacy achievements table — achievement definitions are managed
     // by the frontend (247 achievements in src/types/achievements.ts)
     const achievements = db.prepare(`
@@ -63,10 +75,12 @@ router.post('/player/:playerId/unlock', authenticateTenant, (req: AuthRequest, r
   const db = getDatabase();
 
   try {
-    // Check if player exists in database
-    const playerExists = db.prepare('SELECT 1 FROM players WHERE id = ?').get(playerId);
+    // Tenant isolation: only unlock for a player owned by the caller's tenant.
+    // A player not in this tenant is treated the same as "not in database"
+    // (silent skip) — preventing writes onto another tenant's player.
+    const playerExists = db.prepare('SELECT 1 FROM players WHERE id = ? AND tenant_id = ?').get(playerId, req.tenantId);
     if (!playerExists) {
-      console.log(`[Achievements API] Unlock skipped: player ${playerId} not in database`);
+      console.log(`[Achievements API] Unlock skipped: player ${playerId} not in tenant ${req.tenantId}`);
       return res.json({ message: 'Skipped - player not in database' });
     }
 
@@ -116,10 +130,11 @@ router.put('/player/:playerId/progress', authenticateTenant, (req: AuthRequest, 
   try {
     console.log(`[Achievements API] Updating progress for player ${playerId}:`, Object.keys(achievements).length, 'achievements');
 
-    // Check if player exists in database before attempting to write
-    const playerExists = db.prepare('SELECT 1 FROM players WHERE id = ?').get(playerId);
+    // Tenant isolation: only write progress for a player owned by the caller's
+    // tenant. A player not in this tenant (or a bot/local-only player absent from
+    // the DB) is silently skipped — preventing writes onto another tenant's data.
+    const playerExists = db.prepare('SELECT 1 FROM players WHERE id = ? AND tenant_id = ?').get(playerId, req.tenantId);
     if (!playerExists) {
-      // Player not in DB (e.g. bot or local-only player) - silently skip
       return res.json({ message: 'Skipped - player not in database' });
     }
 

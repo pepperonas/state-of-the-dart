@@ -391,7 +391,17 @@ router.put('/:id', authenticateTenant, (req: AuthRequest, res: Response) => {
           const leg = legs[legIndex];
           const legNumber = leg.legNumber ?? legIndex + 1; // Use legNumber if provided, otherwise use index+1
 
-          const existingLeg = db.prepare('SELECT id FROM legs WHERE id = ?').get(leg.id);
+          // Scope the lookup to THIS match. Ownership of the match row is verified
+          // above, but legs/throws were previously written by their own primary key
+          // with no match_id check — a caller owning match A could pass a leg.id
+          // from another tenant's match B and overwrite its winner/timestamps (or
+          // hijack throw rows by PK). If the leg id exists under a different match,
+          // refuse to touch it.
+          const existingLeg = db.prepare('SELECT id FROM legs WHERE id = ? AND match_id = ?').get(leg.id, id);
+          const legElsewhere = !existingLeg && db.prepare('SELECT 1 FROM legs WHERE id = ?').get(leg.id);
+          if (legElsewhere) {
+            continue; // leg belongs to a different match — cross-match tamper guard
+          }
 
           if (existingLeg) {
             // Update leg
@@ -402,6 +412,10 @@ router.put('/:id', authenticateTenant, (req: AuthRequest, res: Response) => {
             // Update throws
             if (leg.throws && Array.isArray(leg.throws)) {
               for (const throwData of leg.throws) {
+                // Don't let INSERT OR REPLACE hijack a throw that belongs to a
+                // different leg (overwrite-by-PK across matches/tenants).
+                const throwElsewhere = db.prepare('SELECT 1 FROM throws WHERE id = ? AND leg_id != ?').get(throwData.id, leg.id);
+                if (throwElsewhere) continue;
                 db.prepare(`
                   INSERT OR REPLACE INTO throws (
                     id, leg_id, player_id, darts, score, remaining,
@@ -442,6 +456,11 @@ router.put('/:id', authenticateTenant, (req: AuthRequest, res: Response) => {
               `);
 
               for (const throwData of leg.throws) {
+                // A throw id that already exists must belong to another leg (this
+                // leg is brand new) — skip it instead of colliding on / hijacking
+                // the existing primary key.
+                const throwExists = db.prepare('SELECT 1 FROM throws WHERE id = ?').get(throwData.id);
+                if (throwExists) continue;
                 insertThrow.run(
                   throwData.id,
                   leg.id,
