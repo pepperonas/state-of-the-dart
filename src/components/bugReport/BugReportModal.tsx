@@ -101,6 +101,7 @@ export default function BugReportModal({ onClose, currentRoute }: BugReportModal
     { value: 'performance', label: 'Performance' },
     { value: 'auth', label: 'Login/Authentifizierung' },
     { value: 'data', label: 'Daten/Speicherung' },
+    { value: 'achievements', label: 'Achievements' },
     { value: 'other', label: 'Sonstiges' },
   ];
 

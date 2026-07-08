@@ -266,7 +266,7 @@ CREATE TABLE IF NOT EXISTS bug_reports (
   title TEXT NOT NULL,
   description TEXT NOT NULL,
   severity TEXT NOT NULL CHECK(severity IN ('low', 'medium', 'high', 'critical')),
-  category TEXT NOT NULL CHECK(category IN ('gameplay', 'ui', 'audio', 'performance', 'auth', 'data', 'other')),
+  category TEXT NOT NULL CHECK(category IN ('gameplay', 'ui', 'audio', 'performance', 'auth', 'data', 'achievements', 'other')),
   status TEXT NOT NULL DEFAULT 'open' CHECK(status IN ('open', 'in_progress', 'resolved', 'closed')),
   screenshot_url TEXT,
   browser_info TEXT,

@@ -71,6 +71,45 @@ export const initDatabase = (): Database.Database => {
     console.error('Migration error:', error);
   }
 
+  // Migration: Add 'achievements' to bug_reports category CHECK constraint
+  try {
+    const checkSql = db.prepare(`SELECT sql FROM sqlite_master WHERE type='table' AND name='bug_reports'`).get() as any;
+    if (checkSql?.sql && !checkSql.sql.includes("'achievements'")) {
+      console.log('🔧 Migrating bug_reports table: Adding achievements category...');
+      // Recreate table with updated CHECK constraint, preserving exact column structure
+      const tableInfo = db.pragma('table_info(bug_reports)') as any[];
+      const columns = tableInfo.map((col: any) => col.name).join(', ');
+      const colDefs = tableInfo.map((col: any) => {
+        let def = `${col.name} ${col.type}`;
+        if (col.notnull) def += ' NOT NULL';
+        if (col.dflt_value !== null) def += ` DEFAULT ${col.dflt_value}`;
+        if (col.pk) def += ' PRIMARY KEY';
+        // Add CHECK constraints
+        if (col.name === 'severity') def += ` CHECK(severity IN ('low', 'medium', 'high', 'critical'))`;
+        if (col.name === 'category') def += ` CHECK(category IN ('gameplay', 'ui', 'audio', 'performance', 'auth', 'data', 'achievements', 'other'))`;
+        if (col.name === 'status') def += ` CHECK(status IN ('open', 'in_progress', 'resolved', 'closed'))`;
+        return def;
+      }).join(',\n          ');
+      db.exec(`
+        DROP TABLE IF EXISTS bug_reports_new;
+        CREATE TABLE bug_reports_new (
+          ${colDefs},
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+        INSERT INTO bug_reports_new SELECT ${columns} FROM bug_reports;
+        DROP TABLE bug_reports;
+        ALTER TABLE bug_reports_new RENAME TO bug_reports;
+        CREATE INDEX IF NOT EXISTS idx_bug_reports_user ON bug_reports(user_id);
+        CREATE INDEX IF NOT EXISTS idx_bug_reports_status ON bug_reports(status);
+        CREATE INDEX IF NOT EXISTS idx_bug_reports_severity ON bug_reports(severity);
+        CREATE INDEX IF NOT EXISTS idx_bug_reports_created_at ON bug_reports(created_at);
+      `);
+      console.log('✅ achievements category added to bug_reports');
+    }
+  } catch (error) {
+    console.error('Migration error (bug_reports category):', error);
+  }
+
   // Seed default achievements if empty
   const achievementCount = db.prepare('SELECT COUNT(*) as count FROM achievements').get() as { count: number };
   if (achievementCount.count === 0) {

@@ -114,7 +114,7 @@ router.post('/', (req: AuthRequest, res: Response) => {
   }
 
   // Validate category
-  const validCategories = ['gameplay', 'ui', 'audio', 'performance', 'auth', 'data', 'other'];
+  const validCategories = ['gameplay', 'ui', 'audio', 'performance', 'auth', 'data', 'achievements', 'other'];
   if (!validCategories.includes(category)) {
     return res.status(400).json({ error: 'Invalid category' });
   }

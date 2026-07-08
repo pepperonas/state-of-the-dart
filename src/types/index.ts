@@ -374,7 +374,7 @@ export interface ExportData {
 
 // Bug Reports
 export type BugReportSeverity = 'low' | 'medium' | 'high' | 'critical';
-export type BugReportCategory = 'gameplay' | 'ui' | 'audio' | 'performance' | 'auth' | 'data' | 'other';
+export type BugReportCategory = 'gameplay' | 'ui' | 'audio' | 'performance' | 'auth' | 'data' | 'achievements' | 'other';
 export type BugReportStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
 
 export interface BugReport {
