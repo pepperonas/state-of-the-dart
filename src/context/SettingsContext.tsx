@@ -57,14 +57,14 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         const loadedSettings: AppSettings = {
           theme: normalizeTheme(response.theme || 'modern'),
           language: response.language || 'de',
-          soundVolume: 70,
-          callerVolume: 70,
-          effectsVolume: 70,
+          soundVolume: response.sound_volume ?? 70,
+          callerVolume: response.caller_volume ?? 70,
+          effectsVolume: response.effects_volume ?? 70,
           showCheckoutHints: response.show_checkout_suggestions !== 0,
           autoNextPlayer: response.auto_next_player !== 0,
-          showStatsDuringGame: true,
-          confirmScores: false,
-          vibrationEnabled: true,
+          showStatsDuringGame: response.show_stats_during_game !== undefined ? !!response.show_stats_during_game : true,
+          confirmScores: response.confirm_scores !== undefined ? !!response.confirm_scores : false,
+          vibrationEnabled: response.vibration_enabled !== undefined ? !!response.vibration_enabled : true,
           showDartboardHelper: response.enable_achievements_hints !== 0,
         };
         
@@ -107,6 +107,12 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         show_checkout_suggestions: newSettings.showCheckoutHints,
         auto_next_player: newSettings.autoNextPlayer,
         enable_achievements_hints: newSettings.showDartboardHelper,
+        sound_volume: newSettings.soundVolume,
+        caller_volume: newSettings.callerVolume,
+        effects_volume: newSettings.effectsVolume,
+        show_stats_during_game: newSettings.showStatsDuringGame,
+        confirm_scores: newSettings.confirmScores,
+        vibration_enabled: newSettings.vibrationEnabled,
       });
       console.log('✅ Settings saved to API');
     } catch (error) {
@@ -132,6 +138,12 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         show_checkout_suggestions: defaultSettings.showCheckoutHints,
         auto_next_player: defaultSettings.autoNextPlayer,
         enable_achievements_hints: defaultSettings.showDartboardHelper,
+        sound_volume: defaultSettings.soundVolume,
+        caller_volume: defaultSettings.callerVolume,
+        effects_volume: defaultSettings.effectsVolume,
+        show_stats_during_game: defaultSettings.showStatsDuringGame,
+        confirm_scores: defaultSettings.confirmScores,
+        vibration_enabled: defaultSettings.vibrationEnabled,
       });
     } catch (error) {
       console.error('Failed to reset settings:', error);

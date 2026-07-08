@@ -255,6 +255,12 @@ CREATE TABLE IF NOT EXISTS user_settings (
   auto_next_player INTEGER DEFAULT 1,
   show_checkout_suggestions INTEGER DEFAULT 1,
   enable_achievements_hints INTEGER DEFAULT 1,
+  sound_volume INTEGER DEFAULT 70,
+  caller_volume INTEGER DEFAULT 70,
+  effects_volume INTEGER DEFAULT 70,
+  show_stats_during_game INTEGER DEFAULT 1,
+  confirm_scores INTEGER DEFAULT 0,
+  vibration_enabled INTEGER DEFAULT 1,
   updated_at INTEGER NOT NULL,
   FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
 );

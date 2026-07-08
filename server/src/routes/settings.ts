@@ -27,6 +27,12 @@ router.get('/', authenticateTenant, (req: AuthRequest, res: Response) => {
         auto_next_player: true,
         show_checkout_suggestions: true,
         enable_achievements_hints: true,
+        sound_volume: 70,
+        caller_volume: 70,
+        effects_volume: 70,
+        show_stats_during_game: true,
+        confirm_scores: false,
+        vibration_enabled: true,
         updated_at: Date.now()
       });
     }
@@ -56,8 +62,14 @@ router.put('/', authenticateTenant, (req: AuthRequest, res: Response) => {
         auto_next_player,
         show_checkout_suggestions,
         enable_achievements_hints,
+        sound_volume,
+        caller_volume,
+        effects_volume,
+        show_stats_during_game,
+        confirm_scores,
+        vibration_enabled,
         updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(tenant_id) DO UPDATE SET
         theme = excluded.theme,
         language = excluded.language,
@@ -67,19 +79,38 @@ router.put('/', authenticateTenant, (req: AuthRequest, res: Response) => {
         auto_next_player = excluded.auto_next_player,
         show_checkout_suggestions = excluded.show_checkout_suggestions,
         enable_achievements_hints = excluded.enable_achievements_hints,
+        sound_volume = excluded.sound_volume,
+        caller_volume = excluded.caller_volume,
+        effects_volume = excluded.effects_volume,
+        show_stats_during_game = excluded.show_stats_during_game,
+        confirm_scores = excluded.confirm_scores,
+        vibration_enabled = excluded.vibration_enabled,
         updated_at = excluded.updated_at
     `);
-    
+
+    // Clamp a 0-100 volume, falling back to 70 when absent/invalid.
+    const vol = (v: any) => {
+      const n = Number(v);
+      return Number.isFinite(n) ? Math.max(0, Math.min(100, Math.round(n))) : 70;
+    };
+    const bool = (v: any, fallback: number) => (v !== undefined ? (v ? 1 : 0) : fallback);
+
     stmt.run(
       req.tenantId,
       settings.theme || 'dark',
       settings.language || 'de',
-      settings.sound_enabled !== undefined ? (settings.sound_enabled ? 1 : 0) : 1,
+      bool(settings.sound_enabled, 1),
       settings.caller_voice || 'john',
       settings.caller_language || 'en',
-      settings.auto_next_player !== undefined ? (settings.auto_next_player ? 1 : 0) : 1,
-      settings.show_checkout_suggestions !== undefined ? (settings.show_checkout_suggestions ? 1 : 0) : 1,
-      settings.enable_achievements_hints !== undefined ? (settings.enable_achievements_hints ? 1 : 0) : 1,
+      bool(settings.auto_next_player, 1),
+      bool(settings.show_checkout_suggestions, 1),
+      bool(settings.enable_achievements_hints, 1),
+      settings.sound_volume !== undefined ? vol(settings.sound_volume) : 70,
+      settings.caller_volume !== undefined ? vol(settings.caller_volume) : 70,
+      settings.effects_volume !== undefined ? vol(settings.effects_volume) : 70,
+      bool(settings.show_stats_during_game, 1),
+      bool(settings.confirm_scores, 0),
+      bool(settings.vibration_enabled, 1),
       Date.now()
     );
     
@@ -106,6 +137,12 @@ router.patch('/:key', authenticateTenant, (req: AuthRequest, res: Response) => {
     'auto_next_player': 'auto_next_player',
     'show_checkout_suggestions': 'show_checkout_suggestions',
     'enable_achievements_hints': 'enable_achievements_hints',
+    'sound_volume': 'sound_volume',
+    'caller_volume': 'caller_volume',
+    'effects_volume': 'effects_volume',
+    'show_stats_during_game': 'show_stats_during_game',
+    'confirm_scores': 'confirm_scores',
+    'vibration_enabled': 'vibration_enabled',
   };
 
   const column = allowedColumns[key];

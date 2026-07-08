@@ -110,6 +110,32 @@ export const initDatabase = (): Database.Database => {
     console.error('Migration error (bug_reports category):', error);
   }
 
+  // Migration: Add volume/toggle columns to user_settings if they don't exist.
+  // These back the sound/caller/effects volumes and the confirm-scores /
+  // show-stats-during-game / vibration toggles, which previously weren't persisted.
+  try {
+    const settingsInfo = db.pragma('table_info(user_settings)') as any[];
+    const existing = new Set(settingsInfo.map((col: any) => col.name));
+    const newColumns: Array<{ name: string; def: string }> = [
+      { name: 'sound_volume', def: 'INTEGER DEFAULT 70' },
+      { name: 'caller_volume', def: 'INTEGER DEFAULT 70' },
+      { name: 'effects_volume', def: 'INTEGER DEFAULT 70' },
+      { name: 'show_stats_during_game', def: 'INTEGER DEFAULT 1' },
+      { name: 'confirm_scores', def: 'INTEGER DEFAULT 0' },
+      { name: 'vibration_enabled', def: 'INTEGER DEFAULT 1' },
+    ];
+    const missing = newColumns.filter(c => !existing.has(c.name));
+    if (missing.length > 0) {
+      console.log('🔧 Migrating user_settings table: Adding volume/toggle columns...');
+      for (const col of missing) {
+        db.exec(`ALTER TABLE user_settings ADD COLUMN ${col.name} ${col.def};`);
+      }
+      console.log(`✅ Added ${missing.length} column(s) to user_settings`);
+    }
+  } catch (error) {
+    console.error('Migration error (user_settings columns):', error);
+  }
+
   // Seed default achievements if empty
   const achievementCount = db.prepare('SELECT COUNT(*) as count FROM achievements').get() as { count: number };
   if (achievementCount.count === 0) {
