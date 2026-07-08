@@ -10,7 +10,7 @@ import { api } from '../services/api';
 import logger from '../utils/logger';
 import { logBuffer } from '../utils/logBuffer';
 
-interface GameState {
+export interface GameState {
   currentMatch: Match | null;
   checkoutSuggestion: string[] | null;
   currentPlayerIndex: number;
@@ -33,14 +33,14 @@ type GameAction =
   | { type: 'RESUME_MATCH' }
   | { type: 'UPDATE_CHECKOUT_SUGGESTION' };
 
-const initialState: GameState = {
+export const initialState: GameState = {
   currentMatch: null,
   checkoutSuggestion: null,
   currentPlayerIndex: 0,
   currentThrow: [],
 };
 
-const gameReducer = (state: GameState, action: GameAction): GameState => {
+export const gameReducer = (state: GameState, action: GameAction): GameState => {
   switch (action.type) {
     case 'LOAD_MATCH': {
       const match = action.payload;
@@ -339,19 +339,53 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
 
         // Check for set/match win
         const legsToWin = state.currentMatch.settings.legsToWin || 3;
+        const setsToWin = state.currentMatch.settings.setsToWin || 1;
         if (updatedPlayer.legsWon >= legsToWin) {
-          // Set or match won
-          updatedMatch.winner = updatedPlayer.playerId;
-          updatedMatch.status = 'completed';
-          updatedMatch.completedAt = new Date();
+          const isSetsMatch = setsToWin > 1;
+          // In a sets match, reaching legsToWin wins the current SET, not the
+          // match. Only count sets for multi-set matches so single-set behaviour
+          // (setsWon stays 0) is unchanged.
+          if (isSetsMatch) {
+            updatedPlayer.setsWon++;
+          }
 
-          // Announce set or match win — passes the sequence # (not the
-          // checkout score). For 'match' the number is ignored entirely.
-          if (state.currentMatch.settings.setsToWin && state.currentMatch.settings.setsToWin > 1) {
+          const matchWon = !isSetsMatch || updatedPlayer.setsWon >= setsToWin;
+
+          if (matchWon) {
+            updatedMatch.winner = updatedPlayer.playerId;
+            updatedMatch.status = 'completed';
+            updatedMatch.completedAt = new Date();
+            // For 'match' the sequence number is ignored entirely.
+            audioSystem.announceCheckout(0, 'match');
+          } else {
+            // Set won but match continues. Announce the set, reset EVERY player's
+            // legsWon for the new set, advance the set index, and start a fresh
+            // leg. (The old code ended the match after the very first set here.)
             const setNumberInMatch = (updatedMatch.currentSetIndex ?? 0) + 1;
             audioSystem.announceCheckout(setNumberInMatch, 'set');
-          } else {
-            audioSystem.announceCheckout(0, 'match');
+
+            updatedPlayers.forEach(p => { p.legsWon = 0; });
+            updatedMatch.currentSetIndex = (updatedMatch.currentSetIndex ?? 0) + 1;
+
+            // New set opens with a fresh leg; keep the per-leg starter alternating.
+            const setStartPlayer = ((updatedMatch.legStartPlayerIndex ?? 0) + 1) % updatedMatch.players.length;
+            updatedMatch.legStartPlayerIndex = setStartPlayer;
+
+            const newSetLeg = {
+              id: uuidv4(),
+              throws: [],
+              startedAt: new Date(),
+            };
+            updatedMatch.legs = [...updatedMatch.legs, newSetLeg];
+            updatedMatch.currentLegIndex = updatedMatch.legs.length - 1;
+
+            return {
+              ...state,
+              currentMatch: updatedMatch,
+              currentThrow: [],
+              checkoutSuggestion: null,
+              currentPlayerIndex: setStartPlayer,
+            };
           }
         } else {
           // Leg won but match not over - start new leg

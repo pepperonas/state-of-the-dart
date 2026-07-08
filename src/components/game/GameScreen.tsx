@@ -1178,7 +1178,7 @@ const GameScreen: React.FC = () => {
               </div>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-6 mb-6">
+            <div className="grid md:grid-cols-3 gap-6 mb-6">
               <div>
                 <label className="block m3-label-large mb-2 text-on-surface">
                   {t('game.starting_score')}
@@ -1205,6 +1205,22 @@ const GameScreen: React.FC = () => {
                   className="w-full p-2 rounded-m3-lg border border-outline-variant bg-surface-container text-on-surface"
                 >
                   <option value={1}>{t('game.first_to')} 1</option>
+                  <option value={2}>{t('game.first_to')} 2</option>
+                  <option value={3}>{t('game.first_to')} 3</option>
+                  <option value={5}>{t('game.first_to')} 5</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block m3-label-large mb-2 text-on-surface">
+                  {t('game.sets_to_win')}
+                </label>
+                <select
+                  value={gameSettings.setsToWin}
+                  onChange={(e) => setGameSettings({ ...gameSettings, setsToWin: parseInt(e.target.value) })}
+                  className="w-full p-2 rounded-m3-lg border border-outline-variant bg-surface-container text-on-surface"
+                >
+                  <option value={1}>{t('game.no_sets')}</option>
                   <option value={2}>{t('game.first_to')} 2</option>
                   <option value={3}>{t('game.first_to')} 3</option>
                   <option value={5}>{t('game.first_to')} 5</option>
@@ -1444,6 +1460,7 @@ const GameScreen: React.FC = () => {
                 average={player.matchAverage}
                 legsWon={player.legsWon}
                 setsWon={player.setsWon}
+                showSets={(state.currentMatch!.settings.setsToWin || 1) > 1}
               />
             ))}
           </div>

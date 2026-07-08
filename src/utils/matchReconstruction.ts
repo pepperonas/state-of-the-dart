@@ -38,11 +38,20 @@ export function reconstructMatch(apiMatch: any): Match {
   const legStartPlayerIndex =
     (firstStarterIndex + currentLegIndex) % Math.max(1, playerIds.length);
 
+  // currentSetIndex = number of sets already decided = total setsWon across all
+  // players (each completed set incremented exactly one player's setsWon). A match
+  // paused mid-set-2 has one set won → index 1. Previously hardcoded to 0, which
+  // mis-tracked the set number and its announcements on resume.
+  const currentSetIndex = (apiMatch.players ?? []).reduce(
+    (sum: number, p: any) => sum + (p.setsWon ?? p.sets_won ?? 0),
+    0
+  );
+
   const reconstructed = {
     ...apiMatch,
     type: apiMatch.type as GameType,
     currentLegIndex,
-    currentSetIndex: 0,
+    currentSetIndex,
     legStartPlayerIndex,
   };
 

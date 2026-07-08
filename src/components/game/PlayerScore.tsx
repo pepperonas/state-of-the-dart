@@ -14,6 +14,7 @@ interface PlayerScoreProps {
   average: number;
   legsWon: number;
   setsWon: number;
+  showSets?: boolean;
 }
 
 const PlayerScore: React.FC<PlayerScoreProps> = ({
@@ -22,6 +23,8 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
   isActive,
   average,
   legsWon,
+  setsWon,
+  showSets = false,
 }) => {
   const { players } = usePlayer();
   
@@ -62,7 +65,7 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
         }`}
       />
 
-      <div className="grid grid-cols-2 gap-2 text-sm">
+      <div className={`grid ${showSets ? 'grid-cols-3' : 'grid-cols-2'} gap-2 text-sm`}>
         <div className="bg-surface-container-highest rounded-m3-sm p-2">
           <div className="text-on-surface-variant text-xs">Average</div>
           <div className="font-semibold text-on-surface">{average.toFixed(2)}</div>
@@ -75,6 +78,16 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
             <Trophy size={14} className="text-tertiary" />
           </div>
         </div>
+
+        {showSets && (
+          <div className="bg-surface-container-highest rounded-m3-sm p-2">
+            <div className="text-on-surface-variant text-xs">Sets</div>
+            <div className="font-semibold text-on-surface flex items-center gap-1">
+              {setsWon}
+              <Trophy size={14} className="text-primary" />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
