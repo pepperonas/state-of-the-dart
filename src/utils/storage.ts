@@ -102,12 +102,36 @@ export const debouncedSetItem = (
   if (debounceTimers[key]) {
     clearTimeout(debounceTimers[key]);
   }
-  
+
+  // Record the latest value so flushDebouncedSetItem() can write it out early.
+  debouncePending[key] = value;
+
   // Set new timer
   debounceTimers[key] = setTimeout(() => {
     safeSetItem(key, value);
     delete debounceTimers[key];
+    delete debouncePending[key];
   }, delay);
+};
+
+// Pending values keyed by storage key, so a flush can write the latest value even
+// before its debounce timer fires (e.g. on page hide/unload).
+const debouncePending: Record<string, unknown> = {};
+
+/**
+ * Immediately write out any debounced values whose timers haven't fired yet.
+ * Call on `pagehide`/`visibilitychange:hidden` so the last coalesced write isn't
+ * lost if the app is backgrounded/closed within the debounce window.
+ */
+export const flushDebouncedSetItem = (): void => {
+  for (const key of Object.keys(debounceTimers)) {
+    clearTimeout(debounceTimers[key]);
+    delete debounceTimers[key];
+    if (key in debouncePending) {
+      safeSetItem(key, debouncePending[key]);
+      delete debouncePending[key];
+    }
+  }
 };
 
 /**

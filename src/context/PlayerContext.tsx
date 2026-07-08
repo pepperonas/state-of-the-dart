@@ -202,13 +202,18 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
     const currentHeatmap = getPlayerHeatmap(playerId);
     const updatedHeatmap = updateHeatmapData(currentHeatmap, newDarts);
-    
-    // Update in memory immediately
-    setPlayers(prev => prev.map(p => 
-      p.id === playerId ? { ...p, heatmapData: updatedHeatmap } : p
-    ));
-    
-    // Sync to API (Database)
+
+    // Update in memory. Derive the new value from `prev` INSIDE the updater so two
+    // heatmap updates to the same player before the state commits don't clobber
+    // each other — the old code wrote the externally-computed `updatedHeatmap`,
+    // which was based on a stale `players` closure and lost the earlier update.
+    setPlayers(prev => prev.map(p => {
+      if (p.id !== playerId) return p;
+      const base = (p as any).heatmapData || createEmptyHeatmapData(playerId);
+      return { ...p, heatmapData: updateHeatmapData(base, newDarts) };
+    }));
+
+    // Sync to API (best-effort; the next write reconciles any transient skew).
     try {
       const apiData = {
         segments: updatedHeatmap.segments,

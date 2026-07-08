@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo, ReactNode } from 'react';
 import { useTenant } from './TenantContext';
-import { TenantStorage } from '../utils/storage';
+import { TenantStorage, flushDebouncedSetItem } from '../utils/storage';
 import { api } from '../services/api';
 import {
   Achievement,
@@ -99,6 +99,19 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
     progressCacheRef.current = progressCache;
   }, [progressCache]);
 
+  // Flush any debounced progress-cache write before the app is backgrounded or
+  // closed, so the last coalesced update isn't lost inside the debounce window.
+  useEffect(() => {
+    const flush = () => flushDebouncedSetItem();
+    const onVisibility = () => { if (document.visibilityState === 'hidden') flush(); };
+    window.addEventListener('pagehide', flush);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      window.removeEventListener('pagehide', flush);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, []);
+
   // Notification queue consumer: show next notification when current is dismissed
   useEffect(() => {
     if (!currentNotification && notificationQueue.length > 0) {
@@ -130,21 +143,29 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
     if (pending.length === 0) return;
 
     logger.info(`Syncing ${pending.length} pending achievement unlocks...`);
-    const remaining: typeof pending = [];
+    const syncedKeys = new Set<string>();
 
     for (const item of pending) {
       try {
         await api.achievements.unlock(item.playerId, item.achievementId);
+        syncedKeys.add(`${item.playerId}:${item.achievementId}`);
         logger.success(`Synced pending unlock: ${item.achievementId} for ${item.playerId}`);
       } catch (error) {
         logger.error(`Failed to sync pending unlock: ${item.achievementId}`, error);
-        remaining.push(item);
       }
     }
 
-    storage.set(PENDING_SYNC_KEY, remaining);
-    if (remaining.length > 0) {
-      logger.warn(`${remaining.length} achievement unlocks still pending sync`);
+    // Re-read the queue before writing back: a concurrent unlock failure may have
+    // appended a NEW item during our awaits. Remove only what we actually synced,
+    // preserving anything added meanwhile — the old code wrote a stale `remaining`
+    // snapshot and silently dropped those concurrent appends.
+    const current = storage.get<typeof pending>(PENDING_SYNC_KEY, []);
+    const stillPending = current.filter(
+      item => !syncedKeys.has(`${item.playerId}:${item.achievementId}`)
+    );
+    storage.set(PENDING_SYNC_KEY, stillPending);
+    if (stillPending.length > 0) {
+      logger.warn(`${stillPending.length} achievement unlocks still pending sync`);
     }
   };
 
@@ -270,8 +291,13 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
     setProgressCache(prev => {
       const updated = { ...prev, [playerId]: updatedPlayerProgress };
       progressCacheRef.current = updated;
+      // Debounce the localStorage write: checkAchievement/checkStreakProgress call
+      // this many times per confirmed throw, and a synchronous full-cache
+      // JSON.stringify + setItem on each call thrashed localStorage (measurable
+      // jank on large caches). The in-memory state + ref stay immediate; only the
+      // cache write coalesces. Backed by API sync + a pagehide flush below.
       const storage = new TenantStorage(currentTenant.id);
-      storage.set(STORAGE_KEY, updated);
+      storage.setDebounced(STORAGE_KEY, updated);
       return updated;
     });
   }, [currentTenant]);

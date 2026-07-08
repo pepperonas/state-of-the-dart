@@ -74,6 +74,14 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
       },
     });
     setCricketState(saved.cricketState);
+    // START_MATCH resets currentPlayerIndex to 0. Re-advance to whose turn it was
+    // when the game was saved — the reducer has no direct set-index action, so we
+    // step NEXT_PLAYER. Without this, every resume silently reset the turn to
+    // player 0, handing a player a stolen extra turn.
+    const savedTurn = (saved.currentPlayerIndex ?? 0) % restoredPlayers.length;
+    for (let i = 0; i < savedTurn; i++) {
+      dispatch({ type: 'NEXT_PLAYER' });
+    }
     setShowSetup(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
