@@ -243,9 +243,14 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
           origin: { y: 0.6 }
         });
         dispatch({ type: 'END_MATCH' });
+        // Do NOT advance to the next player: the winner dialog renders
+        // `currentPlayer?.name`, and NEXT_PLAYER would increment the index to
+        // the loser, announcing the wrong champion.
+        setCurrentDarts([]);
+        return;
       }
     }
-    
+
     // Next player
     setCurrentDarts([]);
     dispatch({ type: 'NEXT_PLAYER' });

@@ -32,17 +32,22 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dartboardRef = useRef<HTMLCanvasElement>(null);
 
-  // Helper function to parse segment key and get angle/radius
+  // Helper function to parse segment key and get angle/radius.
+  // Two canonical formats feed this, disambiguated by SEPARATOR (not by value —
+  // the old `first <= 3` heuristic mislabelled segments 1–3, since both segment
+  // and multiplier can be ≤ 3, e.g. "2-1" (S2) became D1):
+  //   "<multiplier>x<segment>"  → GameScreen live heatmap, e.g. "3x20" = T20
+  //   "<segment>-<multiplier>"  → persisted player heatmap (heatmap.ts) AND
+  //                               MatchHistoryPage.buildMatchHeatmap, e.g.
+  //                               "20-3" = T20, "2-1" = S2, "2-3" = T2, "25-2" = bull
   const parseSegmentKey = (key: string): { segment: number; multiplier: number } | null => {
-    // Support formats: "3x20", "20-3", "20x3"
-    const match = key.match(/(\d+)[x-](\d+)/);
-    if (match) {
-      const [, first, second] = match;
-      if (parseInt(first) <= 3) {
-        return { multiplier: parseInt(first), segment: parseInt(second) };
-      } else {
-        return { segment: parseInt(first), multiplier: parseInt(second) };
-      }
+    const xMatch = key.match(/^(\d+)x(\d+)$/);
+    if (xMatch) {
+      return { multiplier: parseInt(xMatch[1]), segment: parseInt(xMatch[2]) };
+    }
+    const dashMatch = key.match(/^(\d+)-(\d+)$/);
+    if (dashMatch) {
+      return { segment: parseInt(dashMatch[1]), multiplier: parseInt(dashMatch[2]) };
     }
     return null;
   };

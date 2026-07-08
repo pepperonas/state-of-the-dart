@@ -141,8 +141,8 @@ const StatsOverview: React.FC = () => {
   
   // Calculate improvement metrics
   const improvement = useMemo(() => {
-    return calculateImprovement(playerMatches);
-  }, [playerMatches]);
+    return calculateImprovement(playerMatches, selectedPlayerId);
+  }, [playerMatches, selectedPlayerId]);
   
   // Prepare chart data
   const progressData = useMemo(() => {

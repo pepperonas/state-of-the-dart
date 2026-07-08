@@ -63,6 +63,18 @@ const TrainingScreen: React.FC = () => {
     initializeSession();
   }, [mode]);
 
+  useEffect(() => {
+    // When no currentPlayer exists at mount, the [mode] effect ran and bailed
+    // (initializeSession returns early). Once the user picks a player on the
+    // in-screen selection view, (re)initialize the session — otherwise
+    // sessionRef stays null and the entire session (results, heatmap, training
+    // achievements) is silently never saved.
+    if (currentPlayer && mode && !sessionRef.current) {
+      initializeSession();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPlayer, mode]);
+
   const initializeSession = () => {
     if (!currentPlayer || !mode) return;
 

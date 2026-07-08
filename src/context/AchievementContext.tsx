@@ -221,8 +221,17 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
           return sum + (achievement?.points || 0);
         }, 0);
 
-        // Merge progress: API progress takes precedence, fallback to localStorage
-        const mergedProgress = { ...(currentProgress?.progress || {}), ...apiProgressMap };
+        // Merge progress: keep the HIGHER `current` per achievement. The progress
+        // PUT is fire-and-forget (.catch), so on a failed/offline sync localStorage
+        // holds the more-advanced value while the server stays behind — a plain
+        // API-wins merge would visibly regress the bar (e.g. 6/10 → 5/10) on reload.
+        const mergedProgress = { ...(currentProgress?.progress || {}) };
+        Object.entries(apiProgressMap).forEach(([id, apiEntry]) => {
+          const localEntry = mergedProgress[id];
+          if (!localEntry || apiEntry.current >= localEntry.current) {
+            mergedProgress[id] = apiEntry;
+          }
+        });
 
         const playerProgress: PlayerAchievementProgress = {
           playerId,
@@ -242,12 +251,14 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
           return updated;
         });
 
-        loadedPlayersRef.current.add(playerId);
-        loadingPlayersRef.current.delete(playerId);
         logger.success(`Achievements loaded for player ${playerId} (${mergedAchievements.length} unlocked)`);
       }
     } catch (error) {
       logger.warn(`Failed to load achievements from API for player ${playerId}:`, error);
+    } finally {
+      // Always clear the in-flight flag and mark the player resolved — even when
+      // the API resolves with a non-array/null (no throw), which otherwise left
+      // the player stuck in loadingPlayersRef forever and never retried.
       loadedPlayersRef.current.add(playerId);
       loadingPlayersRef.current.delete(playerId);
     }

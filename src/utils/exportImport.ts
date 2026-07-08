@@ -148,7 +148,7 @@ export const exportMatchHistoryCSV = (matches: Match[], playerName: string): voi
         opponent?.name || '-',
         match.winner === player?.playerId ? 'Win' : 'Loss',
         `${player?.legsWon || 0} - ${opponent?.legsWon || 0}`,
-        player?.matchAverage.toFixed(2) || '0',
+        (player?.matchAverage ?? 0).toFixed(2),
         player?.matchHighestScore || '0',
         player?.match180s || '0',
         player?.match140Plus || '0',
@@ -421,7 +421,15 @@ export interface ImprovementMetrics {
   };
 }
 
-export const calculateImprovement = (matches: Match[]): ImprovementMetrics => {
+export const calculateImprovement = (matches: Match[], playerId?: string): ImprovementMetrics => {
+  // Resolve the row for the player we're analysing. Without a playerId we fall
+  // back to players[0], but callers should pass the selected player's id —
+  // otherwise every metric below silently reflects the opponent when the
+  // analysed player happened to be the 2nd participant.
+  const pickPlayer = (m: Match): MatchPlayer | undefined => {
+    const ps = m.players || [];
+    return playerId ? ps.find(p => p.playerId === playerId) ?? ps[0] : ps[0];
+  };
   if (matches.length === 0) {
     return {
       averageImprovement: 0,
@@ -446,16 +454,14 @@ export const calculateImprovement = (matches: Match[]): ImprovementMetrics => {
   
   const recentAvg = recentMatches.length > 0
     ? recentMatches.reduce((sum, m) => {
-        const players = m.players || [];
-        const player = players[0];
+        const player = pickPlayer(m);
         return sum + (player?.matchAverage || 0);
       }, 0) / recentMatches.length
     : 0;
   
   const historicAvg = historicMatches.length > 0
     ? historicMatches.reduce((sum, m) => {
-        const players = m.players || [];
-        const player = players[0];
+        const player = pickPlayer(m);
         return sum + (player?.matchAverage || 0);
       }, 0) / historicMatches.length
     : recentAvg;
@@ -465,8 +471,7 @@ export const calculateImprovement = (matches: Match[]): ImprovementMetrics => {
   // Calculate checkout improvement
   const recentCheckout = recentMatches.length > 0
     ? recentMatches.reduce((sum, m) => {
-        const players = m.players || [];
-        const player = players[0];
+        const player = pickPlayer(m);
         return sum + (player && player.checkoutAttempts > 0 
           ? (player.checkoutsHit / player.checkoutAttempts) 
           : 0);
@@ -475,8 +480,7 @@ export const calculateImprovement = (matches: Match[]): ImprovementMetrics => {
   
   const historicCheckout = historicMatches.length > 0
     ? historicMatches.reduce((sum, m) => {
-        const players = m.players || [];
-        const player = players[0];
+        const player = pickPlayer(m);
         return sum + (player && player.checkoutAttempts > 0 
           ? (player.checkoutsHit / player.checkoutAttempts) 
           : 0);

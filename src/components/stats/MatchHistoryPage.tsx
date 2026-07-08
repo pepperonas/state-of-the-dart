@@ -149,7 +149,10 @@ const MatchHistoryPage: React.FC = () => {
       (leg.throws || []).forEach((t: any) => {
         if (t.playerId !== playerId) return;
         (t.darts || []).forEach((d: any) => {
-          const key = `${d.multiplier}-${d.segment}`;
+          // Canonical order: "<segment>-<multiplier>" (matches heatmap.ts and
+          // DartboardHeatmapBlur.parseSegmentKey; multiplier-first collided with
+          // the persisted format and mislabelled segments 1–3).
+          const key = `${d.segment}-${d.multiplier}`;
           segments[key] = (segments[key] || 0) + 1;
         });
       });
