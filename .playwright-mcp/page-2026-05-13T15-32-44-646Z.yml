@@ -1,0 +1,66 @@
+- generic [ref=e3]:
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e8]: 🎯
+      - heading "State of the Dart" [level=1] [ref=e9]
+      - paragraph [ref=e10]: Melde dich an um fortzufahren
+    - generic [ref=e11]:
+      - heading "Anmelden" [level=2] [ref=e12]
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e15]: Email
+          - generic [ref=e16]:
+            - img [ref=e17]
+            - textbox "deine@email.de" [ref=e20]
+        - generic [ref=e21]:
+          - generic [ref=e22]: Passwort
+          - generic [ref=e23]:
+            - img [ref=e24]
+            - textbox "••••••••" [ref=e27]
+        - link "Passwort vergessen?" [ref=e29] [cursor=pointer]:
+          - /url: /forgot-password
+        - button "Anmelden" [ref=e30] [cursor=pointer]:
+          - img [ref=e31]
+          - text: Anmelden
+      - generic [ref=e38]: Oder
+      - button "Mit Google anmelden" [ref=e39] [cursor=pointer]:
+        - img [ref=e40]
+        - text: Mit Google anmelden
+      - generic [ref=e45]:
+        - text: Noch kein Account?
+        - link "Registrieren" [ref=e46] [cursor=pointer]:
+          - /url: /register
+  - contentinfo [ref=e47]:
+    - generic [ref=e48]:
+      - generic [ref=e49]:
+        - generic [ref=e50]: © 2026 Martin Pfeffer
+        - generic [ref=e51]: •
+        - link "celox.io" [ref=e52] [cursor=pointer]:
+          - /url: https://celox.io
+          - img [ref=e53]
+          - text: celox.io
+        - generic [ref=e56]: •
+        - link "GitHub" [ref=e57] [cursor=pointer]:
+          - /url: https://github.com/pepperonas/state-of-the-dart
+          - img [ref=e58]
+          - text: GitHub
+      - generic [ref=e61]:
+        - link "Impressum" [ref=e62] [cursor=pointer]:
+          - /url: /impressum
+        - generic [ref=e63]: •
+        - link "Datenschutz" [ref=e64] [cursor=pointer]:
+          - /url: /datenschutz
+        - generic [ref=e65]: •
+        - link "AGB" [ref=e66] [cursor=pointer]:
+          - /url: /nutzungsbedingungen
+      - generic [ref=e67]:
+        - link "LinkedIn" [ref=e68] [cursor=pointer]:
+          - /url: https://www.linkedin.com/in/martin-pfeffer-020831134/
+          - img [ref=e69]
+          - text: LinkedIn
+        - generic [ref=e73]: •
+        - link "GitHub Profil" [ref=e74] [cursor=pointer]:
+          - /url: https://github.com/pepperonas
+          - img [ref=e75]
+          - text: GitHub Profil
+      - paragraph [ref=e78]: Version 0.8.5

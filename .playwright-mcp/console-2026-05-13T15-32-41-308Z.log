@@ -1,0 +1,8 @@
+[      66ms] [LOG] 🔥 Forcing service worker cleanup... @ http://localhost:4173/:175
+[    2769ms] [LOG] 🔐 No auth, redirecting to login... @ http://localhost:4173/:204
+[    2878ms] Error: Redirecting...
+    at http://localhost:4173/:207:19
+[    2785ms] [LOG] 🎨 Theme applied: modern @ http://localhost:4173/assets/index-Kgq3O9pL.js:20
+[    2909ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ http://localhost:4173/login:0
+[    2985ms] [LOG] 🎨 Theme applied: modern @ http://localhost:4173/assets/index-Kgq3O9pL.js:20
+[    3089ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ http://localhost:4173/login:0

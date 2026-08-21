@@ -1,0 +1,9 @@
+[     270ms] [LOG] 🔥 Forcing service worker cleanup... @ http://localhost:5173/login:180
+[     312ms] [LOG] 🔐 No auth, redirecting to login... @ http://localhost:5173/login:209
+[     356ms] Error: Redirecting...
+    at http://localhost:5173/login:212:19
+[     649ms] [WARNING] Error while trying to use the following icon from the Manifest: http://localhost:5173/favicon.svg (Download error or resource isn't a valid image) @ http://localhost:5173/login:0
+[    1262ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=115f2f2c:20102
+[    3781ms] [LOG] 🎨 Theme applied: modern @ http://localhost:5173/src/components/ThemeManager.tsx:30
+[    3784ms] [LOG] 🎨 Theme applied: modern @ http://localhost:5173/src/components/ThemeManager.tsx:30
+[    3862ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ http://localhost:5173/login:0

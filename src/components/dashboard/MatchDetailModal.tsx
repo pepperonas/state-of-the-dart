@@ -345,92 +345,88 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
           </button>
 
           {showThrowHistory && (
-            <div className="glass-card rounded-xl p-6 mt-2 animate-fade-in">
-              {playersWithThrows.map((player) => {
-                const playerThrows = getPlayerThrows(player.playerId);
+            <div className="glass-card rounded-xl p-4 sm:p-6 mt-2 animate-fade-in space-y-4">
+              {(match.legs || []).map((leg, legIdx) => {
+                const throws = leg.throws || [];
+                if (throws.length === 0) return null;
+
+                // Group throws into rounds
+                const rounds: Throw[][] = [];
+                let currentRound: Throw[] = [];
+                let seenInRound = new Set<string>();
+                for (const thr of throws) {
+                  if (seenInRound.has(thr.playerId)) {
+                    rounds.push(currentRound);
+                    currentRound = [thr];
+                    seenInRound = new Set([thr.playerId]);
+                  } else {
+                    currentRound.push(thr);
+                    seenInRound.add(thr.playerId);
+                  }
+                }
+                if (currentRound.length > 0) rounds.push(currentRound);
+
+                const formatDart = (dart: { segment: number; multiplier: number; score: number }) => {
+                  if (dart.score === 0 && dart.multiplier === 0) return 'S0';
+                  const prefix = dart.multiplier === 3 ? 'T' : dart.multiplier === 2 ? 'D' : 'S';
+                  return `${prefix}${dart.segment}`;
+                };
 
                 return (
-                  <div key={player.playerId} className="mb-6 last:mb-0">
-                    <h4 className="text-white font-bold mb-3 flex items-center gap-2">
-                      <span>{player.name}</span>
-                      <span className="text-sm text-gray-400">
-                        ({playerThrows.length} {playerThrows.length === 1 ? 'Wurf' : 'Würfe'})
-                      </span>
-                    </h4>
-
-                    {playerThrows.length === 0 ? (
-                      <p className="text-gray-400 text-sm italic">Keine Würfe</p>
-                    ) : (
-                      <div className="space-y-2">
-                        {playerThrows.map((throwData, index) => (
-                          <div
-                            key={throwData.id || `${player.playerId}-${index}`}
-                            className="bg-dark-800/50 rounded-lg p-3 border border-dark-600"
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-gray-400 text-sm">
-                                Wurf #{index + 1}
-                              </span>
-                              <div className="flex items-center gap-3">
-                                {throwData.isBust && (
-                                  <span className="text-red-400 text-xs font-bold bg-red-500/20 px-2 py-1 rounded">
-                                    BUST
-                                  </span>
-                                )}
-                                <span className={`font-bold text-lg ${
-                                  throwData.isBust
-                                    ? 'text-red-400 line-through'
-                                    : throwData.score >= 140
-                                      ? 'text-orange-400'
-                                      : throwData.score >= 100
-                                        ? 'text-blue-400'
-                                        : 'text-white'
-                                }`}>
-                                  {throwData.score}
-                                </span>
-                                <span className="text-gray-400 text-sm">
-                                  → {throwData.remaining}
-                                </span>
-                              </div>
-                            </div>
-
-                            <div className="flex gap-2">
-                              {throwData.darts && throwData.darts.length > 0 ? (
-                                throwData.darts.map((dart, dartIndex) => (
-                                  <div
-                                    key={dartIndex}
-                                    className={`flex-1 text-center py-2 rounded ${
-                                      dart.multiplier === 3
-                                        ? 'bg-green-500/20 text-green-400'
-                                        : dart.multiplier === 2
-                                          ? 'bg-red-500/20 text-red-400'
-                                          : dart.score === 0
-                                            ? 'bg-gray-700/50 text-gray-500'
-                                            : 'bg-blue-500/20 text-blue-400'
-                                    }`}
-                                  >
-                                    <span className="text-xs font-semibold">
-                                      {dart.score === 0
-                                        ? 'Miss'
-                                        : dart.multiplier === 3
-                                          ? `T${dart.segment}`
-                                          : dart.multiplier === 2
-                                            ? `D${dart.segment}`
-                                            : dart.segment
-                                      }
-                                    </span>
-                                  </div>
-                                ))
-                              ) : (
-                                <div className="flex-1 text-center py-2 rounded bg-gray-700/50 text-gray-500 text-xs">
-                                  Keine Dart-Details
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                  <div key={leg.id || legIdx}>
+                    {(match.legs || []).length > 1 && (
+                      <div className="text-xs text-dark-400 font-semibold mb-2">Leg {legIdx + 1}</div>
                     )}
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-dark-600">
+                            <th className="text-dark-500 text-left py-2 pr-1 w-8">#</th>
+                            {playersWithThrows.map(p => (
+                              <th key={p.playerId} className="text-white font-bold text-center py-2 px-2 truncate max-w-[160px]">
+                                {p.name}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {rounds.map((round, rIdx) => (
+                            <tr key={rIdx} className="border-b border-dark-700/30">
+                              <td className="text-dark-600 py-2 pr-1 align-top text-xs">{rIdx + 1}</td>
+                              {playersWithThrows.map(p => {
+                                const thr = round.find(r => r.playerId === p.playerId);
+                                if (!thr) return <td key={p.playerId} className="py-2 px-2"></td>;
+                                return (
+                                  <td key={p.playerId} className="py-2 px-2 text-center">
+                                    <div className="font-mono text-dark-400 text-xs">
+                                      {(thr.darts || []).map((d, i) => (
+                                        <span key={i} className={`${
+                                          d.multiplier === 3 ? 'text-green-400' :
+                                          d.multiplier === 2 ? 'text-red-400' :
+                                          d.score === 0 ? 'text-dark-600' : 'text-dark-400'
+                                        }${i > 0 ? ' ml-1' : ''}`}>
+                                          {formatDart(d)}
+                                        </span>
+                                      ))}
+                                    </div>
+                                    <div className="flex items-center justify-center gap-1 mt-0.5">
+                                      <span className={`font-bold ${
+                                        thr.isBust ? 'text-red-400' :
+                                        thr.score >= 140 ? 'text-orange-400' :
+                                        thr.score >= 100 ? 'text-blue-400' : 'text-white'
+                                      }`}>
+                                        {thr.isBust ? '0' : thr.score}
+                                      </span>
+                                      <span className="text-dark-500 text-xs">→{thr.remaining}</span>
+                                    </div>
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 );
               })}

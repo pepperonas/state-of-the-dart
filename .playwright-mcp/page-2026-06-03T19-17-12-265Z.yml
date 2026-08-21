@@ -1,0 +1,86 @@
+- generic [ref=e3]:
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e8]: 🎯
+      - heading "State of the Dart" [level=1] [ref=e9]
+      - paragraph [ref=e10]: Erstelle deinen kostenlosen Account
+    - generic [ref=e12]:
+      - heading "Registrieren" [level=2] [ref=e13]
+      - paragraph [ref=e14]:
+        - text: 🎁
+        - strong [ref=e15]: 30 Tage kostenlos
+        - text: testen!
+      - generic [ref=e16]:
+        - generic [ref=e17]:
+          - generic [ref=e18]: Name
+          - generic [ref=e19]:
+            - generic:
+              - img
+            - textbox "Name" [ref=e20]:
+              - /placeholder: Dein Name
+        - generic [ref=e21]:
+          - generic [ref=e22]: Email
+          - generic [ref=e23]:
+            - generic:
+              - img
+            - textbox "Email" [ref=e24]:
+              - /placeholder: deine@email.de
+        - generic [ref=e25]:
+          - generic [ref=e26]: Passwort
+          - generic [ref=e27]:
+            - generic:
+              - img
+            - textbox "Passwort" [ref=e28]:
+              - /placeholder: Mindestens 8 Zeichen
+        - generic [ref=e29]:
+          - generic [ref=e30]: Passwort bestätigen
+          - generic [ref=e31]:
+            - generic:
+              - img
+            - textbox "Passwort bestätigen" [ref=e32]:
+              - /placeholder: Passwort wiederholen
+        - button "Kostenlos registrieren" [ref=e33] [cursor=pointer]:
+          - img [ref=e34]
+          - text: Kostenlos registrieren
+      - generic [ref=e41]: Oder
+      - button "Mit Google registrieren" [ref=e42] [cursor=pointer]:
+        - img [ref=e43]
+        - text: Mit Google registrieren
+      - generic [ref=e48]:
+        - text: Bereits ein Account?
+        - link "Jetzt anmelden" [ref=e49] [cursor=pointer]:
+          - /url: /login
+  - contentinfo [ref=e50]:
+    - generic [ref=e51]:
+      - generic [ref=e52]:
+        - generic [ref=e53]: © 2026 Martin Pfeffer
+        - generic [ref=e54]: •
+        - link "celox.io" [ref=e55] [cursor=pointer]:
+          - /url: https://celox.io
+          - img [ref=e56]
+          - text: celox.io
+        - generic [ref=e59]: •
+        - link "GitHub" [ref=e60] [cursor=pointer]:
+          - /url: https://github.com/pepperonas/state-of-the-dart
+          - img [ref=e61]
+          - text: GitHub
+      - generic [ref=e64]:
+        - link "Impressum" [ref=e65] [cursor=pointer]:
+          - /url: /impressum
+        - generic [ref=e66]: •
+        - link "Datenschutz" [ref=e67] [cursor=pointer]:
+          - /url: /datenschutz
+        - generic [ref=e68]: •
+        - link "AGB" [ref=e69] [cursor=pointer]:
+          - /url: /nutzungsbedingungen
+      - generic [ref=e70]:
+        - link "LinkedIn" [ref=e71] [cursor=pointer]:
+          - /url: https://www.linkedin.com/in/martin-pfeffer-020831134/
+          - img [ref=e72]
+          - text: LinkedIn
+        - generic [ref=e76]: •
+        - link "GitHub Profil" [ref=e77] [cursor=pointer]:
+          - /url: https://github.com/pepperonas
+          - img [ref=e78]
+          - text: GitHub Profil
+      - paragraph [ref=e81]: Version 0.8.5

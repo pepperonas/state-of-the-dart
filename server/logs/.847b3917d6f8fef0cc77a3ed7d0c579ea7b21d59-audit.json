@@ -1,0 +1,25 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 7
+    },
+    "auditLog": "/Users/martin/claude/state-of-the-dart/server/logs/.847b3917d6f8fef0cc77a3ed7d0c579ea7b21d59-audit.json",
+    "files": [
+        {
+            "date": 1778688318328,
+            "name": "/Users/martin/claude/state-of-the-dart/server/logs/app-2026-05-13.log",
+            "hash": "052acda2efc3843fbd41d484f312ec3322408e75e89a4c2d5a6005b3557e277e"
+        },
+        {
+            "date": 1778757891353,
+            "name": "/Users/martin/claude/state-of-the-dart/server/logs/app-2026-05-14.log",
+            "hash": "d1c8baeedb28d45775b36e8b421690a3b9e11a42fa7518d4d92bd8068038e06c"
+        },
+        {
+            "date": 1778956945191,
+            "name": "/Users/martin/claude/state-of-the-dart/server/logs/app-2026-05-16.log",
+            "hash": "009625b3a3902609b8b6436e5ad2f8271d13f5a247370c8176c4ad96f2702fbd"
+        }
+    ],
+    "hashType": "sha256"
+}

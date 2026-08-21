@@ -1,0 +1,36 @@
+- generic [ref=e3]:
+  - paragraph [ref=e8]: Loading...
+  - contentinfo [ref=e9]:
+    - generic [ref=e10]:
+      - generic [ref=e11]:
+        - generic [ref=e12]: © 2026 Martin Pfeffer
+        - generic [ref=e13]: •
+        - link "celox.io" [ref=e14] [cursor=pointer]:
+          - /url: https://celox.io
+          - img [ref=e15]
+          - text: celox.io
+        - generic [ref=e18]: •
+        - link "GitHub" [ref=e19] [cursor=pointer]:
+          - /url: https://github.com/pepperonas/state-of-the-dart
+          - img [ref=e20]
+          - text: GitHub
+      - generic [ref=e23]:
+        - link "Impressum" [ref=e24] [cursor=pointer]:
+          - /url: /impressum
+        - generic [ref=e25]: •
+        - link "Datenschutz" [ref=e26] [cursor=pointer]:
+          - /url: /datenschutz
+        - generic [ref=e27]: •
+        - link "AGB" [ref=e28] [cursor=pointer]:
+          - /url: /nutzungsbedingungen
+      - generic [ref=e29]:
+        - link "LinkedIn" [ref=e30] [cursor=pointer]:
+          - /url: https://www.linkedin.com/in/martin-pfeffer-020831134/
+          - img [ref=e31]
+          - text: LinkedIn
+        - generic [ref=e35]: •
+        - link "GitHub Profil" [ref=e36] [cursor=pointer]:
+          - /url: https://github.com/pepperonas
+          - img [ref=e37]
+          - text: GitHub Profil
+      - paragraph [ref=e40]: Version 0.8.5

@@ -1,0 +1,4 @@
+[    1303ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=f0227bc6:20102
+[    1776ms] [LOG] 🎨 Theme applied: modern @ http://localhost:5173/src/components/ThemeManager.tsx:30
+[    1778ms] [LOG] 🎨 Theme applied: modern @ http://localhost:5173/src/components/ThemeManager.tsx:30
+[    1803ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ http://localhost:5173/login:0
