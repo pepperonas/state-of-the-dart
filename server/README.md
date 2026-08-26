@@ -156,6 +156,48 @@ SMTP_FROM=State of the Dart <noreply@example.com>
 | PUT | `/users/:id` | User aktualisieren |
 | DELETE | `/users/:id` | User löschen |
 
+> ⚠️ **Admin-Rechte lassen sich über die API nicht vergeben.** Das `is_admin`-Flag wird aus
+> der E-Mail-Adresse **abgeleitet** (`server/src/config/adminAllowlist.ts`) und bei jedem
+> Login neu gesetzt — das erteilt es der Master-Adresse und **entzieht** es allen anderen,
+> auch wenn ein Flag in der Datenbank stünde. Es gibt bewusst keinen `make-admin`-Endpunkt.
+
+### Settings (`/api/settings`)
+| Method | Endpoint | Beschreibung |
+|--------|----------|--------------|
+| GET | `/` | Alle Einstellungen des Tenants |
+| PUT | `/` | Einstellungen ersetzen |
+| PATCH | `/:key` | Einzelne Einstellung setzen |
+
+### Leaderboard (`/api/leaderboard`)
+| Method | Endpoint | Beschreibung |
+|--------|----------|--------------|
+| GET | `/` | Globale Bestenliste |
+
+### Bug Reports (`/api/bug-reports`)
+| Method | Endpoint | Beschreibung |
+|--------|----------|--------------|
+| GET | `/` | Alle Reports (Admin) bzw. eigene |
+| POST | `/` | Report anlegen (inkl. Screenshot + Browser-Info) |
+| GET | `/:id` | Report-Details |
+| PATCH | `/:id/status` | Status setzen (`open` → `in_progress` → `resolved`/`closed`) |
+| PATCH | `/:id/notes` | Admin-Notizen |
+| DELETE | `/:id` | Report löschen |
+
+### Debug Flags (`/api/debug-flags`)
+| Method | Endpoint | Beschreibung |
+|--------|----------|--------------|
+| GET | `/` | Alle Flags (nur Admin) |
+| POST | `/` | Flag anlegen — Log-Puffer + Screenshot + Zustand |
+| GET | `/:id` | Flag-Details |
+| PATCH | `/:id/status` | Status (`open` → `investigating` → `resolved`/`dismissed`) |
+| PATCH | `/:id/notes` | Notizen |
+| DELETE | `/:id` | Flag löschen |
+
+### Contact (`/api/contact`)
+| Method | Endpoint | Beschreibung |
+|--------|----------|--------------|
+| POST | `/` | Kontaktformular — **Rate-Limit: 3 / Stunde / IP** |
+
 ## Datenbank Schema
 
 13 Tabellen: `tenants`, `players`, `player_stats`, `matches`, `match_players`, `legs`, `throws`, `heatmap_data`, `training_sessions`, `training_results`, `achievements`, `player_achievements`, `personal_bests`

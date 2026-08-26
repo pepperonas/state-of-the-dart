@@ -1,5 +1,7 @@
 # State of the Dart - Architektur-Dokumentation
 
+> [← Zurück zur README](../README.md) · [Design-System](DESIGN_SYSTEM.md) · [Deployment](DEPLOYMENT_VPS.md)
+
 ## 📋 Inhaltsverzeichnis
 - [Daten-Architektur](#daten-architektur)
 - [Database-First Policy](#database-first-policy)
@@ -7,6 +9,7 @@
 - [API-Endpoints](#api-endpoints)
 - [Context-Provider](#context-provider)
 - [Offline-Support](#offline-support)
+- [Präsentationsschicht](#-präsentationsschicht)
 
 ---
 
@@ -464,13 +467,53 @@ window.addEventListener('online', async () => {
 
 ---
 
-## 📚 Weitere Dokumentation
+## 🎨 Präsentationsschicht
 
-- [API-Dokumentation](./server/README.md)
-- [Deployment-Guide](./DEPLOYMENT_VPS.md)
-- [Changelog](./CHANGELOG.md)
+Die Datenschicht oben beschreibt, **woher** etwas kommt. Wie es aussieht und sich bewegt,
+steht im **[Design-System](DESIGN_SYSTEM.md)** — Token-Layer, Primitiv-Bibliothek, das
+hauseigene Icon-Set (die App rendert keine Emoji), der `Select`-Ersatz für natives
+`<select>`, `PageShell` und die Motion-Regeln.
+
+Drei Punkte, die auch Datenfluss betreffen und deshalb hier erwähnt gehören:
+
+### Spieler-Reihenfolge ist eine Regel, kein Zufall
+
+`GET /api/players` liefert `ORDER BY created_at DESC`. Diese Reihenfolge ist für die
+Oberfläche wertlos — sie stellte ein weggeworfenes `Guest 417`-Profil und jeden Bot über
+die Menschen, die die App benutzen. `src/utils/playerOrder.ts` definiert die Regel und
+`PlayerContext` wendet sie **einmal** an, damit jede Auswahlliste sie erbt:
+
+1. echte Konten vor Bots und generierten Test-/Gast-Profilen
+2. innerhalb einer Gruppe: die meisten Spiele zuerst
+3. Name als stabiler Gleichstand-Entscheid
+
+Die Bestenliste übernimmt die Gruppierung, behält aber ihre eigene Metrik-Sortierung
+innerhalb jeder Gruppe.
+
+### Avatare sind abwärtskompatibel
+
+Gespeicherte Avatare dürfen weiterhin Emoji aus älteren Profilen sein. `iconForEmoji()`
+übersetzt sie beim Rendern in eine Glyphe des Icon-Sets — es gibt **keine** Migration und
+nichts geht verloren.
+
+### Was Emoji für die Persistenz bedeuteten
+
+Bot-Namen enthielten früher ein Emoji **im Namen** (`🎯 Bot 1 (…)`). Das landete damit in
+der Datenbank, in der Match-Historie und in jedem Export. Namen sind jetzt reiner Text; das
+Icon kommt aus dem Avatar-Feld, wo es hingehört.
 
 ---
 
-**Letzte Aktualisierung**: 2026-01-17
-**Version**: 0.1.7
+## 📚 Weitere Dokumentation
+
+- [Design-System](DESIGN_SYSTEM.md)
+- [API-Dokumentation](../server/README.md)
+- [Deployment-Guide](DEPLOYMENT_VPS.md)
+- [Changelog](../CHANGELOG.md)
+
+---
+
+> Diese Datei beschreibt die **Daten-Architektur**. Sie trägt bewusst keine Versionsnummer
+> mehr: eine handgepflegte Version driftet, und `src/tests/docs/docsSync.test.ts` prüft
+> stattdessen laufend, dass die hier dokumentierten `/api/…`-Bereiche echten Route-Modulen
+> entsprechen.

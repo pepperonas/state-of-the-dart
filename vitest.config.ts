@@ -12,7 +12,8 @@ export default defineConfig({
     exclude: ['**/node_modules/**', '**/dist/**', 'e2e/**'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'json-summary', 'html'],
+      reportsDirectory: './coverage',
       exclude: [
         'node_modules/',
         'src/tests/',
@@ -20,6 +21,15 @@ export default defineConfig({
         '**/*.config.*',
         '**/dist/**',
       ],
+      // Floors, not targets. They sit just under the current measurement so a
+      // regression fails CI, while the README badge reports the real number —
+      // `src/tests/docs/docsSync.test.ts` forbids the badge from overstating it.
+      thresholds: {
+        statements: 21,
+        branches: 65,
+        functions: 28,
+        lines: 21,
+      },
     },
   },
   resolve: {

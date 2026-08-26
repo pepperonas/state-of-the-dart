@@ -1,30 +1,75 @@
 <div align="center">
-  <img src="public/images/state-of-the-dart-thumb-xs.jpg" alt="State of the Dart" width="800" />
+  <img src="../public/images/state-of-the-dart-thumb-xs.jpg" alt="State of the Dart" width="800" />
 </div>
 
 > [🇩🇪 Deutsch](../README.md) | 🇬🇧 **English**
 
 # 🎯 State of the Dart
 
-**Professional Dart Scoring System** - A feature-rich, web-based dart scoring application with multi-user support, professional statistics tracking, and live deployment.
+**Professional Dart Scoring System** — a feature-rich, web-based dart scoring application with multi-user support, deep statistics tracking, 463 achievements and live deployment.
 
-[![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green?style=for-the-badge)](https://stateofthedart.com)
-[![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-purple?style=for-the-badge)](https://stateofthedart.celox.io)
-![Version](https://img.shields.io/badge/Version-0.8.3-blue?style=for-the-badge)
+<!-- Links -->
+[![Live Demo](https://img.shields.io/badge/Live_Demo-stateofthedart.com-22c55e?style=for-the-badge&logo=googlechrome&logoColor=white)](https://stateofthedart.com)
+[![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-a855f7?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://stateofthedart.celox.io)
+[![Version](https://img.shields.io/badge/Version-0.8.5-3b82f6?style=for-the-badge)](../CHANGELOG.md)
+
+<!-- Build & repo (live) -->
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![E2E](https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml)
+[![License](https://img.shields.io/github/license/pepperonas/state-of-the-dart)](../LICENSE)
+[![Last Commit](https://img.shields.io/github/last-commit/pepperonas/state-of-the-dart)](https://github.com/pepperonas/state-of-the-dart/commits)
+[![Commit Activity](https://img.shields.io/github/commit-activity/m/pepperonas/state-of-the-dart)](https://github.com/pepperonas/state-of-the-dart/pulse)
+[![Open Issues](https://img.shields.io/github/issues/pepperonas/state-of-the-dart)](https://github.com/pepperonas/state-of-the-dart/issues)
+[![Code Size](https://img.shields.io/github/languages/code-size/pepperonas/state-of-the-dart)](https://github.com/pepperonas/state-of-the-dart)
+[![Top Language](https://img.shields.io/github/languages/top/pepperonas/state-of-the-dart)](https://github.com/pepperonas/state-of-the-dart)
 
+<!-- Frontend -->
 ![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?logo=vite&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?logo=tailwindcss&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)
-![Express](https://img.shields.io/badge/Express-4.x-000000?logo=express&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white)
+![Material Design 3](https://img.shields.io/badge/Material_Design_3-Expressive-757575?logo=materialdesign&logoColor=white)
+![Framer Motion](https://img.shields.io/badge/Framer_Motion-12.x-0055FF?logo=framer&logoColor=white)
+![Recharts](https://img.shields.io/badge/Recharts-2.12-FF6384)
+![i18next](https://img.shields.io/badge/i18next-25.x-26A69A?logo=i18next&logoColor=white)
 ![PWA](https://img.shields.io/badge/PWA-Installable-5A0FC8?logo=pwa&logoColor=white)
+![Workbox](https://img.shields.io/badge/Workbox-7.x-FF6F00?logo=googlechrome&logoColor=white)
 
-🌐 **[Live App](https://stateofthedart.com)** | 📖 **[Deployment Guide](DEPLOYMENT_VPS.md)** | 🏗️ **[Architecture](ARCHITECTURE.md)** | 🐛 **[Report Issues](https://github.com/pepperonas/state-of-the-dart/issues)**
+<!-- Backend -->
+![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express-4.19-000000?logo=express&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white)
+![Socket.IO](https://img.shields.io/badge/Socket.IO-4.8-010101?logo=socket.io&logoColor=white)
+![JWT](https://img.shields.io/badge/Auth-JWT_+_OAuth-000000?logo=jsonwebtokens&logoColor=white)
+![Stripe](https://img.shields.io/badge/Stripe-Payments-635BFF?logo=stripe&logoColor=white)
 
+<!-- Quality -->
+![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
+![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?logo=playwright&logoColor=white)
+![Unit Tests](https://img.shields.io/badge/Unit_Tests-470-brightgreen)
+![E2E Tests](https://img.shields.io/badge/E2E_Tests-11-brightgreen)
+![Coverage](https://img.shields.io/badge/Coverage-22%25_stmts_%7C_67%25_branches-yellow)
+![ESLint](https://img.shields.io/badge/ESLint-configured-4B32C3?logo=eslint&logoColor=white)
+
+<!-- Content -->
+![Achievements](https://img.shields.io/badge/Achievements-463-FFD700)
+![Game Modes](https://img.shields.io/badge/Game_Modes-5-orange)
+![Training Modes](https://img.shields.io/badge/Training_Modes-6-orange)
+![Custom Icons](https://img.shields.io/badge/Custom_Icons-69-8b5cf6)
+![Audio Files](https://img.shields.io/badge/Audio_Files-609-e11d48)
+![i18n](https://img.shields.io/badge/i18n-DE_%7C_EN-informational)
+![Mobile](https://img.shields.io/badge/Mobile-Optimized-success)
+![Offline](https://img.shields.io/badge/Offline-First-0ea5e9)
+
+<!-- Conventions -->
+[![Conventional Commits](https://img.shields.io/badge/Conventional_Commits-1.0.0-FE5196?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org/)
+[![Keep a Changelog](https://img.shields.io/badge/Keep_a_Changelog-1.0.0-E05735?logo=keepachangelog&logoColor=white)](../CHANGELOG.md)
+[![Semantic Versioning](https://img.shields.io/badge/SemVer-2.0.0-3F4551)](https://semver.org/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](../CONTRIBUTING.md)
+[![Code of Conduct](https://img.shields.io/badge/Code_of_Conduct-Contributor_Covenant-5e0d73.svg)](../CODE_OF_CONDUCT.md)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-important)](../SECURITY.md)
+
+🌐 **[Live App](https://stateofthedart.com)** · 🏠 **[Website](https://stateofthedart.celox.io)** · 🏗️ **[Architecture](ARCHITECTURE.md)** · 🎨 **[Design System](DESIGN_SYSTEM.md)** · 🚀 **[Deployment](DEPLOYMENT_VPS.md)** · 📝 **[Changelog](../CHANGELOG.md)** · 🐛 **[Report Issues](https://github.com/pepperonas/state-of-the-dart/issues)**
 ---
 
 ## ✨ Features
@@ -148,50 +193,73 @@
 
 ## 📱 PWA Installation
 
-**State of the Dart** kann als Progressive Web App (PWA) installiert werden!
+**State of the Dart** installs as a Progressive Web App (PWA).
 
-### Schnellinstallation
+### Quick install
 
-1. **Besuche** https://stateofthedart.com
-2. **Klicke** auf "App installieren" im Browser oder in den Einstellungen ⚙️
-3. **Genieße** die native App-Erfahrung mit Offline-Support!
+1. **Visit** https://stateofthedart.com
+2. **Choose** "Install app" in the browser menu, or the install button in ⚙️ Settings
+3. **Enjoy** a native-feeling app with offline support
 
-### Features der PWA
-- ✅ **Offline-Funktionalität** - Spiele ohne Internet
-- ✅ **Homescreen-Icon** - Schnellzugriff wie native App
-- ✅ **Auto-Updates** - Immer die neueste Version
-- ✅ **~30MB Cache** - Schnelle Ladezeiten
-- ✅ **Plattformübergreifend** - Android, iOS, Windows, Mac, Linux
+### What the PWA gives you
+- ✅ **Works offline** — play without a connection
+- ✅ **Home-screen icon** — launches like a native app
+- ✅ **Auto-updates** — always the current version
+- ✅ **Precached shell** — fast cold starts
+- ✅ **Cross-platform** — Android, iOS, Windows, macOS, Linux
 
-📖 **[Ausführliche Installationsanleitung](PWA.md)**
+> Audio is deliberately **not** precached: 609 sound files would bloat the service-worker
+> install. They are cached at runtime (CacheFirst, 30 days) as they are played.
 
 ---
 
 ## 🧪 Automated Testing & CI/CD
 
-**Continuous Integration** ist bereits eingerichtet mit GitHub Actions!
+### Test suite
 
-### Automatische Tests bei jedem Push
-- ✅ **Linting** - ESLint Checks
-- ✅ **Unit Tests** - Vitest (20 Tests)
-- ✅ **Build** - TypeScript Compilation + Vite Build
-- ✅ **Multi-Node** - Tests auf Node.js 18.x & 20.x
+| Layer | Count | Tool |
+|---|---|---|
+| Unit / component | **470** | Vitest + React Testing Library |
+| End-to-end | **11** | Playwright (preview build + isolated backend) |
 
-### Test Status Badge
-[![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
-
-### Workflow Trigger
-Tests laufen automatisch bei:
-- 🔄 Push auf `main`, `master`, oder `develop` Branches
-- 🔀 Pull Requests auf diese Branches
-
-### Lokale Tests ausführen
 ```bash
-npm run test        # Tests im Watch-Modus
-npm run test:run    # Tests einmalig
-npm run test:ui     # Tests mit UI
-npm run coverage    # Mit Coverage Report
+npm test              # watch mode
+npm run test:run      # single run
+npm run test:ui       # Vitest UI
+npm run coverage      # coverage report
+npm run test:e2e      # Playwright, headless
+npm run test:e2e:ui   # Playwright UI
 ```
+
+**Coverage** (`npm run coverage`) — reported straight, not flattered:
+
+| Area | Statements | Why |
+|---|---:|---|
+| `src/components/icons/` | 99 % | Pure functions + path data |
+| `src/components/common/` | 91 % | Primitives with contract tests |
+| `src/utils/` | 55 % | Scoring, heatmap, storage, ordering |
+| `src/context/` | 24 % | Reducers tested, provider wiring not |
+| Screens & views | 16 % | Deliberately covered by **E2E**, not unit tests |
+| **Overall** | **22 %** | |
+
+`vitest.config.ts` sets thresholds just under the current numbers, so a regression fails
+CI. The badge may never claim more than was measured — `docsSync` enforces that.
+
+> **Docs stay honest.** `src/tests/docs/docsSync.test.ts` fails when documentation drifts
+> from the code: every badge number is checked against its source, every documented
+> `npm run …` command must exist, every referenced path and Markdown link must resolve, and
+> both READMEs must carry the same badge set. It was written after the Tests badge sat at
+> "294 passing" for months and `npm run coverage` turned out to have never worked.
+
+### On every push
+- ✅ **Lint** — ESLint
+- ✅ **Unit tests** — Vitest (JUnit reporter)
+- ✅ **Build** — TypeScript compile + Vite build
+- ✅ **E2E** — Playwright, HTML report uploaded as an artifact
+
+### Workflow triggers
+- 🔄 Pushes to `main`, `master`, `develop`
+- 🔀 Pull requests targeting those branches
 
 ---
 

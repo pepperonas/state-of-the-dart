@@ -7,6 +7,55 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 🎨 Material 3 Expressive: eigenes Icon-Set, eigener Select, Spieler-Reihenfolge
+
+Ersetzt die letzten beiden Stellen, an denen die Oberfläche **nicht** vom Design-System
+gezeichnet wurde — Plattform-Emoji und das native `<select>` — und behebt eine Fokus-Regel,
+die die Form jedes fokussierten Elements veränderte.
+
+#### Hinzugefügt
+- **Icon-Set** (`src/components/icons/`): 69 M3-Expressive-Glyphen. Die Geometrie wird von
+  `tools/gen-icons.py` **gerechnet**, nicht getippt. `iconForEmoji()` bildet 427 Emoji auf
+  Glyphen ab und gibt **nie** `undefined` zurück — genau diese Garantie erlaubt es den
+  Aufrufstellen, ihr Emoji ersatzlos zu streichen.
+- **`Select`** (`src/components/common/Select.tsx`): ersetzt alle 23 nativen `<select>`.
+  Menü per Portal am `<body>` (z-60), generischer Werttyp, APG-Combobox-Tastatur inkl.
+  Präfix-Sprung.
+- **`AvatarPicker`**: kuratierte Icon-Auswahl statt der ~1900-Emoji-Palette.
+- **`src/utils/playerOrder.ts`**: eine Sortierregel, einmal in `PlayerContext` angewandt.
+- **Dokumentation**: neues [Design-System](docs/DESIGN_SYSTEM.md); `docsSync`-Testsuite,
+  die Badges, Pfade, Links und Kommandos gegen den Code prüft.
+- **Tests**: +160 (450 → 452 gesamt) — Icon-Set, `Select`, M3-Primitive, `gameStorage`,
+  Heatmap-Mathematik, Spieler-Sortierung, Doku-Abgleich.
+- **Coverage**: `@vitest/coverage-v8` ergänzt — `npm run coverage` war seit jeher
+  dokumentiert, aber der Provider fehlte, das Kommando schlug immer fehl. Dazu Schwellen in
+  `vitest.config.ts`, die Rückschritte scheitern lassen.
+
+#### Geändert
+- **Avatare** sind tonale Discs mit Icons. Gespeicherte Emoji-Avatare älterer Profile
+  werden beim Rendern übersetzt — keine Migration, kein Datenverlust.
+- **Achievement- und Bot-Daten** tragen Icon-Namen statt Emoji.
+- **Bot-Namen** enthalten kein Emoji mehr. Vorher landete es im Namen und damit in der
+  Datenbank, in der Match-Historie und in jedem Export.
+- **Textfelder und Select-Trigger** stehen auf 12 px Radius statt der 4 px des
+  M3-Standards — neben 16–28-px-Karten und Pill-Buttons las sich 4 px als Fremdkörper.
+- **Spielerlisten** sortieren nach Konto-Typ, dann Anzahl Spiele, dann Name.
+
+#### Behoben
+- ⚠️ **Der geteilte Fokus-Ring trug `border-radius: inherit`.** Das rundet nicht die
+  Kontur — es ersetzt den Radius des fokussierten **Elements** durch den seines Elternteils.
+  Da `:focus-visible` als Klasse zählt, war die Regel `(0,1,0)` und gewann den Gleichstand
+  gegen `.m3-button`/`.m3-text-field` über die Import-Reihenfolge. Gemessen: Pill-Button
+  `9999px → 913px`, Textfeld `12px → 0px` beim Tastaturfokus.
+- **Dreifacher Fokus-Ring** am Textfeld (Border + Inset-Shadow + globale Outline) ist jetzt
+  **ein** Ring.
+- **Typeahead-Anker** wurde bei starkem Neurendern schal — liegt jetzt im Ref.
+- **Doku-Fehler**, gefunden von der neuen `docsSync`-Suite: englische README auf Version
+  0.8.3 statt 0.8.5, deutsche Fußzeile auf 0.8.4, defektes Hero-Bild in der englischen
+  README, Link auf ein nicht existierendes `PWA.md`, zwei tote Links in `ARCHITECTURE.md`,
+  deutsche Absätze mitten in der englischen README, „20 Tests"/„294 Tests"-Angaben.
+
+
 ### 🎨 Material 3 Expressive Redesign
 
 Komplette Umstellung der App auf **Material 3 Expressive** — neues Design-Token-Fundament + Primitiv-Bibliothek, alle ~60 Screens migriert.

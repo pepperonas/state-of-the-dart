@@ -166,12 +166,36 @@ npm run coverage
 npm run test:ui
 ```
 
+```bash
+# End-to-end (Playwright, builds first)
+npm run test:e2e
+```
+
 ### Writing Tests
 
-- Write tests for new features
-- Update tests when fixing bugs
-- Use descriptive test names
-- Follow the existing test patterns
+- Write tests for new features; update them when fixing bugs.
+- Use descriptive names — the name should state the behaviour, not the function.
+- **Watch every new test fail once.** A test you have not seen go red is not an
+  assurance. Break the thing it guards, confirm it fails, then restore. Two bugs in
+  this repo were found exactly that way, and two *tests* turned out to be
+  green-blind under the same check.
+- When asserting on source text, strip comments first (`stripComments` in
+  `src/tests/consistency/`). Several docs and comments quote the very rule the
+  test forbids, so a naive text search matches its own documentation.
+
+### The house rules the suite enforces
+
+Some tests guard conventions rather than behaviour. If one fails, the fix is
+usually the code, not the test:
+
+| Suite | Enforces |
+|---|---|
+| `src/tests/consistency/` | One of four page widths, one heading level, **no native `<select>`**, the CSS specificity rules |
+| `src/tests/icons/` | No emoji in rendered code; every achievement names a real icon |
+| `src/tests/docs/` | Documentation matches the code — badge numbers, paths, links, `npm run` commands |
+
+> Changed a number that appears in the README? `npm run test:run -- src/tests/docs`
+> will tell you before a reader notices.
 
 ## 💬 Questions?
 
