@@ -236,8 +236,21 @@ body {
    6. STATE LAYER — shared overlay used by interactive components
    A `::before` overlay tinted with currentColor; opacity ramps on hover/press.
    -------------------------------------------------------------------------- */
+/* ⚠️ `position` sits in `:where()` so it carries ZERO specificity.
+
+   The state layer only needs the host to be *a* containing block — it does not
+   care which kind. But `.m3-state-layer { position: relative }` is (0,1,0), the
+   same as Tailwind's `.fixed`, and this file is imported after Tailwind, so it
+   won the tie and silently un-fixed anything carrying both. The Debug-Flag
+   button was `position: relative` for exactly that reason: it never floated,
+   it sat in the document flow near the top of the tree, and its `bottom`
+   offset merely shoved it further up.
+
+   At zero specificity any position utility (`fixed`/`absolute`/`sticky`) wins,
+   while an element with no position of its own still gets `relative` — which is
+   all the overlay needs. `fixed` and `absolute` are containing blocks too. */
+:where(.m3-state-layer) { position: relative; }
 .m3-state-layer {
-  position: relative;
   isolation: isolate;
 }
 .m3-state-layer::before {

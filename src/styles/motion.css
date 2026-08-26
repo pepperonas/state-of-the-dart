@@ -241,7 +241,9 @@
    removes it again when the wave ends.
    The holder does the clipping, NOT the host: putting `overflow: hidden` on the
    host would clip corner badges that sit on some icon buttons. */
-.m3-ripple { position: relative; }
+/* Zero specificity for the same reason as `.m3-state-layer` in m3.css — see the
+   note there. A position utility on the host must win. */
+:where(.m3-ripple) { position: relative; }
 .m3-ripple-holder {
   position: absolute;
   inset: 0;

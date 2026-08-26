@@ -46,7 +46,7 @@
 <!-- Quality -->
 ![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?logo=playwright&logoColor=white)
-![Unit Tests](https://img.shields.io/badge/Unit_Tests-470-brightgreen)
+![Unit Tests](https://img.shields.io/badge/Unit_Tests-471-brightgreen)
 ![E2E Tests](https://img.shields.io/badge/E2E_Tests-11-brightgreen)
 ![Coverage](https://img.shields.io/badge/Coverage-22%25_stmts_%7C_67%25_branches-yellow)
 ![ESLint](https://img.shields.io/badge/ESLint-configured-4B32C3?logo=eslint&logoColor=white)
@@ -219,7 +219,7 @@
 
 | Layer | Count | Tool |
 |---|---|---|
-| Unit / component | **470** | Vitest + React Testing Library |
+| Unit / component | **471** | Vitest + React Testing Library |
 | End-to-end | **11** | Playwright (preview build + isolated backend) |
 
 ```bash

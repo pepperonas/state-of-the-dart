@@ -156,6 +156,39 @@ describe('page consistency', () => {
     }
   });
 
+  /**
+   * `.m3-state-layer` and `.m3-ripple` only need the host to be *a* containing
+   * block. Declaring `position: relative` at (0,1,0) tied with Tailwind's
+   * `.fixed` and — because these files load after Tailwind — won, silently
+   * un-fixing anything carrying both. The Debug-Flag button was `relative` for
+   * exactly that reason: it never floated, and its `bottom` offset only pushed
+   * it further up the page.
+   */
+  it('the state layer and ripple never override a position utility', () => {
+    const files = {
+      'styles/m3.css': fs.readFileSync(path.resolve(__dirname, '../../styles/m3.css'), 'utf8'),
+      'styles/motion.css': fs.readFileSync(path.resolve(__dirname, '../../styles/motion.css'), 'utf8'),
+    };
+    const offenders: string[] = [];
+    for (const [name, css] of Object.entries(files)) {
+      // Comments here describe the very bug this forbids — compare bare CSS.
+      const bare = css.replace(/\/\*[\s\S]*?\*\//g, '');
+      for (const cls of ['m3-state-layer', 'm3-ripple']) {
+        // A rule that sets `position` for this class must carry zero specificity.
+        const re = new RegExp(`(^|[},])\\s*([^{}]*\\.${cls}(?![\\w-])[^{}]*)\\{([^}]*)\\}`, 'g');
+        for (const m of bare.matchAll(re)) {
+          const [selector, body] = [m[2].trim(), m[3]];
+          if (!/(^|[;\s])position\s*:/.test(body)) continue;
+          if (selector.includes('::')) continue; // pseudo-elements are their own box
+          if (!selector.startsWith(':where(')) {
+            offenders.push(`${name}: "${selector}" sets position outside :where()`);
+          }
+        }
+      }
+    }
+    expect(offenders, `These would out-rank a caller's fixed/absolute:\n${offenders.join('\n')}`).toEqual([]);
+  });
+
   it('admin rights cannot be granted through the API', () => {
     const api = fs.readFileSync(path.resolve(__dirname, '../../services/api.ts'), 'utf8');
     expect(api).not.toContain('make-admin');
