@@ -436,11 +436,16 @@ button.m3-chip {
   color: var(--m3-on-surface-variant);
   pointer-events: none;
 }
+/* ⚠️ Shape: `xs` (4px) is the plain-M3 field radius, but this app is M3
+   *Expressive* — its cards are 16–28px and its buttons are full pills. A 4px
+   field among them read as a hard-edged foreign element (user report, with a
+   screenshot of the inline rename field). `md` (12px) is soft enough to belong
+   and still square enough to read as an input rather than a button. */
 .m3-text-field {
   width: 100%;
   height: 3.5rem;
   padding: 0 1rem;
-  border-radius: var(--m3-shape-xs);
+  border-radius: var(--m3-shape-md);
   background-color: transparent;
   color: var(--m3-on-surface);
   border: 1px solid var(--m3-outline);
@@ -452,16 +457,141 @@ button.m3-chip {
 .m3-text-field.m3-has-icon { padding-left: 2.75rem; }
 .m3-text-field::placeholder { color: var(--m3-on-surface-variant); opacity: 0.7; }
 .m3-text-field:hover { border-color: var(--m3-on-surface); }
+/* ⚠️ One ring only. This used to stack three: the 1px border, an *inset*
+   1px shadow drawn inside it, and the app-wide `:focus-visible` outline sitting
+   2px outside — visible in the report as a box within a box. The shadow now
+   sits flush OUTSIDE the border (so the two read as a single 2px ring and the
+   box does not resize), and the field opts out of the global outline because it
+   already shows a clear focus indicator of its own. */
 .m3-text-field:focus {
   border-color: var(--m3-primary);
-  box-shadow: inset 0 0 0 1px var(--m3-primary);
+  box-shadow: 0 0 0 1px var(--m3-primary);
 }
+.m3-text-field:focus-visible { outline: none; }
 .m3-field.m3-error .m3-text-field { border-color: var(--m3-error); }
 .m3-field.m3-error .m3-field-label { color: var(--m3-error); }
 /* Light theme: bare-input override from index.css would re-add a border colour;
    ensure our token border wins (selector specificity 0,2,0 > legacy 0,1,1). */
 .modern-light .m3-text-field { background-color: transparent; border-color: var(--m3-outline); }
 .modern-light .m3-text-field:focus { border-color: var(--m3-primary); }
+
+/* ---- 7e2. SELECT (custom dropdown) ---------------------------------------
+   Replaces the native `<select>` everywhere in the app. The native control
+   renders its popup in the OS layer, so it ignores every token in this file:
+   the list was always the platform's grey, at the platform's font size, and in
+   the light theme it needed a `select option` override in `index.css` just to
+   stop being unreadable. The custom one is ordinary DOM, so it themes.
+
+   ⚠️ SPECIFICITY — the paint sits in `:where()`, the box does not.
+
+   That split is deliberate and load-bearing. `:where()` is zero-specificity, so
+   these defaults lose to *any* class a caller passes — which is what lets the
+   admin status pills keep `bg-error-container` / `bg-success-container` on the
+   trigger. Restating them as plain `.m3-select-trigger` rules would be (0,1,0)
+   and, because `m3.css` is imported after Tailwind, would silently win over the
+   caller's utility and repaint every pill the same grey.
+
+   Zero specificity also beats the legacy light-theme cascade in `index.css`
+   (`:where(.modern-light) :where(button)` → white, and the substring matcher
+   `button[class*="bg-success"]` → #10b981, which a `bg-success-container` pill
+   would otherwise trip). Those are (0,0,0) too, and this file is imported after
+   `index.css`, so a later equal-specificity rule wins the tie.
+
+   ⚠️ States must sit INSIDE the `:where()` — `:where(.x):hover` is (0,1,0) and
+   would out-rank the caller's utility again. Hence `:where(.m3-select-trigger:hover)`.
+   ------------------------------------------------------------------------- */
+
+/* Paint — anchored on `button`, everything else inside :where().
+   ⚠️ Measured in the browser: a plain `:where(.m3-select-trigger)` is (0,0,0)
+   and LOSES to Tailwind's preflight `button { background-color: transparent }`
+   at (0,0,1) — the trigger rendered with no background at all. Leading with the
+   element name lifts these to (0,0,1): they now beat preflight on source order
+   (this file is imported after Tailwind) while still losing to a caller's
+   `.bg-error-container` at (0,1,0), which is the whole point. */
+button:where(.m3-select-trigger) {
+  background-color: var(--m3-surface-container);
+  color: var(--m3-on-surface);
+  border: 1px solid var(--m3-outline-variant);
+}
+button:where(.m3-select-trigger:hover:not(:disabled)) { border-color: var(--m3-on-surface-variant); }
+button:where(.m3-select-trigger.m3-open)              { border-color: var(--m3-primary); }
+button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surface-variant); }
+
+/* Box — normal specificity: layout is not something a caller overrides. */
+.m3-select-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  border-radius: var(--m3-shape-md);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.m3-select-trigger:disabled { cursor: not-allowed; opacity: 0.38; }
+
+/* Size steps. `lg` is 3rem so it lines up with the `px-4 py-3` text inputs it
+   shares forms with; `sm` matches the inline table pills. */
+.m3-select-sm { min-height: 1.875rem; padding: 0.25rem 0.5rem;    font-size: 0.75rem; }
+.m3-select-md { min-height: 2.5rem;   padding: 0.5rem 0.875rem;   font-size: 0.875rem; }
+.m3-select-lg { min-height: 3rem;     padding: 0.75rem 1rem;      font-size: 1rem; }
+
+.m3-select-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.m3-select-value.m3-placeholder { color: var(--m3-on-surface-variant); }
+.m3-select-arrow { flex: 0 0 auto; opacity: 0.7; }
+
+/* The menu is portalled to <body>, so it escapes `overflow-x-auto` tables and
+   dialog stacking contexts the way the native popup did.
+   z-index 60 clears the dialog scrim (50) and — because `screenshot.ts` skips
+   anything at z >= 50 — keeps an open menu out of bug-report screenshots. */
+.m3-select-menu {
+  position: fixed;
+  z-index: 60;
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: var(--m3-shape-md);
+  background-color: var(--m3-surface-container-high);
+  border: 1px solid var(--m3-outline-variant);
+  box-shadow: var(--m3-elevation-3);
+}
+.m3-select-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--m3-shape-sm);
+  color: var(--m3-on-surface);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.m3-select-option-label { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+/* Highlight follows the keyboard cursor, not :hover — otherwise the mouse
+   pointer resting over the list would show a second, contradicting highlight. */
+.m3-select-option.m3-active {
+  background-color: color-mix(in srgb, var(--m3-on-surface) 10%, transparent);
+}
+.m3-select-option.m3-selected { color: var(--m3-primary); font-weight: 600; }
+.m3-select-option.m3-disabled { opacity: 0.38; cursor: not-allowed; }
+.m3-select-check { flex: 0 0 auto; color: var(--m3-primary); }
+.m3-select-empty {
+  padding: 0.5rem 0.75rem;
+  color: var(--m3-on-surface-variant);
+  font-size: 0.875rem;
+}
 
 /* ---- 7f. CHIP ------------------------------------------------------------ */
 .m3-chip {
@@ -550,6 +680,36 @@ button.m3-chip {
   box-shadow: var(--m3-elevation-3);
   padding: 1.5rem;
 }
+
+/* ---- 7h2. LIGHT-THEME BACKGROUND RESTORE ----------------------------------
+   ⚠️ Bug fix, verified in the browser: in the light theme every M3 button came
+   out transparent — a filled "success" button was white-on-white and unreadable.
+
+   Cause: `index.css` carries a legacy `.modern-light button { background-color:
+   #ffffff }`. The reset at the top of section 7 neutralises it with
+   `.modern-light button.m3-button { background: none }` — but that selector is
+   (0,2,1), while the variant rules (`.m3-button.m3-filled`) are only (0,2,0), so
+   the neutralisation also wiped the variants it was meant to protect.
+
+   Rather than restructure the legacy cascade (which many plain Tailwind buttons
+   still depend on), the variants are restated here at the same specificity.
+   Values are byte-identical to the rules above — this only wins the tie.
+   -------------------------------------------------------------------------- */
+.modern-light button.m3-button.m3-filled   { background-color: var(--m3-primary); }
+.modern-light button.m3-button.m3-tonal    { background-color: var(--m3-secondary-container); }
+.modern-light button.m3-button.m3-accent   { background-color: var(--m3-tertiary-container); }
+.modern-light button.m3-button.m3-elevated { background-color: var(--m3-surface-container-low); }
+.modern-light button.m3-button.m3-danger   { background-color: var(--m3-error); }
+.modern-light button.m3-button.m3-success  { background-color: var(--m3-success); }
+.modern-light button.m3-button.m3-filled:disabled,
+.modern-light button.m3-button.m3-tonal:disabled {
+  background-color: color-mix(in srgb, var(--m3-on-surface) 12%, transparent);
+}
+.modern-light button.m3-icon-button.m3-filled { background-color: var(--m3-primary); }
+.modern-light button.m3-icon-button.m3-tonal  { background-color: var(--m3-secondary-container); }
+.modern-light button.m3-fab                   { background-color: var(--m3-tertiary-container); }
+.modern-light button.m3-fab.m3-primary        { background-color: var(--m3-primary-container); }
+.modern-light button.m3-chip.m3-selected      { background-color: var(--m3-secondary-container); }
 
 /* ---- 7i. ELEVATION utility classes -------------------------------------- */
 .m3-e0 { box-shadow: var(--m3-elevation-0); }

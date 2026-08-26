@@ -130,11 +130,31 @@ M3 primitive library (barrel `src/components/common/index.ts`). **Prefer these o
 - `Card` — `variant`: `filled|elevated|outlined`; `interactive` for hover/press.
 - `TextField` — outlined field with `label`, leading `icon`, `error`.
 - `Switch` — M3 switch (`checked`, `onChange`), thumb grows when on.
+- `Select` — **the app's only dropdown.** Generic in the value type: `<Select<number> value={10} onChange={n => …} options={[{value, label, icon?, text?, disabled?}]} />`. `size`: `sm|md|lg`, `inline` to size to content, `placeholder` for "no selection". Native `<select>` is **banned** (a consistency test fails the build) — its popup is drawn by the OS, so it ignored every token, could not be themed light/dark and could not hold an icon. The menu is **portalled to `<body>` at z-60** so it escapes `overflow-x-auto` tables and dialog stacking contexts, and it re-measures on scroll/resize. Keyboard = APG combobox: arrows/Home/End move, Enter/Space commit, Escape discards, Tab leaves without committing, typing jumps by prefix.
 - `Chip` — filter/assist chip (`selected`, `icon`).
 - `Dialog` — scrim + spring-animated container (`open`, `onClose`, `title`, `actions`, `widthClassName`, `hideClose`); closes on scrim/Escape.
 - `AnimatedNumber` — spring number transition (overdamped → no overshoot/jitter), reduced-motion aware; "tallies" to its new value. Used for in-game scores (`PlayerScore`, `ScoreInput`) and Dashboard KPIs (counts up as async data loads).
 - `ErrorBoundary` — top-level React error boundary. Wraps `<App>` in `main.tsx` so a render-time throw (bad `JSON.parse` in match reconstruction, failed lazy chunk, etc.) shows an M3 recovery screen (reload / back-to-menu) instead of white-screening the PWA. The `window.error`/`unhandledrejection` handlers in `App.tsx` only log — they do NOT catch render errors, so don't remove the boundary.
 - `BackButton.tsx` — canonical back button. **Always use this** for screen-level back navigation. An M3 **tonal** button with a leading `<ArrowLeft>`. In **block mode (default)** it wraps itself in a `mb-6` block so the gap to the page heading is uniform across all screens; pass **`inline`** when it sits in a flex header row / form (opts out of the wrapper — the row/form controls spacing). Override text via `label`.
+
+### Custom Icon Set (`src/components/icons/`)
+**The app renders no emoji.** `<Icon name="trophy" size={24} />` draws one of ~69 hand-built Material 3 Expressive glyphs.
+
+Why: an emoji is a *font*, not artwork. The same glyph is Apple's glossy 3-D on a phone, Google's flat shapes on a tablet and a monochrome outline on Windows; it ignores `currentColor`, so it never followed the light/dark theme; and it cannot be aligned to a 24px grid. Before this, the interface used ~250 distinct emoji across its chrome, its 463 achievements and a ~1900-entry avatar palette.
+
+- **`paths.ts`** — the glyphs. ⚠️ **The geometry is COMPUTED by `tools/gen-icons.py`, never typed.** Circles are actually round, polygons are trigonometric, corner radii are consistent. To change a glyph, change the generator and re-run it.
+- **`emojiMap.ts`** — `iconForEmoji()` maps every emoji that ever appeared onto the closest glyph. It **never returns undefined**: unmapped input falls through Unicode-block heuristics to `target`. That guarantee is what let call sites drop their emoji entirely instead of keeping one as a fallback. It also **passes icon names straight through**, so data files can hold either form.
+- **Data files hold icon NAMES** (`achievements.ts`, `botLogic.ts`, avatar palettes). Stored *user* avatars may still be emoji from older profiles — `PlayerAvatar` resolves them, so nothing breaks.
+- `AvatarPicker` replaced the emoji palette with a curated set from these icons.
+
+⚠️ **Holes are real holes** (`fill-rule="evenodd"`), never a shape painted in the background colour — that only works on one of the two themes. But evenodd cuts both ways: **two overlapping shapes XOR into a hole**, which is how `hash`, `globe` and `board` first rendered as checkerboards. Shapes that should union must not overlap; only ring-and-hole constructs may.
+
+⚠️ `SpinnerWheel` draws on a `<canvas>`, where a React `<svg>` cannot go — it feeds the same path data to `new Path2D(...)`, so the wheel shows the identical glyph.
+
+Pinned by `src/tests/icons/iconSet.test.tsx`, including a scan that fails if an emoji reappears in rendered code (console logs and doc comments are exempt).
+
+### Player list ordering (`src/utils/playerOrder.ts`)
+One rule, applied once in `PlayerContext` so every picker inherits it: **real accounts before bots and generated test/guest profiles; within a group, most games played first; name as a stable tiebreak.** The API returns players newest-first, which used to put a throwaway `Guest 417` and every bot above the people who actually use the app. `isGeneratedPlayer` anchors its patterns at the **start** of the name — a player called `Tom "Guest" Weber` is a real person and must not be demoted. The leaderboard applies the tier rule too, but keeps its own metric sort inside each group.
 
 ### Lazy-Loaded Heavy Modules
 These modules used to ship eagerly and were extracted into their own chunks during the Sprint 1 bundle pass. Anyone touching them: keep them lazy.

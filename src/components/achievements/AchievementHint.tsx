@@ -78,7 +78,7 @@ const AchievementHint: React.FC<AchievementHintProps> = ({ hints, onDismiss }) =
 
           {/* Shimmer Effect */}
           <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-[color-mix(in_srgb,var(--m3-on-surface)_6%,transparent)] to-transparent"
             initial={{ x: '-100%' }}
             animate={{ x: '200%' }}
             transition={{ repeat: Infinity, duration: 3, ease: 'linear' }}

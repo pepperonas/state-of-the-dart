@@ -4,7 +4,8 @@ import { Calendar, Target, Award, ChevronDown, ChevronUp, TrendingUp, Loader, Se
 import { formatDate, getTimestampForSort } from '../../utils/dateUtils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { api } from '../../services/api';
-import { Card, TextField, IconButton, Button } from '../common';
+import { Card, TextField, IconButton, Button, Select } from '../common';
+import { Icon } from '../icons';
 
 interface MatchHistoryProps {
   matches: Match[];
@@ -160,7 +161,7 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
   };
   
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 m3-stagger">
       {/* Search and Pagination Controls */}
       {sortedMatches.length > 0 && (
         <div className="mb-4 space-y-4">
@@ -177,19 +178,14 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-2">
               <span className="m3-body-small text-on-surface-variant">Zeige:</span>
-              <select
+              <Select<number>
                 value={itemsPerPage}
-                onChange={(e) => {
-                  setItemsPerPage(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                className="px-3 py-1 rounded-m3-sm border border-outline-variant bg-surface-container text-on-surface m3-body-small focus:outline-none focus:ring-2 focus:ring-primary-500"
-              >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </select>
+                onChange={(n) => { setItemsPerPage(n); setCurrentPage(1); }}
+                size="sm"
+                inline
+                aria-label="Eintraege pro Seite"
+                options={[10, 20, 50, 100].map((n) => ({ value: n, label: String(n) }))}
+              />
               <span className="m3-body-small text-on-surface-variant">
                 von {filteredMatches.length} Match{filteredMatches.length !== 1 ? 'es' : ''}
               </span>
@@ -464,7 +460,7 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                                 : 'bg-error-container text-on-error-container'
                             }`}
                           >
-                            Leg {index + 1}: {leg.winner === playerId ? '✓' : '✗'}
+                            Leg {index + 1}: <Icon name={leg.winner === playerId ? 'check' : 'close'} size={14} className={leg.winner === playerId ? 'text-success' : 'text-error'} />
                           </div>
                         ))}
                       </div>

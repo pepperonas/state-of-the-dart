@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Target, Crosshair, Clock, TrendingUp, Award, Zap, BarChart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { BackButton, Button, Card } from '../common';
+import { BackButton, Button, Card, PageShell } from '../common';
 import { staggerChild } from '../../utils/motion';
 import { motion } from 'framer-motion';
 
@@ -62,8 +62,10 @@ const TrainingMenu: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-      <div className="max-w-4xl mx-auto">
+    <PageShell
+      width="md"
+      back={false}
+    >
         <div className="flex items-center justify-between mb-6">
           <BackButton onClick={() => navigate('/')} inline />
           <Button
@@ -76,7 +78,7 @@ const TrainingMenu: React.FC = () => {
         </div>
 
         <Card variant="elevated" className="p-6 md:p-8">
-          <h2 className="m3-headline-small text-on-surface mb-6">{t('training.training_modes')}</h2>
+          <h1 className="m3-headline-medium text-on-surface mb-6">{t('training.training_modes')}</h1>
 
           <div className="grid md:grid-cols-2 gap-4">
             {trainingModes.map((mode, index) => {
@@ -116,8 +118,7 @@ const TrainingMenu: React.FC = () => {
             </ul>
           </div>
         </Card>
-      </div>
-    </div>
+        </PageShell>
   );
 };
 

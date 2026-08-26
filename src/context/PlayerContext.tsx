@@ -1,9 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Player, PlayerStats, PlayerPreferences, HeatmapData, Dart } from '../types/index';
 import { useTenant } from './TenantContext';
 import { useAuth } from './AuthContext';
 import { createEmptyHeatmapData, updateHeatmapData } from '../utils/heatmap';
+import { sortPlayers } from '../utils/playerOrder';
 import { api } from '../services/api';
 import logger from '../utils/logger';
 
@@ -65,6 +66,9 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const { user } = useAuth();
   
   const [players, setPlayers] = useState<Player[]>([]);
+  // Ordered once, here, so every picker in the app inherits the same rule
+  // instead of each list re-deciding it (see utils/playerOrder).
+  const orderedPlayers = useMemo(() => sortPlayers(players), [players]);
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
   const [loading, setLoading] = useState(true);
   
@@ -229,7 +233,7 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   
   return (
     <PlayerContext.Provider value={{
-      players,
+      players: orderedPlayers,
       currentPlayer,
       loading,
       addPlayer,

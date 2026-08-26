@@ -10,7 +10,7 @@ import { api } from '../../services/api';
 const MatchChart = lazy(() => import('./MatchChart'));
 import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
 import PlayerAvatar from '../player/PlayerAvatar';
-import { BackButton, Card, Chip, TextField, IconButton, Button } from '../common';
+import { BackButton, Card, Chip, TextField, IconButton, Button, Select } from '../common';
 import { staggerChild } from '../../utils/motion';
 
 const MatchHistoryPage: React.FC = () => {
@@ -190,7 +190,7 @@ const MatchHistoryPage: React.FC = () => {
 
   return (
     <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* Back button */}
         <BackButton onClick={() => { window.location.href = '/'; }} />
 
@@ -225,15 +225,14 @@ const MatchHistoryPage: React.FC = () => {
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-center gap-2">
               <span className="m3-body-small text-on-surface-variant">{t('match_history.showing', 'Zeige')}:</span>
-              <select
+              <Select<number>
                 value={itemsPerPage}
-                onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
-                className="px-2 py-1 rounded-m3-sm border border-outline-variant bg-surface-container text-on-surface m3-body-small"
-              >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-              </select>
+                onChange={(n) => { setItemsPerPage(n); setCurrentPage(1); }}
+                size="sm"
+                inline
+                aria-label={t('match_history.per_page', 'Eintraege pro Seite')}
+                options={[10, 20, 50].map((n) => ({ value: n, label: String(n) }))}
+              />
               <span className="m3-body-small text-on-surface-variant">
                 {t('match_history.of', 'von')} {filteredMatches.length} {t('match_history.matches', 'Matches')}
               </span>

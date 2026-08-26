@@ -322,7 +322,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
   if (showSetup) {
     return (
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto m3-view">
           <BackButton onClick={onBack || (() => { window.location.href = '/'; })} />
 
           <Card variant="elevated" className="rounded-m3-lg p-6">
@@ -360,7 +360,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
             </div>
 
             <div className="bg-surface-container rounded-m3-md p-4 mb-6">
-              <h3 className="m3-title-small text-on-surface mb-2">🎯 Cricket Regeln:</h3>
+              <h3 className="m3-title-small text-on-surface mb-2"> Cricket Regeln:</h3>
               <ul className="text-on-surface-variant text-sm space-y-1">
                 <li>• Zahlen 15-20 und Bull müssen 3x getroffen werden</li>
                 <li>• Triple = 3 Marks, Double = 2 Marks, Single = 1 Mark</li>
@@ -378,7 +378,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
             >
               {selectedPlayers.length < 2
                 ? `${t('game.select_players')} (${selectedPlayers.length}/2)`
-                : 'Cricket starten 🎯'
+                :'Cricket starten'
               }
             </Button>
           </Card>
@@ -457,7 +457,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
           >
             {t('common.back')}
           </Button>
-          <h1 className="m3-title-large text-on-surface">🎯 Cricket</h1>
+          <h1 className="m3-title-large text-on-surface"> Cricket</h1>
           <div className="w-10" />
         </div>
       </div>
@@ -494,7 +494,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
                   ))}
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="m3-stagger-fade">
                 {CRICKET_NUMBERS.map(num => (
                   <tr key={num} className="border-t border-outline-variant">
                     <td className="text-on-surface font-bold p-3 text-lg">

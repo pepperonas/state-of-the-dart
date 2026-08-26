@@ -300,7 +300,7 @@ const TournamentMenu: React.FC = () => {
                   ? 'bg-success-container text-on-success-container'
                   : 'bg-primary-container text-on-primary-container'
               }`}>
-                {activeTournament.status === 'completed' ? '✅ Beendet' : '🎯 Läuft'}
+                {activeTournament.status ==='completed'?'Beendet':'Läuft'}
               </div>
             </div>
 
@@ -341,7 +341,7 @@ const TournamentMenu: React.FC = () => {
                       return (
                         <tr key={p.id} className="border-b border-outline-variant last:border-0">
                           <td className="p-3 text-on-surface font-bold">
-                            {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}
+                            {idx === 0 ?'': idx === 1 ?'': idx === 2 ?'': idx + 1}
                           </td>
                           <td className="p-3">
                             <div className="flex items-center gap-2">
@@ -454,7 +454,7 @@ const TournamentMenu: React.FC = () => {
   if (showCreate) {
     return (
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <BackButton onClick={() => setShowCreate(false)} />
 
           <Card variant="elevated" className="p-6 mt-6">
@@ -576,7 +576,7 @@ const TournamentMenu: React.FC = () => {
               <Trophy size={32} className="text-on-tertiary-container" />
             </div>
             <div>
-              <h2 className="m3-headline-small text-on-surface">Turniere</h2>
+              <h1 className="m3-headline-medium text-on-surface">Turniere</h1>
               <p className="m3-body-medium text-on-surface-variant">Organisiere Dart-Wettbewerbe</p>
             </div>
           </div>

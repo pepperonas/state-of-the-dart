@@ -6,8 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { usePlayer } from '../../context/PlayerContext';
 import { api } from '../../services/api';
 import PlayerAvatar from './PlayerAvatar';
-import EmojiPicker from './EmojiPicker';
-import { BackButton, Button, TextField, Card, IconButton } from '../common';
+import AvatarPicker from './AvatarPicker';
+import { BackButton, Button, TextField, Card, IconButton, PageShell } from '../common';
 import { staggerChild } from '../../utils/motion';
 
 const PlayerManagement: React.FC = () => {
@@ -122,13 +122,15 @@ const PlayerManagement: React.FC = () => {
   };
   
   return (
-    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-      <div className="max-w-4xl mx-auto">
+    <PageShell
+      width="md"
+      back={false}
+    >
         <BackButton onClick={() => navigate('/')} />
         
         <Card variant="elevated" className="p-6 md:p-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="m3-headline-small text-on-surface">{t('players.title')}</h2>
+            <h1 className="m3-headline-medium text-on-surface">{t('players.title')}</h1>
             <Button
               variant="filled"
               icon={<Plus size={20} />}
@@ -238,7 +240,7 @@ const PlayerManagement: React.FC = () => {
                     >
                       <PlayerAvatar avatar={player.avatar} name={player.name} size="md" />
                       <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Smile size={16} className="text-white" />
+                        <Smile size={16} className="text-on-surface" />
                       </div>
                     </div>
                     {editingPlayer === player.id ? (
@@ -341,11 +343,10 @@ const PlayerManagement: React.FC = () => {
             )}
           </div>
         </Card>
-      </div>
 
       {/* Emoji Picker Modal */}
       {showEmojiPicker && (
-        <EmojiPicker
+        <AvatarPicker
           onSelect={handleEmojiSelect}
           onClose={() => setShowEmojiPicker(null)}
           currentEmoji={
@@ -355,7 +356,7 @@ const PlayerManagement: React.FC = () => {
           }
         />
       )}
-    </div>
+        </PageShell>
   );
 };
 

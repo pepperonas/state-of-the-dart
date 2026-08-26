@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Check, X, Delete, Keyboard } from 'lucide-react';
+import { Check, X, Delete, Keyboard, RotateCcw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Dart } from '../../types/index';
 import { motion } from 'framer-motion';
 import { calculateThrowScore, convertScoreToDarts } from '../../utils/scoring';
 import AnimatedNumber from '../common/AnimatedNumber';
+import Select from '../common/Select';
 import { springSpatialFast } from '../../utils/motion';
 
 interface ScoreInputProps {
@@ -18,6 +20,11 @@ interface ScoreInputProps {
   isEditingThrow?: boolean;
   remaining: number;
   isCheckout?: boolean;
+  /** Take back the last CONFIRMED throw (loads its darts back for correction). */
+  onUndoThrow?: () => void;
+  /** The throw `onUndoThrow` would take back — shown on the button so the player
+   *  can see what they are about to undo. `null` = nothing to undo. */
+  lastThrow?: { playerName: string; score: number; isBust?: boolean } | null;
 }
 
 const ScoreInput: React.FC<ScoreInputProps> = ({
@@ -32,7 +39,10 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   isCheckout = false,
   isEditingThrow,
   remaining,
+  onUndoThrow,
+  lastThrow = null,
 }) => {
+  const { t } = useTranslation();
   const [currentInput, setCurrentInput] = useState('');
   const [inputMode, setInputMode] = useState<'quick' | 'numpad'>('numpad');
   const setEditingDartIndex = onSetEditingDartIndex;
@@ -46,6 +56,11 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   const prevLengthRef = useRef(currentThrow.length);
 
   const currentScore = calculateThrowScore(currentThrow);
+
+  // Taking back a confirmed throw reloads its darts into the input, so it would
+  // silently overwrite darts that are already sitting there — only offer it on an
+  // empty visit.
+  const canUndoThrow = Boolean(onUndoThrow && lastThrow && currentThrow.length === 0);
 
   // Auto-scroll confirm button into view on early checkout
   useEffect(() => {
@@ -82,8 +97,16 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
       } else if (e.key === 'Backspace') {
         if (currentInput) {
           setCurrentInput(currentInput.slice(0, -1));
-        } else {
+        } else if (currentThrow.length > 0) {
           onRemoveDart();
+        } else if (canUndoThrow) {
+          // Nothing left to delete in this visit — walk back one confirmed throw.
+          onUndoThrow?.();
+        }
+      } else if ((e.key === 'z' || e.key === 'Z') && (e.ctrlKey || e.metaKey)) {
+        if (canUndoThrow) {
+          e.preventDefault();
+          onUndoThrow?.();
         }
       } else if (e.key === 'Escape') {
         if (currentInput) {
@@ -99,7 +122,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
     // editingDartIndex must be a dep: it changes when a dart slot is clicked WITHOUT
     // currentThrow/currentInput changing, so the listener would otherwise close over a
     // stale value and route keyboard-Enter to the wrong branch (commit vs. replace-dart).
-  }, [currentInput, currentThrow, inputMode, editingDartIndex, onConfirm, onRemoveDart, onClearThrow]);
+  }, [currentInput, currentThrow, inputMode, editingDartIndex, onConfirm, onRemoveDart, onClearThrow, canUndoThrow, onUndoThrow]);
   // Most common scores - prominently displayed
   const commonScores = [0, 26, 41, 45, 60, 81, 85, 100, 121, 140, 180];
   
@@ -221,14 +244,18 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
         </div>
       </div>
 
-      {/* Mode Switcher (M3 segmented) */}
-      <div className="flex gap-1 mb-4 p-1 bg-surface-container rounded-m3-full">
+      {/* Mode Switcher (M3 segmented — one pill glides between the two options) */}
+      <div className="flex gap-1 mb-4 p-1 bg-surface-container rounded-m3-full m3-segmented">
+        <span
+          className="m3-segmented-indicator"
+          data-pos={inputMode === 'numpad' ? '0' : '1'}
+          aria-hidden="true"
+        />
         <button
           onClick={() => setInputMode('numpad')}
-          className={`flex-1 py-2 rounded-m3-full m3-label-large transition-all flex items-center justify-center gap-2 ${
-            inputMode === 'numpad'
-              ? 'bg-secondary-container text-on-secondary-container'
-              : 'text-on-surface-variant hover:bg-surface-container-high'
+          aria-pressed={inputMode === 'numpad'}
+          className={`flex-1 py-2 rounded-m3-full m3-label-large transition-colors flex items-center justify-center gap-2 ${
+            inputMode === 'numpad' ? 'text-on-secondary-container' : 'text-on-surface-variant'
           }`}
         >
           <Keyboard size={16} />
@@ -236,10 +263,9 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
         </button>
         <button
           onClick={() => setInputMode('quick')}
-          className={`flex-1 py-2 rounded-m3-full m3-label-large transition-all ${
-            inputMode === 'quick'
-              ? 'bg-secondary-container text-on-secondary-container'
-              : 'text-on-surface-variant hover:bg-surface-container-high'
+          aria-pressed={inputMode === 'quick'}
+          className={`flex-1 py-2 rounded-m3-full m3-label-large transition-colors ${
+            inputMode === 'quick' ? 'text-on-secondary-container' : 'text-on-surface-variant'
           }`}
         >
           Quick Scores
@@ -271,23 +297,16 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
           </div>
 
           {/* All Scores Dropdown */}
-          <select
-            onChange={(e) => {
-              const score = parseInt(e.target.value);
-              if (!isNaN(score)) {
-                handleQuickScore(score);
-                e.target.value = '';
-              }
-            }}
+          <Select<number>
+            value={null}
+            onChange={handleQuickScore}
             disabled={currentThrow.length >= 3}
-            className="w-full p-3 mb-4 rounded-m3-sm bg-surface-container border border-outline-variant text-on-surface font-semibold disabled:opacity-30"
-            value=""
-          >
-            <option value="">More Scores (0-180)...</option>
-            {allScores.map(score => (
-              <option key={score} value={score}>{score}</option>
-            ))}
-          </select>
+            size="lg"
+            className="mb-4 font-semibold"
+            placeholder={t('game.more_scores', 'More Scores (0-180)...')}
+            aria-label={t('game.more_scores', 'More Scores (0-180)...')}
+            options={allScores.map(score => ({ value: score, label: String(score) }))}
+          />
         </>
       ) : (
         <>
@@ -338,15 +357,43 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
         </>
       )}
 
+      {/* Take back the last CONFIRMED throw. Sits with the other actions instead of
+          hiding in a header icon — it is the correction players reach for most. */}
+      {onUndoThrow && (
+        <button
+          onClick={() => canUndoThrow && onUndoThrow()}
+          disabled={!canUndoThrow}
+          aria-label={t('game.undo_last_throw')}
+          title={
+            !lastThrow
+              ? t('game.no_throw_to_undo')
+              : currentThrow.length > 0
+                ? t('game.undo_throw_blocked')
+                : t('game.undo_last_throw')
+          }
+          className="w-full mb-2 min-h-[52px] flex items-center justify-center gap-2 px-4 py-3 rounded-m3-full bg-tertiary-container text-on-tertiary-container m3-state-layer disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
+        >
+          <RotateCcw size={18} />
+          <span>{t('game.undo_last_throw')}</span>
+          {lastThrow && (
+            <span className="m3-label-large px-2 py-0.5 rounded-m3-full bg-[color-mix(in_srgb,var(--m3-on-tertiary-container)_14%,transparent)] max-w-[45%] truncate">
+              {lastThrow.playerName} · {lastThrow.isBust ? t('game.bust') : lastThrow.score}
+            </span>
+          )}
+        </button>
+      )}
+
       {/* Action Buttons */}
       <div className="grid grid-cols-3 gap-2">
         <button
           onClick={onRemoveDart}
           disabled={currentThrow.length === 0}
+          aria-label={t('game.remove_dart')}
+          title={t('game.remove_dart')}
           className="flex items-center justify-center gap-1 p-3 rounded-m3-full bg-surface-container-high hover:bg-surface-container-highest text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
         >
           <Delete size={18} />
-          <span className="hidden sm:inline">Undo</span>
+          <span className="hidden sm:inline">{t('game.dart')}</span>
         </button>
 
         <button
@@ -377,7 +424,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
 
       {/* Keyboard Shortcuts Hint */}
       <div className="mt-3 text-center m3-body-small text-on-surface-variant">
-        ⌨️ Keyboard: 0-9 to type, Enter to confirm, Backspace to undo, Esc to clear
+        {t('game.keyboard_hint')}
       </div>
     </div>
   );

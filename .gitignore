@@ -68,3 +68,8 @@ server/data/e2e-test.db-*
 # Database
 *.sqlite
 *.db
+
+# Playwright MCP scratch output (console logs, page snapshots)
+.playwright-mcp/
+# Backend runtime logs
+server/logs/

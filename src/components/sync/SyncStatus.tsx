@@ -21,7 +21,7 @@ const SyncStatus: React.FC = () => {
 
   if (status.error) {
     return (
-      <div className="flex items-center gap-2 text-error m3-label-medium cursor-pointer hover:opacity-80 transition-opacity"
+      <div className="flex items-center gap-2 text-error m3-label-medium cursor-pointer hover:opacity-80 transition-opacity m3-breathe"
         title={status.error}
       >
         <CloudOff size={16} />
@@ -35,7 +35,7 @@ const SyncStatus: React.FC = () => {
     const timeAgo = minutes < 1 ? 'gerade eben' : minutes === 1 ? 'vor 1 Min' : `vor ${minutes} Min`;
 
     return (
-      <div className="flex items-center gap-2 text-success m3-label-medium" title={`Letzter Sync: ${timeAgo}`}>
+      <div className="flex items-center gap-2 text-success m3-label-medium m3-enter-fade" title={`Letzter Sync: ${timeAgo}`}>
         <CheckCircle size={16} />
         <span className="hidden sm:inline">{timeAgo}</span>
       </div>

@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useReducedMotion } from 'framer-motion';
 import {
   LineChart,
   Line,
@@ -10,6 +11,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { MatchPlayer, Throw } from '../../types/index';
+import { CHART_MOTION } from '../../utils/motion';
 
 interface ThrowChartProps {
   players: MatchPlayer[];
@@ -26,6 +28,10 @@ const TOOLTIP_STYLE = {
 };
 
 const ThrowChart: React.FC<ThrowChartProps> = ({ players, chartThrows }) => {
+  // Recharts animates SVG attributes from JS; the CSS reduced-motion rule cannot
+  // reach it, so the switch has to be explicit.
+  const reduce = useReducedMotion();
+
   const { scoreData, remainingData } = useMemo(() => {
     const maxThrows = Math.max(
       ...players.map((p) => chartThrows.filter((t) => t.playerId === p.playerId).length),
@@ -63,6 +69,9 @@ const ThrowChart: React.FC<ThrowChartProps> = ({ players, chartThrows }) => {
       dot={{ r: 4 }}
       activeDot={{ r: 6 }}
       connectNulls
+      isAnimationActive={!reduce}
+      animationDuration={CHART_MOTION.duration}
+      animationEasing={CHART_MOTION.easing}
     />
   ));
 

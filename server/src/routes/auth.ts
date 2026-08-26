@@ -50,9 +50,8 @@ router.post('/register', async (req: Request, res: Response) => {
     // Calculate trial end date
     const trialEndsAt = Date.now() + config.trialPeriodDays * 24 * 60 * 60 * 1000;
 
-    // Check if user should be admin
-    const adminEmails = ['martinpaush@gmail.com', 'martin.pfeffer@celox.io'];
-    const isAdmin = adminEmails.includes(email.toLowerCase());
+    // Admin is decided by the single allowlist, never by the request.
+    const isAdmin = isMasterAdmin(email);
     const subscriptionStatus = isAdmin ? 'lifetime' : 'trial';
 
     // Create user
@@ -329,6 +328,7 @@ router.post('/reset-password', async (req: Request, res: Response) => {
  * Get current user
  */
 import { authenticateToken } from '../middleware/auth';
+import { isMasterAdmin } from '../config/adminAllowlist';
 
 router.get('/me', authenticateToken, async (req: Request, res: Response) => {
   const token = req.headers.authorization?.replace('Bearer ', '');

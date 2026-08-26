@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Users, Crown, Zap, Clock, XCircle, Shield, Trash2, UserMinus, UserPlus, AlertCircle, Eye, Edit, CheckCircle, Copy, ChevronDown, Flag, Search } from 'lucide-react';
+import { Users, Crown, Zap, Clock, XCircle, Shield, Trash2, AlertCircle, Eye, Edit, CheckCircle, Copy, ChevronDown, Flag, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import type { BugReport } from '../../types';
 import type { DebugFlag } from '../../types/debugFlag';
 import { formatDebugFlagForAI } from '../../utils/debugExport';
-import { BackButton, Button, Card, Chip, IconButton, Dialog } from '../common';
+import { BackButton, Button, Card, Chip, IconButton, Dialog, Select } from '../common';
 import { staggerChild } from '../../utils/motion';
 
 interface AdminUser {
@@ -232,22 +232,6 @@ const AdminPanel: React.FC = () => {
     }
   };
 
-  const handleToggleAdmin = async (userId: string, isCurrentlyAdmin: boolean) => {
-    const confirmMsg = isCurrentlyAdmin ? t('admin.confirm_remove_admin') : t('admin.confirm_make_admin');
-    if (!confirm(confirmMsg)) return;
-    
-    try {
-      if (isCurrentlyAdmin) {
-        await api.admin.removeAdmin(userId);
-      } else {
-        await api.admin.makeAdmin(userId);
-      }
-      loadData();
-    } catch (err: any) {
-      alert(`Error: ${err.message}`);
-    }
-  };
-
   const handleOpenEditModal = (user: AdminUser) => {
     setEditingUser(user);
     setEditFormData({
@@ -285,16 +269,21 @@ const AdminPanel: React.FC = () => {
     }
   };
 
+  /**
+   * Status badges on the M3 colour roles instead of fixed gradients with white
+   * text. The gradients ignored the theme; on the light theme they were white
+   * on a light wash. The `*-container` pairs carry their own legible on-colour.
+   */
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
       case 'lifetime':
-        return 'bg-gradient-to-r from-amber-500 to-orange-600 text-white';
+        return 'bg-tertiary-container text-on-tertiary-container';
       case 'active':
-        return 'bg-gradient-to-r from-green-500 to-emerald-600 text-white';
+        return 'bg-success-container text-on-success-container';
       case 'trial':
-        return 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white';
+        return 'bg-primary-container text-on-primary-container';
       case 'expired':
-        return 'bg-gradient-to-r from-red-500 to-rose-600 text-white';
+        return 'bg-error-container text-on-error-container';
       default:
         return 'bg-surface-container-highest text-on-surface-variant';
     }
@@ -349,12 +338,12 @@ const AdminPanel: React.FC = () => {
           <BackButton onClick={() => navigate('/')} />
 
           <div className="flex items-center gap-4 mb-2">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 shadow-lg">
-              <Shield size={32} className="text-white" />
+            <div className="w-12 h-12 rounded-m3-lg bg-tertiary-container text-on-tertiary-container flex items-center justify-center shrink-0">
+              <Shield size={28} />
             </div>
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-on-surface">{t('admin.admin_panel')}</h1>
-              <p className="text-on-surface-variant">{t('admin.subtitle')}</p>
+            <div className="min-w-0">
+              <h1 className="m3-headline-medium text-on-surface">{t('admin.admin_panel')}</h1>
+              <p className="m3-body-medium text-on-surface-variant">{t('admin.subtitle')}</p>
             </div>
           </div>
         </motion.div>
@@ -478,7 +467,7 @@ const AdminPanel: React.FC = () => {
                             onError={() => setFailedAvatars(prev => new Set(prev).add(u.id))}
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-xl font-bold text-white">
+                          <div className="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center text-xl font-bold">
                             {u.avatar && !u.avatar.startsWith('http') ? u.avatar : u.name.charAt(0).toUpperCase()}
                           </div>
                         )}
@@ -534,15 +523,6 @@ const AdminPanel: React.FC = () => {
                             label={t('admin.revoke_access')}
                           >
                             <XCircle size={16} />
-                          </IconButton>
-                        )}
-                        {u.id !== user?.id && (
-                          <IconButton
-                            variant={u.is_admin === 1 ? 'standard' : 'tonal'}
-                            onClick={() => handleToggleAdmin(u.id, u.is_admin === 1)}
-                            label={u.is_admin === 1 ? t('admin.remove_admin') : t('admin.make_admin')}
-                          >
-                            {u.is_admin === 1 ? <UserMinus size={16} /> : <UserPlus size={16} />}
                           </IconButton>
                         )}
                         {u.id !== user?.id && (
@@ -650,31 +630,33 @@ const AdminPanel: React.FC = () => {
           <div className="flex gap-4 mb-6">
             <div>
               <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.status_label')}</label>
-              <select
+              <Select<string>
                 value={bugFilter}
-                onChange={(e) => setBugFilter(e.target.value)}
-                className="px-4 py-2 bg-surface-container border border-outline-variant rounded-m3-md text-on-surface focus:outline-none focus:border-primary-500"
-              >
-                <option value="all">{t('admin.select_all')}</option>
-                <option value="open">{t('admin.select_open')}</option>
-                <option value="in_progress">{t('admin.select_in_progress')}</option>
-                <option value="resolved">{t('admin.select_resolved')}</option>
-                <option value="closed">{t('admin.select_closed')}</option>
-              </select>
+                onChange={setBugFilter}
+                aria-label={t('admin.status_label')}
+                options={[
+                  { value: 'all', label: t('admin.select_all') },
+                  { value: 'open', label: t('admin.select_open') },
+                  { value: 'in_progress', label: t('admin.select_in_progress') },
+                  { value: 'resolved', label: t('admin.select_resolved') },
+                  { value: 'closed', label: t('admin.select_closed') },
+                ]}
+              />
             </div>
             <div>
               <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.severity_label')}</label>
-              <select
+              <Select<string>
                 value={bugSeverityFilter}
-                onChange={(e) => setBugSeverityFilter(e.target.value)}
-                className="px-4 py-2 bg-surface-container border border-outline-variant rounded-m3-md text-on-surface focus:outline-none focus:border-primary-500"
-              >
-                <option value="all">{t('admin.select_all')}</option>
-                <option value="critical">{t('admin.select_critical')}</option>
-                <option value="high">{t('admin.select_high')}</option>
-                <option value="medium">{t('admin.select_medium')}</option>
-                <option value="low">{t('admin.select_low')}</option>
-              </select>
+                onChange={setBugSeverityFilter}
+                aria-label={t('admin.severity_label')}
+                options={[
+                  { value: 'all', label: t('admin.select_all') },
+                  { value: 'critical', label: t('admin.select_critical') },
+                  { value: 'high', label: t('admin.select_high') },
+                  { value: 'medium', label: t('admin.select_medium') },
+                  { value: 'low', label: t('admin.select_low') },
+                ]}
+              />
             </div>
           </div>
 
@@ -730,21 +712,25 @@ const AdminPanel: React.FC = () => {
                           </span>
                         </td>
                         <td className="py-3 px-4">
-                          <select
+                          <Select<string>
                             value={report.status}
-                            onChange={(e) => handleUpdateBugStatus(report.id, e.target.value)}
-                            className={`px-2 py-1 rounded-m3-sm text-xs font-semibold border-none cursor-pointer outline-none ${
+                            onChange={(status) => handleUpdateBugStatus(report.id, status)}
+                            size="sm"
+                            inline
+                            aria-label={t('admin.status_label')}
+                            className={`font-semibold border-none ${
                               report.status === 'open' ? 'bg-error-container text-on-error-container' :
                               report.status === 'in_progress' ? 'bg-secondary-container text-on-secondary-container' :
                               report.status === 'resolved' ? 'bg-success-container text-on-success-container' :
                               'bg-surface-container-highest text-on-surface-variant'
                             }`}
-                          >
-                            <option value="open">{t('admin.status_open')}</option>
-                            <option value="in_progress">{t('admin.status_in_progress')}</option>
-                            <option value="resolved">{t('admin.status_resolved')}</option>
-                            <option value="closed">{t('admin.status_closed')}</option>
-                          </select>
+                            options={[
+                              { value: 'open', label: t('admin.status_open') },
+                              { value: 'in_progress', label: t('admin.status_in_progress') },
+                              { value: 'resolved', label: t('admin.status_resolved') },
+                              { value: 'closed', label: t('admin.status_closed') },
+                            ]}
+                          />
                         </td>
                         <td className="py-3 px-4 text-on-surface-variant capitalize">{report.category}</td>
                         <td className="py-3 px-4 text-on-surface-variant text-sm">
@@ -871,17 +857,18 @@ const AdminPanel: React.FC = () => {
             {/* Filter */}
             <div className="mb-6">
               <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.status_label')}</label>
-              <select
+              <Select<string>
                 value={debugFilter}
-                onChange={(e) => setDebugFilter(e.target.value)}
-                className="px-4 py-2 bg-surface-container border border-outline-variant rounded-m3-md text-on-surface focus:outline-none focus:border-primary-500"
-              >
-                <option value="all">{t('debug.select_all')}</option>
-                <option value="open">{t('debug.select_open')}</option>
-                <option value="investigating">{t('debug.select_investigating')}</option>
-                <option value="resolved">{t('debug.select_resolved')}</option>
-                <option value="dismissed">{t('debug.select_dismissed')}</option>
-              </select>
+                onChange={setDebugFilter}
+                aria-label={t('admin.status_label')}
+                options={[
+                  { value: 'all', label: t('debug.select_all') },
+                  { value: 'open', label: t('debug.select_open') },
+                  { value: 'investigating', label: t('debug.select_investigating') },
+                  { value: 'resolved', label: t('debug.select_resolved') },
+                  { value: 'dismissed', label: t('debug.select_dismissed') },
+                ]}
+              />
             </div>
 
             {/* Debug Flags Table */}
@@ -913,21 +900,25 @@ const AdminPanel: React.FC = () => {
                           <td className="py-3 px-4 text-on-surface font-medium max-w-xs truncate">{flag.comment}</td>
                           <td className="py-3 px-4 text-on-surface-variant font-mono text-sm">{flag.route || '-'}</td>
                           <td className="py-3 px-4">
-                            <select
+                            <Select<string>
                               value={flag.status}
-                              onChange={(e) => handleUpdateDebugStatus(flag.id, e.target.value)}
-                              className={`px-2 py-1 rounded-m3-sm text-xs font-semibold border-none cursor-pointer outline-none ${
+                              onChange={(status) => handleUpdateDebugStatus(flag.id, status)}
+                              size="sm"
+                              inline
+                              aria-label={t('admin.status_label')}
+                              className={`font-semibold border-none ${
                                 flag.status === 'open' ? 'bg-error-container text-on-error-container' :
                                 flag.status === 'investigating' ? 'bg-secondary-container text-on-secondary-container' :
                                 flag.status === 'resolved' ? 'bg-success-container text-on-success-container' :
                                 'bg-surface-container-highest text-on-surface-variant'
                               }`}
-                            >
-                              <option value="open">{t('debug.status_open')}</option>
-                              <option value="investigating">{t('debug.status_investigating')}</option>
-                              <option value="resolved">{t('debug.status_resolved')}</option>
-                              <option value="dismissed">{t('debug.status_dismissed')}</option>
-                            </select>
+                              options={[
+                                { value: 'open', label: t('debug.status_open') },
+                                { value: 'investigating', label: t('debug.status_investigating') },
+                                { value: 'resolved', label: t('debug.status_resolved') },
+                                { value: 'dismissed', label: t('debug.status_dismissed') },
+                              ]}
+                            />
                           </td>
                           <td className="py-3 px-4 text-on-surface-variant text-sm">
                             {new Date(flag.createdAt).toLocaleDateString()}
@@ -1144,7 +1135,7 @@ const AdminPanel: React.FC = () => {
                         className="w-12 h-12 rounded-full object-cover ring-2 ring-outline-variant"
                       />
                     ) : (
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-xl font-bold text-white">
+                      <div className="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center text-xl font-bold">
                         {editingUser.avatar || editingUser.name.charAt(0).toUpperCase()}
                       </div>
                     )}
@@ -1160,16 +1151,18 @@ const AdminPanel: React.FC = () => {
                   <label className="block text-sm font-semibold text-on-surface-variant mb-2">
                     {t('admin.status_required')}
                   </label>
-                  <select
+                  <Select<string>
                     value={editFormData.subscriptionStatus}
-                    onChange={(e) => setEditFormData({ ...editFormData, subscriptionStatus: e.target.value })}
-                    className="w-full px-4 py-3 bg-surface-container border border-outline-variant rounded-m3-md text-on-surface focus:outline-none focus:border-primary-500"
-                  >
-                    <option value="expired">{t('admin.option_expired')}</option>
-                    <option value="trial">{t('admin.option_trial')}</option>
-                    <option value="active">{t('admin.option_active')}</option>
-                    <option value="lifetime">{t('admin.option_lifetime')}</option>
-                  </select>
+                    onChange={(subscriptionStatus) => setEditFormData({ ...editFormData, subscriptionStatus })}
+                    size="lg"
+                    aria-label={t('admin.status_label')}
+                    options={[
+                      { value: 'expired', label: t('admin.option_expired') },
+                      { value: 'trial', label: t('admin.option_trial') },
+                      { value: 'active', label: t('admin.option_active') },
+                      { value: 'lifetime', label: t('admin.option_lifetime') },
+                    ]}
+                  />
                 </div>
 
                 {/* Plan */}
@@ -1177,16 +1170,18 @@ const AdminPanel: React.FC = () => {
                   <label className="block text-sm font-semibold text-on-surface-variant mb-2">
                     {t('admin.plan_label')}
                   </label>
-                  <select
+                  <Select<string>
                     value={editFormData.subscriptionPlan}
-                    onChange={(e) => setEditFormData({ ...editFormData, subscriptionPlan: e.target.value })}
-                    className="w-full px-4 py-3 bg-surface-container border border-outline-variant rounded-m3-md text-on-surface focus:outline-none focus:border-primary-500"
-                  >
-                    <option value="">{t('admin.plan_none')}</option>
-                    <option value="monthly">{t('admin.plan_monthly')}</option>
-                    <option value="annual">{t('admin.plan_annual')}</option>
-                    <option value="lifetime">{t('admin.plan_lifetime')}</option>
-                  </select>
+                    onChange={(subscriptionPlan) => setEditFormData({ ...editFormData, subscriptionPlan })}
+                    size="lg"
+                    aria-label={t('admin.plan_label')}
+                    options={[
+                      { value: '', label: t('admin.plan_none') },
+                      { value: 'monthly', label: t('admin.plan_monthly') },
+                      { value: 'annual', label: t('admin.plan_annual') },
+                      { value: 'lifetime', label: t('admin.plan_lifetime') },
+                    ]}
+                  />
                 </div>
 
                 {/* Ends At */}

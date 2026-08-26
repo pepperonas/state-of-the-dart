@@ -3,6 +3,8 @@ import { X, Camera, AlertCircle, Loader2 } from 'lucide-react';
 import { api } from '../../services/api';
 import { captureScreenshot, getBrowserInfo } from '../../utils/screenshot';
 import type { BugReportSeverity, BugReportCategory } from '../../types';
+import { Select } from '../common';
+import { Icon } from '../icons';
 
 interface BugReportModalProps {
   onClose: () => void;
@@ -106,17 +108,17 @@ export default function BugReportModal({ onClose, currentRoute }: BugReportModal
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="glass-card rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 m3-scrim-enter">
+      <div className="m3-card m3-elevated rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto m3-dialog-enter">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <AlertCircle className="text-warning-400" size={28} />
-            <h2 className="text-2xl font-bold text-white">Bug melden</h2>
+            <h2 className="text-2xl font-bold text-on-surface">Bug melden</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-dark-700/50 rounded-lg transition-colors"
+            className="p-2 hover:bg-surface-container-high rounded-lg transition-colors"
             disabled={isSubmitting}
           >
             <X size={24} className="text-gray-400" />
@@ -125,8 +127,8 @@ export default function BugReportModal({ onClose, currentRoute }: BugReportModal
 
         {success ? (
           <div className="py-12 text-center">
-            <div className="text-green-400 text-6xl mb-4">✓</div>
-            <h3 className="text-2xl font-bold text-white mb-2">Vielen Dank!</h3>
+            <div className="mb-4 flex justify-center text-success"><Icon name="checkCircle" size={56} /></div>
+            <h3 className="text-2xl font-bold text-on-surface mb-2">Vielen Dank!</h3>
             <p className="text-gray-400">Dein Bug-Report wurde erfolgreich übermittelt.</p>
           </div>
         ) : (
@@ -148,7 +150,7 @@ export default function BugReportModal({ onClose, currentRoute }: BugReportModal
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Kurze Zusammenfassung des Problems"
-                className="w-full px-4 py-3 bg-dark-800/50 border border-dark-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-warning-500 transition-colors"
+                className="w-full px-4 py-3 bg-surface-container border border-outline-variant rounded-lg text-on-surface placeholder-on-surface-variant focus:outline-none focus:border-primary transition-colors"
                 required
                 disabled={isSubmitting}
                 maxLength={100}
@@ -165,7 +167,7 @@ export default function BugReportModal({ onClose, currentRoute }: BugReportModal
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Beschreibe das Problem so detailliert wie möglich. Was hast du erwartet und was ist stattdessen passiert?"
                 rows={6}
-                className="w-full px-4 py-3 bg-dark-800/50 border border-dark-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-warning-500 transition-colors resize-none"
+                className="w-full px-4 py-3 bg-surface-container border border-outline-variant rounded-lg text-on-surface placeholder-on-surface-variant focus:outline-none focus:border-primary transition-colors resize-none"
                 required
                 disabled={isSubmitting}
               />
@@ -178,18 +180,14 @@ export default function BugReportModal({ onClose, currentRoute }: BugReportModal
                 <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Schweregrad *
                 </label>
-                <select
+                <Select<BugReportSeverity>
                   value={severity}
-                  onChange={(e) => setSeverity(e.target.value as BugReportSeverity)}
-                  className="w-full px-4 py-3 bg-dark-800/50 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-warning-500 transition-colors"
+                  onChange={setSeverity}
+                  options={severityOptions}
+                  size="lg"
                   disabled={isSubmitting}
-                >
-                  {severityOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  aria-label="Schweregrad"
+                />
               </div>
 
               {/* Category */}
@@ -197,18 +195,14 @@ export default function BugReportModal({ onClose, currentRoute }: BugReportModal
                 <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Kategorie *
                 </label>
-                <select
+                <Select<BugReportCategory>
                   value={category}
-                  onChange={(e) => setCategory(e.target.value as BugReportCategory)}
-                  className="w-full px-4 py-3 bg-dark-800/50 border border-dark-700 rounded-lg text-white focus:outline-none focus:border-warning-500 transition-colors"
+                  onChange={setCategory}
+                  options={categoryOptions}
+                  size="lg"
                   disabled={isSubmitting}
-                >
-                  {categoryOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  aria-label="Kategorie"
+                />
               </div>
             </div>
 
@@ -222,7 +216,7 @@ export default function BugReportModal({ onClose, currentRoute }: BugReportModal
                   <img
                     src={screenshot}
                     alt="Screenshot"
-                    className="w-full rounded-lg border border-dark-700"
+                    className="w-full rounded-lg border border-outline-variant"
                   />
                   <button
                     type="button"
@@ -230,7 +224,7 @@ export default function BugReportModal({ onClose, currentRoute }: BugReportModal
                     className="absolute top-2 right-2 p-2 bg-red-500 hover:bg-red-600 rounded-lg transition-colors"
                     disabled={isSubmitting}
                   >
-                    <X size={16} className="text-white" />
+                    <X size={16} className="text-on-surface" />
                   </button>
                 </div>
               ) : (
@@ -238,7 +232,7 @@ export default function BugReportModal({ onClose, currentRoute }: BugReportModal
                   type="button"
                   onClick={handleCaptureScreenshot}
                   disabled={isCapturing || isSubmitting}
-                  className="w-full py-3 px-4 bg-dark-800/50 border border-dark-700 hover:border-warning-500 rounded-lg text-white transition-colors flex items-center justify-center gap-2"
+                  className="w-full py-3 px-4 bg-surface-container border border-outline-variant hover:border-primary rounded-lg text-on-surface transition-colors flex items-center justify-center gap-2"
                 >
                   {isCapturing ? (
                     <>
@@ -260,7 +254,7 @@ export default function BugReportModal({ onClose, currentRoute }: BugReportModal
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 py-3 px-4 bg-dark-700 hover:bg-dark-600 rounded-lg text-white font-semibold transition-colors"
+                className="flex-1 py-3 px-4 bg-surface-container-high hover:bg-surface-container-highest rounded-lg text-on-surface font-semibold transition-colors"
                 disabled={isSubmitting}
               >
                 Abbrechen
@@ -268,7 +262,7 @@ export default function BugReportModal({ onClose, currentRoute }: BugReportModal
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-1 py-3 px-4 bg-gradient-to-r from-warning-500 to-orange-600 hover:from-warning-600 hover:to-orange-700 rounded-lg text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 py-3 px-4 bg-tertiary-container text-on-tertiary-container m3-state-layer m3-ripple rounded-m3-full font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (
                   <>

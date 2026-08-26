@@ -274,55 +274,13 @@ router.delete('/users/:userId', async (req: Request, res: Response) => {
 });
 
 /**
- * Make user admin
+ * Admin rights are NOT grantable.
+ *
+ * There used to be `POST /users/:id/make-admin` and `DELETE /users/:id/admin`
+ * here. They are gone on purpose: exactly one account is admin, decided by
+ * e-mail in `config/adminAllowlist.ts`, and `users.is_admin` is reconciled from
+ * that on every login and at database init. A route that can hand out full
+ * access is an attack surface with no remaining use.
  */
-router.post('/users/:userId/make-admin', async (req: Request, res: Response) => {
-  const { userId } = req.params;
-
-  const db = getDatabase();
-
-  try {
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
-
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    db.prepare('UPDATE users SET is_admin = 1 WHERE id = ?').run(userId);
-
-    const updatedUser = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
-
-    res.json(updatedUser);
-  } catch (error) {
-    console.error('Make admin error:', error);
-    res.status(500).json({ error: 'Failed to make user admin' });
-  }
-});
-
-/**
- * Remove admin status
- */
-router.delete('/users/:userId/admin', async (req: Request, res: Response) => {
-  const { userId } = req.params;
-
-  const db = getDatabase();
-
-  try {
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
-
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    db.prepare('UPDATE users SET is_admin = 0 WHERE id = ?').run(userId);
-
-    const updatedUser = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
-
-    res.json(updatedUser);
-  } catch (error) {
-    console.error('Remove admin error:', error);
-    res.status(500).json({ error: 'Failed to remove admin status' });
-  }
-});
 
 export default router;

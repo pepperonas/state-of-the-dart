@@ -190,7 +190,7 @@ const OnlineMultiplayer: React.FC = () => {
   if (currentRoom) {
     return (
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto m3-view">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <BackButton onClick={handleLeaveRoom} label="Raum verlassen" inline />
@@ -211,7 +211,7 @@ const OnlineMultiplayer: React.FC = () => {
           <Card variant="elevated" className="p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h1 className="m3-headline-small text-on-surface flex items-center gap-2">
+                <h1 className="m3-headline-medium text-on-surface flex items-center gap-2">
                   {currentRoom.settings.isPrivate && <Lock size={20} className="text-tertiary" />}
                   {currentRoom.name}
                 </h1>
@@ -349,7 +349,7 @@ const OnlineMultiplayer: React.FC = () => {
   // Lobby View
   return (
     <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto m3-view">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <BackButton onClick={() => navigate('/')} inline />

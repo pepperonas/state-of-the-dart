@@ -2,22 +2,19 @@ import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import BackButton from '../common/BackButton';
 import Card from '../common/Card';
+import { PageShell } from '../common';
 
 const Nutzungsbedingungen: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-      <div className="max-w-4xl mx-auto">
-        <BackButton onClick={() => navigate(-1)} />
-
-        <h1 className="m3-headline-medium text-on-surface mb-8">
-          Allgemeine Nutzungsbedingungen
-        </h1>
-
+    <PageShell
+      width="md"
+      title="Allgemeine Nutzungsbedingungen"
+      onBack={() => navigate(-1)}
+    >
         {/* 1. Geltungsbereich */}
         <Card variant="elevated" className="p-6 md:p-8 mb-6">
           <h2 className="m3-title-large text-on-surface mb-4">
@@ -524,8 +521,7 @@ const Nutzungsbedingungen: React.FC = () => {
         <div className="text-center m3-label-large text-on-surface-variant mt-8 mb-4">
           Stand: Februar 2026
         </div>
-      </div>
-    </div>
+        </PageShell>
   );
 };
 

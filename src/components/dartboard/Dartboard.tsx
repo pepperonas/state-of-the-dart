@@ -50,6 +50,17 @@ const Dartboard: React.FC<DartboardProps> = ({
     }
   };
   
+  /** Class list for one board segment: press feedback always, a slow breathe
+   *  while it is part of the suggested checkout. */
+  const segmentClass = (highlighted: boolean) =>
+    [
+      'm3-board-segment',
+      interactive ? 'cursor-pointer hover:opacity-80' : '',
+      highlighted ? 'm3-board-hit' : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
+
   const getSegmentPath = (index: number, innerRadius: number, outerRadius: number) => {
     const startAngle = (index * segmentAngle - 90 - segmentAngle / 2) * Math.PI / 180;
     const endAngle = ((index + 1) * segmentAngle - 90 - segmentAngle / 2) * Math.PI / 180;
@@ -105,7 +116,7 @@ const Dartboard: React.FC<DartboardProps> = ({
               stroke="#c0c0c0"
               strokeWidth="1"
               onClick={() => handleSegmentClick(number, 2, 'double')}
-              className={interactive ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}
+              className={segmentClass(isHighlighted(number, 2))}
             />
             
             {/* Outer single */}
@@ -115,7 +126,7 @@ const Dartboard: React.FC<DartboardProps> = ({
               stroke="#c0c0c0"
               strokeWidth="1"
               onClick={() => handleSegmentClick(number, 1, 'single')}
-              className={interactive ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}
+              className={segmentClass(isHighlighted(number, 1))}
             />
             
             {/* Triple ring */}
@@ -125,7 +136,7 @@ const Dartboard: React.FC<DartboardProps> = ({
               stroke="#c0c0c0"
               strokeWidth="1"
               onClick={() => handleSegmentClick(number, 3, 'triple')}
-              className={interactive ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}
+              className={segmentClass(isHighlighted(number, 3))}
             />
             
             {/* Inner single */}
@@ -135,7 +146,7 @@ const Dartboard: React.FC<DartboardProps> = ({
               stroke="#c0c0c0"
               strokeWidth="1"
               onClick={() => handleSegmentClick(number, 1, 'single')}
-              className={interactive ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}
+              className={segmentClass(isHighlighted(number, 1))}
             />
             
             {/* Number label */}
@@ -164,7 +175,7 @@ const Dartboard: React.FC<DartboardProps> = ({
         stroke="#c0c0c0"
         strokeWidth="1"
         onClick={() => handleBullClick(true)}
-        className={interactive ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}
+        className={segmentClass(highlightedSegments.includes('OB'))}
       />
       
       {/* Inner bull (50 points) - red center */}
@@ -176,7 +187,7 @@ const Dartboard: React.FC<DartboardProps> = ({
         stroke="#c0c0c0"
         strokeWidth="1"
         onClick={() => handleBullClick(false)}
-        className={interactive ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}
+        className={segmentClass(highlightedSegments.includes('Bull'))}
       />
     </svg>
   );

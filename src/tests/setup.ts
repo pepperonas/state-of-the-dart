@@ -7,6 +7,14 @@ afterEach(() => {
   cleanup();
 });
 
+// jsdom implements no layout, so `scrollIntoView` is simply absent from its
+// Element prototype. Anything that keeps a highlighted row in view (Select's
+// listbox, for one) calls it. Stub it here rather than guarding the call in
+// production code for the benefit of the test environment.
+if (!Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = () => {};
+}
+
 // Mock localStorage
 const createLocalStorageMock = () => {
   let store: Record<string, string> = {};

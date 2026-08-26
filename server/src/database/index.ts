@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { config } from '../config';
 import { schema, defaultAchievements } from './schema';
+import { MASTER_ADMIN_EMAIL } from '../config/adminAllowlist';
 
 let db: Database.Database | null = null;
 
@@ -163,17 +164,22 @@ export const initDatabase = (): Database.Database => {
     console.log(`✅ Seeded ${defaultAchievements.length} default achievements`);
   }
 
-  // Ensure martinpaush@gmail.com always has admin rights
+  // Reconcile admin rights with the allowlist: the master address gets them,
+  // EVERY other account loses them. The demotion half matters — accounts
+  // promoted before the make-admin endpoint was removed would otherwise keep
+  // full access forever, with no way left in the UI to take it back.
   try {
-    const masterAdmin = 'martinpaush@gmail.com';
-    const user = db.prepare('SELECT id, is_admin FROM users WHERE email = ?').get(masterAdmin) as { id: string; is_admin: number } | undefined;
+    const granted = db.prepare(
+      'UPDATE users SET is_admin = 1 WHERE lower(email) = ? AND is_admin != 1'
+    ).run(MASTER_ADMIN_EMAIL) as { changes: number };
+    const revoked = db.prepare(
+      'UPDATE users SET is_admin = 0 WHERE lower(email) != ? AND is_admin = 1'
+    ).run(MASTER_ADMIN_EMAIL) as { changes: number };
 
-    if (user && user.is_admin !== 1) {
-      db.prepare('UPDATE users SET is_admin = 1 WHERE email = ?').run(masterAdmin);
-      console.log('✅ Master admin rights ensured for martinpaush@gmail.com');
-    }
+    if (granted.changes) console.log(`✅ Master admin rights ensured for ${MASTER_ADMIN_EMAIL}`);
+    if (revoked.changes) console.log(`✅ Revoked stale admin rights from ${revoked.changes} account(s)`);
   } catch (error) {
-    console.error('Master admin check error:', error);
+    console.error('Admin reconciliation error:', error);
   }
 
   // Schedule periodic WAL checkpoint to prevent corruption

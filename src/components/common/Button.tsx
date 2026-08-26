@@ -39,6 +39,7 @@ const Button: React.FC<ButtonProps> = ({
   const classes = [
     'm3-button',
     'm3-state-layer',
+    'm3-ripple',
     `m3-${variant}`,
     size === 'sm' ? 'm3-size-sm' : size === 'lg' ? 'm3-size-lg' : '',
     fullWidth ? 'm3-full' : '',

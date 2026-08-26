@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, TrendingUp, Target, Award, Loader, RefreshCw } from 'lucide-react';
 import api from '../../services/api';
-import { BackButton, Card, Chip, Button, IconButton } from '../common';
+import { BackButton, Card, Chip, Button, IconButton, PageShell } from '../common';
 import { useAuth } from '../../context/AuthContext';
 import { motion } from 'framer-motion';
 import { staggerChild } from '../../utils/motion';
+import { Icon } from '../icons';
 
 interface LeaderboardEntry {
   playerId: string;
@@ -71,18 +72,22 @@ const GlobalLeaderboard: React.FC = () => {
     return 'text-on-surface-variant';
   };
 
+  /** The podium gets a medal, tinted by place; everyone else gets their number. */
   const getRankBadge = (rank: number) => {
-    if (rank === 1) return '🥇';
-    if (rank === 2) return '🥈';
-    if (rank === 3) return '🥉';
-    return `#${rank}`;
+    const tint = rank === 1 ? 'text-tertiary' : rank === 2 ? 'text-on-surface-variant' : 'text-primary';
+    if (rank <= 3) {
+      return <Icon name="medal" size={24} className={tint} label={`Platz ${rank}`} />;
+    }
+    return <span>{`#${rank}`}</span>;
   };
 
   const currentMetric = metrics.find((m) => m.id === metric);
 
   return (
-    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-      <div className="max-w-5xl mx-auto">
+    <PageShell
+      width="lg"
+      back={false}
+    >
         {/* Header */}
         <BackButton
           onClick={() => navigate(isAuthenticated ? '/' : '/login')}
@@ -91,7 +96,7 @@ const GlobalLeaderboard: React.FC = () => {
 
         <div className="text-center mb-8">
           <h1 className="m3-headline-medium md:m3-headline-large text-on-surface mb-2">
-            🏆 Global Leaderboard
+            Global Leaderboard
           </h1>
           <p className="m3-title-medium text-on-surface-variant">
             Die besten Spieler weltweit
@@ -240,8 +245,7 @@ const GlobalLeaderboard: React.FC = () => {
             </div>
           </Card>
         )}
-      </div>
-    </div>
+        </PageShell>
   );
 };
 

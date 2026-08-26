@@ -26,12 +26,19 @@ type GameAction =
   | { type: 'REPLACE_DART'; payload: { index: number; dart: Dart } }
   | { type: 'CONFIRM_THROW' }
   | { type: 'UNDO_THROW' }
+  | { type: 'REMOVE_PLAYER'; payload: { playerId: string } }
   | { type: 'NEXT_PLAYER' }
   | { type: 'END_MATCH' }
   | { type: 'UNDO_END_MATCH' }
   | { type: 'PAUSE_MATCH' }
   | { type: 'RESUME_MATCH' }
   | { type: 'UPDATE_CHECKOUT_SUGGESTION' };
+
+/**
+ * A match needs at least two players — REMOVE_PLAYER refuses to strip it down
+ * to a solo run. The UI hides the remove control at this count.
+ */
+export const MIN_MATCH_PLAYERS = 2;
 
 export const initialState: GameState = {
   currentMatch: null,
@@ -566,6 +573,86 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
       };
     }
     
+    case 'REMOVE_PLAYER': {
+      if (!state.currentMatch) return state;
+
+      const { playerId } = action.payload;
+      const removedIndex = state.currentMatch.players.findIndex(p => p.playerId === playerId);
+      if (removedIndex === -1) return state;
+      // A match is a match: never strip it down below two players.
+      if (state.currentMatch.players.length <= MIN_MATCH_PLAYERS) return state;
+
+      const removedPlayer = state.currentMatch.players[removedIndex];
+      logBuffer.log('info', 'game_event', 'REMOVE_PLAYER', {
+        matchId: state.currentMatch.id,
+        playerId,
+        name: removedPlayer.name,
+        playersLeft: state.currentMatch.players.length - 1,
+      });
+
+      const remainingPlayers = state.currentMatch.players.filter(p => p.playerId !== playerId);
+
+      // Drop the removed player's throws so the match reads as if they had never
+      // been in it. The remaining players' stats are NOT recomputed on purpose:
+      // average, 180s, highest score and legsWon all derive from their OWN throws,
+      // which this action never touches. (Recomputing legsWon from leg winners
+      // would break sets matches, where legsWon is reset per set.)
+      const updatedLegs = state.currentMatch.legs.map(leg => {
+        const throws = leg.throws.filter(t => t.playerId !== playerId);
+        const wonByRemoved = leg.winner === playerId;
+        if (throws.length === leg.throws.length && !wonByRemoved) return leg;
+        return {
+          ...leg,
+          throws,
+          // A leg the removed player had won belongs to nobody now.
+          winner: wonByRemoved ? undefined : leg.winner,
+          completedAt: wonByRemoved ? undefined : leg.completedAt,
+        };
+      });
+
+      // Shift the turn pointer. Removing a player BEFORE the current one moves
+      // everyone down a slot; removing the current player leaves the index
+      // pointing at whoever was next (the modulo wraps when it was the last slot).
+      const shiftIndex = (index: number) =>
+        (index - (removedIndex < index ? 1 : 0)) % remainingPlayers.length;
+
+      const nextPlayerIndex = shiftIndex(state.currentPlayerIndex);
+      const removedWasCurrent = removedIndex === state.currentPlayerIndex;
+
+      const updatedMatch: Match = {
+        ...state.currentMatch,
+        players: remainingPlayers,
+        legs: updatedLegs,
+        legStartPlayerIndex: shiftIndex(state.currentMatch.legStartPlayerIndex ?? 0),
+      };
+
+      // The pending darts belong to the player who was at the oche — they die
+      // with them, but survive when somebody else was removed.
+      const currentThrow = removedWasCurrent ? [] : state.currentThrow;
+
+      const nextPlayer = updatedMatch.players[nextPlayerIndex];
+      const nextLeg = updatedMatch.legs[updatedMatch.currentLegIndex];
+      const scored = (nextLeg?.throws || [])
+        .filter(t => t.playerId === nextPlayer.playerId)
+        .reduce((sum, t) => sum + t.score, 0);
+      const remaining =
+        (updatedMatch.settings.startScore || 501) - scored - calculateThrowScore(currentThrow);
+
+      let checkoutSuggestion = null;
+      const requireDouble = updatedMatch.settings.doubleOut ?? true;
+      if (remaining <= 170 && remaining >= 1) {
+        checkoutSuggestion = getCheckoutSuggestion(remaining, 3 - currentThrow.length, requireDouble);
+      }
+
+      return {
+        ...state,
+        currentMatch: updatedMatch,
+        currentPlayerIndex: nextPlayerIndex,
+        currentThrow,
+        checkoutSuggestion,
+      };
+    }
+
     case 'END_MATCH': {
       if (!state.currentMatch) return state;
       logBuffer.log('info', 'game_event', 'END_MATCH', { matchId: state.currentMatch.id, winner: state.currentMatch.winner });
@@ -767,6 +854,9 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       status: state.currentMatch.status,
       currentLegIndex: state.currentMatch.currentLegIndex,
       currentPlayerIndex: state.currentPlayerIndex,
+      // Player count matters: removing a player may leave leg/throw counts
+      // untouched, and without this the save would be skipped as "unchanged".
+      playersCount: state.currentMatch.players.length,
       legsCount: state.currentMatch.legs.length,
       lastLegThrowsCount: state.currentMatch.legs[state.currentMatch.currentLegIndex]?.throws.length || 0,
     });

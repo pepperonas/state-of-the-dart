@@ -1,15 +1,17 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Moon, Sun, Volume2, Bell, Globe, User, Play, Download, Upload, Smartphone, Palette, Check, Sparkles, AlertCircle, ChevronDown } from 'lucide-react';
-import { BackButton, Button, Switch, Card, Dialog } from './common';
+import { Button, Switch, Card, Dialog, PageShell, Select } from './common';
 import { useTranslation } from 'react-i18next';
 import { useSettings } from '../context/SettingsContext';
+import { revealTheme } from '../utils/theme';
 import { useTenant } from '../context/TenantContext';
 import audioSystem from '../utils/audio';
 import { exportTenantData, importTenantData } from '../utils/exportImport';
 import { api } from '../services/api';
 import type { BugReport } from '../types';
 import BugReportModal from './bugReport/BugReportModal';
+import { Icon, iconForEmoji } from './icons';
 
 interface SettingsProps {
   darkMode: boolean;
@@ -85,7 +87,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
-      alert('ℹ️ Installation ist derzeit nicht verfügbar.\n\nTipp: Auf iOS verwende "Zum Home-Bildschirm" im Safari-Menü.');
+      alert('ℹ Installation ist derzeit nicht verfügbar.\n\nTipp: Auf iOS verwende"Zum Home-Bildschirm"im Safari-Menü.');
       return;
     }
 
@@ -107,9 +109,9 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
     
     try {
       exportTenantData(currentTenant.id, currentTenant.name);
-      alert('✅ Daten erfolgreich exportiert!');
+      alert('Daten erfolgreich exportiert!');
     } catch (error) {
-      alert('❌ Export fehlgeschlagen. Bitte versuche es erneut.');
+      alert('Export fehlgeschlagen. Bitte versuche es erneut.');
       console.error(error);
     }
   };
@@ -123,12 +125,12 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
     if (!file || !currentTenant) return;
 
     if (!file.name.endsWith('.json')) {
-      alert('❌ Bitte wähle eine JSON-Datei aus.');
+      alert('Bitte wähle eine JSON-Datei aus.');
       return;
     }
 
     const confirmed = window.confirm(
-      '⚠️ Achtung: Der Import überschreibt alle aktuellen Daten!\n\n' +
+      'Achtung: Der Import überschreibt alle aktuellen Daten!\n\n'+
       'Möchtest du vorher ein Backup exportieren?'
     );
 
@@ -139,10 +141,10 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
 
     try {
       await importTenantData(file, currentTenant.id);
-      alert('✅ Daten erfolgreich importiert!\n\nDie Seite wird neu geladen...');
+      alert('Daten erfolgreich importiert!\n\nDie Seite wird neu geladen...');
       window.location.reload();
     } catch (error) {
-      alert('❌ Import fehlgeschlagen. Bitte überprüfe die Datei.');
+      alert('Import fehlgeschlagen. Bitte überprüfe die Datei.');
       console.error(error);
     }
 
@@ -150,12 +152,13 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
   };
   
   return (
-    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-      <div className="max-w-4xl mx-auto">
-        <BackButton onClick={() => navigate('/')} label={t('menu.back_to_menu')} />
-
+    <PageShell
+      title={t('settings.settings')}
+      width="md"
+      onBack={() => navigate('/')}
+      backLabel={t('menu.back_to_menu')}
+    >
         <Card variant="elevated" className="p-6 md:p-8">
-          <h2 className="m3-headline-small font-bold mb-6 text-on-surface">{t('settings.settings')}</h2>
 
           <div className="space-y-6">
             {/* PWA Installation */}
@@ -173,7 +176,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                         <Smartphone size={20} className="text-on-success-container" />
                       </div>
                       <div>
-                        <p className="text-on-success-container font-semibold">{t('settings.app_installed')} ✅</p>
+                        <p className="text-on-success-container font-semibold">{t('settings.app_installed')} </p>
                         <p className="text-on-success-container text-sm">Die App läuft als eigenständige Anwendung.</p>
                       </div>
                     </div>
@@ -192,7 +195,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
 
                     <div className="mt-3 p-3 bg-primary-container rounded-m3-md">
                       <p className="text-sm text-on-primary-container">
-                        📱 <strong className="text-on-primary-container">{t('settings.pwa_benefits')}</strong>
+                        <strong className="text-on-primary-container">{t('settings.pwa_benefits')}</strong>
                       </p>
                       <ul className="text-sm text-on-primary-container mt-2 space-y-1 ml-4 list-disc">
                         <li>{t('settings.pwa_benefit_offline')}</li>
@@ -204,8 +207,8 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
 
                     <div className="mt-3 p-3 bg-surface-container rounded-m3-md">
                       <p className="text-xs text-on-surface-variant">
-                        💡 <strong>iOS:</strong> {t('settings.pwa_ios_tip')}<br/>
-                        💡 <strong>Android:</strong> {t('settings.pwa_android_tip')}
+                        <strong>iOS:</strong> {t('settings.pwa_ios_tip')}<br/>
+                        <strong>Android:</strong> {t('settings.pwa_android_tip')}
                       </p>
                     </div>
                   </>
@@ -223,7 +226,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               <div className="space-y-3">
                 {/* Modern Theme */}
                 <button
-                  onClick={() => updateSettings({ theme: 'modern' })}
+                  onClick={(e) => revealTheme('modern', e, () => updateSettings({ theme: 'modern' }))}
                   className={`w-full p-4 rounded-m3-lg border-2 transition-all ${
                     settings.theme === 'modern'
                       ? 'border-primary bg-primary-container'
@@ -248,7 +251,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
 
                 {/* Modern Light Theme */}
                 <button
-                  onClick={() => updateSettings({ theme: 'modern-light' })}
+                  onClick={(e) => revealTheme('modern-light', e, () => updateSettings({ theme: 'modern-light' }))}
                   className={`w-full p-4 rounded-m3-lg border-2 transition-all ${
                     settings.theme === 'modern-light'
                       ? 'border-primary bg-primary-container'
@@ -412,14 +415,16 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 Language / Sprache
               </h3>
 
-              <select
+              <Select<'de' | 'en'>
                 value={settings.language}
-                onChange={(e) => updateSettings({ language: e.target.value as 'en' | 'de' })}
-                className="w-full p-3 rounded-m3-sm bg-surface-container border border-outline-variant text-on-surface cursor-pointer focus:border-primary focus:outline-none transition-colors"
-              >
-                <option value="de">🇩🇪 Deutsch</option>
-                <option value="en">🇬🇧 English</option>
-              </select>
+                onChange={(language) => updateSettings({ language })}
+                size="lg"
+                aria-label="Language / Sprache"
+                options={[
+ { value:'de', label:' Deutsch' },
+ { value:'en', label:' English' },
+                ]}
+              />
 
               <p className="text-sm text-on-surface-variant mt-2">
                 Language changes are applied instantly
@@ -462,7 +467,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
 
                 <div className="p-3 bg-tertiary-container rounded-m3-md">
                   <p className="text-sm text-on-tertiary-container">
-                    ℹ️ {t('settings.export_info')}
+                    ℹ {t('settings.export_info')}
                   </p>
                 </div>
               </div>
@@ -567,7 +572,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               <div className="bg-surface-container rounded-m3-md p-4 mb-4">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-2xl">
-                    {currentTenant?.avatar}
+                    <Icon name={iconForEmoji(currentTenant?.avatar)} size={26} />
                   </div>
                   <div>
                     <p className="font-semibold text-on-surface">{currentTenant?.name}</p>
@@ -581,7 +586,6 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
             </div>
           </div>
         </Card>
-      </div>
 
       {/* Bug Report Detail Modal */}
       {selectedBugReport && (
@@ -759,7 +763,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
           currentRoute={window.location.pathname}
         />
       )}
-    </div>
+    </PageShell>
   );
 };
 

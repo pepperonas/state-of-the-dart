@@ -1,7 +1,7 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { MotionConfig } from 'framer-motion';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { TenantProvider } from './context/TenantContext';
 import { GameProvider } from './context/GameContext';
 import { PlayerProvider } from './context/PlayerContext';
@@ -55,6 +55,7 @@ const lazyWithRetry = (componentImport: () => Promise<any>) =>
   });
 
 // Lazy load heavy components
+const Landing = lazyWithRetry(() => import('./components/landing/Landing'));
 const GameScreen = lazyWithRetry(() => import('./components/game/GameScreen'));
 const PlayerManagement = lazyWithRetry(() => import('./components/player/PlayerManagement'));
 const PlayerProfile = lazyWithRetry(() => import('./components/player/PlayerProfile'));
@@ -105,6 +106,26 @@ function RouteLogger() {
     logBuffer.log('info', 'navigation', `Route: ${pathname}`);
   }, [pathname]);
   return null;
+}
+
+/**
+ * `/` — the one place where landing page and app meet.
+ *
+ * Signed out → the public landing. Signed in → the app home, exactly as before.
+ * While the session is still being restored we render nothing rather than
+ * flashing the landing at a returning user for a frame.
+ */
+function HomeRoute() {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) return <LoadingScreen />;
+  if (!isAuthenticated) return <Landing />;
+
+  return (
+    <ProtectedRoute>
+      <MainMenu />
+    </ProtectedRoute>
+  );
 }
 
 function AppContent() {
@@ -199,12 +220,17 @@ function AppContent() {
                         </ProtectedRoute>
                       } />
                       
-                      {/* Protected App Routes */}
-                      <Route path="/" element={
-                        <ProtectedRoute>
-                          <MainMenu />
-                        </ProtectedRoute>
-                      } />
+                      {/* The seam between landing page and app.
+                          `/` is a SWITCH, not a redirect: signed out it is the public
+                          landing, signed in it is the app home. That keeps every
+                          `navigate('/')` and hard `location.href = '/'` inside the app
+                          meaning "app home" — a redirect here would throw a player
+                          mid-match onto the marketing page. It also keeps the PWA's
+                          `start_url: /` correct in both states. */}
+                      <Route path="/" element={<HomeRoute />} />
+
+                      {/* The landing stays reachable while signed in. */}
+                      <Route path="/willkommen" element={<Landing />} />
                       
                       <Route path="/dashboard" element={
                         <ProtectedRoute>

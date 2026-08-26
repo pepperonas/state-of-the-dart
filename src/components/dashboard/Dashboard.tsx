@@ -15,6 +15,7 @@ import MatchDetailModal from './MatchDetailModal';
 import { motion } from 'framer-motion';
 import { BackButton, Button, Card, AnimatedNumber } from '../common';
 import { staggerChild } from '../../utils/motion';
+import { Icon, iconForEmoji } from '../icons';
 
 interface RecentActivity {
   id: string;
@@ -201,20 +202,20 @@ const Dashboard: React.FC = () => {
           
           // Determine title based on main player
           let title = 'Match gespielt';
-          let icon = '🎯';
+          let icon = 'board';
           
           if (match.winner) {
             if (mainPlayerId && match.winner === mainPlayerId) {
               title = 'Spiel gewonnen!';
-              icon = '🏆';
+              icon = 'trophy';
             } else if (mainPlayerId) {
               // Main player lost - show who won
               title = `${winnerName} gewonnen`;
-              icon = '🏆';
+              icon = 'medal';
             } else {
               // No main player - show winner
               title = `${winnerName} gewonnen`;
-              icon = '🏆';
+              icon = 'medal';
             }
           }
           
@@ -299,7 +300,7 @@ const Dashboard: React.FC = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="m3-headline-medium font-bold text-on-surface mb-2">
-            Willkommen zurück, {user?.name}! 👋
+            Willkommen zurück, {user?.name}!
           </h1>
           <p className="text-on-surface-variant">
             {hasActiveSubscription ? (
@@ -313,7 +314,7 @@ const Dashboard: React.FC = () => {
               )
             ) : (
               <span>
-                🎁 Noch <strong className="text-primary">{trialDaysLeft} Tage</strong> Trial
+                Noch <strong className="text-primary">{trialDaysLeft} Tage</strong> Trial
               </span>
             )}
           </p>
@@ -358,7 +359,7 @@ const Dashboard: React.FC = () => {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
           <motion.div {...staggerChild(0)}>
             <Card variant="elevated" className="p-4">
-              <div className="text-3xl mb-2">🎯</div>
+              <div className="mb-2 flex justify-center"><Icon name="board" size={30} /></div>
               <p className="m3-headline-small font-bold text-on-surface"><AnimatedNumber value={stats.totalMatches} /></p>
               <p className="m3-body-small text-on-surface-variant">Matches</p>
             </Card>
@@ -366,7 +367,7 @@ const Dashboard: React.FC = () => {
 
           <motion.div {...staggerChild(1)}>
             <Card variant="elevated" className="p-4">
-              <div className="text-3xl mb-2">🏆</div>
+              <div className="mb-2 flex justify-center"><Icon name="trophy" size={30} /></div>
               <p className="m3-headline-small font-bold text-on-surface"><AnimatedNumber value={stats.totalWins} /></p>
               <p className="m3-body-small text-on-surface-variant">Siege</p>
             </Card>
@@ -374,7 +375,7 @@ const Dashboard: React.FC = () => {
 
           <motion.div {...staggerChild(2)}>
             <Card variant="elevated" className="p-4">
-              <div className="text-3xl mb-2">📊</div>
+              <div className="mb-2 flex justify-center"><Icon name="percent" size={30} /></div>
               <p className="m3-headline-small font-bold text-on-surface"><AnimatedNumber value={stats.winRate} />%</p>
               <p className="m3-body-small text-on-surface-variant">Win Rate</p>
             </Card>
@@ -382,7 +383,7 @@ const Dashboard: React.FC = () => {
 
           <motion.div {...staggerChild(3)}>
             <Card variant="elevated" className="p-4">
-              <div className="text-3xl mb-2">🔥</div>
+              <div className="mb-2 flex justify-center"><Icon name="flame" size={30} /></div>
               <p className="m3-headline-small font-bold text-on-surface"><AnimatedNumber value={stats.currentStreak} /></p>
               <p className="m3-body-small text-on-surface-variant">Streak</p>
             </Card>
@@ -390,7 +391,7 @@ const Dashboard: React.FC = () => {
 
           <motion.div {...staggerChild(4)}>
             <Card variant="elevated" className="p-4">
-              <div className="text-3xl mb-2">📈</div>
+              <div className="mb-2 flex justify-center"><Icon name="chartUp" size={30} /></div>
               <p className="m3-headline-small font-bold text-on-surface"><AnimatedNumber value={stats.averageScore} decimals={1} /></p>
               <p className="m3-body-small text-on-surface-variant">Average</p>
             </Card>
@@ -398,7 +399,7 @@ const Dashboard: React.FC = () => {
 
           <motion.div {...staggerChild(5)}>
             <Card variant="elevated" className="p-4">
-              <div className="text-3xl mb-2">⚡</div>
+              <div className="mb-2 flex justify-center"><Icon name="target" size={30} /></div>
               <p className="m3-headline-small font-bold text-on-surface"><AnimatedNumber value={stats.total180s} /></p>
               <p className="m3-body-small text-on-surface-variant">180s</p>
             </Card>
@@ -434,7 +435,7 @@ const Dashboard: React.FC = () => {
                         }
                       }}
                     >
-                      <div className="text-3xl">{activity.icon}</div>
+                      <Icon name={iconForEmoji(activity.icon)} size={30} />
                       <div className="flex-1 min-w-0">
                         <p className="text-on-surface font-semibold truncate">
                           {activity.title}
@@ -487,10 +488,10 @@ const Dashboard: React.FC = () => {
             {/* Motivation Card */}
             <Card variant="filled" className="p-6 bg-primary-container text-on-primary-container">
               <div className="text-center">
-                <div className="text-5xl mb-3">🎯</div>
+                <div className="mb-3 flex justify-center"><Icon name="flame" size={44} /></div>
                 <h3 className="m3-title-medium font-bold text-on-primary-container mb-2">
                   {stats.currentStreak > 0 ? (
-                    <>Du bist on fire! 🔥</>
+                    <>Du bist on fire! </>
                   ) : stats.totalMatches === 0 ? (
                     <>Let's get started!</>
                   ) : (
@@ -519,7 +520,7 @@ const Dashboard: React.FC = () => {
 
         {/* Loading Overlay for Match */}
         {loadingMatch && (
-          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 m3-scrim-enter">
             <Loader className="animate-spin text-primary" size={48} />
           </div>
         )}

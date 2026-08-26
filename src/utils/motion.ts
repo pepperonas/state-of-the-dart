@@ -72,3 +72,14 @@ export const dialogMotion = {
   exit: { opacity: 0, scale: 0.95, y: 8 },
   transition: springStandardDefault,
 };
+
+/**
+ * Chart motion (recharts).
+ *
+ * Recharts only accepts its own easing keywords — it will not take a
+ * cubic-bezier — so `ease-out` is the closest thing to the emphasized-decelerate
+ * curve the rest of the app uses. The duration is a real token value
+ * (`--m3-dur-long-4` = 600ms); recharts' own default is 1500ms, which reads as
+ * sluggish next to everything else on screen.
+ */
+export const CHART_MOTION = { duration: 600, easing: 'ease-out' } as const;

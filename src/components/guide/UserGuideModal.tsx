@@ -41,7 +41,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
       case 'overview':
         return (
           <div className="space-y-6">
-            <h3 className="m3-headline-small text-on-surface">Willkommen bei State of the Dart! 🎯</h3>
+            <h3 className="m3-headline-small text-on-surface">Willkommen bei State of the Dart! </h3>
             <p className="text-on-surface-variant leading-relaxed">
               State of the Dart ist eine professionelle Dart-Scoring-App mit umfangreichen Features für Spieler aller Levels.
               Von einfachen Matches bis hin zu kompletten Turnieren – alles ist möglich.
@@ -64,7 +64,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
             </div>
 
             <div className="rounded-m3-md p-4 bg-tertiary-container text-on-tertiary-container">
-              <h4 className="m3-title-medium text-on-surface mb-2">💡 Tipp für Einsteiger</h4>
+              <h4 className="m3-title-medium text-on-surface mb-2"> Tipp für Einsteiger</h4>
               <p className="text-on-surface-variant">
                 Starte mit einem <strong>Quick Match</strong> gegen einen Bot, um die App kennenzulernen.
                 Die KI-Gegner passen sich deinem Skill-Level an!
@@ -76,7 +76,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
       case 'quickstart':
         return (
           <div className="space-y-6">
-            <h3 className="m3-headline-small text-on-surface">Schnellstart-Anleitung 🚀</h3>
+            <h3 className="m3-headline-small text-on-surface">Schnellstart-Anleitung </h3>
 
             <div className="space-y-4">
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
@@ -140,7 +140,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
 
             <div className="rounded-m3-md p-4 bg-success-container text-on-success-container">
               <p className="m3-body-medium text-sm">
-                <strong>✓ Fertig!</strong> Du bist bereit für dein erstes Match. Viel Erfolg! 🎯
+                <strong> Fertig!</strong> Du bist bereit für dein erstes Match. Viel Erfolg!
               </p>
             </div>
           </div>
@@ -149,7 +149,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
       case 'game':
         return (
           <div className="space-y-6">
-            <h3 className="m3-headline-small text-on-surface">Spiel-Modi 🎮</h3>
+            <h3 className="m3-headline-small text-on-surface">Spiel-Modi </h3>
 
             <div className="space-y-4">
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
@@ -210,7 +210,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
       case 'players':
         return (
           <div className="space-y-6">
-            <h3 className="m3-headline-small text-on-surface">Spieler-Verwaltung 👥</h3>
+            <h3 className="m3-headline-small text-on-surface">Spieler-Verwaltung </h3>
 
             <div className="space-y-4">
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
@@ -232,7 +232,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
                   Setze einen Spieler als Haupt-Profil, um dessen Stats im Dashboard zu sehen.
                 </p>
                 <p className="text-on-surface-variant text-sm">
-                  <strong>Klicke auf die Krone</strong> 👑 neben einem Spieler, um ihn als Main Player zu setzen.
+                  <strong>Klicke auf die Krone</strong> neben einem Spieler, um ihn als Main Player zu setzen.
                 </p>
               </div>
 
@@ -249,12 +249,12 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
                   <li>• <strong>Avatar:</strong> Professionelles Design mit geschwungener Schrift oder Emoji</li>
                 </ul>
                 <p className="text-on-surface-variant text-sm mt-2">
-                  💡 <strong>Tipp:</strong> Der gesamte Listeneintrag ist klickbar - nicht nur das Auge-Icon!
+                  <strong>Tipp:</strong> Der gesamte Listeneintrag ist klickbar - nicht nur das Auge-Icon!
                 </p>
               </div>
 
               <div className="rounded-m3-md p-4 bg-primary-container text-on-primary-container">
-                <h4 className="m3-title-medium text-on-surface mb-2">🔍 Suchfunktion & Pagination</h4>
+                <h4 className="m3-title-medium text-on-surface mb-2"> Suchfunktion & Pagination</h4>
                 <p className="text-on-surface-variant text-sm mb-2">
                   <strong>Suche nach Spielern:</strong> Nutze das Suchfeld, um schnell einen Spieler zu finden.
                 </p>
@@ -264,7 +264,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
               </div>
 
               <div className="rounded-m3-md p-4 bg-secondary-container text-on-secondary-container">
-                <h4 className="m3-title-medium text-on-surface mb-2">💡 Tipp: Multi-Tenant</h4>
+                <h4 className="m3-title-medium text-on-surface mb-2"> Tipp: Multi-Tenant</h4>
                 <p className="text-on-surface-variant text-sm">
                   Du kannst mehrere <strong>Profile/Tenants</strong> erstellen (z.B. Familie, Verein, Freunde).
                   Wechsle zwischen Profilen in den <strong>Einstellungen</strong>.
@@ -277,7 +277,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
       case 'training':
         return (
           <div className="space-y-6">
-            <h3 className="m3-headline-small text-on-surface">Trainingsmodi 🏋️</h3>
+            <h3 className="m3-headline-small text-on-surface">Trainingsmodi </h3>
 
             <div className="space-y-4">
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
@@ -326,7 +326,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
               </div>
 
               <div className="rounded-m3-md p-4 bg-success-container text-on-success-container">
-                <h4 className="m3-title-medium text-on-surface mb-2">📊 Training-Stats</h4>
+                <h4 className="m3-title-medium text-on-surface mb-2"> Training-Stats</h4>
                 <p className="text-on-surface-variant text-sm">
                   Alle Training-Sessions werden gespeichert und in deiner <strong>Heatmap</strong> berücksichtigt!
                   Sieh deinen Fortschritt in den Statistiken.
@@ -339,7 +339,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
       case 'stats':
         return (
           <div className="space-y-6">
-            <h3 className="m3-headline-small text-on-surface">Statistiken & Analytics 📊</h3>
+            <h3 className="m3-headline-small text-on-surface">Statistiken & Analytics </h3>
 
             <div className="space-y-4">
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
@@ -388,7 +388,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
               </div>
 
               <div className="rounded-m3-md p-4 bg-primary-container text-on-primary-container">
-                <h4 className="m3-title-medium text-on-surface mb-2">📈 Export-Funktion</h4>
+                <h4 className="m3-title-medium text-on-surface mb-2"> Export-Funktion</h4>
                 <p className="text-on-surface-variant text-sm">
                   Exportiere deine Stats in verschiedenen Formaten: CSV, Excel, PDF, JSON.
                   Perfekt für eigene Analysen!
@@ -401,7 +401,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
       case 'achievements':
         return (
           <div className="space-y-6">
-            <h3 className="m3-headline-small text-on-surface">Achievements & Erfolge 🏆</h3>
+            <h3 className="m3-headline-small text-on-surface">Achievements & Erfolge </h3>
 
             <p className="text-on-surface-variant">
               Schalte <strong>145+ Achievements</strong> frei, indem du bestimmte Meilensteine erreichst!
@@ -423,26 +423,26 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
                 <h4 className="m3-title-medium text-on-surface mb-2">Achievement-Beispiele</h4>
                 <div className="space-y-3">
                   <div className="bg-surface-container p-3 rounded-m3-sm">
-                    <p className="text-on-surface m3-title-medium">🎯 Erste Schritte</p>
+                    <p className="text-on-surface m3-title-medium"> Erste Schritte</p>
                     <p className="text-on-surface-variant text-sm">Erstes Match abgeschlossen</p>
                   </div>
                   <div className="bg-surface-container p-3 rounded-m3-sm">
-                    <p className="text-on-surface m3-title-medium">💯 Century</p>
+                    <p className="text-on-surface m3-title-medium"> Century</p>
                     <p className="text-on-surface-variant text-sm">100+ Punkte in einem Wurf</p>
                   </div>
                   <div className="bg-surface-container p-3 rounded-m3-sm">
-                    <p className="text-on-surface m3-title-medium">⚡ Maximum</p>
+                    <p className="text-on-surface m3-title-medium"> Maximum</p>
                     <p className="text-on-surface-variant text-sm">180 Punkte (3x T20)</p>
                   </div>
                   <div className="bg-surface-container p-3 rounded-m3-sm">
-                    <p className="text-on-surface m3-title-medium">🔥 Hot Streak</p>
+                    <p className="text-on-surface m3-title-medium"> Hot Streak</p>
                     <p className="text-on-surface-variant text-sm">5 Spiele in Folge gewonnen</p>
                   </div>
                 </div>
               </div>
 
               <div className="rounded-m3-md p-4 bg-tertiary-container text-on-tertiary-container">
-                <h4 className="m3-title-medium text-on-surface mb-2">🏅 Benachrichtigungen</h4>
+                <h4 className="m3-title-medium text-on-surface mb-2"> Benachrichtigungen</h4>
                 <p className="text-on-surface-variant text-sm">
                   Achievements werden während des Spiels automatisch freigeschaltet und angezeigt!
                   Aktiviere Sound & Benachrichtigungen in den Einstellungen.
@@ -455,7 +455,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
       case 'settings':
         return (
           <div className="space-y-6">
-            <h3 className="m3-headline-small text-on-surface">Einstellungen ⚙️</h3>
+            <h3 className="m3-headline-small text-on-surface">Einstellungen </h3>
 
             <div className="space-y-4">
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
@@ -503,7 +503,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
               </div>
 
               <div className="rounded-m3-md p-4 bg-error-container text-on-error-container">
-                <h4 className="m3-title-medium text-on-surface mb-2">⚠️ Gefahrenzone</h4>
+                <h4 className="m3-title-medium text-on-surface mb-2"> Gefahrenzone</h4>
                 <p className="text-on-surface-variant text-sm">
                   <strong>Alle Daten löschen:</strong> Vorsicht! Löscht alle Matches, Spieler und Statistiken unwiderruflich.
                 </p>
@@ -515,7 +515,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
       case 'admin':
         return (
           <div className="space-y-6">
-            <h3 className="m3-headline-small text-on-surface">Admin-Panel 👑</h3>
+            <h3 className="m3-headline-small text-on-surface">Admin-Panel </h3>
 
             <div className="rounded-m3-md p-4 bg-tertiary-container text-on-tertiary-container">
               <p className="m3-body-medium text-sm">
@@ -571,11 +571,11 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
       case 'tips':
         return (
           <div className="space-y-6">
-            <h3 className="m3-headline-small text-on-surface">Tipps & Tricks 💡</h3>
+            <h3 className="m3-headline-small text-on-surface">Tipps & Tricks </h3>
 
             <div className="space-y-4">
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
-                <h4 className="m3-title-medium text-on-surface mb-2">🎯 Für Anfänger</h4>
+                <h4 className="m3-title-medium text-on-surface mb-2"> Für Anfänger</h4>
                 <ul className="text-on-surface-variant text-sm space-y-2">
                   <li>• Starte mit <strong>Bot-Gegnern Level 1-3</strong> zum Üben</li>
                   <li>• Nutze <strong>Trainingsmodi</strong> um spezifische Skills zu verbessern</li>
@@ -585,7 +585,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
               </div>
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
-                <h4 className="m3-title-medium text-on-surface mb-2">📊 Stats nutzen</h4>
+                <h4 className="m3-title-medium text-on-surface mb-2"> Stats nutzen</h4>
                 <ul className="text-on-surface-variant text-sm space-y-2">
                   <li>• Prüfe deine <strong>Heatmap</strong> um Schwächen zu erkennen</li>
                   <li>• Verfolge deine <strong>Average-Entwicklung</strong> über Zeit</li>
@@ -595,7 +595,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
               </div>
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
-                <h4 className="m3-title-medium text-on-surface mb-2">⚡ Schnelle Eingabe & Undo</h4>
+                <h4 className="m3-title-medium text-on-surface mb-2"> Schnelle Eingabe & Undo</h4>
                 <ul className="text-on-surface-variant text-sm space-y-2">
                   <li>• Nach 3 Darts wird automatisch bestätigt (600ms Delay)</li>
                   <li>• <strong>Undo-Button:</strong> Macht den letzten Wurf rückgängig</li>
@@ -607,7 +607,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
               </div>
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
-                <h4 className="m3-title-medium text-on-surface mb-2">🏆 Achievements farmen</h4>
+                <h4 className="m3-title-medium text-on-surface mb-2"> Achievements farmen</h4>
                 <ul className="text-on-surface-variant text-sm space-y-2">
                   <li>• Spiele verschiedene Modi für unterschiedliche Achievements</li>
                   <li>• Nutze <strong>Training</strong> für skill-basierte Erfolge</li>
@@ -616,7 +616,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
               </div>
 
               <div className="rounded-m3-md p-4 bg-secondary-container text-on-secondary-container">
-                <h4 className="m3-title-medium text-on-surface mb-2">🐛 Probleme melden</h4>
+                <h4 className="m3-title-medium text-on-surface mb-2"> Probleme melden</h4>
                 <p className="text-on-surface-variant text-sm">
                   Bug gefunden? Nutze den <strong>Bug-Report-Button</strong> (neben Undo im Spiel).
                   Screenshots werden automatisch erstellt!
@@ -624,7 +624,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
               </div>
 
               <div className="rounded-m3-md p-4 bg-success-container text-on-success-container">
-                <h4 className="m3-title-medium text-on-surface mb-2">✨ Pro-Tipp</h4>
+                <h4 className="m3-title-medium text-on-surface mb-2"> Pro-Tipp</h4>
                 <p className="text-on-surface-variant text-sm">
                   Erstelle separate <strong>Tenants/Profile</strong> für verschiedene Szenarien:
                   Familie, Verein, Solo-Training. So bleiben deine Stats organisiert!
@@ -641,12 +641,12 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center z-50 p-4 overflow-y-auto"
+      className="fixed inset-0 flex items-center justify-center z-50 p-4 overflow-y-auto m3-scrim-enter"
       style={{ backgroundColor: 'color-mix(in srgb, var(--m3-scrim) 50%, transparent)' }}
       onClick={onClose}
     >
       <div
-        className="m3-dialog !max-w-6xl !p-0 overflow-hidden flex flex-col"
+        className="m3-dialog m3-dialog-enter !max-w-6xl !p-0 overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -690,7 +690,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-4 md:p-6">
+          <div key={activeSection} className="flex-1 overflow-y-auto p-4 md:p-6 m3-enter-fade">
             {renderContent()}
           </div>
         </div>

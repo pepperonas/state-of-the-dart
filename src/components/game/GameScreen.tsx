@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo, Suspense, lazy } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, X, Bot, ChevronDown, ChevronUp, AlertTriangle, Smile, Flame } from 'lucide-react';
+import { ArrowLeft, RotateCcw, X, Bot, ChevronDown, AlertTriangle, Smile, Flame, UserMinus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 const Confetti = lazy(() => import('react-confetti'));
 const ThrowChart = lazy(() => import('./ThrowChart'));
-import { useGame } from '../../context/GameContext';
+import { useGame, MIN_MATCH_PLAYERS } from '../../context/GameContext';
 import { usePlayer } from '../../context/PlayerContext';
 import { useSettings } from '../../context/SettingsContext';
 import { useTenant } from '../../context/TenantContext';
@@ -19,7 +19,7 @@ import AchievementHint from '../achievements/AchievementHint';
 import SpinnerWheel from './SpinnerWheel';
 import BugReportModal from '../bugReport/BugReportModal';
 import PlayerAvatar from '../player/PlayerAvatar';
-import EmojiPicker from '../player/EmojiPicker';
+import AvatarPicker from '../player/AvatarPicker';
 import { Dart, Player, GameType, MatchSettings, Throw, HeatmapData } from '../../types/index';
 import { calculateThrowScore, isBogeyNumber } from '../../utils/scoring';
 import { getCheckoutAlternatives } from '../../data/checkoutTable';
@@ -29,8 +29,9 @@ import { api } from '../../services/api';
 import { createAdaptiveBotPlayer, getAdaptiveBotConfigs, generateBotTurn, AdaptiveBotCategory } from '../../utils/botLogic';
 import BackButton from '../common/BackButton';
 import { motion } from 'framer-motion';
-import { Button, IconButton, Card } from '../common';
+import { Button, IconButton, Card, Dialog, Select } from '../common';
 import { staggerChild, springSpatialDefault, springSpatialFast } from '../../utils/motion';
+import { Icon, iconForEmoji } from '../icons';
 
 const GameScreen: React.FC = () => {
   const { t } = useTranslation();
@@ -82,6 +83,9 @@ const GameScreen: React.FC = () => {
   // Confirmation dialogs
   const [showBackConfirm, setShowBackConfirm] = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
+  // Player pending removal from the running match (id, so the callback stays stable
+  // across renders and PlayerScore's React.memo keeps working).
+  const [playerToRemoveId, setPlayerToRemoveId] = useState<string | null>(null);
 
   // Leg won animation state
   const [legWonAnimation, setLegWonAnimation] = useState<{
@@ -545,7 +549,7 @@ const GameScreen: React.FC = () => {
     if (selectedPlayers.length < 2) {
       // Add a guest player if only one selected
       try {
-        const guestPlayer = await addPlayer(`Guest ${Date.now() % 1000}`, '👤');
+        const guestPlayer = await addPlayer(`Guest ${Date.now() % 1000}`, 'user');
         finalPlayers = [...selectedPlayers, guestPlayer];
         setSelectedPlayers(finalPlayers);
       } catch (error) {
@@ -810,6 +814,22 @@ const GameScreen: React.FC = () => {
     return newRemaining === 0 && (!requiresDouble || lastDart?.multiplier === 2);
   }, [state.currentThrow, state.currentMatch, state.currentPlayerIndex, isEditingThrow]);
 
+  // The last confirmed throw of the current leg — labels the undo button so the
+  // player sees whose visit they are about to take back. Mirrors UNDO_THROW, which
+  // also only ever reaches back within the current leg.
+  const lastThrowInfo = useMemo(() => {
+    const match = state.currentMatch;
+    if (!match || match.status !== 'in-progress') return null;
+    const leg = match.legs[match.currentLegIndex];
+    const last = leg?.throws[leg.throws.length - 1];
+    if (!last) return null;
+    return {
+      playerName: match.players.find(p => p.playerId === last.playerId)?.name ?? '?',
+      score: last.score,
+      isBust: last.isBust,
+    };
+  }, [state.currentMatch]);
+
   // Auto-confirm on checkout ONLY when all 3 darts have been thrown
   useEffect(() => {
     if (!state.currentMatch || state.currentThrow.length < 3) return;
@@ -900,6 +920,30 @@ const GameScreen: React.FC = () => {
     dispatch({ type: 'UNDO_THROW' });
   };
   
+  // Stable identity: PlayerScore is memoized, an inline arrow would re-render every card.
+  const handleRequestRemovePlayer = React.useCallback((playerId: string) => {
+    setPlayerToRemoveId(playerId);
+  }, []);
+
+  const confirmRemovePlayer = () => {
+    if (!playerToRemoveId) return;
+
+    // Only the player at the oche loses their pending darts — and only then may the
+    // correction state be cleared. Clearing it while somebody else's darts are still
+    // in the input would re-arm the 3-dart auto-confirm and commit their correction
+    // behind their back.
+    const wasAtTheOche =
+      state.currentMatch?.players[state.currentPlayerIndex]?.playerId === playerToRemoveId;
+
+    dispatch({ type: 'REMOVE_PLAYER', payload: { playerId: playerToRemoveId } });
+    setPlayerToRemoveId(null);
+
+    if (wasAtTheOche) {
+      setIsEditingThrow(false);
+      setEditingDartIndex(null);
+    }
+  };
+
   const handleRemoveDart = React.useCallback(() => {
     dispatch({ type: 'REMOVE_DART' });
   }, [dispatch]);
@@ -1025,14 +1069,14 @@ const GameScreen: React.FC = () => {
                       onClick={() => setShowPlayerNameInput(true)}
                       className="p-3 rounded-m3-lg border-2 border-dashed border-outline-variant hover:border-outline transition-all"
                     >
-                      <div className="text-2xl mb-1">➕</div>
+                      <div className="mb-1 flex justify-center"><Icon name="plus" size={24} /></div>
                       <div className="m3-label-large text-on-surface">{t('game.add_player')}</div>
                     </button>
                     <button
                       onClick={() => setShowBotSelector(true)}
                       className="p-3 rounded-m3-lg border-2 border-dashed border-primary-700 hover:border-primary-500 transition-all bg-primary-container/40"
                     >
-                      <div className="text-2xl mb-1">🤖</div>
+                      <div className="mb-1 flex justify-center"><Icon name="robot" size={24} /></div>
                       <div className="m3-label-large text-primary">{t('game.add_bot')}</div>
                     </button>
                   </>
@@ -1068,7 +1112,7 @@ const GameScreen: React.FC = () => {
 
                               // Save bot to database with its existing ID
                               try {
-                                const createdBot = await addPlayer(bot.name, bot.avatar || '🤖', bot.isBot, bot.botLevel, bot.id);
+                                const createdBot = await addPlayer(bot.name, bot.avatar || 'robot', bot.isBot, bot.botLevel, bot.id);
                                 setSelectedPlayers([...selectedPlayers, createdBot]);
                               } catch (error) {
                                 console.error('Failed to create bot player:', error);
@@ -1078,7 +1122,7 @@ const GameScreen: React.FC = () => {
                             }}
                             className="p-3 rounded-m3-lg bg-surface-container-high hover:bg-surface-container-highest border-2 border-transparent hover:border-primary-500 transition-all text-center"
                           >
-                            <div className="text-3xl mb-2">{config.icon}</div>
+                            <div className="mb-2 flex justify-center"><Icon name={iconForEmoji(config.icon)} size={30} /></div>
                             <div className="m3-label-large text-on-surface">{config.nameDE}</div>
                             <div className="m3-body-small text-on-surface-variant mt-1">{config.descriptionDE}</div>
                           </button>
@@ -1183,48 +1227,44 @@ const GameScreen: React.FC = () => {
                 <label className="block m3-label-large mb-2 text-on-surface">
                   {t('game.starting_score')}
                 </label>
-                <select
+                <Select<number>
                   value={gameSettings.startScore}
-                  onChange={(e) => setGameSettings({ ...gameSettings, startScore: parseInt(e.target.value) })}
-                  className="w-full p-2 rounded-m3-lg border border-outline-variant bg-surface-container text-on-surface"
-                >
-                  <option value={301}>301</option>
-                  <option value={501}>501</option>
-                  <option value={701}>701</option>
-                  <option value={1001}>1001</option>
-                </select>
+                  onChange={(startScore) => setGameSettings({ ...gameSettings, startScore })}
+                  aria-label={t('game.starting_score')}
+                  options={[301, 501, 701, 1001].map((n) => ({ value: n, label: String(n) }))}
+                />
               </div>
 
               <div>
                 <label className="block m3-label-large mb-2 text-on-surface">
                   {t('game.legs_to_win')}
                 </label>
-                <select
+                <Select<number>
                   value={gameSettings.legsToWin}
-                  onChange={(e) => setGameSettings({ ...gameSettings, legsToWin: parseInt(e.target.value) })}
-                  className="w-full p-2 rounded-m3-lg border border-outline-variant bg-surface-container text-on-surface"
-                >
-                  <option value={1}>{t('game.first_to')} 1</option>
-                  <option value={2}>{t('game.first_to')} 2</option>
-                  <option value={3}>{t('game.first_to')} 3</option>
-                  <option value={5}>{t('game.first_to')} 5</option>
-                </select>
+                  onChange={(legsToWin) => setGameSettings({ ...gameSettings, legsToWin })}
+                  aria-label={t('game.legs_to_win')}
+                  options={[1, 2, 3, 5].map((n) => ({
+                    value: n,
+                    label: `${t('game.first_to')} ${n}`,
+                  }))}
+                />
               </div>
 
               <div>
                 <label className="block m3-label-large mb-2 text-on-surface">
                   {t('game.sets_to_win')}
                 </label>
-                <select
+                <Select<number>
                   value={gameSettings.setsToWin}
-                  onChange={(e) => setGameSettings({ ...gameSettings, setsToWin: parseInt(e.target.value) })}
-                  className="w-full p-2 rounded-m3-lg border border-outline-variant bg-surface-container text-on-surface"
-                >
-                  <option value={1}>{t('game.no_sets')}</option>
-                  <option value={2}>{t('game.first_to')} 2</option>
-                  <option value={3}>{t('game.first_to')} 3</option>
-                  <option value={5}>{t('game.first_to')} 5</option>
-                </select>
+                  onChange={(setsToWin) => setGameSettings({ ...gameSettings, setsToWin })}
+                  aria-label={t('game.sets_to_win')}
+                  options={[
+                    { value: 1, label: t('game.no_sets') },
+                    { value: 2, label: `${t('game.first_to')} 2` },
+                    { value: 3, label: `${t('game.first_to')} 3` },
+                    { value: 5, label: `${t('game.first_to')} 5` },
+                  ]}
+                />
               </div>
             </div>
             
@@ -1306,7 +1346,7 @@ const GameScreen: React.FC = () => {
         </div>
         <div className="max-w-4xl w-full relative z-10">
           <motion.div
-            className="glass-card-gold p-12 text-center"
+            className="m3-card m3-elevated p-12 text-center"
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={springSpatialDefault}
@@ -1318,7 +1358,7 @@ const GameScreen: React.FC = () => {
                 transition={{ ...springSpatialDefault, delay: 0.15 }}
                 className="text-6xl md:text-8xl font-bold mb-4"
               >
-                🏆
+                
               </motion.h1>
               <h2 className="text-4xl md:text-6xl font-bold text-on-surface mb-2">
                 {winner?.name} gewinnt!
@@ -1370,21 +1410,21 @@ const GameScreen: React.FC = () => {
                   }});
                 }}
               >
-                🔄 Rematch
+                Rematch
               </Button>
               <Button
                 variant="filled"
                 size="lg"
                 onClick={() => navigate('/stats')}
               >
-                📊 Statistiken
+                Statistiken
               </Button>
               <Button
                 variant="tonal"
                 size="lg"
                 onClick={() => navigate('/')}
               >
-                🏠 Hauptmenü
+                Hauptmenü
               </Button>
             </div>
           </motion.div>
@@ -1395,6 +1435,11 @@ const GameScreen: React.FC = () => {
   
   const currentPlayer = state.currentMatch!.players[state.currentPlayerIndex];
   const currentLeg = state.currentMatch!.legs[state.currentMatch!.currentLegIndex];
+  // Removing is only offered while the match runs and stays a match afterwards.
+  const canRemovePlayers =
+    state.currentMatch!.status === 'in-progress' &&
+    state.currentMatch!.players.length > MIN_MATCH_PLAYERS;
+  const playerToRemove = state.currentMatch!.players.find(p => p.playerId === playerToRemoveId) || null;
   const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer!.playerId);
   const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
   const currentThrowScore = calculateThrowScore(state.currentThrow);
@@ -1419,14 +1464,6 @@ const GameScreen: React.FC = () => {
               onClick={() => setShowBugReportModal(true)}
             >
               <AlertTriangle size={20} />
-            </IconButton>
-
-            <IconButton
-              variant="tonal"
-              label="Letzten Wurf rückgängig machen"
-              onClick={handleUndoThrow}
-            >
-              <RotateCcw size={20} />
             </IconButton>
 
             <IconButton
@@ -1461,6 +1498,8 @@ const GameScreen: React.FC = () => {
                 legsWon={player.legsWon}
                 setsWon={player.setsWon}
                 showSets={(state.currentMatch!.settings.setsToWin || 1) > 1}
+                onRemove={canRemovePlayers ? handleRequestRemovePlayer : undefined}
+                removeLabel={t('game.remove_player')}
               />
             ))}
           </div>
@@ -1479,6 +1518,8 @@ const GameScreen: React.FC = () => {
               isEditingThrow={isEditingThrow}
               remaining={remaining}
               isCheckout={isEarlyCheckout}
+              onUndoThrow={handleUndoThrow}
+              lastThrow={lastThrowInfo}
             />
 
             {state.checkoutSuggestion && (
@@ -1519,11 +1560,11 @@ const GameScreen: React.FC = () => {
                   className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition-all"
                 >
                   <h3 className="m3-title-medium text-on-surface">Match Statistics</h3>
-                  {showMatchStats ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                  <ChevronDown size={24} className={`m3-chevron ${showMatchStats ? 'm3-open' : ''}`} />
                 </button>
 
                 {showMatchStats && (
-                  <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 animate-fade-in">
+                  <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-on-surface-variant">Average:</span>
@@ -1568,25 +1609,35 @@ const GameScreen: React.FC = () => {
             className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition-all"
           >
             <h3 className="m3-title-medium text-on-surface">Wurf-Verlauf</h3>
-            {showThrowHistory ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+            <ChevronDown size={24} className={`m3-chevron ${showThrowHistory ? 'm3-open' : ''}`} />
           </button>
 
           {showThrowHistory && (
-            <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 animate-fade-in">
+            <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
               {/* Leg/Match Toggle */}
-              <div className="flex gap-2 mb-4">
+              <div
+                className="flex gap-1 mb-4 p-1 bg-surface-container rounded-m3-lg m3-segmented"
+                style={{ '--m3-seg-fill': 'var(--m3-primary)' } as React.CSSProperties}
+              >
+                <span
+                  className="m3-segmented-indicator"
+                  data-pos={statsView === 'leg' ? '0' : '1'}
+                  aria-hidden="true"
+                />
                 <button
                   onClick={() => setStatsView('leg')}
-                  className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm transition-all ${
-                    statsView === 'leg' ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
+                  aria-pressed={statsView === 'leg'}
+                  className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm m3-tab ${
+                    statsView === 'leg' ? 'text-on-primary' : 'text-on-surface-variant'
                   }`}
                 >
                   Aktuelles Leg
                 </button>
                 <button
                   onClick={() => setStatsView('match')}
-                  className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm transition-all ${
-                    statsView === 'match' ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
+                  aria-pressed={statsView === 'match'}
+                  className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm m3-tab ${
+                    statsView === 'match' ? 'text-on-primary' : 'text-on-surface-variant'
                   }`}
                 >
                   Gesamtes Spiel
@@ -1688,7 +1739,7 @@ const GameScreen: React.FC = () => {
             className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition-all"
           >
             <h3 className="m3-title-medium text-on-surface">Wurf-Statistik (Chart)</h3>
-            {showThrowChart ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+            <ChevronDown size={24} className={`m3-chevron ${showThrowChart ? 'm3-open' : ''}`} />
           </button>
 
           {showThrowChart && (() => {
@@ -1696,21 +1747,31 @@ const GameScreen: React.FC = () => {
               ? currentLeg.throws
               : state.currentMatch.legs.flatMap(l => l.throws);
             return (
-              <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 animate-fade-in">
+              <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
                 {/* Leg/Match Toggle */}
-                <div className="flex gap-2 mb-4">
+                <div
+                  className="flex gap-1 mb-4 p-1 bg-surface-container rounded-m3-lg m3-segmented"
+                  style={{ '--m3-seg-fill': 'var(--m3-primary)' } as React.CSSProperties}
+                >
+                  <span
+                    className="m3-segmented-indicator"
+                    data-pos={statsView === 'leg' ? '0' : '1'}
+                    aria-hidden="true"
+                  />
                   <button
                     onClick={() => setStatsView('leg')}
-                    className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm transition-all ${
-                      statsView === 'leg' ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
+                    aria-pressed={statsView === 'leg'}
+                    className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm m3-tab ${
+                      statsView === 'leg' ? 'text-on-primary' : 'text-on-surface-variant'
                     }`}
                   >
                     Aktuelles Leg
                   </button>
                   <button
                     onClick={() => setStatsView('match')}
-                    className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm transition-all ${
-                      statsView === 'match' ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
+                    aria-pressed={statsView === 'match'}
+                    className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm m3-tab ${
+                      statsView === 'match' ? 'text-on-primary' : 'text-on-surface-variant'
                     }`}
                   >
                     Gesamtes Spiel
@@ -1734,11 +1795,11 @@ const GameScreen: React.FC = () => {
               <Flame size={24} className="text-orange-400" />
               <h3 className="m3-title-medium text-on-surface">Live-Heatmap (aktuelles Spiel)</h3>
             </div>
-            {showLiveHeatmap ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+            <ChevronDown size={24} className={`m3-chevron ${showLiveHeatmap ? 'm3-open' : ''}`} />
           </button>
 
           {showLiveHeatmap && (
-            <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 animate-fade-in">
+            <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
               {/* Leg/Match Toggle */}
               <div className="flex gap-2 mb-4">
                 <button
@@ -1903,8 +1964,8 @@ const GameScreen: React.FC = () => {
 
       {/* Back to Menu Confirmation Dialog */}
       {showBackConfirm && (
-        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_70%,transparent)] flex items-center justify-center z-50 p-4" onClick={(e) => e.stopPropagation()}>
-          <div className="m3-dialog max-w-md w-full">
+        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_70%,transparent)] flex items-center justify-center z-50 p-4 m3-scrim-enter" onClick={(e) => e.stopPropagation()}>
+          <div className="m3-dialog m3-dialog-enter max-w-md w-full">
             <h3 className="m3-headline-small text-on-surface mb-4">Match verlassen?</h3>
             <p className="text-on-surface-variant mb-2">
               <strong className="text-primary">Pausieren & Verlassen:</strong> Dein Match wird gespeichert und kann jederzeit aus dem Hauptmenü fortgesetzt werden.
@@ -1938,9 +1999,9 @@ const GameScreen: React.FC = () => {
 
       {/* End Match Confirmation Dialog */}
       {showEndConfirm && (
-        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_70%,transparent)] flex items-center justify-center z-50 p-4">
-          <div className="m3-dialog max-w-md w-full">
-            <h3 className="m3-headline-small text-on-surface mb-4">❌ Match beenden?</h3>
+        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_70%,transparent)] flex items-center justify-center z-50 p-4 m3-scrim-enter">
+          <div className="m3-dialog m3-dialog-enter max-w-md w-full">
+            <h3 className="m3-headline-small text-on-surface mb-4"> Match beenden?</h3>
             <p className="text-on-surface-variant mb-6">
               Das Match wird als abgebrochen markiert. Du kannst es später rückgängig machen.
             </p>
@@ -1978,6 +2039,30 @@ const GameScreen: React.FC = () => {
         </div>
       )}
 
+      {/* Remove Player Confirmation */}
+      <Dialog
+        open={Boolean(playerToRemove)}
+        onClose={() => setPlayerToRemoveId(null)}
+        title={t('game.remove_player_title', { name: playerToRemove?.name ?? '' })}
+        actions={
+          <>
+            <Button variant="text" onClick={() => setPlayerToRemoveId(null)}>
+              {t('common.cancel')}
+            </Button>
+            <Button variant="danger" onClick={confirmRemovePlayer} icon={<UserMinus size={18} />}>
+              {t('game.remove_player')}
+            </Button>
+          </>
+        }
+      >
+        <p className="text-on-surface-variant mb-2">
+          {t('game.remove_player_body', { name: playerToRemove?.name ?? '' })}
+        </p>
+        <p className="m3-body-small text-on-surface-variant">
+          {t('game.remove_player_irreversible')}
+        </p>
+      </Dialog>
+
       {/* Bug Report Modal */}
       {showBugReportModal && (
         <BugReportModal
@@ -1988,7 +2073,7 @@ const GameScreen: React.FC = () => {
 
       {/* Emoji Picker Modal */}
       {showEmojiPicker && (
-        <EmojiPicker
+        <AvatarPicker
           onSelect={(emoji) => {
             setNewPlayerAvatar(emoji || undefined);
             setShowEmojiPicker(false);

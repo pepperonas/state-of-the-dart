@@ -36,7 +36,7 @@ export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const defaultTenant: Tenant = {
     id: 'default',
     name: 'Default',
-    avatar: '👤',
+    avatar: 'user',
     createdAt: new Date(),
     lastActive: new Date(),
   };

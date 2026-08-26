@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
+import { dialogMotion, effectsDefault, springSpatialDefault } from '../../utils/motion';
 import { ArrowLeft, RotateCcw, Trophy, Zap, Check, X } from 'lucide-react';
 import { usePlayer } from '../../context/PlayerContext';
 import { Player, Dart } from '../../types/index';
@@ -446,7 +447,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
             </div>
 
             <div className="bg-surface-container rounded-m3-lg p-4 mb-6">
-              <h3 className="text-on-surface font-semibold mb-2">⚡ Spielregeln:</h3>
+              <h3 className="text-on-surface font-semibold mb-2"> Spielregeln:</h3>
               <ul className="text-on-surface-variant text-sm space-y-1">
                 <li>• Jede Runde zielt auf eine bestimmte Zahl</li>
                 <li>• Nur Treffer auf die Zielzahl zählen Punkte</li>
@@ -465,7 +466,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
             >
               {selectedPlayers.length < 2
                 ? `${t('game.select_players')} (${selectedPlayers.length}/2)`
-                : 'Shanghai starten ⚡'
+                :'Shanghai starten'
               }
             </Button>
           </Card>
@@ -484,11 +485,14 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={effectsDefault}
             className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_50%,transparent)] flex items-center justify-center z-50"
           >
             <motion.div
-              initial={{ scale: 0.5 }}
-              animate={{ scale: 1 }}
+              initial={dialogMotion.initial}
+              animate={dialogMotion.animate}
+              exit={dialogMotion.exit}
+              transition={springSpatialDefault}
               className="m3-dialog p-8 text-center max-w-md"
             >
               <Trophy className="w-20 h-20 text-tertiary mx-auto mb-4" />
@@ -497,7 +501,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
               </h2>
               {shanghaiWinner && (
                 <div className="bg-tertiary-container rounded-m3-lg p-3 mb-4">
-                  <p className="text-on-tertiary-container font-bold text-xl">⚡ SHANGHAI! ⚡</p>
+                  <p className="text-on-tertiary-container font-bold text-xl"> SHANGHAI! </p>
                 </div>
               )}
               <p className="text-2xl font-bold mb-6" style={{ color: 'var(--m3-primary)' }}>
@@ -526,12 +530,14 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={effectsDefault}
             className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_50%,transparent)] flex items-center justify-center z-50 p-4"
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
+              initial={dialogMotion.initial}
+              animate={dialogMotion.animate}
+              exit={dialogMotion.exit}
+              transition={dialogMotion.transition}
               className="m3-dialog p-6 max-w-sm w-full text-center"
             >
               <h3 className="m3-title-large font-bold text-on-surface mb-3">
@@ -568,7 +574,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
             {t('common.back')}
           </Button>
           <div className="text-center">
-            <h1 className="m3-title-large font-bold text-on-surface">⚡ Shanghai</h1>
+            <h1 className="m3-title-large font-bold text-on-surface"> Shanghai</h1>
             <p className="text-on-surface-variant text-sm">Runde {currentRound + 1}/{rounds}</p>
           </div>
           <div className="w-10" />
@@ -603,7 +609,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
                   }`}
                 >
                   <span className="text-lg font-bold text-on-surface-variant w-6">
-                    {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}
+                    {idx === 0 ?'': idx === 1 ?'': idx === 2 ?'': idx + 1}
                   </span>
                   <PlayerAvatar avatar={player.avatar} name={player.name} size="sm" />
                   <span className="text-on-surface font-medium flex-1">{player.name}</span>

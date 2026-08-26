@@ -4,6 +4,8 @@ import { Mail, AlertCircle, CheckCircle } from 'lucide-react';
 import api from '../../services/api';
 import BackButton from '../common/BackButton';
 import { Card, Button, TextField } from '../common';
+import BackToLanding from './BackToLanding';
+import { Icon } from '../icons';
 
 const ResendVerification: React.FC = () => {
   const navigate = useNavigate();
@@ -30,13 +32,14 @@ const ResendVerification: React.FC = () => {
   if (success) {
     return (
       <div className="min-h-dvh flex items-center justify-center gradient-mesh p-4">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md m3-enter-pop">
+          <BackToLanding />
           <Card variant="elevated" className="p-8 text-center">
             <div className="w-16 h-16 bg-success-container rounded-m3-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="text-success" size={32} />
             </div>
             <h2 className="m3-headline-small text-on-surface mb-4">
-              Email gesendet! 📧
+              Email gesendet!
             </h2>
             <p className="m3-body-medium text-on-surface-variant mb-6">
               Wir haben dir eine neue Verification-Email an <strong className="text-on-surface">{email}</strong> gesendet.
@@ -53,9 +56,10 @@ const ResendVerification: React.FC = () => {
 
   return (
     <div className="min-h-dvh flex items-center justify-center gradient-mesh p-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md m3-enter-pop">
+        <BackToLanding />
         <div className="text-center mb-8">
-          <div className="text-6xl mb-4">📧</div>
+          <div className="mb-4 flex justify-center text-primary"><Icon name="mail" size={56} /></div>
           <h1 className="m3-display-small text-on-surface mb-2">
             Verification-Email erneut senden
           </h1>

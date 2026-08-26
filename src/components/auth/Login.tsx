@@ -6,6 +6,8 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { Button, Card, TextField } from '../common';
 import { enterDrop, enterPop } from '../../utils/motion';
+import BackToLanding from './BackToLanding';
+import { Icon } from '../icons';
 
 const Login: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -35,9 +37,10 @@ const Login: React.FC = () => {
   return (
     <div className="min-h-dvh flex items-center justify-center gradient-mesh p-4">
       <div className="w-full max-w-md">
+        <BackToLanding />
         {/* Logo/Header */}
         <motion.div {...enterDrop} className="text-center mb-8">
-          <div className="text-6xl mb-4">🎯</div>
+          <div className="mb-4 flex justify-center text-primary"><Icon name="target" size={56} /></div>
           <h1 className="m3-display-small font-bold text-on-surface mb-2">
             {t('common.app_name')}
           </h1>
@@ -50,7 +53,7 @@ const Login: React.FC = () => {
             <h2 className="m3-headline-small font-bold text-on-surface mb-6">{t('auth.login')}</h2>
 
             {error && (
-              <div className="mb-4 p-4 bg-error-container text-on-error-container rounded-m3-md flex items-center gap-3">
+              <div className="mb-4 p-4 bg-error-container text-on-error-container rounded-m3-md flex items-center gap-3 m3-error-in">
                 <AlertCircle size={22} className="flex-shrink-0" />
                 <span className="m3-body-medium font-semibold">{error}</span>
               </div>
