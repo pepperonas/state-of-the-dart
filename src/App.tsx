@@ -11,6 +11,7 @@ import MainMenu from './components/MainMenu';
 import AchievementNotification from './components/achievements/AchievementNotification';
 import OfflineIndicator from './components/sync/OfflineIndicator';
 import DebugFlagButton from './components/debug/DebugFlagButton';
+import BugReportButton from './components/bugReport/BugReportButton';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import ThemeManager from './components/ThemeManager';
 import Footer from './components/Footer';
@@ -188,6 +189,7 @@ function AppContent() {
                   <div className="min-h-dvh bg-surface text-on-surface flex flex-col">
                     <AchievementNotification />
                     <OfflineIndicator />
+                    <BugReportButton />
                     <DebugFlagButton />
                     <div className="flex-1">
                       <Suspense fallback={<LoadingScreen />}>

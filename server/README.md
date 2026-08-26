@@ -152,9 +152,23 @@ SMTP_FROM=State of the Dart <noreply@example.com>
 ### Admin (`/api/admin`)
 | Method | Endpoint | Beschreibung |
 |--------|----------|--------------|
-| GET | `/users` | Alle User |
+| GET | `/users` | Alle User — **inkl. Nutzungsdaten** (s. u.) |
 | PUT | `/users/:id` | User aktualisieren |
 | DELETE | `/users/:id` | User löschen |
+
+`GET /users` liefert je Nutzer zusätzlich:
+
+| Feld | Bedeutung |
+|---|---|
+| `last_active` | Zeitstempel des letzten Logins |
+| `match_count` / `training_count` | Gesamtzahl, über alle Zeit |
+| `usage_count` | Summe aus beiden |
+| `activity` | 30 Zahlen, eine je Tag, **ältester Tag zuerst** — die Sparkline im Admin Panel |
+
+Ein Nutzer besitzt keine Matches direkt: er besitzt Tenants, und die besitzen
+Matches und Trainings-Sessions. Beide zählen — wer nur trainiert, nutzt die App.
+⚠️ Zwei gruppierte Queries, **kein N+1**: die Tabelle wächst mit der Nutzerzahl.
+Tages-Buckets sind ganze UTC-Tage.
 
 > ⚠️ **Admin-Rechte lassen sich über die API nicht vergeben.** Das `is_admin`-Flag wird aus
 > der E-Mail-Adresse **abgeleitet** (`server/src/config/adminAllowlist.ts`) und bei jedem
@@ -174,6 +188,14 @@ SMTP_FROM=State of the Dart <noreply@example.com>
 | GET | `/` | Globale Bestenliste |
 
 ### Bug Reports (`/api/bug-reports`)
+
+> **Offen für jeden angemeldeten Nutzer** — nur `authenticateToken`, kein
+> `requireAdmin`. Beim Lesen sieht ein Nicht-Admin ausschließlich die eigenen
+> Reports; `PATCH` auf Status/Notizen bleibt Admins vorbehalten. Das ist der
+> Gegensatz zu **Debug Flags**, die komplett admin-only sind: ein Bug-Report ist
+> Nutzer-Feedback, ein Debug-Flag ist ein Diagnose-Schnappschuss mit Log-Puffer,
+> Screenshot und Spielzustand.
+
 | Method | Endpoint | Beschreibung |
 |--------|----------|--------------|
 | GET | `/` | Alle Reports (Admin) bzw. eigene |
@@ -184,6 +206,9 @@ SMTP_FROM=State of the Dart <noreply@example.com>
 | DELETE | `/:id` | Report löschen |
 
 ### Debug Flags (`/api/debug-flags`)
+
+> **Admin-only, alle Endpunkte** (`router.use(requireAdmin)`).
+
 | Method | Endpoint | Beschreibung |
 |--------|----------|--------------|
 | GET | `/` | Alle Flags (nur Admin) |

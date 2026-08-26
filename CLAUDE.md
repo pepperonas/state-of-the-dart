@@ -153,6 +153,36 @@ Why: an emoji is a *font*, not artwork. The same glyph is Apple's glossy 3-D on 
 
 Pinned by `src/tests/icons/iconSet.test.tsx`, including a scan that fails if an emoji reappears in rendered code (console logs and doc comments are exempt).
 
+### Admin usage overview (`/api/admin/users`)
+`GET /api/admin/users` returns, per user, `last_active`, `match_count`,
+`training_count`, `usage_count` and `activity` — 30 daily counts, **oldest
+first**. A user owns no matches directly: they own tenants, which own matches and
+training sessions; both are counted, because someone who only trains is still
+using the app.
+
+⚠️ **Two grouped queries, never one per user.** With four accounts an N+1 is
+invisible, but this endpoint renders a table that grows with the user base.
+Buckets are whole UTC days.
+
+Rendering: `ActivitySparkline` (bars scaled to the row's **own** maximum — the
+question is "when was this person active", not "who is most active") and
+`utils/activity.ts` (`relativeTime`, `recencyOf`) for the "last seen" column.
+⚠️ `relativeTime` treats a future timestamp as "just now": client and server
+clocks disagree, and "in 3 days" would be nonsense.
+
+### Who can file what
+| | Bug report | Debug flag |
+|---|---|---|
+| Signed-in user | ✅ create, read own | ❌ 403 |
+| Admin | ✅ read all, set status/notes | ✅ full |
+
+`/api/bug-reports` carries only `authenticateToken`; `/api/debug-flags` adds
+`router.use(requireAdmin)` to **every** endpoint. Bug reporting was always open
+to all users — what was missing was a way to find it, so `BugReportButton` now
+sits beside the admin-only `DebugFlagButton` at the bottom-left of every screen.
+`utils/reporters.ts` builds the admin "filter by user" options from the rows on
+screen, not from the user table.
+
 ### Player list ordering (`src/utils/playerOrder.ts`)
 One rule, applied once in `PlayerContext` so every picker inherits it: **real accounts before bots and generated test/guest profiles; within a group, most games played first; name as a stable tiebreak.** The API returns players newest-first, which used to put a throwaway `Guest 417` and every bot above the people who actually use the app. `isGeneratedPlayer` anchors its patterns at the **start** of the name — a player called `Tom "Guest" Weber` is a real person and must not be demoted. The leaderboard applies the tier rule too, but keeps its own metric sort inside each group.
 

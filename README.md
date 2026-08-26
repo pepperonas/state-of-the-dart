@@ -46,9 +46,9 @@
 <!-- Qualität -->
 ![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?logo=playwright&logoColor=white)
-![Unit Tests](https://img.shields.io/badge/Unit_Tests-471-brightgreen)
+![Unit Tests](https://img.shields.io/badge/Unit_Tests-512-brightgreen)
 ![E2E Tests](https://img.shields.io/badge/E2E_Tests-11-brightgreen)
-![Coverage](https://img.shields.io/badge/Coverage-22%25_stmts_%7C_67%25_branches-yellow)
+![Coverage](https://img.shields.io/badge/Coverage-22%25_stmts_%7C_69%25_branches-yellow)
 ![ESLint](https://img.shields.io/badge/ESLint-configured-4B32C3?logo=eslint&logoColor=white)
 
 <!-- Inhalt -->
@@ -250,6 +250,21 @@
   - Status-Workflow: open → investigating → resolved/dismissed
   - "Copy for AI" exportiert strukturierten Debug-Text zur Analyse
 
+#### Nutzungs-Übersicht (nur Admin)
+- **Aktivitäts-Chart je Nutzer** — 30-Tage-Balkendiagramm aus Matches **und** Trainings-Sessions. Skaliert auf das eigene Maximum der Zeile, nicht auf ein globales: die Frage ist „wann war diese Person aktiv", nicht „wer ist am aktivsten". Ein ruhiger Tag bleibt als feiner Grundstrich sichtbar, damit die Zeile als Zeitachse lesbar ist.
+- **Zuletzt aktiv** — relative Angabe („vor 3 Tagen"), eingefärbt nach Frische: grün ≤ 7 Tage, neutral ≤ 30, rot darüber. Das exakte Datum steht im Tooltip.
+- **Filter nach Nutzer** in den Tabellen für Bug Reports und Debug Flags. Die Auswahl wird aus den tatsächlich vorhandenen Einträgen gebaut — ein Filter, der leere Konten anbietet, ist Rauschen; einer, der einen Melder auslässt, versteckt dessen Einträge.
+
+> Die Daten kommen aus `GET /api/admin/users`, das hinter `requireAdmin` liegt — sie erreichen einen Nicht-Admin-Client also gar nicht erst.
+
+#### Wer darf was melden
+| | Bug Report | Debug Flag |
+|---|---|---|
+| Angemeldeter Nutzer | ✅ anlegen, eigene sehen | ❌ |
+| Admin | ✅ alle sehen, Status/Notizen setzen | ✅ vollständig |
+
+Ein **Bug Report** ist Nutzer-Feedback und steht jedem angemeldeten Konto offen — erreichbar über den 🐞-Knopf unten links auf jedem Bildschirm. Ein **Debug Flag** ist ein Diagnose-Schnappschuss (Log-Puffer, Screenshot, Spielzustand, Route) und bleibt Admins vorbehalten.
+
 ### 📴 Offline-First PWA (NEU in v0.2.0)
 - **Vollständiger Offline-Modus** - App funktioniert ohne Internetverbindung
 - **IndexedDB-Speicherung** - Lokale Datenspeicherung mit `idb` Library
@@ -269,7 +284,7 @@
   - Async/await für saubere Audio-Abfolge
 - **Bust-Benachrichtigungen** - Klares Audio-Feedback für ungültige Würfe
 - **Separate Lautstärke** - Unabhängige Kontrolle für Caller und Effects
-- **400+ Audio-Dateien** - Vollständiges professionelles Dart-Calling-Erlebnis
+- **609 Audio-Dateien** - Vollständiges professionelles Dart-Calling-Erlebnis
 - **Lautstärkeregelung** - Separate Regler für Caller (Scores) und Effects (UI-Sounds)
 
 ### 📖 User Guide & Dokumentation
@@ -433,7 +448,7 @@ state-of-the-dart/
 │   ├── DART_ONLINE_TURNIER.md # Online-Turnier Konzept
 │   └── README.en.md          # English README
 ├── public/
-│   ├── sounds/               # 400+ Audio-Dateien
+│   ├── sounds/               # 609 Audio-Dateien
 │   └── images/               # Bilder & Thumbnails
 ├── website/                  # Landing Page (stateofthedart.celox.io)
 ├── dist/                     # Production Build
@@ -626,7 +641,7 @@ PWA-Konfiguration in `vite.config.ts`.
 ## 🧪 Testing
 
 ### Unit-Tests (Vitest + React Testing Library)
-**471 Tests** in `src/tests/`, gegliedert nach dem, was sie schützen:
+**512 Tests** in `src/tests/`, gegliedert nach dem, was sie schützen:
 
 | Bereich | Was abgedeckt ist |
 |---|---|

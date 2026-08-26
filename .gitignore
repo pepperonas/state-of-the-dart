@@ -73,3 +73,6 @@ server/data/e2e-test.db-*
 .playwright-mcp/
 # Backend runtime logs
 server/logs/
+
+# Ad-hoc verification screenshots
+/*.png

@@ -9,6 +9,9 @@ import type { BugReport } from '../../types';
 import type { DebugFlag } from '../../types/debugFlag';
 import { formatDebugFlagForAI } from '../../utils/debugExport';
 import { BackButton, Button, Card, Chip, IconButton, Dialog, Select } from '../common';
+import ActivitySparkline from './ActivitySparkline';
+import { relativeTime, recencyOf } from '../../utils/activity';
+import { reporterOptions, filterByReporter } from '../../utils/reporters';
 import { staggerChild } from '../../utils/motion';
 
 interface AdminUser {
@@ -26,6 +29,13 @@ interface AdminUser {
   stripe_subscription_id?: string;
   created_at: number;
   last_active: number;
+  /** Usage, admin-only — see `collectUsageByUser` in server/src/routes/admin.ts. */
+  match_count?: number;
+  training_count?: number;
+  usage_count?: number;
+  /** One count per day, oldest first. */
+  activity?: number[];
+  activity_days?: number;
 }
 
 interface AdminStats {
@@ -50,6 +60,8 @@ const AdminPanel: React.FC = () => {
   const [bugReports, setBugReports] = useState<BugReport[]>([]);
   const [bugFilter, setBugFilter] = useState<string>('all');
   const [bugSeverityFilter, setBugSeverityFilter] = useState<string>('all');
+  const [bugUserFilter, setBugUserFilter] = useState<string>('all');
+
   const [selectedBugReport, setSelectedBugReport] = useState<BugReport | null>(null);
   const [bugLoading, setBugLoading] = useState(false);
   const [bugReportsOpen, setBugReportsOpen] = useState(false);
@@ -57,6 +69,7 @@ const AdminPanel: React.FC = () => {
   // Debug Flags
   const [debugFlags, setDebugFlags] = useState<DebugFlag[]>([]);
   const [debugFilter, setDebugFilter] = useState<string>('all');
+  const [debugUserFilter, setDebugUserFilter] = useState<string>('all');
   const [selectedDebugFlag, setSelectedDebugFlag] = useState<DebugFlag | null>(null);
   const [debugLoading, setDebugLoading] = useState(false);
   const [debugFlagsOpen, setDebugFlagsOpen] = useState(false);
@@ -447,6 +460,8 @@ const AdminPanel: React.FC = () => {
                   <th className="px-6 py-4 font-semibold text-on-surface-variant text-sm uppercase tracking-wide">{t('admin.table_status')}</th>
                   <th className="px-6 py-4 font-semibold text-on-surface-variant text-sm uppercase tracking-wide hidden md:table-cell">{t('admin.table_plan')}</th>
                   <th className="px-6 py-4 font-semibold text-on-surface-variant text-sm uppercase tracking-wide hidden lg:table-cell">{t('admin.table_created')}</th>
+                  <th className="px-6 py-4 font-semibold text-on-surface-variant text-sm uppercase tracking-wide hidden md:table-cell">{t('admin.table_activity')}</th>
+                  <th className="px-6 py-4 font-semibold text-on-surface-variant text-sm uppercase tracking-wide hidden sm:table-cell">{t('admin.table_last_seen')}</th>
                   <th className="px-6 py-4 font-semibold text-on-surface-variant text-sm uppercase tracking-wide">{t('admin.table_actions')}</th>
                 </tr>
               </thead>
@@ -497,6 +512,33 @@ const AdminPanel: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 text-on-surface-variant hidden lg:table-cell">
                       {formatDate(u.created_at)}
+                    </td>
+                    <td className="px-6 py-4 hidden md:table-cell">
+                      <div className="flex flex-col gap-1">
+                        <ActivitySparkline values={u.activity ?? []} />
+                        <span className="m3-body-small text-on-surface-variant tabular-nums whitespace-nowrap">
+                          {t('admin.usage_summary', { total: u.usage_count ?? 0 })}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 hidden sm:table-cell">
+                      {(() => {
+                        const rel = relativeTime(u.last_active);
+                        const tone = {
+                          recent: 'text-success',
+                          idle: 'text-on-surface-variant',
+                          dormant: 'text-error',
+                          never: 'text-on-surface-variant',
+                        }[recencyOf(u.last_active)];
+                        return (
+                          <span
+                            className={`m3-body-medium ${tone}`}
+                            title={u.last_active ? formatDate(u.last_active) : undefined}
+                          >
+                            {rel ?? t('admin.never_seen')}
+                          </span>
+                        );
+                      })()}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-wrap gap-2">
@@ -658,6 +700,15 @@ const AdminPanel: React.FC = () => {
                 ]}
               />
             </div>
+            <div>
+              <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.user_label')}</label>
+              <Select<string>
+                value={bugUserFilter}
+                onChange={setBugUserFilter}
+                aria-label={t('admin.user_label')}
+                options={reporterOptions(bugReports)}
+              />
+            </div>
           </div>
 
           {/* Bug Reports Table */}
@@ -683,6 +734,7 @@ const AdminPanel: React.FC = () => {
                   {bugReports
                     .filter(r => bugFilter === 'all' || r.status === bugFilter)
                     .filter(r => bugSeverityFilter === 'all' || r.severity === bugSeverityFilter)
+                    .filter(r => filterByReporter([r], bugUserFilter).length > 0)
                     .sort((a, b) => {
                       const statusOrder: Record<string, number> = { open: 0, in_progress: 1, resolved: 2, closed: 3 };
                       const orderDiff = (statusOrder[a.status] ?? 4) - (statusOrder[b.status] ?? 4);
@@ -855,20 +907,31 @@ const AdminPanel: React.FC = () => {
             </div>
 
             {/* Filter */}
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.status_label')}</label>
-              <Select<string>
-                value={debugFilter}
-                onChange={setDebugFilter}
-                aria-label={t('admin.status_label')}
-                options={[
-                  { value: 'all', label: t('debug.select_all') },
-                  { value: 'open', label: t('debug.select_open') },
-                  { value: 'investigating', label: t('debug.select_investigating') },
-                  { value: 'resolved', label: t('debug.select_resolved') },
-                  { value: 'dismissed', label: t('debug.select_dismissed') },
-                ]}
-              />
+            <div className="flex gap-4 mb-6">
+              <div>
+                <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.status_label')}</label>
+                <Select<string>
+                  value={debugFilter}
+                  onChange={setDebugFilter}
+                  aria-label={t('admin.status_label')}
+                  options={[
+                    { value: 'all', label: t('debug.select_all') },
+                    { value: 'open', label: t('debug.select_open') },
+                    { value: 'investigating', label: t('debug.select_investigating') },
+                    { value: 'resolved', label: t('debug.select_resolved') },
+                    { value: 'dismissed', label: t('debug.select_dismissed') },
+                  ]}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.user_label')}</label>
+                <Select<string>
+                  value={debugUserFilter}
+                  onChange={setDebugUserFilter}
+                  aria-label={t('admin.user_label')}
+                  options={reporterOptions(debugFlags)}
+                />
+              </div>
             </div>
 
             {/* Debug Flags Table */}
@@ -889,6 +952,7 @@ const AdminPanel: React.FC = () => {
                   <tbody>
                     {debugFlags
                       .filter(f => debugFilter === 'all' || f.status === debugFilter)
+                      .filter(f => filterByReporter([f], debugUserFilter).length > 0)
                       .sort((a, b) => {
                         const statusOrder: Record<string, number> = { open: 0, investigating: 1, resolved: 2, dismissed: 3 };
                         const orderDiff = (statusOrder[a.status] ?? 4) - (statusOrder[b.status] ?? 4);

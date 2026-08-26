@@ -46,9 +46,9 @@
 <!-- Quality -->
 ![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?logo=playwright&logoColor=white)
-![Unit Tests](https://img.shields.io/badge/Unit_Tests-471-brightgreen)
+![Unit Tests](https://img.shields.io/badge/Unit_Tests-512-brightgreen)
 ![E2E Tests](https://img.shields.io/badge/E2E_Tests-11-brightgreen)
-![Coverage](https://img.shields.io/badge/Coverage-22%25_stmts_%7C_67%25_branches-yellow)
+![Coverage](https://img.shields.io/badge/Coverage-22%25_stmts_%7C_69%25_branches-yellow)
 ![ESLint](https://img.shields.io/badge/ESLint-configured-4B32C3?logo=eslint&logoColor=white)
 
 <!-- Content -->
@@ -153,17 +153,46 @@
 ### 👑 Admin System
 - **User Management** - Complete management of all registered users
 - **Subscription Control** - Grant or revoke lifetime access
-- **Admin Rights** - Make other users administrators
 - **User Statistics** - Dashboard with overall overview
 - **Filter & Search** - Filter by subscription status (Trial, Active, Lifetime, Expired)
 - **Delete Users** - Permanently delete users with all data
 - **Real-time Updates** - Changes displayed immediately
 
+> ⚠️ **Admin rights cannot be granted.** `is_admin` is *derived* from the email
+> address (`server/src/config/adminAllowlist.ts`) and re-applied on every login —
+> which grants it to the master address and **revokes** it from anyone else, even
+> if a flag were set in the database. There is deliberately no `make-admin`
+> endpoint.
+
+#### Usage overview (admin only)
+- **Per-user activity chart** — a 30-day bar chart of matches **and** training
+  sessions. Scaled to the row's own maximum rather than a global one: the
+  question is "when was this person active", not "who is most active". An idle
+  day stays visible as a faint baseline tick so the row reads as a timeline.
+- **Last seen** — relative ("3 days ago"), tinted by recency: green ≤ 7 days,
+  neutral ≤ 30, red beyond. The exact date is in the tooltip.
+- **Filter by user** on the bug-report and debug-flag tables, built from the
+  entries actually present rather than from the user table.
+
+> The data comes from `GET /api/admin/users`, which sits behind `requireAdmin`,
+> so it never reaches a non-admin client.
+
+#### Who can report what
+| | Bug report | Debug flag |
+|---|---|---|
+| Signed-in user | ✅ create, see own | ❌ |
+| Admin | ✅ see all, set status/notes | ✅ full access |
+
+A **bug report** is user feedback and is open to every signed-in account — reachable
+from the 🐞 button in the bottom-left of every screen. A **debug flag** is a
+diagnostic snapshot (log buffer, screenshot, game state, route) and stays
+admin-only.
+
 ### 🔊 Professional Audio System
 - **Score Announcements** - Professional caller voice for every score (0-180)
 - **Checkout Calls** - Special announcements for leg/set/match wins
 - **Bust Notifications** - Clear audio feedback for invalid throws
-- **400+ Audio Files** - Complete professional dart calling experience
+- **609 Audio Files** - Complete professional dart calling experience
 - **Volume Control** - Adjustable volume and mute options
 
 ### 🎨 Modern UI/UX
@@ -219,7 +248,7 @@
 
 | Layer | Count | Tool |
 |---|---|---|
-| Unit / component | **471** | Vitest + React Testing Library |
+| Unit / component | **512** | Vitest + React Testing Library |
 | End-to-end | **11** | Playwright (preview build + isolated backend) |
 
 ```bash

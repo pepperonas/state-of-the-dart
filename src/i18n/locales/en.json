@@ -376,7 +376,12 @@
     "select_critical": "Critical",
     "select_high": "High",
     "select_medium": "Medium",
-    "select_low": "Low"
+    "select_low": "Low",
+    "table_activity": "Activity",
+    "table_last_seen": "Last seen",
+    "never_seen": "never",
+    "usage_summary": "{{total}} games",
+    "user_label": "User"
   },
   "debug": {
     "title": "Debug Flag",

@@ -7,6 +7,42 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 📊 Admin: Nutzungs-Übersicht, Bug-Report-Zugang, Filter nach Nutzer
+
+#### Hinzugefügt
+- **Aktivitäts-Chart je Nutzer** im Admin Panel — 30-Tage-Balkendiagramm aus
+  Matches **und** Trainings-Sessions, dazu die Gesamtzahl. Skaliert auf das
+  eigene Maximum der Zeile: die Frage ist „wann war diese Person aktiv", nicht
+  „wer ist am aktivsten". Ein ruhiger Tag bleibt als Grundstrich sichtbar.
+  Screenreader bekommen die Zahlen im `<title>`, nicht nur ein Bild.
+- **Spalte „Zuletzt aktiv"** — relative Angabe, eingefärbt nach Frische
+  (grün ≤ 7 Tage, neutral ≤ 30, rot darüber), exaktes Datum im Tooltip.
+- **Filter nach Nutzer** in den Tabellen für Bug Reports und Debug Flags.
+- **`BugReportButton`** — der 🐞-Knopf unten links, für **jeden angemeldeten
+  Nutzer**. Der admin-only Debug-Flag-Knopf sitzt daneben.
+- **Tests**: +42 (470 → 512) für `utils/activity.ts`, `utils/reporters.ts` und
+  `ActivitySparkline`.
+
+#### Geändert
+- `GET /api/admin/users` liefert zusätzlich `last_active`, `match_count`,
+  `training_count`, `usage_count` und `activity` (30 Tageswerte, ältester
+  zuerst). ⚠️ Zwei gruppierte Queries, **kein N+1** — die Tabelle wächst mit der
+  Nutzerzahl.
+
+#### Klarstellung
+Bug-Reports standen **schon immer** jedem angemeldeten Nutzer offen
+(`/api/bug-reports` trägt nur `authenticateToken`); admin-only sind die **Debug
+Flags**. Gefehlt hat nicht die Berechtigung, sondern die Auffindbarkeit: der
+Einstieg lag in einem zugeklappten Abschnitt der Einstellungen, während das
+Debug-Flag einen Dauerknopf hatte. Beide sind jetzt gleichgestellt.
+
+#### Behoben (Doku)
+- Die englische README versprach „**Admin Rights** — Make other users
+  administrators". Das geht seit der Allowlist nicht mehr und stand dort
+  irreführend; ersetzt durch die tatsächliche Regel.
+- Audio-Dateien standen mit „400+" in beiden READMEs — es sind 609.
+
+
 ### 🎨 Material 3 Expressive: eigenes Icon-Set, eigener Select, Spieler-Reihenfolge
 
 Ersetzt die letzten beiden Stellen, an denen die Oberfläche **nicht** vom Design-System
