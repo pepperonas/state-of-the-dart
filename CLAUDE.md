@@ -371,15 +371,29 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **10 tests** currently:
+- Specs in `e2e/`. **11 tests** currently:
   - `smoke.spec.ts` — load redirect, asset-count regression guard, no-heavy-chunks-eager guard
   - `login-page.spec.ts` — form render, empty-submit validation, version footer
   - `auth.spec.ts` — real login against backend (200 + JWT), wrong password (401)
   - `main-menu.spec.ts` — post-login menu tiles, `/game?new=1` lazy-load smoke
 - Runs against `vite preview` (:4173) **plus** an isolated backend (:3001) with its own SQLite DB at `server/data/e2e-test.db`. Both started by `playwright.config.ts` `webServer[]`.
-- `e2e/global-setup.ts`:
-  1. Rebuilds the frontend with `VITE_API_URL=http://localhost:3001` (the checked-in `.env` points at production, which would let test browsers hit the live API)
-  2. Runs `server/scripts/seed-test-user.ts` — wipes the test DB, creates the verified test user **plus a tenant** (the auth middleware refuses any `/api/*` without one)
+- **⚠️ There is deliberately no `globalSetup`.** Playwright starts `webServer`
+  **before** `globalSetup`, so both pieces of setup work are chained into the
+  `webServer` commands themselves, where the ordering is guaranteed:
+  1. Frontend: `VITE_API_URL=http://localhost:3001 npm run build && npm run preview`
+     — the checked-in `.env` points at production, which would let test browsers
+     hit the live API.
+  2. Backend: `npx ts-node --transpile-only scripts/seed-test-user.ts && node dist/index.js`
+     — the seed wipes the test DB and creates the verified test user **plus a
+     tenant** (the auth middleware refuses any `/api/*` without one).
+- **Do not move either step back into a setup hook.** Both were there and both
+  failed in CI, invisibly, for the same reason. With the build in `globalSetup`,
+  `vite preview` had no `dist/` to serve and the URL probe timed out after 60s.
+  With the seed in `globalSetup`, the backend had **already opened** the database
+  file that the seed then `unlink`s, so it kept reading the deleted inode, never
+  saw the test user, and every login returned `401`. Neither reproduced locally,
+  because a stale `dist/` and a previously-seeded `e2e-test.db` papered over
+  both — delete both before trusting a local green run.
 - Reusable helper: `e2e/helpers/login.ts` — `await login(page)` does the form-submit dance and waits for the 200 response.
 - Workers are pinned to 1 — `vite preview` races under parallel load and the regression guards become flaky. Service workers are blocked (`serviceWorkers: 'block'`); the PWA SW would otherwise intercept requests and skew network assertions.
 - Test fixtures + DB paths centralized in `e2e/fixtures.ts`.

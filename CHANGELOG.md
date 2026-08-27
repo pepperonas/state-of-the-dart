@@ -11,12 +11,20 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Fixed
 
-- **E2E suite could never pass in CI.** Playwright starts `webServer` *before*
-  `globalSetup`, but the frontend build lived in `globalSetup` — so `vite preview`
-  came up with no `dist/` to serve and the URL probe timed out after 60s on every
-  clean checkout. The build moved into the `webServer` command, where the ordering
-  is guaranteed. It only ever looked healthy locally because a stale `dist/` was
-  present; reproduced by deleting `dist/` and confirmed fixed (11/11 passing).
+- **E2E suite could never pass in CI** — two separate instances of the same
+  ordering bug. Playwright starts `webServer` *before* `globalSetup`, but both
+  the frontend build and the database seed lived in `globalSetup`:
+  - `vite preview` came up with no `dist/` to serve, so the URL probe timed out
+    after 60s;
+  - the backend had already opened the database file that the seed then
+    `unlink`s, so it kept reading the deleted inode, never saw the test user,
+    and every login returned `401`.
+
+  Both steps are now chained into their `webServer` commands, where Playwright
+  guarantees the ordering, and `globalSetup` is retired. Neither fault
+  reproduced locally, because a stale `dist/` and a leftover `e2e-test.db`
+  papered over them; deleting both reproduces CI exactly, and the suite now
+  passes 11/11 from a genuinely clean tree.
 - Unit-test CI job installed root dependencies only, so the admin usage-stats
   suite could not resolve the backend's `better-sqlite3`. The workflow now
   installs `server/` dependencies too.

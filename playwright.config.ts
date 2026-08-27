@@ -2,20 +2,28 @@ import { defineConfig, devices } from '@playwright/test';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import { TEST_USER } from './e2e/fixtures';
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TEST_DB_PATH = path.resolve(__dirname, 'server', 'data', 'e2e-test.db');
 const FRONTEND_PORT = 4173;
 const BACKEND_PORT = 3001;
 
 /**
- * Playwright config — frontend E2E against the production preview build
- * with a real (isolated) backend on :3001 seeded by global-setup.
+ * Playwright config — frontend E2E against the production preview build with a
+ * real, isolated backend on :3001.
+ *
+ * ⚠️ Both the frontend build and the database seed are chained into their
+ * `webServer` commands rather than a `globalSetup` hook. Playwright starts
+ * `webServer` BEFORE `globalSetup`, so setup-hook work lands too late: the
+ * preview server had no `dist/` to serve, and the backend had already opened
+ * the database file the seed then deleted. Neither showed up locally, where
+ * stale artefacts from previous runs happened to paper over both.
  */
 export default defineConfig({
   testDir: './e2e',
-  globalSetup: './e2e/global-setup.ts',
   // Exclude helper modules from being treated as tests
-  testIgnore: ['**/fixtures.ts', '**/global-setup.ts'],
+  testIgnore: ['**/fixtures.ts'],
   // Tests share a single `vite preview` server. Parallel workers occasionally
   // race against each other for the in-flight asset requests, producing flaky
   // network-assertions. Suite is small, serial costs ~1s.
@@ -63,8 +71,17 @@ export default defineConfig({
       timeout: 240_000,
     },
     {
-      // Isolated backend pointing at the test DB seeded in globalSetup
-      command: 'node dist/index.js',
+      // Isolated backend on its own SQLite file.
+      //
+      // ⚠️ The seed runs HERE, chained ahead of the server, for the same
+      // ordering reason as the frontend build: Playwright starts `webServer`
+      // before `globalSetup`, and the seed script *unlinks* the database file.
+      // Seeding afterwards left the already-running backend holding a handle to
+      // the deleted inode, so it never saw the test user and every login came
+      // back 401. It only passed locally because a previously-seeded
+      // `e2e-test.db` happened to be on disk.
+      command:
+        'npx ts-node --transpile-only scripts/seed-test-user.ts && node dist/index.js',
       cwd: path.resolve(__dirname, 'server'),
       url: `http://localhost:${BACKEND_PORT}/health`,
       reuseExistingServer: !process.env.CI,
@@ -81,6 +98,10 @@ export default defineConfig({
         // No OAuth flow is exercised in tests; password login only.
         GOOGLE_CLIENT_ID: 'e2e-dummy-client-id',
         GOOGLE_CLIENT_SECRET: 'e2e-dummy-secret',
+        // Consumed by scripts/seed-test-user.ts in the same command chain.
+        TEST_USER_EMAIL: TEST_USER.email,
+        TEST_USER_PASSWORD: TEST_USER.password,
+        TEST_USER_NAME: TEST_USER.name,
       },
     },
   ],
