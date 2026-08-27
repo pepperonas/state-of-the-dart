@@ -11,7 +11,7 @@
 <!-- Links -->
 [![Live Demo](https://img.shields.io/badge/Live_Demo-stateofthedart.com-22c55e?style=for-the-badge&logo=googlechrome&logoColor=white)](https://stateofthedart.com)
 [![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-a855f7?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://stateofthedart.celox.io)
-[![Version](https://img.shields.io/badge/Version-0.8.5-3b82f6?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-0.9.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
 
 <!-- Build & Repo (live) -->
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
@@ -795,6 +795,28 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.9.0 (28. August 2026) - Material 3 Expressive, eigenes Icon-Set & Scoring-Fix
+
+**⚠️ Behoben — Scoring:** `convertScoreToDarts` lieferte für **36 von 172** werfbaren Scores zu wenig zurück (141 kam als 140 heraus). Da der Reducer den Wurf aus der Dart-Summe berechnet, zog das Eintippen von 141 auf dem Numpad nur 140 ab. Neu ist ein exakter Zerlegungs-Backstop; die übrigen 136 Rekonstruktionen sind unverändert.
+
+**Design-System**
+- **69 eigene M3-Expressive-Icons** ersetzen ~250 Emoji in Oberfläche, Achievements und Avatar-Palette. Geometrie wird von `tools/gen-icons.py` **gerechnet**, nicht getippt.
+- **Eigener `Select`** statt aller 23 nativen `<select>` — Menü per Portal, generischer Werttyp, APG-Combobox-Tastatur.
+- **Fokus-Ring** trug `border-radius: inherit` und formte damit jedes fokussierte Element um (Pill-Button 9999px → 913px). Entfernt.
+- Textfelder und Select-Trigger auf 12 px Radius.
+
+**Spieler & Admin**
+- **Spielerlisten sortieren nach Regel**: echte Konten vor Bots und Gast-Profilen, dann meiste Spiele.
+- **Admin-Nutzungsübersicht**: 30-Tage-Aktivitäts-Chart je Nutzer, „Zuletzt aktiv", Filter nach Nutzer.
+- **Bug-Report-Knopf für jeden angemeldeten Nutzer** (Debug-Flags bleiben admin-only).
+
+**Qualität**
+- **692 Unit-Tests** (+398 seit 0.8.5), Coverage 24 % Statements / 76 % Branches.
+- **Doku-Abgleich-Suite**: Badges, Pfade, Links und Kommandos werden gegen den Code geprüft — die Doku kann nicht mehr still veralten.
+- Neues [Design-System-Dokument](docs/DESIGN_SYSTEM.md).
+
+---
 
 ### v0.8.5 (14. März 2026) - Achievement Fixes
 

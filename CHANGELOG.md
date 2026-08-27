@@ -7,6 +7,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-08-28
+
 ### 🧪 Test-Ausbau — und ein dabei gefundener Scoring-Bug
 
 #### Behoben
