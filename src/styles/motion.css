@@ -1,0 +1,619 @@
+/* ============================================================================
+   MATERIAL 3 EXPRESSIVE — MOTION LAYER
+   ----------------------------------------------------------------------------
+   The single source of truth for *movement* in this app, the way `m3.css` is the
+   single source of truth for colour and shape.
+
+   Structure
+     1. Tokens        — duration scale, easing set, stagger step, travel distances
+     2. Keyframes     — the primitive movements everything else composes from
+     3. Entrance      — `.m3-enter*` + `.m3-stagger*` (views, cards, list items)
+     4. Interaction   — press / hover / focus feedback, ripple, shape morph
+     5. State change  — toggles, sliders, loading, active/inactive
+     6. Navigation    — view + tab transitions, sliding indicators
+     7. Feedback      — dialogs, toasts, error/success states
+     8. Live data     — value changes, status dots, progress
+     9. Reduced motion
+
+   Rules this file follows (and that additions must keep following):
+     · Animate `transform` and `opacity` only — never width/height/top/left in a
+       loop, they force layout on every frame.
+     · Entrance animations use `animation-fill-mode: backwards`, never `both`.
+       `backwards` holds the *start* frame during the delay and then hands the
+       element back to its normal CSS — so nothing can be left invisible or
+       untouchable if an animation is interrupted.
+     · Every animation is reachable from a token. No magic numbers below.
+     · Section 9 is the reduced-motion guard, and it is not optional.
+
+   Imported after `m3.css` (see `main.tsx`), so the token aliases at the end of
+   section 1 re-point the older `--m3-duration-*` / `--m3-easing-*` names at this
+   scale. The *values* are unchanged — this only merges the two sets into one.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   1. TOKENS
+   -------------------------------------------------------------------------- */
+:root {
+  /* Duration scale (M3). Pick by travel distance and element size:
+     short → small in-place feedback · medium → components entering/leaving
+     long → full-width or full-screen movement */
+  --m3-dur-short-1: 50ms;
+  --m3-dur-short-2: 100ms;
+  --m3-dur-short-3: 150ms;
+  --m3-dur-short-4: 200ms;
+  --m3-dur-medium-1: 250ms;
+  --m3-dur-medium-2: 300ms;
+  --m3-dur-medium-3: 350ms;
+  --m3-dur-medium-4: 400ms;
+  --m3-dur-long-1: 450ms;
+  --m3-dur-long-2: 500ms;
+  --m3-dur-long-3: 550ms;
+  --m3-dur-long-4: 600ms;
+  --m3-dur-xlong-1: 700ms;
+  --m3-dur-xlong-2: 800ms;
+
+  /* Easing.
+     standard    — utilitarian, no personality (colour, opacity, small states)
+     emphasized  — the M3 default for anything the eye should follow
+     spring*     — the *expressive* curves: they overshoot slightly, which is what
+                   makes a card feel like it has mass. Spatial changes only —
+                   an overshooting opacity would flicker past 1. */
+  --m3-ease-linear: linear;
+  --m3-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --m3-ease-standard-accelerate: cubic-bezier(0.3, 0, 1, 1);
+  --m3-ease-standard-decelerate: cubic-bezier(0, 0, 0, 1);
+  --m3-ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --m3-ease-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --m3-ease-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --m3-ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --m3-ease-spring-soft: cubic-bezier(0.34, 1.16, 0.64, 1);
+
+  /* Rhythm + travel */
+  --m3-stagger-step: 45ms;
+  --m3-stagger-step-fast: 28ms;
+  --m3-travel-sm: 8px;
+  --m3-travel-md: 16px;
+  --m3-travel-lg: 24px;
+
+  /* Aliases — the names `m3.css` and the components already use. Values are
+     byte-identical to what they were; this only folds them into one scale. */
+  --m3-duration-short: var(--m3-dur-short-4);
+  --m3-duration-medium: var(--m3-dur-medium-2);
+  --m3-duration-long: var(--m3-dur-long-2);
+  --m3-easing-standard: var(--m3-ease-standard);
+  --m3-easing-emphasized: var(--m3-ease-emphasized);
+  --m3-easing-emphasized-decelerate: var(--m3-ease-emphasized-decelerate);
+  --m3-easing-emphasized-accelerate: var(--m3-ease-emphasized-accelerate);
+}
+
+/* ----------------------------------------------------------------------------
+   2. KEYFRAMES
+   -------------------------------------------------------------------------- */
+@keyframes m3-rise {
+  from { opacity: 0; transform: translate3d(0, var(--m3-travel-md), 0); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes m3-drop {
+  from { opacity: 0; transform: translate3d(0, calc(-1 * var(--m3-travel-md)), 0); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes m3-pop {
+  from { opacity: 0; transform: scale(0.86); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes m3-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Feedback */
+@keyframes m3-shake {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  20%      { transform: translate3d(-6px, 0, 0); }
+  40%      { transform: translate3d(5px, 0, 0); }
+  60%      { transform: translate3d(-3px, 0, 0); }
+  80%      { transform: translate3d(2px, 0, 0); }
+}
+@keyframes m3-success-pop {
+  0%   { transform: scale(0.7); opacity: 0; }
+  60%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+/* Drop in, then shake — as ONE keyframe. Two classes each declaring `animation`
+   would not combine: the later rule in this file would silently win. */
+@keyframes m3-error-in {
+  0%   { opacity: 0; transform: translate3d(0, calc(-1 * var(--m3-travel-md)), 0); }
+  45%  { opacity: 1; transform: translate3d(0, 0, 0); }
+  58%  { transform: translate3d(-6px, 0, 0); }
+  70%  { transform: translate3d(5px, 0, 0); }
+  82%  { transform: translate3d(-3px, 0, 0); }
+  92%  { transform: translate3d(2px, 0, 0); }
+  100% { opacity: 1; transform: none; }
+}
+
+/* Live data + loading */
+@keyframes m3-breathe {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+@keyframes m3-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes m3-ripple-out {
+  from { transform: scale(0); opacity: 0.32; }
+  to   { transform: scale(1); opacity: 0; }
+}
+
+/* ----------------------------------------------------------------------------
+   3. ENTRANCE — views, sections, cards, list items
+   `backwards` (never `both`): after the run the element is handed back to its
+   own CSS, so an interrupted animation can never leave it invisible.
+   -------------------------------------------------------------------------- */
+.m3-enter        { animation: m3-rise  var(--m3-dur-medium-4) var(--m3-ease-emphasized-decelerate) backwards; }
+.m3-enter-drop   { animation: m3-drop  var(--m3-dur-medium-4) var(--m3-ease-emphasized-decelerate) backwards; }
+.m3-enter-pop    { animation: m3-pop   var(--m3-dur-medium-3) var(--m3-ease-spring) backwards; }
+.m3-enter-fade   { animation: m3-fade  var(--m3-dur-medium-2) var(--m3-ease-standard) backwards; }
+
+/* A whole route/screen arriving. Slower + a shorter travel than a card, because
+   the moving mass is bigger. */
+.m3-view {
+  animation: m3-rise var(--m3-dur-long-2) var(--m3-ease-emphasized-decelerate) backwards;
+  --m3-travel-md: 12px;
+}
+
+/* Manual delay steps, for a handful of siblings that are not a uniform list. */
+.m3-delay-1 { animation-delay: calc(1 * var(--m3-stagger-step)); }
+.m3-delay-2 { animation-delay: calc(2 * var(--m3-stagger-step)); }
+.m3-delay-3 { animation-delay: calc(3 * var(--m3-stagger-step)); }
+.m3-delay-4 { animation-delay: calc(4 * var(--m3-stagger-step)); }
+.m3-delay-5 { animation-delay: calc(5 * var(--m3-stagger-step)); }
+.m3-delay-6 { animation-delay: calc(6 * var(--m3-stagger-step)); }
+
+/* Staggered children. Put the class on the CONTAINER; every direct child rises
+   in turn. Children past the 14th share the last delay so a long list still
+   finishes in well under a second. */
+.m3-stagger > * {
+  animation: m3-rise var(--m3-dur-medium-4) var(--m3-ease-emphasized-decelerate) backwards;
+  animation-delay: calc(13 * var(--m3-stagger-step));
+}
+.m3-stagger > *:nth-child(1)  { animation-delay: 0ms; }
+.m3-stagger > *:nth-child(2)  { animation-delay: calc(1 * var(--m3-stagger-step)); }
+.m3-stagger > *:nth-child(3)  { animation-delay: calc(2 * var(--m3-stagger-step)); }
+.m3-stagger > *:nth-child(4)  { animation-delay: calc(3 * var(--m3-stagger-step)); }
+.m3-stagger > *:nth-child(5)  { animation-delay: calc(4 * var(--m3-stagger-step)); }
+.m3-stagger > *:nth-child(6)  { animation-delay: calc(5 * var(--m3-stagger-step)); }
+.m3-stagger > *:nth-child(7)  { animation-delay: calc(6 * var(--m3-stagger-step)); }
+.m3-stagger > *:nth-child(8)  { animation-delay: calc(7 * var(--m3-stagger-step)); }
+.m3-stagger > *:nth-child(9)  { animation-delay: calc(8 * var(--m3-stagger-step)); }
+.m3-stagger > *:nth-child(10) { animation-delay: calc(9 * var(--m3-stagger-step)); }
+.m3-stagger > *:nth-child(11) { animation-delay: calc(10 * var(--m3-stagger-step)); }
+.m3-stagger > *:nth-child(12) { animation-delay: calc(11 * var(--m3-stagger-step)); }
+.m3-stagger > *:nth-child(13) { animation-delay: calc(12 * var(--m3-stagger-step)); }
+
+/* Opacity-only stagger. Table rows and inline elements can misbehave under a
+   transform (border-collapse, line boxes), so those get this one. */
+.m3-stagger-fade > * {
+  animation: m3-fade var(--m3-dur-medium-2) var(--m3-ease-standard) backwards;
+  animation-delay: calc(15 * var(--m3-stagger-step-fast));
+}
+.m3-stagger-fade > *:nth-child(1)  { animation-delay: 0ms; }
+.m3-stagger-fade > *:nth-child(2)  { animation-delay: calc(1 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fade > *:nth-child(3)  { animation-delay: calc(2 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fade > *:nth-child(4)  { animation-delay: calc(3 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fade > *:nth-child(5)  { animation-delay: calc(4 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fade > *:nth-child(6)  { animation-delay: calc(5 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fade > *:nth-child(7)  { animation-delay: calc(6 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fade > *:nth-child(8)  { animation-delay: calc(7 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fade > *:nth-child(9)  { animation-delay: calc(8 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fade > *:nth-child(10) { animation-delay: calc(9 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fade > *:nth-child(11) { animation-delay: calc(10 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fade > *:nth-child(12) { animation-delay: calc(11 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fade > *:nth-child(13) { animation-delay: calc(12 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fade > *:nth-child(14) { animation-delay: calc(13 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fade > *:nth-child(15) { animation-delay: calc(14 * var(--m3-stagger-step-fast)); }
+
+/* Same rhythm, tighter — for dense lists (table rows, chips, emoji grids). */
+.m3-stagger-fast > * {
+  animation: m3-pop var(--m3-dur-medium-1) var(--m3-ease-spring-soft) backwards;
+  animation-delay: calc(15 * var(--m3-stagger-step-fast));
+}
+.m3-stagger-fast > *:nth-child(1)  { animation-delay: 0ms; }
+.m3-stagger-fast > *:nth-child(2)  { animation-delay: calc(1 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fast > *:nth-child(3)  { animation-delay: calc(2 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fast > *:nth-child(4)  { animation-delay: calc(3 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fast > *:nth-child(5)  { animation-delay: calc(4 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fast > *:nth-child(6)  { animation-delay: calc(5 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fast > *:nth-child(7)  { animation-delay: calc(6 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fast > *:nth-child(8)  { animation-delay: calc(7 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fast > *:nth-child(9)  { animation-delay: calc(8 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fast > *:nth-child(10) { animation-delay: calc(9 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fast > *:nth-child(11) { animation-delay: calc(10 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fast > *:nth-child(12) { animation-delay: calc(11 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fast > *:nth-child(13) { animation-delay: calc(12 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fast > *:nth-child(14) { animation-delay: calc(13 * var(--m3-stagger-step-fast)); }
+.m3-stagger-fast > *:nth-child(15) { animation-delay: calc(14 * var(--m3-stagger-step-fast)); }
+
+/* ----------------------------------------------------------------------------
+   4. INTERACTION — press / hover / focus
+   -------------------------------------------------------------------------- */
+
+/* Ripple. `src/utils/ripple.ts` inserts a self-clipping holder at press time and
+   removes it again when the wave ends.
+   The holder does the clipping, NOT the host: putting `overflow: hidden` on the
+   host would clip corner badges that sit on some icon buttons. */
+/* Zero specificity for the same reason as `.m3-state-layer` in m3.css — see the
+   note there. A position utility on the host must win. */
+:where(.m3-ripple) { position: relative; }
+.m3-ripple-holder {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.m3-ripple-wave {
+  position: absolute;
+  border-radius: 50%;
+  background-color: currentColor;
+  transform: scale(0);
+  animation: m3-ripple-out var(--m3-dur-long-2) var(--m3-ease-standard-decelerate) forwards;
+}
+
+/* ---- 4a. GLOBAL INTERACTION BASELINE ---------------------------------------
+   Every clickable thing in the app answers a press, and every focusable thing
+   shows where the keyboard is — including the several dozen hand-rolled buttons
+   that are not M3 primitives.
+
+   Written entirely with `:where()`, i.e. specificity ZERO on purpose: any
+   component that already declares its own transform, transition or outline keeps
+   winning. This is a floor, never an override.
+   -------------------------------------------------------------------------- */
+:where(button, [role='button'], a, summary, label[for], .cursor-pointer) {
+  transition: transform var(--m3-dur-short-3) var(--m3-ease-spring-soft),
+              background-color var(--m3-dur-short-4) var(--m3-ease-standard),
+              border-color var(--m3-dur-short-4) var(--m3-ease-standard),
+              color var(--m3-dur-short-4) var(--m3-ease-standard),
+              box-shadow var(--m3-dur-short-4) var(--m3-ease-standard),
+              opacity var(--m3-dur-short-4) var(--m3-ease-standard);
+}
+:where(button, [role='button']):where(:active):where(:not(:disabled)) {
+  transform: scale(0.97);
+}
+
+/* One focus ring for the whole app, in the primary colour role.
+
+   ⚠️ NO `border-radius` here. This rule used to carry `border-radius: inherit`,
+   which does not shape the *outline* — it replaces the focused ELEMENT's own
+   radius with its parent's. Because `:focus-visible` counts as a class, the
+   selector is (0,1,0) — a tie with `.m3-button` / `.m3-text-field`, and this
+   file is imported after `m3.css`, so the tie went to `inherit`. Measured:
+   a pill button went 9999px → 913px and the rename field went 12px → 0px the
+   moment it took keyboard focus. That was the source of the "hard edges".
+   Modern browsers already draw the outline along the element's own corners, so
+   nothing is needed here. */
+:where(button, [role='button'], a, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--m3-primary);
+  outline-offset: 2px;
+}
+
+/* ---- 4b. PRIMITIVE UPGRADES ------------------------------------------------
+   `m3.css` gives the primitives their colour, shape and state layer. Their
+   *movement* belongs here, so all of it stays in one file. Additive only —
+   no rule below changes a colour, a size or a layout.
+   -------------------------------------------------------------------------- */
+
+/* Buttons already morph their corners on press (m3.css). Add the scale dip so
+   the press is felt on touch, where there is no hover to confirm the target. */
+.m3-button:active:not(:disabled) { transform: scale(0.97); }
+
+/* Icon buttons had no press feedback at all — only a colour change. */
+.m3-icon-button {
+  transition: background-color var(--m3-dur-short-4) var(--m3-ease-standard),
+              color var(--m3-dur-short-4) var(--m3-ease-standard),
+              transform var(--m3-dur-short-3) var(--m3-ease-spring-soft);
+}
+.m3-icon-button:active:not(:disabled) { transform: scale(0.88); }
+
+/* FAB: the expressive corner morph plus a dip. */
+.m3-fab {
+  transition: box-shadow var(--m3-dur-short-4) var(--m3-ease-standard),
+              border-radius var(--m3-dur-medium-2) var(--m3-ease-emphasized),
+              transform var(--m3-dur-short-3) var(--m3-ease-spring-soft);
+}
+.m3-fab:active { border-radius: var(--m3-shape-md); transform: scale(0.95); }
+
+/* Chips: springy press + a corner morph on selection, so picking a filter reads
+   as a state change rather than a recolour. */
+.m3-chip {
+  transition: background-color var(--m3-dur-short-4) var(--m3-ease-standard),
+              border-color var(--m3-dur-short-4) var(--m3-ease-standard),
+              color var(--m3-dur-short-4) var(--m3-ease-standard),
+              border-radius var(--m3-dur-medium-2) var(--m3-ease-emphasized),
+              transform var(--m3-dur-short-3) var(--m3-ease-spring-soft);
+}
+.m3-chip:active { transform: scale(0.95); }
+.m3-chip.m3-selected { border-radius: var(--m3-shape-full); }
+
+/* Interactive cards lift toward the pointer; touch gets the press dip only. */
+@media (hover: hover) and (pointer: fine) {
+  .m3-card.m3-interactive:hover { transform: translate3d(0, -2px, 0); }
+}
+
+/* Switch: the track squashes a hair while held — the M3 "grabbed" cue. */
+.m3-switch { transition: background-color var(--m3-dur-short-4) var(--m3-ease-standard),
+                         border-color var(--m3-dur-short-4) var(--m3-ease-standard),
+                         transform var(--m3-dur-short-3) var(--m3-ease-spring-soft); }
+.m3-switch:active:not(:disabled) { transform: scale(0.96); }
+.m3-switch:active:not(:disabled) .m3-switch-thumb { width: 1.75rem; }
+
+/* Text field: the label rises to the accent colour on focus. */
+.m3-field-label { transition: color var(--m3-dur-short-4) var(--m3-ease-standard); }
+.m3-field:focus-within .m3-field-label { color: var(--m3-primary); }
+.m3-field.m3-error .m3-text-field { animation: m3-shake var(--m3-dur-long-2) var(--m3-ease-standard); }
+
+/* Dialogs from the shared primitive already spring in via framer-motion; this
+   covers the hand-rolled ones that mark themselves up with the same classes. */
+
+/* ----------------------------------------------------------------------------
+   5. STATE CHANGE — toggles, sliders, loading, active/inactive
+   -------------------------------------------------------------------------- */
+
+/* Native range inputs: thumb grows on grab, like the M3 slider handle. */
+input[type='range'] {
+  transition: filter var(--m3-dur-short-4) var(--m3-ease-standard);
+}
+input[type='range']::-webkit-slider-thumb {
+  transition: transform var(--m3-dur-short-3) var(--m3-ease-spring),
+              box-shadow var(--m3-dur-short-4) var(--m3-ease-standard);
+}
+input[type='range']:active::-webkit-slider-thumb { transform: scale(1.25); }
+input[type='range']::-moz-range-thumb {
+  transition: transform var(--m3-dur-short-3) var(--m3-ease-spring);
+}
+input[type='range']:active::-moz-range-thumb { transform: scale(1.25); }
+
+/* Native checkbox/radio press feedback. */
+input[type='checkbox'],
+input[type='radio'] {
+  transition: transform var(--m3-dur-short-3) var(--m3-ease-spring),
+              background-color var(--m3-dur-short-4) var(--m3-ease-standard),
+              border-color var(--m3-dur-short-4) var(--m3-ease-standard);
+}
+input[type='checkbox']:active,
+input[type='radio']:active { transform: scale(0.88); }
+
+/* Selects + textareas get the same focus timing as the M3 text field. */
+select,
+textarea {
+  transition: border-color var(--m3-dur-short-4) var(--m3-ease-standard),
+              box-shadow var(--m3-dur-short-4) var(--m3-ease-standard),
+              background-color var(--m3-dur-short-4) var(--m3-ease-standard);
+}
+
+/* Custom select menu. The list grows out of the trigger edge it is anchored to,
+   so `transform-origin` flips with the placement — a menu that opened upward but
+   scaled from its top would appear to leap over the trigger and drop back.
+   Uniform `scale` (not `scaleY`) keeps the labels from stretching mid-flight. */
+.m3-select-menu {
+  animation: m3-menu-in var(--m3-dur-short-4) var(--m3-ease-emphasized-decelerate) backwards;
+  transform-origin: top center;
+}
+.m3-select-menu.m3-up { transform-origin: bottom center; }
+@keyframes m3-menu-in {
+  from { opacity: 0; transform: scale(0.95) translateY(calc(var(--m3-travel-sm) * -0.5)); }
+  to   { opacity: 1; transform: none; }
+}
+.m3-select-menu.m3-up { animation-name: m3-menu-in-up; }
+@keyframes m3-menu-in-up {
+  from { opacity: 0; transform: scale(0.95) translateY(calc(var(--m3-travel-sm) * 0.5)); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Trigger press — same weight as the other pressables. */
+.m3-select-trigger:active:not(:disabled) { transform: scale(0.985); }
+.m3-select-trigger {
+  transition: transform var(--m3-dur-short-3) var(--m3-ease-spring),
+              border-color var(--m3-dur-short-4) var(--m3-ease-standard),
+              background-color var(--m3-dur-short-4) var(--m3-ease-standard);
+}
+.m3-select-option {
+  transition: background-color var(--m3-dur-short-2) var(--m3-ease-standard),
+              color var(--m3-dur-short-2) var(--m3-ease-standard);
+}
+
+/* Disclosure chevron. (There is no measured-height accordion in this app —
+   every collapsible is a conditional render, so the panel gets an entrance
+   animation and only the chevron needs a transition.) */
+.m3-chevron {
+  transition: transform var(--m3-dur-medium-2) var(--m3-ease-emphasized);
+}
+.m3-chevron.m3-open { transform: rotate(180deg); }
+
+/* Dartboard: the fill change to gold fades instead of snapping, a tapped bed
+   dims under the finger, and a bed that is part of the suggested checkout
+   breathes so the hint is findable without reading the text. */
+.m3-board-segment {
+  transition: fill var(--m3-dur-medium-2) var(--m3-ease-standard),
+              opacity var(--m3-dur-short-2) var(--m3-ease-standard);
+}
+.m3-board-segment:active { opacity: 0.6; }
+.m3-board-hit { animation: m3-breathe calc(var(--m3-dur-xlong-2) * 2) var(--m3-ease-standard) infinite; }
+
+/* ----------------------------------------------------------------------------
+   6. NAVIGATION — tabs and sliding indicators
+   -------------------------------------------------------------------------- */
+.m3-tab {
+  transition: color var(--m3-dur-short-4) var(--m3-ease-standard),
+              background-color var(--m3-dur-short-4) var(--m3-ease-standard),
+              transform var(--m3-dur-short-3) var(--m3-ease-spring-soft);
+}
+.m3-tab:active { transform: scale(0.96); }
+/* Two-option segmented control with a GLIDING indicator: one pill that slides
+   between the options, instead of two backgrounds cross-fading. The geometry is
+   pure CSS — the pill is exactly one option wide and travels its own width plus
+   the gap, so nothing has to be measured in JS.
+   Hosts that use different spacing override the two variables inline. */
+.m3-segmented {
+  position: relative;
+  --m3-seg-pad: 4px;
+  --m3-seg-gap: 4px;
+}
+.m3-segmented-indicator {
+  position: absolute;
+  top: var(--m3-seg-pad);
+  bottom: var(--m3-seg-pad);
+  left: var(--m3-seg-pad);
+  width: calc((100% - 2 * var(--m3-seg-pad) - var(--m3-seg-gap)) / 2);
+  border-radius: inherit;
+  background-color: var(--m3-seg-fill, var(--m3-secondary-container));
+  transition: transform var(--m3-dur-medium-2) var(--m3-ease-emphasized),
+              background-color var(--m3-dur-short-4) var(--m3-ease-standard);
+  pointer-events: none;
+  z-index: 0;
+}
+.m3-segmented-indicator[data-pos='1'] { transform: translateX(calc(100% + var(--m3-seg-gap))); }
+/* Keep the labels above the pill. */
+.m3-segmented > button { position: relative; z-index: 1; }
+
+/* ----------------------------------------------------------------------------
+   7. FEEDBACK — dialogs, toasts, error/success
+   -------------------------------------------------------------------------- */
+.m3-scrim-enter { animation: m3-fade var(--m3-dur-short-4) var(--m3-ease-standard) backwards; }
+.m3-dialog-enter {
+  animation: m3-pop var(--m3-dur-medium-3) var(--m3-ease-spring-soft) backwards;
+}
+
+/* Error banners: arrive, then object. */
+.m3-error-in { animation: m3-error-in var(--m3-dur-xlong-1) var(--m3-ease-standard) backwards; }
+.m3-success-in { animation: m3-success-pop var(--m3-dur-medium-4) var(--m3-ease-spring) backwards; }
+
+/* ----------------------------------------------------------------------------
+   8. LIVE DATA — value changes, status, progress
+   -------------------------------------------------------------------------- */
+
+.m3-breathe { animation: m3-breathe calc(var(--m3-dur-xlong-2) * 2) var(--m3-ease-standard) infinite; }
+
+/* Determinate bars: the width change itself is the animation, so it may animate
+   `width` — it runs once per data update, not per frame. */
+.m3-progress-bar {
+  transition: width var(--m3-dur-long-2) var(--m3-ease-emphasized),
+              background-color var(--m3-dur-medium-2) var(--m3-ease-standard);
+}
+
+/* ----------------------------------------------------------------------------
+   8c. THEME REVEAL
+   Switching dark ↔ light used to be a hard cut. It is now a circle growing out
+   of the control that was pressed (`src/utils/theme.ts` sets the three custom
+   properties and the class, then runs the swap inside a view transition).
+
+   ⚠️ The four overrides below are not optional. By default the browser ALSO
+   cross-fades the old and new snapshots and composites them with
+   `mix-blend-mode: plus-lighter` — which, under a clip-path, adds two fully
+   opaque images together and washes the page out to milk. So: kill the default
+   animation on both, set normal blending, drop the isolation on the image pair,
+   and stack the new snapshot over the old one instead of blending them.
+
+   Scoped to `html.m3-theme-anim` so any other view transition keeps the
+   browser default.
+   -------------------------------------------------------------------------- */
+@keyframes m3-theme-reveal {
+  from { clip-path: circle(0px at var(--m3-vt-x) var(--m3-vt-y)); }
+  to   { clip-path: circle(var(--m3-vt-r) at var(--m3-vt-x) var(--m3-vt-y)); }
+}
+html.m3-theme-anim::view-transition-old(root),
+html.m3-theme-anim::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+html.m3-theme-anim::view-transition-image-pair(root) { isolation: auto; }
+html.m3-theme-anim::view-transition-old(root) { z-index: 1; }
+html.m3-theme-anim::view-transition-new(root) {
+  z-index: 2;
+  animation: m3-theme-reveal var(--m3-dur-xlong-1) var(--m3-ease-emphasized) forwards;
+}
+
+/* ----------------------------------------------------------------------------
+   8b. LEGACY BRIDGE
+   `index.css` (and Tailwind core) already ship a handful of animation utilities
+   that predate this file: hand-timed, `ease-out`, and — the part that matters —
+   `animation-fill-mode: forwards`, which pins an element to the last keyframe.
+   Every one of those keyframes happens to end on the element's natural state, so
+   re-pointing them at the token scale with `backwards` is visually identical and
+   removes the "stuck invisible" failure mode. Re-declared here (loaded after
+   `index.css`, same specificity → later wins) rather than edited in place, so all
+   motion stays in one file.
+   -------------------------------------------------------------------------- */
+.animate-fade-in       { animation: m3-fade var(--m3-dur-medium-2) var(--m3-ease-standard) backwards; }
+.animate-bounce-in     { animation: m3-pop  var(--m3-dur-medium-3) var(--m3-ease-spring) backwards; }
+.animate-scale-in      { animation: m3-pop  var(--m3-dur-medium-4) var(--m3-ease-spring-soft) backwards; }
+.animate-slide-in-right{ animation: m3-slide-end var(--m3-dur-medium-2) var(--m3-ease-emphasized-decelerate) backwards; }
+/* Tailwind core utilities, re-timed onto the same scale so a spinner in one
+   corner of the app turns at the same rate as one in another. */
+.animate-spin          { animation: m3-spin var(--m3-dur-xlong-2) var(--m3-ease-linear) infinite; }
+.animate-pulse         { animation: m3-breathe calc(var(--m3-dur-xlong-2) * 2) var(--m3-ease-standard) infinite; }
+
+/* ----------------------------------------------------------------------------
+   9. REDUCED MOTION
+   `index.css` already collapses every duration to 0.01ms globally. That alone
+   leaves decorative *infinite* animations spinning at ~100 000 fps worth of
+   restarts, so those are switched off outright here, and transforms are dropped
+   so nothing is left displaced.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .m3-enter,
+  .m3-enter-drop,
+  .m3-enter-pop,
+  .m3-enter-fade,
+  .m3-view,
+  .m3-stagger > *,
+  .m3-stagger-fast > *,
+  .m3-stagger-fade > *,
+  .m3-scrim-enter,
+  .m3-dialog-enter,
+  .m3-select-menu,
+  .m3-error-in,
+  .m3-success-in,
+  .m3-breathe,
+  .m3-ripple-wave,
+  .m3-ripple-holder,
+  .animate-fade-in,
+  .animate-bounce-in,
+  .animate-scale-in,
+  .animate-slide-in-right,
+  .animate-pulse,
+  .m3-board-hit {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1;
+  }
+  /* A ripple has nothing to say without motion — hide it rather than leaving a
+     static disc sitting on the element. */
+  .m3-ripple-wave { opacity: 0 !important; }
+
+  :where(button, [role='button']):where(:active):where(:not(:disabled)),
+  .m3-button:active:not(:disabled),
+  .m3-icon-button:active:not(:disabled),
+  .m3-fab:active,
+  .m3-chip:active,
+  .m3-select-trigger:active:not(:disabled),
+  .m3-switch:active:not(:disabled),
+  .m3-card.m3-interactive:hover,
+  .m3-tab:active,
+  input[type='range']:active::-webkit-slider-thumb,
+  input[type='checkbox']:active,
+  input[type='radio']:active {
+    transform: none;
+  }
+  .m3-field.m3-error .m3-text-field { animation: none !important; }
+
+  html.m3-theme-anim::view-transition-new(root) { animation: none !important; }
+
+  /* Loading spinners are the exception: they report state, they are not
+     decoration, so they keep turning — just slower. This also overrides the
+     blanket 0.01ms in `index.css`, which would otherwise restart a spinner
+     thousands of times a second and burn a core for nothing. */
+  .animate-spin {
+    animation: m3-spin calc(var(--m3-dur-xlong-2) * 2) var(--m3-ease-linear) infinite !important;
+  }
+}

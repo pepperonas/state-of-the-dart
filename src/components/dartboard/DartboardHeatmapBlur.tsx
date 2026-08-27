@@ -550,7 +550,7 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
   }, [heatmapData, compact]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 m3-stagger">
       {/* Heatmap Visualization */}
       <div className="relative">
         <div className="absolute inset-0 blur-3xl opacity-20">
@@ -590,15 +590,15 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
 
       {/* Statistics Cards */}
       {heatmapStats && !compact && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 m3-stagger-fast">
           <Card variant="filled" className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <Crosshair size={18} className="text-primary" />
               <span className="m3-label-medium text-on-surface-variant">Cluster-Zentrum</span>
             </div>
             <div className="m3-title-medium text-on-surface">
-              {heatmapStats.scatterRadiusPercent < 15 ? '🎯 Sehr präzise' :
-               heatmapStats.scatterRadiusPercent < 25 ? '✓ Präzise' : '↔ Gestreut'}
+              {heatmapStats.scatterRadiusPercent < 15 ?'Sehr präzise':
+               heatmapStats.scatterRadiusPercent < 25 ?'Präzise':'↔ Gestreut'}
             </div>
           </Card>
 
@@ -704,7 +704,8 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
                     className="absolute inset-0 opacity-20"
                     style={{
                       background: `linear-gradient(to right, ${color}, transparent)`,
-                      width: `${Math.min(100, percentage * 10)}%`
+                      width: `${Math.min(100, percentage * 10)}%`,
+                      transition: 'width var(--m3-dur-long-2) var(--m3-ease-emphasized)'
                     }}
                   />
 

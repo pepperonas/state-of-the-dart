@@ -18,7 +18,8 @@ import {
 } from '../../types/achievements';
 import { formatDate } from '../../utils/dateUtils';
 import logger from '../../utils/logger';
-import { BackButton, Card, Chip } from '../common';
+import { BackButton, Card, Chip, Select } from '../common';
+import { Icon, iconForEmoji } from '../icons';
 
 const AchievementsScreen: React.FC = () => {
   const { t } = useTranslation();
@@ -102,8 +103,9 @@ const AchievementsScreen: React.FC = () => {
   if (players.length === 0) {
     return (
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto m3-view">
           <BackButton onClick={() => navigate('/')} />
+          <h1 className="m3-headline-medium text-on-surface mb-6">{t('achievements.achievements')}</h1>
 
           <Card variant="filled" className="p-8 text-center">
             <Trophy size={64} className="mx-auto mb-4 text-on-surface-variant" />
@@ -126,23 +128,19 @@ const AchievementsScreen: React.FC = () => {
         <Card variant="elevated" className="p-6 mb-6">
           <div className="flex items-center gap-3 mb-6">
             <Trophy size={32} className="text-primary" />
-            <h1 className="m3-headline-small text-on-surface">{t('achievements.achievements')}</h1>
+            <h1 className="m3-headline-medium text-on-surface">{t('achievements.achievements')}</h1>
           </div>
 
           {/* Player Selection */}
           <div className="mb-6">
             <label className="block m3-label-large text-on-surface-variant mb-2">{t('achievements.player')}</label>
-            <select
+            <Select<string>
               value={selectedPlayerId}
-              onChange={(e) => setSelectedPlayerId(e.target.value)}
-              className="w-full px-4 py-3 bg-surface-container-high border border-outline-variant rounded-m3-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              {players.map((player) => (
-                <option key={player.id} value={player.id}>
-                  {player.name}
-                </option>
-              ))}
-            </select>
+              onChange={setSelectedPlayerId}
+              size="lg"
+              aria-label={t('achievements.select_player', 'Spieler')}
+              options={players.map((player) => ({ value: player.id, label: player.name }))}
+            />
           </div>
 
           {/* Stats Overview */}
@@ -183,7 +181,7 @@ const AchievementsScreen: React.FC = () => {
             </div>
             <div className="w-full bg-surface-container-highest rounded-m3-full h-3">
               <div
-                className="bg-primary h-3 rounded-m3-full transition-all"
+                className="bg-primary h-3 rounded-m3-full m3-progress-bar"
                 style={{ width: `${completionPercentage}%` }}
               />
             </div>
@@ -296,7 +294,7 @@ const AchievementCard = React.memo<AchievementCardProps>(({ achievement, unlocke
           className={`text-4xl flex-shrink-0 ${unlocked ? '' : 'grayscale opacity-50'}`}
           title={achievement.tier}
         >
-          {isHidden ? '❓' : achievement.icon}
+          <Icon name={isHidden ? 'question' : iconForEmoji(achievement.icon)} size={30} />
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="m3-title-medium text-on-surface flex items-center gap-2 truncate">
@@ -319,7 +317,7 @@ const AchievementCard = React.memo<AchievementCardProps>(({ achievement, unlocke
           </div>
           <div className="w-full bg-surface-container-highest rounded-m3-full h-2">
             <div
-              className="bg-primary h-2 rounded-m3-full transition-all"
+              className="bg-primary h-2 rounded-m3-full m3-progress-bar"
               style={{ width: `${progress.percentage}%` }}
             />
           </div>

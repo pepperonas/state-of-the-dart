@@ -150,7 +150,19 @@
     "first_to": "First to",
     "double_out": "Double Out",
     "double_in": "Double In",
-    "start_game": "Start Game"
+    "start_game": "Start Game",
+    "dart": "Dart",
+    "remove_dart": "Delete last dart",
+    "undo_last_throw": "Undo throw",
+    "undo_throw_blocked": "Clear the current throw first",
+    "no_throw_to_undo": "No throw to undo",
+    "keyboard_hint": "⌨️ 0–9 to type, Enter to confirm, Backspace to undo dart/throw, Ctrl+Z to undo throw, Esc to clear",
+    "remove_player": "Remove player",
+    "remove_player_title": "Remove {{name}} from the match?",
+    "remove_player_body": "Every throw {{name}} made in this match is deleted. The match continues with the remaining players.",
+    "remove_player_irreversible": "This cannot be undone.",
+    "remove_player_min": "A match needs at least 2 players",
+    "more_scores": "More scores (0–180)…"
   },
   "stats": {
     "statistics": "Statistics",
@@ -165,7 +177,8 @@
     "best_average": "Best Average",
     "highest_checkout": "Highest Checkout",
     "checkout_percentage": "Checkout Percentage",
-    "personal_bests": "Personal Bests"
+    "personal_bests": "Personal Bests",
+    "select_player": "Select player"
   },
   "training": {
     "training": "Training",
@@ -297,8 +310,6 @@
     "edit_subscription": "Edit subscription",
     "grant_lifetime": "Grant lifetime",
     "revoke_access": "Revoke access",
-    "remove_admin": "Remove admin",
-    "make_admin": "Make admin",
     "delete_user": "Delete user",
     "no_users_found": "No users found with filter \"{{filter}}\"",
     "bug_reports": "Bug Reports",
@@ -349,8 +360,6 @@
     "confirm_grant_lifetime": "Grant lifetime access to this user?",
     "confirm_revoke_access": "Revoke access for this user?",
     "confirm_delete_user": "DELETE this user permanently? This cannot be undone!",
-    "confirm_remove_admin": "Remove admin status from this user?",
-    "confirm_make_admin": "Make this user an admin?",
     "view_details": "View Details",
     "copy_clipboard": "Copy to clipboard",
     "subscriptions": "Subscriptions",
@@ -367,7 +376,12 @@
     "select_critical": "Critical",
     "select_high": "High",
     "select_medium": "Medium",
-    "select_low": "Low"
+    "select_low": "Low",
+    "table_activity": "Activity",
+    "table_last_seen": "Last seen",
+    "never_seen": "never",
+    "usage_summary": "{{total}} games",
+    "user_label": "User"
   },
   "debug": {
     "title": "Debug Flag",
@@ -449,7 +463,8 @@
     "hint_average": "Only {{remaining}} average left for the achievement!",
     "hint_180s": "{{remaining}} more 180s for the achievement!",
     "hint_checkout": "Only {{remaining}}% checkout rate left for the achievement!",
-    "hint_winstreak": "{{remaining}} more wins in a row for the achievement!"
+    "hint_winstreak": "{{remaining}} more wins in a row for the achievement!",
+    "select_player": "Select player"
   },
   "subscription": {
     "trial": "Trial",

@@ -1,5 +1,6 @@
 import React from 'react';
-import { isEmoji, getInitial } from '../../utils/avatar';
+import { getInitial } from '../../utils/avatar';
+import { Icon, iconForEmoji } from '../icons';
 
 interface PlayerAvatarProps {
   avatar?: string;
@@ -10,19 +11,32 @@ interface PlayerAvatarProps {
 }
 
 const sizeClasses = {
-  sm: 'w-8 h-8 text-sm',
-  md: 'w-12 h-12 text-lg',
-  lg: 'w-16 h-16 text-2xl',
-  xl: 'w-24 h-24 md:w-32 md:h-32 text-4xl md:text-6xl',
+  sm: 'w-8 h-8',
+  md: 'w-12 h-12',
+  lg: 'w-16 h-16',
+  xl: 'w-24 h-24 md:w-32 md:h-32',
 };
+
+/** Glyph is ~55% of the disc, the optical ratio M3 uses for avatars. */
+const glyphSize = { sm: 18, md: 26, lg: 34, xl: 52 };
 
 const badgeSizeClasses = {
-  sm: 'w-4 h-4 text-xs',
-  md: 'w-5 h-5 text-sm',
-  lg: 'w-6 h-6 text-base',
-  xl: 'w-8 h-8 md:w-10 md:h-10 text-lg md:text-xl',
+  sm: 'w-4 h-4',
+  md: 'w-5 h-5',
+  lg: 'w-6 h-6',
+  xl: 'w-8 h-8 md:w-10 md:h-10',
 };
 
+/**
+ * A player's avatar as a tonal disc with a custom icon.
+ *
+ * Avatars used to be raw emoji, which meant every player's face was drawn by the
+ * operating system: Apple's glossy 3-D on a phone, Google's flat shapes on a
+ * tablet, a flat outline on Windows — three different looks for one player, none
+ * of them in the app's palette. The stored value is still whatever emoji the user
+ * picked; `iconForEmoji` translates it to a glyph from the app's own set, so old
+ * profiles keep their meaning and gain the theme.
+ */
 const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
   avatar,
   name,
@@ -30,39 +44,41 @@ const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
   showBadge = false,
   className = '',
 }) => {
-  const isAvatarEmoji = avatar && isEmoji(avatar);
-  const displayEmoji = isAvatarEmoji ? avatar : null;
+  const isUrl = !!avatar && /^https?:\/\//.test(avatar);
+  // An avatar that is plain text (not an emoji, not a URL) is a person's initial
+  // and should stay as a letter — only glyph avatars become icons.
+  const isLetter = !!avatar && !isUrl && /^[\p{L}\p{N}]$/u.test(avatar);
   const initial = getInitial(name);
+
+  const disc = `${sizeClasses[size]} rounded-full flex items-center justify-center shrink-0
+    bg-primary-container text-on-primary-container`;
 
   return (
     <div className={`relative ${className}`}>
-      {displayEmoji ? (
-        // Show emoji directly
-        <div className={`${sizeClasses[size]} rounded-full flex items-center justify-center`}>
-          <span className="text-2xl md:text-3xl">{displayEmoji}</span>
+      {isUrl ? (
+        <img
+          src={avatar}
+          alt={name}
+          className={`${sizeClasses[size]} rounded-full object-cover shrink-0`}
+        />
+      ) : isLetter ? (
+        <div className={disc}>
+          <span className="m3-title-medium font-bold">{avatar}</span>
+        </div>
+      ) : avatar ? (
+        <div className={disc}>
+          <Icon name={iconForEmoji(avatar)} size={glyphSize[size]} />
         </div>
       ) : (
-        // Show initial with gradient background
-        <div
-          className={`${sizeClasses[size]} rounded-full bg-gradient-to-br from-primary-500 via-accent-500 to-success-500 flex items-center justify-center shadow-2xl border-4 border-white/20`}
-        >
-          <span
-            className="font-bold text-white"
-            style={{
-              fontFamily: "'Brush Script MT', 'Lucida Handwriting', cursive, serif",
-              textShadow: '2px 2px 4px rgba(0,0,0,0.5), 0 0 20px rgba(255,255,255,0.3)',
-              letterSpacing: '0.05em',
-            }}
-          >
-            {initial}
-          </span>
+        <div className={disc}>
+          <span className="m3-title-medium font-bold">{initial}</span>
         </div>
       )}
-      {showBadge && displayEmoji && (
+      {showBadge && !isUrl && (
         <div
-          className={`absolute -bottom-1 -right-1 ${badgeSizeClasses[size]} bg-accent-500 rounded-full border-4 border-dark-900 flex items-center justify-center shadow-lg`}
+          className={`absolute -bottom-1 -right-1 ${badgeSizeClasses[size]} bg-tertiary-container text-on-tertiary-container rounded-full border-2 border-surface flex items-center justify-center`}
         >
-          <span className="text-xs">{displayEmoji}</span>
+          <Icon name={iconForEmoji(avatar)} size={size === 'sm' ? 10 : 12} />
         </div>
       )}
     </div>

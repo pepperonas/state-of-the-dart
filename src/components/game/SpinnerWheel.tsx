@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Player } from '../../types';
 import { audioSystem } from '../../utils/audio';
+import { Icon, iconForEmoji, ICON_PATHS } from '../icons';
 
 interface SpinnerWheelProps {
   players: Player[];
@@ -82,12 +83,19 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
       ctx.translate(textX, textY);
       ctx.rotate(midAngle + Math.PI / 2);
 
-      // Avatar emoji
-      ctx.font = 'bold 28px sans-serif';
+      // Avatar glyph. `Path2D` accepts the same 24x24 path data the <Icon>
+      // component renders, so the wheel shows the app's own icon rather than a
+      // platform emoji drawn in a canvas font.
       ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(player.avatar || '🎯', 0, -15);
+      const glyph = new Path2D(ICON_PATHS[iconForEmoji(player.avatar)]);
+      ctx.save();
+      const GLYPH = 30;
+      ctx.translate(-GLYPH / 2, -15 - GLYPH / 2);
+      ctx.scale(GLYPH / 24, GLYPH / 24);
+      ctx.fill(glyph, 'evenodd');
+      ctx.restore();
 
       // Player name (truncated)
       ctx.font = 'bold 14px sans-serif';
@@ -205,7 +213,7 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 m3-scrim-enter">
       <div className="flex flex-col items-center gap-6 p-8 bg-surface-container rounded-m3-lg shadow-m3-3">
         <h2 className="m3-headline-small text-on-surface text-center">
           Wer wirft zuerst?
@@ -255,7 +263,7 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
         {/* Result */}
         {showResult && winner && (
           <div className="animate-bounce-in text-center">
-            <div className="text-5xl mb-2">{winner.avatar || '🎯'}</div>
+            <div className="mb-2 flex justify-center"><Icon name={iconForEmoji(winner.avatar)} size={48} /></div>
             <div className="m3-title-large text-tertiary">
               {winner.name}
             </div>

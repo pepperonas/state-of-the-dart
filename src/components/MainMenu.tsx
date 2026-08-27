@@ -61,10 +61,10 @@ const MainMenu: React.FC = () => {
     ...(resumableMatchCount > 0
       ? [{ title: t('resume.menu_title'), icon: RotateCcw, description: t('resume.menu_desc', { count: resumableMatchCount }), onClick: () => navigate('/resume'), tone: 'success' as Tone, badge: resumableMatchCount }]
       : []),
-    { title: '🎯 ' + t('menu.cricket'), icon: Target, description: t('menu.cricket_desc'), onClick: () => navigate('/cricket'), tone: 'success' },
-    { title: '🕐 ' + t('menu.around_the_clock'), icon: Target, description: t('menu.around_the_clock_desc'), onClick: () => navigate('/around-the-clock'), tone: 'secondary' },
-    { title: '⚡ ' + t('menu.shanghai'), icon: Target, description: t('menu.shanghai_desc'), onClick: () => navigate('/shanghai'), tone: 'tertiary' },
-    { title: '🌐 ' + t('menu.online_multiplayer'), icon: Target, description: t('menu.online_multiplayer_desc'), onClick: () => navigate('/online'), tone: 'tertiary' },
+    { title: t('menu.cricket'), icon: Target, description: t('menu.cricket_desc'), onClick: () => navigate('/cricket'), tone: 'success' },
+    { title: t('menu.around_the_clock'), icon: Target, description: t('menu.around_the_clock_desc'), onClick: () => navigate('/around-the-clock'), tone: 'secondary' },
+    { title: t('menu.shanghai'), icon: Target, description: t('menu.shanghai_desc'), onClick: () => navigate('/shanghai'), tone: 'tertiary' },
+    { title: t('menu.online_multiplayer'), icon: Target, description: t('menu.online_multiplayer_desc'), onClick: () => navigate('/online'), tone: 'tertiary' },
     { title: t('menu.players'), icon: Users, description: t('menu.players_desc'), onClick: () => navigate('/players'), tone: 'secondary' },
     { title: t('menu.statistics'), icon: TrendingUp, description: t('menu.statistics_desc'), onClick: () => navigate('/stats'), tone: 'primary' },
     { title: t('menu.match_history'), icon: ClipboardList, description: t('menu.match_history_desc'), onClick: () => navigate('/match-history'), tone: 'secondary' },
@@ -80,7 +80,7 @@ const MainMenu: React.FC = () => {
 
   // Add Admin Panel button only if user is admin
   if (user?.isAdmin) {
-    menuItems.push({ title: '👑 ' + t('menu.admin_panel'), icon: Shield, description: t('menu.admin_panel_desc'), onClick: () => navigate('/admin'), tone: 'error' });
+    menuItems.push({ title: t('menu.admin_panel'), icon: Shield, description: t('menu.admin_panel_desc'), onClick: () => navigate('/admin'), tone: 'error' });
   }
 
   return (

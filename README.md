@@ -6,38 +6,70 @@
 
 # 🎯 State of the Dart
 
-**Professionelles Dart-Zählsystem** - Eine funktionsreiche, webbasierte Dart-Scoring-Anwendung mit Multi-User-Support, professionellem Statistik-Tracking und Live-Deployment.
+**Professionelles Dart-Zählsystem** — eine funktionsreiche, webbasierte Dart-Scoring-Anwendung mit Multi-User-Support, tiefem Statistik-Tracking, 463 Achievements und Live-Deployment.
 
-[![Live Demo](https://img.shields.io/badge/Live-stateofthedart.com-green?style=for-the-badge)](https://stateofthedart.com)
-[![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-purple?style=for-the-badge)](https://stateofthedart.celox.io)
-![Version](https://img.shields.io/badge/Version-0.8.5-blue?style=for-the-badge)
+<!-- Links -->
+[![Live Demo](https://img.shields.io/badge/Live_Demo-stateofthedart.com-22c55e?style=for-the-badge&logo=googlechrome&logoColor=white)](https://stateofthedart.com)
+[![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-a855f7?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://stateofthedart.celox.io)
+[![Version](https://img.shields.io/badge/Version-0.9.1-3b82f6?style=for-the-badge)](CHANGELOG.md)
+
+<!-- Build & Repo (live) -->
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![E2E](https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml)
+[![License](https://img.shields.io/github/license/pepperonas/state-of-the-dart)](LICENSE)
+[![Last Commit](https://img.shields.io/github/last-commit/pepperonas/state-of-the-dart)](https://github.com/pepperonas/state-of-the-dart/commits)
+[![Commit Activity](https://img.shields.io/github/commit-activity/m/pepperonas/state-of-the-dart)](https://github.com/pepperonas/state-of-the-dart/pulse)
+[![Open Issues](https://img.shields.io/github/issues/pepperonas/state-of-the-dart)](https://github.com/pepperonas/state-of-the-dart/issues)
+[![Code Size](https://img.shields.io/github/languages/code-size/pepperonas/state-of-the-dart)](https://github.com/pepperonas/state-of-the-dart)
+[![Top Language](https://img.shields.io/github/languages/top/pepperonas/state-of-the-dart)](https://github.com/pepperonas/state-of-the-dart)
 
+<!-- Frontend -->
 ![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?logo=vite&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?logo=tailwindcss&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)
-![Express](https://img.shields.io/badge/Express-4.x-000000?logo=express&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white)
-![PWA](https://img.shields.io/badge/PWA-Installable-5A0FC8?logo=pwa&logoColor=white)
-![Socket.IO](https://img.shields.io/badge/Socket.IO-4.x-010101?logo=socket.io&logoColor=white)
+![Material Design 3](https://img.shields.io/badge/Material_Design_3-Expressive-757575?logo=materialdesign&logoColor=white)
 ![Framer Motion](https://img.shields.io/badge/Framer_Motion-12.x-0055FF?logo=framer&logoColor=white)
 ![Recharts](https://img.shields.io/badge/Recharts-2.12-FF6384)
-![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
+![i18next](https://img.shields.io/badge/i18next-25.x-26A69A?logo=i18next&logoColor=white)
+![PWA](https://img.shields.io/badge/PWA-Installable-5A0FC8?logo=pwa&logoColor=white)
+![Workbox](https://img.shields.io/badge/Workbox-7.x-FF6F00?logo=googlechrome&logoColor=white)
+
+<!-- Backend -->
+![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express-4.19-000000?logo=express&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white)
+![Socket.IO](https://img.shields.io/badge/Socket.IO-4.8-010101?logo=socket.io&logoColor=white)
+![JWT](https://img.shields.io/badge/Auth-JWT_+_OAuth-000000?logo=jsonwebtokens&logoColor=white)
 ![Stripe](https://img.shields.io/badge/Stripe-Payments-635BFF?logo=stripe&logoColor=white)
 
-![Achievements](https://img.shields.io/badge/Achievements-463-gold)
-![Game Modes](https://img.shields.io/badge/Game_Modes-6-orange)
-![Audio Files](https://img.shields.io/badge/Audio_Files-400+-red)
-![Tests](https://img.shields.io/badge/Tests-294_passing-brightgreen)
+<!-- Qualität -->
+![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
+![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?logo=playwright&logoColor=white)
+![Unit Tests](https://img.shields.io/badge/Unit_Tests-692-brightgreen)
+![E2E Tests](https://img.shields.io/badge/E2E_Tests-11-brightgreen)
+![Coverage](https://img.shields.io/badge/Coverage-24%25_stmts_%7C_75%25_branches-yellow)
+![ESLint](https://img.shields.io/badge/ESLint-configured-4B32C3?logo=eslint&logoColor=white)
+
+<!-- Inhalt -->
+![Achievements](https://img.shields.io/badge/Achievements-463-FFD700)
+![Game Modes](https://img.shields.io/badge/Game_Modes-5-orange)
+![Training Modes](https://img.shields.io/badge/Training_Modes-6-orange)
+![Custom Icons](https://img.shields.io/badge/Custom_Icons-69-8b5cf6)
+![Audio Files](https://img.shields.io/badge/Audio_Files-609-e11d48)
 ![i18n](https://img.shields.io/badge/i18n-DE_%7C_EN-informational)
 ![Mobile](https://img.shields.io/badge/Mobile-Optimized-success)
+![Offline](https://img.shields.io/badge/Offline-First-0ea5e9)
 
-🌐 **[Live App](https://stateofthedart.com)** | 🏠 **[Website](https://stateofthedart.celox.io)** | 📖 **[Deployment Guide](docs/DEPLOYMENT_VPS.md)** | 🏗️ **[Architektur](docs/ARCHITECTURE.md)** | 🐛 **[Issues melden](https://github.com/pepperonas/state-of-the-dart/issues)**
+<!-- Konventionen -->
+[![Conventional Commits](https://img.shields.io/badge/Conventional_Commits-1.0.0-FE5196?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org/)
+[![Keep a Changelog](https://img.shields.io/badge/Keep_a_Changelog-1.0.0-E05735?logo=keepachangelog&logoColor=white)](CHANGELOG.md)
+[![Semantic Versioning](https://img.shields.io/badge/SemVer-2.0.0-3F4551)](https://semver.org/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Code of Conduct](https://img.shields.io/badge/Code_of_Conduct-Contributor_Covenant-5e0d73.svg)](CODE_OF_CONDUCT.md)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-important)](SECURITY.md)
 
+🌐 **[Live App](https://stateofthedart.com)** · 🏠 **[Website](https://stateofthedart.celox.io)** · 🏗️ **[Architektur](docs/ARCHITECTURE.md)** · 🎨 **[Design-System](docs/DESIGN_SYSTEM.md)** · 🚀 **[Deployment](docs/DEPLOYMENT_VPS.md)** · 📝 **[Changelog](CHANGELOG.md)** · 🐛 **[Issues](https://github.com/pepperonas/state-of-the-dart/issues)**
 ---
 
 ## 📸 Screenshots
@@ -183,7 +215,7 @@
   - **Skill-Radar** - 5-dimensionale Skill-Visualisierung
   - **Karriere-Zeitachse** - Vom ersten bis zum letzten Spiel mit allen Stats
   - **Achievement-Showcase** - Zeige freigeschaltete Achievements
-  - **Player Avatar System** - Professionelles Avatar-Design mit geschwungener Schrift oder Emoji
+  - **Player Avatar System** - Tonale Avatar-Discs mit Icons aus dem hauseigenen Set (siehe [Design-System](docs/DESIGN_SYSTEM.md)); ältere Profile mit Emoji werden automatisch übersetzt
   - **🔥 Professionelle Heatmap (NEU in v0.1.11)** - Wissenschaftliche Wurf-Visualisierung:
     - **Polarkoordinaten-Histogramm** - 1440 Zellen (20 Ringe × 72 Winkel) statt 82 Standard-Felder
     - **Gaussian Blur (15px)** - Smooth Übergänge für professionellen Look
@@ -218,6 +250,21 @@
   - Status-Workflow: open → investigating → resolved/dismissed
   - "Copy for AI" exportiert strukturierten Debug-Text zur Analyse
 
+#### Nutzungs-Übersicht (nur Admin)
+- **Aktivitäts-Chart je Nutzer** — 30-Tage-Balkendiagramm aus Matches **und** Trainings-Sessions. Skaliert auf das eigene Maximum der Zeile, nicht auf ein globales: die Frage ist „wann war diese Person aktiv", nicht „wer ist am aktivsten". Ein ruhiger Tag bleibt als feiner Grundstrich sichtbar, damit die Zeile als Zeitachse lesbar ist.
+- **Zuletzt aktiv** — relative Angabe („vor 3 Tagen"), eingefärbt nach Frische: grün ≤ 7 Tage, neutral ≤ 30, rot darüber. Das exakte Datum steht im Tooltip.
+- **Filter nach Nutzer** in den Tabellen für Bug Reports und Debug Flags. Die Auswahl wird aus den tatsächlich vorhandenen Einträgen gebaut — ein Filter, der leere Konten anbietet, ist Rauschen; einer, der einen Melder auslässt, versteckt dessen Einträge.
+
+> Die Daten kommen aus `GET /api/admin/users`, das hinter `requireAdmin` liegt — sie erreichen einen Nicht-Admin-Client also gar nicht erst.
+
+#### Wer darf was melden
+| | Bug Report | Debug Flag |
+|---|---|---|
+| Angemeldeter Nutzer | ✅ anlegen, eigene sehen | ❌ |
+| Admin | ✅ alle sehen, Status/Notizen setzen | ✅ vollständig |
+
+Ein **Bug Report** ist Nutzer-Feedback und steht jedem angemeldeten Konto offen — erreichbar über den 🐞-Knopf unten links auf jedem Bildschirm. Ein **Debug Flag** ist ein Diagnose-Schnappschuss (Log-Puffer, Screenshot, Spielzustand, Route) und bleibt Admins vorbehalten.
+
 ### 📴 Offline-First PWA (NEU in v0.2.0)
 - **Vollständiger Offline-Modus** - App funktioniert ohne Internetverbindung
 - **IndexedDB-Speicherung** - Lokale Datenspeicherung mit `idb` Library
@@ -237,7 +284,7 @@
   - Async/await für saubere Audio-Abfolge
 - **Bust-Benachrichtigungen** - Klares Audio-Feedback für ungültige Würfe
 - **Separate Lautstärke** - Unabhängige Kontrolle für Caller und Effects
-- **400+ Audio-Dateien** - Vollständiges professionelles Dart-Calling-Erlebnis
+- **609 Audio-Dateien** - Vollständiges professionelles Dart-Calling-Erlebnis
 - **Lautstärkeregelung** - Separate Regler für Caller (Scores) und Effects (UI-Sounds)
 
 ### 📖 User Guide & Dokumentation
@@ -248,7 +295,7 @@
   - Glass-card Styling mit responsivem Layout
   - Direkter Zugriff aus dem Hauptmenü
   - Click-outside zum Schließen
-  - **Aktualisiert (v0.1.9):** Dokumentiert alle neuen Features (Emoji Picker, Undo-System, klickbare Spielerliste)
+  - **Aktualisiert (v0.1.9):** Dokumentiert alle neuen Features (Avatar-Auswahl, Undo-System, klickbare Spielerliste)
 
 ### 💾 Database Backup System
 - **Automatisierte Backups (NEU in v0.1.8)** - Verhindert VPS-Speicher-Überlastung:
@@ -401,7 +448,7 @@ state-of-the-dart/
 │   ├── DART_ONLINE_TURNIER.md # Online-Turnier Konzept
 │   └── README.en.md          # English README
 ├── public/
-│   ├── sounds/               # 400+ Audio-Dateien
+│   ├── sounds/               # 609 Audio-Dateien
 │   └── images/               # Bilder & Thumbnails
 ├── website/                  # Landing Page (stateofthedart.celox.io)
 ├── dist/                     # Production Build
@@ -594,7 +641,19 @@ PWA-Konfiguration in `vite.config.ts`.
 ## 🧪 Testing
 
 ### Unit-Tests (Vitest + React Testing Library)
-**294 Tests** in `src/tests/` — Scoring, Achievement-Definitionen, Match-Reconstruction, Hooks, Context.
+**692 Tests** in `src/tests/`, gegliedert nach dem, was sie schützen:
+
+| Bereich | Was abgedeckt ist |
+|---|---|
+| `data/` | **Checkout-Tabelle als Property-Test**: jede der ~162 Routen muss exakt auf ihren Score summieren, auf einer Doppel enden und in drei Darts passen |
+| `utils/` | X01-Regelwerk (Bust, Checkout, Averages, Score-Rekonstruktion), Bot-Logik, Offline-Queue mit Retry-Politik, Log-Ringpuffer, Theme-Wechsel, Heatmap-Mathematik, Spieler-Sortierung, Game-State-Persistenz (48-h-Regel), Debug-Export |
+| `context/` | Game-Reducer — Zug-Ablauf, Bust, Checkout, Undo, Sets/Legs, Spieler-Entfernung |
+| `components/` | M3-Primitive (Contract, nicht Aussehen), `Select` inkl. Tastatur & Portal, ScoreInput-Undo, Aktivitäts-Sparkline |
+| `icons/` | Pfad-Validität, `currentColor`, echte Löcher, Emoji-Auflösung, **Scan gegen zurückkehrende Emoji** |
+| `server/` | Admin-Allowlist, Nutzungs-Aggregation gegen **echtes SQLite** inkl. N+1-Wächter |
+| `consistency/` | Seitenbreiten, Titel-Ebene, kein natives `<select>`, Spezifitäts-Regeln |
+| `docs/` | **Doku-Abgleich** — Badges, Pfade, Links und Kommandos gegen den echten Code |
+| `legal/`, `landing/` | Normverweise, Landing-Fakten |
 
 ```bash
 npm test              # Watch-Modus
@@ -603,8 +662,25 @@ npm run test:ui       # Mit UI
 npm run coverage      # Coverage-Report
 ```
 
+**Coverage** (`npm run coverage`) — die Zahlen sind ehrlich, nicht geschönt:
+
+| Bereich | Statements | Warum |
+|---|---:|---|
+| `src/components/icons/` | 99 % | Reine Funktionen + Pfaddaten |
+| `src/data/` | 95 % | Checkout-Tabelle, komplett per Property-Tests validiert |
+| `src/components/common/` | 91 % | Primitive mit Contract-Tests |
+| `src/utils/` | 75 % | Scoring, Checkout, Heatmap, Bots, Offline-Queue, Log-Puffer, Theme |
+| `src/context/` | 31 % | Reducer getestet, Provider-Verdrahtung nicht |
+| Screens & Views | 18 % | Bewusst über **E2E** abgedeckt, nicht per Unit-Test |
+| **Gesamt** | **24 %** Statements · **76 %** Branches | |
+
+`vitest.config.ts` setzt Schwellen knapp unter den Ist-Werten — ein Rückschritt lässt CI
+scheitern. Das Badge darf laut Doku-Abgleich **nie mehr** behaupten, als gemessen wurde.
+
+> **Doku-Abgleich:** `src/tests/docs/docsSync.test.ts` lässt die Dokumentation nicht driften. Es prüft, dass jede Zahl in einem Badge zum Code passt, dass jeder dokumentierte `npm run …`-Befehl existiert, dass jeder erwähnte Pfad und jeder Markdown-Link auflösbar ist und dass beide READMEs denselben Badge-Satz tragen. Wer eine Zahl ändert, ohne die Doku nachzuziehen, bekommt einen roten Test statt einer stillen Lüge.
+
 ### E2E-Tests (Playwright)
-**10 Tests** in `e2e/` gegen `vite preview` + isoliertes Backend mit eigener SQLite-DB.
+**11 Tests** in `e2e/` gegen `vite preview` + isoliertes Backend mit eigener SQLite-DB.
 
 ```bash
 npm run test:e2e       # Headless
@@ -720,6 +796,28 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 
 ## 📝 Changelog
 
+### v0.9.1 (28. August 2026) - Material 3 Expressive, eigenes Icon-Set & Scoring-Fix
+
+**⚠️ Behoben — Scoring:** `convertScoreToDarts` lieferte für **36 von 172** werfbaren Scores zu wenig zurück (141 kam als 140 heraus). Da der Reducer den Wurf aus der Dart-Summe berechnet, zog das Eintippen von 141 auf dem Numpad nur 140 ab. Neu ist ein exakter Zerlegungs-Backstop; die übrigen 136 Rekonstruktionen sind unverändert.
+
+**Design-System**
+- **69 eigene M3-Expressive-Icons** ersetzen ~250 Emoji in Oberfläche, Achievements und Avatar-Palette. Geometrie wird von `tools/gen-icons.py` **gerechnet**, nicht getippt.
+- **Eigener `Select`** statt aller 23 nativen `<select>` — Menü per Portal, generischer Werttyp, APG-Combobox-Tastatur.
+- **Fokus-Ring** trug `border-radius: inherit` und formte damit jedes fokussierte Element um (Pill-Button 9999px → 913px). Entfernt.
+- Textfelder und Select-Trigger auf 12 px Radius.
+
+**Spieler & Admin**
+- **Spielerlisten sortieren nach Regel**: echte Konten vor Bots und Gast-Profilen, dann meiste Spiele.
+- **Admin-Nutzungsübersicht**: 30-Tage-Aktivitäts-Chart je Nutzer, „Zuletzt aktiv", Filter nach Nutzer.
+- **Bug-Report-Knopf für jeden angemeldeten Nutzer** (Debug-Flags bleiben admin-only).
+
+**Qualität**
+- **692 Unit-Tests** (+398 seit 0.8.5), Coverage 24 % Statements / 76 % Branches.
+- **Doku-Abgleich-Suite**: Badges, Pfade, Links und Kommandos werden gegen den Code geprüft — die Doku kann nicht mehr still veralten.
+- Neues [Design-System-Dokument](docs/DESIGN_SYSTEM.md).
+
+---
+
 ### v0.8.5 (14. März 2026) - Achievement Fixes
 
 #### 🔧 Verbesserungen
@@ -774,7 +872,7 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 
 #### 🔧 Verbesserungen
 - Logger Ring-Buffer immer aktiv (auch in Production), Konsolen-Ausgabe bleibt environment-gated
-- 11 neue Scope-Tests (294 Tests total)
+- 11 neue Scope-Tests (damals 294 Tests total)
 
 ### v0.8.2 (27. Februar 2026) - Bust-Logik Fix
 
@@ -1023,11 +1121,17 @@ Siehe [CHANGELOG.md](CHANGELOG.md) für eine vollständige Liste der Änderungen
 ---
 
 <div align="center">
-  <p>Made with ❤️ and 🎯 by Martin Pfeffer</p>
-  <p>© 2026 celox.io | Version 0.8.4</p>
+  <p><strong>Made with ❤️ and 🎯 by Martin Pfeffer</strong></p>
+  <sub>© 2026 celox.io</sub>
   <p>
     <a href="https://stateofthedart.com">🌐 Live Demo</a> •
     <a href="https://github.com/pepperonas/state-of-the-dart">📦 GitHub</a> •
     <a href="https://github.com/pepperonas/state-of-the-dart/issues">🐛 Issues</a>
   </p>
 </div>
+
+<p align="center">
+  <a href="https://stateofthedart.com">
+    <img src="https://img.shields.io/badge/Try_it_now-stateofthedart.com-green?style=for-the-badge" alt="Jetzt ausprobieren">
+  </a>
+</p>

@@ -12,7 +12,8 @@ import { useTenant } from '../../context/TenantContext';
 import { api } from '../../services/api';
 import { useGameAchievements } from '../../hooks/useGameAchievements';
 import BackButton from '../common/BackButton';
-import { Button, Card } from '../common';
+import { Button, Card, AnimatedNumber } from '../common';
+import { Icon, iconForEmoji } from '../icons';
 
 interface TrainingState {
   currentTarget: number;
@@ -533,7 +534,7 @@ const TrainingScreen: React.FC = () => {
     
     return (
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-6xl mx-auto m3-view">
           <BackButton onClick={() => navigate('/training')} />
 
           <Card variant="elevated" className="p-8">
@@ -572,8 +573,10 @@ const TrainingScreen: React.FC = () => {
                           className="w-16 h-16 rounded-full object-cover ring-2 ring-outline-variant group-hover:ring-[var(--m3-primary)]"
                         />
                       ) : (
-                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-2xl font-bold text-on-primary ring-2 ring-outline-variant group-hover:ring-[var(--m3-primary)]">
-                          {player.avatar || player.name.charAt(0).toUpperCase()}
+                        <div className="w-16 h-16 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold ring-2 ring-outline-variant group-hover:ring-[var(--m3-primary)]">
+                          {player.avatar
+                            ? <Icon name={iconForEmoji(player.avatar)} size={34} />
+                            : <span className="text-2xl">{player.name.charAt(0).toUpperCase()}</span>}
                         </div>
                       )}
                       <div className="flex-1">
@@ -598,7 +601,7 @@ const TrainingScreen: React.FC = () => {
 
   return (
     <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto m3-view">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <BackButton onClick={() => navigate('/training')} inline />
@@ -618,24 +621,35 @@ const TrainingScreen: React.FC = () => {
               </p>
             </div>
             <div className="text-right">
-              <p className="m3-headline-small font-bold text-success-400">{trainingState.score}</p>
+              <AnimatedNumber
+                value={trainingState.score}
+                className="block m3-headline-small font-bold text-success-400"
+              />
               <p className="text-sm text-on-surface-variant">Punkte</p>
             </div>
           </div>
         </Card>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 m3-stagger-fast">
           <Card variant="elevated" className="p-2 sm:p-4 text-center">
-            <p className="text-xl sm:text-2xl font-bold text-on-surface">{trainingState.attempts}</p>
+            <AnimatedNumber
+              value={trainingState.attempts}
+              className="block text-xl sm:text-2xl font-bold text-on-surface"
+            />
             <p className="text-xs sm:text-sm text-on-surface-variant">Versuche</p>
           </Card>
           <Card variant="elevated" className="p-2 sm:p-4 text-center">
-            <p className="text-xl sm:text-2xl font-bold text-success-400">{trainingState.hits}</p>
+            <AnimatedNumber
+              value={trainingState.hits}
+              className="block text-xl sm:text-2xl font-bold text-success-400"
+            />
             <p className="text-xs sm:text-sm text-on-surface-variant">Treffer</p>
           </Card>
           <Card variant="elevated" className="p-2 sm:p-4 text-center">
-            <p className="text-xl sm:text-2xl font-bold text-primary-400">{accuracy}%</p>
+            <p className="text-xl sm:text-2xl font-bold text-primary-400">
+              <AnimatedNumber value={accuracy} />%
+            </p>
             <p className="text-xs sm:text-sm text-on-surface-variant">Genauigkeit</p>
           </Card>
         </div>
@@ -669,7 +683,7 @@ const TrainingScreen: React.FC = () => {
                 {currentThrow.map((dart, index) => (
                   <div
                     key={index}
-                    className="flex-1 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-m3-md flex items-center justify-center text-on-primary font-bold text-xl shadow-m3-1"
+                    className="flex-1 h-16 bg-primary text-on-primary rounded-m3-md flex items-center justify-center font-bold text-xl shadow-m3-1"
                   >
                     {dart.score}
                   </div>
@@ -710,9 +724,9 @@ const TrainingScreen: React.FC = () => {
 
             {/* Completion Message */}
             {trainingState.completed && (
-              <Card variant="elevated" className="glass-card-gold p-6 border-2 border-primary-500">
+              <Card variant="elevated" className="p-6 border-2 border-primary-500">
                 <h3 className="m3-headline-small text-on-surface mb-4 text-center">
-                  Training Abgeschlossen! 🎯
+                  Training Abgeschlossen!
                 </h3>
                 <div className="grid grid-cols-3 gap-4 mb-4">
                   <div className="text-center bg-surface-container-high rounded-m3-md p-3">
@@ -731,16 +745,16 @@ const TrainingScreen: React.FC = () => {
                 <div className="text-sm text-on-surface-variant mb-4 text-center">
                   {trainingState.hits} Treffer in {trainingState.attempts} Versuchen
                   {mode === 'doubles' && trainingState.currentTarget === 20 && trainingState.hits === 20 && (
-                    <p className="text-success-400 font-bold mt-2">🏆 Perfekt! Alle Doppel getroffen!</p>
+                    <p className="text-success-400 font-bold mt-2"> Perfekt! Alle Doppel getroffen!</p>
                   )}
                   {mode === 'triples' && trainingState.currentTarget === 1 && trainingState.hits === 20 && (
-                    <p className="text-success-400 font-bold mt-2">🏆 Perfekt! Alle Tripel getroffen!</p>
+                    <p className="text-success-400 font-bold mt-2"> Perfekt! Alle Tripel getroffen!</p>
                   )}
                   {mode === 'around-the-clock' && trainingState.currentTarget === 20 && trainingState.hits === 20 && (
-                    <p className="text-success-400 font-bold mt-2">🏆 Perfekt! Voller Rundgang abgeschlossen!</p>
+                    <p className="text-success-400 font-bold mt-2"> Perfekt! Voller Rundgang abgeschlossen!</p>
                   )}
                   {mode === 'checkout-121' && trainingState.score === 0 && (
-                    <p className="text-success-400 font-bold mt-2">🏆 Checkout erfolgreich!</p>
+                    <p className="text-success-400 font-bold mt-2"> Checkout erfolgreich!</p>
                   )}
                 </div>
                 <div className="flex gap-2">

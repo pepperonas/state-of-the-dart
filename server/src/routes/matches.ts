@@ -383,6 +383,19 @@ router.put('/:id', authenticateTenant, (req: AuthRequest, res: Response) => {
             player.playerId
           );
         }
+
+        // The payload is the authoritative roster. A player removed from a running
+        // match has to disappear here too — this endpoint used to only UPDATE, so
+        // their row survived and resuming the match from the DB brought them back.
+        // Guarded on a non-empty roster: an empty array is never a legitimate
+        // "wipe every player" instruction.
+        if (players.length > 0) {
+          const keptIds = players.map((p: any) => p.playerId);
+          db.prepare(`
+            DELETE FROM match_players
+            WHERE match_id = ? AND player_id NOT IN (${keptIds.map(() => '?').join(', ')})
+          `).run(id, ...keptIds);
+        }
       }
 
       // Update/Insert legs if provided
@@ -411,6 +424,20 @@ router.put('/:id', authenticateTenant, (req: AuthRequest, res: Response) => {
 
             // Update throws
             if (leg.throws && Array.isArray(leg.throws)) {
+              // Same story as the roster above: throws that the client dropped —
+              // by taking a throw back, or by removing a player — must go, or a
+              // reload from the DB resurrects them. Scoped to this leg, whose
+              // match ownership was verified above.
+              const keptThrowIds = leg.throws.map((t: any) => t.id);
+              if (keptThrowIds.length > 0) {
+                db.prepare(`
+                  DELETE FROM throws
+                  WHERE leg_id = ? AND id NOT IN (${keptThrowIds.map(() => '?').join(', ')})
+                `).run(leg.id, ...keptThrowIds);
+              } else {
+                db.prepare('DELETE FROM throws WHERE leg_id = ?').run(leg.id);
+              }
+
               for (const throwData of leg.throws) {
                 // Don't let INSERT OR REPLACE hijack a throw that belongs to a
                 // different leg (overwrite-by-PK across matches/tenants).

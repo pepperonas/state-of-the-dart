@@ -10,7 +10,8 @@ import { motion } from 'framer-motion';
 import { api } from '../../services/api';
 import { toDateOrNow, formatDateTime, formatDateShort } from '../../utils/dateUtils';
 import { staggerChild } from '../../utils/motion';
-import { BackButton, Button, Card } from '../common';
+import { BackButton, Button, Card, Select } from '../common';
+import { Icon, iconForEmoji } from '../icons';
 
 const TrainingStats: React.FC = () => {
   const { t } = useTranslation();
@@ -151,9 +152,9 @@ const TrainingStats: React.FC = () => {
         <div className="max-w-6xl mx-auto">
           {/* Back Button */}
           <BackButton onClick={() => navigate('/training')} />
+          <h1 className="m3-headline-medium text-on-surface mb-6">Training Statistiken</h1>
 
           <Card variant="elevated" className="p-8">
-            <h2 className="m3-headline-small text-on-surface mb-4 text-center">Training Statistiken</h2>
             <p className="m3-body-large text-on-surface-variant mb-6 text-center">Bitte wähle einen Spieler aus, um Trainingsstatistiken anzuzeigen.</p>
 
             {players.length === 0 ? (
@@ -166,21 +167,19 @@ const TrainingStats: React.FC = () => {
             ) : (
               <div className="max-w-md mx-auto">
                 <label className="block m3-label-large text-on-surface mb-2">Spieler auswählen:</label>
-                <select
-                  onChange={(e) => {
-                    const player = players.find(p => p.id === e.target.value);
-                    setCurrentPlayer(player || null);
-                  }}
-                  className="w-full px-4 py-3 bg-surface-container-high text-on-surface rounded-m3-md border border-outline-variant focus:border-primary outline-none text-lg"
-                  defaultValue=""
-                >
-                  <option value="" disabled>Wähle einen Spieler...</option>
-                  {players.map(player => (
-                    <option key={player.id} value={player.id}>
-                      {player.avatar} {player.name}
-                    </option>
-                  ))}
-                </select>
+                <Select<string>
+                  value={null}
+                  onChange={(id) => setCurrentPlayer(players.find(p => p.id === id) || null)}
+                  size="lg"
+                  placeholder="Wähle einen Spieler..."
+                  aria-label="Spieler"
+                  options={players.map(player => ({
+                    value: player.id,
+                    label: player.name,
+                    text: player.name,
+                    icon: <Icon name={iconForEmoji(player.avatar)} size={18} />,
+                  }))}
+                />
               </div>
             )}
           </Card>
@@ -195,7 +194,7 @@ const TrainingStats: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <BackButton onClick={() => navigate('/training')} inline />
-          <h1 className="m3-headline-small text-on-surface flex items-center gap-2">
+          <h1 className="m3-headline-medium text-on-surface flex items-center gap-2">
             <BarChart size={32} />
             Training Statistiken
           </h1>
@@ -208,50 +207,52 @@ const TrainingStats: React.FC = () => {
             {/* Player Selector */}
             <div className="flex items-center gap-2">
               <span className="m3-label-large text-on-surface">Spieler:</span>
-              <select
-                value={currentPlayer?.id || ''}
-                onChange={(e) => {
-                  const player = players.find(p => p.id === e.target.value);
-                  setCurrentPlayer(player || null);
-                }}
-                className="px-4 py-2 bg-surface-container-high text-on-surface rounded-m3-md border border-outline-variant focus:border-primary outline-none"
-              >
-                {players.map(player => (
-                  <option key={player.id} value={player.id}>
-                    {player.avatar} {player.name}
-                  </option>
-                ))}
-              </select>
+              <Select<string>
+                value={currentPlayer?.id ?? null}
+                onChange={(id) => setCurrentPlayer(players.find(p => p.id === id) || null)}
+                inline
+                aria-label="Spieler"
+                options={players.map(player => ({
+                  value: player.id,
+                  label: player.name,
+                  text: player.name,
+                  icon: <Icon name={iconForEmoji(player.avatar)} size={18} />,
+                }))}
+              />
             </div>
 
             <div className="flex items-center gap-2">
               <Filter size={20} className="text-primary" />
               <span className="m3-label-large text-on-surface">Filter:</span>
             </div>
-            <select
+            <Select<TrainingType | 'all'>
               value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value as TrainingType | 'all')}
-              className="px-4 py-2 bg-surface-container-high text-on-surface rounded-m3-md border border-outline-variant focus:border-primary outline-none"
-            >
-              <option value="all">Alle Modi</option>
-              <option value="doubles">Doubles</option>
-              <option value="triples">Triples</option>
-              <option value="around-the-clock">Around the Clock</option>
-              <option value="checkout-121">Checkout 121</option>
-              <option value="bobs-27">Bob's 27</option>
-              <option value="score-training">Score Training</option>
-            </select>
+              onChange={setSelectedType}
+              inline
+              aria-label="Trainingsmodus"
+              options={[
+                { value: 'all', label: 'Alle Modi' },
+                { value: 'doubles', label: 'Doubles' },
+                { value: 'triples', label: 'Triples' },
+                { value: 'around-the-clock', label: 'Around the Clock' },
+                { value: 'checkout-121', label: 'Checkout 121' },
+                { value: 'bobs-27', label: "Bob's 27" },
+                { value: 'score-training', label: 'Score Training' },
+              ]}
+            />
             <div className="flex items-center gap-2 ml-auto">
               <span className="m3-label-large text-on-surface">Sortieren:</span>
-              <select
+              <Select<'date' | 'score' | 'accuracy'>
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as 'date' | 'score' | 'accuracy')}
-                className="px-4 py-2 bg-surface-container-high text-on-surface rounded-m3-md border border-outline-variant focus:border-primary outline-none"
-              >
-                <option value="date">Datum</option>
-                <option value="score">Score</option>
-                <option value="accuracy">Genauigkeit</option>
-              </select>
+                onChange={setSortBy}
+                inline
+                aria-label="Sortieren"
+                options={[
+                  { value: 'date', label: 'Datum' },
+                  { value: 'score', label: 'Score' },
+                  { value: 'accuracy', label: 'Genauigkeit' },
+                ]}
+              />
             </div>
           </div>
         </Card>

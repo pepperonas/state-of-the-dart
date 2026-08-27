@@ -185,17 +185,17 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
 
   return (
     <div
-      className="fixed inset-0 bg-black/70 flex items-start justify-center z-50 p-4 pt-16 overflow-y-auto"
+      className="fixed inset-0 bg-black/70 flex items-start justify-center z-50 p-4 pt-16 overflow-y-auto m3-scrim-enter"
       onClick={onClose}
     >
       <div
-        className="glass-card rounded-2xl p-6 max-w-6xl w-full mb-8"
+        className="m3-card m3-elevated rounded-2xl p-6 max-w-6xl w-full mb-8 m3-dialog-enter"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+            <h2 className="text-2xl font-bold text-on-surface flex items-center gap-2">
               {(() => {
                 let gameType: string = match.type || 'x01';
                 if (gameType === 'x01' && match.settings?.startScore) {
@@ -204,14 +204,14 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
                 return gameType;
               })()}
             </h2>
-            <p className="text-sm text-dark-400 flex items-center gap-2 mt-1">
+            <p className="text-sm text-on-surface-variant flex items-center gap-2 mt-1">
               <Calendar size={14} />
               {formatDateTime(match.startedAt)}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-dark-700 rounded-lg transition-colors text-white"
+            className="p-2 hover:bg-surface-container-high rounded-lg transition-colors text-on-surface"
           >
             <X size={24} />
           </button>
@@ -225,10 +225,10 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
                 <div className={`text-4xl font-bold ${match.winner === player.playerId ? 'text-success-400' : 'text-red-500'}`}>
                   {player.legsWon ?? 0}
                 </div>
-                <div className="text-white font-semibold mt-1">{player.name}</div>
+                <div className="text-on-surface font-semibold mt-1">{player.name}</div>
               </div>
               {index === 0 && matchPlayers.length > 1 && (
-                <div className="text-dark-400 text-2xl font-bold self-center">vs</div>
+                <div className="text-on-surface-variant text-2xl font-bold self-center">vs</div>
               )}
             </React.Fragment>
           ))}
@@ -244,13 +244,13 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
         )}
 
         {/* Round-by-Round Chart */}
-        <div className="glass-card p-6 rounded-xl mb-6">
-          <h4 className="font-bold text-white mb-4 flex items-center gap-2">
+        <div className="m3-card m3-elevated p-6 rounded-xl mb-6">
+          <h4 className="font-bold text-on-surface mb-4 flex items-center gap-2">
             <TrendingUp size={20} className="text-primary-400" />
             Runden-Verlauf
           </h4>
           {chartData.length > 0 ? (
-            <div className="bg-dark-900 rounded-lg p-4">
+            <div className="bg-surface-container-low rounded-lg p-4">
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
@@ -296,12 +296,12 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="bg-dark-900 rounded-lg p-8 text-center">
-              <div className="text-dark-500 mb-3">
+            <div className="bg-surface-container-low rounded-lg p-8 text-center">
+              <div className="text-on-surface-variant mb-3">
                 <TrendingUp size={48} className="mx-auto opacity-30" />
               </div>
-              <p className="text-dark-400 font-medium">Keine Runden-Daten verfügbar</p>
-              <p className="text-dark-500 text-sm mt-2">
+              <p className="text-on-surface-variant font-medium">Keine Runden-Daten verfügbar</p>
+              <p className="text-on-surface-variant text-sm mt-2">
                 Dieses Match wurde möglicherweise vor dem Tracking-Update gespielt
               </p>
             </div>
@@ -312,7 +312,7 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
         <div className={`grid ${playersWithThrows.length > 1 ? 'md:grid-cols-2' : 'md:grid-cols-1'} gap-6 mb-6`}>
           {playersWithThrows.map((player) => (
             <div key={player.playerId}>
-              <h4 className="font-bold text-gray-800 dark:text-white mb-3">
+              <h4 className="font-bold text-gray-800 dark:text-on-surface mb-3">
                 {player.name}
               </h4>
               <div className="grid grid-cols-2 gap-3">
@@ -338,99 +338,95 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
         <div className="mt-6">
           <button
             onClick={() => setShowThrowHistory(!showThrowHistory)}
-            className="w-full glass-card rounded-xl p-4 flex items-center justify-between hover:glass-card-hover transition-all"
+            className="w-full m3-card m3-elevated rounded-xl p-4 flex items-center justify-between hover:bg-surface-container-high transition-all"
           >
-            <h3 className="text-lg font-bold text-white">Wurf-Verlauf</h3>
+            <h3 className="text-lg font-bold text-on-surface">Wurf-Verlauf</h3>
             {showThrowHistory ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
           </button>
 
           {showThrowHistory && (
-            <div className="glass-card rounded-xl p-6 mt-2 animate-fade-in">
-              {playersWithThrows.map((player) => {
-                const playerThrows = getPlayerThrows(player.playerId);
+            <div className="m3-card m3-elevated rounded-xl p-4 sm:p-6 mt-2 animate-fade-in space-y-4">
+              {(match.legs || []).map((leg, legIdx) => {
+                const throws = leg.throws || [];
+                if (throws.length === 0) return null;
+
+                // Group throws into rounds
+                const rounds: Throw[][] = [];
+                let currentRound: Throw[] = [];
+                let seenInRound = new Set<string>();
+                for (const thr of throws) {
+                  if (seenInRound.has(thr.playerId)) {
+                    rounds.push(currentRound);
+                    currentRound = [thr];
+                    seenInRound = new Set([thr.playerId]);
+                  } else {
+                    currentRound.push(thr);
+                    seenInRound.add(thr.playerId);
+                  }
+                }
+                if (currentRound.length > 0) rounds.push(currentRound);
+
+                const formatDart = (dart: { segment: number; multiplier: number; score: number }) => {
+                  if (dart.score === 0 && dart.multiplier === 0) return 'S0';
+                  const prefix = dart.multiplier === 3 ? 'T' : dart.multiplier === 2 ? 'D' : 'S';
+                  return `${prefix}${dart.segment}`;
+                };
 
                 return (
-                  <div key={player.playerId} className="mb-6 last:mb-0">
-                    <h4 className="text-white font-bold mb-3 flex items-center gap-2">
-                      <span>{player.name}</span>
-                      <span className="text-sm text-gray-400">
-                        ({playerThrows.length} {playerThrows.length === 1 ? 'Wurf' : 'Würfe'})
-                      </span>
-                    </h4>
-
-                    {playerThrows.length === 0 ? (
-                      <p className="text-gray-400 text-sm italic">Keine Würfe</p>
-                    ) : (
-                      <div className="space-y-2">
-                        {playerThrows.map((throwData, index) => (
-                          <div
-                            key={throwData.id || `${player.playerId}-${index}`}
-                            className="bg-dark-800/50 rounded-lg p-3 border border-dark-600"
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-gray-400 text-sm">
-                                Wurf #{index + 1}
-                              </span>
-                              <div className="flex items-center gap-3">
-                                {throwData.isBust && (
-                                  <span className="text-red-400 text-xs font-bold bg-red-500/20 px-2 py-1 rounded">
-                                    BUST
-                                  </span>
-                                )}
-                                <span className={`font-bold text-lg ${
-                                  throwData.isBust
-                                    ? 'text-red-400 line-through'
-                                    : throwData.score >= 140
-                                      ? 'text-orange-400'
-                                      : throwData.score >= 100
-                                        ? 'text-blue-400'
-                                        : 'text-white'
-                                }`}>
-                                  {throwData.score}
-                                </span>
-                                <span className="text-gray-400 text-sm">
-                                  → {throwData.remaining}
-                                </span>
-                              </div>
-                            </div>
-
-                            <div className="flex gap-2">
-                              {throwData.darts && throwData.darts.length > 0 ? (
-                                throwData.darts.map((dart, dartIndex) => (
-                                  <div
-                                    key={dartIndex}
-                                    className={`flex-1 text-center py-2 rounded ${
-                                      dart.multiplier === 3
-                                        ? 'bg-green-500/20 text-green-400'
-                                        : dart.multiplier === 2
-                                          ? 'bg-red-500/20 text-red-400'
-                                          : dart.score === 0
-                                            ? 'bg-gray-700/50 text-gray-500'
-                                            : 'bg-blue-500/20 text-blue-400'
-                                    }`}
-                                  >
-                                    <span className="text-xs font-semibold">
-                                      {dart.score === 0
-                                        ? 'Miss'
-                                        : dart.multiplier === 3
-                                          ? `T${dart.segment}`
-                                          : dart.multiplier === 2
-                                            ? `D${dart.segment}`
-                                            : dart.segment
-                                      }
-                                    </span>
-                                  </div>
-                                ))
-                              ) : (
-                                <div className="flex-1 text-center py-2 rounded bg-gray-700/50 text-gray-500 text-xs">
-                                  Keine Dart-Details
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                  <div key={leg.id || legIdx}>
+                    {(match.legs || []).length > 1 && (
+                      <div className="text-xs text-on-surface-variant font-semibold mb-2">Leg {legIdx + 1}</div>
                     )}
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-outline-variant">
+                            <th className="text-on-surface-variant text-left py-2 pr-1 w-8">#</th>
+                            {playersWithThrows.map(p => (
+                              <th key={p.playerId} className="text-on-surface font-bold text-center py-2 px-2 truncate max-w-[160px]">
+                                {p.name}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {rounds.map((round, rIdx) => (
+                            <tr key={rIdx} className="border-b border-outline-variant/30">
+                              <td className="text-on-surface-variant py-2 pr-1 align-top text-xs">{rIdx + 1}</td>
+                              {playersWithThrows.map(p => {
+                                const thr = round.find(r => r.playerId === p.playerId);
+                                if (!thr) return <td key={p.playerId} className="py-2 px-2"></td>;
+                                return (
+                                  <td key={p.playerId} className="py-2 px-2 text-center">
+                                    <div className="font-mono text-on-surface-variant text-xs">
+                                      {(thr.darts || []).map((d, i) => (
+                                        <span key={i} className={`${
+                                          d.multiplier === 3 ? 'text-green-400' :
+                                          d.multiplier === 2 ? 'text-red-400' :
+                                          d.score === 0 ? 'text-on-surface-variant' : 'text-on-surface-variant'
+                                        }${i > 0 ? ' ml-1' : ''}`}>
+                                          {formatDart(d)}
+                                        </span>
+                                      ))}
+                                    </div>
+                                    <div className="flex items-center justify-center gap-1 mt-0.5">
+                                      <span className={`font-bold ${
+                                        thr.isBust ? 'text-red-400' :
+                                        thr.score >= 140 ? 'text-orange-400' :
+                                        thr.score >= 100 ? 'text-blue-400' : 'text-on-surface'
+                                      }`}>
+                                        {thr.isBust ? '0' : thr.score}
+                                      </span>
+                                      <span className="text-on-surface-variant text-xs">→{thr.remaining}</span>
+                                    </div>
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 );
               })}
@@ -440,7 +436,7 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
 
         {/* Leg-by-Leg Breakdown */}
         {match.legs && match.legs.length > 0 && (
-          <div className="pt-4 border-t border-dark-700">
+          <div className="pt-4 border-t border-outline-variant">
             <h5 className="font-semibold text-sm text-gray-700 dark:text-gray-300 mb-2">
               Leg Details
             </h5>
@@ -468,7 +464,7 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
 const StatBox: React.FC<{ label: string; value: string | number }> = ({ label, value }) => (
   <div className="bg-gray-100 dark:bg-gray-700 rounded p-2">
     <div className="text-xs text-gray-600 dark:text-gray-400">{label}</div>
-    <div className="text-lg font-bold text-gray-800 dark:text-white">{value}</div>
+    <div className="text-lg font-bold text-gray-800 dark:text-on-surface">{value}</div>
   </div>
 );
 

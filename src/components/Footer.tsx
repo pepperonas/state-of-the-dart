@@ -6,7 +6,7 @@ import packageJson from '../../package.json';
 const Footer: React.FC = () => {
   return (
     <footer className="mt-auto pt-8 pb-4">
-      <div className="max-w-6xl mx-auto px-4 text-center space-y-3">
+      <div className="max-w-6xl mx-auto px-4 text-center space-y-3 m3-enter-fade m3-delay-3">
         <div className="flex flex-wrap items-center justify-center gap-3 m3-body-small text-on-surface-variant">
           <span>&copy; 2026 Martin Pfeffer</span>
           <span className="hidden sm:inline">&bull;</span>

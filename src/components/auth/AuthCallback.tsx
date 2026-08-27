@@ -44,7 +44,7 @@ const AuthCallback: React.FC = () => {
 
   return (
     <div className="min-h-dvh flex items-center justify-center gradient-mesh p-4">
-      <div className="text-center">
+      <div className="text-center m3-enter-pop">
         {error ? (
           <>
             <div className="text-error text-5xl mb-4">!</div>

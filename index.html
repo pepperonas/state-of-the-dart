@@ -166,8 +166,6 @@
     <!-- Force unregister old service workers BEFORE loading React -->
     <script>
       (async function() {
-        // Check if we have auth token
-        const hasAuth = localStorage.getItem('auth_token');
         const hasMigrated = localStorage.getItem('sw_migration_v3');
         
         if (!hasMigrated) {
@@ -197,13 +195,12 @@
           
           // Mark migration done
           localStorage.setItem('sw_migration_v3', 'true');
-          
-          // If no auth, redirect to login
-          if (!hasAuth) {
-            console.log('🔐 No auth, redirecting to login...');
-            window.location.href = '/login';
-            throw new Error('Redirecting...'); // Stop execution
-          }
+
+          // NOTE: this block used to hard-redirect every visitor without a token
+          // to /login, before React even started. That made a public page at `/`
+          // impossible — a first-time visitor never saw anything but the login
+          // form. The cleanup above is the actual purpose of this script; who
+          // gets to see what is decided by the router (`HomeRoute` in App.tsx).
         }
       })();
     </script>

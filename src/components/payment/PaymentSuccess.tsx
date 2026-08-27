@@ -25,7 +25,7 @@ const PaymentSuccess: React.FC = () => {
             </div>
 
             <h1 className="m3-headline-medium text-on-surface mb-4">
-              Zahlung erfolgreich! 🎉
+              Zahlung erfolgreich!
             </h1>
 
             <p className="m3-body-medium text-on-surface-variant mb-8">
@@ -53,7 +53,7 @@ const PaymentSuccess: React.FC = () => {
 
             <div className="mt-8 p-4 bg-primary-container text-on-primary-container rounded-m3-md">
               <p className="m3-body-small">
-                💡 Tipp: Du kannst dein Abo jederzeit in den Einstellungen verwalten.
+                Tipp: Du kannst dein Abo jederzeit in den Einstellungen verwalten.
               </p>
             </div>
           </Card>

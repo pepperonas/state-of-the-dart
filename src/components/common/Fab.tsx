@@ -24,6 +24,7 @@ const Fab: React.FC<FabProps> = ({
   const classes = [
     'm3-fab',
     'm3-state-layer',
+    'm3-ripple',
     color === 'primary' ? 'm3-primary' : '',
     size === 'lg' ? 'm3-fab-lg' : '',
     className,

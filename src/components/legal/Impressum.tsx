@@ -2,24 +2,23 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import BackButton from '../common/BackButton';
 import Card from '../common/Card';
+import { PageShell } from '../common';
 
 const Impressum: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-      <div className="max-w-4xl mx-auto">
-        <BackButton onClick={() => navigate(-1)} />
-
-        <h1 className="m3-headline-medium text-on-surface mb-8">Impressum</h1>
-
-        {/* Angaben gemaess § 5 TMG */}
+    <PageShell
+      width="md"
+      title="Impressum"
+      onBack={() => navigate(-1)}
+    >
+        {/* Angaben gemaess § 5 DDG (fruher § 5 TMG) */}
         <Card variant="elevated" className="p-6 md:p-8 mb-6">
           <h2 className="m3-title-large text-on-surface mb-4">
-            Angaben gem. &sect; 5 TMG
+            Angaben gem. &sect; 5 DDG
           </h2>
           <div className="m3-body-medium text-on-surface-variant space-y-2">
             <p>celox</p>
@@ -114,31 +113,6 @@ const Impressum: React.FC = () => {
           </div>
         </Card>
 
-        {/* EU-Streitschlichtung */}
-        <Card variant="elevated" className="p-6 md:p-8 mb-6">
-          <h2 className="m3-title-large text-on-surface mb-4">
-            EU-Streitschlichtung
-          </h2>
-          <div className="m3-body-medium text-on-surface-variant space-y-3">
-            <p>
-              Die Europ&auml;ische Kommission stellt eine Plattform zur
-              Online-Streitbeilegung (OS) bereit:{' '}
-              <a
-                href="https://ec.europa.eu/consumers/odr/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="transition-colors break-all"
-                style={{ color: 'var(--m3-primary)' }}
-              >
-                https://ec.europa.eu/consumers/odr/
-              </a>
-            </p>
-            <p>
-              Unsere E-Mail-Adresse finden Sie oben im Impressum.
-            </p>
-          </div>
-        </Card>
-
         {/* Verbraucherstreitbeilegung */}
         <Card variant="elevated" className="p-6 md:p-8 mb-6">
           <h2 className="m3-title-large text-on-surface mb-4">
@@ -157,11 +131,12 @@ const Impressum: React.FC = () => {
           </h2>
           <div className="m3-body-medium text-on-surface-variant space-y-3">
             <p>
-              Als Diensteanbieter sind wir gem&auml;&szlig; &sect; 7 Abs. 1 TMG
+              Als Diensteanbieter sind wir gem&auml;&szlig; &sect; 7 Abs. 1 DDG
               f&uuml;r eigene Inhalte auf diesen Seiten nach den allgemeinen
-              Gesetzen verantwortlich. Nach &sect;&sect; 8 bis 10 TMG sind wir als
-              Diensteanbieter jedoch nicht verpflichtet, &uuml;bermittelte oder
-              gespeicherte fremde Informationen zu &uuml;berwachen oder nach
+              Gesetzen verantwortlich. Nach Art. 4 bis 6 und Art. 8 der
+              Verordnung (EU) 2022/2065 (Gesetz &uuml;ber digitale Dienste) sind
+              wir als Diensteanbieter jedoch nicht verpflichtet, &uuml;bermittelte
+              oder gespeicherte fremde Informationen zu &uuml;berwachen oder nach
               Umst&auml;nden zu forschen, die auf eine rechtswidrige
               T&auml;tigkeit hinweisen.
             </p>
@@ -229,8 +204,7 @@ const Impressum: React.FC = () => {
         <div className="text-center m3-label-large text-on-surface-variant mt-8 mb-4">
           Stand: Februar 2026
         </div>
-      </div>
-    </div>
+        </PageShell>
   );
 };
 

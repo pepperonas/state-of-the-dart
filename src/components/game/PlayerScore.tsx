@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Target } from 'lucide-react';
+import { Trophy, Target, UserMinus } from 'lucide-react';
 import { MatchPlayer } from '../../types/index';
 import PlayerAvatar from '../player/PlayerAvatar';
 import { usePlayer } from '../../context/PlayerContext';
 import AnimatedNumber from '../common/AnimatedNumber';
+import IconButton from '../common/IconButton';
 import { springSpatialDefault } from '../../utils/motion';
 
 interface PlayerScoreProps {
@@ -15,6 +16,11 @@ interface PlayerScoreProps {
   legsWon: number;
   setsWon: number;
   showSets?: boolean;
+  /** Remove this player from the running match. Omit to hide the control.
+   *  Takes the id so callers can pass one stable callback for every card. */
+  onRemove?: (playerId: string) => void;
+  /** Tooltip for the remove control. */
+  removeLabel?: string;
 }
 
 const PlayerScore: React.FC<PlayerScoreProps> = ({
@@ -25,6 +31,8 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
   legsWon,
   setsWon,
   showSets = false,
+  onRemove,
+  removeLabel = 'Spieler entfernen',
 }) => {
   const { players } = usePlayer();
   
@@ -47,15 +55,26 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
       }`}
     >
       <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <PlayerAvatar avatar={fullPlayer?.avatar} name={player.name} size="md" />
-          <h3 className="m3-title-large text-on-surface">
+          <h3 className="m3-title-large text-on-surface truncate">
             {player.name}
           </h3>
         </div>
-        {isActive && (
-          <Target className="text-primary animate-pulse" size={24} />
-        )}
+        <div className="flex items-center gap-1 shrink-0">
+          {isActive && (
+            <Target className="text-primary animate-pulse" size={24} />
+          )}
+          {onRemove && (
+            <IconButton
+              label={removeLabel}
+              onClick={() => onRemove(player.playerId)}
+              className="text-on-surface-variant"
+            >
+              <UserMinus size={18} />
+            </IconButton>
+          )}
+        </div>
       </div>
 
       <AnimatedNumber

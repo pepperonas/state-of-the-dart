@@ -1,4 +1,5 @@
 import React from 'react';
+import { useReducedMotion } from 'framer-motion';
 import {
   LineChart,
   Line,
@@ -9,6 +10,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { CHART_MOTION } from '../../utils/motion';
 
 interface MatchChartPlayer {
   playerId: string;
@@ -29,7 +31,12 @@ const TOOLTIP_STYLE = {
   padding: '8px',
 };
 
-const MatchChart: React.FC<MatchChartProps> = ({ data, players }) => (
+const MatchChart: React.FC<MatchChartProps> = ({ data, players }) => {
+  // Recharts animates SVG attributes from JS; the CSS reduced-motion rule cannot
+  // reach it, so the switch has to be explicit.
+  const reduce = useReducedMotion();
+
+  return (
   <div className="h-[180px] sm:h-[250px]">
     <ResponsiveContainer width="100%" height="100%">
       <LineChart data={data}>
@@ -50,11 +57,15 @@ const MatchChart: React.FC<MatchChartProps> = ({ data, players }) => (
             strokeWidth={2}
             dot={{ r: 3 }}
             name={p.name}
+            isAnimationActive={!reduce}
+            animationDuration={CHART_MOTION.duration}
+            animationEasing={CHART_MOTION.easing}
           />
         ))}
       </LineChart>
     </ResponsiveContainer>
   </div>
-);
+  );
+};
 
 export default MatchChart;

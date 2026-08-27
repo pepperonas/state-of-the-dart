@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Wifi, WifiOff, Cloud, CloudOff, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { springStandardDefault, springSpatialDefault } from '../../utils/motion';
 import offlineSync from '../../utils/offlineSync';
 
 const OfflineIndicator: React.FC = () => {
@@ -77,6 +78,7 @@ const OfflineIndicator: React.FC = () => {
             initial={{ y: -100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -100, opacity: 0 }}
+            transition={springStandardDefault}
             className={`fixed top-0 left-0 right-0 z-50 p-3 text-center m3-label-large ${
               isOnline
                 ? 'bg-success-container text-success'
@@ -103,8 +105,9 @@ const OfflineIndicator: React.FC = () => {
       {/* Floating indicator */}
       {(!isOnline || pendingCount > 0) && (
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={springSpatialDefault}
           className="fixed bottom-20 right-4 z-40"
         >
           <button

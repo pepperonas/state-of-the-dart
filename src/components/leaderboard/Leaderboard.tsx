@@ -2,15 +2,17 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Trophy, TrendingUp, Target, Zap, Award, Medal, Crown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { playerTier } from '../../utils/playerOrder';
 import { usePlayer } from '../../context/PlayerContext';
 import { useAchievements } from '../../context/AchievementContext';
 import { useTenant } from '../../context/TenantContext';
 import { api } from '../../services/api';
 import { PersonalBests, createEmptyPersonalBests } from '../../types/personalBests';
 import { ACHIEVEMENTS } from '../../types/achievements';
-import { BackButton, Card, Chip } from '../common';
+import { BackButton, Card, Chip, PageShell } from '../common';
 import { motion } from 'framer-motion';
 import { staggerChild } from '../../utils/motion';
+import { Icon, iconForEmoji } from '../icons';
 
 type LeaderboardCategory = 
   | 'average'
@@ -92,6 +94,7 @@ const Leaderboard: React.FC = () => {
         id: player.id,
         name: player.name,
         avatar: player.avatar,
+        tier: playerTier(player),
         average: pb.bestAverage.value,
         wins: pb.totalWins,
         winRate,
@@ -106,6 +109,10 @@ const Leaderboard: React.FC = () => {
 
   const sortedData = useMemo(() => {
     const sorted = [...leaderboardData].sort((a, b) => {
+      // Real accounts rank above bots and generated test profiles regardless of
+      // the metric — a bot out-averaging the people who own the board reads as a
+      // bug, not a result. Inside each group the chosen metric still decides.
+      if (a.tier !== b.tier) return a.tier - b.tier;
       switch (category) {
         case 'average':
           return b.average - a.average;
@@ -176,8 +183,10 @@ const Leaderboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-      <div className="max-w-4xl mx-auto">
+    <PageShell
+      width="md"
+      back={false}
+    >
         {/* Header */}
         <BackButton onClick={() => navigate('/')} />
 
@@ -231,8 +240,8 @@ const Leaderboard: React.FC = () => {
 
                       {/* Avatar & Name */}
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center text-2xl shadow-m3-1">
-                          {player.avatar}
+                        <div className="w-12 h-12 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center text-2xl shadow-m3-1">
+                          <Icon name={iconForEmoji(player.avatar)} size={22} />
                         </div>
                         <div>
                           <h3 className="m3-title-medium text-on-surface">{player.name}</h3>
@@ -286,8 +295,7 @@ const Leaderboard: React.FC = () => {
             </div>
           )}
         </Card>
-      </div>
-    </div>
+        </PageShell>
   );
 };
 

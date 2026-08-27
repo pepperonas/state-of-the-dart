@@ -14,6 +14,7 @@ import { formatDate } from '../../utils/dateUtils';
 import { ACHIEVEMENTS } from '../../types/achievements';
 import PlayerAvatar from './PlayerAvatar';
 import { BackButton, Card, Button, Dialog } from '../common';
+import { Icon, iconForEmoji } from '../icons';
 
 const PlayerProfile: React.FC = () => {
   const { t } = useTranslation();
@@ -165,7 +166,7 @@ const PlayerProfile: React.FC = () => {
   if (!player || !playerId) {
     return (
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto m3-view">
           <BackButton onClick={() => navigate('/players')} />
           <Card variant="elevated" className="p-8 text-center">
             <h2 className="m3-headline-small text-on-surface mb-2">Spieler nicht gefunden</h2>
@@ -181,7 +182,7 @@ const PlayerProfile: React.FC = () => {
 
   return (
     <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto m3-view">
         {/* Header */}
         <BackButton onClick={() => navigate('/players')} />
 
@@ -237,14 +238,14 @@ const PlayerProfile: React.FC = () => {
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-tertiary-container text-on-tertiary-container rounded-m3-md p-4">
-              <div className="m3-body-small mb-1">🎯 Höchster Score</div>
+              <div className="m3-body-small mb-1"> Höchster Score</div>
               <div className="m3-title-large text-on-surface">{personalBests.highestScore.value}</div>
               <div className="m3-body-small opacity-70 mt-1">
                 {formatDate(personalBests.highestScore.date)}
               </div>
             </div>
             <div className="bg-primary-container text-on-primary-container rounded-m3-md p-4">
-              <div className="m3-body-small mb-1">📊 Bester Average</div>
+              <div className="m3-body-small mb-1"> Bester Average</div>
               <div className="m3-title-large text-on-surface">
                 {personalBests.bestAverage.value.toFixed(2)}
               </div>
@@ -253,14 +254,14 @@ const PlayerProfile: React.FC = () => {
               </div>
             </div>
             <div className="bg-tertiary-container text-on-tertiary-container rounded-m3-md p-4">
-              <div className="m3-body-small mb-1">🔥 Meiste 180s</div>
+              <div className="m3-body-small mb-1"> Meiste 180s</div>
               <div className="m3-title-large text-on-surface">{personalBests.most180s.value}</div>
               <div className="m3-body-small opacity-70 mt-1">
                 {formatDate(personalBests.most180s.date)}
               </div>
             </div>
             <div className="bg-success-container text-on-success-container rounded-m3-md p-4">
-              <div className="m3-body-small mb-1">🎯 Höchster Checkout</div>
+              <div className="m3-body-small mb-1"> Höchster Checkout</div>
               <div className="m3-title-large text-on-surface">{personalBests.highestCheckout.value}</div>
               <div className="m3-body-small opacity-70 mt-1">
                 {personalBests.highestCheckout.value > 0
@@ -269,7 +270,7 @@ const PlayerProfile: React.FC = () => {
               </div>
             </div>
             <div className="bg-primary-container text-on-primary-container rounded-m3-md p-4">
-              <div className="m3-body-small mb-1">✅ Beste Checkout-Quote</div>
+              <div className="m3-body-small mb-1"> Beste Checkout-Quote</div>
               <div className="m3-title-large text-on-surface">
                 {personalBests.bestCheckoutRate.value.toFixed(1)}%
               </div>
@@ -280,7 +281,7 @@ const PlayerProfile: React.FC = () => {
               </div>
             </div>
             <div className="bg-tertiary-container text-on-tertiary-container rounded-m3-md p-4">
-              <div className="m3-body-small mb-1">⚡ Kürzestes Leg</div>
+              <div className="m3-body-small mb-1"> Kürzestes Leg</div>
               <div className="m3-title-large text-on-surface">
                 {personalBests.shortestLeg.darts < 999 ? `${personalBests.shortestLeg.darts} Darts` : '-'}
               </div>
@@ -291,14 +292,14 @@ const PlayerProfile: React.FC = () => {
               </div>
             </div>
             <div className="bg-success-container text-on-success-container rounded-m3-md p-4">
-              <div className="m3-body-small mb-1">🏆 Längste Siegesserie</div>
+              <div className="m3-body-small mb-1"> Längste Siegesserie</div>
               <div className="m3-title-large text-on-surface">{personalBests.longestWinningStreak.value}</div>
               <div className="m3-body-small opacity-70 mt-1">
                 {personalBests.longestWinningStreak.value > 0 ? 'Spiele' : '-'}
               </div>
             </div>
             <div className="bg-tertiary-container text-on-tertiary-container rounded-m3-md p-4">
-              <div className="m3-body-small mb-1">🎯 Meiste Legs gewonnen</div>
+              <div className="m3-body-small mb-1"> Meiste Legs gewonnen</div>
               <div className="m3-title-large text-on-surface">{personalBests.mostLegsWon.value}</div>
               <div className="m3-body-small opacity-70 mt-1">
                 {personalBests.mostLegsWon.value > 0
@@ -383,7 +384,7 @@ const PlayerProfile: React.FC = () => {
         <Card variant="elevated" className="p-6 mb-6">
           <h2 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
             <Flame className="text-primary" size={24} />
-            🎯 Wurf-Heatmap
+            Wurf-Heatmap
           </h2>
           
           {heatmapData && heatmapData.totalDarts > 0 ? (
@@ -428,7 +429,7 @@ const PlayerProfile: React.FC = () => {
             </>
           ) : (
             <div className="bg-surface-container rounded-m3-md p-8 text-center border-2 border-dashed border-outline-variant">
-              <div className="text-6xl mb-4">🎯</div>
+              <div className="mb-4 flex justify-center text-on-surface-variant"><Icon name="board" size={56} /></div>
               <h3 className="m3-title-medium text-on-surface mb-2">Noch keine Wurf-Daten</h3>
               <p className="m3-body-medium text-on-surface-variant mb-4">
                 Spiele ein Match, um deine Wurf-Heatmap zu sehen!
@@ -463,7 +464,7 @@ const PlayerProfile: React.FC = () => {
                   key={achievement.id}
                   className="bg-surface-container rounded-m3-md p-3 text-center hover:bg-surface-container-high transition-colors"
                 >
-                  <div className="text-3xl mb-2">{achievement.icon}</div>
+                  <div className="mb-2 flex justify-center"><Icon name={iconForEmoji(achievement.icon)} size={30} /></div>
                   <div className="m3-body-medium text-on-surface mb-1">{achievement.name}</div>
                   <div className="m3-body-small text-tertiary">+{achievement.points}</div>
                 </div>
@@ -496,7 +497,7 @@ const PlayerProfile: React.FC = () => {
                   {formatDate(personalBests.firstGameDate, { year: 'numeric', month: 'long', day: 'numeric' })}
                 </div>
               </div>
-              <div className="flex-1 mx-4 h-1 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full" />
+              <div className="flex-1 mx-4 h-1 bg-primary rounded-full" />
               <div className="text-right">
                 <div className="m3-body-small text-on-surface-variant">Letztes Spiel</div>
                 <div className="m3-title-medium text-on-surface">

@@ -3,22 +3,23 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Plus, X, LogIn, Trash2 } from 'lucide-react';
 import { useTenant } from '../context/TenantContext';
 import { formatDate } from '../utils/dateUtils';
+import { Icon, iconForEmoji } from './icons';
 
 const TenantSelector: React.FC = () => {
   const { tenants, currentTenant, setCurrentTenant, addTenant, deleteTenant } = useTenant();
   const [showNewTenant, setShowNewTenant] = useState(false);
   const [newTenantName, setNewTenantName] = useState('');
-  const [newTenantAvatar, setNewTenantAvatar] = useState('👤');
+  const [newTenantAvatar, setNewTenantAvatar] = useState('user');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
 
-  const avatarOptions = ['👤', '🎯', '🏆', '👑', '🔥', '⭐', '💪', '🎪', '🦅', '🚀', '💎', '🎨'];
+  const avatarOptions = ['user', 'target', 'trophy', 'crown', 'flame', 'star', 'wave', 'party', 'rocket', 'gem', 'sparkle', 'bolt'];
 
   const handleAddTenant = () => {
     if (newTenantName.trim()) {
       const tenant = addTenant(newTenantName.trim(), newTenantAvatar);
       setCurrentTenant(tenant);
       setNewTenantName('');
-      setNewTenantAvatar('👤');
+      setNewTenantAvatar('user');
       setShowNewTenant(false);
     }
   };
@@ -90,7 +91,7 @@ const TenantSelector: React.FC = () => {
                   className="w-full flex items-center gap-5 p-5 bg-surface-container hover:bg-surface-container-high rounded-m3-lg transition-all border border-outline-variant hover:border-[var(--m3-primary)] shadow-m3-1"
                 >
                   <div className="w-20 h-20 bg-primary-container rounded-m3-full flex items-center justify-center text-4xl shadow-m3-1">
-                    {tenant.avatar}
+                    <Icon name={iconForEmoji(tenant.avatar)} size={26} />
                   </div>
                   <div className="flex-1 text-left">
                     <h3 className="m3-title-large font-bold text-on-surface mb-1">{tenant.name}</h3>
@@ -131,7 +132,7 @@ const TenantSelector: React.FC = () => {
                           Profil "{tenant.name}" wirklich löschen?
                         </p>
                         <p className="text-error m3-body-small mb-6">
-                          ⚠️ Alle Daten gehen unwiderruflich verloren!
+                          Alle Daten gehen unwiderruflich verloren!
                         </p>
                         <div className="flex gap-3 justify-center">
                           <button
@@ -179,7 +180,7 @@ const TenantSelector: React.FC = () => {
                 onClick={() => {
                   setShowNewTenant(false);
                   setNewTenantName('');
-                  setNewTenantAvatar('👤');
+                  setNewTenantAvatar('user');
                 }}
                 className="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-m3-md transition-all"
               >
@@ -204,7 +205,7 @@ const TenantSelector: React.FC = () => {
                         : 'bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant'
                     }`}
                   >
-                    {avatar}
+                    <Icon name={iconForEmoji(avatar)} size={24} />
                   </motion.button>
                 ))}
               </div>

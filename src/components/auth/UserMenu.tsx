@@ -60,7 +60,7 @@ const UserMenu: React.FC = () => {
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 mt-2 w-56 bg-surface-container-high rounded-m3-md shadow-m3-2 border border-outline-variant z-50 overflow-hidden">
+          <div className="absolute right-0 mt-2 w-56 bg-surface-container-high rounded-m3-md shadow-m3-2 border border-outline-variant z-50 overflow-hidden m3-enter-drop">
             {/* User Info */}
             <div className="p-4 border-b border-outline-variant">
               <p className="m3-label-large text-on-surface">{user.name}</p>

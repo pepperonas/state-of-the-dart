@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getDatabase } from '../database';
 import { config } from '../config';
 import { emailService } from '../services/email';
+import { isMasterAdmin, adminFlagFor } from './adminAllowlist';
 
 // Configure Google OAuth
 passport.use(
@@ -22,11 +23,11 @@ passport.use(
 
         if (user) {
           // Update last active and ensure admin status + lifetime subscription for admin emails
-          const adminEmails = ['martinpaush@gmail.com', 'martin.pfeffer@celox.io'];
-          const shouldBeAdmin = adminEmails.includes(user.email?.toLowerCase());
+          // is_admin is DERIVED from the address — this also demotes a stale flag.
+          const shouldBeAdmin = isMasterAdmin(user.email);
           db.prepare('UPDATE users SET last_active = ?, is_admin = ?, subscription_status = ? WHERE id = ?').run(
             Date.now(),
-            shouldBeAdmin ? 1 : user.is_admin,
+            adminFlagFor(user.email),
             shouldBeAdmin ? 'lifetime' : user.subscription_status,
             user.id
           );
@@ -42,12 +43,11 @@ passport.use(
 
           if (user) {
             // Link Google account to existing user and ensure admin status + lifetime subscription
-            const adminEmails = ['martinpaush@gmail.com', 'martin.pfeffer@celox.io'];
-            const shouldBeAdmin = adminEmails.includes(user.email?.toLowerCase());
+            const shouldBeAdmin = isMasterAdmin(user.email);
             db.prepare('UPDATE users SET google_id = ?, last_active = ?, is_admin = ?, subscription_status = ? WHERE id = ?').run(
               profile.id,
               Date.now(),
-              shouldBeAdmin ? 1 : user.is_admin,
+              adminFlagFor(user.email),
               shouldBeAdmin ? 'lifetime' : user.subscription_status,
               user.id
             );
@@ -65,8 +65,7 @@ passport.use(
         
         // Check if user should be admin
         const userEmail = email?.toLowerCase() || `${profile.id}@google.oauth`;
-        const adminEmails = ['martinpaush@gmail.com', 'martin.pfeffer@celox.io'];
-        const isAdmin = adminEmails.includes(userEmail);
+        const isAdmin = isMasterAdmin(userEmail);
         const subscriptionStatus = isAdmin ? 'lifetime' : 'trial';
 
         db.prepare(`

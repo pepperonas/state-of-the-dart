@@ -150,7 +150,19 @@
     "first_to": "Erster bis",
     "double_out": "Double Out",
     "double_in": "Double In",
-    "start_game": "Spiel starten"
+    "start_game": "Spiel starten",
+    "dart": "Dart",
+    "remove_dart": "Letzten Dart löschen",
+    "undo_last_throw": "Wurf zurück",
+    "undo_throw_blocked": "Erst den aktuellen Wurf leeren",
+    "no_throw_to_undo": "Kein Wurf zum Zurücknehmen",
+    "keyboard_hint": "⌨️ 0–9 tippen, Enter bestätigen, Backspace Dart/Wurf zurück, Strg+Z Wurf zurück, Esc leeren",
+    "remove_player": "Spieler entfernen",
+    "remove_player_title": "{{name}} aus dem Match entfernen?",
+    "remove_player_body": "Alle Würfe von {{name}} in diesem Match werden gelöscht. Das Match läuft mit den übrigen Spielern weiter.",
+    "remove_player_irreversible": "Das lässt sich nicht rückgängig machen.",
+    "remove_player_min": "Ein Match braucht mindestens 2 Spieler",
+    "more_scores": "Weitere Punktzahlen (0–180)…"
   },
   "stats": {
     "statistics": "Statistiken",
@@ -165,7 +177,8 @@
     "best_average": "Bester Average",
     "highest_checkout": "Höchster Checkout",
     "checkout_percentage": "Checkout-Quote",
-    "personal_bests": "Persönliche Bestleistungen"
+    "personal_bests": "Persönliche Bestleistungen",
+    "select_player": "Spieler auswählen"
   },
   "training": {
     "training": "Training",
@@ -297,8 +310,6 @@
     "edit_subscription": "Abonnement bearbeiten",
     "grant_lifetime": "Lifetime gewähren",
     "revoke_access": "Zugang entziehen",
-    "remove_admin": "Admin entfernen",
-    "make_admin": "Zum Admin machen",
     "delete_user": "Benutzer löschen",
     "no_users_found": "Keine Benutzer mit Filter \"{{filter}}\" gefunden",
     "bug_reports": "Bug Reports",
@@ -349,8 +360,6 @@
     "confirm_grant_lifetime": "Diesem Benutzer Lifetime-Zugang gewähren?",
     "confirm_revoke_access": "Zugang für diesen Benutzer widerrufen?",
     "confirm_delete_user": "Diesen Benutzer DAUERHAFT löschen? Dies kann nicht rückgängig gemacht werden!",
-    "confirm_remove_admin": "Admin-Status von diesem Benutzer entfernen?",
-    "confirm_make_admin": "Diesen Benutzer zum Admin machen?",
     "view_details": "Details anzeigen",
     "copy_clipboard": "In Zwischenablage kopieren",
     "subscriptions": "Abonnements",
@@ -367,7 +376,12 @@
     "select_critical": "Kritisch",
     "select_high": "Hoch",
     "select_medium": "Mittel",
-    "select_low": "Niedrig"
+    "select_low": "Niedrig",
+    "table_activity": "Aktivität",
+    "table_last_seen": "Zuletzt aktiv",
+    "never_seen": "nie",
+    "usage_summary": "{{total}} Spiele",
+    "user_label": "Nutzer"
   },
   "debug": {
     "title": "Debug Flag",
@@ -449,7 +463,8 @@
     "hint_average": "Nur noch {{remaining}} Average bis zum Achievement!",
     "hint_180s": "Noch {{remaining}} 180er bis zum Achievement!",
     "hint_checkout": "Nur noch {{remaining}}% Checkout-Quote bis zum Achievement!",
-    "hint_winstreak": "Noch {{remaining}} Siege in Folge bis zum Achievement!"
+    "hint_winstreak": "Noch {{remaining}} Siege in Folge bis zum Achievement!",
+    "select_player": "Spieler auswählen"
   },
   "subscription": {
     "trial": "Testphase",

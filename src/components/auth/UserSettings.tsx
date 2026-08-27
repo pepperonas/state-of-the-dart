@@ -7,9 +7,16 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
-import { BackButton, Button, Card, TextField } from '../common';
+import { BackButton, Button, Card, TextField, PageShell } from '../common';
+import { Icon, iconForEmoji, type IconName } from '../icons';
 
-const AVATAR_EMOJIS = ['👤', '🎯', '🎲', '🎮', '🏆', '⚡', '🔥', '💎', '🎪', '🎭', '🎨', '🎸', '🎹', '🎺', '🎻', '🥁', '🎤', '🎧', '🎬', '🎯', '🏹', '⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏉', '🥏', '🎱', '🏓', '🏸', '🏒', '🏑', '🥍', '🏏', '🥊', '🥋', '🥅', '⛳', '⛸️', '🎿', '🛷', '🏂'];
+/** The avatar choices, as names from the app's own icon set. */
+const AVATAR_ICONS: IconName[] = [
+  'user', 'target', 'bullseye', 'board', 'dart', 'dice', 'trophy', 'medal', 'crown',
+  'star', 'sparkle', 'gem', 'flame', 'bolt', 'rocket', 'shield', 'heart', 'brain',
+  'robot', 'ghost', 'skull', 'music', 'party', 'gift', 'sprout', 'moon', 'sun',
+  'snow', 'globe', 'flag', 'eye', 'key', 'bulb', 'wave', 'ribbon', 'slot',
+];
 
 // Helper to check if avatar is a URL (from Google OAuth)
 const isAvatarUrl = (avatar: string) => avatar?.startsWith('http');
@@ -31,7 +38,7 @@ const renderAvatar = (avatarValue: string, size: 'sm' | 'md' | 'lg' = 'md') => {
       />
     );
   }
-  return <span>{avatarValue || '👤'}</span>;
+  return <Icon name={iconForEmoji(avatarValue)} size={size === 'sm' ? 20 : size === 'lg' ? 40 : 28} />;
 };
 
 const UserSettings: React.FC = () => {
@@ -40,7 +47,7 @@ const UserSettings: React.FC = () => {
   const { user, refreshUser, logout } = useAuth();
   
   const [name, setName] = useState(user?.name || '');
-  const [avatar, setAvatar] = useState(user?.avatar || '👤');
+  const [avatar, setAvatar] = useState(user?.avatar || 'user');
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   
   const [newEmail, setNewEmail] = useState('');
@@ -141,8 +148,10 @@ const UserSettings: React.FC = () => {
   if (!user) return null;
 
   return (
-    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-      <div className="max-w-4xl mx-auto">
+    <PageShell
+      width="md"
+      back={false}
+    >
         {/* Header */}
         <BackButton onClick={() => navigate(-1)} />
 
@@ -150,14 +159,14 @@ const UserSettings: React.FC = () => {
 
         {/* Success/Error Messages */}
         {success && (
-          <div className="mb-6 p-4 bg-success-container text-on-success-container rounded-m3-md flex items-center gap-2">
+          <div className="mb-6 p-4 bg-success-container text-on-success-container rounded-m3-md flex items-center gap-2 m3-success-in">
             <CheckCircle size={20} />
             <span className="m3-body-medium">{success}</span>
           </div>
         )}
 
         {error && (
-          <div className="mb-6 p-4 bg-error-container text-on-error-container rounded-m3-md flex items-center gap-3 shadow-m3-1">
+          <div className="mb-6 p-4 bg-error-container text-on-error-container rounded-m3-md flex items-center gap-3 shadow-m3-1 m3-error-in">
             <AlertCircle size={24} className="flex-shrink-0" />
             <span className="m3-body-medium font-semibold">{error}</span>
           </div>
@@ -196,7 +205,7 @@ const UserSettings: React.FC = () => {
 
                 {showAvatarPicker && (
                   <div className="mt-4 p-4 bg-surface-container rounded-m3-md border border-outline-variant grid grid-cols-8 sm:grid-cols-12 gap-2 max-h-64 overflow-y-auto">
-                    {AVATAR_EMOJIS.map((emoji) => (
+                    {AVATAR_ICONS.map((emoji) => (
                       <button
                         key={emoji}
                         type="button"
@@ -305,7 +314,7 @@ const UserSettings: React.FC = () => {
               <div className="p-4 bg-tertiary-container text-on-tertiary-container rounded-m3-md">
                 <p className="m3-body-small font-semibold flex items-center gap-2">
                   <AlertCircle size={18} />
-                  ⚠️ Du wirst ausgeloggt und musst deine neue Email-Adresse verifizieren.
+                  Du wirst ausgeloggt und musst deine neue Email-Adresse verifizieren.
                 </p>
               </div>
 
@@ -325,7 +334,7 @@ const UserSettings: React.FC = () => {
           <Card variant="outlined" className="p-6 border-error">
             <h2 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
               <Trash2 size={24} className="text-error" />
-              <span>🚨 Gefahrenzone</span>
+              <span> Gefahrenzone</span>
             </h2>
 
             <p className="text-on-surface mb-4 m3-body-medium">
@@ -348,7 +357,7 @@ const UserSettings: React.FC = () => {
                 <div className="p-4 bg-error-container text-on-error-container rounded-m3-md">
                   <p className="m3-body-small font-bold flex items-center gap-2">
                     <AlertCircle size={20} className="flex-shrink-0" />
-                    ⚠️ WARNUNG: Diese Aktion kann nicht rückgängig gemacht werden!
+                    WARNUNG: Diese Aktion kann nicht rückgängig gemacht werden!
                   </p>
                 </div>
 
@@ -386,8 +395,7 @@ const UserSettings: React.FC = () => {
             )}
           </Card>
         </div>
-      </div>
-    </div>
+        </PageShell>
   );
 };
 

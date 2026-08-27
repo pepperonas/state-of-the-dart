@@ -7,6 +7,7 @@ import { useAchievements } from '../../context/AchievementContext';
 import { usePlayer } from '../../context/PlayerContext';
 import { AchievementTier, AchievementNotification as AchievementNotificationType, getTierColor, getRarityColor, getAchievementScope, getScopeColor, ACHIEVEMENTS } from '../../types/achievements';
 import { audioSystem } from '../../utils/audio';
+import { Icon, iconForEmoji } from '../icons';
 
 const TIER_CONFETTI_COUNT: Record<AchievementTier, number> = {
   bronze: 30,
@@ -196,7 +197,7 @@ const NotificationCard: React.FC<{
               animate={{ scale: [1, 1.08, 1] }}
               transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
             >
-              {achievement.icon}
+              <Icon name={iconForEmoji(achievement.icon)} size={28} />
             </motion.div>
 
             <div className="flex-1 min-w-0">

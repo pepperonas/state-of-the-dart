@@ -1,9 +1,10 @@
 import { test, expect, type ConsoleMessage } from '@playwright/test';
 
 test.describe('Production build smoke', () => {
-  test('loads / and redirects to /login without console errors', async ({ page }) => {
-    // React Router throws an internal "Redirecting…" signal when <Navigate> fires;
-    // filter it out so only real bugs surface.
+  test('loads / as the public landing without console errors', async ({ page }) => {
+    // `/` used to bounce every signed-out visitor straight to /login — the app
+    // had no public face at all. It is now a switch: landing when signed out,
+    // app home when signed in (see HomeRoute in src/App.tsx).
     const IGNORABLE_ERRORS = [/^Error: Redirecting/];
     const consoleErrors: string[] = [];
     const collect = (text: string) => {
@@ -17,10 +18,19 @@ test.describe('Production build smoke', () => {
     });
 
     await page.goto('/');
-    await expect(page).toHaveURL(/\/login$/);
-    await expect(page.getByRole('heading', { name: 'State of the Dart' })).toBeVisible();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    // The two ways into the app must be on the page.
+    await expect(page.getByRole('button', { name: /Kostenlos starten/ }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: /^Anmelden$/ }).first()).toBeVisible();
 
     expect(consoleErrors, `Unexpected console errors:\n${consoleErrors.join('\n')}`).toEqual([]);
+  });
+
+  test('signed out, the app home is still reachable via /login', async ({ page }) => {
+    // Guard for the other half of the switch: protected routes keep bouncing.
+    await page.goto('/dashboard');
+    await expect(page).toHaveURL(/\/login$/);
   });
 
   test('initial asset count is bounded (regression guard)', async ({ page }) => {

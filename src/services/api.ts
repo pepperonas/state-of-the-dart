@@ -375,15 +375,6 @@ export const api = {
         method: 'DELETE',
       }),
 
-    makeAdmin: (userId: string) =>
-      apiClient(`/api/admin/users/${userId}/make-admin`, {
-        method: 'POST',
-      }),
-
-    removeAdmin: (userId: string) =>
-      apiClient(`/api/admin/users/${userId}/admin`, {
-        method: 'DELETE',
-      }),
   },
 
   // Bug Reports

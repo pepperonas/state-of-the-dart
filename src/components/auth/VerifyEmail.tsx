@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import api from '../../services/api';
 import { Card, Button } from '../common';
+import BackToLanding from './BackToLanding';
 
 const VerifyEmail: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -40,7 +41,8 @@ const VerifyEmail: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-dvh flex items-center justify-center gradient-mesh p-4">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md m3-enter-pop">
+          <BackToLanding />
           <Card variant="elevated" className="p-8 text-center">
             <Loader2 className="animate-spin text-primary mx-auto mb-4" size={48} />
             <h2 className="m3-headline-small text-on-surface mb-2">
@@ -58,13 +60,14 @@ const VerifyEmail: React.FC = () => {
   if (success) {
     return (
       <div className="min-h-dvh flex items-center justify-center gradient-mesh p-4">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md m3-enter-pop">
+          <BackToLanding />
           <Card variant="elevated" className="p-8 text-center">
             <div className="w-16 h-16 bg-success-container rounded-m3-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="text-success" size={32} />
             </div>
             <h2 className="m3-headline-small text-on-surface mb-4">
-              Email erfolgreich verifiziert! 🎉
+              Email erfolgreich verifiziert!
             </h2>
             <p className="m3-body-medium text-on-surface-variant mb-6">
               Dein 30-Tage-Trial hat begonnen! Du kannst dich jetzt anmelden und loslegen.
@@ -83,7 +86,8 @@ const VerifyEmail: React.FC = () => {
 
   return (
     <div className="min-h-dvh flex items-center justify-center gradient-mesh p-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md m3-enter-pop">
+        <BackToLanding />
         <Card variant="elevated" className="p-8 text-center">
           <div className="w-16 h-16 bg-error-container rounded-m3-full flex items-center justify-center mx-auto mb-4">
             <AlertCircle className="text-error" size={32} />

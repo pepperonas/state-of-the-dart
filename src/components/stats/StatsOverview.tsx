@@ -24,7 +24,8 @@ import { api } from '../../services/api';
 import { formatDate, getTimestampForSort } from '../../utils/dateUtils';
 import BackButton from '../common/BackButton';
 import { staggerChild } from '../../utils/motion';
-import { Card, Button, Chip } from '../common';
+import { Card, Button, Chip, Select } from '../common';
+import { Icon, iconForEmoji } from '../icons';
 
 const VALID_TABS = ['overview', 'progress', 'history', 'compare', 'heatmap'] as const;
 type TabType = typeof VALID_TABS[number];
@@ -316,8 +317,9 @@ const StatsOverview: React.FC = () => {
   if (players.length === 0) {
     return (
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto m3-view">
           <BackButton onClick={() => navigate('/')} />
+          <h1 className="m3-headline-medium text-on-surface mb-6">{t('stats.statistics')}</h1>
 
           <Card variant="elevated" className="p-12">
             <div className="text-center py-12">
@@ -342,9 +344,12 @@ const StatsOverview: React.FC = () => {
     <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <BackButton onClick={() => navigate('/')} inline />
-          
+        <div className="flex items-center justify-between mb-6 gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <BackButton onClick={() => navigate('/')} inline />
+            <h1 className="m3-headline-medium text-on-surface truncate">{t('stats.statistics')}</h1>
+          </div>
+
           <div ref={exportMenuRef} className="relative">
             <Button
               variant="filled"
@@ -386,17 +391,18 @@ const StatsOverview: React.FC = () => {
         <Card variant="elevated" className="p-4 mb-6">
           <div className="flex items-center gap-4">
             <label className="text-on-surface m3-label-large">Spieler:</label>
-            <select
+            <Select<string>
               value={selectedPlayerId}
-              onChange={(e) => setSelectedPlayerId(e.target.value)}
-              className="flex-1 max-w-xs px-4 py-2 bg-surface-container border border-outline-variant text-on-surface rounded-m3-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-            >
-              {players.map(player => (
-                <option key={player.id} value={player.id}>
-                  {player.avatar} {player.name}
-                </option>
-              ))}
-            </select>
+              onChange={setSelectedPlayerId}
+              className="flex-1 max-w-xs"
+              aria-label={t('stats.select_player', 'Spieler')}
+              options={players.map(player => ({
+                value: player.id,
+                label: player.name,
+                text: player.name,
+                icon: <Icon name={iconForEmoji(player.avatar)} size={18} />,
+              }))}
+            />
           </div>
         </Card>
 
@@ -422,9 +428,9 @@ const StatsOverview: React.FC = () => {
                     )}
                     <div>
                       <h3 className="m3-title-large text-on-surface">
-                        {improvement.trend === 'improving' && 'Du verbesserst dich! 📈'}
-                        {improvement.trend === 'declining' && 'Leichter Rückgang 📉'}
-                        {improvement.trend === 'stable' && 'Stabile Performance 📊'}
+                        {improvement.trend ==='improving'&&'Du verbesserst dich!'}
+                        {improvement.trend ==='declining'&&'Leichter Rückgang'}
+                        {improvement.trend ==='stable'&&'Stabile Performance'}
                       </h3>
                       <p className="m3-body-small text-on-surface-variant mt-1">
                         Aktuell: <span className="font-bold text-on-surface">{improvement.recentAverage.toFixed(2)}</span> |
@@ -468,7 +474,7 @@ const StatsOverview: React.FC = () => {
 
             {/* Tab Content */}
             {selectedTab === 'overview' && (
-              <div className="space-y-6">
+              <div className="space-y-6 m3-enter">
                 {/* Stats Grid */}
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <motion.div {...staggerChild(0)}>
@@ -495,7 +501,7 @@ const StatsOverview: React.FC = () => {
                     <StatCard label="Bester Avg" value={selectedPlayer.stats.bestAverage.toFixed(2)} color="yellow" />
                   </motion.div>
                   <motion.div {...staggerChild(5)}>
-                    <StatCard label="180s" value={selectedPlayer.stats.total180s} icon="🎯" />
+                    <StatCard label="180s"value={selectedPlayer.stats.total180s} icon=""/>
                   </motion.div>
                   <motion.div {...staggerChild(6)}>
                     <StatCard label="High Checkout" value={selectedPlayer.stats.highestCheckout || '-'} />
@@ -513,7 +519,7 @@ const StatsOverview: React.FC = () => {
                     <StatCard label="60+ Scores" value={selectedPlayer.stats.total60Plus} />
                   </motion.div>
                   <motion.div {...staggerChild(11)}>
-                    <StatCard label="9-Darters" value={selectedPlayer.stats.nineDartFinishes} icon="⭐" />
+                    <StatCard label="9-Darters"value={selectedPlayer.stats.nineDartFinishes} icon=""/>
                   </motion.div>
                 </div>
 
@@ -525,7 +531,7 @@ const StatsOverview: React.FC = () => {
                       {/* Performance Radar */}
                       <Card variant="elevated" className="p-6">
                         <h3 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
-                          <span className="text-2xl">⭐</span>
+                            <Icon name="target" size={22} />
                           Performance-Profil
                         </h3>
                         <div className="bg-surface-container rounded-m3-md p-4">
@@ -569,7 +575,7 @@ const StatsOverview: React.FC = () => {
                       {/* Win/Loss Pie */}
                       <Card variant="elevated" className="p-6">
                         <h3 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
-                          <span className="text-2xl">🏆</span>
+                            <Icon name="trophy" size={22} />
                           Sieg-Statistik
                         </h3>
                         <div className="bg-surface-container rounded-m3-md p-4">
@@ -608,7 +614,7 @@ const StatsOverview: React.FC = () => {
                     {scoreDistribution.length > 0 && (
                       <Card variant="elevated" className="p-6">
                         <h3 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
-                          <span className="text-2xl">🎯</span>
+                            <Icon name="chartBar" size={22} />
                           Score-Verteilung
                         </h3>
                         <div className="bg-surface-container rounded-m3-md p-4">
@@ -658,7 +664,7 @@ const StatsOverview: React.FC = () => {
                       <Card variant="elevated" className="p-6">
                         <div className="flex items-center justify-between mb-4">
                           <h3 className="m3-title-large text-on-surface flex items-center gap-2">
-                            <span className="text-2xl">📊</span>
+                            <Icon name="chartLine" size={22} />
                             Entwicklung im Zeitverlauf
                             {timeSeriesData.length === 1 && (
                               <span className="m3-body-small text-tertiary ml-2">(Nur 1 Datenpunkt - spiele mehr für Entwicklung!)</span>
@@ -667,16 +673,18 @@ const StatsOverview: React.FC = () => {
                               <span className="m3-body-small text-error ml-2">(Keine gültigen Zeitstempel in Match-Daten)</span>
                             )}
                           </h3>
-                          <select
+                          <Select<TimeInterval>
                             value={timeInterval}
-                            onChange={(e) => setTimeInterval(e.target.value as TimeInterval)}
-                            className="px-4 py-2 bg-surface-container border border-outline-variant text-on-surface rounded-m3-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-                          >
-                            <option value="daily">Täglich</option>
-                            <option value="weekly">Wöchentlich</option>
-                            <option value="monthly">Monatlich</option>
-                            <option value="yearly">Jährlich</option>
-                          </select>
+                            onChange={setTimeInterval}
+                            inline
+                            aria-label="Zeitraum"
+                            options={[
+                              { value: 'daily', label: 'Täglich' },
+                              { value: 'weekly', label: 'Wöchentlich' },
+                              { value: 'monthly', label: 'Monatlich' },
+                              { value: 'yearly', label: 'Jährlich' },
+                            ]}
+                          />
                         </div>
                         {timeSeriesData.length > 0 ? (
                           <div className="bg-surface-container rounded-m3-md p-4">
@@ -761,7 +769,7 @@ const StatsOverview: React.FC = () => {
             )}
 
             {selectedTab === 'progress' && (
-              <div className="space-y-6">
+              <div className="space-y-6 m3-enter">
                 {playerMatches.length === 0 ? (
                   <Card variant="elevated" className="p-12 text-center">
                     <Activity size={64} className="mx-auto mb-4 text-on-surface-variant" />
@@ -772,7 +780,7 @@ const StatsOverview: React.FC = () => {
                   <>
                     {/* Average Progress Chart */}
                     <Card variant="elevated" className="p-6">
-                      <h3 className="m3-title-large text-on-surface mb-4">📈 Average-Entwicklung</h3>
+                      <h3 className="m3-title-large text-on-surface mb-4"> Average-Entwicklung</h3>
                       <div className="bg-surface-container rounded-m3-md p-4">
                         <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <LineChart data={progressData}>
@@ -821,7 +829,7 @@ const StatsOverview: React.FC = () => {
 
                     {/* Checkout Percentage Chart */}
                     <Card variant="elevated" className="p-6">
-                      <h3 className="m3-title-large text-on-surface mb-4">🎯 Checkout-Quote</h3>
+                      <h3 className="m3-title-large text-on-surface mb-4"> Checkout-Quote</h3>
                       <div className="bg-surface-container rounded-m3-md p-4">
                         <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <LineChart data={progressData}>
@@ -870,7 +878,7 @@ const StatsOverview: React.FC = () => {
 
                     {/* Score Distribution Chart */}
                     <Card variant="elevated" className="p-6">
-                      <h3 className="m3-title-large text-on-surface mb-4">🔥 Score-Verteilung pro Match</h3>
+                      <h3 className="m3-title-large text-on-surface mb-4"> Score-Verteilung pro Match</h3>
                       <div className="bg-surface-container rounded-m3-md p-4">
                         <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <BarChart data={progressData}>
@@ -926,7 +934,7 @@ const StatsOverview: React.FC = () => {
 
                     {/* Legs Won/Lost Trend */}
                     <Card variant="elevated" className="p-6">
-                      <h3 className="m3-title-large text-on-surface mb-4">🎯 Legs Gewonnen vs. Verloren</h3>
+                      <h3 className="m3-title-large text-on-surface mb-4"> Legs Gewonnen vs. Verloren</h3>
                       <div className="bg-surface-container rounded-m3-md p-4">
                         <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={progressData}>
@@ -981,7 +989,7 @@ const StatsOverview: React.FC = () => {
 
                     {/* Highest Score per Match */}
                     <Card variant="elevated" className="p-6">
-                      <h3 className="m3-title-large text-on-surface mb-4">🚀 Höchste Scores</h3>
+                      <h3 className="m3-title-large text-on-surface mb-4"> Höchste Scores</h3>
                       <div className="bg-surface-container rounded-m3-md p-4">
                         <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <ComposedChart data={progressData}>
@@ -1040,7 +1048,7 @@ const StatsOverview: React.FC = () => {
                     {/* Performance Improvement Summary */}
                     {improvement && (
                       <Card variant="elevated" className="p-6">
-                        <h3 className="m3-title-large text-on-surface mb-4">📈 Verbesserungs-Trend</h3>
+                        <h3 className="m3-title-large text-on-surface mb-4"> Verbesserungs-Trend</h3>
                         <div className="grid md:grid-cols-3 gap-4">
                           <div className="bg-surface-container rounded-m3-md p-4">
                             <div className="flex items-center gap-2 mb-2">
@@ -1090,8 +1098,8 @@ const StatsOverview: React.FC = () => {
             )}
 
             {selectedTab === 'history' && (
-              <Card variant="elevated" className="p-6">
-                <h3 className="m3-title-large text-on-surface mb-4">📜 Match-Verlauf</h3>
+              <Card variant="elevated" className="p-6 m3-enter">
+                <h3 className="m3-title-large text-on-surface mb-4"> Match-Verlauf</h3>
                 {playerMatches.length === 0 ? (
                   <div className="text-center py-12">
                     <Activity size={64} className="mx-auto mb-4 text-on-surface-variant" />
@@ -1115,13 +1123,13 @@ const StatsOverview: React.FC = () => {
             )}
 
             {selectedTab === 'heatmap' && (
-              <div className="space-y-6">
+              <div className="space-y-6 m3-enter">
                 {/* Heatmap Header */}
                 <Card variant="elevated" className="p-6">
                   <div className="flex items-center justify-between mb-2">
                     <h2 className="m3-headline-small text-on-surface flex items-center gap-3">
                       <Flame size={32} className="text-tertiary" />
-                      🎯 Wurf-Heatmap
+                      Wurf-Heatmap
                     </h2>
                   </div>
                   <p className="text-on-surface-variant m3-body-large">
@@ -1177,7 +1185,7 @@ const StatsOverview: React.FC = () => {
                   </div>
                 ) : (
                   <Card variant="outlined" className="p-12 text-center border-2 border-dashed border-outline-variant">
-                    <div className="text-8xl mb-6">🎯</div>
+                    <div className="text-8xl mb-6"></div>
                     <h3 className="m3-headline-small text-on-surface mb-4">Noch keine Wurf-Daten</h3>
                     <p className="text-on-surface-variant m3-body-large mb-6">
                       Spiele ein Match, um deine Wurf-Heatmap zu sehen!
@@ -1351,10 +1359,10 @@ const PlayerComparisonView: React.FC<{
                   : 'cursor-pointer hover:scale-105'
               }`}
             >
-              <div className="text-4xl mb-3">{player.avatar}</div>
+              <div className="mb-3 flex justify-center"><Icon name={iconForEmoji(player.avatar)} size={40} /></div>
               <div className="font-bold text-on-surface m3-body-large">{player.name}</div>
               {comparePlayerIds.includes(player.id) && (
-                <div className="m3-body-small text-primary mt-2 font-semibold">✓ Ausgewählt</div>
+                <div className="m3-body-small text-primary mt-2 font-semibold"> Ausgewählt</div>
               )}
             </button>
           ))}
@@ -1372,7 +1380,7 @@ const PlayerComparisonView: React.FC<{
         <>
           {/* Radar Comparison */}
           <Card variant="elevated" className="p-6">
-            <h3 className="m3-title-large text-on-surface mb-4">📊 Leistungsvergleich</h3>
+            <h3 className="m3-title-large text-on-surface mb-4"> Leistungsvergleich</h3>
             <div className="bg-surface-container rounded-m3-md p-4">
               <div className="h-[280px] sm:h-[400px]"><ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData}>
@@ -1404,7 +1412,7 @@ const PlayerComparisonView: React.FC<{
 
           {/* Stats Comparison Table */}
           <Card variant="elevated" className="p-6">
-            <h3 className="m3-title-large text-on-surface mb-4">📈 Statistik-Vergleich</h3>
+            <h3 className="m3-title-large text-on-surface mb-4"> Statistik-Vergleich</h3>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[500px]">
                 <thead>
@@ -1413,7 +1421,7 @@ const PlayerComparisonView: React.FC<{
                     {comparisonData.map((data, index) => (
                       <th key={index} className="text-center p-3 text-on-surface font-semibold">
                         <div className="flex flex-col items-center gap-2">
-                          <span className="text-2xl">{data!.player.avatar}</span>
+                          <Icon name={iconForEmoji(data!.player.avatar)} size={24} />
                           <span>{data!.player.name}</span>
                         </div>
                       </th>
@@ -1484,7 +1492,7 @@ const PlayerComparisonView: React.FC<{
 
           {/* Bar Chart Comparison */}
           <Card variant="elevated" className="p-6">
-            <h3 className="m3-title-large text-on-surface mb-4">📊 Direktvergleich</h3>
+            <h3 className="m3-title-large text-on-surface mb-4"> Direktvergleich</h3>
             <div className="bg-surface-container rounded-m3-md p-4">
               <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                 <BarChart

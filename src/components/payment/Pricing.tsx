@@ -51,7 +51,7 @@ const Pricing: React.FC = () => {
 
         {/* Title */}
         <div className="text-center mb-12">
-          <h1 className="m3-display-small text-on-surface mb-4">
+          <h1 className="m3-headline-medium text-on-surface mb-4">
             Wähle deinen Plan
           </h1>
           <p className="m3-body-large text-on-surface-variant">
@@ -59,7 +59,7 @@ const Pricing: React.FC = () => {
               'Upgraden oder verwalten'
             ) : user?.subscriptionStatus === 'trial' ? (
               <>
-                🎁 Du hast noch <strong className="text-primary">{trialDaysLeft} Tage</strong> Trial
+                Du hast noch <strong className="text-primary">{trialDaysLeft} Tage</strong> Trial
               </>
             ) : (
               'Starte jetzt mit 30 Tagen kostenlos'

@@ -152,9 +152,76 @@ SMTP_FROM=State of the Dart <noreply@example.com>
 ### Admin (`/api/admin`)
 | Method | Endpoint | Beschreibung |
 |--------|----------|--------------|
-| GET | `/users` | Alle User |
+| GET | `/users` | Alle User — **inkl. Nutzungsdaten** (s. u.) |
 | PUT | `/users/:id` | User aktualisieren |
 | DELETE | `/users/:id` | User löschen |
+
+`GET /users` liefert je Nutzer zusätzlich:
+
+| Feld | Bedeutung |
+|---|---|
+| `last_active` | Zeitstempel des letzten Logins |
+| `match_count` / `training_count` | Gesamtzahl, über alle Zeit |
+| `usage_count` | Summe aus beiden |
+| `activity` | 30 Zahlen, eine je Tag, **ältester Tag zuerst** — die Sparkline im Admin Panel |
+
+Ein Nutzer besitzt keine Matches direkt: er besitzt Tenants, und die besitzen
+Matches und Trainings-Sessions. Beide zählen — wer nur trainiert, nutzt die App.
+⚠️ Zwei gruppierte Queries, **kein N+1**: die Tabelle wächst mit der Nutzerzahl.
+Tages-Buckets sind ganze UTC-Tage.
+
+> ⚠️ **Admin-Rechte lassen sich über die API nicht vergeben.** Das `is_admin`-Flag wird aus
+> der E-Mail-Adresse **abgeleitet** (`server/src/config/adminAllowlist.ts`) und bei jedem
+> Login neu gesetzt — das erteilt es der Master-Adresse und **entzieht** es allen anderen,
+> auch wenn ein Flag in der Datenbank stünde. Es gibt bewusst keinen `make-admin`-Endpunkt.
+
+### Settings (`/api/settings`)
+| Method | Endpoint | Beschreibung |
+|--------|----------|--------------|
+| GET | `/` | Alle Einstellungen des Tenants |
+| PUT | `/` | Einstellungen ersetzen |
+| PATCH | `/:key` | Einzelne Einstellung setzen |
+
+### Leaderboard (`/api/leaderboard`)
+| Method | Endpoint | Beschreibung |
+|--------|----------|--------------|
+| GET | `/` | Globale Bestenliste |
+
+### Bug Reports (`/api/bug-reports`)
+
+> **Offen für jeden angemeldeten Nutzer** — nur `authenticateToken`, kein
+> `requireAdmin`. Beim Lesen sieht ein Nicht-Admin ausschließlich die eigenen
+> Reports; `PATCH` auf Status/Notizen bleibt Admins vorbehalten. Das ist der
+> Gegensatz zu **Debug Flags**, die komplett admin-only sind: ein Bug-Report ist
+> Nutzer-Feedback, ein Debug-Flag ist ein Diagnose-Schnappschuss mit Log-Puffer,
+> Screenshot und Spielzustand.
+
+| Method | Endpoint | Beschreibung |
+|--------|----------|--------------|
+| GET | `/` | Alle Reports (Admin) bzw. eigene |
+| POST | `/` | Report anlegen (inkl. Screenshot + Browser-Info) |
+| GET | `/:id` | Report-Details |
+| PATCH | `/:id/status` | Status setzen (`open` → `in_progress` → `resolved`/`closed`) |
+| PATCH | `/:id/notes` | Admin-Notizen |
+| DELETE | `/:id` | Report löschen |
+
+### Debug Flags (`/api/debug-flags`)
+
+> **Admin-only, alle Endpunkte** (`router.use(requireAdmin)`).
+
+| Method | Endpoint | Beschreibung |
+|--------|----------|--------------|
+| GET | `/` | Alle Flags (nur Admin) |
+| POST | `/` | Flag anlegen — Log-Puffer + Screenshot + Zustand |
+| GET | `/:id` | Flag-Details |
+| PATCH | `/:id/status` | Status (`open` → `investigating` → `resolved`/`dismissed`) |
+| PATCH | `/:id/notes` | Notizen |
+| DELETE | `/:id` | Flag löschen |
+
+### Contact (`/api/contact`)
+| Method | Endpoint | Beschreibung |
+|--------|----------|--------------|
+| POST | `/` | Kontaktformular — **Rate-Limit: 3 / Stunde / IP** |
 
 ## Datenbank Schema
 

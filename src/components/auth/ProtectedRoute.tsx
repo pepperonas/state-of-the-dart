@@ -20,7 +20,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   if (loading) {
     return (
       <div className="min-h-dvh flex items-center justify-center gradient-mesh">
-        <div className="bg-surface-container rounded-m3-lg px-8 py-6 text-center shadow-m3-1">
+        <div className="bg-surface-container rounded-m3-lg px-8 py-6 text-center shadow-m3-1 m3-enter-pop">
           <Loader className="animate-spin text-primary mx-auto mb-4" size={48} />
           <p className="text-on-surface m3-title-medium">Lade...</p>
         </div>
@@ -37,7 +37,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   if (requireEmailVerification && user && !user.emailVerified) {
     return (
       <div className="min-h-dvh flex items-center justify-center gradient-mesh p-4">
-        <div className="m3-card m3-elevated rounded-m3-xl p-8 max-w-md w-full text-center">
+        <div className="m3-card m3-elevated rounded-m3-xl p-8 max-w-md w-full text-center m3-enter-pop">
           <div className="w-20 h-20 bg-tertiary-container rounded-m3-full flex items-center justify-center mx-auto mb-6">
             <Mail className="text-on-tertiary-container" size={40} />
           </div>

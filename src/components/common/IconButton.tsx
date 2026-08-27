@@ -20,6 +20,7 @@ const IconButton: React.FC<IconButtonProps> = ({
   const classes = [
     'm3-icon-button',
     'm3-state-layer',
+    'm3-ripple',
     variant !== 'standard' ? `m3-${variant}` : '',
     className,
   ]

@@ -67,21 +67,43 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return;
     }
 
-    try {
-      const userData = await api.auth.getMe();
-      setUser(userData);
-    } catch (error: any) {
-      console.error('Failed to load user:', error);
-      // Only remove token on actual auth errors (401, 403), not on rate limiting (429) or network errors
-      const errorMessage = error?.message || '';
-      const isAuthError = errorMessage.includes('401') || errorMessage.includes('403') || errorMessage.includes('Unauthorized');
-      if (isAuthError) {
-        removeAuthToken();
+    const isAuthError = (error: any) => {
+      const status = error?.status;
+      if (status === 401 || status === 403) return true;
+      const msg = error?.message || '';
+      return msg.includes('401') || msg.includes('403') || msg.includes('Unauthorized');
+    };
+
+    // Session restore gets ONE retry on a non-auth failure.
+    //
+    // Keeping the token on a network error was already right, but it was not
+    // enough: without `user` the app still counts as signed out, so
+    // ProtectedRoute bounces to /login and the session is lost in practice —
+    // a cold backend or a dropped request at boot logged the user out. This
+    // showed up as an intermittently failing E2E test.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const userData = await api.auth.getMe();
+        setUser(userData);
+        break;
+      } catch (error: any) {
+        if (isAuthError(error)) {
+          console.error('Session rejected:', error);
+          removeAuthToken();
+          break;
+        }
+        if (attempt === 0) {
+          logBuffer.log('info', 'state_change', 'Session restore failed, retrying once', {
+            error: String(error?.message || error),
+          });
+          await new Promise((r) => setTimeout(r, 600));
+          continue;
+        }
+        // Give up for this boot, but keep the token: a later request can recover.
+        console.error('Failed to load user:', error);
       }
-      // On rate limit or network errors, keep the token and user state
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   const login = async (email: string, password: string) => {

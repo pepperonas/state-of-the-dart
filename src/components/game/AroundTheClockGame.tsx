@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
+import { dialogMotion, effectsDefault, springSpatialDefault } from '../../utils/motion';
 import { ArrowLeft, RotateCcw, Trophy, Clock, Check, X } from 'lucide-react';
 import { usePlayer } from '../../context/PlayerContext';
 import { useSettings } from '../../context/SettingsContext';
@@ -631,11 +632,14 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={effectsDefault}
             className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_70%,transparent)] flex items-center justify-center z-50 p-4"
           >
             <motion.div
-              initial={{ scale: 0.5 }}
-              animate={{ scale: 1 }}
+              initial={dialogMotion.initial}
+              animate={dialogMotion.animate}
+              exit={dialogMotion.exit}
+              transition={springSpatialDefault}
               className="m3-dialog rounded-m3-xl p-6 sm:p-8 text-center max-w-md w-full"
             >
               <Trophy className="w-16 h-16 sm:w-20 sm:h-20 text-tertiary mx-auto mb-4" />
@@ -695,12 +699,14 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={effectsDefault}
             className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_70%,transparent)] flex items-center justify-center z-50 p-4"
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
+              initial={dialogMotion.initial}
+              animate={dialogMotion.animate}
+              exit={dialogMotion.exit}
+              transition={dialogMotion.transition}
               className="m3-dialog rounded-m3-xl p-6 max-w-sm w-full text-center"
             >
               <h3 className="m3-title-large text-on-surface mb-3">
@@ -747,7 +753,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
       {/* Progress Track — wrapping grid, no scroll */}
       <div className="max-w-4xl mx-auto mb-3">
         <Card variant="elevated" className="p-3">
-          <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center m3-stagger-fast">
             {targets.map((target, idx) => {
               const effectiveProgress = getEffectiveProgress(currentPlayer?.id || '');
               const committedProgress = playerProgress[currentPlayer?.id || ''] || 0;
@@ -760,7 +766,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
                   key={`${target.label}-${idx}`}
                   className={`w-9 h-9 sm:w-10 sm:h-10 rounded-m3-full flex items-center justify-center font-bold text-xs sm:text-sm transition-all ${
                     isPast
-                      ? 'bg-success-500 text-white'
+                      ? 'bg-success-500 text-on-surface'
                       : isPending
                       ? 'bg-success-container text-on-success-container ring-1 ring-success-400'
                       : isCurrent
@@ -780,7 +786,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
       {selectedPlayers.length > 1 && (
         <div className="max-w-4xl mx-auto mb-3">
           <Card variant="elevated" className="p-3">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 m3-stagger-fast">
               {selectedPlayers.map((player, idx) => {
                 const effectiveProgress = getEffectiveProgress(player.id);
                 const darts = playerDarts[player.id] || 0;

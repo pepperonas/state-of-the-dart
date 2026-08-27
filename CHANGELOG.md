@@ -7,6 +7,151 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-08-28
+
+### Fixed
+
+- **E2E suite could never pass in CI** — two separate instances of the same
+  ordering bug. Playwright starts `webServer` *before* `globalSetup`, but both
+  the frontend build and the database seed lived in `globalSetup`:
+  - `vite preview` came up with no `dist/` to serve, so the URL probe timed out
+    after 60s;
+  - the backend had already opened the database file that the seed then
+    `unlink`s, so it kept reading the deleted inode, never saw the test user,
+    and every login returned `401`.
+
+  Both steps are now chained into their `webServer` commands, where Playwright
+  guarantees the ordering, and `globalSetup` is retired. Neither fault
+  reproduced locally, because a stale `dist/` and a leftover `e2e-test.db`
+  papered over them; deleting both reproduces CI exactly, and the suite now
+  passes 11/11 from a genuinely clean tree.
+- Unit-test CI job installed root dependencies only, so the admin usage-stats
+  suite could not resolve the backend's `better-sqlite3`. The workflow now
+  installs `server/` dependencies too.
+- Documentation link check no longer reports generated paths (`server/data/`,
+  `dist/`, `coverage/`, `node_modules/`) as dangling — they are legitimately
+  named in the docs but absent from a clean checkout, which is exactly what CI is.
+
+## [0.9.0] - 2026-08-28
+
+### 🧪 Test-Ausbau — und ein dabei gefundener Scoring-Bug
+
+#### Behoben
+- ⚠️ **`convertScoreToDarts` gab für 36 von 172 werfbaren Scores zu wenig zurück.**
+  141 kam als 140 heraus, 146 als 140. Da `CONFIRM_THROW` den Wurf aus der
+  Dart-Summe berechnet, **zog das Eintippen von 141 auf dem Numpad nur 140 ab**.
+  Ursache: der Greedy-Aufbau verliert bei `Math.floor(x/3)` den Rest und kann
+  drei Darts verbrauchen, während noch Punkte offen sind. Neu ist ein exakter
+  Zerlegungs-Backstop, der nur einspringt, wenn die Greedy-Variante nicht
+  aufgeht — die übrigen 136 Rekonstruktionen sind byte-identisch.
+
+#### Hinzugefügt
+- **+180 Tests** (512 → 692), Coverage 22 % → **24 %** Statements und
+  69 % → **76 %** Branches. `src/utils/` von 55 % auf **75 %**.
+- **Checkout-Tabelle als Property-Test**: jede der ~162 Routen muss exakt auf
+  ihren Score summieren, auf einer Doppel enden und in drei Darts passen.
+- **X01-Regelwerk** an den Kanten: Bust bei 1, bei Bogey-Zahlen, Double-Out,
+  Bull als Doppel, Averages pro Dart statt pro Aufnahme.
+- **Game-Reducer**: Zug-Ablauf, Dart-Limit, Undo über mehrere Aufnahmen,
+  Bust-Behandlung, Leg- und Match-Abschluss.
+- **Offline-Queue**: Retry-Politik (Aufgabe nach 5 Versuchen), TTL-Cache,
+  Cache-Fallback bei Netzfehler.
+- **Bot-Logik**: Monotonie der Level, gültige Darts über 35 000 Würfe,
+  adaptive Level bleiben in ihrem Fenster.
+- **Log-Ringpuffer**, **Theme-Wechsel**, **Debug-Export**, sowie die
+  **Nutzungs-Aggregation gegen echtes SQLite** samt N+1-Wächter.
+
+#### Geändert
+- `collectUsageByUser` liegt jetzt in `server/src/services/usageStats.ts` —
+  vorher steckte es in `routes/admin.ts` und war nicht testbar.
+- Coverage-Schwellen in `vitest.config.ts` auf die neuen Werte angehoben.
+
+
+### 📊 Admin: Nutzungs-Übersicht, Bug-Report-Zugang, Filter nach Nutzer
+
+#### Hinzugefügt
+- **Aktivitäts-Chart je Nutzer** im Admin Panel — 30-Tage-Balkendiagramm aus
+  Matches **und** Trainings-Sessions, dazu die Gesamtzahl. Skaliert auf das
+  eigene Maximum der Zeile: die Frage ist „wann war diese Person aktiv", nicht
+  „wer ist am aktivsten". Ein ruhiger Tag bleibt als Grundstrich sichtbar.
+  Screenreader bekommen die Zahlen im `<title>`, nicht nur ein Bild.
+- **Spalte „Zuletzt aktiv"** — relative Angabe, eingefärbt nach Frische
+  (grün ≤ 7 Tage, neutral ≤ 30, rot darüber), exaktes Datum im Tooltip.
+- **Filter nach Nutzer** in den Tabellen für Bug Reports und Debug Flags.
+- **`BugReportButton`** — der 🐞-Knopf unten links, für **jeden angemeldeten
+  Nutzer**. Der admin-only Debug-Flag-Knopf sitzt daneben.
+- **Tests**: +42 (470 → 512) für `utils/activity.ts`, `utils/reporters.ts` und
+  `ActivitySparkline`.
+
+#### Geändert
+- `GET /api/admin/users` liefert zusätzlich `last_active`, `match_count`,
+  `training_count`, `usage_count` und `activity` (30 Tageswerte, ältester
+  zuerst). ⚠️ Zwei gruppierte Queries, **kein N+1** — die Tabelle wächst mit der
+  Nutzerzahl.
+
+#### Klarstellung
+Bug-Reports standen **schon immer** jedem angemeldeten Nutzer offen
+(`/api/bug-reports` trägt nur `authenticateToken`); admin-only sind die **Debug
+Flags**. Gefehlt hat nicht die Berechtigung, sondern die Auffindbarkeit: der
+Einstieg lag in einem zugeklappten Abschnitt der Einstellungen, während das
+Debug-Flag einen Dauerknopf hatte. Beide sind jetzt gleichgestellt.
+
+#### Behoben (Doku)
+- Die englische README versprach „**Admin Rights** — Make other users
+  administrators". Das geht seit der Allowlist nicht mehr und stand dort
+  irreführend; ersetzt durch die tatsächliche Regel.
+- Audio-Dateien standen mit „400+" in beiden READMEs — es sind 609.
+
+
+### 🎨 Material 3 Expressive: eigenes Icon-Set, eigener Select, Spieler-Reihenfolge
+
+Ersetzt die letzten beiden Stellen, an denen die Oberfläche **nicht** vom Design-System
+gezeichnet wurde — Plattform-Emoji und das native `<select>` — und behebt eine Fokus-Regel,
+die die Form jedes fokussierten Elements veränderte.
+
+#### Hinzugefügt
+- **Icon-Set** (`src/components/icons/`): 69 M3-Expressive-Glyphen. Die Geometrie wird von
+  `tools/gen-icons.py` **gerechnet**, nicht getippt. `iconForEmoji()` bildet 427 Emoji auf
+  Glyphen ab und gibt **nie** `undefined` zurück — genau diese Garantie erlaubt es den
+  Aufrufstellen, ihr Emoji ersatzlos zu streichen.
+- **`Select`** (`src/components/common/Select.tsx`): ersetzt alle 23 nativen `<select>`.
+  Menü per Portal am `<body>` (z-60), generischer Werttyp, APG-Combobox-Tastatur inkl.
+  Präfix-Sprung.
+- **`AvatarPicker`**: kuratierte Icon-Auswahl statt der ~1900-Emoji-Palette.
+- **`src/utils/playerOrder.ts`**: eine Sortierregel, einmal in `PlayerContext` angewandt.
+- **Dokumentation**: neues [Design-System](docs/DESIGN_SYSTEM.md); `docsSync`-Testsuite,
+  die Badges, Pfade, Links und Kommandos gegen den Code prüft.
+- **Tests**: +160 (450 → 452 gesamt) — Icon-Set, `Select`, M3-Primitive, `gameStorage`,
+  Heatmap-Mathematik, Spieler-Sortierung, Doku-Abgleich.
+- **Coverage**: `@vitest/coverage-v8` ergänzt — `npm run coverage` war seit jeher
+  dokumentiert, aber der Provider fehlte, das Kommando schlug immer fehl. Dazu Schwellen in
+  `vitest.config.ts`, die Rückschritte scheitern lassen.
+
+#### Geändert
+- **Avatare** sind tonale Discs mit Icons. Gespeicherte Emoji-Avatare älterer Profile
+  werden beim Rendern übersetzt — keine Migration, kein Datenverlust.
+- **Achievement- und Bot-Daten** tragen Icon-Namen statt Emoji.
+- **Bot-Namen** enthalten kein Emoji mehr. Vorher landete es im Namen und damit in der
+  Datenbank, in der Match-Historie und in jedem Export.
+- **Textfelder und Select-Trigger** stehen auf 12 px Radius statt der 4 px des
+  M3-Standards — neben 16–28-px-Karten und Pill-Buttons las sich 4 px als Fremdkörper.
+- **Spielerlisten** sortieren nach Konto-Typ, dann Anzahl Spiele, dann Name.
+
+#### Behoben
+- ⚠️ **Der geteilte Fokus-Ring trug `border-radius: inherit`.** Das rundet nicht die
+  Kontur — es ersetzt den Radius des fokussierten **Elements** durch den seines Elternteils.
+  Da `:focus-visible` als Klasse zählt, war die Regel `(0,1,0)` und gewann den Gleichstand
+  gegen `.m3-button`/`.m3-text-field` über die Import-Reihenfolge. Gemessen: Pill-Button
+  `9999px → 913px`, Textfeld `12px → 0px` beim Tastaturfokus.
+- **Dreifacher Fokus-Ring** am Textfeld (Border + Inset-Shadow + globale Outline) ist jetzt
+  **ein** Ring.
+- **Typeahead-Anker** wurde bei starkem Neurendern schal — liegt jetzt im Ref.
+- **Doku-Fehler**, gefunden von der neuen `docsSync`-Suite: englische README auf Version
+  0.8.3 statt 0.8.5, deutsche Fußzeile auf 0.8.4, defektes Hero-Bild in der englischen
+  README, Link auf ein nicht existierendes `PWA.md`, zwei tote Links in `ARCHITECTURE.md`,
+  deutsche Absätze mitten in der englischen README, „20 Tests"/„294 Tests"-Angaben.
+
+
 ### 🎨 Material 3 Expressive Redesign
 
 Komplette Umstellung der App auf **Material 3 Expressive** — neues Design-Token-Fundament + Primitiv-Bibliothek, alle ~60 Screens migriert.

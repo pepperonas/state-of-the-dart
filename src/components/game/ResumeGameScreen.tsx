@@ -8,7 +8,7 @@ import { useGame } from '../../context/GameContext';
 import { generateMatchName } from '../../utils/matchNames';
 import { reconstructMatch } from '../../utils/matchReconstruction';
 import { getLocalGameSummaries, clearGameState, LocalGameSummary } from '../../utils/gameStorage';
-import { BackButton, Button, Card } from '../common';
+import { BackButton, Button, Card, PageShell } from '../common';
 
 interface ResumableMatch {
   id: string;
@@ -156,8 +156,10 @@ const ResumeGameScreen: React.FC = () => {
   const isEmpty = matches.length === 0 && localGames.length === 0;
 
   return (
-    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-      <div className="max-w-2xl mx-auto">
+    <PageShell
+      width="sm"
+      back={false}
+    >
         <BackButton onClick={() => navigate('/')} />
 
         <h1 className="m3-headline-medium text-on-surface mb-6">
@@ -370,8 +372,7 @@ const ResumeGameScreen: React.FC = () => {
             })}
           </AnimatePresence>
         )}
-      </div>
-    </div>
+        </PageShell>
   );
 };
 

@@ -130,11 +130,99 @@ M3 primitive library (barrel `src/components/common/index.ts`). **Prefer these o
 - `Card` — `variant`: `filled|elevated|outlined`; `interactive` for hover/press.
 - `TextField` — outlined field with `label`, leading `icon`, `error`.
 - `Switch` — M3 switch (`checked`, `onChange`), thumb grows when on.
+- `Select` — **the app's only dropdown.** Generic in the value type: `<Select<number> value={10} onChange={n => …} options={[{value, label, icon?, text?, disabled?}]} />`. `size`: `sm|md|lg`, `inline` to size to content, `placeholder` for "no selection". Native `<select>` is **banned** (a consistency test fails the build) — its popup is drawn by the OS, so it ignored every token, could not be themed light/dark and could not hold an icon. The menu is **portalled to `<body>` at z-60** so it escapes `overflow-x-auto` tables and dialog stacking contexts, and it re-measures on scroll/resize. Keyboard = APG combobox: arrows/Home/End move, Enter/Space commit, Escape discards, Tab leaves without committing, typing jumps by prefix.
 - `Chip` — filter/assist chip (`selected`, `icon`).
 - `Dialog` — scrim + spring-animated container (`open`, `onClose`, `title`, `actions`, `widthClassName`, `hideClose`); closes on scrim/Escape.
 - `AnimatedNumber` — spring number transition (overdamped → no overshoot/jitter), reduced-motion aware; "tallies" to its new value. Used for in-game scores (`PlayerScore`, `ScoreInput`) and Dashboard KPIs (counts up as async data loads).
 - `ErrorBoundary` — top-level React error boundary. Wraps `<App>` in `main.tsx` so a render-time throw (bad `JSON.parse` in match reconstruction, failed lazy chunk, etc.) shows an M3 recovery screen (reload / back-to-menu) instead of white-screening the PWA. The `window.error`/`unhandledrejection` handlers in `App.tsx` only log — they do NOT catch render errors, so don't remove the boundary.
 - `BackButton.tsx` — canonical back button. **Always use this** for screen-level back navigation. An M3 **tonal** button with a leading `<ArrowLeft>`. In **block mode (default)** it wraps itself in a `mb-6` block so the gap to the page heading is uniform across all screens; pass **`inline`** when it sits in a flex header row / form (opts out of the wrapper — the row/form controls spacing). Override text via `label`.
+
+### Custom Icon Set (`src/components/icons/`)
+**The app renders no emoji.** `<Icon name="trophy" size={24} />` draws one of ~69 hand-built Material 3 Expressive glyphs.
+
+Why: an emoji is a *font*, not artwork. The same glyph is Apple's glossy 3-D on a phone, Google's flat shapes on a tablet and a monochrome outline on Windows; it ignores `currentColor`, so it never followed the light/dark theme; and it cannot be aligned to a 24px grid. Before this, the interface used ~250 distinct emoji across its chrome, its 463 achievements and a ~1900-entry avatar palette.
+
+- **`paths.ts`** — the glyphs. ⚠️ **The geometry is COMPUTED by `tools/gen-icons.py`, never typed.** Circles are actually round, polygons are trigonometric, corner radii are consistent. To change a glyph, change the generator and re-run it.
+- **`emojiMap.ts`** — `iconForEmoji()` maps every emoji that ever appeared onto the closest glyph. It **never returns undefined**: unmapped input falls through Unicode-block heuristics to `target`. That guarantee is what let call sites drop their emoji entirely instead of keeping one as a fallback. It also **passes icon names straight through**, so data files can hold either form.
+- **Data files hold icon NAMES** (`achievements.ts`, `botLogic.ts`, avatar palettes). Stored *user* avatars may still be emoji from older profiles — `PlayerAvatar` resolves them, so nothing breaks.
+- `AvatarPicker` replaced the emoji palette with a curated set from these icons.
+
+⚠️ **Holes are real holes** (`fill-rule="evenodd"`), never a shape painted in the background colour — that only works on one of the two themes. But evenodd cuts both ways: **two overlapping shapes XOR into a hole**, which is how `hash`, `globe` and `board` first rendered as checkerboards. Shapes that should union must not overlap; only ring-and-hole constructs may.
+
+⚠️ `SpinnerWheel` draws on a `<canvas>`, where a React `<svg>` cannot go — it feeds the same path data to `new Path2D(...)`, so the wheel shows the identical glyph.
+
+Pinned by `src/tests/icons/iconSet.test.tsx`, including a scan that fails if an emoji reappears in rendered code (console logs and doc comments are exempt).
+
+### The checkout table is validated, not spot-checked
+`src/tests/data/checkoutTable.test.ts` walks **every** route in
+`src/data/checkoutTable.ts` and asserts it sums exactly to its score, finishes on
+a double, and fits in three darts. A typo in one of ~162 entries would otherwise
+tell a player to throw at the wrong bed and nothing would catch it.
+
+⚠️ `'25'` (outer bull) is the **single** token outside the `S`/`D`/`T` + `Bull`
+scheme, used once, in the 125 finish. It is standard darts shorthand and the
+strings are only rendered, never parsed — pinned as a known exception so it is
+not "fixed" by accident.
+
+⚠️ The bogey guard in `getCheckoutSuggestion` and the absence of those scores
+from the table are **two independent mechanisms** that agree. Mutating either
+alone changes no behaviour (an equivalent mutation, not a gap in the tests).
+
+### `convertScoreToDarts` has a correctness backstop
+The greedy reconstruction cannot land exactly on every total — `Math.floor(x/3)`
+drops the remainder, and the loop can spend three darts with score left over.
+That returned a short reconstruction for **36 of 172** throwable scores (141 came
+back as 140). Because `CONFIRM_THROW` derives a turn from
+`calculateThrowScore(darts)`, **typing 141 on the numpad deducted 140**.
+
+`decomposeScoreExactly` now substitutes an exact decomposition whenever the
+greedy result does not add up. The other 136 reconstructions are byte-identical,
+so the heatmap distribution is unchanged.
+
+### Bots may bust — that is not a defect
+The "smart bot" check only guards the dart the bot *hits*. A missed dart lands on
+a neighbouring bed with no such check, so roughly one dart in six busts from a
+tight remainder. Real players bust too and the reducer voids the turn. The
+guarantee the tests pin is *"never produces a dart that could not be thrown"*.
+
+### ⚠️ CONFIRM_THROW does not advance the player
+`NEXT_PLAYER` is a separate dispatch. On a checkout, `CONFIRM_THROW` already
+handles the leg/match transition and an extra `NEXT_PLAYER` would skip somebody's
+turn — which is why bot auto-play dispatches it only conditionally. Pinned in
+`gameReducer.turns.test.ts` so the two never get merged.
+
+### Admin usage overview (`/api/admin/users`)
+`GET /api/admin/users` returns, per user, `last_active`, `match_count`,
+`training_count`, `usage_count` and `activity` — 30 daily counts, **oldest
+first**. A user owns no matches directly: they own tenants, which own matches and
+training sessions; both are counted, because someone who only trains is still
+using the app.
+
+⚠️ **Two grouped queries, never one per user.** With four accounts an N+1 is
+invisible, but this endpoint renders a table that grows with the user base.
+Buckets are whole UTC days.
+
+Rendering: `ActivitySparkline` (bars scaled to the row's **own** maximum — the
+question is "when was this person active", not "who is most active") and
+`utils/activity.ts` (`relativeTime`, `recencyOf`) for the "last seen" column.
+⚠️ `relativeTime` treats a future timestamp as "just now": client and server
+clocks disagree, and "in 3 days" would be nonsense.
+
+### Who can file what
+| | Bug report | Debug flag |
+|---|---|---|
+| Signed-in user | ✅ create, read own | ❌ 403 |
+| Admin | ✅ read all, set status/notes | ✅ full |
+
+`/api/bug-reports` carries only `authenticateToken`; `/api/debug-flags` adds
+`router.use(requireAdmin)` to **every** endpoint. Bug reporting was always open
+to all users — what was missing was a way to find it, so `BugReportButton` now
+sits beside the admin-only `DebugFlagButton` at the bottom-left of every screen.
+`utils/reporters.ts` builds the admin "filter by user" options from the rows on
+screen, not from the user table.
+
+### Player list ordering (`src/utils/playerOrder.ts`)
+One rule, applied once in `PlayerContext` so every picker inherits it: **real accounts before bots and generated test/guest profiles; within a group, most games played first; name as a stable tiebreak.** The API returns players newest-first, which used to put a throwaway `Guest 417` and every bot above the people who actually use the app. `isGeneratedPlayer` anchors its patterns at the **start** of the name — a player called `Tom "Guest" Weber` is a real person and must not be demoted. The leaderboard applies the tier rule too, but keeps its own metric sort inside each group.
 
 ### Lazy-Loaded Heavy Modules
 These modules used to ship eagerly and were extracted into their own chunks during the Sprint 1 bundle pass. Anyone touching them: keep them lazy.
@@ -283,15 +371,29 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **10 tests** currently:
+- Specs in `e2e/`. **11 tests** currently:
   - `smoke.spec.ts` — load redirect, asset-count regression guard, no-heavy-chunks-eager guard
   - `login-page.spec.ts` — form render, empty-submit validation, version footer
   - `auth.spec.ts` — real login against backend (200 + JWT), wrong password (401)
   - `main-menu.spec.ts` — post-login menu tiles, `/game?new=1` lazy-load smoke
 - Runs against `vite preview` (:4173) **plus** an isolated backend (:3001) with its own SQLite DB at `server/data/e2e-test.db`. Both started by `playwright.config.ts` `webServer[]`.
-- `e2e/global-setup.ts`:
-  1. Rebuilds the frontend with `VITE_API_URL=http://localhost:3001` (the checked-in `.env` points at production, which would let test browsers hit the live API)
-  2. Runs `server/scripts/seed-test-user.ts` — wipes the test DB, creates the verified test user **plus a tenant** (the auth middleware refuses any `/api/*` without one)
+- **⚠️ There is deliberately no `globalSetup`.** Playwright starts `webServer`
+  **before** `globalSetup`, so both pieces of setup work are chained into the
+  `webServer` commands themselves, where the ordering is guaranteed:
+  1. Frontend: `VITE_API_URL=http://localhost:3001 npm run build && npm run preview`
+     — the checked-in `.env` points at production, which would let test browsers
+     hit the live API.
+  2. Backend: `npx ts-node --transpile-only scripts/seed-test-user.ts && node dist/index.js`
+     — the seed wipes the test DB and creates the verified test user **plus a
+     tenant** (the auth middleware refuses any `/api/*` without one).
+- **Do not move either step back into a setup hook.** Both were there and both
+  failed in CI, invisibly, for the same reason. With the build in `globalSetup`,
+  `vite preview` had no `dist/` to serve and the URL probe timed out after 60s.
+  With the seed in `globalSetup`, the backend had **already opened** the database
+  file that the seed then `unlink`s, so it kept reading the deleted inode, never
+  saw the test user, and every login returned `401`. Neither reproduced locally,
+  because a stale `dist/` and a previously-seeded `e2e-test.db` papered over
+  both — delete both before trusting a local green run.
 - Reusable helper: `e2e/helpers/login.ts` — `await login(page)` does the form-submit dance and waits for the 200 response.
 - Workers are pinned to 1 — `vite preview` races under parallel load and the regression guards become flaky. Service workers are blocked (`serviceWorkers: 'block'`); the PWA SW would otherwise intercept requests and skew network assertions.
 - Test fixtures + DB paths centralized in `e2e/fixtures.ts`.
