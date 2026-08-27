@@ -153,6 +153,44 @@ Why: an emoji is a *font*, not artwork. The same glyph is Apple's glossy 3-D on 
 
 Pinned by `src/tests/icons/iconSet.test.tsx`, including a scan that fails if an emoji reappears in rendered code (console logs and doc comments are exempt).
 
+### The checkout table is validated, not spot-checked
+`src/tests/data/checkoutTable.test.ts` walks **every** route in
+`src/data/checkoutTable.ts` and asserts it sums exactly to its score, finishes on
+a double, and fits in three darts. A typo in one of ~162 entries would otherwise
+tell a player to throw at the wrong bed and nothing would catch it.
+
+⚠️ `'25'` (outer bull) is the **single** token outside the `S`/`D`/`T` + `Bull`
+scheme, used once, in the 125 finish. It is standard darts shorthand and the
+strings are only rendered, never parsed — pinned as a known exception so it is
+not "fixed" by accident.
+
+⚠️ The bogey guard in `getCheckoutSuggestion` and the absence of those scores
+from the table are **two independent mechanisms** that agree. Mutating either
+alone changes no behaviour (an equivalent mutation, not a gap in the tests).
+
+### `convertScoreToDarts` has a correctness backstop
+The greedy reconstruction cannot land exactly on every total — `Math.floor(x/3)`
+drops the remainder, and the loop can spend three darts with score left over.
+That returned a short reconstruction for **36 of 172** throwable scores (141 came
+back as 140). Because `CONFIRM_THROW` derives a turn from
+`calculateThrowScore(darts)`, **typing 141 on the numpad deducted 140**.
+
+`decomposeScoreExactly` now substitutes an exact decomposition whenever the
+greedy result does not add up. The other 136 reconstructions are byte-identical,
+so the heatmap distribution is unchanged.
+
+### Bots may bust — that is not a defect
+The "smart bot" check only guards the dart the bot *hits*. A missed dart lands on
+a neighbouring bed with no such check, so roughly one dart in six busts from a
+tight remainder. Real players bust too and the reducer voids the turn. The
+guarantee the tests pin is *"never produces a dart that could not be thrown"*.
+
+### ⚠️ CONFIRM_THROW does not advance the player
+`NEXT_PLAYER` is a separate dispatch. On a checkout, `CONFIRM_THROW` already
+handles the leg/match transition and an extra `NEXT_PLAYER` would skip somebody's
+turn — which is why bot auto-play dispatches it only conditionally. Pinned in
+`gameReducer.turns.test.ts` so the two never get merged.
+
 ### Admin usage overview (`/api/admin/users`)
 `GET /api/admin/users` returns, per user, `last_active`, `match_count`,
 `training_count`, `usage_count` and `activity` — 30 daily counts, **oldest

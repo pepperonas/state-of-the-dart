@@ -46,9 +46,9 @@
 <!-- Qualität -->
 ![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?logo=playwright&logoColor=white)
-![Unit Tests](https://img.shields.io/badge/Unit_Tests-512-brightgreen)
+![Unit Tests](https://img.shields.io/badge/Unit_Tests-692-brightgreen)
 ![E2E Tests](https://img.shields.io/badge/E2E_Tests-11-brightgreen)
-![Coverage](https://img.shields.io/badge/Coverage-22%25_stmts_%7C_69%25_branches-yellow)
+![Coverage](https://img.shields.io/badge/Coverage-24%25_stmts_%7C_75%25_branches-yellow)
 ![ESLint](https://img.shields.io/badge/ESLint-configured-4B32C3?logo=eslint&logoColor=white)
 
 <!-- Inhalt -->
@@ -641,17 +641,19 @@ PWA-Konfiguration in `vite.config.ts`.
 ## 🧪 Testing
 
 ### Unit-Tests (Vitest + React Testing Library)
-**512 Tests** in `src/tests/`, gegliedert nach dem, was sie schützen:
+**692 Tests** in `src/tests/`, gegliedert nach dem, was sie schützen:
 
 | Bereich | Was abgedeckt ist |
 |---|---|
-| `utils/` | Scoring & Bust-Logik, Checkout-Tabelle, Heatmap-Mathematik, Spieler-Sortierung, Game-State-Persistenz (48-h-Regel), Match-Namen, Storage |
-| `context/` | Game-Reducer — Sets/Legs, Spieler-Entfernung, Zug-Reihenfolge |
-| `components/` | M3-Primitive (Contract, nicht Aussehen), `Select` inkl. Tastatur & Portal, ScoreInput-Undo |
+| `data/` | **Checkout-Tabelle als Property-Test**: jede der ~162 Routen muss exakt auf ihren Score summieren, auf einer Doppel enden und in drei Darts passen |
+| `utils/` | X01-Regelwerk (Bust, Checkout, Averages, Score-Rekonstruktion), Bot-Logik, Offline-Queue mit Retry-Politik, Log-Ringpuffer, Theme-Wechsel, Heatmap-Mathematik, Spieler-Sortierung, Game-State-Persistenz (48-h-Regel), Debug-Export |
+| `context/` | Game-Reducer — Zug-Ablauf, Bust, Checkout, Undo, Sets/Legs, Spieler-Entfernung |
+| `components/` | M3-Primitive (Contract, nicht Aussehen), `Select` inkl. Tastatur & Portal, ScoreInput-Undo, Aktivitäts-Sparkline |
 | `icons/` | Pfad-Validität, `currentColor`, echte Löcher, Emoji-Auflösung, **Scan gegen zurückkehrende Emoji** |
+| `server/` | Admin-Allowlist, Nutzungs-Aggregation gegen **echtes SQLite** inkl. N+1-Wächter |
 | `consistency/` | Seitenbreiten, Titel-Ebene, kein natives `<select>`, Spezifitäts-Regeln |
 | `docs/` | **Doku-Abgleich** — Badges, Pfade, Links und Kommandos gegen den echten Code |
-| `legal/`, `server/`, `landing/` | Normverweise, Admin-Allowlist, Landing-Fakten |
+| `legal/`, `landing/` | Normverweise, Landing-Fakten |
 
 ```bash
 npm test              # Watch-Modus
@@ -665,11 +667,12 @@ npm run coverage      # Coverage-Report
 | Bereich | Statements | Warum |
 |---|---:|---|
 | `src/components/icons/` | 99 % | Reine Funktionen + Pfaddaten |
+| `src/data/` | 95 % | Checkout-Tabelle, komplett per Property-Tests validiert |
 | `src/components/common/` | 91 % | Primitive mit Contract-Tests |
-| `src/utils/` | 55 % | Scoring, Heatmap, Storage, Sortierung |
-| `src/context/` | 24 % | Reducer getestet, Provider-Verdrahtung nicht |
-| Screens & Views | 16 % | Bewusst über **E2E** abgedeckt, nicht per Unit-Test |
-| **Gesamt** | **22 %** | |
+| `src/utils/` | 75 % | Scoring, Checkout, Heatmap, Bots, Offline-Queue, Log-Puffer, Theme |
+| `src/context/` | 31 % | Reducer getestet, Provider-Verdrahtung nicht |
+| Screens & Views | 18 % | Bewusst über **E2E** abgedeckt, nicht per Unit-Test |
+| **Gesamt** | **24 %** Statements · **76 %** Branches | |
 
 `vitest.config.ts` setzt Schwellen knapp unter den Ist-Werten — ein Rückschritt lässt CI
 scheitern. Das Badge darf laut Doku-Abgleich **nie mehr** behaupten, als gemessen wurde.

@@ -46,9 +46,9 @@
 <!-- Quality -->
 ![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?logo=playwright&logoColor=white)
-![Unit Tests](https://img.shields.io/badge/Unit_Tests-512-brightgreen)
+![Unit Tests](https://img.shields.io/badge/Unit_Tests-692-brightgreen)
 ![E2E Tests](https://img.shields.io/badge/E2E_Tests-11-brightgreen)
-![Coverage](https://img.shields.io/badge/Coverage-22%25_stmts_%7C_69%25_branches-yellow)
+![Coverage](https://img.shields.io/badge/Coverage-24%25_stmts_%7C_75%25_branches-yellow)
 ![ESLint](https://img.shields.io/badge/ESLint-configured-4B32C3?logo=eslint&logoColor=white)
 
 <!-- Content -->
@@ -248,7 +248,7 @@ admin-only.
 
 | Layer | Count | Tool |
 |---|---|---|
-| Unit / component | **512** | Vitest + React Testing Library |
+| Unit / component | **692** | Vitest + React Testing Library |
 | End-to-end | **11** | Playwright (preview build + isolated backend) |
 
 ```bash
@@ -265,11 +265,25 @@ npm run test:e2e:ui   # Playwright UI
 | Area | Statements | Why |
 |---|---:|---|
 | `src/components/icons/` | 99 % | Pure functions + path data |
+| `src/data/` | 95 % | Checkout table, validated by property tests |
 | `src/components/common/` | 91 % | Primitives with contract tests |
-| `src/utils/` | 55 % | Scoring, heatmap, storage, ordering |
-| `src/context/` | 24 % | Reducers tested, provider wiring not |
-| Screens & views | 16 % | Deliberately covered by **E2E**, not unit tests |
-| **Overall** | **22 %** | |
+| `src/utils/` | 75 % | Scoring, checkout, heatmap, bots, offline queue, log buffer, theme |
+| `src/context/` | 31 % | Reducers tested, provider wiring not |
+| Screens & views | 18 % | Deliberately covered by **E2E**, not unit tests |
+| **Overall** | **24 %** statements · **76 %** branches | |
+
+### What the suite protects
+
+| Area | Covered |
+|---|---|
+| `data/` | **The checkout table as a property test**: every one of ~162 routes must sum exactly to its score, finish on a double, and fit in three darts |
+| `utils/` | The X01 rulebook (bust, checkout, averages, score reconstruction), bot logic, the offline queue's retry policy, the log ring buffer, theme switching, heatmap maths, player ordering, game-state persistence |
+| `context/` | Game reducer — turn flow, bust, checkout, undo, sets/legs, player removal |
+| `components/` | M3 primitives (contract, not appearance), `Select` incl. keyboard & portal, ScoreInput undo, activity sparkline |
+| `icons/` | Path validity, `currentColor`, real holes, emoji resolution, **a scan that fails if an emoji returns** |
+| `server/` | Admin allowlist, usage aggregation against **real SQLite** incl. an N+1 guard |
+| `consistency/` | Page widths, heading level, no native `<select>`, the CSS specificity rules |
+| `docs/` | **Docs sync** — badges, paths, links and commands against the real code |
 
 `vitest.config.ts` sets thresholds just under the current numbers, so a regression fails
 CI. The badge may never claim more than was measured — `docsSync` enforces that.

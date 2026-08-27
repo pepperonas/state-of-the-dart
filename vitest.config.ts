@@ -25,10 +25,10 @@ export default defineConfig({
       // regression fails CI, while the README badge reports the real number —
       // `src/tests/docs/docsSync.test.ts` forbids the badge from overstating it.
       thresholds: {
-        statements: 21,
-        branches: 65,
-        functions: 28,
-        lines: 21,
+        statements: 24,
+        branches: 74,
+        functions: 38,
+        lines: 24,
       },
     },
   },

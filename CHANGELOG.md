@@ -7,6 +7,39 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### 🧪 Test-Ausbau — und ein dabei gefundener Scoring-Bug
+
+#### Behoben
+- ⚠️ **`convertScoreToDarts` gab für 36 von 172 werfbaren Scores zu wenig zurück.**
+  141 kam als 140 heraus, 146 als 140. Da `CONFIRM_THROW` den Wurf aus der
+  Dart-Summe berechnet, **zog das Eintippen von 141 auf dem Numpad nur 140 ab**.
+  Ursache: der Greedy-Aufbau verliert bei `Math.floor(x/3)` den Rest und kann
+  drei Darts verbrauchen, während noch Punkte offen sind. Neu ist ein exakter
+  Zerlegungs-Backstop, der nur einspringt, wenn die Greedy-Variante nicht
+  aufgeht — die übrigen 136 Rekonstruktionen sind byte-identisch.
+
+#### Hinzugefügt
+- **+180 Tests** (512 → 692), Coverage 22 % → **24 %** Statements und
+  69 % → **76 %** Branches. `src/utils/` von 55 % auf **75 %**.
+- **Checkout-Tabelle als Property-Test**: jede der ~162 Routen muss exakt auf
+  ihren Score summieren, auf einer Doppel enden und in drei Darts passen.
+- **X01-Regelwerk** an den Kanten: Bust bei 1, bei Bogey-Zahlen, Double-Out,
+  Bull als Doppel, Averages pro Dart statt pro Aufnahme.
+- **Game-Reducer**: Zug-Ablauf, Dart-Limit, Undo über mehrere Aufnahmen,
+  Bust-Behandlung, Leg- und Match-Abschluss.
+- **Offline-Queue**: Retry-Politik (Aufgabe nach 5 Versuchen), TTL-Cache,
+  Cache-Fallback bei Netzfehler.
+- **Bot-Logik**: Monotonie der Level, gültige Darts über 35 000 Würfe,
+  adaptive Level bleiben in ihrem Fenster.
+- **Log-Ringpuffer**, **Theme-Wechsel**, **Debug-Export**, sowie die
+  **Nutzungs-Aggregation gegen echtes SQLite** samt N+1-Wächter.
+
+#### Geändert
+- `collectUsageByUser` liegt jetzt in `server/src/services/usageStats.ts` —
+  vorher steckte es in `routes/admin.ts` und war nicht testbar.
+- Coverage-Schwellen in `vitest.config.ts` auf die neuen Werte angehoben.
+
+
 ### 📊 Admin: Nutzungs-Übersicht, Bug-Report-Zugang, Filter nach Nutzer
 
 #### Hinzugefügt

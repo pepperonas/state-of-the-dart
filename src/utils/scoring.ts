@@ -400,9 +400,74 @@ export const convertScoreToDarts = (score: number): Dart[] => {
     const coords = generateDartCoordinates(0, 0);
     darts.push({ segment: 0, multiplier: 0, score: 0, bed: 'miss', ...coords });
   }
-  
+
+  // ⚠️ Correctness backstop.
+  //
+  // The greedy fill above cannot land exactly on every total: `Math.floor(x / 3)`
+  // drops the remainder, and the loop can spend all three darts with score still
+  // left. That silently returned a short reconstruction for 36 of the 172
+  // throwable scores — 141 came back as 140, 146 as 140. Because the reducer
+  // derives a turn from `calculateThrowScore(darts)`, typing 141 on the numpad
+  // actually deducted 140 from the player's remaining score.
+  //
+  // Rather than unpick the greedy chain (which produces good, realistic darts for
+  // the other 136 scores), an exact decomposition is substituted only when the
+  // greedy result does not add up.
+  const greedyTotal = darts.reduce((sum, d) => sum + d.score, 0);
+  if (greedyTotal !== score) {
+    const exact = decomposeScoreExactly(score);
+    if (exact) return exact;
+  }
+
   return darts;
 };
+
+/**
+ * Finds up to three real darts that sum to `score` exactly, or null if the score
+ * is not throwable at all (179, 178, 176, …).
+ *
+ * Searches highest-value darts first, so the result reads like something a
+ * player would actually throw (T20 before S1) rather than an arbitrary triple.
+ */
+function decomposeScoreExactly(score: number): Dart[] | null {
+  if (score === 0) {
+    return [{ segment: 0, multiplier: 0, score: 0, bed: 'miss', ...generateDartCoordinates(0, 0) }];
+  }
+
+  type Option = { segment: number; multiplier: 1 | 2 | 3; score: number; bed: Dart['bed'] };
+  const options: Option[] = [];
+  for (let seg = 20; seg >= 1; seg--) {
+    options.push({ segment: seg, multiplier: 3, score: seg * 3, bed: 'triple' });
+    options.push({ segment: seg, multiplier: 2, score: seg * 2, bed: 'double' });
+    options.push({ segment: seg, multiplier: 1, score: seg, bed: 'single' });
+  }
+  options.push({ segment: 25, multiplier: 2, score: 50, bed: 'double' });
+  options.push({ segment: 25, multiplier: 1, score: 25, bed: 'single' });
+  options.sort((a, b) => b.score - a.score);
+
+  const make = (o: Option): Dart =>
+    ({ ...o, ...generateDartCoordinates(o.segment, o.multiplier) }) as Dart;
+
+  for (const a of options) {
+    if (a.score === score) return [make(a)];
+  }
+  for (const a of options) {
+    if (a.score >= score) continue;
+    for (const b of options) {
+      if (a.score + b.score === score) return [make(a), make(b)];
+    }
+  }
+  for (const a of options) {
+    if (a.score >= score) continue;
+    for (const b of options) {
+      if (a.score + b.score >= score) continue;
+      for (const c of options) {
+        if (a.score + b.score + c.score === score) return [make(a), make(b), make(c)];
+      }
+    }
+  }
+  return null;
+}
 
 export const getBogeyNumbers = (): number[] => {
   return [169, 168, 166, 165, 163, 162, 159];
