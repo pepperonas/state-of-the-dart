@@ -11,7 +11,7 @@
 <!-- Links -->
 [![Live Demo](https://img.shields.io/badge/Live_Demo-stateofthedart.com-22c55e?style=for-the-badge&logo=googlechrome&logoColor=white)](https://stateofthedart.com)
 [![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-a855f7?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://stateofthedart.celox.io)
-[![Version](https://img.shields.io/badge/Version-0.9.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-0.9.1-3b82f6?style=for-the-badge)](CHANGELOG.md)
 
 <!-- Build & Repo (live) -->
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
@@ -796,7 +796,7 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 
 ## 📝 Changelog
 
-### v0.9.0 (28. August 2026) - Material 3 Expressive, eigenes Icon-Set & Scoring-Fix
+### v0.9.1 (28. August 2026) - Material 3 Expressive, eigenes Icon-Set & Scoring-Fix
 
 **⚠️ Behoben — Scoring:** `convertScoreToDarts` lieferte für **36 von 172** werfbaren Scores zu wenig zurück (141 kam als 140 heraus). Da der Reducer den Wurf aus der Dart-Summe berechnet, zog das Eintippen von 141 auf dem Numpad nur 140 ab. Neu ist ein exakter Zerlegungs-Backstop; die übrigen 136 Rekonstruktionen sind unverändert.
 

@@ -238,14 +238,36 @@ describe('generateBotTurn', () => {
   });
 
   it('stops at a checkout rather than throwing on', () => {
-    for (let i = 0; i < 200; i++) {
+    // ⚠️ The invariant is NOT "any zero ends the turn". In X01, reaching exactly
+    // zero on a single is a BUST, not a checkout — only a double finishes. So the
+    // real rule is: once the bot lands on zero *with a double*, it must not throw
+    // again. An earlier version of this test asserted the looser claim and passed
+    // only by luck of the RNG.
+    for (let i = 0; i < 400; i++) {
       const darts = generateBotTurn(10, 40);
-      const running: number[] = [];
       let left = 40;
-      for (const d of darts) { left -= d.score; running.push(left); }
-      // If it ever reached exactly zero, that must be the last dart.
-      const zeroAt = running.indexOf(0);
-      if (zeroAt !== -1) expect(zeroAt).toBe(running.length - 1);
+      for (let d = 0; d < darts.length; d++) {
+        left -= darts[d].score;
+        if (left === 0 && darts[d].multiplier === 2) {
+          expect(d, 'checked out on a double but kept throwing').toBe(darts.length - 1);
+        }
+      }
+    }
+  });
+
+  it('never throws on after the score has gone below zero', () => {
+    // A dart that takes the score negative is a bust; the turn ends there.
+    for (let level = 1; level <= 10; level++) {
+      for (let i = 0; i < 60; i++) {
+        const darts = generateBotTurn(level, 40);
+        let left = 40;
+        for (let d = 0; d < darts.length; d++) {
+          left -= darts[d].score;
+          if (left < 0) {
+            expect(d, `level ${level}: threw on after a bust`).toBe(darts.length - 1);
+          }
+        }
+      }
     }
   });
 

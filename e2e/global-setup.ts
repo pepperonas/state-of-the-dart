@@ -7,24 +7,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 
 /**
- * Playwright globalSetup:
- *  1. Rebuild the frontend pointing VITE_API_URL at the test backend.
- *     The repo's checked-in .env points at production, which would make
- *     test browsers hit the live API.
- *  2. Wipe + seed the isolated E2E SQLite database with our test user.
+ * Playwright globalSetup: wipe and seed the isolated E2E SQLite database.
+ *
+ * ⚠️ The frontend build used to happen here, but Playwright starts `webServer`
+ * BEFORE globalSetup — so `vite preview` came up with no `dist/` to serve and
+ * timed out in any clean checkout (i.e. every CI run). The build now lives in
+ * the `webServer` command in `playwright.config.ts`, where the ordering is
+ * guaranteed.
  */
 export default async function globalSetup() {
-  // 1. Rebuild frontend with test API URL
-  execFileSync('npm', ['run', 'build'], {
-    cwd: ROOT,
-    env: {
-      ...process.env,
-      VITE_API_URL: `http://localhost:${BACKEND_PORT}`,
-    },
-    stdio: 'inherit',
-  });
-
-  // 2. Seed test DB
   execFileSync(
     'npx',
     ['ts-node', '--transpile-only', path.join('scripts', 'seed-test-user.ts')],

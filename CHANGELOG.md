@@ -7,6 +7,23 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-08-28
+
+### Fixed
+
+- **E2E suite could never pass in CI.** Playwright starts `webServer` *before*
+  `globalSetup`, but the frontend build lived in `globalSetup` — so `vite preview`
+  came up with no `dist/` to serve and the URL probe timed out after 60s on every
+  clean checkout. The build moved into the `webServer` command, where the ordering
+  is guaranteed. It only ever looked healthy locally because a stale `dist/` was
+  present; reproduced by deleting `dist/` and confirmed fixed (11/11 passing).
+- Unit-test CI job installed root dependencies only, so the admin usage-stats
+  suite could not resolve the backend's `better-sqlite3`. The workflow now
+  installs `server/` dependencies too.
+- Documentation link check no longer reports generated paths (`server/data/`,
+  `dist/`, `coverage/`, `node_modules/`) as dangling — they are legitimately
+  named in the docs but absent from a clean checkout, which is exactly what CI is.
+
 ## [0.9.0] - 2026-08-28
 
 ### 🧪 Test-Ausbau — und ein dabei gefundener Scoring-Bug

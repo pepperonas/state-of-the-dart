@@ -46,11 +46,21 @@ export default defineConfig({
 
   webServer: [
     {
-      // Frontend preview
-      command: 'npm run preview',
+      // Frontend preview.
+      //
+      // ⚠️ The build belongs HERE, not in `globalSetup`: Playwright starts
+      // `webServer` *before* the setup hook, so in a clean checkout `vite
+      // preview` came up with no `dist/` to serve and the URL probe timed out
+      // after 60s. It only ever looked healthy locally because a stale `dist/`
+      // happened to be present.
+      //
+      // VITE_API_URL must point at the E2E backend — the checked-in `.env`
+      // points at production, which would send test browsers at the live API.
+      command: `VITE_API_URL=http://localhost:${BACKEND_PORT} npm run build && npm run preview`,
       url: `http://localhost:${FRONTEND_PORT}`,
       reuseExistingServer: !process.env.CI,
-      timeout: 60_000,
+      // Generous: this now includes a full production build (~70s and growing).
+      timeout: 240_000,
     },
     {
       // Isolated backend pointing at the test DB seeded in globalSetup
