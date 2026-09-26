@@ -89,7 +89,7 @@ const MainMenu: React.FC = () => {
         { title: t('menu.shanghai'), icon: Target, description: t('menu.shanghai_desc'), onClick: () => navigate('/shanghai'), tone: 'tertiary' },
         { title: t('menu.training'), icon: Dumbbell, description: t('menu.training_desc'), onClick: () => navigate('/training'), tone: 'success' },
         { title: t('menu.tournaments'), icon: Trophy, description: t('menu.tournaments_desc'), onClick: () => navigate('/tournament'), tone: 'secondary' },
-        { title: t('menu.online_multiplayer'), icon: Target, description: t('menu.online_multiplayer_desc'), onClick: () => navigate('/online'), tone: 'tertiary', beta: true },
+        { title: t('menu.online_multiplayer'), icon: Target, description: t('menu.online_multiplayer_desc'), onClick: () => navigate('/online'), tone: 'tertiary' },
       ],
     },
     {

@@ -110,3 +110,99 @@ describe('chat', () => {
     expect(cleanChatMessage('x'.repeat(2000))).toHaveLength(500);
   });
 });
+
+import { markDisconnected, reconnectPlayer, restartMatch, sanitizeClientId, playerForSocket } from '../../../server/src/socket/rooms';
+
+describe('stable identity and reconnecting (0.17.0)', () => {
+  /** Seats are keyed by a client id, not the socket: a phone that locks its screen gets a new socket. */
+  const seated = (): GameRoom => {
+    const room = playing(['alice', 'bob'], 0, 301);
+    room.players = room.players.map(pl => ({ ...pl, socketId: `sock-${pl.id}` }));
+    return room;
+  };
+
+  it('scores and turns follow the player id, whatever the socket', () => {
+    const room = seated();
+    expect(applyThrow(room, 'alice', { score: 100 }).kind).toBe('scored');
+    expect(room.gameState!.scores.alice).toBe(201);
+    expect(playerForSocket(room, 'sock-bob')?.id).toBe('bob');
+    expect(playerForSocket(room, 'nobody')).toBeUndefined();
+  });
+
+  it('a disconnect during a game keeps the seat; reconnecting rebinds the new socket', () => {
+    const room = seated();
+    applyThrow(room, 'alice', { score: 100 });
+    expect(markDisconnected(room, 'bob')).toBe(true); // game running: hold the seat
+    expect(room.players.find(pl => pl.id === 'bob')!.connected).toBe(false);
+    expect(room.gameState!.scores.bob).toBe(301);
+    expect(reconnectPlayer(room, 'bob', 'sock-new')).toBe(true);
+    const bob = room.players.find(pl => pl.id === 'bob')!;
+    expect(bob.connected).toBe(true);
+    expect(bob.socketId).toBe('sock-new');
+    expect(applyThrow(room, 'bob', { score: 60 }).kind).toBe('scored');
+  });
+
+  it('a disconnect while waiting in the lobby does not hold a seat', () => {
+    const room = seated();
+    room.status = 'waiting';
+    expect(markDisconnected(room, 'bob')).toBe(false);
+  });
+
+  it('reconnecting a player who is not in the room does nothing', () => {
+    expect(reconnectPlayer(seated(), 'mallory', 'sock-x')).toBe(false);
+  });
+
+  it('a rematch resets scores and legs and moves the throw-off on', () => {
+    const room = seated();
+    applyThrow(room, 'alice', { score: 180 });
+    applyThrow(room, 'bob', { score: 60 });
+    applyThrow(room, 'alice', { score: 121, darts: [{ multiplier: 1 }, { multiplier: 1 }, { multiplier: 2 }] });
+    applyThrow(room, 'bob', { score: 60 });
+    room.status = 'finished';
+    expect(restartMatch(room)).toBe(true);
+    expect(room.status).toBe('playing');
+    expect(room.gameState!.scores).toEqual({ alice: 301, bob: 301 });
+    expect(room.gameState!.legs).toEqual({ alice: 0, bob: 0 });
+    expect(room.players[room.gameState!.currentPlayerIndex].id).toBe('bob');
+    room.status = 'finished';
+    restartMatch(room);
+    expect(room.players[room.gameState!.currentPlayerIndex].id).toBe('alice');
+  });
+
+  it('no rematch while a game runs or with fewer than two connected players', () => {
+    const room = seated();
+    expect(restartMatch(room)).toBe(false);
+    room.status = 'finished';
+    room.players[1].connected = false;
+    expect(restartMatch(room)).toBe(false);
+  });
+
+  it('accepts only sane client ids', () => {
+    expect(sanitizeClientId('c-1a2b3c4d-5e6f')).toBe('c-1a2b3c4d-5e6f');
+    expect(sanitizeClientId('short')).toBeNull();
+    expect(sanitizeClientId('x'.repeat(65))).toBeNull();
+    expect(sanitizeClientId('bad id with spaces!')).toBeNull();
+    expect(sanitizeClientId(42)).toBeNull();
+  });
+});
+
+describe('throw-off alternates per leg', () => {
+  it('the next leg starts with the next player in turn, not whoever follows the winner', () => {
+    const room = playing(['a', 'b'], 0, 301); // a throws first in leg 1
+    applyThrow(room, 'a', { score: 100 });
+    applyThrow(room, 'b', { score: 180 });
+    applyThrow(room, 'a', { score: 100 });
+    // b (not the starter) wins leg 1
+    expect(applyThrow(room, 'b', { score: 121, darts: [{ multiplier: 3 }, { multiplier: 1 }, { multiplier: 2 }] }).kind).toBe('leg');
+    // leg 2: b throws first — the old code gave it back to a (who follows b)
+    expect(room.players[room.gameState!.currentPlayerIndex].id).toBe('b');
+  });
+
+  it('when the starter wins, the other player starts the next leg', () => {
+    const room = playing(['a', 'b'], 0, 301);
+    applyThrow(room, 'a', { score: 180 });
+    applyThrow(room, 'b', { score: 60 });
+    applyThrow(room, 'a', { score: 121, darts: [{ multiplier: 1 }, { multiplier: 1 }, { multiplier: 2 }] });
+    expect(room.players[room.gameState!.currentPlayerIndex].id).toBe('b');
+  });
+});
