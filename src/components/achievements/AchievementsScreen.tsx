@@ -1,3 +1,4 @@
+import { shapePolygon, TIER_SHAPE } from '../../utils/shapes';
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -289,16 +290,22 @@ const AchievementCard = React.memo<AchievementCardProps>(({ achievement, unlocke
       variant={unlocked ? 'elevated' : 'filled'}
       // Locked cards are not dimmed as a whole — that pushed the description
       // below AA (3.99:1 in the light theme). Only the icon goes grey.
-      className={`p-4 transition-all hover:scale-105 ${
+      className={`p-4 transition hover:scale-105 ${
         unlocked ? 'border-2 border-primary' : ''
       }`}
     >
       <div className="flex items-start gap-3 mb-3">
+        {/* The outline tells the tier at a glance (circle → cookie → sunny →
+            clover → gem); computed M3 Expressive shapes, utils/shapes.ts. */}
         <div
-          className={`text-4xl flex-shrink-0 ${unlocked ? '' : 'grayscale opacity-50'}`}
+          className={`w-12 h-12 flex-shrink-0 flex items-center justify-center ${
+            unlocked ? 'bg-secondary-container text-on-secondary-container' : 'bg-[color-mix(in_srgb,var(--m3-on-surface)_12%,transparent)] text-on-surface-variant'
+          }`}
+          style={{ clipPath: shapePolygon(TIER_SHAPE[achievement.tier]) }}
           title={achievement.tier}
+          data-shape={TIER_SHAPE[achievement.tier]}
         >
-          <Icon name={isHidden ? 'question' : iconForEmoji(achievement.icon)} size={30} />
+          <Icon name={isHidden ? 'question' : iconForEmoji(achievement.icon)} size={26} />
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="m3-title-medium text-on-surface flex items-center gap-2 truncate">

@@ -173,7 +173,7 @@ const GlobalLeaderboard: React.FC = () => {
                   <motion.div
                     key={entry.playerId}
                     {...staggerChild(Math.min(index, 12))}
-                    className={`flex items-center gap-4 p-4 rounded-m3-md transition-all ${
+                    className={`flex items-center gap-4 p-4 rounded-m3-md transition ${
                       entry.rank <= 3
                         ? 'bg-primary-container text-on-primary-container border border-outline-variant'
                         : 'bg-surface-container hover:bg-surface-container-high'

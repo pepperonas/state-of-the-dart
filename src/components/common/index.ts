@@ -23,3 +23,5 @@ export { default as TextArea } from './TextArea';
 export { FeedbackProvider } from './Feedback';
 export { useFeedback } from './feedbackContext';
 export type { ConfirmOptions } from './feedbackContext';
+export { default as Menu } from './Menu';
+export type { MenuItem } from './Menu';

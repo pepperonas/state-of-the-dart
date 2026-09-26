@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import fs from 'fs';
 import path from 'path';
+import { scanNestedElevation } from './scanNestedElevation';
 
 const ROOT = path.resolve(__dirname, '../../components');
 
@@ -262,5 +263,21 @@ describe('page consistency', () => {
     const api = fs.readFileSync(path.resolve(__dirname, '../../services/api.ts'), 'utf8');
     expect(api).not.toContain('make-admin');
     expect(api).not.toMatch(/makeAdmin|removeAdmin/);
+  });
+
+  it('no transition-all: it animates layout properties and ignores the motion tokens', () => {
+    const offenders = ALL_FILES.filter(([, src]) => /\btransition-all\b/.test(stripComments(src))).map(([rel]) => rel);
+    expect(offenders).toEqual([]);
+  });
+
+  it('nested surfaces are separated by tone, not by stacked shadows', () => {
+    const offenders = FILES.flatMap(([rel, src]) => scanNestedElevation(src).map(l => `${rel}:${l}`));
+    expect(offenders, 'elevated card inside an elevated card — use variant="filled" or "outlined" inside').toEqual([]);
+  });
+
+  it('the nested-elevation scanner catches both card forms (cross-check)', () => {
+    expect(scanNestedElevation('const X = () => <Card><Card>x</Card></Card>;')).toHaveLength(1);
+    expect(scanNestedElevation('const X = () => <div className="m3-card m3-elevated"><div className="m3-card m3-elevated" /></div>;')).toHaveLength(1);
+    expect(scanNestedElevation('const X = () => <Card><Card variant="filled">x</Card></Card>;')).toHaveLength(0);
   });
 });

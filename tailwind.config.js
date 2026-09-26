@@ -7,6 +7,15 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      // Plain `transition` runs on the M3 motion tokens (it used Tailwind's
+      // 150 ms ease). `transition-all` is banned by a consistency test.
+      transitionDuration: { DEFAULT: 'var(--m3-duration-short)' },
+      transitionTimingFunction: { DEFAULT: 'var(--m3-easing-standard)' },
+      screens: {
+        // A phone on its side: wide but very short. `lg` alone would give it the
+        // desktop layout, which needs ~800px of height.
+        phoneland: { raw: '(orientation: landscape) and (max-height: 500px)' },
+      },
       colors: {
         // Modern Minimalist Color Palette
         primary: {

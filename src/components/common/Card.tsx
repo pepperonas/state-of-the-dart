@@ -34,6 +34,8 @@ const Card: React.FC<CardProps> = ({
     'm3-card',
     `m3-${variant}`,
     interactive ? 'm3-interactive m3-state-layer' : '',
+    // Selected cards (pickers) carry the app's selection mark themselves.
+    selected ? 'ring-2 ring-[var(--m3-primary)]' : '',
     className,
   ]
     .filter(Boolean)

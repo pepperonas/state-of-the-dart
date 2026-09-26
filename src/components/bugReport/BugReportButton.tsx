@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Bug } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
+import Fab from '../common/Fab';
 import BugReportModal from './BugReportModal';
 
 /**
@@ -24,14 +25,14 @@ const BugReportButton: React.FC = () => {
 
   return (
     <>
-      <button
+      <Fab
+        size="sm"
+        color="secondary"
+        icon={<Bug size={18} />}
+        ariaLabel={t('bug_button.label')}
         onClick={() => setOpen(true)}
-        className="fixed bottom-24 left-4 md:bottom-4 md:left-24 z-30 w-12 h-12 rounded-m3-full bg-secondary-container text-on-secondary-container shadow-m3-3 hover:shadow-m3-4 flex items-center justify-center transition-all m3-enter-pop m3-ripple m3-state-layer"
-        title={t('bug_button.label')}
-        aria-label={t('bug_button.label')}
-      >
-        <Bug size={18} />
-      </button>
+        className="fixed bottom-24 left-4 md:bottom-4 md:left-24 z-30 m3-enter-pop"
+      />
       {open && (
         <BugReportModal
           onClose={() => setOpen(false)}

@@ -86,7 +86,7 @@ const TrainingMenu: React.FC = () => {
               return (
                 <motion.div key={mode.title} {...staggerChild(index)}>
                   <Card
-                    variant="elevated"
+                    variant="filled"
                     interactive
                     onClick={() => navigate(`/training/${mode.mode}`)}
                     className="p-6 cursor-pointer"

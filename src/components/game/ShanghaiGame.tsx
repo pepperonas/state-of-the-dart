@@ -393,7 +393,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
                     <button
                       key={num}
                       onClick={() => setStartNumber(num)}
-                      className={`flex-1 py-2 rounded-m3-md font-medium transition-all ${
+                      className={`flex-1 py-2 rounded-m3-md font-medium transition ${
                         startNumber === num
                           ? 'bg-surface-container-high text-on-surface ring-2 ring-[var(--m3-primary)]'
                           : 'bg-surface-container border border-outline-variant text-on-surface-variant hover:bg-surface-container-high'
@@ -412,7 +412,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
                     <button
                       key={num}
                       onClick={() => setRounds(num)}
-                      className={`flex-1 py-2 rounded-m3-md font-medium transition-all ${
+                      className={`flex-1 py-2 rounded-m3-md font-medium transition ${
                         rounds === num
                           ? 'bg-surface-container-high text-on-surface ring-2 ring-[var(--m3-primary)]'
                           : 'bg-surface-container border border-outline-variant text-on-surface-variant hover:bg-surface-container-high'
@@ -442,7 +442,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
                         setSelectedPlayers(prev => [...prev, player]);
                       }
                     }}
-                    className={`p-3 rounded-m3-md border transition-all ${
+                    className={`p-3 rounded-m3-md border transition ${
                       selectedPlayers.find(p => p.id === player.id)
                         ? 'border-[var(--m3-primary)] bg-primary-container shadow-m3-1'
                         : 'border-outline-variant hover:border-outline'
@@ -572,7 +572,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
               return (
                 <div
                   key={player.id}
-                  className={`flex items-center gap-3 p-3 rounded-m3-lg transition-all ${
+                  className={`flex items-center gap-3 p-3 rounded-m3-lg transition ${
                     isActive ? 'bg-surface-container-high ring-2 ring-[var(--m3-primary)]' : 'bg-surface-container'
                   }`}
                 >

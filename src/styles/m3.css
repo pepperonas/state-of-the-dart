@@ -429,6 +429,9 @@ button.m3-chip {
 .m3-fab:hover { box-shadow: var(--m3-elevation-4); }
 .m3-fab.m3-fab-lg { height: 6rem; min-width: 6rem; border-radius: var(--m3-shape-xl); }
 .m3-fab.m3-primary { background-color: var(--m3-primary-container); color: var(--m3-on-primary-container); }
+.m3-fab.m3-secondary { background-color: var(--m3-secondary-container); color: var(--m3-on-secondary-container); }
+/* M3 small FAB: 40px, medium corner. The touch target stays 48px (see 7e2). */
+.m3-fab.m3-fab-sm { height: 2.5rem; min-width: 2.5rem; padding: 0; border-radius: var(--m3-shape-md); gap: 0; }
 
 /* ---- 7d. CARD ------------------------------------------------------------ */
 .m3-card {
@@ -629,7 +632,8 @@ button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surfa
    it the containing block. */
 .m3-icon-button::after,
 .m3-chip::after,
-.m3-button::after {
+.m3-button::after,
+.m3-fab::after {
   content: '';
   position: absolute;
   top: min(0px, calc((100% - 48px) / 2));
@@ -754,6 +758,7 @@ button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surfa
 .modern-light button.m3-icon-button.m3-tonal  { background-color: var(--m3-secondary-container); }
 .modern-light button.m3-fab                   { background-color: var(--m3-tertiary-container); }
 .modern-light button.m3-fab.m3-primary        { background-color: var(--m3-primary-container); }
+.modern-light button.m3-fab.m3-secondary      { background-color: var(--m3-secondary-container); }
 .modern-light button.m3-chip.m3-selected      { background-color: var(--m3-secondary-container); }
 
 /* ---- 7i. ELEVATION utility classes -------------------------------------- */

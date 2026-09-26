@@ -340,7 +340,7 @@ const AchievementNotification: React.FC = () => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             onClick={dismissAllNotifications}
-            className="self-end px-3 py-1.5 rounded-m3-full text-xs font-bold tracking-wide text-on-surface-variant hover:text-on-surface bg-surface-container-high hover:bg-surface-container-highest backdrop-blur-sm border border-outline-variant transition-all"
+            className="self-end px-3 py-1.5 rounded-m3-full text-xs font-bold tracking-wide text-on-surface-variant hover:text-on-surface bg-surface-container-high hover:bg-surface-container-highest backdrop-blur-sm border border-outline-variant transition"
           >
             {t('achievement_toast.close_all', { count: allNotifications.length })}
           </motion.button>

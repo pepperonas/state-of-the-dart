@@ -1371,7 +1371,8 @@
     "win_stats": "Sieg-Statistik",
     "wins": "Siege",
     "won": "Gewonnen",
-    "yearly": "Jährlich"
+    "yearly": "Jährlich",
+    "export_failed": "Export fehlgeschlagen."
   },
   "throw_chart": {
     "scored_per_visit": "Geworfene Punkte pro Aufnahme",

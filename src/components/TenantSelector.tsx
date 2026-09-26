@@ -90,7 +90,7 @@ const TenantSelector: React.FC = () => {
               >
                 <button
                   onClick={() => setCurrentTenant(tenant)}
-                  className="w-full flex items-center gap-5 p-5 bg-surface-container hover:bg-surface-container-high rounded-m3-lg transition-all border border-outline-variant hover:border-[var(--m3-primary)] shadow-m3-1"
+                  className="w-full flex items-center gap-5 p-5 bg-surface-container hover:bg-surface-container-high rounded-m3-lg transition border border-outline-variant hover:border-[var(--m3-primary)] shadow-m3-1"
                 >
                   <div className="w-20 h-20 bg-primary-container rounded-m3-full flex items-center justify-center text-4xl shadow-m3-1">
                     <Icon name={iconForEmoji(tenant.avatar)} size={26} />
@@ -110,7 +110,7 @@ const TenantSelector: React.FC = () => {
                     e.stopPropagation();
                     setShowDeleteConfirm(tenant.id);
                   }}
-                  className="absolute top-3 right-3 p-2.5 bg-error-container hover:opacity-90 rounded-m3-md opacity-0 group-hover:opacity-100 transition-all"
+                  className="absolute top-3 right-3 p-2.5 bg-error-container hover:opacity-90 rounded-m3-md opacity-0 group-hover:opacity-100 transition"
                   title={t('tenant_selector.delete_profile')}
                   aria-label={t('tenant_selector.delete_profile')}
                 >
@@ -140,13 +140,13 @@ const TenantSelector: React.FC = () => {
                         <div className="flex gap-3 justify-center">
                           <button
                             onClick={() => handleDeleteTenant(tenant.id)}
-                            className="px-6 py-2.5 bg-error hover:opacity-90 text-on-error rounded-m3-full font-semibold transition-all shadow-m3-1"
+                            className="px-6 py-2.5 bg-error hover:opacity-90 text-on-error rounded-m3-full font-semibold transition shadow-m3-1"
                           >
                             {t('common.delete')}
                           </button>
                           <button
                             onClick={() => setShowDeleteConfirm(null)}
-                            className="px-6 py-2.5 bg-surface-container-high hover:bg-surface-container-highest text-on-surface rounded-m3-full font-semibold transition-all"
+                            className="px-6 py-2.5 bg-surface-container-high hover:bg-surface-container-highest text-on-surface rounded-m3-full font-semibold transition"
                           >
                             {t('common.cancel')}
                           </button>
@@ -165,7 +165,7 @@ const TenantSelector: React.FC = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setShowNewTenant(true)}
-            className="w-full py-5 bg-primary hover:opacity-90 text-on-primary rounded-m3-full font-bold text-lg flex items-center justify-center gap-3 transition-all shadow-m3-1"
+            className="w-full py-5 bg-primary hover:opacity-90 text-on-primary rounded-m3-full font-bold text-lg flex items-center justify-center gap-3 transition shadow-m3-1"
           >
             <Plus size={28} />
             {t('tenant_selector.create_new')}
@@ -186,7 +186,7 @@ const TenantSelector: React.FC = () => {
                   setNewTenantAvatar('user');
                 }}
                 aria-label={t('common.close')}
-                className="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-m3-md transition-all"
+                className="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-m3-md transition"
               >
                 <X size={22} />
               </button>
@@ -203,7 +203,7 @@ const TenantSelector: React.FC = () => {
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setNewTenantAvatar(avatar)}
-                    className={`p-4 text-3xl rounded-m3-md transition-all ${
+                    className={`p-4 text-3xl rounded-m3-md transition ${
                       newTenantAvatar === avatar
                         ? 'bg-primary-container shadow-m3-1 ring-2 ring-[var(--m3-primary)]'
                         : 'bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant'
@@ -227,7 +227,7 @@ const TenantSelector: React.FC = () => {
                   if (e.key === 'Enter') handleAddTenant();
                 }}
                 placeholder={t('tenant_selector.name_placeholder')}
-                className="w-full px-4 py-3 bg-surface-container-high border border-outline rounded-m3-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-[var(--m3-primary)] transition-all"
+                className="w-full px-4 py-3 bg-surface-container-high border border-outline rounded-m3-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-[var(--m3-primary)] transition"
                 autoFocus
               />
             </div>
@@ -237,7 +237,7 @@ const TenantSelector: React.FC = () => {
               whileTap={{ scale: 0.98 }}
               onClick={handleAddTenant}
               disabled={!newTenantName.trim()}
-              className="w-full py-4 bg-success hover:opacity-90 disabled:bg-surface-container-high disabled:text-on-surface-variant disabled:cursor-not-allowed text-on-success rounded-m3-full font-bold text-lg transition-all shadow-m3-1 disabled:shadow-none"
+              className="w-full py-4 bg-success hover:opacity-90 disabled:bg-surface-container-high disabled:text-on-surface-variant disabled:cursor-not-allowed text-on-success rounded-m3-full font-bold text-lg transition shadow-m3-1 disabled:shadow-none"
             >
               {t('tenant_selector.create')}
             </motion.button>

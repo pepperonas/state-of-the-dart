@@ -212,7 +212,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 {/* Modern Theme */}
                 <button
                   onClick={(e) => revealTheme('modern', e, () => updateSettings({ theme: 'modern' }))}
-                  className={`w-full p-4 rounded-m3-lg border-2 transition-all ${
+                  className={`w-full p-4 rounded-m3-lg border-2 transition ${
                     settings.theme === 'modern'
                       ? 'border-primary bg-primary-container'
                       : 'border-outline-variant bg-surface-container hover:border-outline'
@@ -237,7 +237,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 {/* Modern Light Theme */}
                 <button
                   onClick={(e) => revealTheme('modern-light', e, () => updateSettings({ theme: 'modern-light' }))}
-                  className={`w-full p-4 rounded-m3-lg border-2 transition-all ${
+                  className={`w-full p-4 rounded-m3-lg border-2 transition ${
                     settings.theme === 'modern-light'
                       ? 'border-primary bg-primary-container'
                       : 'border-outline-variant bg-surface-container hover:border-outline'

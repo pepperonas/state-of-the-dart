@@ -229,7 +229,7 @@ const Leaderboard: React.FC = () => {
                     key={player.id}
                     {...staggerChild(Math.min(index, 12))}
                     onClick={() => navigate(`/players/${player.id}`)}
-                    className={`w-full text-left flex items-center justify-between p-4 border-2 rounded-m3-lg transition-all cursor-pointer hover:scale-[1.02] ${getRankColor(
+                    className={`w-full text-left flex items-center justify-between p-4 border-2 rounded-m3-lg transition cursor-pointer hover:scale-[1.02] ${getRankColor(
                       rank
                     )}`}
                   >
