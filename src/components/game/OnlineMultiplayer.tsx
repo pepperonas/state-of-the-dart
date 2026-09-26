@@ -74,10 +74,10 @@ const OnlineMultiplayer: React.FC = () => {
   // update, and each change used to close and reopen the socket — a new
   // socket.id, so the server dropped us from our room.
   const mainPlayer = players.find(p => !p.isBot);
-  const joinInfoRef = useRef({ name: 'Guest', playerId: undefined as string | undefined });
+  const joinInfoRef = useRef({ name: t('online_game.guest'), playerId: undefined as string | undefined });
   useEffect(() => {
-    joinInfoRef.current = { name: mainPlayer?.name || user?.email || 'Guest', playerId: mainPlayer?.id };
-  }, [mainPlayer?.name, mainPlayer?.id, user?.email]);
+    joinInfoRef.current = { name: mainPlayer?.name || user?.email || t('online_game.guest'), playerId: mainPlayer?.id };
+  }, [mainPlayer?.name, mainPlayer?.id, user?.email, t]);
 
   // Connect to socket
   useEffect(() => {
@@ -203,15 +203,15 @@ const OnlineMultiplayer: React.FC = () => {
         <div className="max-w-4xl mx-auto m3-view">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <BackButton onClick={handleLeaveRoom} label="Raum verlassen" inline />
+            <BackButton onClick={handleLeaveRoom} label={t('online_game.leave_room')} inline />
             <div className="flex items-center gap-2">
               {connected ? (
                 <span className="flex items-center gap-1 px-3 py-1.5 rounded-m3-full bg-success-container text-on-success-container m3-label-large">
-                  <Wifi size={16} /> Online
+                  <Wifi size={16} /> {t('online_game.online')}
                 </span>
               ) : (
                 <span className="flex items-center gap-1 px-3 py-1.5 rounded-m3-full bg-error-container text-on-error-container m3-label-large">
-                  <WifiOff size={16} /> Offline
+                  <WifiOff size={16} /> {t('online_game.offline')}
                 </span>
               )}
             </div>
@@ -226,13 +226,13 @@ const OnlineMultiplayer: React.FC = () => {
                   {currentRoom.name}
                 </h1>
                 <p className="text-on-surface-variant">
-                  {currentRoom.settings.startScore} • Best of {currentRoom.settings.legsToWin * 2 - 1}
+                  {t('online_game.room_settings', { score: currentRoom.settings.startScore, count: currentRoom.settings.legsToWin * 2 - 1 })}
                 </p>
                 {currentRoom.settings.isPrivate && (
                   <div className="mt-2 flex items-center gap-2">
                     <span className="text-on-surface-variant m3-body-small">{t('online.room_id')}:</span>
                     <code className="text-primary font-mono">{currentRoom.id}</code>
-                    <IconButton variant="tonal" label="Copy room ID" onClick={handleCopyRoomId}>
+                    <IconButton variant="tonal" label={t('online_game.copy_room_id')} onClick={handleCopyRoomId}>
                       {copiedRoomId ? (
                         <Check size={16} className="text-success" />
                       ) : (
@@ -249,13 +249,13 @@ const OnlineMultiplayer: React.FC = () => {
                   ? 'bg-success-container text-on-success-container'
                   : 'bg-surface-container-high text-on-surface-variant'
               }`}>
-                {currentRoom.status === 'waiting' ? 'Wartet...' :
-                 currentRoom.status === 'playing' ? 'Läuft' : 'Beendet'}
+                {currentRoom.status === 'waiting' ? t('online_game.status_waiting') :
+                 currentRoom.status === 'playing' ? t('online_game.status_playing') : t('online_game.status_finished')}
               </div>
             </div>
 
             {/* Players */}
-            <h3 className="text-on-surface m3-title-small mb-3">Spieler ({currentRoom.players.length}/4)</h3>
+            <h3 className="text-on-surface m3-title-small mb-3">{t('online_game.players_count', { count: currentRoom.players.length, max: 4 })}</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
               {currentRoom.players.map((player, idx) => (
                 <div
@@ -292,7 +292,7 @@ const OnlineMultiplayer: React.FC = () => {
                   <div className="w-12 h-12 rounded-m3-full bg-surface-container-high flex items-center justify-center mx-auto">
                     <Users size={20} className="text-on-surface-variant" />
                   </div>
-                  <p className="text-on-surface-variant mt-2 text-sm">Leer</p>
+                  <p className="text-on-surface-variant mt-2 text-sm">{t('online_game.empty_slot')}</p>
                 </div>
               ))}
             </div>
@@ -307,13 +307,13 @@ const OnlineMultiplayer: React.FC = () => {
                 disabled={currentRoom.players.length < 2}
                 icon={<Play size={24} />}
               >
-                Spiel starten
+                {t('online_game.start_game')}
               </Button>
             )}
 
             {currentRoom.status === 'waiting' && !isHost && (
               <p className="text-center text-on-surface-variant">
-                Warte auf Host zum Starten...
+                {t('online_game.waiting_for_host')}
               </p>
             )}
           </Card>
@@ -322,12 +322,12 @@ const OnlineMultiplayer: React.FC = () => {
           <Card variant="elevated" className="p-4">
             <h3 className="text-on-surface m3-title-small mb-3 flex items-center gap-2">
               <MessageCircle size={18} />
-              Chat
+              {t('online_game.chat')}
             </h3>
 
             <div className="h-48 overflow-y-auto mb-3 space-y-2 bg-surface-container rounded-m3-md p-3">
               {chatMessages.length === 0 ? (
-                <p className="text-on-surface-variant text-center text-sm">Noch keine Nachrichten</p>
+                <p className="text-on-surface-variant text-center text-sm">{t('online_game.no_messages')}</p>
               ) : (
                 chatMessages.map((msg, idx) => (
                   <div key={idx} className="text-sm">
@@ -344,9 +344,9 @@ const OnlineMultiplayer: React.FC = () => {
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSendChat()}
-                placeholder="Nachricht..."
+                placeholder={t('online_game.message_placeholder')}
               />
-              <IconButton variant="filled" label="Send message" onClick={handleSendChat}>
+              <IconButton variant="filled" label={t('online_game.send_message')} onClick={handleSendChat}>
                 <Send size={18} />
               </IconButton>
             </div>
@@ -366,11 +366,11 @@ const OnlineMultiplayer: React.FC = () => {
           <div className="flex items-center gap-2">
             {connected ? (
               <span className="flex items-center gap-1 px-3 py-1.5 rounded-m3-full bg-success-container text-on-success-container m3-label-large">
-                <Wifi size={16} /> {onlinePlayers.length} Online
+                <Wifi size={16} /> {t('online_game.online_count', { count: onlinePlayers.length })}
               </span>
             ) : (
               <span className="flex items-center gap-1 px-3 py-1.5 rounded-m3-full bg-error-container text-on-error-container m3-label-large">
-                <WifiOff size={16} /> Verbinde...
+                <WifiOff size={16} /> {t('online_game.connecting')}
               </span>
             )}
           </div>
@@ -379,9 +379,9 @@ const OnlineMultiplayer: React.FC = () => {
         <Card variant="elevated" className="p-6 mb-6">
           <h1 className="m3-headline-medium text-on-surface mb-2 flex items-center gap-3">
             <Globe className="text-primary" />
-            Online Multiplayer
+            {t('online_game.title')}
           </h1>
-          <p className="text-on-surface-variant">Spiele gegen andere Spieler in Echtzeit</p>
+          <p className="text-on-surface-variant">{t('online_game.subtitle')}</p>
         </Card>
 
         {/* Create Room Button */}
@@ -393,7 +393,7 @@ const OnlineMultiplayer: React.FC = () => {
           icon={<Plus size={24} />}
           className="mb-6"
         >
-          Raum erstellen
+          {t('online_game.create_room')}
         </Button>
 
         {/* Join Private Room by Code */}
@@ -424,28 +424,28 @@ const OnlineMultiplayer: React.FC = () => {
         <Dialog
           open={showCreateRoom}
           onClose={() => setShowCreateRoom(false)}
-          title="Raum erstellen"
+          title={t('online_game.create_room')}
           actions={
             <>
               <Button variant="text" onClick={() => setShowCreateRoom(false)}>
-                Abbrechen
+                {t('common.cancel')}
               </Button>
               <Button variant="filled" onClick={handleCreateRoom} disabled={!roomName.trim()}>
-                Erstellen
+                {t('online_game.create')}
               </Button>
             </>
           }
         >
           <div className="space-y-4">
             <TextField
-              label="Raumname"
+              label={t('online_game.room_name')}
               value={roomName}
               onChange={(e) => setRoomName(e.target.value)}
-              placeholder="z.B. Freitagsrunde"
+              placeholder={t('online_game.room_name_placeholder')}
             />
 
             <div>
-              <label className="block text-on-surface-variant m3-label-large mb-2">Startscore</label>
+              <label className="block text-on-surface-variant m3-label-large mb-2">{t('online_game.start_score')}</label>
               <div className="flex gap-2">
                 {[301, 501, 701].map(score => (
                   <Chip
@@ -461,7 +461,7 @@ const OnlineMultiplayer: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-on-surface-variant m3-label-large mb-2">Legs zum Gewinnen</label>
+              <label className="block text-on-surface-variant m3-label-large mb-2">{t('online_game.legs_to_win')}</label>
               <div className="flex gap-2">
                 {[2, 3, 4, 5].map(legs => (
                   <Chip
@@ -485,7 +485,7 @@ const OnlineMultiplayer: React.FC = () => {
               />
               <span className="text-on-surface flex items-center gap-2">
                 <Lock size={16} />
-                Privater Raum
+                {t('online_game.private_room')}
               </span>
             </label>
           </div>
@@ -494,8 +494,8 @@ const OnlineMultiplayer: React.FC = () => {
         {/* Available Rooms */}
         <Card variant="elevated" className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="m3-title-large text-on-surface">Verfügbare Räume</h2>
-            <IconButton variant="tonal" label="Refresh rooms" onClick={() => socket?.emit('rooms:refresh')}>
+            <h2 className="m3-title-large text-on-surface">{t('online_game.available_rooms')}</h2>
+            <IconButton variant="tonal" label={t('online_game.refresh_rooms')} onClick={() => socket?.emit('rooms:refresh')}>
               <RefreshCw size={18} />
             </IconButton>
           </div>
@@ -503,8 +503,8 @@ const OnlineMultiplayer: React.FC = () => {
           {rooms.length === 0 ? (
             <div className="text-center py-12">
               <Users size={48} className="mx-auto text-on-surface-variant mb-4" />
-              <p className="text-on-surface-variant">Keine offenen Räume verfügbar</p>
-              <p className="text-on-surface-variant text-sm">Erstelle einen neuen Raum!</p>
+              <p className="text-on-surface-variant">{t('online_game.no_rooms')}</p>
+              <p className="text-on-surface-variant text-sm">{t('online_game.create_new_room_hint')}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -516,11 +516,11 @@ const OnlineMultiplayer: React.FC = () => {
                   <div>
                     <h3 className="text-on-surface m3-title-small">{room.name}</h3>
                     <p className="text-on-surface-variant text-sm">
-                      {room.settings.startScore} • {room.players.length}/4 Spieler
+                      {t('online_game.room_summary', { score: room.settings.startScore, count: room.players.length, max: 4 })}
                     </p>
                   </div>
                   <Button variant="filled" size="sm" onClick={() => handleJoinRoom(room.id)}>
-                    Beitreten
+                    {t('online.join')}
                   </Button>
                 </div>
               ))}

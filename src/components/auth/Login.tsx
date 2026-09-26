@@ -10,7 +10,7 @@ import BackToLanding from './BackToLanding';
 import { Icon } from '../icons';
 
 const Login: React.FC = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { login, googleAuth } = useAuth();
 
@@ -28,7 +28,7 @@ const Login: React.FC = () => {
       await login(email, password);
       navigate('/');
     } catch (err: any) {
-      setError(err.message || 'Login fehlgeschlagen');
+      setError(err.message || t('login.failed'));
     } finally {
       setLoading(false);
     }
@@ -102,7 +102,7 @@ const Login: React.FC = () => {
               </div>
               <div className="relative flex justify-center">
                 <span className="px-4 m3-body-small bg-surface-container-low text-on-surface-variant">
-                  {i18n.language === 'de' ? 'Oder' : 'Or'}
+                  {t('login.or')}
                 </span>
               </div>
             </div>

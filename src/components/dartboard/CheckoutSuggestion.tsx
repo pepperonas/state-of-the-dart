@@ -27,7 +27,7 @@ const CheckoutSuggestion: React.FC<CheckoutSuggestionProps> = ({ suggestion, alt
         <div className="flex items-center gap-2 mb-2">
           <Target className="text-tertiary" size={18} />
           <span className="m3-title-small">
-            Checkout: {remaining}
+            {t('checkout.title', { remaining })}
           </span>
         </div>
 
@@ -35,7 +35,7 @@ const CheckoutSuggestion: React.FC<CheckoutSuggestionProps> = ({ suggestion, alt
           {suggestion.map((dart, index) => (
             <React.Fragment key={index}>
               {index > 0 && (
-                <span className="text-on-surface-variant m3-body-medium">&rarr;</span>
+                <span className="text-on-surface-variant m3-body-medium">→</span>
               )}
               <div className="px-3 py-1.5 bg-surface-container-high rounded-m3-sm shadow-m3-1">
                 <span className="m3-title-medium text-on-surface">
@@ -61,7 +61,7 @@ const CheckoutSuggestion: React.FC<CheckoutSuggestionProps> = ({ suggestion, alt
             {alt.map((dart, index) => (
               <React.Fragment key={index}>
                 {index > 0 && (
-                  <span className="text-on-surface-variant m3-body-medium">&rarr;</span>
+                  <span className="text-on-surface-variant m3-body-medium">→</span>
                 )}
                 <div className="px-3 py-1.5 bg-surface-container-high rounded-m3-sm shadow-m3-1">
                   <span className="m3-title-medium text-on-surface">

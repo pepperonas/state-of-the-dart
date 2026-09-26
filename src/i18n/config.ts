@@ -28,4 +28,11 @@ i18n
     }
   });
 
+/** `<html lang>` follows the active language — screen readers pick their voice from it. */
+const syncDocumentLang = (lng: string) => {
+  if (typeof document !== 'undefined') document.documentElement.lang = lng.split('-')[0];
+};
+syncDocumentLang(i18n.language || 'de');
+i18n.on('languageChanged', syncDocumentLang);
+
 export default i18n;

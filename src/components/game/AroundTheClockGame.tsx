@@ -1,3 +1,4 @@
+import IconButton from '../common/IconButton';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -773,7 +774,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
                       <div className="flex-1 text-left min-w-0">
                         <p className="text-on-surface m3-title-small truncate">{player.name}</p>
                         <p className="text-on-surface-variant m3-body-small">
-                          {effectiveProgress}/{targets.length} • {darts} Darts
+                          {t('atc_game.player_progress', { progress: effectiveProgress, total: targets.length, count: darts })}
                         </p>
                       </div>
                       <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-m3-md flex items-center justify-center font-bold text-sm sm:text-base flex-shrink-0 ${
@@ -814,13 +815,14 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
             <h3 className="text-on-surface m3-title-small">
               {t('atc.throw_count', { current: currentDarts.length })}
             </h3>
-            <button
+            <IconButton
+              variant="tonal"
+              label={t('common.undo')}
               onClick={handleUndo}
               disabled={currentDarts.length === 0 && turnHistory.length === 0}
-              className="p-2 rounded-m3-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant disabled:opacity-50"
             >
               <RotateCcw size={18} />
-            </button>
+            </IconButton>
           </div>
 
           <div className="flex gap-2 sm:gap-3 mb-4">

@@ -4,7 +4,7 @@ import {
   User, Mail, Trash2, Save, AlertCircle,
   CheckCircle, Lock, CreditCard
 } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import { BackButton, Button, Card, TextField, PageShell } from '../common';
@@ -22,7 +22,7 @@ const AVATAR_ICONS: IconName[] = [
 const isAvatarUrl = (avatar: string) => avatar?.startsWith('http');
 
 // Helper to render avatar (emoji or image)
-const renderAvatar = (avatarValue: string, size: 'sm' | 'md' | 'lg' = 'md') => {
+const renderAvatar = (avatarValue: string, alt: string, size: 'sm' | 'md' | 'lg' = 'md') => {
   const imageSizeClasses = {
     sm: 'w-8 h-8',
     md: 'w-12 h-12',
@@ -33,7 +33,7 @@ const renderAvatar = (avatarValue: string, size: 'sm' | 'md' | 'lg' = 'md') => {
     return (
       <img
         src={avatarValue}
-        alt="Avatar"
+        alt={alt}
         className={`${imageSizeClasses[size]} rounded-full object-cover`}
       />
     );
@@ -69,9 +69,9 @@ const UserSettings: React.FC = () => {
     try {
       await api.auth.updateProfile(name, avatar);
       await refreshUser();
-      setSuccess('Profil erfolgreich aktualisiert!');
+      setSuccess(t('user_settings.profile_updated'));
     } catch (err: any) {
-      setError(err.message || 'Fehler beim Aktualisieren des Profils');
+      setError(err.message || t('user_settings.profile_update_failed'));
     } finally {
       setLoading(null);
     }
@@ -85,7 +85,7 @@ const UserSettings: React.FC = () => {
 
     try {
       await api.auth.updateEmail(newEmail, emailPassword);
-      setSuccess('Email aktualisiert! Bitte verifiziere deine neue Email-Adresse.');
+      setSuccess(t('user_settings.email_updated'));
       setNewEmail('');
       setEmailPassword('');
       // Wait 2 seconds then logout (user needs to verify new email)
@@ -94,7 +94,7 @@ const UserSettings: React.FC = () => {
         navigate('/login');
       }, 2000);
     } catch (err: any) {
-      setError(err.message || 'Fehler beim Aktualisieren der Email');
+      setError(err.message || t('user_settings.email_update_failed'));
     } finally {
       setLoading(null);
     }
@@ -114,7 +114,7 @@ const UserSettings: React.FC = () => {
       logout();
       navigate('/login?deleted=true');
     } catch (err: any) {
-      setError(err.message || 'Fehler beim Löschen des Accounts');
+      setError(err.message || t('user_settings.delete_failed'));
       setConfirmDelete(false);
     } finally {
       setLoading(null);
@@ -135,9 +135,9 @@ const UserSettings: React.FC = () => {
       // Don't show error to user if they don't have a Stripe customer yet
       // This happens for Google Auth users who haven't made a payment
       if (err.message?.includes('400')) {
-        setError('Du hast noch keine Zahlungen getätigt. Das Kundenportal ist nur für zahlende Kunden verfügbar.');
+        setError(t('user_settings.portal_no_payments'));
       } else {
-        setError(err.message || 'Fehler beim Öffnen des Kundenportals');
+        setError(err.message || t('user_settings.portal_failed'));
       }
       setLoading(null);
     } finally {
@@ -155,7 +155,7 @@ const UserSettings: React.FC = () => {
         {/* Header */}
         <BackButton onClick={() => navigate(-1)} />
 
-        <h1 className="m3-headline-medium text-on-surface mb-8">Account Einstellungen</h1>
+        <h1 className="m3-headline-medium text-on-surface mb-8">{t('user_settings.title')}</h1>
 
         {/* Success/Error Messages */}
         {success && (
@@ -177,29 +177,31 @@ const UserSettings: React.FC = () => {
           <Card variant="elevated" className="p-6">
             <h2 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
               <User size={24} />
-              Profil
+              {t('user.profile')}
             </h2>
 
             <form onSubmit={handleUpdateProfile} className="space-y-4">
               {/* Avatar Picker */}
               <div>
                 <label className="block m3-label-large text-on-surface mb-2">
-                  Avatar
+                  {t('user_settings.avatar')}
                 </label>
                 <div className="flex items-center gap-4">
                   <button
                     type="button"
                     onClick={() => !isAvatarUrl(avatar) && setShowAvatarPicker(!showAvatarPicker)}
+                    aria-label={isAvatarUrl(avatar) ? t('user_settings.avatar') : t('user_settings.click_to_change_avatar')}
+                    aria-expanded={isAvatarUrl(avatar) ? undefined : showAvatarPicker}
                     className={`w-16 h-16 text-4xl bg-surface-container border border-outline-variant rounded-m3-md transition-colors flex items-center justify-center ${
                       isAvatarUrl(avatar) ? 'cursor-default' : 'hover:bg-surface-container-high'
                     }`}
                   >
-                    {renderAvatar(avatar, 'md')}
+                    {renderAvatar(avatar, t('user_settings.avatar'), 'md')}
                   </button>
                   <span className="text-on-surface-variant m3-body-small">
                     {isAvatarUrl(avatar)
-                      ? 'Google Avatar (kann nicht geändert werden)'
-                      : 'Klicke um Avatar zu ändern'}
+                      ? t('user_settings.google_avatar_locked')
+                      : t('user_settings.click_to_change_avatar')}
                   </span>
                 </div>
 
@@ -226,7 +228,7 @@ const UserSettings: React.FC = () => {
 
               {/* Name */}
               <TextField
-                label="Name"
+                label={t('auth.name')}
                 icon={<User size={20} />}
                 type="text"
                 value={name}
@@ -237,14 +239,14 @@ const UserSettings: React.FC = () => {
               {/* Current Email (read-only) */}
               <div>
                 <TextField
-                  label="Email"
+                  label={t('auth.email')}
                   icon={<Mail size={20} />}
                   type="email"
                   value={user.email}
                   disabled
                 />
                 <p className="m3-body-small text-on-surface-variant mt-1">
-                  Um deine Email zu ändern, nutze den Bereich weiter unten
+                  {t('user_settings.change_email_hint')}
                 </p>
               </div>
 
@@ -255,7 +257,7 @@ const UserSettings: React.FC = () => {
                 loading={loading === 'profile'}
                 icon={<Save size={20} />}
               >
-                {loading === 'profile' ? 'Speichern...' : 'Speichern'}
+                {loading === 'profile' ? t('user_settings.saving') : t('common.save')}
               </Button>
             </form>
           </Card>
@@ -266,10 +268,10 @@ const UserSettings: React.FC = () => {
             <Card variant="elevated" className="p-6">
               <h2 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
                 <CreditCard size={24} />
-                Abonnement verwalten
+                {t('user.manage_subscription')}
               </h2>
               <p className="text-on-surface m3-body-medium mb-4">
-                Verwalte dein Abo, ändere Zahlungsmethoden oder kündige.
+                {t('user_settings.subscription_desc')}
               </p>
               <Button
                 onClick={handleManageSubscription}
@@ -278,7 +280,7 @@ const UserSettings: React.FC = () => {
                 loading={loading === 'subscription'}
                 icon={<CreditCard size={20} />}
               >
-                {loading === 'subscription' ? 'Öffne Portal...' : 'Kundenportal öffnen'}
+                {loading === 'subscription' ? t('user_settings.opening_portal') : t('user_settings.open_portal')}
               </Button>
             </Card>
           )}
@@ -287,34 +289,34 @@ const UserSettings: React.FC = () => {
           <Card variant="elevated" className="p-6">
             <h2 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
               <Mail size={24} />
-              Email ändern
+              {t('user.change_email')}
             </h2>
 
             <form onSubmit={handleUpdateEmail} className="space-y-4">
               <TextField
-                label="Neue Email"
+                label={t('user_settings.new_email')}
                 icon={<Mail size={20} />}
                 type="email"
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
-                placeholder="neue@email.de"
+                placeholder={t('user_settings.new_email_placeholder')}
                 required
               />
 
               <TextField
-                label="Passwort bestätigen"
+                label={t('auth.confirm_password')}
                 icon={<Lock size={20} />}
                 type="password"
                 value={emailPassword}
                 onChange={(e) => setEmailPassword(e.target.value)}
-                placeholder="Dein aktuelles Passwort"
+                placeholder={t('user_settings.current_password_placeholder')}
                 required
               />
 
               <div className="p-4 bg-tertiary-container text-on-tertiary-container rounded-m3-md">
                 <p className="m3-body-small font-semibold flex items-center gap-2">
                   <AlertCircle size={18} />
-                  Du wirst ausgeloggt und musst deine neue Email-Adresse verifizieren.
+                  {t('user_settings.email_change_logout_hint')}
                 </p>
               </div>
 
@@ -325,7 +327,7 @@ const UserSettings: React.FC = () => {
                 loading={loading === 'email'}
                 icon={<Mail size={20} />}
               >
-                {loading === 'email' ? 'Aktualisieren...' : 'Email ändern'}
+                {loading === 'email' ? t('user_settings.updating') : t('user.change_email')}
               </Button>
             </form>
           </Card>
@@ -334,12 +336,14 @@ const UserSettings: React.FC = () => {
           <Card variant="outlined" className="p-6 border-error">
             <h2 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
               <Trash2 size={24} className="text-error" />
-              <span> Gefahrenzone</span>
+              <span>{t('user.danger_zone')}</span>
             </h2>
 
             <p className="text-on-surface mb-4 m3-body-medium">
-              Wenn du deinen Account löschst, werden <strong className="text-on-error-container bg-error-container px-2 py-1 rounded-m3-sm">alle deine Daten unwiderruflich gelöscht</strong>.
-              Dies beinhaltet: Matches, Stats, Achievements, Personal Bests, Tenants und Spieler.
+              <Trans
+                i18nKey="user_settings.delete_explanation"
+                components={{ strong: <strong className="text-on-error-container bg-error-container px-2 py-1 rounded-m3-sm" /> }}
+              />
             </p>
 
             {!confirmDelete ? (
@@ -350,14 +354,14 @@ const UserSettings: React.FC = () => {
                 icon={<Trash2 size={20} />}
                 className="text-error border-error"
               >
-                Account löschen
+                {t('user.delete_account')}
               </Button>
             ) : (
               <div className="space-y-4">
                 <div className="p-4 bg-error-container text-on-error-container rounded-m3-md">
                   <p className="m3-body-small font-bold flex items-center gap-2">
                     <AlertCircle size={20} className="flex-shrink-0" />
-                    WARNUNG: Diese Aktion kann nicht rückgängig gemacht werden!
+                    {t('user_settings.delete_warning')}
                   </p>
                 </div>
 
@@ -366,7 +370,7 @@ const UserSettings: React.FC = () => {
                   type="password"
                   value={deletePassword}
                   onChange={(e) => setDeletePassword(e.target.value)}
-                  placeholder="Passwort zur Bestätigung"
+                  placeholder={t('user_settings.password_to_confirm')}
                 />
 
                 <div className="flex gap-3">
@@ -378,7 +382,7 @@ const UserSettings: React.FC = () => {
                     variant="text"
                     className="flex-1"
                   >
-                    Abbrechen
+                    {t('common.cancel')}
                   </Button>
                   <Button
                     onClick={handleDeleteAccount}
@@ -388,7 +392,7 @@ const UserSettings: React.FC = () => {
                     loading={loading === 'delete'}
                     icon={<Trash2 size={20} />}
                   >
-                    {loading === 'delete' ? 'Lösche...' : 'Endgültig löschen'}
+                    {loading === 'delete' ? t('user_settings.deleting') : t('user_settings.delete_permanently')}
                   </Button>
                 </div>
               </div>

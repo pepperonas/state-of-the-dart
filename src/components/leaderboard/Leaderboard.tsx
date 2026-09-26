@@ -75,13 +75,13 @@ const Leaderboard: React.FC = () => {
     icon: React.ReactNode;
     color: string;
   }> = [
-    { id: 'average', name: 'Best Average', icon: <TrendingUp size={18} />, color: 'primary' },
-    { id: 'wins', name: 'Most Wins', icon: <Trophy size={18} />, color: 'success' },
-    { id: 'winRate', name: 'Win Rate', icon: <Target size={18} />, color: 'accent' },
-    { id: '180s', name: 'Most 180s', icon: <Zap size={18} />, color: 'amber' },
-    { id: 'checkoutRate', name: 'Checkout Rate', icon: <Target size={18} />, color: 'primary' },
-    { id: 'achievements', name: 'Achievements', icon: <Award size={18} />, color: 'accent' },
-    { id: 'totalPoints', name: 'Total Points', icon: <Crown size={18} />, color: 'amber' },
+    { id: 'average', name: t('leaderboard.cat_average'), icon: <TrendingUp size={18} />, color: 'primary' },
+    { id: 'wins', name: t('leaderboard.cat_wins'), icon: <Trophy size={18} />, color: 'success' },
+    { id: 'winRate', name: t('leaderboard.cat_win_rate'), icon: <Target size={18} />, color: 'accent' },
+    { id: '180s', name: t('leaderboard.cat_180s'), icon: <Zap size={18} />, color: 'amber' },
+    { id: 'checkoutRate', name: t('leaderboard.cat_checkout_rate'), icon: <Target size={18} />, color: 'primary' },
+    { id: 'achievements', name: t('leaderboard.cat_achievements'), icon: <Award size={18} />, color: 'accent' },
+    { id: 'totalPoints', name: t('leaderboard.cat_total_points'), icon: <Crown size={18} />, color: 'amber' },
   ];
 
   const leaderboardData = useMemo(() => {
@@ -193,7 +193,7 @@ const Leaderboard: React.FC = () => {
         <Card variant="elevated" className="p-6 md:p-8">
           <div className="flex items-center gap-3 mb-6">
             <Trophy size={32} className="text-[var(--m3-medal-gold)]" />
-            <h1 className="m3-headline-medium text-on-surface">Leaderboard</h1>
+            <h1 className="m3-headline-medium text-on-surface">{t('leaderboard.title')}</h1>
           </div>
 
           {/* Category Selection */}
@@ -214,9 +214,9 @@ const Leaderboard: React.FC = () => {
           {sortedData.length === 0 ? (
             <div className="text-center py-12">
               <Trophy size={64} className="mx-auto text-on-surface-variant mb-4" />
-              <p className="m3-title-medium text-on-surface">Noch keine Daten</p>
+              <p className="m3-title-medium text-on-surface">{t('leaderboard.empty')}</p>
               <p className="m3-body-medium text-on-surface-variant mt-2">
-                Spiele einige Matches, um im Leaderboard zu erscheinen!
+                {t('leaderboard.empty_hint')}
               </p>
             </div>
           ) : (
@@ -224,11 +224,12 @@ const Leaderboard: React.FC = () => {
               {sortedData.map((player, index) => {
                 const rank = index + 1;
                 return (
-                  <motion.div
+                  <motion.button
+                    type="button"
                     key={player.id}
                     {...staggerChild(Math.min(index, 12))}
                     onClick={() => navigate(`/players/${player.id}`)}
-                    className={`flex items-center justify-between p-4 border-2 rounded-m3-lg transition-all cursor-pointer hover:scale-[1.02] ${getRankColor(
+                    className={`w-full text-left flex items-center justify-between p-4 border-2 rounded-m3-lg transition-all cursor-pointer hover:scale-[1.02] ${getRankColor(
                       rank
                     )}`}
                   >
@@ -246,7 +247,7 @@ const Leaderboard: React.FC = () => {
                         <div>
                           <h3 className="m3-title-medium text-on-surface">{player.name}</h3>
                           <p className="m3-body-medium text-on-surface-variant">
-                            {player.gamesPlayed} {player.gamesPlayed === 1 ? 'Spiel' : 'Spiele'}
+                            {t('leaderboard.games', { count: player.gamesPlayed })}
                           </p>
                         </div>
                       </div>
@@ -259,7 +260,7 @@ const Leaderboard: React.FC = () => {
                         {categories.find((c) => c.id === category)?.name}
                       </div>
                     </div>
-                  </motion.div>
+                  </motion.button>
                 );
               })}
             </div>
@@ -271,25 +272,25 @@ const Leaderboard: React.FC = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center">
                   <div className="m3-title-large text-on-surface">{sortedData.length}</div>
-                  <div className="m3-label-large text-on-surface-variant mt-1">Aktive Spieler</div>
+                  <div className="m3-label-large text-on-surface-variant mt-1">{t('leaderboard.active_players')}</div>
                 </div>
                 <div className="text-center">
                   <div className="m3-title-large text-primary">
                     {(sortedData.reduce((sum, p) => sum + p.gamesPlayed, 0) / sortedData.length).toFixed(0)}
                   </div>
-                  <div className="m3-label-large text-on-surface-variant mt-1">Ø Spiele</div>
+                  <div className="m3-label-large text-on-surface-variant mt-1">{t('leaderboard.avg_games')}</div>
                 </div>
                 <div className="text-center">
                   <div className="m3-title-large text-[var(--m3-medal-gold)]">
                     {sortedData.reduce((sum, p) => sum + p.total180s, 0)}
                   </div>
-                  <div className="m3-label-large text-on-surface-variant mt-1">Total 180s</div>
+                  <div className="m3-label-large text-on-surface-variant mt-1">{t('leaderboard.total_180s')}</div>
                 </div>
                 <div className="text-center">
                   <div className="m3-title-large text-tertiary">
                     {sortedData.reduce((sum, p) => sum + p.achievementsCount, 0)}
                   </div>
-                  <div className="m3-label-large text-on-surface-variant mt-1">Total Achievements</div>
+                  <div className="m3-label-large text-on-surface-variant mt-1">{t('leaderboard.total_achievements')}</div>
                 </div>
               </div>
             </div>

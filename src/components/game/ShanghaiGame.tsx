@@ -384,10 +384,10 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
 
             {/* Options */}
             <div className="mb-6 space-y-4">
-              <h2 className="m3-title-medium font-semibold text-on-surface mb-3">Optionen</h2>
+              <h2 className="m3-title-medium font-semibold text-on-surface mb-3">{t('shanghai_game.options')}</h2>
 
               <div>
-                <label className="block text-on-surface-variant mb-2">Startnummer</label>
+                <label className="block text-on-surface-variant mb-2">{t('shanghai_game.start_number')}</label>
                 <div className="flex gap-2">
                   {[1, 5, 10, 15].map(num => (
                     <button
@@ -406,7 +406,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
               </div>
 
               <div>
-                <label className="block text-on-surface-variant mb-2">Runden</label>
+                <label className="block text-on-surface-variant mb-2">{t('shanghai_game.rounds')}</label>
                 <div className="flex gap-2">
                   {[5, 7, 10, 15, 20].map(num => (
                     <button
@@ -423,7 +423,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
                   ))}
                 </div>
                 <p className="text-on-surface-variant text-sm mt-2">
-                  Spielt Zahlen {startNumber} bis {Math.min(startNumber + rounds - 1, 20)}
+                  {t('shanghai_game.plays_numbers', { from: startNumber, to: Math.min(startNumber + rounds - 1, 20) })}
                 </p>
               </div>
             </div>
@@ -458,13 +458,13 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
             </div>
 
             <div className="bg-surface-container rounded-m3-lg p-4 mb-6">
-              <h3 className="text-on-surface font-semibold mb-2"> Spielregeln:</h3>
+              <h3 className="text-on-surface font-semibold mb-2">{t('shanghai_game.rules_title')}</h3>
               <ul className="text-on-surface-variant text-sm space-y-1">
-                <li>• Jede Runde zielt auf eine bestimmte Zahl</li>
-                <li>• Nur Treffer auf die Zielzahl zählen Punkte</li>
-                <li>• Single = Zahl × 1, Double = × 2, Triple = × 3</li>
-                <li>• <span className="text-tertiary font-semibold">SHANGHAI</span>: Single + Double + Triple = Sofortiger Sieg!</li>
-                <li>• Höchste Punktzahl am Ende gewinnt</li>
+                <li>• {t('shanghai_game.rule_target')}</li>
+                <li>• {t('shanghai_game.rule_only_target')}</li>
+                <li>• {t('shanghai_game.rule_multiplier')}</li>
+                <li>• <span className="text-tertiary font-semibold">SHANGHAI</span>: {t('shanghai_game.rule_shanghai')}</li>
+                <li>• {t('shanghai_game.rule_winner')}</li>
               </ul>
             </div>
 
@@ -476,8 +476,8 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
               disabled={selectedPlayers.length < 2}
             >
               {selectedPlayers.length < 2
-                ? `${t('game.select_players')} (${selectedPlayers.length}/2)`
-                :'Shanghai starten'
+                ? t('shanghai_game.select_players_count', { count: selectedPlayers.length, min: 2 })
+                : t('shanghai_game.start')
               }
             </Button>
           </Card>
@@ -499,7 +499,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
             </h2>
             {shanghaiWinner && (
               <div className="bg-tertiary-container rounded-m3-lg p-3 mb-4">
-                <p className="text-on-tertiary-container font-bold text-xl">SHANGHAI!</p>
+                <p className="text-on-tertiary-container font-bold text-xl">{t('shanghai_game.shanghai')}</p>
               </div>
             )}
             <p className="text-2xl font-bold mb-6" style={{ color: 'var(--m3-primary)' }}>
@@ -543,7 +543,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
           </Button>
           <div className="text-center">
             <h1 className="m3-title-large m3-emphasized text-on-surface"> Shanghai</h1>
-            <p className="text-on-surface-variant text-sm">Runde {currentRound + 1}/{rounds}</p>
+            <p className="text-on-surface-variant text-sm">{t('shanghai_game.round_of', { current: currentRound + 1, total: rounds })}</p>
           </div>
           <div className="w-10" />
         </div>
@@ -552,18 +552,18 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
       {/* Current Target */}
       <div className="max-w-4xl mx-auto mb-4">
         <Card variant="elevated" className="p-6 text-center">
-          <p className="text-on-surface-variant mb-2">Zielzahl</p>
+          <p className="text-on-surface-variant mb-2">{t('shanghai_game.target_number')}</p>
           <div className="text-7xl font-bold text-tertiary">
             {currentTarget}
           </div>
-          <p className="text-on-surface mt-2">{currentPlayer?.name} ist dran</p>
+          <p className="text-on-surface mt-2">{t('shanghai_game.player_turn', { name: currentPlayer?.name })}</p>
         </Card>
       </div>
 
       {/* Scoreboard */}
       <div className="max-w-4xl mx-auto mb-4">
         <Card variant="elevated" className="p-4">
-          <h3 className="text-on-surface font-semibold mb-3">Punktestand</h3>
+          <h3 className="text-on-surface font-semibold mb-3">{t('shanghai_game.standings')}</h3>
           <div className="space-y-2">
             {getSortedPlayers().map((player, idx) => {
               const isActive = player.id === currentPlayer?.id;
@@ -593,10 +593,12 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
       <div className="max-w-4xl mx-auto mb-4">
         <Card variant="elevated" className="p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-on-surface font-semibold">Wurf ({currentDarts.length}/3)</h3>
+            <h3 className="text-on-surface font-semibold">{t('shanghai_game.visit', { count: currentDarts.length })}</h3>
             <button
               onClick={handleUndo}
               disabled={currentDarts.length === 0 && turnHistory.length === 0}
+              aria-label={t('common.undo')}
+              title={t('common.undo')}
               className="p-2 rounded-m3-md bg-surface-container hover:bg-surface-container-high text-on-surface-variant disabled:opacity-50"
             >
               <RotateCcw size={18} />
@@ -620,7 +622,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
                   }`}
                 >
                   {dart ? (
-                    dart.segment === 0 ? 'Miss' :
+                    dart.segment === 0 ? t('shanghai_game.miss') :
                     `${dart.multiplier === 3 ? 'T' : dart.multiplier === 2 ? 'D' : ''}${dart.segment}`
                   ) : '-'}
                 </div>
@@ -635,7 +637,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
             onClick={handleConfirmThrow}
             disabled={currentDarts.length === 0}
           >
-            Bestätigen
+            {t('common.confirm')}
           </Button>
         </Card>
       </div>
@@ -643,7 +645,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
       {/* Input for Target Number */}
       <div className="max-w-4xl mx-auto">
         <Card variant="elevated" className="p-4">
-          <p className="text-on-surface-variant text-center mb-3">Ziel: <span className="text-tertiary font-bold">{currentTarget}</span></p>
+          <p className="text-on-surface-variant text-center mb-3">{t('shanghai_game.target_label')} <span className="text-tertiary font-bold">{currentTarget}</span></p>
 
           <div className="grid grid-cols-3 gap-2 mb-3">
             <button
@@ -651,21 +653,21 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
               disabled={currentDarts.length >= 3}
               className="py-4 rounded-m3-md bg-surface-container hover:bg-surface-container-high text-on-surface font-bold text-lg disabled:opacity-50"
             >
-              Single {currentTarget}
+              {t('shanghai_game.single', { number: currentTarget })}
             </button>
             <button
               onClick={() => handleDartHit(currentTarget, 2)}
               disabled={currentDarts.length >= 3}
               className="py-4 rounded-m3-md bg-success-container hover:brightness-110 text-on-success-container font-bold text-lg disabled:opacity-50"
             >
-              Double {currentTarget}
+              {t('shanghai_game.double', { number: currentTarget })}
             </button>
             <button
               onClick={() => handleDartHit(currentTarget, 3)}
               disabled={currentDarts.length >= 3}
               className="py-4 rounded-m3-md bg-error-container hover:brightness-110 text-on-error-container font-bold text-lg disabled:opacity-50"
             >
-              Triple {currentTarget}
+              {t('shanghai_game.triple', { number: currentTarget })}
             </button>
           </div>
 
@@ -675,7 +677,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
             className="w-full py-3 rounded-m3-md bg-surface-container-low hover:bg-surface-container text-on-surface-variant font-bold disabled:opacity-50 flex items-center justify-center gap-2"
           >
             <X size={20} />
-            Miss / Andere Zahl
+            {t('shanghai_game.miss_other')}
           </button>
         </Card>
       </div>

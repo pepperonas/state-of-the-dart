@@ -13,6 +13,7 @@ import { useAchievementHints } from '../../hooks/useAchievementHints';
 import Dartboard from '../dartboard/Dartboard';
 import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
 import ScoreInput from './ScoreInput';
+import GameAnnouncer from './GameAnnouncer';
 import PlayerScore from './PlayerScore';
 import ScoreStrip from './ScoreStrip';
 import CheckoutSuggestion from '../dartboard/CheckoutSuggestion';
@@ -41,7 +42,8 @@ import { Icon, iconForEmoji } from '../icons';
 
 const GameScreen: React.FC = () => {
   const { notify } = useFeedback();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isGerman = (i18n.language || 'de').startsWith('de');
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const forceNewGameRef = useRef(searchParams.get('new') === '1');
@@ -903,7 +905,7 @@ const GameScreen: React.FC = () => {
                     key={bot.id}
                     onClick={() => setSelectedPlayers(selectedPlayers.filter(p => p.id !== bot.id))}
                     className="p-3 rounded-m3-lg border-2 border-[var(--m3-primary)] bg-primary-container shadow-m3-1 relative group"
-                    title="Klicken zum Entfernen"
+                    title={t('game_screen.click_to_remove')}
                   >
                     <div className="absolute top-1 right-1 text-primary opacity-0 group-hover:opacity-100 transition-opacity">
                       <X size={14} />
@@ -937,7 +939,7 @@ const GameScreen: React.FC = () => {
                       <div className="flex items-center justify-between">
                         <span className="text-on-surface m3-title-small flex items-center gap-2">
                           <Bot size={18} className="text-primary" />
-                          Bot-Gegner wählen
+                          {t('game_screen.choose_bot')}
                         </span>
                         <button
                           onClick={() => setShowBotSelector(false)}
@@ -947,7 +949,7 @@ const GameScreen: React.FC = () => {
                         </button>
                       </div>
                       <p className="m3-body-small text-on-surface-variant">
-                        Die Schwierigkeit passt sich automatisch an dein Können an
+                        {t('game_screen.bot_adaptive_hint')}
                       </p>
                       <div className="grid grid-cols-3 gap-2">
                         {getAdaptiveBotConfigs().map((config) => (
@@ -974,8 +976,8 @@ const GameScreen: React.FC = () => {
                             className="p-3 rounded-m3-lg bg-surface-container-high hover:bg-surface-container-highest border-2 border-transparent hover:border-[var(--m3-primary)] transition-all text-center"
                           >
                             <div className="mb-2 flex justify-center"><Icon name={iconForEmoji(config.icon)} size={30} /></div>
-                            <div className="m3-label-large text-on-surface">{config.nameDE}</div>
-                            <div className="m3-body-small text-on-surface-variant mt-1">{config.descriptionDE}</div>
+                            <div className="m3-label-large text-on-surface">{isGerman ? config.nameDE : config.name}</div>
+                            <div className="m3-body-small text-on-surface-variant mt-1">{isGerman ? config.descriptionDE : config.description}</div>
                           </button>
                         ))}
                       </div>
@@ -993,11 +995,11 @@ const GameScreen: React.FC = () => {
                                 onClick={() => setNewPlayerAvatar(undefined)}
                                 className="m3-label-medium px-2 py-1 bg-error-container hover:bg-error-container/80 text-on-error-container rounded-m3-sm transition-all"
                               >
-                                Entfernen
+                                {t('game_screen.remove')}
                               </button>
                             </div>
                           ) : (
-                            <div className="text-on-surface-variant m3-body-medium">Kein Emoji ausgewählt</div>
+                            <div className="text-on-surface-variant m3-body-medium">{t('game_screen.no_emoji')}</div>
                           )}
                         </div>
                         <Button
@@ -1006,7 +1008,7 @@ const GameScreen: React.FC = () => {
                           onClick={() => setShowEmojiPicker(true)}
                           icon={<Smile size={16} />}
                         >
-                          Emoji
+                          {t('game_screen.emoji')}
                         </Button>
                       </div>
                       <input
@@ -1027,7 +1029,7 @@ const GameScreen: React.FC = () => {
                             }
                           }
                         }}
-                        placeholder="Player name..."
+                        placeholder={t('game_screen.player_name_placeholder')}
                         className="w-full px-2 py-1 rounded-m3-sm border border-outline-variant bg-surface-container-high text-on-surface placeholder-on-surface-variant"
                         autoFocus
                       />
@@ -1052,7 +1054,7 @@ const GameScreen: React.FC = () => {
                           }}
                           disabled={!newPlayerName.trim()}
                         >
-                          Add
+                          {t('game_screen.add')}
                         </Button>
                         <Button
                           variant="tonal"
@@ -1064,7 +1066,7 @@ const GameScreen: React.FC = () => {
                               setNewPlayerAvatar(undefined);
                           }}
                         >
-                          Cancel
+                          {t('common.cancel')}
                         </Button>
                       </div>
                     </div>
@@ -1167,7 +1169,7 @@ const GameScreen: React.FC = () => {
     return (
       <div className="min-h-dvh flex items-center justify-center">
         <div className="text-center">
-          <p className="m3-title-large text-on-surface-variant mb-4">No active game</p>
+          <p className="m3-title-large text-on-surface-variant mb-4">{t('game_screen.no_active_game')}</p>
           <Button
             variant="filled"
             onClick={() => { navigate('/'); }}
@@ -1305,6 +1307,7 @@ const GameScreen: React.FC = () => {
   
   return (
     <div className="min-h-dvh p-4 md:p-6 gradient-mesh overflow-x-hidden">
+      <GameAnnouncer match={state.currentMatch} />
       {showConfetti && (
         <Suspense fallback={null}>
           <Confetti recycle={false} numberOfPieces={300} gravity={0.3} />
@@ -1326,7 +1329,7 @@ const GameScreen: React.FC = () => {
             </IconButton>
             <IconButton
               variant="tonal"
-              label="Bug melden"
+              label={t('bug_button.label')}
               onClick={() => setShowBugReportModal(true)}
             >
               <AlertTriangle size={20} />
@@ -1334,7 +1337,7 @@ const GameScreen: React.FC = () => {
 
             <IconButton
               variant="filled"
-              label="Match beenden"
+              label={t('game.end_match')}
               onClick={handleEndMatch}
               style={{ backgroundColor: 'var(--m3-error)', color: 'var(--m3-on-error)' }}
             >
@@ -1418,7 +1421,7 @@ const GameScreen: React.FC = () => {
                   disabled={state.currentThrow.length >= 3}
                   icon={<X size={20} />}
                 >
-                  Miss / No Score
+                  {t('game_screen.miss_no_score')}
                 </Button>
               </div>
             )}
@@ -1432,7 +1435,7 @@ const GameScreen: React.FC = () => {
                   onClick={() => setShowMatchStats(!showMatchStats)}
                   className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition-all"
                 >
-                  <h3 className="m3-title-medium text-on-surface">Match Statistics</h3>
+                  <h3 className="m3-title-medium text-on-surface">{t('game_screen.match_statistics')}</h3>
                   <ChevronDown size={24} className={`m3-chevron ${showMatchStats ? 'm3-open' : ''}`} />
                 </button>
 
@@ -1440,11 +1443,11 @@ const GameScreen: React.FC = () => {
                   <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-on-surface-variant">Average:</span>
+                        <span className="text-on-surface-variant">{t('game_screen.stat_average')}</span>
                         <span className="font-semibold text-on-surface">{currentPlayer!.matchAverage.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-on-surface-variant">Highest Score:</span>
+                        <span className="text-on-surface-variant">{t('game_screen.stat_highest')}</span>
                         <span className="font-semibold text-on-surface">{currentPlayer!.matchHighestScore}</span>
                       </div>
                       <div className="flex justify-between">
@@ -1460,7 +1463,7 @@ const GameScreen: React.FC = () => {
                         <span className="font-semibold text-on-surface">{currentPlayer!.match100Plus}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-on-surface-variant">Checkout %:</span>
+                        <span className="text-on-surface-variant">{t('game_screen.stat_checkout')}</span>
                         <span className="font-semibold text-on-surface">
                           {currentPlayer!.checkoutAttempts > 0
                             ? ((currentPlayer!.checkoutsHit / currentPlayer!.checkoutAttempts) * 100).toFixed(1)
@@ -1481,7 +1484,7 @@ const GameScreen: React.FC = () => {
             onClick={() => setShowThrowHistory(!showThrowHistory)}
             className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition-all"
           >
-            <h3 className="m3-title-medium text-on-surface">Wurf-Verlauf</h3>
+            <h3 className="m3-title-medium text-on-surface">{t('game_screen.throw_history')}</h3>
             <ChevronDown size={24} className={`m3-chevron ${showThrowHistory ? 'm3-open' : ''}`} />
           </button>
 
@@ -1509,12 +1512,12 @@ const GameScreen: React.FC = () => {
                     <h4 className="text-on-surface font-bold mb-3 flex items-center gap-2">
                       <span>{player.name}</span>
                       <span className="text-sm text-on-surface-variant">
-                        ({playerThrows.length} {playerThrows.length === 1 ? 'Wurf' : 'Würfe'})
+                        {t('game_screen.visit_count', { count: playerThrows.length })}
                       </span>
                     </h4>
 
                     {playerThrows.length === 0 ? (
-                      <p className="text-on-surface-variant text-sm italic">Noch keine Würfe</p>
+                      <p className="text-on-surface-variant text-sm italic">{t('game_screen.no_visits')}</p>
                     ) : (
                       <div className="space-y-2">
                         {playerThrows.map((throwData, index) => (
@@ -1524,12 +1527,12 @@ const GameScreen: React.FC = () => {
                           >
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-on-surface-variant text-sm">
-                                Wurf #{index + 1}
+                                {t('game_screen.visit_number', { n: index + 1 })}
                               </span>
                               <div className="flex items-center gap-3">
                                 {throwData.isBust && (
                                   <span className="text-on-error-container text-xs font-bold bg-error-container px-2 py-1 rounded-m3-sm">
-                                    BUST
+                                    {t('game_screen.bust')}
                                   </span>
                                 )}
                                 <span className={`font-bold text-lg ${
@@ -1565,7 +1568,7 @@ const GameScreen: React.FC = () => {
                                 >
                                   <span className="text-xs font-semibold">
                                     {dart.score === 0
-                                      ? 'Miss'
+                                      ? t('game.miss')
                                       : dart.multiplier === 3
                                         ? `T${dart.segment}`
                                         : dart.multiplier === 2
@@ -1593,7 +1596,7 @@ const GameScreen: React.FC = () => {
             onClick={() => setShowThrowChart(!showThrowChart)}
             className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition-all"
           >
-            <h3 className="m3-title-medium text-on-surface">Wurf-Statistik (Chart)</h3>
+            <h3 className="m3-title-medium text-on-surface">{t('game_screen.throw_chart')}</h3>
             <ChevronDown size={24} className={`m3-chevron ${showThrowChart ? 'm3-open' : ''}`} />
           </button>
 
@@ -1630,7 +1633,7 @@ const GameScreen: React.FC = () => {
           >
             <div className="flex items-center gap-3">
               <Flame size={24} className="text-tertiary" aria-hidden="true" />
-              <h3 className="m3-title-medium text-on-surface">Live-Heatmap (aktuelles Spiel)</h3>
+              <h3 className="m3-title-medium text-on-surface">{t('game_screen.live_heatmap')}</h3>
             </div>
             <ChevronDown size={24} className={`m3-chevron ${showLiveHeatmap ? 'm3-open' : ''}`} />
           </button>
@@ -1645,7 +1648,7 @@ const GameScreen: React.FC = () => {
                     heatmapView === 'leg' ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
                   }`}
                 >
-                  Aktuelles Leg
+                  {t('game.current_leg')}
                 </button>
                 <button
                   onClick={() => setHeatmapView('match')}
@@ -1653,13 +1656,13 @@ const GameScreen: React.FC = () => {
                     heatmapView === 'match' ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
                   }`}
                 >
-                  Gesamtes Spiel
+                  {t('game.whole_match')}
                 </button>
               </div>
               {/* Player Selector */}
               {state.currentMatch.players.length > 1 && (
                 <div className="mb-6">
-                  <label className="block m3-label-large text-on-surface-variant mb-2">Spieler auswählen</label>
+                  <label className="block m3-label-large text-on-surface-variant mb-2">{t('game.select_players')}</label>
                   <div className="flex flex-wrap gap-2">
                     {state.currentMatch.players.map(player => (
                       <button
@@ -1691,8 +1694,8 @@ const GameScreen: React.FC = () => {
                   return (
                     <div className="text-center py-12">
                       <Flame size={48} className="mx-auto mb-4 text-on-surface-variant" />
-                      <p className="text-on-surface-variant text-lg">Noch keine Wurf-Daten für {playerName}</p>
-                      <p className="text-on-surface-variant text-sm mt-2">Die Heatmap wird mit jedem Wurf aktualisiert</p>
+                      <p className="text-on-surface-variant text-lg">{t('game_screen.no_heatmap_data', { name: playerName })}</p>
+                      <p className="text-on-surface-variant text-sm mt-2">{t('game_screen.heatmap_hint')}</p>
                     </div>
                   );
                 }
@@ -1701,7 +1704,7 @@ const GameScreen: React.FC = () => {
                   <div>
                     <div className="text-center mb-4">
                       <span className="text-lg font-bold text-on-surface">{playerName}</span>
-                      <span className="text-on-surface-variant ml-2">({playerHeatmap.totalDarts} Darts)</span>
+                      <span className="text-on-surface-variant ml-2">{t('game_screen.darts_count', { count: playerHeatmap.totalDarts })}</span>
                     </div>
                     <DartboardHeatmapBlur 
                       heatmapData={playerHeatmap} 
@@ -1762,7 +1765,7 @@ const GameScreen: React.FC = () => {
             {/* LEG text with glow */}
             <div className="text-6xl md:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 animate-pulse mb-2"
                  style={{ textShadow: '0 0 40px rgba(245, 158, 11, 0.5)' }}>
-              LEG {legWonAnimation.legNumber}
+              {t('game_screen.leg_number', { n: legWonAnimation.legNumber })}
             </div>
 
             {/* Winner name */}
@@ -1788,12 +1791,12 @@ const GameScreen: React.FC = () => {
 
             {/* Progress text */}
             <div className="text-xl text-on-surface-variant">
-              {legWonAnimation.legsWon} / {legWonAnimation.legsTotal} Legs
+              {t('game_screen.legs_progress', { won: legWonAnimation.legsWon, total: legWonAnimation.legsTotal })}
             </div>
 
             {/* Next leg indicator */}
             <div className="mt-6 text-lg text-primary animate-pulse">
-              Nächstes Leg startet...
+              {t('game_screen.next_leg_starting')}
             </div>
           </div>
         </div>

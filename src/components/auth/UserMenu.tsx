@@ -51,21 +51,21 @@ const UserMenu: React.FC<UserMenuProps> = ({ onOpenGuide, onOpenContact }) => {
                 {user.subscriptionStatus === 'lifetime' ? (
                   <>
                     <Crown size={12} className="text-tertiary" />
-                    <span className="text-tertiary">Lifetime</span>
+                    <span className="text-tertiary">{t('user_menu.lifetime')}</span>
                   </>
                 ) : (
                   <>
-                    <span className="text-success">Aktiv</span>
+                    <span className="text-success">{t('user_menu.active')}</span>
                   </>
                 )}
               </span>
             ) : user.subscriptionStatus === 'trial' ? (
               <span className="flex items-center gap-1">
                 <Clock size={12} className="text-primary" />
-                <span className="text-primary">{trialDaysLeft} Tage Trial</span>
+                <span className="text-primary">{t('user_menu.trial_days', { count: trialDaysLeft })}</span>
               </span>
             ) : (
-              <span className="text-error">Kein Abo</span>
+              <span className="text-error">{t('user_menu.no_subscription')}</span>
             )}
           </p>
         </div>
@@ -77,6 +77,8 @@ const UserMenu: React.FC<UserMenuProps> = ({ onOpenGuide, onOpenContact }) => {
           <div
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
+            data-backdrop
+            aria-hidden="true"
           />
           <div className="absolute right-0 mt-2 w-56 bg-surface-container-high rounded-m3-md shadow-m3-2 border border-outline-variant z-50 overflow-hidden m3-enter-drop">
             {/* User Info */}
@@ -91,7 +93,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ onOpenGuide, onOpenContact }) => {
                 <div className="flex items-center gap-2 mb-2">
                   <Clock size={16} className="text-on-primary-container" />
                   <span className="m3-label-large text-on-primary-container">
-                    Noch {trialDaysLeft} {trialDaysLeft === 1 ? 'Tag' : 'Tage'} Premium-Trial
+                    {t('user_menu.trial_remaining', { count: trialDaysLeft })}
                   </span>
                 </div>
                 <button
@@ -102,7 +104,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ onOpenGuide, onOpenContact }) => {
                   className="w-full py-2 px-3 bg-primary text-on-primary m3-label-large rounded-m3-full transition-all flex items-center justify-center gap-2 hover:shadow-m3-1"
                 >
                   <Crown size={16} />
-                  Jetzt upgraden
+                  {t('user_menu.upgrade_now')}
                 </button>
               </div>
             )}
@@ -117,7 +119,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ onOpenGuide, onOpenContact }) => {
                 className="w-full px-4 py-2 text-left flex items-center gap-2 text-on-surface hover:bg-surface-container-highest transition-colors"
               >
                 <User size={18} />
-                Account
+                {t('user_menu.account')}
               </button>
 
               <button
@@ -128,7 +130,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ onOpenGuide, onOpenContact }) => {
                 className="w-full px-4 py-2 text-left flex items-center gap-2 text-on-surface hover:bg-surface-container-highest transition-colors"
               >
                 <Settings size={18} />
-                App Einstellungen
+                {t('user_menu.app_settings')}
               </button>
 
               <button
@@ -139,7 +141,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ onOpenGuide, onOpenContact }) => {
                 className="w-full px-4 py-2 text-left flex items-center gap-2 text-on-surface hover:bg-surface-container-highest transition-colors"
               >
                 <CreditCard size={18} />
-                {user.subscriptionStatus === 'lifetime' ? 'Lifetime-Lizenz' : hasActiveSubscription ? 'Abo verwalten' : 'Upgrade'}
+                {user.subscriptionStatus === 'lifetime' ? t('user_menu.lifetime_license') : hasActiveSubscription ? t('user_menu.manage_subscription') : t('user_menu.upgrade')}
               </button>
 
               {onOpenGuide && (
@@ -169,7 +171,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ onOpenGuide, onOpenContact }) => {
                   className="w-full px-4 py-3 flex items-center justify-center gap-3 text-error hover:bg-error-container rounded-m3-md m3-label-large transition-colors"
                 >
                   <LogOut size={20} className="flex-shrink-0" />
-                  Abmelden
+                  {t('auth.logout')}
                 </button>
               </div>
             </div>

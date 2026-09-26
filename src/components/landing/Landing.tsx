@@ -16,6 +16,7 @@ import {
   Smartphone,
   BarChart3,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { Button, Card } from '../common';
 import Footer from '../Footer';
@@ -33,24 +34,28 @@ import { LANDING_FACTS } from './landingFacts';
  * one product, not like a brochure that links to a tool.
  */
 
-type Feature = { icon: typeof Target; title: string; text: string; tone: string };
+/** Copy lives in i18n under `landing.mode_<key>_*` / `landing.feature_<key>_*`. */
+type Feature = { icon: typeof Target; key: string; tone: string; count?: number };
 
 const MODES: Feature[] = [
-  { icon: Target, title: 'X01', text: '301 · 501 · 701 mit Sets, Legs, Double-Out und Checkout-Vorschlägen.', tone: 'primary' },
-  { icon: Flame, title: 'Cricket', text: 'Die 15 bis 20 und Bull — schließen, punkten, zumachen.', tone: 'tertiary' },
-  { icon: Trophy, title: 'Around the Clock', text: '1 bis 20 der Reihe nach. Der Klassiker fürs Zielen.', tone: 'secondary' },
-  { icon: Award, title: 'Shanghai', text: 'Single, Double, Triple derselben Zahl — der Sofortsieg.', tone: 'success' },
-  { icon: Globe2, title: 'Online', text: 'Privater Raum per Code, Gegner überall, live synchron.', tone: 'primary' },
+  { icon: Target, key: 'x01', tone: 'primary' },
+  { icon: Flame, key: 'cricket', tone: 'tertiary' },
+  { icon: Trophy, key: 'atc', tone: 'secondary' },
+  { icon: Award, key: 'shanghai', tone: 'success' },
+  { icon: Globe2, key: 'online', tone: 'primary' },
 ];
 
 const FEATURES: Feature[] = [
-  { icon: BarChart3, title: 'Statistik, die etwas sagt', text: 'Average, First-9, Checkout-Quote, 180er, Verlauf pro Leg und Match — nicht nur eine Zahl am Ende.', tone: 'primary' },
-  { icon: Flame, title: 'Heatmaps', text: 'Wo landen deine Darts wirklich? Die Trefferverteilung auf dem Board, über Wochen gesammelt.', tone: 'tertiary' },
-  { icon: Award, title: `${LANDING_FACTS.achievements} Achievements`, text: 'Von „erstes 180" bis zu Serien über Monate. Mit Fortschrittsanzeige statt Überraschungspopup.', tone: 'success' },
-  { icon: Bot, title: `${LANDING_FACTS.botLevels} Bot-Stufen`, text: 'Vom Anfänger bis zum Profi — der Bot passt sich deinem Können an, wenn du willst.', tone: 'secondary' },
-  { icon: Dumbbell, title: `${LANDING_FACTS.trainingModes} Trainingsmodi`, text: 'Doppel, Triple, Around the Clock, Checkout 121, Bob’s 27 und Score-Training.', tone: 'primary' },
-  { icon: Users, title: 'Mehrere Profile', text: 'Ein Konto, getrennte Profile — Verein, Familie, du allein. Die Daten bleiben sauber getrennt.', tone: 'tertiary' },
+  { icon: BarChart3, key: 'stats', tone: 'primary' },
+  { icon: Flame, key: 'heatmaps', tone: 'tertiary' },
+  { icon: Award, key: 'achievements', tone: 'success', count: LANDING_FACTS.achievements },
+  { icon: Bot, key: 'bots', tone: 'secondary', count: LANDING_FACTS.botLevels },
+  { icon: Dumbbell, key: 'training', tone: 'primary', count: LANDING_FACTS.trainingModes },
+  { icon: Users, key: 'profiles', tone: 'tertiary' },
 ];
+
+/** Darts notation, not language. */
+const CHECKOUT_EXAMPLE = 'T20 · T20 · Bull';
 
 const TONE: Record<string, string> = {
   primary: 'bg-primary-container text-on-primary-container',
@@ -67,6 +72,7 @@ const Stat: React.FC<{ value: string; label: string }> = ({ value, label }) => (
 );
 
 const Landing: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const signedIn = Boolean(user);
@@ -80,21 +86,21 @@ const Landing: React.FC = () => {
             <span className="w-9 h-9 rounded-m3-md bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">
               <Target size={20} />
             </span>
-            <span className="m3-title-medium text-on-surface truncate">State of the Dart</span>
+            <span className="m3-title-medium text-on-surface truncate">{t('common.app_name')}</span>
           </Link>
 
           <nav className="flex items-center gap-2">
             {signedIn ? (
               <Button variant="filled" onClick={() => navigate('/')} icon={<ArrowRight size={18} />}>
-                Zur App
+                {t('landing.to_app')}
               </Button>
             ) : (
               <>
                 <Button variant="text" onClick={() => navigate('/login')} icon={<LogIn size={18} />}>
-                  Anmelden
+                  {t('auth.login')}
                 </Button>
                 <Button variant="filled" onClick={() => navigate('/register')}>
-                  Kostenlos starten
+                  {t('landing.start_free')}
                 </Button>
               </>
             )}
@@ -109,27 +115,26 @@ const Landing: React.FC = () => {
             <div className="m3-enter">
               <span className="inline-flex items-center gap-2 px-3 py-1 rounded-m3-full bg-tertiary-container text-on-tertiary-container m3-label-large mb-5">
                 <Smartphone size={16} />
-                Läuft im Browser · installierbar · offline
+                {t('landing.hero_badge')}
               </span>
               <h1 className="m3-display-medium text-on-surface mb-4 text-balance">
-                Dart zählen, ohne den Kopf zu benutzen.
+                {t('landing.hero_title')}
               </h1>
               <p className="m3-body-large text-on-surface-variant mb-8 max-w-xl text-pretty">
-                State of the Dart übernimmt das Rechnen, schlägt das Finish vor und merkt sich
-                jeden Wurf — damit du am Board bleibst statt am Taschenrechner.
+                {t('landing.hero_body')}
               </p>
               <div className="flex flex-wrap gap-3">
                 {signedIn ? (
                   <Button variant="filled" size="lg" onClick={() => navigate('/')} icon={<ArrowRight size={20} />}>
-                    Zur App
+                    {t('landing.to_app')}
                   </Button>
                 ) : (
                   <>
                     <Button variant="filled" size="lg" onClick={() => navigate('/register')} icon={<Target size={20} />}>
-                      Kostenlos starten
+                      {t('landing.start_free')}
                     </Button>
                     <Button variant="outlined" size="lg" onClick={() => navigate('/login')}>
-                      Ich habe schon ein Konto
+                      {t('landing.have_account')}
                     </Button>
                   </>
                 )}
@@ -139,19 +144,19 @@ const Landing: React.FC = () => {
             {/* Kennzahlen-Karte statt Screenshot: lädt sofort, kippt mit dem Theme */}
             <Card variant="elevated" className="p-6 md:p-8 m3-enter m3-delay-2">
               <div className="grid grid-cols-2 gap-6 mb-6">
-                <Stat value={String(LANDING_FACTS.gameModes)} label="Spielmodi" />
-                <Stat value={String(LANDING_FACTS.trainingModes)} label="Trainings" />
-                <Stat value={String(LANDING_FACTS.achievements)} label="Achievements" />
-                <Stat value={String(LANDING_FACTS.botLevels)} label="Bot-Stufen" />
+                <Stat value={String(LANDING_FACTS.gameModes)} label={t('landing.stat_game_modes')} />
+                <Stat value={String(LANDING_FACTS.trainingModes)} label={t('landing.stat_training')} />
+                <Stat value={String(LANDING_FACTS.achievements)} label={t('landing.stat_achievements')} />
+                <Stat value={String(LANDING_FACTS.botLevels)} label={t('landing.stat_bot_levels')} />
               </div>
               <div className="rounded-m3-lg bg-surface-container-high p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="m3-label-large text-on-surface-variant">Restpunkte</span>
-                  <span className="m3-label-medium text-on-surface-variant">Checkout</span>
+                  <span className="m3-label-large text-on-surface-variant">{t('landing.remaining')}</span>
+                  <span className="m3-label-medium text-on-surface-variant">{t('landing.checkout')}</span>
                 </div>
                 <div className="flex items-baseline justify-between">
                   <span className="text-5xl font-bold text-primary tabular-nums">170</span>
-                  <span className="m3-title-medium text-tertiary">T20 · T20 · Bull</span>
+                  <span className="m3-title-medium text-tertiary">{CHECKOUT_EXAMPLE}</span>
                 </div>
               </div>
             </Card>
@@ -160,19 +165,18 @@ const Landing: React.FC = () => {
 
         {/* ---- Spielmodi ---------------------------------------------------- */}
         <section className="max-w-6xl mx-auto px-4 py-12 md:py-16">
-          <h2 className="m3-headline-medium text-on-surface mb-2">Fünf Wege zu spielen</h2>
+          <h2 className="m3-headline-medium text-on-surface mb-2">{t('landing.modes_title')}</h2>
           <p className="m3-body-large text-on-surface-variant mb-8 max-w-2xl">
-            Jeder Modus zählt, prüft und beendet nach seinen eigenen Regeln — inklusive Bust,
-            Double-Out und Set-Rechnung.
+            {t('landing.modes_body')}
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 m3-stagger">
             {MODES.map((m) => (
-              <Card key={m.title} variant="elevated" className="p-6">
+              <Card key={m.key} variant="elevated" className="p-6">
                 <span className={`w-11 h-11 rounded-m3-md flex items-center justify-center mb-4 ${TONE[m.tone]}`}>
                   <m.icon size={22} />
                 </span>
-                <h3 className="m3-title-large text-on-surface mb-1">{m.title}</h3>
-                <p className="m3-body-medium text-on-surface-variant">{m.text}</p>
+                <h3 className="m3-title-large text-on-surface mb-1">{t(`landing.mode_${m.key}_title`)}</h3>
+                <p className="m3-body-medium text-on-surface-variant">{t(`landing.mode_${m.key}_text`)}</p>
               </Card>
             ))}
           </div>
@@ -180,18 +184,18 @@ const Landing: React.FC = () => {
 
         {/* ---- Funktionen --------------------------------------------------- */}
         <section className="max-w-6xl mx-auto px-4 py-12 md:py-16">
-          <h2 className="m3-headline-medium text-on-surface mb-2">Was danach passiert</h2>
+          <h2 className="m3-headline-medium text-on-surface mb-2">{t('landing.features_title')}</h2>
           <p className="m3-body-large text-on-surface-variant mb-8 max-w-2xl">
-            Das Zählen ist der Anfang. Interessant wird es, wenn genug Würfe zusammenkommen.
+            {t('landing.features_body')}
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 m3-stagger">
             {FEATURES.map((f) => (
-              <Card key={f.title} variant="filled" className="p-6">
+              <Card key={f.key} variant="filled" className="p-6">
                 <span className={`w-11 h-11 rounded-m3-md flex items-center justify-center mb-4 ${TONE[f.tone]}`}>
                   <f.icon size={22} />
                 </span>
-                <h3 className="m3-title-large text-on-surface mb-1">{f.title}</h3>
-                <p className="m3-body-medium text-on-surface-variant">{f.text}</p>
+                <h3 className="m3-title-large text-on-surface mb-1">{t(`landing.feature_${f.key}_title`, { count: f.count })}</h3>
+                <p className="m3-body-medium text-on-surface-variant">{t(`landing.feature_${f.key}_text`)}</p>
               </Card>
             ))}
           </div>
@@ -203,12 +207,10 @@ const Landing: React.FC = () => {
             <div className="grid md:grid-cols-3 gap-8 items-center">
               <div className="md:col-span-2">
                 <h2 className="m3-headline-small text-on-surface mb-3">
-                  Der Keller hat kein WLAN. Die App stört das nicht.
+                  {t('landing.offline_title')}
                 </h2>
                 <p className="m3-body-large text-on-surface-variant">
-                  Installier sie wie eine App auf dem Handy. Ein laufendes Match wird lokal
-                  gehalten und synchronisiert sich, sobald wieder Netz da ist — mitten im Leg
-                  abzubrechen ist keine Option.
+                  {t('landing.offline_body')}
                 </p>
               </div>
               <div className="flex md:justify-end gap-3">
@@ -230,25 +232,25 @@ const Landing: React.FC = () => {
         <section className="max-w-6xl mx-auto px-4 pb-16 md:pb-24">
           <Card variant="filled" className="p-8 md:p-12 text-center m3-enter">
             <h2 className="m3-headline-medium text-on-surface mb-3">
-              {signedIn ? 'Weiter geht’s.' : 'Nächstes Leg?'}
+              {signedIn ? t('landing.cta_title_signed_in') : t('landing.cta_title')}
             </h2>
             <p className="m3-body-large text-on-surface-variant mb-8 max-w-xl mx-auto">
               {signedIn
-                ? 'Dein Konto ist angemeldet — du bist einen Klick vom nächsten Match entfernt.'
-                : 'Konto anlegen, Spieler eintragen, loslegen. Ohne Installation, ohne Karte.'}
+                ? t('landing.cta_body_signed_in')
+                : t('landing.cta_body')}
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
               {signedIn ? (
                 <Button variant="filled" size="lg" onClick={() => navigate('/')} icon={<ArrowRight size={20} />}>
-                  Zur App
+                  {t('landing.to_app')}
                 </Button>
               ) : (
                 <>
                   <Button variant="filled" size="lg" onClick={() => navigate('/register')} icon={<Target size={20} />}>
-                    Kostenlos starten
+                    {t('landing.start_free')}
                   </Button>
                   <Button variant="text" size="lg" onClick={() => navigate('/login')}>
-                    Anmelden
+                    {t('auth.login')}
                   </Button>
                 </>
               )}

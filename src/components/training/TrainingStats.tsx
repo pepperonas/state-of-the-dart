@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart, TrendingUp, Target, Calendar, Filter, Trophy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -87,6 +87,23 @@ const TrainingStats: React.FC = () => {
       }));
   }, [sortedSessions]);
 
+  // Declared before the memos that call it: a `const` read during render
+  // before its declaration line is a temporal-dead-zone ReferenceError.
+  const formatTrainingType = useCallback((type: TrainingType): string => {
+    const labels: Record<TrainingType, string> = {
+      'doubles': t('training_stats.type_doubles'),
+      'triples': t('training_stats.type_triples'),
+      'singles': t('training_stats.type_singles'),
+      'around-the-clock': 'Around the Clock',
+      'checkout-121': 'Checkout 121',
+      'bobs-27': "Bob's 27",
+      'score-training': t('training_stats.type_score_training'),
+      'catch-40': 'Catch 40',
+      'halve-it': 'Halve It'
+    };
+    return labels[type] || type;
+  }, [t]);
+
   // Training type distribution
   const typeDistribution = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -97,7 +114,7 @@ const TrainingStats: React.FC = () => {
       name: formatTrainingType(type as TrainingType),
       value: count
     }));
-  }, [playerSessions]);
+  }, [playerSessions, formatTrainingType]);
 
   // Summary stats
   const stats = useMemo(() => {
@@ -125,21 +142,6 @@ const TrainingStats: React.FC = () => {
     };
   }, [filteredSessions]);
 
-  const formatTrainingType = (type: TrainingType): string => {
-    const labels: Record<TrainingType, string> = {
-      'doubles': 'Doubles',
-      'triples': 'Triples',
-      'singles': 'Singles',
-      'around-the-clock': 'Around the Clock',
-      'checkout-121': 'Checkout 121',
-      'bobs-27': "Bob's 27",
-      'score-training': 'Score Training',
-      'catch-40': 'Catch 40',
-      'halve-it': 'Halve It'
-    };
-    return labels[type] || type;
-  };
-
   const formatDuration = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -154,27 +156,27 @@ const TrainingStats: React.FC = () => {
         <div className="max-w-6xl mx-auto">
           {/* Back Button */}
           <BackButton onClick={() => navigate('/training')} />
-          <h1 className="m3-headline-medium text-on-surface mb-6">Training Statistiken</h1>
+          <h1 className="m3-headline-medium text-on-surface mb-6">{t('training_stats.title')}</h1>
 
           <Card variant="elevated" className="p-8">
-            <p className="m3-body-large text-on-surface-variant mb-6 text-center">Bitte wähle einen Spieler aus, um Trainingsstatistiken anzuzeigen.</p>
+            <p className="m3-body-large text-on-surface-variant mb-6 text-center">{t('training_stats.select_prompt')}</p>
 
             {players.length === 0 ? (
               <div className="text-center">
-                <p className="m3-body-medium text-on-surface-variant mb-4">Noch keine Spieler vorhanden.</p>
+                <p className="m3-body-medium text-on-surface-variant mb-4">{t('training_stats.no_players')}</p>
                 <Button variant="filled" onClick={() => navigate('/players')}>
-                  Spieler erstellen
+                  {t('training_stats.create_player')}
                 </Button>
               </div>
             ) : (
               <div className="max-w-md mx-auto">
-                <label className="block m3-label-large text-on-surface mb-2">Spieler auswählen:</label>
+                <label className="block m3-label-large text-on-surface mb-2">{t('training_stats.select_player')}</label>
                 <Select<string>
                   value={null}
                   onChange={(id) => setCurrentPlayer(players.find(p => p.id === id) || null)}
                   size="lg"
-                  placeholder="Wähle einen Spieler..."
-                  aria-label="Spieler"
+                  placeholder={t('training_stats.select_player_placeholder')}
+                  aria-label={t('training_stats.player')}
                   options={players.map(player => ({
                     value: player.id,
                     label: player.name,
@@ -198,7 +200,7 @@ const TrainingStats: React.FC = () => {
           <BackButton onClick={() => navigate('/training')} inline />
           <h1 className="m3-headline-medium text-on-surface flex items-center gap-2">
             <BarChart size={32} />
-            Training Statistiken
+            {t('training_stats.title')}
           </h1>
           <div className="w-24" /> {/* Spacer for alignment */}
         </div>
@@ -208,12 +210,12 @@ const TrainingStats: React.FC = () => {
           <div className="flex flex-wrap gap-4 items-center">
             {/* Player Selector */}
             <div className="flex items-center gap-2">
-              <span className="m3-label-large text-on-surface">Spieler:</span>
+              <span className="m3-label-large text-on-surface">{t('training_stats.player_label')}</span>
               <Select<string>
                 value={currentPlayer?.id ?? null}
                 onChange={(id) => setCurrentPlayer(players.find(p => p.id === id) || null)}
                 inline
-                aria-label="Spieler"
+                aria-label={t('training_stats.player')}
                 options={players.map(player => ({
                   value: player.id,
                   label: player.name,
@@ -225,34 +227,34 @@ const TrainingStats: React.FC = () => {
 
             <div className="flex items-center gap-2">
               <Filter size={20} className="text-primary" />
-              <span className="m3-label-large text-on-surface">Filter:</span>
+              <span className="m3-label-large text-on-surface">{t('training_stats.filter_label')}</span>
             </div>
             <Select<TrainingType | 'all'>
               value={selectedType}
               onChange={setSelectedType}
               inline
-              aria-label="Trainingsmodus"
+              aria-label={t('training_stats.mode')}
               options={[
-                { value: 'all', label: 'Alle Modi' },
-                { value: 'doubles', label: 'Doubles' },
-                { value: 'triples', label: 'Triples' },
+                { value: 'all', label: t('training_stats.all_modes') },
+                { value: 'doubles', label: t('training_stats.type_doubles') },
+                { value: 'triples', label: t('training_stats.type_triples') },
                 { value: 'around-the-clock', label: 'Around the Clock' },
                 { value: 'checkout-121', label: 'Checkout 121' },
                 { value: 'bobs-27', label: "Bob's 27" },
-                { value: 'score-training', label: 'Score Training' },
+                { value: 'score-training', label: t('training_stats.type_score_training') },
               ]}
             />
             <div className="flex items-center gap-2 ml-auto">
-              <span className="m3-label-large text-on-surface">Sortieren:</span>
+              <span className="m3-label-large text-on-surface">{t('training_stats.sort_label')}</span>
               <Select<'date' | 'score' | 'accuracy'>
                 value={sortBy}
                 onChange={setSortBy}
                 inline
-                aria-label="Sortieren"
+                aria-label={t('common.sort')}
                 options={[
-                  { value: 'date', label: 'Datum' },
-                  { value: 'score', label: 'Score' },
-                  { value: 'accuracy', label: 'Genauigkeit' },
+                  { value: 'date', label: t('training_stats.sort_date') },
+                  { value: 'score', label: t('training_stats.score') },
+                  { value: 'accuracy', label: t('training_stats.accuracy') },
                 ]}
               />
             </div>
@@ -264,25 +266,25 @@ const TrainingStats: React.FC = () => {
           <motion.div {...staggerChild(0)}>
             <Card variant="filled" className="p-4 text-center">
               <div className="m3-headline-small text-on-surface">{stats.totalSessions}</div>
-              <div className="m3-label-large text-on-surface-variant">Sessions</div>
+              <div className="m3-label-large text-on-surface-variant">{t('training_stats.sessions')}</div>
             </Card>
           </motion.div>
           <motion.div {...staggerChild(1)}>
             <Card variant="filled" className="p-4 text-center">
               <div className="m3-headline-small text-success">{stats.averageScore.toFixed(0)}</div>
-              <div className="m3-label-large text-on-surface-variant">Ø Score</div>
+              <div className="m3-label-large text-on-surface-variant">{t('training_stats.avg_score')}</div>
             </Card>
           </motion.div>
           <motion.div {...staggerChild(2)}>
             <Card variant="filled" className="p-4 text-center">
               <div className="m3-headline-small text-primary">{stats.averageAccuracy.toFixed(1)}%</div>
-              <div className="m3-label-large text-on-surface-variant">Ø Genauigkeit</div>
+              <div className="m3-label-large text-on-surface-variant">{t('training_stats.avg_accuracy')}</div>
             </Card>
           </motion.div>
           <motion.div {...staggerChild(3)}>
             <Card variant="filled" className="p-4 text-center">
               <div className="m3-headline-small text-tertiary">{stats.personalBests}</div>
-              <div className="m3-label-large text-on-surface-variant">Personal Bests</div>
+              <div className="m3-label-large text-on-surface-variant">{t('training_stats.personal_bests')}</div>
             </Card>
           </motion.div>
         </div>
@@ -294,7 +296,7 @@ const TrainingStats: React.FC = () => {
             <Card variant="filled" className="p-6">
               <h3 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
                 <TrendingUp size={20} />
-                Performance Verlauf
+                {t('training_stats.performance_history')}
               </h3>
               <div className="bg-surface-container-low rounded-m3-md p-4">
                 <div className="h-[180px] sm:h-[250px]"><ResponsiveContainer width="100%" height="100%">
@@ -310,8 +312,8 @@ const TrainingStats: React.FC = () => {
                       }}
                     />
                     <Legend />
-                    <Line type="monotone" dataKey="score" stroke={chart.success} strokeWidth={2} name="Score" />
-                    <Line type="monotone" dataKey="accuracy" stroke={chart.series[0]} strokeWidth={2} name="Genauigkeit %" />
+                    <Line type="monotone" dataKey="score" stroke={chart.success} strokeWidth={2} name={t('training_stats.score')} />
+                    <Line type="monotone" dataKey="accuracy" stroke={chart.series[0]} strokeWidth={2} name={t('training_stats.accuracy_percent')} />
                   </LineChart>
                 </ResponsiveContainer></div>
               </div>
@@ -324,7 +326,7 @@ const TrainingStats: React.FC = () => {
               <Card variant="filled" className="p-6">
                 <h3 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
                   <Target size={20} />
-                  Training Modi Verteilung
+                  {t('training_stats.mode_distribution')}
                 </h3>
                 <div className="bg-surface-container-low rounded-m3-md p-4">
                   <div className="h-[180px] sm:h-[250px]"><ResponsiveContainer width="100%" height="100%">
@@ -363,16 +365,16 @@ const TrainingStats: React.FC = () => {
         <Card variant="filled" className="p-6">
           <h3 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
             <Calendar size={20} />
-            Session Historie
+            {t('training_stats.session_history')}
           </h3>
 
           {sortedSessions.length === 0 ? (
             <div className="text-center py-12">
               <Target size={64} className="mx-auto mb-4 text-on-surface-variant" />
-              <p className="m3-body-large text-on-surface-variant">Noch keine Training Sessions</p>
+              <p className="m3-body-large text-on-surface-variant">{t('training_stats.no_sessions')}</p>
               <div className="mt-4">
                 <Button variant="filled" onClick={() => navigate('/training')}>
-                  Training starten
+                  {t('training.start_training')}
                 </Button>
               </div>
             </div>
@@ -397,7 +399,7 @@ const TrainingStats: React.FC = () => {
                           {formatTrainingType(session.type)}
                           {session.personalBest && (
                             <span className="m3-label-medium px-2 py-0.5 bg-tertiary-container text-on-tertiary-container rounded-m3-full">
-                              PB
+                              {t('training_stats.pb')}
                             </span>
                           )}
                         </div>
@@ -408,28 +410,28 @@ const TrainingStats: React.FC = () => {
                     </div>
                     <div className="text-right">
                       <div className="m3-title-large text-success">{session.score || 0}</div>
-                      <div className="m3-label-medium text-on-surface-variant">Score</div>
+                      <div className="m3-label-medium text-on-surface-variant">{t('training_stats.score')}</div>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-4 gap-3 text-center">
                     <div className="bg-surface-container-high rounded-m3-sm p-2">
                       <div className="m3-title-medium text-on-surface">{session.totalAttempts || 0}</div>
-                      <div className="m3-label-medium text-on-surface-variant">Versuche</div>
+                      <div className="m3-label-medium text-on-surface-variant">{t('training_stats.attempts')}</div>
                     </div>
                     <div className="bg-surface-container-high rounded-m3-sm p-2">
                       <div className="m3-title-medium text-success">{session.totalHits || 0}</div>
-                      <div className="m3-label-medium text-on-surface-variant">Treffer</div>
+                      <div className="m3-label-medium text-on-surface-variant">{t('training.hits')}</div>
                     </div>
                     <div className="bg-surface-container-high rounded-m3-sm p-2">
                       <div className="m3-title-medium text-primary">{(session.hitRate || 0).toFixed(1)}%</div>
-                      <div className="m3-label-medium text-on-surface-variant">Genauigkeit</div>
+                      <div className="m3-label-medium text-on-surface-variant">{t('training_stats.accuracy')}</div>
                     </div>
                     <div className="bg-surface-container-high rounded-m3-sm p-2">
                       <div className="m3-title-medium text-tertiary">
                         {session.duration ? formatDuration(session.duration) : '-'}
                       </div>
-                      <div className="m3-label-medium text-on-surface-variant">Zeit</div>
+                      <div className="m3-label-medium text-on-surface-variant">{t('training_stats.time')}</div>
                     </div>
                   </div>
                 </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Trophy, TrendingUp, Target, Award, RefreshCw } from 'lucide-react';
 import api from '../../services/api';
 import { BackButton, Card, Chip, Button, IconButton, PageShell } from '../common';
@@ -27,6 +28,7 @@ interface LeaderboardData {
 }
 
 const GlobalLeaderboard: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const [metric, setMetric] = useState<string>('average');
@@ -35,11 +37,11 @@ const GlobalLeaderboard: React.FC = () => {
   const [error, setError] = useState('');
 
   const metrics = [
-    { id: 'average', name: 'Best Average', icon: TrendingUp, suffix: '' },
-    { id: 'wins', name: 'Most Wins', icon: Trophy, suffix: ' Siege' },
-    { id: '180s', name: 'Most 180s', icon: Target, suffix: ' × 180' },
-    { id: 'checkouts', name: 'Highest Checkout', icon: Award, suffix: '' },
-    { id: 'best_leg', name: 'Best Leg', icon: Award, suffix: ' Darts' },
+    { id: 'average', name: t('global_leaderboard.metric_average'), short: t('global_leaderboard.metric_average_short'), icon: TrendingUp, format: (v: number) => v.toFixed(2) },
+    { id: 'wins', name: t('global_leaderboard.metric_wins'), short: t('global_leaderboard.metric_wins_short'), icon: Trophy, format: (v: number) => t('global_leaderboard.value_wins', { count: v }) },
+    { id: '180s', name: t('global_leaderboard.metric_180s'), short: '180s', icon: Target, format: (v: number) => `${v} × 180` },
+    { id: 'checkouts', name: t('global_leaderboard.metric_checkout'), short: t('global_leaderboard.metric_checkout_short'), icon: Award, format: (v: number) => String(v) },
+    { id: 'best_leg', name: t('global_leaderboard.metric_best_leg'), short: t('global_leaderboard.metric_best_leg_short'), icon: Award, format: (v: number) => t('global_leaderboard.value_darts', { count: v }) },
   ];
 
   useEffect(() => {
@@ -54,13 +56,13 @@ const GlobalLeaderboard: React.FC = () => {
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/leaderboard?metric=${metric}&limit=50`);
       
       if (!response.ok) {
-        throw new Error('Failed to load leaderboard');
+        throw new Error(t('global_leaderboard.load_failed'));
       }
 
       const data = await response.json();
       setData(data);
     } catch (err: any) {
-      setError(err.message || 'Failed to load leaderboard');
+      setError(err.message || t('global_leaderboard.load_failed'));
     } finally {
       setLoading(false);
     }
@@ -77,7 +79,7 @@ const GlobalLeaderboard: React.FC = () => {
   const getRankBadge = (rank: number) => {
     const tint = rank === 1 ? 'text-tertiary' : rank === 2 ? 'text-on-surface-variant' : 'text-primary';
     if (rank <= 3) {
-      return <Icon name="medal" size={24} className={tint} label={`Platz ${rank}`} />;
+      return <Icon name="medal" size={24} className={tint} label={t('global_leaderboard.rank', { rank })} />;
     }
     return <span>{`#${rank}`}</span>;
   };
@@ -92,15 +94,15 @@ const GlobalLeaderboard: React.FC = () => {
         {/* Header */}
         <BackButton
           onClick={() => navigate(isAuthenticated ? '/' : '/login')}
-          label={isAuthenticated ? 'Zurück' : 'Zum Login'}
+          label={isAuthenticated ? t('common.back') : t('global_leaderboard.to_login')}
         />
 
         <div className="text-center mb-8">
           <h1 className="m3-headline-medium text-on-surface mb-2">
-            Global Leaderboard
+            {t('global_leaderboard.title')}
           </h1>
           <p className="m3-title-medium text-on-surface-variant">
-            Die besten Spieler weltweit
+            {t('global_leaderboard.subtitle')}
           </p>
         </div>
 
@@ -117,7 +119,7 @@ const GlobalLeaderboard: React.FC = () => {
                   onClick={() => setMetric(m.id)}
                 >
                   <span className="hidden sm:inline">{m.name}</span>
-                  <span className="sm:hidden">{m.id === '180s' ? '180s' : m.name.split(' ')[0]}</span>
+                  <span className="sm:hidden">{m.short}</span>
                 </Chip>
               );
             })}
@@ -141,7 +143,7 @@ const GlobalLeaderboard: React.FC = () => {
               onClick={loadLeaderboard}
               className="mx-auto"
             >
-              Erneut versuchen
+              {t('common.retry')}
             </Button>
           </Card>
         )}
@@ -154,7 +156,7 @@ const GlobalLeaderboard: React.FC = () => {
                 {currentMetric && <currentMetric.icon size={24} />}
                 {currentMetric?.name}
               </h2>
-              <IconButton label="Aktualisieren" onClick={loadLeaderboard}>
+              <IconButton label={t('global_leaderboard.refresh')} onClick={loadLeaderboard}>
                 <RefreshCw size={20} />
               </IconButton>
             </div>
@@ -162,8 +164,8 @@ const GlobalLeaderboard: React.FC = () => {
             {data.entries.length === 0 ? (
               <div className="text-center py-12 text-on-surface-variant">
                 <Trophy size={48} className="mx-auto mb-4 opacity-50" />
-                <p>Noch keine Einträge</p>
-                <p className="m3-body-medium mt-2">Sei der Erste auf der Rangliste!</p>
+                <p>{t('global_leaderboard.empty')}</p>
+                <p className="m3-body-medium mt-2">{t('global_leaderboard.empty_hint')}</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -207,11 +209,10 @@ const GlobalLeaderboard: React.FC = () => {
                     {/* Stats */}
                     <div className="text-right">
                       <p className="m3-title-large text-on-surface">
-                        {metric === 'average' ? entry.value.toFixed(2) : entry.value}
-                        {currentMetric?.suffix}
+                        {currentMetric ? currentMetric.format(entry.value) : entry.value}
                       </p>
                       <p className="m3-body-medium text-on-surface-variant">
-                        {entry.gamesPlayed} Spiele
+                        {t('global_leaderboard.games', { count: entry.gamesPlayed })}
                       </p>
                     </div>
                   </motion.div>
@@ -221,7 +222,7 @@ const GlobalLeaderboard: React.FC = () => {
 
             {data.total > 0 && (
               <div className="mt-6 text-center m3-body-medium text-on-surface-variant">
-                {data.total} {data.total === 1 ? 'Eintrag' : 'Einträge'}
+                {t('global_leaderboard.entries', { count: data.total })}
               </div>
             )}
           </Card>
@@ -231,17 +232,17 @@ const GlobalLeaderboard: React.FC = () => {
         {!isAuthenticated && (
           <Card variant="elevated" className="mt-8 p-8 text-center">
             <h3 className="m3-title-large text-on-surface mb-4">
-              Möchtest du auf der Rangliste erscheinen?
+              {t('global_leaderboard.cta_title')}
             </h3>
             <p className="m3-body-large text-on-surface-variant mb-6">
-              Registriere dich kostenlos und starte deine 30-Tage-Testversion!
+              {t('global_leaderboard.cta_text')}
             </p>
             <div className="flex gap-4 justify-center">
               <Button variant="success" onClick={() => navigate('/register')}>
-                Jetzt registrieren
+                {t('global_leaderboard.register')}
               </Button>
               <Button variant="tonal" onClick={() => navigate('/login')}>
-                Anmelden
+                {t('global_leaderboard.login')}
               </Button>
             </div>
           </Card>

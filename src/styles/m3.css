@@ -620,6 +620,24 @@ button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surfa
   font-size: 0.875rem;
 }
 
+/* ---- 7e2. TOUCH TARGET ---------------------------------------------------
+   M3 draws icon buttons at 40px and chips at 32px, but the finger needs 48px.
+   An invisible ::after extends the hit area to at least 48×48 without moving
+   the layout. `min(0px, …)` only grows it: a control already 48px or larger
+   keeps its own box. (::before is the state layer — do not touch it.)
+   Percent offsets refer to the control itself, because the state layer makes
+   it the containing block. */
+.m3-icon-button::after,
+.m3-chip::after,
+.m3-button::after {
+  content: '';
+  position: absolute;
+  top: min(0px, calc((100% - 48px) / 2));
+  bottom: min(0px, calc((100% - 48px) / 2));
+  left: min(0px, calc((100% - 48px) / 2));
+  right: min(0px, calc((100% - 48px) / 2));
+}
+
 /* ---- 7f. CHIP ------------------------------------------------------------ */
 .m3-chip {
   display: inline-flex;

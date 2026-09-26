@@ -33,7 +33,7 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
   setsWon,
   showSets = false,
   onRemove,
-  removeLabel = 'Spieler entfernen',
+  removeLabel,
 }) => {
   const { t } = useTranslation();
   const { players } = usePlayer();
@@ -69,7 +69,7 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
           )}
           {onRemove && (
             <IconButton
-              label={removeLabel}
+              label={removeLabel ?? t('player_score.remove')}
               onClick={() => onRemove(player.playerId)}
               className="text-on-surface-variant"
             >
@@ -132,7 +132,7 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
         )}
         {player.matchHighestScore > 0 && (
           <div className="bg-primary-container text-on-primary-container rounded-m3-sm p-1 text-center">
-            <span className="font-bold">High</span>
+            <span className="font-bold">{t('player_score.highest')}</span>
             <span className="opacity-70"> {player.matchHighestScore}</span>
           </div>
         )}

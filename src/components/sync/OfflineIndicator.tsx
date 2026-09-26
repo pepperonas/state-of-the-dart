@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Wifi, WifiOff, Cloud, CloudOff, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { springStandardDefault, springSpatialDefault } from '../../utils/motion';
+import { useTranslation } from 'react-i18next';
 import offlineSync from '../../utils/offlineSync';
 import { replayOfflineAction } from '../../services/api';
 
 const OfflineIndicator: React.FC = () => {
+  const { t } = useTranslation();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [pendingCount, setPendingCount] = useState(0);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -83,12 +85,12 @@ const OfflineIndicator: React.FC = () => {
               {isOnline ? (
                 <>
                   <Wifi size={18} />
-                  <span>Wieder online! Daten werden synchronisiert...</span>
+                  <span>{t('offline.back_online')}</span>
                 </>
               ) : (
                 <>
                   <WifiOff size={18} />
-                  <span>Offline - Änderungen werden lokal gespeichert</span>
+                  <span>{t('offline.offline_banner')}</span>
                 </>
               )}
             </div>
@@ -123,12 +125,12 @@ const OfflineIndicator: React.FC = () => {
             
             {pendingCount > 0 && (
               <span className="m3-label-medium">
-                {pendingCount} ausstehend
+                {t('offline.pending', { count: pendingCount })}
               </span>
             )}
 
             {!isOnline && pendingCount === 0 && (
-              <span className="m3-label-medium">Offline</span>
+              <span className="m3-label-medium">{t('offline.offline')}</span>
             )}
           </button>
         </motion.div>

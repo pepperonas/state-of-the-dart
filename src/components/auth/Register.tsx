@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { UserPlus, Mail, Lock, User, AlertCircle, CheckCircle } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { Button, Card, TextField } from '../common';
@@ -28,12 +28,12 @@ const Register: React.FC = () => {
 
     // Validation
     if (password.length < 8) {
-      setError('Passwort muss mindestens 8 Zeichen lang sein');
+      setError(t('register.password_too_short'));
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('Passwörter stimmen nicht überein');
+      setError(t('register.passwords_mismatch'));
       return;
     }
 
@@ -43,7 +43,7 @@ const Register: React.FC = () => {
       await register(email, password, name);
       setSuccess(true);
     } catch (err: any) {
-      setError(err.message || 'Registrierung fehlgeschlagen');
+      setError(err.message || t('register.failed'));
     } finally {
       setLoading(false);
     }
@@ -64,16 +64,19 @@ const Register: React.FC = () => {
                 <CheckCircle className="text-on-success-container" size={32} />
               </div>
               <h2 className="m3-headline-small m3-emphasized text-on-surface mb-4">
-                Registrierung erfolgreich!
+                {t('register.success_title')}
               </h2>
               <p className="m3-body-large text-on-surface-variant mb-6">
-                Wir haben dir eine Email an <strong className="text-on-surface">{email}</strong> gesendet.
-                Bitte verifiziere deine Email-Adresse, um fortzufahren.
+                <Trans
+                  i18nKey="register.success_body"
+                  values={{ email }}
+                  components={{ strong: <strong className="text-on-surface" /> }}
+                />
               </p>
               <div className="space-y-3">
                 <Link to="/login">
                   <Button variant="filled" size="lg" fullWidth>
-                    Zum Login
+                    {t('register.to_login')}
                   </Button>
                 </Link>
                 <Button
@@ -82,7 +85,7 @@ const Register: React.FC = () => {
                   fullWidth
                   onClick={() => navigate('/resend-verification')}
                 >
-                  Email nicht erhalten? Erneut senden
+                  {t('register.resend')}
                 </Button>
               </div>
             </Card>
@@ -100,17 +103,20 @@ const Register: React.FC = () => {
         <motion.div {...enterDrop} className="text-center mb-8">
           <div className="mb-4 flex justify-center text-primary"><Icon name="target" size={56} /></div>
           <h1 className="m3-display-small m3-emphasized text-on-surface mb-2">
-            State of the Dart
+            {t('common.app_name')}
           </h1>
-          <p className="m3-body-large text-on-surface-variant">Erstelle deinen kostenlosen Account</p>
+          <p className="m3-body-large text-on-surface-variant">{t('register.subtitle')}</p>
         </motion.div>
 
         {/* Register Card */}
         <motion.div {...enterPop}>
           <Card variant="elevated" className="p-8">
-            <h2 className="m3-headline-small m3-emphasized text-on-surface mb-2">Registrieren</h2>
+            <h2 className="m3-headline-small m3-emphasized text-on-surface mb-2">{t('auth.register')}</h2>
             <p className="m3-body-medium text-on-surface-variant mb-6">
-              <strong style={{ color:'var(--m3-primary)'}}>30 Tage kostenlos</strong> testen!
+              <Trans
+                i18nKey="register.trial_hint"
+                components={{ strong: <strong style={{ color: 'var(--m3-primary)' }} /> }}
+              />
             </p>
 
             {error && (
@@ -123,46 +129,46 @@ const Register: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-5">
               <TextField
                 type="text"
-                label="Name"
+                label={t('auth.name')}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Dein Name"
+                placeholder={t('auth.name_placeholder')}
                 icon={<User size={20} />}
                 required
               />
 
               <TextField
                 type="email"
-                label="Email"
+                label={t('auth.email')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="deine@email.de"
+                placeholder={t('auth.email_placeholder')}
                 icon={<Mail size={20} />}
                 required
               />
 
               <TextField
                 type="password"
-                label="Passwort"
+                label={t('auth.password')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Mindestens 8 Zeichen"
+                placeholder={t('register.password_placeholder')}
                 icon={<Lock size={20} />}
                 required
               />
 
               <TextField
                 type="password"
-                label="Passwort bestätigen"
+                label={t('auth.confirm_password')}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Passwort wiederholen"
+                placeholder={t('register.confirm_placeholder')}
                 icon={<Lock size={20} />}
                 required
               />
 
               <Button type="submit" variant="success" size="lg" fullWidth loading={loading} icon={<UserPlus size={20} />}>
-                {loading ? 'Erstelle Account...' : 'Kostenlos registrieren'}
+                {loading ? t('register.creating') : t('register.submit')}
               </Button>
             </form>
 
@@ -172,7 +178,7 @@ const Register: React.FC = () => {
                 <div className="w-full border-t border-outline-variant" />
               </div>
               <div className="relative flex justify-center">
-                <span className="px-4 m3-body-small bg-surface-container-low text-on-surface-variant">Oder</span>
+                <span className="px-4 m3-body-small bg-surface-container-low text-on-surface-variant">{t('login.or')}</span>
               </div>
             </div>
 
@@ -191,14 +197,14 @@ const Register: React.FC = () => {
                 </svg>
               }
             >
-              Mit Google registrieren
+              {t('auth.sign_up_google')}
             </Button>
 
             {/* Login Link */}
             <div className="mt-6 text-center m3-body-medium text-on-surface-variant">
-              Bereits ein Account?{' '}
+              {t('auth.have_account')}{' '}
               <Link to="/login" className="font-semibold" style={{ color: 'var(--m3-primary)' }}>
-                Jetzt anmelden
+                {t('register.sign_in_now')}
               </Link>
             </div>
           </Card>

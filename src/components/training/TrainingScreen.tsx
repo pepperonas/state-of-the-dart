@@ -218,30 +218,30 @@ const TrainingScreen: React.FC = () => {
 
   const getTrainingTitle = () => {
     switch (mode) {
-      case 'doubles': return 'Doppel Training';
-      case 'triples': return 'Tripel Training';
-      case 'around-the-clock': return 'Rund um die Uhr';
-      case 'checkout-121': return 'Checkout Training';
-      case 'bobs-27': return "Bob's 27";
-      case 'score-training': return 'Score Training';
-      default: return 'Training';
+      case 'doubles': return t('training_screen.title_doubles');
+      case 'triples': return t('training_screen.title_triples');
+      case 'around-the-clock': return t('training_screen.title_atc');
+      case 'checkout-121': return t('training_screen.title_checkout');
+      case 'bobs-27': return t('training_screen.title_bobs27');
+      case 'score-training': return t('training_screen.title_score');
+      default: return t('training_screen.title_default');
     }
   };
 
   const getTrainingDescription = () => {
     switch (mode) {
       case 'doubles':
-        return `Triff Doppel ${trainingState.currentTarget} | Fortschritt: ${trainingState.currentTarget - 1}/20`;
+        return t('training_screen.desc_doubles', { target: trainingState.currentTarget, done: trainingState.currentTarget - 1, total: 20 });
       case 'triples':
-        return `Triff Tripel ${trainingState.currentTarget} | Fortschritt: ${20 - trainingState.currentTarget}/20`;
+        return t('training_screen.desc_triples', { target: trainingState.currentTarget, done: 20 - trainingState.currentTarget, total: 20 });
       case 'around-the-clock':
-        return `Triff ${trainingState.currentTarget} (jedes Segment) | Fortschritt: ${trainingState.currentTarget - 1}/20`;
+        return t('training_screen.desc_atc', { target: trainingState.currentTarget, done: trainingState.currentTarget - 1, total: 20 });
       case 'checkout-121':
-        return `Checkout ${trainingState.score} verbleibend`;
+        return t('training_screen.desc_checkout', { remaining: trainingState.score });
       case 'bobs-27':
-        return `Punkte: ${trainingState.score} | Ziel: ${trainingState.currentTarget === BOBS_27_BULL ? 'Bull' : `D${trainingState.currentTarget}`}`;
+        return t('training_screen.desc_bobs27', { score: trainingState.score, target: trainingState.currentTarget === BOBS_27_BULL ? 'Bull' : `D${trainingState.currentTarget}` });
       case 'score-training':
-        return `Erziele ${trainingState.currentTarget}+ in 3 Darts`;
+        return t('training_screen.desc_score', { target: trainingState.currentTarget });
       default:
         return '';
     }
@@ -252,14 +252,14 @@ const TrainingScreen: React.FC = () => {
       case 'doubles':
       case 'triples':
       case 'around-the-clock':
-        return `Versuch ${trainingState.attempts} / ${trainingState.totalRounds}`;
+        return t('training_screen.attempt_of', { current: trainingState.attempts, total: trainingState.totalRounds });
       case 'bobs-27':
       case 'score-training':
-        return `Runde ${trainingState.round} / ${trainingState.totalRounds}`;
+        return t('training_screen.round_of', { current: trainingState.round, total: trainingState.totalRounds });
       case 'checkout-121':
-        return `Versuch ${trainingState.attempts} / ${trainingState.totalRounds}`;
+        return t('training_screen.attempt_of', { current: trainingState.attempts, total: trainingState.totalRounds });
       default:
-        return `Runde ${trainingState.round} / ${trainingState.totalRounds}`;
+        return t('training_screen.round_of', { current: trainingState.round, total: trainingState.totalRounds });
     }
   };
 
@@ -502,17 +502,17 @@ const TrainingScreen: React.FC = () => {
 
           <Card variant="elevated" className="p-8">
             <h2 className="m3-headline-small text-on-surface mb-2">
-              Wer trainiert?
+              {t('training_screen.who_trains')}
             </h2>
             <p className="text-on-surface-variant mb-6">
-              Wähle einen Spieler aus, um das Training zu starten. Deine Würfe werden in deiner Heatmap gespeichert.
+              {t('training_screen.who_trains_hint')}
             </p>
 
             {realPlayers.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-on-surface-variant mb-4">Noch keine Spieler vorhanden</p>
+                <p className="text-on-surface-variant mb-4">{t('training_screen.no_players')}</p>
                 <Button variant="filled" onClick={() => navigate('/players')}>
-                  Spieler erstellen
+                  {t('training_screen.create_player')}
                 </Button>
               </div>
             ) : (
@@ -547,7 +547,7 @@ const TrainingScreen: React.FC = () => {
                           {player.name}
                         </h3>
                         <p className="m3-body-medium text-on-surface-variant">
-                          Average: {player.stats?.averageOverall?.toFixed(1) || '0.0'}
+                          {t('training_screen.player_average', { value: player.stats?.averageOverall?.toFixed(1) || '0.0' })}
                         </p>
                       </div>
                       <ArrowRight className="text-on-surface-variant group-hover:text-primary transition-colors" size={24} />
@@ -570,7 +570,7 @@ const TrainingScreen: React.FC = () => {
           <BackButton onClick={() => navigate('/training')} inline />
           <h1 className="m3-headline-small text-on-surface">{getTrainingTitle()}</h1>
           <Button variant="filled" onClick={handleRestart}>
-            Neustart
+            {t('training_screen.restart')}
           </Button>
         </div>
 
@@ -588,7 +588,7 @@ const TrainingScreen: React.FC = () => {
                 value={trainingState.score}
                 className="block m3-headline-small m3-emphasized text-success"
               />
-              <p className="m3-body-medium text-on-surface-variant">Punkte</p>
+              <p className="m3-body-medium text-on-surface-variant">{t('training_screen.points')}</p>
             </div>
           </div>
         </Card>
@@ -600,20 +600,20 @@ const TrainingScreen: React.FC = () => {
               value={trainingState.attempts}
               className="block m3-headline-small m3-emphasized text-on-surface"
             />
-            <p className="m3-body-small sm:text-sm text-on-surface-variant">Versuche</p>
+            <p className="m3-body-small sm:text-sm text-on-surface-variant">{t('training_screen.attempts')}</p>
           </Card>
           <Card variant="elevated" className="p-2 sm:p-4 text-center">
             <AnimatedNumber
               value={trainingState.hits}
               className="block m3-headline-small m3-emphasized text-success"
             />
-            <p className="m3-body-small sm:text-sm text-on-surface-variant">Treffer</p>
+            <p className="m3-body-small sm:text-sm text-on-surface-variant">{t('training.hits')}</p>
           </Card>
           <Card variant="elevated" className="p-2 sm:p-4 text-center">
             <p className="m3-headline-small m3-emphasized text-primary">
               <AnimatedNumber value={accuracy} />%
             </p>
-            <p className="m3-body-small sm:text-sm text-on-surface-variant">Genauigkeit</p>
+            <p className="m3-body-small sm:text-sm text-on-surface-variant">{t('training.accuracy')}</p>
           </Card>
         </div>
 
@@ -633,7 +633,7 @@ const TrainingScreen: React.FC = () => {
               onClick={() => handleDartHit({ segment: 0, multiplier: 0, score: 0 })}
               disabled={currentThrow.length >= 3 || trainingState.completed}
             >
-              Verfehlt / Keine Punkte
+              {t('training_screen.miss_no_score')}
             </Button>
           </Card>
 
@@ -641,7 +641,7 @@ const TrainingScreen: React.FC = () => {
           <div className="space-y-4">
             {/* Current Throw */}
             <Card variant="elevated" className="p-6">
-              <h3 className="m3-title-medium text-on-surface mb-4">Aktueller Wurf</h3>
+              <h3 className="m3-title-medium text-on-surface mb-4">{t('training_screen.current_visit')}</h3>
               <div className="flex gap-2 mb-4">
                 {currentThrow.map((dart, index) => (
                   <div
@@ -667,14 +667,14 @@ const TrainingScreen: React.FC = () => {
                   onClick={handleConfirmThrow}
                   disabled={currentThrow.length === 0 || trainingState.completed}
                 >
-                  Bestätigen
+                  {t('common.confirm')}
                 </Button>
                 <Button
                   variant="tonal"
                   onClick={handleRemoveDart}
                   disabled={currentThrow.length === 0 || trainingState.completed}
                 >
-                  Zurück
+                  {t('common.back')}
                 </Button>
                 <Button
                   variant="danger"
@@ -689,40 +689,40 @@ const TrainingScreen: React.FC = () => {
             {trainingState.completed && (
               <Card variant="elevated" className="p-6 border-2 border-[var(--m3-primary)]">
                 <h3 className="m3-headline-small text-on-surface mb-4 text-center">
-                  Training Abgeschlossen!
+                  {t('training_screen.completed')}
                 </h3>
                 <div className="grid grid-cols-3 gap-4 mb-4">
                   <div className="text-center bg-surface-container-high rounded-m3-md p-3">
                     <p className="m3-headline-small text-on-surface">{trainingState.score}</p>
-                    <p className="m3-body-small text-on-surface-variant">Endpunktzahl</p>
+                    <p className="m3-body-small text-on-surface-variant">{t('training_screen.final_score')}</p>
                   </div>
                   <div className="text-center bg-surface-container-high rounded-m3-md p-3">
                     <p className="m3-headline-small text-success">{trainingState.hits}</p>
-                    <p className="m3-body-small text-on-surface-variant">Treffer</p>
+                    <p className="m3-body-small text-on-surface-variant">{t('training.hits')}</p>
                   </div>
                   <div className="text-center bg-surface-container-high rounded-m3-md p-3">
                     <p className="m3-headline-small text-primary">{accuracy}%</p>
-                    <p className="m3-body-small text-on-surface-variant">Genauigkeit</p>
+                    <p className="m3-body-small text-on-surface-variant">{t('training.accuracy')}</p>
                   </div>
                 </div>
                 <div className="m3-body-medium text-on-surface-variant mb-4 text-center">
-                  {trainingState.hits} Treffer in {trainingState.attempts} Versuchen
+                  {t('training_screen.hits_in_attempts', { hits: trainingState.hits, count: trainingState.attempts })}
                   {mode === 'doubles' && trainingState.currentTarget === 20 && trainingState.hits === 20 && (
-                    <p className="text-success font-bold mt-2"> Perfekt! Alle Doppel getroffen!</p>
+                    <p className="text-success font-bold mt-2">{t('training_screen.perfect_doubles')}</p>
                   )}
                   {mode === 'triples' && trainingState.currentTarget === 1 && trainingState.hits === 20 && (
-                    <p className="text-success font-bold mt-2"> Perfekt! Alle Tripel getroffen!</p>
+                    <p className="text-success font-bold mt-2">{t('training_screen.perfect_triples')}</p>
                   )}
                   {mode === 'around-the-clock' && trainingState.currentTarget === 20 && trainingState.hits === 20 && (
-                    <p className="text-success font-bold mt-2"> Perfekt! Voller Rundgang abgeschlossen!</p>
+                    <p className="text-success font-bold mt-2">{t('training_screen.perfect_atc')}</p>
                   )}
                   {mode === 'checkout-121' && trainingState.score === 0 && (
-                    <p className="text-success font-bold mt-2"> Checkout erfolgreich!</p>
+                    <p className="text-success font-bold mt-2">{t('training_screen.checkout_success')}</p>
                   )}
                 </div>
                 <div className="flex gap-2">
                   <Button variant="success" fullWidth onClick={handleRestart}>
-                    Nochmal versuchen
+                    {t('training_screen.try_again')}
                   </Button>
                   <Button variant="tonal" fullWidth onClick={() => navigate('/training')}>
                     {t('common.back')}
@@ -733,50 +733,50 @@ const TrainingScreen: React.FC = () => {
 
             {/* Instructions */}
             <Card variant="elevated" className="p-6">
-              <h3 className="m3-title-medium text-on-surface mb-2">Anleitung</h3>
+              <h3 className="m3-title-medium text-on-surface mb-2">{t('training_screen.instructions')}</h3>
               <div className="m3-body-medium text-on-surface-variant space-y-1">
                 {mode === 'doubles' && (
                   <>
-                    <p>• Triff alle Doppel von D1 bis D20</p>
-                    <p>• Klicke auf den Doppelring auf der Dartscheibe</p>
-                    <p>• Fahre mit dem nächsten Doppel bei jedem Treffer fort</p>
+                    <p>• {t('training_screen.inst_doubles_1')}</p>
+                    <p>• {t('training_screen.inst_doubles_2')}</p>
+                    <p>• {t('training_screen.inst_doubles_3')}</p>
                   </>
                 )}
                 {mode === 'triples' && (
                   <>
-                    <p>• Triff alle Tripel von T20 bis T1</p>
-                    <p>• Klicke auf den Tripelring auf der Dartscheibe</p>
-                    <p>• Fahre mit dem nächsten Tripel bei jedem Treffer fort</p>
+                    <p>• {t('training_screen.inst_triples_1')}</p>
+                    <p>• {t('training_screen.inst_triples_2')}</p>
+                    <p>• {t('training_screen.inst_triples_3')}</p>
                   </>
                 )}
                 {mode === 'around-the-clock' && (
                   <>
-                    <p>• Triff alle Zahlen von 1 bis 20 in Reihenfolge</p>
-                    <p>• Jedes Segment (Single, Double, Triple) zählt</p>
-                    <p>• Schließe den Rundgang so schnell wie möglich ab</p>
+                    <p>• {t('training_screen.inst_atc_1')}</p>
+                    <p>• {t('training_screen.inst_atc_2')}</p>
+                    <p>• {t('training_screen.inst_atc_3')}</p>
                   </>
                 )}
                 {mode === 'checkout-121' && (
                   <>
-                    <p>• Checke die verbleibenden Punkte aus</p>
-                    <p>• Muss auf einem Doppel beendet werden</p>
-                    <p>• Übe gängige Checkout-Kombinationen</p>
+                    <p>• {t('training_screen.inst_checkout_1')}</p>
+                    <p>• {t('training_screen.inst_checkout_2')}</p>
+                    <p>• {t('training_screen.inst_checkout_3')}</p>
                   </>
                 )}
                 {mode === 'bobs-27' && (
                   <>
-                    <p>• Starte mit 27 Punkten</p>
-                    <p>• Runde für Runde D1 bis D20, zum Schluss Bull</p>
-                    <p>• Jeder Treffer im Doppel: + Doppelwert</p>
-                    <p>• Kein Doppel in der Runde: − Doppelwert</p>
-                    <p>• Lass deine Punkte nicht auf 0 fallen!</p>
+                    <p>• {t('training_screen.inst_bobs27_1')}</p>
+                    <p>• {t('training_screen.inst_bobs27_2')}</p>
+                    <p>• {t('training_screen.inst_bobs27_3')}</p>
+                    <p>• {t('training_screen.inst_bobs27_4')}</p>
+                    <p>• {t('training_screen.inst_bobs27_5')}</p>
                   </>
                 )}
                 {mode === 'score-training' && (
                   <>
-                    <p>• Versuche 60+ Punkte pro Wurf zu erzielen</p>
-                    <p>• Ziele auf hohe Punktesegmente</p>
-                    <p>• Baue Konstanz und Kraft auf</p>
+                    <p>• {t('training_screen.inst_score_1')}</p>
+                    <p>• {t('training_screen.inst_score_2')}</p>
+                    <p>• {t('training_screen.inst_score_3')}</p>
                   </>
                 )}
               </div>

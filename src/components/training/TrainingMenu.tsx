@@ -73,7 +73,7 @@ const TrainingMenu: React.FC = () => {
             icon={<BarChart size={20} />}
             onClick={() => navigate('/training-stats')}
           >
-            Statistiken
+            {t('training_menu.statistics')}
           </Button>
         </div>
 

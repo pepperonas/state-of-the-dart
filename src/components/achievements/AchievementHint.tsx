@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { IconButton } from '../common';
 import { AchievementHint as AchievementHintType } from '../../hooks/useAchievementHints';
 
@@ -10,6 +11,7 @@ interface AchievementHintProps {
 }
 
 const AchievementHint: React.FC<AchievementHintProps> = ({ hints, onDismiss }) => {
+  const { t } = useTranslation();
   if (hints.length === 0) return null;
 
   const hint = hints[0]; // Show first hint only
@@ -34,13 +36,13 @@ const AchievementHint: React.FC<AchievementHintProps> = ({ hints, onDismiss }) =
                   <TrendingUp size={20} className="text-primary" />
                 </div>
                 <div>
-                  <h4 className="text-on-primary-container m3-title-small">Fast geschafft!</h4>
-                  <p className="text-on-primary-container/80 m3-label-medium">Achievement in Reichweite</p>
+                  <h4 className="text-on-primary-container m3-title-small">{t('achievement_hint.title')}</h4>
+                  <p className="text-on-primary-container/80 m3-label-medium">{t('achievement_hint.subtitle')}</p>
                 </div>
               </div>
               <IconButton
                 onClick={() => onDismiss(hint.achievementId)}
-                label="Close hint"
+                label={t('achievement_hint.close')}
               >
                 <X size={18} />
               </IconButton>

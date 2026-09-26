@@ -17,6 +17,8 @@ interface DialogProps {
   widthClassName?: string;
   /** Scrim click does not close (winner screens, forms with unsaved input). */
   persistent?: boolean;
+  /** Accessible name when the dialog draws its own header instead of `title`. */
+  ariaLabel?: string;
   children: React.ReactNode;
 }
 
@@ -39,6 +41,7 @@ const Dialog: React.FC<DialogProps> = ({
   hideClose = false,
   widthClassName,
   persistent = false,
+  ariaLabel,
   children,
 }) => {
   const { t } = useTranslation();
@@ -94,6 +97,7 @@ const Dialog: React.FC<DialogProps> = ({
           exit={{ opacity: 0 }}
           transition={effectsDefault}
           onClick={persistent ? undefined : onClose}
+          data-backdrop
         >
           <motion.div
             ref={panelRef}
@@ -107,6 +111,7 @@ const Dialog: React.FC<DialogProps> = ({
             role="dialog"
             aria-modal="true"
             aria-labelledby={title ? titleId : undefined}
+            aria-label={title ? undefined : ariaLabel}
           >
             {(title || !hideClose) && (
               <div className="flex items-center justify-between mb-4 gap-3">

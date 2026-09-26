@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { setAuthToken } from '../../services/api';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import LoadingIndicator from '../common/LoadingIndicator';
 
 const AuthCallback: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { refreshUser } = useAuth();
@@ -29,7 +31,7 @@ const AuthCallback: React.FC = () => {
           navigate('/', { replace: true });
         } catch (err) {
           console.error('AuthCallback: error during auth:', err);
-          setError('Authentifizierung fehlgeschlagen');
+          setError(t('auth_callback.failed'));
           setTimeout(() => navigate('/login?error=auth_failed', { replace: true }), 2000);
         }
       } else {
@@ -49,7 +51,7 @@ const AuthCallback: React.FC = () => {
           <>
             <div className="text-error text-5xl mb-4">!</div>
             <h2 className="m3-headline-small text-on-surface mb-2">
-              Fehler
+              {t('common.error')}
             </h2>
             <p className="m3-body-large text-error">
               {error}
@@ -59,10 +61,10 @@ const AuthCallback: React.FC = () => {
           <>
             <LoadingIndicator size={48} />
             <h2 className="m3-headline-small text-on-surface mb-2">
-              Anmeldung läuft...
+              {t('auth_callback.signing_in')}
             </h2>
             <p className="m3-body-medium text-on-surface-variant">
-              Du wirst weitergeleitet
+              {t('auth_callback.redirecting')}
             </p>
           </>
         )}

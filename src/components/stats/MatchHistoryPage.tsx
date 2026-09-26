@@ -243,7 +243,7 @@ const MatchHistoryPage: React.FC = () => {
               <div className="flex items-center gap-1">
                 <IconButton
                   variant="outlined"
-                  label={t('common.previous', 'Zurück')}
+                  label={t('match_history_page.previous')}
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
                 >
@@ -375,13 +375,13 @@ const MatchHistoryPage: React.FC = () => {
                                   </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-2">
-                                  <StatBox label="Average" value={(p.matchAverage ?? 0).toFixed(1)} />
-                                  <StatBox label="Legs" value={p.legsWon ?? 0} />
+                                  <StatBox label={t('match_history_page.average')} value={(p.matchAverage ?? 0).toFixed(1)} />
+                                  <StatBox label={t('match_history_page.legs')} value={p.legsWon ?? 0} />
                                   <StatBox label="180s" value={p.match180s ?? 0} />
-                                  <StatBox label="High" value={p.matchHighestScore ?? 0} />
+                                  <StatBox label={t('match_history_page.high')} value={p.matchHighestScore ?? 0} />
                                   <StatBox label="140+" value={p.match140Plus ?? 0} />
                                   <StatBox
-                                    label="Checkout %"
+                                    label={t('match_history_page.checkout_rate')}
                                     value={
                                       (p.checkoutAttempts ?? 0) > 0
                                         ? `${(((p.checkoutsHit ?? 0) / p.checkoutAttempts) * 100).toFixed(0)}%`
@@ -403,7 +403,7 @@ const MatchHistoryPage: React.FC = () => {
                                   <TrendingUp size={16} className="text-primary" />
                                   {t('match_history.round_chart', 'Runden-Verlauf')}
                                 </h4>
-                                <Suspense fallback={<div className="h-[180px] sm:h-[250px] flex items-center justify-center text-on-surface-variant m3-body-small">Lade…</div>}>
+                                <Suspense fallback={<div className="h-[180px] sm:h-[250px] flex items-center justify-center text-on-surface-variant m3-body-small">{t('match_history_page.loading')}</div>}>
                                   <MatchChart data={chartData} players={detail.players || players} />
                                 </Suspense>
                               </Card>

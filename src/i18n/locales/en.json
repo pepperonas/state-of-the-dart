@@ -167,7 +167,7 @@
     "undo_last_throw": "Undo throw",
     "undo_throw_blocked": "Clear the current throw first",
     "no_throw_to_undo": "No throw to undo",
-    "keyboard_hint": "⌨️ 0–9 to type, Enter to confirm, Backspace to undo dart/throw, Ctrl+Z to undo throw, Esc to clear",
+    "keyboard_hint": "0–9 to type, Enter to confirm, Backspace to undo dart/throw, Ctrl+Z to undo throw, Esc to clear",
     "remove_player": "Remove player",
     "remove_player_title": "Remove {{name}} from the match?",
     "remove_player_body": "Every throw {{name}} made in this match is deleted. The match continues with the remaining players.",
@@ -199,7 +199,7 @@
     "multiplier": "Multiplier",
     "single": "Single",
     "double": "Double",
-    "triple": "Treble",
+    "triple": "Triple",
     "miss": "Miss",
     "clear_input": "Clear input",
     "set_dart": "Set",
@@ -751,5 +751,1284 @@
     "legs": "Legs",
     "leg_winner": "Leg {{n}}: {{name}}",
     "unknown": "Unknown"
+  },
+  "guide": {
+    "title": "User guide",
+    "nav": {
+      "overview": "Overview",
+      "quickstart": "Quick start",
+      "game": "Game modes",
+      "players": "Managing players",
+      "training": "Training",
+      "stats": "Statistics",
+      "achievements": "Achievements",
+      "settings": "Settings",
+      "admin": "Admin panel",
+      "tips": "Tips & tricks"
+    },
+    "overview": {
+      "heading": "Welcome to State of the Dart!",
+      "intro": "State of the Dart is a professional darts scoring app with a wide range of features for players of every level. From a casual match to a full tournament – it's all possible.",
+      "featuresTitle": "Key features",
+      "features": [
+        "<b>Multiple game modes:</b> 501, Cricket, Around the Clock and more",
+        "<b>AI opponents:</b> 10 difficulty levels for solo practice",
+        "<b>Detailed statistics:</b> heatmaps, averages, checkout rate",
+        "<b>Training modes:</b> doubles, trebles, checkout practice",
+        "<b>Achievements:</b> 145+ unlockable achievements in 7 categories",
+        "<b>Multi-tenant:</b> several profiles (family, club, etc.)",
+        "<b>Audio caller:</b> professional announcements just like on TV"
+      ],
+      "tipTitle": "Tip for beginners",
+      "tip": "Start with a <b>Quick Match</b> against a bot to get to know the app. The AI opponents adapt to your skill level!"
+    },
+    "quickstart": {
+      "heading": "Quick start guide",
+      "steps": [
+        {
+          "title": "Create players",
+          "text": "Go to <b>Players</b> → <b>+ New player</b>. Choose a name and an avatar. Player statistics are tracked automatically."
+        },
+        {
+          "title": "Start a match",
+          "text": "Tap <b>Quick Match</b> → choose players → choose a game mode (e.g. 501) → <b>Start game</b>"
+        },
+        {
+          "title": "Enter your throws",
+          "text": "Tap the segments you hit on the dartboard. After 3 darts → <b>Confirm</b>. The app calculates scores, averages and more automatically."
+        },
+        {
+          "title": "View statistics",
+          "text": "After the match: <b>Statistics</b> → check out heatmaps, charts, averages and more!"
+        }
+      ],
+      "done": "<b>Done!</b> You're ready for your first match. Good luck!"
+    },
+    "game": {
+      "heading": "Game modes",
+      "x01": {
+        "title": "501 (standard)",
+        "text": "Every player starts on 501 points. Goal: count down to exactly 0. The last dart must be a double (double out).",
+        "settingsTitle": "Settings:",
+        "settings": [
+          "First to: number of legs needed to win (best of 3, 5, 7, etc.)",
+          "Double out: required (default) or off",
+          "Sets: optional, for longer matches"
+        ]
+      },
+      "cricket": {
+        "title": "Cricket",
+        "text": "A game of strategy: close the numbers 15–20 plus the bull. Score points on numbers you have open.",
+        "rules": [
+          "3 hits close a number",
+          "Further hits score points (only while your opponent still has it open)",
+          "Winner: all numbers closed + most points"
+        ]
+      },
+      "atc": {
+        "title": "Around the Clock",
+        "text": "Hit every number from 1 to 20 in order. Fastest player wins!"
+      },
+      "bots": {
+        "title": "AI opponents (bots)",
+        "text": "Practise against an adaptive AI with 10 difficulty levels:",
+        "levels": [
+          "<b>Level 1-3:</b> beginner (30-50 average)",
+          "<b>Level 4-6:</b> amateur (50-70 average)",
+          "<b>Level 7-8:</b> advanced (70-85 average)",
+          "<b>Level 9-10:</b> pro (85-100 average)"
+        ]
+      }
+    },
+    "players": {
+      "heading": "Managing players",
+      "create": {
+        "title": "Create players",
+        "path": "<b>Players</b> → <b>+ New player</b>",
+        "items": [
+          "Enter a name",
+          "<b>Pick an emoji:</b> WhatsApp-style emoji picker with 8 categories",
+          "The emoji replaces the initial as the avatar",
+          "Optional: mark as a bot with a difficulty level"
+        ]
+      },
+      "main": {
+        "title": "Main profile (main player)",
+        "text": "Set a player as your main profile to see their stats on the dashboard.",
+        "hint": "<b>Tap the crown</b> next to a player to make them the main player."
+      },
+      "profiles": {
+        "title": "Player profiles",
+        "intro": "<b>Tap a player entry</b> in the list to see their full profile:",
+        "items": [
+          "<b>Statistics:</b> average, 180s, checkout rate",
+          "<b>Heatmap:</b> L.A.-style heatmap with smooth blur effects",
+          "<b>Match history:</b> every match played",
+          "<b>Personal bests:</b> top performances",
+          "<b>Avatar:</b> professional design with script lettering or an emoji"
+        ],
+        "tip": "<b>Tip:</b> the whole list entry is clickable – not just the eye icon!"
+      },
+      "search": {
+        "title": "Search & pagination",
+        "search": "<b>Search for players:</b> use the search field to find a player quickly.",
+        "paging": "<b>Page through results:</b> choose 10/20/50/100 items per page and use the navigation to move through long lists."
+      },
+      "tenant": {
+        "title": "Tip: multi-tenant",
+        "text": "You can create several <b>profiles/tenants</b> (e.g. family, club, friends). Switch between profiles in <b>Settings</b>."
+      }
+    },
+    "training": {
+      "heading": "Training modes",
+      "modes": [
+        {
+          "title": "Doubles training",
+          "text": "Practise every double from D1 to D20. Sharpen your checkout skills!"
+        },
+        {
+          "title": "Trebles training",
+          "text": "Practise every triple from T20 down to T1. Perfect your big scores."
+        },
+        {
+          "title": "Around the Clock",
+          "text": "Hit every number from 1 to 20 in order. Every segment counts (single, double, triple)."
+        },
+        {
+          "title": "Checkout training",
+          "text": "Practise common checkout combinations (40, 60, 80, etc.). Improve your finishing rate!"
+        },
+        {
+          "title": "Bob's 27",
+          "text": "Start on 27 points. Hit the target: +3 points. Miss: -3 points.",
+          "goal": "<b>Goal:</b> don't let your points drop to 0!"
+        },
+        {
+          "title": "Score training",
+          "text": "Score 60+ points per visit. Build consistency and power!"
+        }
+      ],
+      "statsTitle": "Training stats",
+      "stats": "Every training session is saved and included in your <b>heatmap</b>! Track your progress in the statistics."
+    },
+    "stats": {
+      "heading": "Statistics & analytics",
+      "heatmap": {
+        "title": "Heatmap",
+        "intro": "A visual map of all your throws. See at a glance:",
+        "items": [
+          "Which segments you hit most often",
+          "Your strengths and weaknesses",
+          "How your hits spread across all matches"
+        ]
+      },
+      "average": {
+        "title": "Average charts",
+        "text": "Follow how your average develops over time. Filter by period (7/30/90/365 days)."
+      },
+      "checkout": {
+        "title": "Checkout statistics",
+        "intro": "Detailed checkout analysis:",
+        "items": [
+          "Checkout percentage",
+          "Most frequent checkouts",
+          "Best checkout combinations",
+          "Checkouts by double"
+        ]
+      },
+      "history": {
+        "title": "Match history",
+        "text": "Every match played, with details: opponent, score, date, average, 180s. Tap a match for detailed statistics.",
+        "items": [
+          "<b>Search:</b> search by opponent, date or game type",
+          "<b>Pagination:</b> page through results (10/20/50/100 per page)",
+          "<b>Throw history:</b> the detail view shows every throw per player"
+        ]
+      },
+      "export": {
+        "title": "Export",
+        "text": "Export your stats in several formats: CSV, Excel, PDF, JSON. Perfect for your own analysis!"
+      }
+    },
+    "achievements": {
+      "heading": "Achievements",
+      "intro": "Unlock <b>145+ achievements</b> by reaching specific milestones!",
+      "categoriesTitle": "Achievement categories",
+      "categories": [
+        "<b>Beginner:</b> first steps (first match, first win)",
+        "<b>Skill-based:</b> 180, 171+, high checkouts",
+        "<b>Consistency:</b> win streaks, perfect legs",
+        "<b>Milestones:</b> 100 matches, 1000 180s",
+        "<b>Special:</b> 9-darter, bullseye finish"
+      ],
+      "examplesTitle": "Example achievements",
+      "examples": [
+        {
+          "name": "First steps",
+          "desc": "Finished your first match"
+        },
+        {
+          "name": "Century",
+          "desc": "100+ points in one visit"
+        },
+        {
+          "name": "Maximum",
+          "desc": "180 points (3x T20)"
+        },
+        {
+          "name": "Hot streak",
+          "desc": "Won 5 games in a row"
+        }
+      ],
+      "notifyTitle": "Notifications",
+      "notify": "Achievements are unlocked and shown automatically during play! Turn on sound & notifications in Settings."
+    },
+    "settings": {
+      "heading": "Settings",
+      "audio": {
+        "title": "Audio & sound",
+        "items": [
+          "<b>Caller volume:</b> professional announcements (scores, checkouts)",
+          "<b>Effects volume:</b> dart hits, achievements",
+          "<b>Separate volumes:</b> caller and effects can be adjusted independently"
+        ]
+      },
+      "theme": {
+        "title": "Theme / appearance",
+        "text": "Choose between <b>dark mode</b> and <b>light mode</b>."
+      },
+      "language": {
+        "title": "Language",
+        "text": "Available languages: <b>Deutsch</b> and <b>English</b>."
+      },
+      "pwa": {
+        "title": "Progressive Web App (PWA)",
+        "intro": "Install the app on your device:",
+        "items": [
+          "<b>iOS:</b> Safari → Share → \"Add to Home Screen\"",
+          "<b>Android:</b> Chrome → menu → \"Install app\"",
+          "<b>Desktop:</b> Chrome/Edge → address bar → install icon"
+        ]
+      },
+      "data": {
+        "title": "Data management",
+        "items": [
+          "<b>Profiles/tenants:</b> switch between different profiles",
+          "<b>New profile:</b> create separate environments",
+          "<b>Demo data:</b> generate test data to try things out"
+        ]
+      },
+      "danger": {
+        "title": "Danger zone",
+        "text": "<b>Delete all data:</b> careful! Permanently deletes all matches, players and statistics."
+      }
+    },
+    "admin": {
+      "heading": "Admin panel",
+      "notice": "<b>Note:</b> this area is only visible to administrators.",
+      "users": {
+        "title": "User management",
+        "items": [
+          "View all registered users",
+          "Manage subscription status",
+          "Grant lifetime access",
+          "Revoke access",
+          "Grant/remove admin rights"
+        ]
+      },
+      "subscriptions": {
+        "title": "Subscription management",
+        "intro": "Full control over subscriptions:",
+        "items": [
+          "Change status: active, trial, expired, lifetime",
+          "Change plan: monthly, annual, lifetime",
+          "Set an expiry date"
+        ]
+      },
+      "bugs": {
+        "title": "Bug report management",
+        "items": [
+          "View all bug reports",
+          "Change status: open → in progress → resolved",
+          "Add admin notes",
+          "Delete reports",
+          "Filter by status/severity"
+        ]
+      },
+      "stats": {
+        "title": "Statistics",
+        "text": "Overview: total users, active subscriptions, trial users, expired users."
+      }
+    },
+    "tips": {
+      "heading": "Tips & tricks",
+      "beginners": {
+        "title": "For beginners",
+        "items": [
+          "Start with <b>bot opponents at level 1-3</b> to practise",
+          "Use the <b>training modes</b> to work on specific skills",
+          "Take a look at the <b>checkout table</b> (shown during play)",
+          "Turn on the <b>audio caller</b> for better feedback"
+        ]
+      },
+      "stats": {
+        "title": "Using your stats",
+        "items": [
+          "Check your <b>heatmap</b> to spot weaknesses",
+          "Follow your <b>average</b> over time",
+          "Analyse your <b>checkout rate</b> per double",
+          "Export your stats for your own analysis"
+        ]
+      },
+      "input": {
+        "title": "Fast input & undo",
+        "items": [
+          "After 3 darts the visit is confirmed automatically (600ms delay)",
+          "<b>Undo button:</b> takes back your last throw",
+          "<b>Undo match end:</b> a match finished by mistake can be resumed",
+          "<b>History preview:</b> undo shows a preview panel with the removed throws",
+          "<b>Stats recalculation:</b> all stats are updated correctly on undo",
+          "Tap <b>\"Miss\"</b> for a missed dart (0 points)"
+        ]
+      },
+      "farm": {
+        "title": "Farming achievements",
+        "items": [
+          "Play different modes for different achievements",
+          "Use <b>training</b> for skill-based achievements",
+          "Browse the <b>achievement list</b> for inspiration"
+        ]
+      },
+      "report": {
+        "title": "Reporting problems",
+        "text": "Found a bug? Use the <b>bug report button</b> (next to undo during play). Screenshots are taken automatically!"
+      },
+      "pro": {
+        "title": "Pro tip",
+        "text": "Create separate <b>tenants/profiles</b> for different scenarios: family, club, solo practice. That keeps your stats organised!"
+      }
+    }
+  },
+  "global_leaderboard": {
+    "metric_average": "Best average",
+    "metric_average_short": "Average",
+    "metric_wins": "Most wins",
+    "metric_wins_short": "Wins",
+    "metric_180s": "Most 180s",
+    "metric_checkout": "Highest checkout",
+    "metric_checkout_short": "Checkout",
+    "metric_best_leg": "Best leg",
+    "metric_best_leg_short": "Leg",
+    "value_wins_one": "{{count}} win",
+    "value_wins_other": "{{count}} wins",
+    "value_darts_one": "{{count}} dart",
+    "value_darts_other": "{{count}} darts",
+    "load_failed": "Could not load the leaderboard",
+    "rank": "Rank {{rank}}",
+    "to_login": "To login",
+    "title": "Global leaderboard",
+    "subtitle": "The best players worldwide",
+    "refresh": "Refresh",
+    "empty": "No entries yet",
+    "empty_hint": "Be the first on the leaderboard!",
+    "games_one": "{{count}} game",
+    "games_other": "{{count}} games",
+    "entries_one": "{{count}} entry",
+    "entries_other": "{{count}} entries",
+    "cta_title": "Want to appear on the leaderboard?",
+    "cta_text": "Sign up for free and start your 30-day trial!",
+    "register": "Sign up now",
+    "login": "Sign in"
+  },
+  "heatmap": {
+    "cluster_center": "Cluster centre",
+    "very_precise": "Very precise",
+    "precise": "Precise",
+    "scattered": "Scattered",
+    "scatter_radius": "Scatter radius",
+    "of_board_diameter": "of the board diameter",
+    "triple_rate": "Triple rate",
+    "double_rate": "Double rate",
+    "bull_and_outer": "Bull & outer bull",
+    "inner_bull": "Inner bull",
+    "legend": "Heatmap legend",
+    "cold": "Cold",
+    "rare": "Rare",
+    "hot": "Hot",
+    "frequent": "Frequent",
+    "legend_hint": "⊕ Crosshair = centre of your throws · ○ Dashed circle = scatter radius",
+    "top_hotspots_one": "Top {{count}} hotspot",
+    "top_hotspots_other": "Top {{count}} hotspots",
+    "hits_one": "{{count}} hit",
+    "hits_other": "{{count}} hits"
+  },
+  "leaderboard": {
+    "cat_average": "Best average",
+    "cat_wins": "Most wins",
+    "cat_win_rate": "Win rate",
+    "cat_180s": "Most 180s",
+    "cat_checkout_rate": "Checkout rate",
+    "cat_achievements": "Achievements",
+    "cat_total_points": "Total points",
+    "title": "Leaderboard",
+    "empty": "No data yet",
+    "empty_hint": "Play a few matches to appear on the leaderboard!",
+    "games_one": "{{count}} game",
+    "games_other": "{{count}} games",
+    "active_players": "Active players",
+    "avg_games": "Ø games",
+    "total_180s": "Total 180s",
+    "total_achievements": "Total achievements"
+  },
+  "match_detail_extra": {
+    "average": "Average",
+    "highest_score": "Highest score",
+    "checkout_rate": "Checkout %",
+    "leg": "Leg {{n}}"
+  },
+  "match_history_page": {
+    "average": "Average",
+    "legs": "Legs",
+    "high": "High",
+    "checkout_rate": "Checkout %",
+    "loading": "Loading…",
+    "previous": "Previous page"
+  },
+  "match_list": {
+    "search_placeholder": "Search by opponent, date or game type...",
+    "show": "Show:",
+    "per_page": "Entries per page",
+    "of_matches_one": "of {{count}} match",
+    "of_matches_other": "of {{count}} matches",
+    "previous_page": "Previous page",
+    "next_page": "Next page",
+    "none_found": "No matches found",
+    "none_played": "No games played yet",
+    "none_found_for": "No matches found for \"{{query}}\"",
+    "win": "WIN",
+    "loss": "LOSS",
+    "unknown": "Unknown",
+    "score": "Score: {{own}} - {{opponent}}",
+    "avg": "Avg: {{value}}",
+    "high": "High: {{value}}",
+    "round_chart": "Round history",
+    "loading_details": "Loading match details...",
+    "round": "Round",
+    "points": "Points",
+    "points_value_one": "{{count}} point",
+    "points_value_other": "{{count}} points",
+    "no_rounds": "No round data available",
+    "no_rounds_hint": "This match was probably played before the tracking update",
+    "average": "Average",
+    "highest_score": "Highest score",
+    "checkout_rate": "Checkout %",
+    "leg_details": "Leg details",
+    "leg_label": "Leg {{n}}:"
+  },
+  "player_profile": {
+    "skill_average": "Average",
+    "skill_checkout": "Checkout",
+    "skill_consistency": "Consistency",
+    "skill_achievements": "Achievements",
+    "not_found": "Player not found",
+    "wins_count_one": "{{count}} win",
+    "wins_count_other": "{{count}} wins",
+    "points_count_one": "{{count}} point",
+    "points_count_other": "{{count}} points",
+    "achievements_count": "{{unlocked}}/{{total}} achievements",
+    "games": "Games",
+    "win_rate": "Win rate",
+    "best_avg": "Best avg",
+    "total_180s": "Total 180s",
+    "personal_bests": "Personal bests",
+    "highest_score": "Highest score",
+    "best_average": "Best average",
+    "most_180s": "Most 180s",
+    "highest_checkout": "Highest checkout",
+    "best_checkout_rate": "Best checkout rate",
+    "shortest_leg": "Shortest leg",
+    "darts_count_one": "{{count}} dart",
+    "darts_count_other": "{{count}} darts",
+    "longest_streak": "Longest winning streak",
+    "streak_unit_one": "game",
+    "streak_unit_other": "games",
+    "most_legs_won": "Most legs won",
+    "performance_trend": "Performance trend",
+    "average": "Average",
+    "checkout_rate": "Checkout %",
+    "no_matches": "No matches played yet",
+    "skill_profile": "Skill profile",
+    "skills": "Skills",
+    "throw_heatmap": "Throw heatmap",
+    "miss_rate": "Miss rate",
+    "triple_rate": "Triple rate",
+    "double_rate": "Double rate",
+    "favorite_segment": "Favourite bed",
+    "total_darts": "Total darts",
+    "no_throw_data": "No throw data yet",
+    "no_throw_data_hint": "Play a match to see your throw heatmap!",
+    "heatmap_explainer": "The heatmap shows where you hit most often:",
+    "hot_zones": "Hot zones (hit often)",
+    "cold_zones": "Cold zones (rarely hit)",
+    "recent_achievements": "Latest achievements ({{unlocked}}/{{total}})",
+    "show_all_achievements": "Show all {{count}} achievements →",
+    "career": "Career",
+    "first_game": "First game",
+    "last_game": "Last game",
+    "wins": "Wins",
+    "losses": "Losses",
+    "legs_won": "Legs won",
+    "checkouts": "Checkouts"
+  },
+  "stats_overview": {
+    "all_recorded_darts": "All recorded darts",
+    "average": "Average",
+    "average_long": "Average",
+    "average_trend": "Average trend",
+    "best_avg": "Best avg",
+    "category": "Category",
+    "checkout_quote": "Checkout rate",
+    "checkout_rate": "Checkout %",
+    "checkout_rate_long": "Checkout rate",
+    "cold_zones": "Cold zones",
+    "consistency": "Consistency",
+    "create_player": "Create player",
+    "current_label": "Current:",
+    "daily": "Daily",
+    "difference_label": "Difference:",
+    "distinct_beds": "Distinct beds",
+    "experience": "Experience",
+    "export": "Export",
+    "export_csv": "CSV export",
+    "export_excel": "Excel export",
+    "export_pdf": "PDF export",
+    "games": "Games",
+    "head_to_head": "Head to head",
+    "heatmap_explainer": "At a glance, the heatmap shows where you hit most often:",
+    "heatmap_subtitle": "Every throw visualised for",
+    "heatmap_tab": "Heatmap",
+    "high_checkout": "Highest checkout",
+    "highest_score": "Highest score",
+    "highest_scores": "Highest scores",
+    "historic_label": "Historic:",
+    "history_tab": "History ({{count}})",
+    "hit_often": "(hit often)",
+    "hit_rarely": "(rarely hit)",
+    "hot_zones": "Hot zones",
+    "improvement_trend": "Improvement trend",
+    "legs_lost": "Legs lost",
+    "legs_won": "Legs won",
+    "legs_won_vs_lost": "Legs won vs. lost",
+    "lost": "Lost",
+    "match_history": "Match history",
+    "maximum_scores": "Maximum scores",
+    "monthly": "Monthly",
+    "nine_darters": "9-darters",
+    "no_game_data": "No game data yet",
+    "no_game_data_hint": "Play a few matches to see detailed charts and statistics",
+    "no_games_for_player": "No games for this player yet",
+    "no_games_for_player_hint": "Play a few matches to see your progress",
+    "no_matches": "No matches played yet",
+    "no_matches_hint": "Start a game to see your history",
+    "no_players": "No players yet",
+    "no_players_hint": "Create players to compare them",
+    "no_stats": "No statistics available",
+    "no_stats_hint": "Create a player and play a few matches to see statistics",
+    "no_throw_data": "No throw data yet",
+    "no_throw_data_hint": "Play a match to see your throw heatmap!",
+    "no_time_series": "No time series data available",
+    "no_time_series_hint": "The match data has no valid timestamps. New matches are recorded correctly.",
+    "no_timestamps": "(No valid timestamps in the match data)",
+    "performance": "Performance",
+    "performance_comparison": "Performance comparison",
+    "performance_profile": "Performance profile",
+    "pick_at_least": "Pick at least {{min}} players to compare",
+    "pick_hint": "Click the players above to select them",
+    "player_label": "Player:",
+    "precision": "Precision",
+    "score": "Score",
+    "score_distribution": "Score distribution",
+    "score_distribution_per_match": "Score distribution per match",
+    "scores_100": "100+ scores",
+    "scores_140": "140+ scores",
+    "scores_60": "60+ scores",
+    "segments_hit": "Segments hit",
+    "select_players_max": "Select players (max. {{max}})",
+    "selected": "Selected",
+    "single_datapoint": "(Only 1 data point – play more to see a trend!)",
+    "stats_comparison": "Statistics comparison",
+    "throw_heatmap": "Throw heatmap",
+    "time_range": "Time range",
+    "total_throws": "Total throws",
+    "trend_declining": "Slight decline",
+    "trend_improving": "You're improving!",
+    "trend_over_time": "Trend over time",
+    "trend_stable": "Steady performance",
+    "week_key": "{{year}} W{{week}}",
+    "weekly": "Weekly",
+    "win_rate": "Win rate",
+    "win_rate_percent": "Win rate %",
+    "win_stats": "Win statistics",
+    "wins": "Wins",
+    "won": "Won",
+    "yearly": "Yearly"
+  },
+  "throw_chart": {
+    "scored_per_visit": "Points scored per visit",
+    "remaining_points": "Points remaining",
+    "visit": "Visit",
+    "points": "Points",
+    "remaining": "Remaining"
+  },
+  "training_stats": {
+    "type_doubles": "Doubles",
+    "type_triples": "Triples",
+    "type_singles": "Singles",
+    "type_score_training": "Score Training",
+    "title": "Training statistics",
+    "select_prompt": "Please select a player to view training statistics.",
+    "no_players": "No players yet.",
+    "create_player": "Create player",
+    "select_player": "Select player:",
+    "select_player_placeholder": "Choose a player...",
+    "player": "Player",
+    "player_label": "Player:",
+    "filter_label": "Filter:",
+    "mode": "Training mode",
+    "all_modes": "All modes",
+    "sort_label": "Sort:",
+    "sort_date": "Date",
+    "score": "Score",
+    "accuracy": "Accuracy",
+    "accuracy_percent": "Accuracy %",
+    "sessions": "Sessions",
+    "avg_score": "Ø score",
+    "avg_accuracy": "Ø accuracy",
+    "personal_bests": "Personal bests",
+    "performance_history": "Performance history",
+    "mode_distribution": "Training mode distribution",
+    "session_history": "Session history",
+    "no_sessions": "No training sessions yet",
+    "pb": "PB",
+    "attempts": "Attempts",
+    "time": "Time"
+  },
+  "admin_panel": {
+    "load_failed": "Could not load admin data",
+    "error_lifetime_with_end_date": "Lifetime subscriptions should not have an end date.",
+    "error_past_end_date": "End date must be in the future.",
+    "admin_badge": "Admin",
+    "debug_screenshot_alt": "Debug flag screenshot"
+  },
+  "auth_callback": {
+    "failed": "Authentication failed",
+    "signing_in": "Signing you in…",
+    "redirecting": "Redirecting you now"
+  },
+  "avatar_picker": {
+    "group_darts": "Darts",
+    "group_awards": "Awards",
+    "group_energy": "Energy",
+    "group_figures": "Figures",
+    "group_other": "Other",
+    "nothing_found": "Nothing found"
+  },
+  "back_to_landing": {
+    "label": "Back to home page"
+  },
+  "footer": {
+    "imprint": "Legal notice",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "github_profile": "GitHub profile",
+    "version": "Version {{version}}"
+  },
+  "forgot_password": {
+    "failed": "Could not send the email",
+    "sent_title": "Email sent!",
+    "sent_body": "We've sent an email to <strong>{{email}}</strong>. Follow the instructions to reset your password.",
+    "subtitle": "No problem! We'll help you.",
+    "back_to_login": "Back to sign-in",
+    "intro": "Enter your email address and we'll send you a link to reset your password.",
+    "sending": "Sending email…",
+    "submit": "Send reset link"
+  },
+  "landing": {
+    "to_app": "Open the app",
+    "start_free": "Start for free",
+    "hero_badge": "Runs in the browser · installable · offline",
+    "hero_title": "Score darts without doing the maths.",
+    "hero_body": "State of the Dart does the counting, suggests the finish and remembers every throw — so you stay at the board instead of at the calculator.",
+    "have_account": "I already have an account",
+    "stat_game_modes": "Game modes",
+    "stat_training": "Training modes",
+    "stat_achievements": "Achievements",
+    "stat_bot_levels": "Bot levels",
+    "remaining": "Remaining",
+    "checkout": "Checkout",
+    "modes_title": "Five ways to play",
+    "modes_body": "Every mode scores, checks and finishes by its own rules — including busts, double-out and set scoring.",
+    "mode_x01_title": "X01",
+    "mode_x01_text": "301 · 501 · 701 with sets, legs, double-out and checkout suggestions.",
+    "mode_cricket_title": "Cricket",
+    "mode_cricket_text": "15 to 20 and the bull — close them, score, shut it out.",
+    "mode_atc_title": "Around the Clock",
+    "mode_atc_text": "1 to 20 in order. The classic for accuracy.",
+    "mode_shanghai_title": "Shanghai",
+    "mode_shanghai_text": "Single, double and triple of the same number — the instant win.",
+    "mode_online_title": "Online",
+    "mode_online_text": "Private room by code, opponents anywhere, synced live.",
+    "features_title": "What happens next",
+    "features_body": "Scoring is only the start. It gets interesting once enough throws add up.",
+    "feature_stats_title": "Statistics that mean something",
+    "feature_stats_text": "Average, first 9, checkout rate, 180s, progress per leg and match — not just one number at the end.",
+    "feature_heatmaps_title": "Heatmaps",
+    "feature_heatmaps_text": "Where do your darts really land? Your hit distribution on the board, collected over weeks.",
+    "feature_achievements_title_one": "{{count}} achievement",
+    "feature_achievements_title_other": "{{count}} achievements",
+    "feature_achievements_text": "From “first 180” to streaks that span months. With progress bars instead of surprise pop-ups.",
+    "feature_bots_title_one": "{{count}} bot level",
+    "feature_bots_title_other": "{{count}} bot levels",
+    "feature_bots_text": "From beginner to pro — the bot adapts to your skill if you want it to.",
+    "feature_training_title_one": "{{count}} training mode",
+    "feature_training_title_other": "{{count}} training modes",
+    "feature_training_text": "Doubles, trebles, Around the Clock, Checkout 121, Bob’s 27 and score training.",
+    "feature_profiles_title": "Multiple profiles",
+    "feature_profiles_text": "One account, separate profiles — club, family or just you. The data stays neatly apart.",
+    "offline_title": "The basement has no Wi-Fi. The app doesn't mind.",
+    "offline_body": "Install it like an app on your phone. A running match is kept locally and syncs as soon as you're back online — quitting mid-leg is not an option.",
+    "cta_title_signed_in": "Let's keep going.",
+    "cta_title": "Next leg?",
+    "cta_body_signed_in": "You're signed in — one click away from your next match.",
+    "cta_body": "Create an account, add players, start playing. No installation, no card."
+  },
+  "login": {
+    "failed": "Sign-in failed",
+    "or": "Or"
+  },
+  "payment_success": {
+    "title": "Payment successful!",
+    "body": "Thank you for your trust! Your subscription is now active and you have full access to every feature.",
+    "to_app": "Go to the app",
+    "to_settings": "Go to settings",
+    "tip": "Tip: you can manage your subscription at any time in the settings."
+  },
+  "player_management": {
+    "avatar_label": "Choose an avatar (optional – replaces the initial)",
+    "remove": "Remove",
+    "no_avatar": "No avatar selected",
+    "choose_avatar": "Choose avatar",
+    "no_results": "No players found",
+    "no_results_for": "No players found for “{{query}}”",
+    "to_profile": "Open profile",
+    "change_avatar": "Change avatar",
+    "main_profile": "Main profile",
+    "stats_line": "Games: {{games}} | Avg: {{avg}}",
+    "show_stats": "Show statistics",
+    "set_main_profile": "Set as main profile",
+    "delete_confirm": "Delete player “{{name}}”?"
+  },
+  "pricing": {
+    "checkout_failed": "Checkout failed",
+    "feature_unlimited_matches": "Track unlimited matches",
+    "feature_stats_charts": "Detailed statistics & charts",
+    "feature_heatmap": "Heatmap analysis",
+    "feature_training": "Training modes",
+    "feature_achievements": "Achievement system",
+    "feature_personal_bests": "Personal-best tracking",
+    "feature_leaderboard": "Leaderboard",
+    "feature_future_features": "All future features",
+    "title": "Choose your plan",
+    "upgrade_or_manage": "Upgrade or manage",
+    "trial_left_one": "You have <strong>{{count}} day</strong> of trial left",
+    "trial_left_other": "You have <strong>{{count}} days</strong> of trial left",
+    "start_free": "Start now with 30 days free",
+    "monthly": "Monthly",
+    "monthly_desc": "Flexible, cancel any time",
+    "monthly_price": "€4.99",
+    "per_month": "/month",
+    "redirecting": "Redirecting…",
+    "subscribe_monthly": "Subscribe monthly",
+    "best_value": "BEST VALUE",
+    "lifetime": "Lifetime",
+    "lifetime_desc": "One-time payment",
+    "lifetime_price": "€29.99",
+    "lifetime_saving": "Save over 50% compared with 6 months",
+    "lifetime_access": "Lifetime access",
+    "buy_lifetime": "Buy Lifetime",
+    "faq_title": "Frequently asked questions",
+    "faq_cancel_q": "Can I cancel at any time?",
+    "faq_cancel_a": "Yes! You can cancel the monthly plan at any time. You keep full access until the end of the billing period.",
+    "faq_after_trial_q": "What happens after the trial?",
+    "faq_after_trial_a": "Your free trial ends after 30 days. You can then subscribe or buy Lifetime. Your data stays saved.",
+    "faq_payment_methods_q": "Which payment methods are accepted?",
+    "faq_payment_methods_a": "We accept all major credit cards, SEPA direct debit and other payment methods via Stripe.",
+    "faq_secure_q": "Is my payment secure?",
+    "faq_secure_a": "Yes! All payments are processed by Stripe – one of the most secure payment providers in the world. We don't store any credit card data."
+  },
+  "protected_route": {
+    "verification_required": "Email verification required",
+    "confirm_email": "Please confirm your email address <strong>{{email}}</strong> to continue.",
+    "check_spam": "We've sent you an email with a verification link. Please check your spam folder too.",
+    "resend": "Resend verification email",
+    "reload": "Reload page",
+    "other_account": "Sign in with another account"
+  },
+  "register": {
+    "password_too_short": "Password must be at least 8 characters long",
+    "passwords_mismatch": "Passwords don't match",
+    "failed": "Registration failed",
+    "success_title": "Registration successful!",
+    "success_body": "We've sent an email to <strong>{{email}}</strong>. Please verify your email address to continue.",
+    "to_login": "Go to sign-in",
+    "resend": "Didn't get the email? Send it again",
+    "subtitle": "Create your free account",
+    "trial_hint": "Try it <strong>free for 30 days</strong>!",
+    "password_placeholder": "At least 8 characters",
+    "confirm_placeholder": "Repeat password",
+    "creating": "Creating account…",
+    "submit": "Sign up for free",
+    "sign_in_now": "Sign in now"
+  },
+  "resend_verification": {
+    "sent_body": "We've sent a new verification email to <strong>{{email}}</strong>. Please check your inbox.",
+    "title": "Resend verification email",
+    "intro": "Didn't get the email? Enter your email address and we'll send you a new verification link.",
+    "submit": "Send again"
+  },
+  "reset_password": {
+    "invalid_token": "Invalid reset link",
+    "failed": "Could not reset your password",
+    "invalid_title": "Invalid link",
+    "invalid_body": "This reset link is invalid or has expired.",
+    "request_new": "Request a new link",
+    "success_title": "Password changed successfully!",
+    "redirecting": "You'll be taken to the sign-in page automatically…",
+    "title": "Set a new password",
+    "submit": "Change password"
+  },
+  "settings_page": {
+    "app_standalone": "The app is running as a standalone application.",
+    "language_label": "Language / Sprache",
+    "language_instant": "Language changes are applied instantly",
+    "export_json": "Export (JSON)",
+    "import_json": "Import (JSON)",
+    "active_profile": "Active profile",
+    "bug_screenshot_alt": "Bug report screenshot",
+    "browser_info": "Browser information",
+    "user_agent": "User agent:",
+    "screen": "Screen:",
+    "viewport": "Viewport:"
+  },
+  "tenant_selector": {
+    "title": "Choose your profile",
+    "subtitle": "Your stats and games are stored separately",
+    "empty_title": "No profiles yet",
+    "empty_body": "Create your first profile to get started",
+    "last_active": "Last active: {{date}}",
+    "delete_profile": "Delete profile",
+    "delete_confirm": "Really delete the profile “{{name}}”?",
+    "delete_warning": "All data will be lost permanently!",
+    "create_new": "Create new profile",
+    "new_profile": "New profile",
+    "choose_avatar": "Choose avatar",
+    "profile_name": "Profile name",
+    "name_placeholder": "Your name…",
+    "create": "Create profile"
+  },
+  "user_menu": {
+    "lifetime": "Lifetime",
+    "active": "Active",
+    "trial_days_one": "{{count}}-day trial",
+    "trial_days_other": "{{count}} days of trial",
+    "no_subscription": "No subscription",
+    "trial_remaining_one": "{{count}} day of Premium trial left",
+    "trial_remaining_other": "{{count}} days of Premium trial left",
+    "upgrade_now": "Upgrade now",
+    "account": "Account",
+    "app_settings": "App settings",
+    "lifetime_license": "Lifetime license",
+    "manage_subscription": "Manage subscription",
+    "upgrade": "Upgrade"
+  },
+  "user_settings": {
+    "avatar": "Avatar",
+    "profile_updated": "Profile updated successfully!",
+    "profile_update_failed": "Could not update your profile",
+    "email_updated": "Email updated! Please verify your new email address.",
+    "email_update_failed": "Could not update your email",
+    "delete_failed": "Could not delete your account",
+    "portal_no_payments": "You haven't made any payments yet. The customer portal is only available to paying customers.",
+    "portal_failed": "Could not open the customer portal",
+    "title": "Account settings",
+    "google_avatar_locked": "Google avatar (can't be changed)",
+    "click_to_change_avatar": "Click to change your avatar",
+    "change_email_hint": "To change your email, use the section below",
+    "saving": "Saving…",
+    "subscription_desc": "Manage your plan, change payment methods or cancel.",
+    "opening_portal": "Opening portal…",
+    "open_portal": "Open customer portal",
+    "new_email": "New email",
+    "new_email_placeholder": "new@email.com",
+    "current_password_placeholder": "Your current password",
+    "email_change_logout_hint": "You'll be signed out and will need to verify your new email address.",
+    "updating": "Updating…",
+    "delete_explanation": "Deleting your account <strong>permanently deletes all of your data</strong>. This includes matches, stats, achievements, personal bests, profiles and players.",
+    "delete_warning": "WARNING: This action cannot be undone!",
+    "password_to_confirm": "Password to confirm",
+    "deleting": "Deleting…",
+    "delete_permanently": "Delete permanently"
+  },
+  "verify_email": {
+    "no_token": "No verification token found",
+    "failed": "Verification failed",
+    "verifying": "Verifying email…",
+    "please_wait": "Please wait a moment",
+    "trial_started": "Your 30-day trial has started! You can sign in now and get going.",
+    "redirecting": "You'll be redirected automatically…",
+    "invalid_link": "This verification link is invalid or has expired."
+  },
+  "error_boundary": {
+    "title": "Something went wrong",
+    "message": "The app ran into an unexpected error. Your data is safely stored — reloading usually fixes it.",
+    "reload": "Reload",
+    "home": "Back to main menu"
+  },
+  "sync_status": {
+    "syncing": "Syncing...",
+    "error": "Sync error",
+    "just_now": "just now",
+    "minutes_ago_one": "{{count}} min ago",
+    "minutes_ago_other": "{{count}} min ago",
+    "last_sync": "Last sync: {{time}}"
+  },
+  "debug_button": {
+    "label": "Debug flag"
+  },
+  "bug_button": {
+    "label": "Report a bug"
+  },
+  "checkout": {
+    "title": "Checkout: {{remaining}}"
+  },
+  "offline": {
+    "back_online": "Back online! Syncing data...",
+    "offline_banner": "Offline – changes are saved locally",
+    "pending_one": "{{count}} pending",
+    "pending_other": "{{count}} pending",
+    "offline": "Offline"
+  },
+  "player_score": {
+    "remove": "Remove player",
+    "highest": "High"
+  },
+  "dartboard": {
+    "label": "Interactive dartboard"
+  },
+  "spinner": {
+    "spin": "SPIN",
+    "throws_first": "throws first!"
+  },
+  "resume_screen": {
+    "legs_progress_one": "{{scores}} (best of {{count}})",
+    "legs_progress_other": "{{scores}} (best of {{count}})",
+    "double_out_short": "DO"
+  },
+  "atc_game": {
+    "player_progress_one": "{{progress}}/{{total}} • {{count}} dart",
+    "player_progress_other": "{{progress}}/{{total}} • {{count}} darts"
+  },
+  "achievement_hint": {
+    "title": "Almost there!",
+    "subtitle": "Achievement within reach",
+    "close": "Close hint"
+  },
+  "training_menu": {
+    "statistics": "Statistics"
+  },
+  "achievement_toast": {
+    "tier_bronze": "Bronze",
+    "tier_silver": "Silver",
+    "tier_gold": "Gold",
+    "tier_platinum": "Platinum",
+    "tier_diamond": "Diamond",
+    "unlocked_by": "{{name}} — achievement unlocked",
+    "points_short_one": "{{count}} pt",
+    "points_short_other": "{{count}} pts",
+    "unlocked_count_one": "{{count}}/{{total}} achievements",
+    "unlocked_count_other": "{{count}}/{{total}} achievements",
+    "close_all_one": "Dismiss all ({{count}})",
+    "close_all_other": "Dismiss all ({{count}})"
+  },
+  "score_input": {
+    "total": "Total",
+    "replace_dart": "Replace dart",
+    "submit_total": "Enter visit total and confirm",
+    "checkout": "Checkout!"
+  },
+  "cricket_game": {
+    "rules_title": "Cricket rules:",
+    "rule_close": "Hit 15–20 and the bull three times each to close them",
+    "rule_marks": "Triple = 3 marks, double = 2 marks, single = 1 mark",
+    "rule_points": "Once closed: score points (while your opponent is still open)",
+    "rule_winner": "Winner: all numbers closed + most points",
+    "select_players_count": "Select players ({{count}}/{{min}})",
+    "start": "Start Cricket",
+    "wins": "{{name}} wins!",
+    "match_over": "Cricket match over",
+    "new_game": "New game",
+    "number": "Number",
+    "points": "Points",
+    "player_visit": "{{name}}'s visit ({{count}}/3)",
+    "confirm_visit": "Confirm visit",
+    "enter_hits": "Enter hits",
+    "miss": "Miss"
+  },
+  "shanghai_game": {
+    "options": "Options",
+    "start_number": "Starting number",
+    "rounds": "Rounds",
+    "plays_numbers": "Plays numbers {{from}} to {{to}}",
+    "rules_title": "Rules:",
+    "rule_target": "Each round targets one specific number",
+    "rule_only_target": "Only hits on the target number score",
+    "rule_multiplier": "Single = number × 1, double = × 2, triple = × 3",
+    "rule_shanghai": "single + double + triple = instant win!",
+    "rule_winner": "Highest score at the end wins",
+    "select_players_count": "Select players ({{count}}/{{min}})",
+    "start": "Start Shanghai",
+    "shanghai": "SHANGHAI!",
+    "round_of": "Round {{current}}/{{total}}",
+    "target_number": "Target number",
+    "player_turn": "{{name}} to throw",
+    "standings": "Standings",
+    "visit": "Visit ({{count}}/3)",
+    "miss": "Miss",
+    "target_label": "Target:",
+    "single": "Single {{number}}",
+    "double": "Double {{number}}",
+    "triple": "Triple {{number}}",
+    "miss_other": "Miss / other number"
+  },
+  "dashboard": {
+    "unknown": "Unknown",
+    "activity_played": "Match played",
+    "activity_won": "Match won!",
+    "activity_winner": "{{name}} won",
+    "quick_game": "Quick game",
+    "training": "Training",
+    "players": "Players",
+    "welcome_back": "Welcome back, {{name}}!",
+    "lifetime_member": "Lifetime member",
+    "premium_member": "Premium member",
+    "trial_days_left_one": "<strong>{{count}} day</strong> of trial left",
+    "trial_days_left_other": "<strong>{{count}} days</strong> of trial left",
+    "stats_for": "Stats for:",
+    "trial_banner_title_one": "Premium trial: {{count}} day left",
+    "trial_banner_title_other": "Premium trial: {{count}} days left",
+    "trial_banner_text": "Enjoy every premium feature during your trial",
+    "upgrade_now": "Upgrade now",
+    "stat_matches": "Matches",
+    "stat_wins": "Wins",
+    "stat_win_rate": "Win rate",
+    "stat_streak": "Streak",
+    "stat_average": "Average",
+    "recent_activity": "Recent activity",
+    "no_activity": "No activity yet",
+    "start_first_game": "Start your first game!",
+    "show_all_stats": "Show all statistics",
+    "quick_actions": "Quick actions",
+    "motivation_streak_title": "You're on fire!",
+    "motivation_new_title": "Let's get started!",
+    "motivation_default_title": "Keep going!",
+    "motivation_streak_text_one": "{{count}} win in a row!",
+    "motivation_streak_text_other": "{{count}} wins in a row!",
+    "motivation_new_text": "Play your first match!",
+    "motivation_default_text": "The next streak is waiting!"
+  },
+  "tournament_menu": {
+    "knockout": "Knockout",
+    "knockout_desc": "Single elimination – the loser is out",
+    "round_robin": "Round robin",
+    "round_robin_desc": "Everyone plays everyone",
+    "tbd": "TBD",
+    "unknown": "Unknown",
+    "end_tournament": "End tournament",
+    "subtitle_one": "{{mode}} • Best of {{count}}",
+    "subtitle_other": "{{mode}} • Best of {{count}}",
+    "status_completed": "Finished",
+    "status_running": "In progress",
+    "champion": "Tournament winner",
+    "standings": "Standings",
+    "player": "Player",
+    "wins": "Wins",
+    "wins_short": "W",
+    "losses": "Losses",
+    "losses_short": "L",
+    "legs": "Legs",
+    "current_match": "Current match",
+    "leg_minus": "Remove a leg: {{name}}",
+    "leg_plus": "Add a leg: {{name}}",
+    "first_to_one": "First to {{count}} leg",
+    "first_to_other": "First to {{count}} legs",
+    "confirm_match": "Confirm match",
+    "played_matches": "Played matches",
+    "create": "Create new tournament",
+    "name": "Tournament name",
+    "name_placeholder": "e.g. Friday Night Darts",
+    "mode": "Tournament format",
+    "legs_to_win": "Legs to win",
+    "players_count": "Players ({{count}}/{{max}})",
+    "min_players_one": "At least {{count}} player required",
+    "min_players_other": "At least {{count}} players required",
+    "start": "Start tournament",
+    "title": "Tournaments",
+    "subtitle_menu": "Organise darts competitions",
+    "available_modes": "Available formats",
+    "player_range": "{{min}}–{{max}} players"
+  },
+  "online_game": {
+    "guest": "Guest",
+    "leave_room": "Leave room",
+    "online": "Online",
+    "offline": "Offline",
+    "room_settings_one": "{{score}} • Best of {{count}}",
+    "room_settings_other": "{{score}} • Best of {{count}}",
+    "copy_room_id": "Copy room ID",
+    "status_waiting": "Waiting...",
+    "status_playing": "In progress",
+    "status_finished": "Finished",
+    "players_count": "Players ({{count}}/{{max}})",
+    "empty_slot": "Empty",
+    "start_game": "Start game",
+    "waiting_for_host": "Waiting for the host to start...",
+    "chat": "Chat",
+    "no_messages": "No messages yet",
+    "message_placeholder": "Message...",
+    "send_message": "Send message",
+    "online_count_one": "{{count}} online",
+    "online_count_other": "{{count}} online",
+    "connecting": "Connecting...",
+    "title": "Online multiplayer",
+    "subtitle": "Play against other players in real time",
+    "create_room": "Create room",
+    "create": "Create",
+    "room_name": "Room name",
+    "room_name_placeholder": "e.g. Friday night",
+    "start_score": "Starting score",
+    "legs_to_win": "Legs to win",
+    "private_room": "Private room",
+    "available_rooms": "Available rooms",
+    "refresh_rooms": "Refresh rooms",
+    "no_rooms": "No open rooms available",
+    "create_new_room_hint": "Create a new room!",
+    "room_summary_one": "{{score}} • {{count}}/{{max}} players",
+    "room_summary_other": "{{score}} • {{count}}/{{max}} players"
+  },
+  "game_screen": {
+    "click_to_remove": "Click to remove",
+    "choose_bot": "Choose a bot opponent",
+    "bot_adaptive_hint": "Difficulty adapts to your skill automatically",
+    "remove": "Remove",
+    "no_emoji": "No emoji selected",
+    "emoji": "Emoji",
+    "player_name_placeholder": "Player name...",
+    "add": "Add",
+    "no_active_game": "No active game",
+    "miss_no_score": "Miss / no score",
+    "match_statistics": "Match statistics",
+    "stat_average": "Average:",
+    "stat_highest": "Highest score:",
+    "stat_checkout": "Checkout %:",
+    "throw_history": "Visit history",
+    "visit_count_one": "({{count}} visit)",
+    "visit_count_other": "({{count}} visits)",
+    "no_visits": "No visits yet",
+    "visit_number": "Visit #{{n}}",
+    "bust": "BUST",
+    "throw_chart": "Visit statistics (chart)",
+    "live_heatmap": "Live heatmap (current game)",
+    "no_heatmap_data": "No throw data yet for {{name}}",
+    "heatmap_hint": "The heatmap updates with every throw",
+    "darts_count_one": "({{count}} dart)",
+    "darts_count_other": "({{count}} darts)",
+    "leg_number": "LEG {{n}}",
+    "legs_progress": "{{won}} / {{total}} legs",
+    "next_leg_starting": "Next leg starting..."
+  },
+  "training_screen": {
+    "title_doubles": "Doubles training",
+    "title_triples": "Trebles training",
+    "title_atc": "Around the Clock",
+    "title_checkout": "Checkout training",
+    "title_bobs27": "Bob's 27",
+    "title_score": "Scoring training",
+    "title_default": "Training",
+    "desc_doubles": "Hit double {{target}} | Progress: {{done}}/{{total}}",
+    "desc_triples": "Hit triple {{target}} | Progress: {{done}}/{{total}}",
+    "desc_atc": "Hit {{target}} (any segment) | Progress: {{done}}/{{total}}",
+    "desc_checkout": "Checkout: {{remaining}} remaining",
+    "desc_bobs27": "Points: {{score}} | Target: {{target}}",
+    "desc_score": "Score {{target}}+ with 3 darts",
+    "attempt_of": "Attempt {{current}} / {{total}}",
+    "round_of": "Round {{current}} / {{total}}",
+    "who_trains": "Who's practising?",
+    "who_trains_hint": "Pick a player to start training. Your throws are saved to your heatmap.",
+    "no_players": "No players yet",
+    "create_player": "Create player",
+    "player_average": "Average: {{value}}",
+    "restart": "Restart",
+    "points": "Points",
+    "attempts": "Attempts",
+    "miss_no_score": "Miss / no score",
+    "current_visit": "Current visit",
+    "completed": "Training complete!",
+    "final_score": "Final score",
+    "hits_in_attempts_one": "{{hits}} hits in {{count}} attempt",
+    "hits_in_attempts_other": "{{hits}} hits in {{count}} attempts",
+    "perfect_doubles": "Perfect! Every double hit!",
+    "perfect_triples": "Perfect! Every triple hit!",
+    "perfect_atc": "Perfect! Full round completed!",
+    "checkout_success": "Checkout successful!",
+    "try_again": "Try again",
+    "instructions": "How to play",
+    "inst_doubles_1": "Hit every double from D1 to D20",
+    "inst_doubles_2": "Click the double ring on the dartboard",
+    "inst_doubles_3": "Move on to the next double with every hit",
+    "inst_triples_1": "Hit every triple from T20 to T1",
+    "inst_triples_2": "Click the triple ring on the dartboard",
+    "inst_triples_3": "Move on to the next triple with every hit",
+    "inst_atc_1": "Hit every number from 1 to 20 in order",
+    "inst_atc_2": "Any segment (single, double, triple) counts",
+    "inst_atc_3": "Finish the round as fast as you can",
+    "inst_checkout_1": "Check out the remaining score",
+    "inst_checkout_2": "You must finish on a double",
+    "inst_checkout_3": "Practise common checkout routes",
+    "inst_bobs27_1": "Start with 27 points",
+    "inst_bobs27_2": "Round by round from D1 to D20, bull last",
+    "inst_bobs27_3": "Every double hit: + the double's value",
+    "inst_bobs27_4": "No double in the round: − the double's value",
+    "inst_bobs27_5": "Don't let your points drop to 0!",
+    "inst_score_1": "Try to score 60+ per visit",
+    "inst_score_2": "Aim for the high-scoring segments",
+    "inst_score_3": "Build consistency and power"
+  },
+  "shortcuts": {
+    "title": "Keyboard shortcuts",
+    "intro": "In a game, every visit can be entered without a mouse.",
+    "type": "Type the score",
+    "confirm": "Confirm the visit",
+    "back": "Take back the last dart or visit",
+    "undo": "Take back the last visit",
+    "clear": "Clear the input, close a dialog",
+    "help": "Open this overview"
+  },
+  "announce": {
+    "visit": "{{name}}: {{score}}, {{remaining}} left",
+    "bust": "{{name}}: bust, {{remaining}} left",
+    "leg_won": "{{name}} checks out {{score}} and wins the leg",
+    "match_won": "{{name}} checks out {{score}} and wins the match",
+    "undo": "Visit taken back",
+    "undo_to": "Visit taken back, {{name}} is on {{remaining}} again"
   }
 }

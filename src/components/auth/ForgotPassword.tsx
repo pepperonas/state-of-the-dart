@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, AlertCircle, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Trans, useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import BackButton from '../common/BackButton';
 import { Button, Card, TextField } from '../common';
@@ -10,6 +11,7 @@ import BackToLanding from './BackToLanding';
 import { Icon } from '../icons';
 
 const ForgotPassword: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
@@ -25,7 +27,7 @@ const ForgotPassword: React.FC = () => {
       await api.auth.forgotPassword(email);
       setSuccess(true);
     } catch (err: any) {
-      setError(err.message || 'Fehler beim Senden der Email');
+      setError(err.message || t('forgot_password.failed'));
     } finally {
       setLoading(false);
     }
@@ -42,15 +44,18 @@ const ForgotPassword: React.FC = () => {
                 <CheckCircle className="text-on-success-container" size={32} />
               </div>
               <h2 className="m3-headline-small m3-emphasized text-on-surface mb-4">
-                Email gesendet!
+                {t('forgot_password.sent_title')}
               </h2>
               <p className="m3-body-large text-on-surface-variant mb-6">
-                Wir haben dir eine Email an <strong className="text-on-surface">{email}</strong> gesendet.
-                Folge den Anweisungen um dein Passwort zurückzusetzen.
+                <Trans
+                  i18nKey="forgot_password.sent_body"
+                  values={{ email }}
+                  components={{ strong: <strong className="text-on-surface" /> }}
+                />
               </p>
               <Link to="/login">
                 <Button variant="filled" size="lg" fullWidth>
-                  Zum Login
+                  {t('register.to_login')}
                 </Button>
               </Link>
             </Card>
@@ -68,21 +73,21 @@ const ForgotPassword: React.FC = () => {
         <motion.div {...enterDrop} className="text-center mb-8">
           <div className="mb-4 flex justify-center text-primary"><Icon name="lock" size={56} /></div>
           <h1 className="m3-display-small m3-emphasized text-on-surface mb-2">
-            Passwort vergessen?
+            {t('auth.forgot_password')}
           </h1>
-          <p className="m3-body-large text-on-surface-variant">Kein Problem! Wir helfen dir.</p>
+          <p className="m3-body-large text-on-surface-variant">{t('forgot_password.subtitle')}</p>
         </motion.div>
 
         {/* Card */}
         <motion.div {...enterPop}>
           <Card variant="elevated" className="p-8">
-            <BackButton onClick={() => navigate('/login')} label="Zurück zum Login" inline />
+            <BackButton onClick={() => navigate('/login')} label={t('forgot_password.back_to_login')} inline />
 
             <h2 className="m3-headline-small m3-emphasized text-on-surface mb-2">
-              Passwort zurücksetzen
+              {t('auth.reset_password')}
             </h2>
             <p className="m3-body-medium text-on-surface-variant mb-6">
-              Gib deine Email-Adresse ein und wir senden dir einen Link zum Zurücksetzen.
+              {t('forgot_password.intro')}
             </p>
 
             {error && (
@@ -95,16 +100,16 @@ const ForgotPassword: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-5">
               <TextField
                 type="email"
-                label="Email"
+                label={t('auth.email')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="deine@email.de"
+                placeholder={t('auth.email_placeholder')}
                 icon={<Mail size={20} />}
                 required
               />
 
               <Button type="submit" variant="filled" size="lg" fullWidth loading={loading} icon={<Mail size={20} />}>
-                {loading ? 'Sende Email...' : 'Reset-Link senden'}
+                {loading ? t('forgot_password.sending') : t('forgot_password.submit')}
               </Button>
             </form>
           </Card>

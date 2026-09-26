@@ -4,7 +4,7 @@ import {
   Trophy, Target, Award, TrendingUp, Flame, Calendar,
   ArrowRight, Play, Users, Dumbbell, ArrowLeft, Crown, Clock
 } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useTenant } from '../../context/TenantContext';
 import { usePlayer } from '../../context/PlayerContext';
@@ -197,29 +197,29 @@ const Dashboard: React.FC = () => {
           // Get all player names in the match
           const matchPlayers = match.players || [];
           const playerNames = matchPlayers
-            .map((p: any) => p.name || 'Unbekannt')
-            .filter((name: string) => name !== 'Unbekannt')
+            .map((p: any) => p.name)
+            .filter((name: string | undefined): name is string => !!name)
             .join(' vs ');
           
           // Get winner player name
           const winnerPlayer = matchPlayers.find((p: any) => p.playerId === match.winner);
-          const winnerName = winnerPlayer?.name || 'Unbekannt';
+          const winnerName = winnerPlayer?.name || t('dashboard.unknown');
           
           // Determine title based on main player
-          let title = 'Match gespielt';
+          let title = t('dashboard.activity_played');
           let icon = 'board';
           
           if (match.winner) {
             if (mainPlayerId && match.winner === mainPlayerId) {
-              title = 'Spiel gewonnen!';
+              title = t('dashboard.activity_won');
               icon = 'trophy';
             } else if (mainPlayerId) {
               // Main player lost - show who won
-              title = `${winnerName} gewonnen`;
+              title = t('dashboard.activity_winner', { name: winnerName });
               icon = 'medal';
             } else {
               // No main player - show winner
-              title = `${winnerName} gewonnen`;
+              title = t('dashboard.activity_winner', { name: winnerName });
               icon = 'medal';
             }
           }
@@ -270,17 +270,17 @@ const Dashboard: React.FC = () => {
 
   const quickActions = [
     {
-      title: 'Quick Game',
+      title: t('dashboard.quick_game'),
       icon: Play,
       onClick: () => navigate('/game'),
     },
     {
-      title: 'Training',
+      title: t('dashboard.training'),
       icon: Dumbbell,
       onClick: () => navigate('/training'),
     },
     {
-      title: 'Players',
+      title: t('dashboard.players'),
       icon: Users,
       onClick: () => navigate('/players'),
     },
@@ -304,28 +304,32 @@ const Dashboard: React.FC = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="m3-headline-medium m3-emphasized text-on-surface mb-2">
-            Willkommen zurück, {user?.name}!
+            {t('dashboard.welcome_back', { name: user?.name })}
           </h1>
           <p className="text-on-surface-variant">
             {hasActiveSubscription ? (
               user?.subscriptionStatus === 'lifetime' ? (
                 <span className="flex items-center gap-2">
                   <Trophy className="text-tertiary" size={18} />
-                  <span>Lifetime Member</span>
+                  <span>{t('dashboard.lifetime_member')}</span>
                 </span>
               ) : (
-                'Premium Member'
+                t('dashboard.premium_member')
               )
             ) : (
               <span>
-                Noch <strong className="text-primary">{trialDaysLeft} Tage</strong> Trial
+                <Trans
+                  i18nKey="dashboard.trial_days_left"
+                  count={trialDaysLeft}
+                  components={{ strong: <strong className="text-primary" /> }}
+                />
               </span>
             )}
           </p>
           {mainPlayerId && (
             <p className="m3-body-small text-on-surface-variant mt-1 flex items-center gap-1">
               <Crown size={16} className="text-tertiary" />
-              Statistiken für: <strong className="text-on-surface">{players.find(p => p.id === mainPlayerId)?.name || 'Unbekannt'}</strong>
+              {t('dashboard.stats_for')} <strong className="text-on-surface">{players.find(p => p.id === mainPlayerId)?.name || t('dashboard.unknown')}</strong>
             </p>
           )}
         </div>
@@ -340,10 +344,10 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div>
                   <p className="m3-title-medium m3-emphasized text-on-primary-container">
-                    Premium-Trial: Noch {trialDaysLeft} {trialDaysLeft === 1 ? 'Tag' : 'Tage'}
+                    {t('dashboard.trial_banner_title', { count: trialDaysLeft })}
                   </p>
                   <p className="m3-body-small text-on-primary-container">
-                    Genieße alle Premium-Features während deiner Testphase
+                    {t('dashboard.trial_banner_text')}
                   </p>
                 </div>
               </div>
@@ -353,7 +357,7 @@ const Dashboard: React.FC = () => {
                 icon={<Crown size={20} />}
                 className="w-full sm:w-auto"
               >
-                Jetzt upgraden
+                {t('dashboard.upgrade_now')}
               </Button>
             </div>
           </Card>
@@ -365,7 +369,7 @@ const Dashboard: React.FC = () => {
             <Card variant="elevated" className="p-4">
               <div className="mb-2 flex justify-center"><Icon name="board" size={30} /></div>
               <p className="m3-headline-small m3-emphasized text-on-surface"><AnimatedNumber value={stats.totalMatches} /></p>
-              <p className="m3-body-small text-on-surface-variant">Matches</p>
+              <p className="m3-body-small text-on-surface-variant">{t('dashboard.stat_matches')}</p>
             </Card>
           </motion.div>
 
@@ -373,7 +377,7 @@ const Dashboard: React.FC = () => {
             <Card variant="elevated" className="p-4">
               <div className="mb-2 flex justify-center"><Icon name="trophy" size={30} /></div>
               <p className="m3-headline-small m3-emphasized text-on-surface"><AnimatedNumber value={stats.totalWins} /></p>
-              <p className="m3-body-small text-on-surface-variant">Siege</p>
+              <p className="m3-body-small text-on-surface-variant">{t('dashboard.stat_wins')}</p>
             </Card>
           </motion.div>
 
@@ -381,7 +385,7 @@ const Dashboard: React.FC = () => {
             <Card variant="elevated" className="p-4">
               <div className="mb-2 flex justify-center"><Icon name="percent" size={30} /></div>
               <p className="m3-headline-small m3-emphasized text-on-surface"><AnimatedNumber value={stats.winRate} />%</p>
-              <p className="m3-body-small text-on-surface-variant">Win Rate</p>
+              <p className="m3-body-small text-on-surface-variant">{t('dashboard.stat_win_rate')}</p>
             </Card>
           </motion.div>
 
@@ -389,7 +393,7 @@ const Dashboard: React.FC = () => {
             <Card variant="elevated" className="p-4">
               <div className="mb-2 flex justify-center"><Icon name="flame" size={30} /></div>
               <p className="m3-headline-small m3-emphasized text-on-surface"><AnimatedNumber value={stats.currentStreak} /></p>
-              <p className="m3-body-small text-on-surface-variant">Streak</p>
+              <p className="m3-body-small text-on-surface-variant">{t('dashboard.stat_streak')}</p>
             </Card>
           </motion.div>
 
@@ -397,7 +401,7 @@ const Dashboard: React.FC = () => {
             <Card variant="elevated" className="p-4">
               <div className="mb-2 flex justify-center"><Icon name="chartUp" size={30} /></div>
               <p className="m3-headline-small m3-emphasized text-on-surface"><AnimatedNumber value={stats.averageScore} decimals={1} /></p>
-              <p className="m3-body-small text-on-surface-variant">Average</p>
+              <p className="m3-body-small text-on-surface-variant">{t('dashboard.stat_average')}</p>
             </Card>
           </motion.div>
 
@@ -416,14 +420,14 @@ const Dashboard: React.FC = () => {
             <Card variant="elevated" className="p-6">
               <h2 className="m3-title-large m3-emphasized text-on-surface mb-6 flex items-center gap-2">
                 <Calendar size={24} />
-                Letzte Aktivitäten
+                {t('dashboard.recent_activity')}
               </h2>
 
               {activities.length === 0 ? (
                 <div className="text-center py-12 text-on-surface-variant">
                   <Target size={48} className="mx-auto mb-4 opacity-50" />
-                  <p>Noch keine Aktivitäten</p>
-                  <p className="m3-body-small mt-2">Starte dein erstes Spiel!</p>
+                  <p>{t('dashboard.no_activity')}</p>
+                  <p className="m3-body-small mt-2">{t('dashboard.start_first_game')}</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -461,7 +465,7 @@ const Dashboard: React.FC = () => {
                 icon={<TrendingUp size={20} />}
                 className="mt-4"
               >
-                Alle Statistiken anzeigen
+                {t('dashboard.show_all_stats')}
               </Button>
             </Card>
           </div>
@@ -469,7 +473,7 @@ const Dashboard: React.FC = () => {
           {/* Quick Actions */}
           <div>
             <Card variant="elevated" className="p-6 mb-6">
-              <h2 className="m3-title-large m3-emphasized text-on-surface mb-4">Quick Actions</h2>
+              <h2 className="m3-title-large m3-emphasized text-on-surface mb-4">{t('dashboard.quick_actions')}</h2>
               <div className="space-y-3">
                 {quickActions.map((action, index) => {
                   const Icon = action.icon;
@@ -495,19 +499,19 @@ const Dashboard: React.FC = () => {
                 <div className="mb-3 flex justify-center"><Icon name="flame" size={44} /></div>
                 <h3 className="m3-title-medium m3-emphasized text-on-primary-container mb-2">
                   {stats.currentStreak > 0 ? (
-                    <>Du bist on fire! </>
+                    <>{t('dashboard.motivation_streak_title')}</>
                   ) : stats.totalMatches === 0 ? (
-                    <>Let's get started!</>
+                    <>{t('dashboard.motivation_new_title')}</>
                   ) : (
-                    <>Keep going!</>
+                    <>{t('dashboard.motivation_default_title')}</>
                   )}
                 </h3>
                 <p className="text-on-primary-container m3-body-small">
                   {stats.currentStreak > 0
-                    ? `${stats.currentStreak} Siege in Folge!`
+                    ? t('dashboard.motivation_streak_text', { count: stats.currentStreak })
                     : stats.totalMatches === 0
-                    ? 'Spiele dein erstes Match!'
-                    : 'Die nächste Serie wartet!'}
+                    ? t('dashboard.motivation_new_text')
+                    : t('dashboard.motivation_default_text')}
                 </p>
               </div>
             </Card>

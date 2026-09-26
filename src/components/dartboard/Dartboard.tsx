@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dart } from '../../types/index';
 
 interface DartboardProps {
@@ -14,6 +15,7 @@ const Dartboard: React.FC<DartboardProps> = ({
   interactive = true,
   size = 400 
 }) => {
+  const { t } = useTranslation();
   const numbers = [20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5];
   const radius = size / 2;
   const segmentAngle = 18;
@@ -90,7 +92,7 @@ const Dartboard: React.FC<DartboardProps> = ({
       className="dart-shadow rounded-full max-w-full h-auto"
       style={{ touchAction: 'none' }}
       role="application"
-      aria-label="Interactive Dartboard"
+      aria-label={t('dartboard.label')}
     >
       {/* Board background */}
       <circle cx={radius} cy={radius} r={radius} fill="#1a1a1a" />

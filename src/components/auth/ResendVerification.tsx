@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, AlertCircle, CheckCircle } from 'lucide-react';
+import { Trans, useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import BackButton from '../common/BackButton';
 import { Card, Button, TextField } from '../common';
@@ -8,6 +9,7 @@ import BackToLanding from './BackToLanding';
 import { Icon } from '../icons';
 
 const ResendVerification: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
@@ -23,7 +25,7 @@ const ResendVerification: React.FC = () => {
       await api.auth.resendVerification(email);
       setSuccess(true);
     } catch (err: any) {
-      setError(err.message || 'Fehler beim Senden der Email');
+      setError(err.message || t('forgot_password.failed'));
     } finally {
       setLoading(false);
     }
@@ -39,14 +41,17 @@ const ResendVerification: React.FC = () => {
               <CheckCircle className="text-success" size={32} />
             </div>
             <h2 className="m3-headline-small text-on-surface mb-4">
-              Email gesendet!
+              {t('forgot_password.sent_title')}
             </h2>
             <p className="m3-body-medium text-on-surface-variant mb-6">
-              Wir haben dir eine neue Verification-Email an <strong className="text-on-surface">{email}</strong> gesendet.
-              Bitte überprüfe deinen Posteingang.
+              <Trans
+                i18nKey="resend_verification.sent_body"
+                values={{ email }}
+                components={{ strong: <strong className="text-on-surface" /> }}
+              />
             </p>
             <Button variant="filled" fullWidth onClick={() => navigate('/login')}>
-              Zum Login
+              {t('register.to_login')}
             </Button>
           </Card>
         </div>
@@ -61,15 +66,15 @@ const ResendVerification: React.FC = () => {
         <div className="text-center mb-8">
           <div className="mb-4 flex justify-center text-primary"><Icon name="mail" size={56} /></div>
           <h1 className="m3-display-small text-on-surface mb-2">
-            Verification-Email erneut senden
+            {t('resend_verification.title')}
           </h1>
         </div>
 
         <Card variant="elevated" className="p-8">
-          <BackButton onClick={() => navigate('/login')} label="Zurück zum Login" inline />
+          <BackButton onClick={() => navigate('/login')} label={t('forgot_password.back_to_login')} inline />
 
           <p className="m3-body-medium text-on-surface-variant mb-6">
-            Email nicht erhalten? Gib deine Email-Adresse ein und wir senden dir einen neuen Verification-Link.
+            {t('resend_verification.intro')}
           </p>
 
           {error && (
@@ -91,11 +96,11 @@ const ResendVerification: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <TextField
               type="email"
-              label="Email"
+              label={t('auth.email')}
               icon={<Mail size={20} />}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="deine@email.de"
+              placeholder={t('auth.email_placeholder')}
               required
             />
 
@@ -106,7 +111,7 @@ const ResendVerification: React.FC = () => {
               loading={loading}
               icon={!loading ? <Mail size={20} /> : undefined}
             >
-              {loading ? 'Sende Email...' : 'Erneut senden'}
+              {loading ? t('forgot_password.sending') : t('resend_verification.submit')}
             </Button>
           </form>
         </Card>

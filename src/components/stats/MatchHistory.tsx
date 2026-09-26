@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Match, Throw } from '../../types';
 import { Calendar, Target, Award, ChevronDown, ChevronUp, TrendingUp, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatDate, getTimestampForSort } from '../../utils/dateUtils';
@@ -15,6 +16,7 @@ interface MatchHistoryProps {
 }
 
 const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
+  const { t } = useTranslation();
   const chart = useChartTheme();
   const [expandedMatch, setExpandedMatch] = useState<string | null>(null);
   const [matchDetails, setMatchDetails] = useState<Record<string, Match>>({});
@@ -173,24 +175,24 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Nach Gegner, Datum oder Spieltyp suchen..."
+            placeholder={t('match_list.search_placeholder')}
             icon={<Search size={20} />}
           />
 
           {/* Items per page and pagination info */}
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-2">
-              <span className="m3-body-small text-on-surface-variant">Zeige:</span>
+              <span className="m3-body-small text-on-surface-variant">{t('match_list.show')}</span>
               <Select<number>
                 value={itemsPerPage}
                 onChange={(n) => { setItemsPerPage(n); setCurrentPage(1); }}
                 size="sm"
                 inline
-                aria-label="Eintraege pro Seite"
+                aria-label={t('match_list.per_page')}
                 options={[10, 20, 50, 100].map((n) => ({ value: n, label: String(n) }))}
               />
               <span className="m3-body-small text-on-surface-variant">
-                von {filteredMatches.length} Match{filteredMatches.length !== 1 ? 'es' : ''}
+                {t('match_list.of_matches', { count: filteredMatches.length })}
               </span>
             </div>
 
@@ -199,7 +201,7 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
               <div className="flex items-center gap-2">
                 <IconButton
                   variant="outlined"
-                  label="Vorherige Seite"
+                  label={t('match_list.previous_page')}
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
                 >
@@ -234,7 +236,7 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
 
                 <IconButton
                   variant="outlined"
-                  label="Nächste Seite"
+                  label={t('match_list.next_page')}
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
                 >
@@ -249,9 +251,9 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
       {filteredMatches.length === 0 ? (
         <div className="text-center py-8 text-on-surface-variant">
           <Target size={48} className="mx-auto mb-2 opacity-50" />
-          <p className="m3-body-large">{searchQuery ? 'Keine Matches gefunden' : 'Noch keine Spiele gespielt'}</p>
+          <p className="m3-body-large">{searchQuery ? t('match_list.none_found') : t('match_list.none_played')}</p>
           {searchQuery && (
-            <p className="m3-body-small mt-2">Keine Matches gefunden für "{searchQuery}"</p>
+            <p className="m3-body-small mt-2">{t('match_list.none_found_for', { query: searchQuery })}</p>
           )}
         </div>
       ) : (
@@ -283,21 +285,21 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                       ? 'bg-success-container text-on-success-container'
                       : 'bg-error-container text-on-error-container'
                   }`}>
-                    {isWin ? 'WIN' : 'LOSS'}
+                    {isWin ? t('match_list.win') : t('match_list.loss')}
                   </div>
 
                   {/* Match Info */}
                   <div className="flex-1 text-left">
                     <div className="m3-title-medium m3-emphasized text-on-surface">
-                      {player.name} vs {opponent?.name || 'Unbekannt'}
+                      {player.name} vs {opponent?.name || t('match_list.unknown')}
                     </div>
                     <div className="m3-body-small text-on-surface-variant flex items-center gap-3">
                       <span className="flex items-center gap-1">
                         <Calendar size={14} />
                         {formatDate(match.startedAt)}
                       </span>
-                      <span>Score: {player.legsWon} - {opponent?.legsWon ?? 0}</span>
-                      <span>Avg: {(player.matchAverage ?? 0).toFixed(2)}</span>
+                      <span>{t('match_list.score', { own: player.legsWon, opponent: opponent?.legsWon ?? 0 })}</span>
+                      <span>{t('match_list.avg', { value: (player.matchAverage ?? 0).toFixed(2) })}</span>
                     </div>
                   </div>
 
@@ -311,7 +313,7 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                     )}
                     {player.matchHighestScore > 0 && (
                       <div className="text-on-surface-variant">
-                        High: {player.matchHighestScore}
+                        {t('match_list.high', { value: player.matchHighestScore })}
                       </div>
                     )}
                   </div>
@@ -328,12 +330,12 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                   <Card variant="filled" className="p-6">
                     <h4 className="m3-title-medium m3-emphasized text-on-surface mb-4 flex items-center gap-2">
                       <TrendingUp size={20} className="text-primary" />
-                      Runden-Verlauf
+                      {t('match_list.round_chart')}
                     </h4>
                     {loadingDetails[match.id] ? (
                       <div className="bg-surface-container-high rounded-m3-md p-12 text-center">
                         <LoadingIndicator size={48} />
-                        <p className="text-on-surface-variant m3-body-medium">Lade Match-Details...</p>
+                        <p className="text-on-surface-variant m3-body-medium">{t('match_list.loading_details')}</p>
                       </div>
                     ) : matchDetails[match.id] ? (
                       <div className="bg-surface-container-high rounded-m3-md p-4">
@@ -345,12 +347,12 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                             dataKey="round" 
                             stroke={chart.axis} 
                             style={{ fontSize: '12px' }}
-                            label={{ value: 'Runde', position: 'insideBottom', offset: -5, fill: chart.axis }}
+                            label={{ value: t('match_list.round'), position: 'insideBottom', offset: -5, fill: chart.axis }}
                           />
                           <YAxis 
                             stroke={chart.axis} 
                             style={{ fontSize: '12px' }}
-                            label={{ value: 'Punkte', angle: -90, position: 'insideLeft', fill: chart.axis }}
+                            label={{ value: t('match_list.points'), angle: -90, position: 'insideLeft', fill: chart.axis }}
                           />
                           <Tooltip 
                             contentStyle={{ 
@@ -361,7 +363,7 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                             }} 
                             labelStyle={{ color: chart.text, fontWeight: 'bold' }}
                             itemStyle={{ color: chart.text }}
-                            formatter={(value: number) => [`${value} Punkte`, '']}
+                            formatter={(value: number) => [t('match_list.points_value', { count: value }), '']}
                           />
                           <Legend 
                             wrapperStyle={{ paddingTop: '20px' }}
@@ -384,9 +386,9 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                         ) : (
                           <div className="bg-surface-container-high rounded-m3-md p-8 text-center">
                             <TrendingUp size={48} className="mx-auto mb-3 text-on-surface-variant opacity-30" />
-                            <p className="text-on-surface-variant m3-body-medium">Keine Runden-Daten verfügbar</p>
+                            <p className="text-on-surface-variant m3-body-medium">{t('match_list.no_rounds')}</p>
                             <p className="text-on-surface-variant m3-body-small mt-2">
-                              Dieses Match wurde möglicherweise vor dem Tracking-Update gespielt
+                              {t('match_list.no_rounds_hint')}
                             </p>
                           </div>
                         )}
@@ -394,7 +396,7 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                     ) : (
                       <div className="bg-surface-container-high rounded-m3-md p-8 text-center">
                         <TrendingUp size={48} className="mx-auto mb-3 text-on-surface-variant opacity-30" />
-                        <p className="text-on-surface-variant m3-body-medium">Keine Runden-Daten verfügbar</p>
+                        <p className="text-on-surface-variant m3-body-medium">{t('match_list.no_rounds')}</p>
                       </div>
                     )}
                   </Card>
@@ -406,13 +408,13 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                         {player.name}
                       </h4>
                       <div className="grid grid-cols-2 gap-3">
-                        <StatBox label="Average" value={(player.matchAverage ?? 0).toFixed(2)} />
-                        <StatBox label="Highest Score" value={player.matchHighestScore ?? 0} />
+                        <StatBox label={t('match_list.average')} value={(player.matchAverage ?? 0).toFixed(2)} />
+                        <StatBox label={t('match_list.highest_score')} value={player.matchHighestScore ?? 0} />
                         <StatBox label="180s" value={player.match180s ?? 0} />
                         <StatBox label="140+" value={player.match140Plus ?? 0} />
                         <StatBox label="100+" value={player.match100Plus ?? 0} />
                         <StatBox
-                          label="Checkout %"
+                          label={t('match_list.checkout_rate')}
                           value={
                             (player.checkoutAttempts ?? 0) > 0
                               ? `${(((player.checkoutsHit ?? 0) / player.checkoutAttempts) * 100).toFixed(1)}%`
@@ -429,13 +431,13 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                           {opponent.name}
                         </h4>
                         <div className="grid grid-cols-2 gap-3">
-                          <StatBox label="Average" value={(opponent.matchAverage ?? 0).toFixed(2)} />
-                          <StatBox label="Highest Score" value={opponent.matchHighestScore ?? 0} />
+                          <StatBox label={t('match_list.average')} value={(opponent.matchAverage ?? 0).toFixed(2)} />
+                          <StatBox label={t('match_list.highest_score')} value={opponent.matchHighestScore ?? 0} />
                           <StatBox label="180s" value={opponent.match180s ?? 0} />
                           <StatBox label="140+" value={opponent.match140Plus ?? 0} />
                           <StatBox label="100+" value={opponent.match100Plus ?? 0} />
                           <StatBox
-                            label="Checkout %"
+                            label={t('match_list.checkout_rate')}
                             value={
                               (opponent.checkoutAttempts ?? 0) > 0
                                 ? `${(((opponent.checkoutsHit ?? 0) / opponent.checkoutAttempts) * 100).toFixed(1)}%`
@@ -451,7 +453,7 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                   {match.legs && match.legs.length > 0 && (
                     <div className="mt-4 pt-4 border-t border-outline-variant">
                       <h5 className="m3-label-large font-semibold text-on-surface-variant mb-2">
-                        Leg Details
+                        {t('match_list.leg_details')}
                       </h5>
                       <div className="flex gap-2 flex-wrap">
                         {match.legs.map((leg, index) => (
@@ -463,7 +465,7 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                                 : 'bg-error-container text-on-error-container'
                             }`}
                           >
-                            Leg {index + 1}: <Icon name={leg.winner === playerId ? 'check' : 'close'} size={14} className={leg.winner === playerId ? 'text-success' : 'text-error'} />
+                            {t('match_list.leg_label', { n: index + 1 })} <Icon name={leg.winner === playerId ? 'check' : 'close'} size={14} className={leg.winner === playerId ? 'text-success' : 'text-error'} />
                           </div>
                         ))}
                       </div>

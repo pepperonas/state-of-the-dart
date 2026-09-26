@@ -147,7 +147,7 @@ const PlayerManagement: React.FC = () => {
             <Card variant="filled" className="mb-6 p-4">
               <div className="mb-4">
                 <label className="block m3-label-large text-on-surface mb-2">
-                  Emoji auswählen (optional - lässt den Anfangsbuchstaben ersetzen)
+                  {t('player_management.avatar_label')}
                 </label>
                 <div className="flex items-center gap-3">
                   <div className="flex-1">
@@ -159,11 +159,11 @@ const PlayerManagement: React.FC = () => {
                           size="sm"
                           onClick={() => setNewPlayerAvatar(undefined)}
                         >
-                          Entfernen
+                          {t('player_management.remove')}
                         </Button>
                       </div>
                     ) : (
-                      <div className="text-on-surface-variant m3-body-medium">Kein Emoji ausgewählt</div>
+                      <div className="text-on-surface-variant m3-body-medium">{t('player_management.no_avatar')}</div>
                     )}
                   </div>
                   <Button
@@ -171,7 +171,7 @@ const PlayerManagement: React.FC = () => {
                     icon={<Smile size={18} />}
                     onClick={() => setShowEmojiPicker('new')}
                   >
-                    Emoji wählen
+                    {t('player_management.choose_avatar')}
                   </Button>
                 </div>
               </div>
@@ -212,11 +212,11 @@ const PlayerManagement: React.FC = () => {
               <div className="text-center py-12">
                 <User size={64} className="mx-auto text-on-surface-variant mb-4" />
                 <p className="text-on-surface m3-title-medium">
-                  {searchQuery ? 'Keine Spieler gefunden' : t('players.no_players_yet')}
+                  {searchQuery ? t('player_management.no_results') : t('players.no_players_yet')}
                 </p>
                 <p className="m3-body-medium text-on-surface-variant mt-2">
                   {searchQuery
-                    ? `Keine Spieler gefunden für "${searchQuery}"`
+                    ? t('player_management.no_results_for', { query: searchQuery })
                     : t('players.add_first_player')
                   }
                 </p>
@@ -226,26 +226,21 @@ const PlayerManagement: React.FC = () => {
                 <motion.div key={player.id} {...staggerChild(Math.min(index, 10))}>
                 <Card
                   variant="filled"
-                  className="flex items-center justify-between p-4"
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-4"
                 >
-                  <div 
-                    className="flex items-center gap-3 flex-1 cursor-pointer"
-                    onClick={() => navigate(`/players/${player.id}`)}
-                    title="Zum Profil"
-                  >
-                    <div
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowEmojiPicker(player.id);
-                      }}
-                      className="relative group"
-                      title="Emoji ändern"
+                  <div className="flex items-center gap-3 flex-1 min-w-0 w-full sm:w-auto">
+                    <button
+                      type="button"
+                      onClick={() => setShowEmojiPicker(player.id)}
+                      className="relative group rounded-full"
+                      title={t('player_management.change_avatar')}
+                      aria-label={t('player_management.change_avatar')}
                     >
                       <PlayerAvatar avatar={player.avatar} name={player.name} size="md" />
                       <div className="absolute inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_50%,transparent)] rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <Smile size={16} className="text-on-surface" />
                       </div>
-                    </div>
+                    </button>
                     {editingPlayer === player.id ? (
                       <TextField
                         type="text"
@@ -255,27 +250,31 @@ const PlayerManagement: React.FC = () => {
                           if (e.key === 'Enter') handleEditPlayer(player.id);
                         }}
                         onBlur={() => handleEditPlayer(player.id)}
-                        onClick={(e) => e.stopPropagation()}
                         autoFocus
                       />
                     ) : (
-                      <div className="flex-1 min-w-0">
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/players/${player.id}`)}
+                        title={t('player_management.to_profile')}
+                        className="flex-1 min-w-0 text-left rounded-m3-sm"
+                      >
                         <h3 className="m3-title-medium text-on-surface flex items-center gap-2">
                           <span className="truncate">{player.name}</span>
                           {mainPlayerId === player.id && (
-                            <span title="Haupt-Profil">
+                            <span title={t('player_management.main_profile')}>
                               <Crown size={18} className="text-tertiary" />
                             </span>
                           )}
                         </h3>
                         <p className="m3-body-medium text-on-surface-variant">
-                          {t('players.games')}: {player.stats.gamesPlayed} | {t('players.avg')}: {player.stats.averageOverall.toFixed(2)}
+                          {t('player_management.stats_line', { games: player.stats.gamesPlayed, avg: player.stats.averageOverall.toFixed(2) })}
                         </p>
-                      </div>
+                      </button>
                     )}
                   </div>
                   
-                  <div className="flex items-center gap-1 sm:gap-2">
+                  <div className="flex items-center justify-end gap-1 sm:gap-2 self-end sm:self-auto">
                     <IconButton
                       label={t('players.view_profile')}
                       className="text-primary"
@@ -287,7 +286,7 @@ const PlayerManagement: React.FC = () => {
                       <Eye size={18} />
                     </IconButton>
                     <IconButton
-                      label="Statistiken anzeigen"
+                      label={t('player_management.show_stats')}
                       className="text-success"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -300,7 +299,7 @@ const PlayerManagement: React.FC = () => {
                     </IconButton>
                     {mainPlayerId !== player.id && (
                       <IconButton
-                        label="Als Haupt-Profil setzen"
+                        label={t('player_management.set_main_profile')}
                         className="text-tertiary"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -327,7 +326,7 @@ const PlayerManagement: React.FC = () => {
                       className="text-error"
                       onClick={async (e) => {
                         e.stopPropagation();
-                        if (await confirm({ title: `${t('players.delete_confirm')} "${player.name}"?`, danger: true, confirmLabel: t('common.delete') })) {
+                        if (await confirm({ title: t('player_management.delete_confirm', { name: player.name }), danger: true, confirmLabel: t('common.delete') })) {
                           try {
                             await deletePlayer(player.id);
                           } catch (error) {
