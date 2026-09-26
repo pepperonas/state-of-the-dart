@@ -258,7 +258,7 @@ These modules used to ship eagerly and were extracted into their own chunks duri
 - **Cricket** - `CricketGame.tsx` (own turn state + `turnHistory` undo, scoring in `utils/cricket.ts`, localStorage via gameStorage). ⚠️ It must NOT use GameContext: it did, and replaced running X01 matches, posted itself as an X01 match and polluted career stats.
 - **Around the Clock** - `AroundTheClockGame.tsx` (Hit/Miss input, standalone state with turnHistory undo)
 - **Shanghai** - `ShanghaiGame.tsx` (standalone state with turnHistory undo + auto-confirm)
-- **Online Multiplayer** - `OnlineMultiplayer.tsx` (WebSocket via Socket.IO, no persistence). Private rooms show Room ID with copy button; lobby has join-by-code input
+- **Online Multiplayer** - `OnlineMultiplayer.tsx` (lobby, room, chat) + `OnlineGamePanel.tsx` (scoreboard, score pad, winner, rematch). Socket.IO; rooms in server memory (`server/src/socket/`), no persistence — a deploy ends running online games. Room logic is pure and tested (`rooms.ts`): **seats are keyed by a stable client id** (`getOnlineClientId()`, localStorage), never the socket id; a disconnect mid-game holds the seat `RECONNECT_GRACE_MS` (60 s) and `player:join` with the same id rebinds it (`room:rejoined`). The throw-off alternates per leg (`legStarterIndex`) and per rematch (`starterIndex`). Visit totals are pre-checked by `utils/onlineVisit.ts`; the server re-checks (double-out from the last dart). Pinned end to end by `e2e/online.spec.ts` (two browsers).
 - **6 Training Modes** - `TrainingScreen.tsx`
 
 All game modes except Online Multiplayer persist state to localStorage and appear in the Resume Game screen (`/resume`). See "Game State Persistence" below.
@@ -420,7 +420,8 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **22 tests** currently:
+- Specs in `e2e/`. **23 tests** currently:
+  - `online.spec.ts` — two browsers play an online match to the end; a reload mid-leg keeps the seat; a leg won by the non-starter pins the throw-off rule; rematch
   - `tournament.spec.ts` — create a tournament in the UI, enter a leg, reload, resume, confirm, reload: nothing is lost
   - `a11y.spec.ts` — axe-core on 20 screens and four game modes in play, touch-target sizes, the live announcement, plus a cross-check
   - `contrast.spec.ts` — WCAG AA text contrast on eleven screens in both themes, plus a cross-check that the tool catches a bad element
