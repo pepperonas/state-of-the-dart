@@ -20,7 +20,8 @@ interface ShanghaiGameProps {
 const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { players } = usePlayer();
+  const { players, loading: playersLoading } = usePlayer();
+  const restoredRef = useRef(false);
   
   const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
   const [showSetup, setShowSetup] = useState(true);
@@ -69,8 +70,11 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
     return selectedPlayers[currentPlayerIndex];
   }, [selectedPlayers, currentPlayerIndex]);
 
-  // Restore saved game on mount
+  // Restore a saved game — once the players have loaded. On mount the list is
+  // still empty, every saved player looked deleted and the game was thrown away.
   useEffect(() => {
+    if (restoredRef.current || playersLoading) return;
+    restoredRef.current = true;
     const saved = loadGameState<ShanghaiSavedState>(STORAGE_KEYS.SHANGHAI);
     if (!saved) return;
     const validPlayers = saved.selectedPlayers.filter(sp =>
@@ -96,8 +100,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
     setRoundScores(saved.roundScores);
     setTurnHistory(saved.turnHistory || []);
     setShowSetup(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [playersLoading, players]);
 
   // Save game state on changes
   useEffect(() => {

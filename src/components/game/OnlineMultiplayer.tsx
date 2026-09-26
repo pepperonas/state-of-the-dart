@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -64,6 +64,14 @@ const OnlineMultiplayer: React.FC = () => {
   const [joinRoomId, setJoinRoomId] = useState('');
   const [copiedRoomId, setCopiedRoomId] = useState(false);
 
+  // Who we announce ourselves as. Read through a ref so the socket does not
+  // depend on the players array: its identity changes on every stats or heatmap
+  // update, and each change used to close and reopen the socket — a new
+  // socket.id, so the server dropped us from our room.
+  const mainPlayer = players.find(p => !p.isBot);
+  const joinInfoRef = useRef({ name: 'Guest', playerId: undefined as string | undefined });
+  joinInfoRef.current = { name: mainPlayer?.name || user?.email || 'Guest', playerId: mainPlayer?.id };
+
   // Connect to socket
   useEffect(() => {
     const apiUrl = import.meta.env.VITE_API_URL || 'https://api.stateofthedart.com';
@@ -76,12 +84,7 @@ const OnlineMultiplayer: React.FC = () => {
       console.log('[Socket.IO] Connected');
       setConnected(true);
       
-      // Join with player info
-      const mainPlayer = players.find(p => !p.isBot);
-      newSocket.emit('player:join', {
-        name: mainPlayer?.name || user?.email || 'Guest',
-        playerId: mainPlayer?.id,
-      });
+      newSocket.emit('player:join', joinInfoRef.current);
     });
 
     newSocket.on('disconnect', () => {
@@ -128,7 +131,7 @@ const OnlineMultiplayer: React.FC = () => {
     return () => {
       newSocket.close();
     };
-  }, [players, user]);
+  }, [user?.id]);
 
   const handleCreateRoom = () => {
     if (!socket || !roomName.trim()) return;

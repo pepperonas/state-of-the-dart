@@ -261,6 +261,7 @@ CREATE TABLE IF NOT EXISTS user_settings (
   show_stats_during_game INTEGER DEFAULT 1,
   confirm_scores INTEGER DEFAULT 0,
   vibration_enabled INTEGER DEFAULT 1,
+  show_dartboard_helper INTEGER DEFAULT 1,
   updated_at INTEGER NOT NULL,
   FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
 );

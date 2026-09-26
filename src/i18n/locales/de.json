@@ -600,5 +600,8 @@
     "join_private": "Privatem Raum beitreten",
     "enter_room_id": "Raum-ID eingeben...",
     "join": "Beitreten"
+  },
+  "tournament": {
+    "bye": "Freilos"
   }
 }

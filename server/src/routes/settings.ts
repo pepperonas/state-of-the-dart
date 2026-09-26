@@ -33,6 +33,7 @@ router.get('/', authenticateTenant, (req: AuthRequest, res: Response) => {
         show_stats_during_game: true,
         confirm_scores: false,
         vibration_enabled: true,
+        show_dartboard_helper: true,
         updated_at: Date.now()
       });
     }
@@ -68,8 +69,9 @@ router.put('/', authenticateTenant, (req: AuthRequest, res: Response) => {
         show_stats_during_game,
         confirm_scores,
         vibration_enabled,
+        show_dartboard_helper,
         updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(tenant_id) DO UPDATE SET
         theme = excluded.theme,
         language = excluded.language,
@@ -85,6 +87,7 @@ router.put('/', authenticateTenant, (req: AuthRequest, res: Response) => {
         show_stats_during_game = excluded.show_stats_during_game,
         confirm_scores = excluded.confirm_scores,
         vibration_enabled = excluded.vibration_enabled,
+        show_dartboard_helper = excluded.show_dartboard_helper,
         updated_at = excluded.updated_at
     `);
 
@@ -111,6 +114,7 @@ router.put('/', authenticateTenant, (req: AuthRequest, res: Response) => {
       bool(settings.show_stats_during_game, 1),
       bool(settings.confirm_scores, 0),
       bool(settings.vibration_enabled, 1),
+      bool(settings.show_dartboard_helper, 1),
       Date.now()
     );
     
@@ -143,6 +147,7 @@ router.patch('/:key', authenticateTenant, (req: AuthRequest, res: Response) => {
     'show_stats_during_game': 'show_stats_during_game',
     'confirm_scores': 'confirm_scores',
     'vibration_enabled': 'vibration_enabled',
+    'show_dartboard_helper': 'show_dartboard_helper',
   };
 
   const column = allowedColumns[key];

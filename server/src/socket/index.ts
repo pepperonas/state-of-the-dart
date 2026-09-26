@@ -2,31 +2,26 @@ import { Server as HttpServer } from 'http';
 import { Server, Socket } from 'socket.io';
 import { config } from '../config';
 
-interface OnlinePlayer {
-  id: string;
-  name: string;
-  socketId: string;
-  playerId?: string;
-}
-
-interface GameRoom {
-  id: string;
-  name: string;
-  host: string;
-  players: OnlinePlayer[];
-  settings: {
-    gameType: string;
-    startScore: number;
-    legsToWin: number;
-    isPrivate: boolean;
-  };
-  status: 'waiting' | 'playing' | 'finished';
-  gameState?: any;
-}
+import { OnlinePlayer, GameRoom, isMember, removeFromRoom, applyThrow, cleanChatMessage } from './rooms';
 
 // In-memory storage (for simplicity)
 const onlinePlayers: Map<string, OnlinePlayer> = new Map();
 const gameRooms: Map<string, GameRoom> = new Map();
+
+const publicRooms = () =>
+  Array.from(gameRooms.values()).filter(r => !r.settings.isPrivate && r.status === 'waiting');
+
+/**
+ * A throwing handler inside socket.io is an uncaught exception in the Node
+ * process — i.e. the API goes down for everyone. Every handler is wrapped.
+ */
+const safe = <A extends unknown[]>(name: string, fn: (...args: A) => void) => (...args: A) => {
+  try {
+    fn(...args);
+  } catch (err) {
+    console.error(`[Socket.IO] ${name} failed:`, err);
+  }
+};
 
 export function setupSocketIO(server: HttpServer): Server {
   const io = new Server(server, {
@@ -42,10 +37,10 @@ export function setupSocketIO(server: HttpServer): Server {
     console.log(`[Socket.IO] Client connected: ${socket.id}`);
 
     // Player joins with their info
-    socket.on('player:join', (data: { name: string; playerId?: string }) => {
+    socket.on('player:join', safe('player:join', (data: { name: string; playerId?: string }) => {
       const player: OnlinePlayer = {
         id: socket.id,
-        name: data.name,
+        name: typeof data?.name === 'string' && data.name.trim() ? data.name.trim().slice(0, 40) : 'Guest',
         socketId: socket.id,
         playerId: data.playerId,
       };
@@ -55,11 +50,11 @@ export function setupSocketIO(server: HttpServer): Server {
       io.emit('players:online', Array.from(onlinePlayers.values()));
       
       // Send available rooms to new player
-      socket.emit('rooms:list', Array.from(gameRooms.values()).filter(r => !r.settings.isPrivate && r.status === 'waiting'));
-    });
+      socket.emit('rooms:list', publicRooms());
+    }));
 
     // Create a game room
-    socket.on('room:create', (data: { name: string; settings: GameRoom['settings'] }) => {
+    socket.on('room:create', safe('room:create', (data: { name: string; settings: GameRoom['settings'] }) => {
       const player = onlinePlayers.get(socket.id);
       if (!player) return;
 
@@ -77,11 +72,11 @@ export function setupSocketIO(server: HttpServer): Server {
       socket.join(roomId);
       
       socket.emit('room:created', room);
-      io.emit('rooms:list', Array.from(gameRooms.values()).filter(r => !r.settings.isPrivate && r.status === 'waiting'));
-    });
+      io.emit('rooms:list', publicRooms());
+    }));
 
     // Join a game room
-    socket.on('room:join', (roomId: string) => {
+    socket.on('room:join', safe('room:join', (roomId: string) => {
       const player = onlinePlayers.get(socket.id);
       const room = gameRooms.get(roomId);
       
@@ -104,30 +99,23 @@ export function setupSocketIO(server: HttpServer): Server {
       socket.join(roomId);
       
       io.to(roomId).emit('room:updated', room);
-      io.emit('rooms:list', Array.from(gameRooms.values()).filter(r => !r.settings.isPrivate && r.status === 'waiting'));
-    });
+      io.emit('rooms:list', publicRooms());
+    }));
 
     // Leave a room
-    socket.on('room:leave', (roomId: string) => {
+    socket.on('room:leave', safe('room:leave', (roomId: string) => {
       const room = gameRooms.get(roomId);
       if (!room) return;
-
-      room.players = room.players.filter(p => p.socketId !== socket.id);
+      const outcome = removeFromRoom(room, socket.id);
+      if (outcome === 'not-member') return;
       socket.leave(roomId);
-
-      if (room.players.length === 0) {
-        gameRooms.delete(roomId);
-      } else if (room.host === socket.id) {
-        // Transfer host to next player
-        room.host = room.players[0].socketId;
-      }
-
-      io.to(roomId).emit('room:updated', room);
-      io.emit('rooms:list', Array.from(gameRooms.values()).filter(r => !r.settings.isPrivate && r.status === 'waiting'));
-    });
+      if (outcome === 'deleted') gameRooms.delete(roomId);
+      else io.to(roomId).emit('room:updated', room);
+      io.emit('rooms:list', publicRooms());
+    }));
 
     // Start game
-    socket.on('game:start', (roomId: string) => {
+    socket.on('game:start', safe('game:start', (roomId: string) => {
       const room = gameRooms.get(roomId);
       if (!room || room.host !== socket.id) return;
 
@@ -150,97 +138,61 @@ export function setupSocketIO(server: HttpServer): Server {
       };
 
       io.to(roomId).emit('game:started', room);
-      io.emit('rooms:list', Array.from(gameRooms.values()).filter(r => !r.settings.isPrivate && r.status === 'waiting'));
-    });
+      io.emit('rooms:list', publicRooms());
+    }));
 
     // Submit throw
-    socket.on('game:throw', (data: { roomId: string; darts: any[]; score: number }) => {
-      const room = gameRooms.get(data.roomId);
-      if (!room || room.status !== 'playing') return;
-
-      const currentPlayer = room.players[room.gameState.currentPlayerIndex];
-      if (currentPlayer.socketId !== socket.id) return;
-
-      // Update score
-      const newScore = room.gameState.scores[socket.id] - data.score;
-      
-      if (newScore < 0 || newScore === 1) {
-        // Bust - score stays the same
-        io.to(data.roomId).emit('game:bust', { 
-          playerId: socket.id, 
-          darts: data.darts 
-        });
-      } else if (newScore === 0) {
-        // Checkout!
-        room.gameState.legs[socket.id]++;
-        
-        // Check for match win
-        if (room.gameState.legs[socket.id] >= room.settings.legsToWin) {
-          room.status = 'finished';
-          io.to(data.roomId).emit('game:finished', {
-            winner: currentPlayer,
-            legs: room.gameState.legs,
-          });
-        } else {
-          // Reset scores for new leg
-          Object.keys(room.gameState.scores).forEach(id => {
-            room.gameState.scores[id] = room.settings.startScore;
-          });
-          io.to(data.roomId).emit('game:legWon', {
-            winner: currentPlayer,
-            legs: room.gameState.legs,
-          });
-        }
-      } else {
-        room.gameState.scores[socket.id] = newScore;
+    socket.on('game:throw', safe('game:throw', (data: { roomId: string; darts?: Array<{ multiplier?: number }>; score: unknown }) => {
+      const room = gameRooms.get(data?.roomId);
+      if (!room) return;
+      const result = applyThrow(room, socket.id, data);
+      if (result.kind === 'rejected') return;
+      if (result.kind === 'bust') {
+        io.to(room.id).emit('game:bust', { playerId: socket.id, darts: data.darts });
+      } else if (result.kind === 'leg') {
+        io.to(room.id).emit('game:legWon', { winner: result.winner, legs: room.gameState?.legs });
+      } else if (result.kind === 'match') {
+        io.to(room.id).emit('game:finished', { winner: result.winner, legs: room.gameState?.legs });
       }
+      io.to(room.id).emit('game:state', room.gameState);
+    }));
 
-      // Next player
-      room.gameState.currentPlayerIndex = (room.gameState.currentPlayerIndex + 1) % room.players.length;
-
-      io.to(data.roomId).emit('game:state', room.gameState);
-    });
+    // Refresh the public room list (the lobby's refresh button)
+    socket.on('rooms:refresh', safe('rooms:refresh', () => {
+      socket.emit('rooms:list', publicRooms());
+    }));
 
     // Chat message
-    socket.on('chat:message', (data: { roomId: string; message: string }) => {
+    socket.on('chat:message', safe('chat:message', (data: { roomId: string; message: unknown }) => {
       const player = onlinePlayers.get(socket.id);
-      if (!player) return;
-
-      io.to(data.roomId).emit('chat:message', {
-        from: player.name,
-        message: data.message,
-        timestamp: Date.now(),
-      });
-    });
+      const room = gameRooms.get(data?.roomId);
+      // Only members may talk in a room — it used to accept any roomId.
+      if (!player || !isMember(room, socket.id)) return;
+      const message = cleanChatMessage(data.message);
+      if (!message) return;
+      io.to(data.roomId).emit('chat:message', { from: player.name, message, timestamp: Date.now() });
+    }));
 
     // Disconnect
-    socket.on('disconnect', () => {
+    socket.on('disconnect', safe('disconnect', () => {
       console.log(`[Socket.IO] Client disconnected: ${socket.id}`);
-      
-      // Remove from online players
       onlinePlayers.delete(socket.id);
-      
-      // Remove from rooms
+
       gameRooms.forEach((room, roomId) => {
-        const wasInRoom = room.players.some(p => p.socketId === socket.id);
-        if (wasInRoom) {
-          room.players = room.players.filter(p => p.socketId !== socket.id);
-          
-          if (room.players.length === 0) {
-            gameRooms.delete(roomId);
-          } else if (room.host === socket.id) {
-            room.host = room.players[0].socketId;
-          }
-          
-          io.to(roomId).emit('room:updated', room);
-          io.to(roomId).emit('player:left', { socketId: socket.id });
+        const outcome = removeFromRoom(room, socket.id);
+        if (outcome === 'not-member') return;
+        if (outcome === 'deleted') {
+          gameRooms.delete(roomId);
+          return;
         }
+        io.to(roomId).emit('room:updated', room);
+        io.to(roomId).emit('player:left', { socketId: socket.id });
+        if (room.gameState) io.to(roomId).emit('game:state', room.gameState);
       });
-      
-      // Broadcast updated lists
+
       io.emit('players:online', Array.from(onlinePlayers.values()));
-      io.emit('rooms:list', Array.from(gameRooms.values()).filter(r => !r.settings.isPrivate && r.status === 'waiting'));
-    });
+      io.emit('rooms:list', publicRooms());
+    }));
   });
 
   return io;

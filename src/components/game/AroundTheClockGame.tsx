@@ -31,7 +31,8 @@ interface Target {
 
 const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
   const { t } = useTranslation();
-  const { players } = usePlayer();
+  const { players, loading: playersLoading } = usePlayer();
+  const restoredRef = useRef(false);
   const { settings } = useSettings();
 
   // Wire up audio volume from settings
@@ -136,8 +137,11 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
     }
   }, [showSetup, showWinner, gameStartTime]);
 
-  // Restore saved game on mount
+  // Restore a saved game — once the players have loaded. On mount the list is
+  // still empty, every saved player looked deleted and the game was thrown away.
   useEffect(() => {
+    if (restoredRef.current || playersLoading) return;
+    restoredRef.current = true;
     const saved = loadGameState<ATCSavedState>(STORAGE_KEYS.ATC);
     if (!saved) return;
     // Validate that saved players still exist
@@ -168,8 +172,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
     setElapsedTime(saved.elapsedTime);
     setGameStartTime(Date.now() - saved.elapsedTime * 1000);
     setShowSetup(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [playersLoading, players]);
 
   // Save game state on changes (elapsedTime excluded — computed dynamically to avoid 1Hz localStorage thrashing)
   useEffect(() => {

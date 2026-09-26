@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import api, { setAuthToken, removeAuthToken } from '../services/api';
 import { syncService } from '../services/sync';
 import { logBuffer } from '../utils/logBuffer';
+import { clearDeviceGameState } from '../utils/storage';
 
 interface User {
   id: string;
@@ -124,6 +125,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const logout = () => {
     logBuffer.log('info', 'state_change', 'User logged out');
     api.auth.logout();
+    clearDeviceGameState();
     setUser(null);
   };
 

@@ -124,12 +124,18 @@ export const initDatabase = (): Database.Database => {
       { name: 'show_stats_during_game', def: 'INTEGER DEFAULT 1' },
       { name: 'confirm_scores', def: 'INTEGER DEFAULT 0' },
       { name: 'vibration_enabled', def: 'INTEGER DEFAULT 1' },
+      { name: 'show_dartboard_helper', def: 'INTEGER DEFAULT 1' },
     ];
     const missing = newColumns.filter(c => !existing.has(c.name));
     if (missing.length > 0) {
       console.log('🔧 Migrating user_settings table: Adding volume/toggle columns...');
       for (const col of missing) {
         db.exec(`ALTER TABLE user_settings ADD COLUMN ${col.name} ${col.def};`);
+      }
+      // The dartboard-helper toggle used to be written into
+      // enable_achievements_hints. Carry each user's choice over once.
+      if (missing.some(c => c.name === 'show_dartboard_helper')) {
+        db.exec('UPDATE user_settings SET show_dartboard_helper = COALESCE(enable_achievements_hints, 1);');
       }
       console.log(`✅ Added ${missing.length} column(s) to user_settings`);
     }

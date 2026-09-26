@@ -7,9 +7,11 @@ import { getCheckoutSuggestion } from '../data/checkoutTable';
 import audioSystem from '../utils/audio';
 import { useTenant } from './TenantContext';
 import { usePlayer } from './PlayerContext';
+import { useAuth } from './AuthContext';
 import { api } from '../services/api';
 import logger from '../utils/logger';
 import { logBuffer } from '../utils/logBuffer';
+import { toApiMatch, matchSaveKey } from '../utils/matchApi';
 
 export interface GameState {
   currentMatch: Match | null;
@@ -33,7 +35,8 @@ type GameAction =
   | { type: 'UNDO_END_MATCH' }
   | { type: 'PAUSE_MATCH' }
   | { type: 'RESUME_MATCH' }
-  | { type: 'UPDATE_CHECKOUT_SUGGESTION' };
+  | { type: 'UPDATE_CHECKOUT_SUGGESTION' }
+  | { type: 'RESET_GAME' };
 
 /**
  * A match needs at least two players — REMOVE_PLAYER refuses to strip it down
@@ -665,6 +668,9 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
       };
     }
     
+    case 'RESET_GAME':
+      return initialState;
+
     default:
       return state;
   }
@@ -737,6 +743,18 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [state, dispatch] = useReducer(gameReducer, initialState);
 
+  // A match belongs to the account that played it. When the signed-in account
+  // changes (sign-out, or another account on the same device), drop it from
+  // memory too — logout already cleared the device copy.
+  const { user } = useAuth();
+  const accountRef = React.useRef(user?.id);
+  useEffect(() => {
+    if (accountRef.current !== undefined && accountRef.current !== user?.id) {
+      dispatch({ type: 'RESET_GAME' });
+    }
+    accountRef.current = user?.id;
+  }, [user?.id]);
+
   // Restore active match from localStorage on mount
   useEffect(() => {
     const savedMatch = localStorage.getItem(ACTIVE_MATCH_KEY);
@@ -773,19 +791,6 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [state.currentMatch]);
   
-  // Helper: Transform match for API (maps frontend format to API format)
-  const transformMatchForApi = (match: Match) => ({
-    id: match.id,
-    gameType: match.type, // API expects 'gameType', frontend uses 'type'
-    status: match.status,
-    players: match.players,
-    settings: match.settings,
-    startedAt: match.startedAt ? new Date(match.startedAt).getTime() : Date.now(),
-    completedAt: match.completedAt ? new Date(match.completedAt).getTime() : undefined,
-    winner: match.winner,
-    legs: match.legs,
-  });
-
   // Track if match has been created in DB
   const matchCreatedRef = React.useRef<string | null>(null);
   // Track if a create/update operation is in progress to prevent race conditions
@@ -793,92 +798,53 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Track last saved state to prevent unnecessary saves
   const lastSavedStateRef = React.useRef<string>('');
 
-  // Save game state to API with debouncing (during active game)
-  // Save match to API with debouncing and dependency tracking
-  useEffect(() => {
-    if (!state.currentMatch || state.currentMatch.status !== 'in-progress') {
-      return;
+  /** Create on first save, update afterwards. A 409 means it exists already. */
+  const persistMatch = async (match: Match, options?: RequestInit) => {
+    const apiMatch = toApiMatch(match);
+    if (matchCreatedRef.current !== match.id) {
+      try {
+        await api.matches.create(apiMatch, options);
+      } catch (err: any) {
+        if (err?.status !== 409 && !/\b409\b/.test(err?.message ?? '')) throw err;
+      }
+      matchCreatedRef.current = match.id;
+    } else {
+      await api.matches.update(match.id, apiMatch, options);
     }
+  };
 
-    const matchId = state.currentMatch.id;
+  // Save the running match to the API, debounced. The key covers every
+  // throw's id and score — see matchSaveKey.
+  const saveKey = state.currentMatch ? matchSaveKey(state.currentMatch, state.currentPlayerIndex) : '';
+  useEffect(() => {
+    if (!state.currentMatch || state.currentMatch.status !== 'in-progress') return;
+    if (lastSavedStateRef.current === saveKey) return;
+
+    const match = state.currentMatch;
     const abortController = new AbortController();
     let isMounted = true;
 
-    // Create a stable state string for comparison to prevent unnecessary saves
-    const currentStateString = JSON.stringify({
-      id: matchId,
-      status: state.currentMatch.status,
-      currentLegIndex: state.currentMatch.currentLegIndex,
-      currentPlayerIndex: state.currentPlayerIndex,
-      // Player count matters: removing a player may leave leg/throw counts
-      // untouched, and without this the save would be skipped as "unchanged".
-      playersCount: state.currentMatch.players.length,
-      legsCount: state.currentMatch.legs.length,
-      lastLegThrowsCount: state.currentMatch.legs[state.currentMatch.currentLegIndex]?.throws.length || 0,
-    });
-
-    // Only save if state actually changed
-    if (lastSavedStateRef.current === currentStateString) {
-      return;
-    }
-
     const saveTimer = setTimeout(async () => {
-      if (!isMounted) return;
-      
-      // Prevent concurrent save operations
-      if (matchSavingRef.current) {
-        return;
-      }
-
+      if (!isMounted || matchSavingRef.current) return;
       matchSavingRef.current = true;
-      const apiMatch = transformMatchForApi(state.currentMatch!);
-
       try {
-        // If we haven't created this match yet, create it first
-        if (matchCreatedRef.current !== matchId) {
-          try {
-            await api.matches.create(apiMatch, { signal: abortController.signal });
-            matchCreatedRef.current = matchId;
-            logger.success('Match created in DB:', matchId);
-          } catch (createError: any) {
-            // If aborted, exit silently
-            if (createError.name === 'AbortError' || !isMounted) return;
-            // If it already exists (409 conflict), mark as created and continue.
-            // apiClient attaches `status` to the thrown error; older code checked the
-            // non-existent `.response.status`, so this branch never ran.
-            if (createError?.status === 409 || /\b409\b/.test(createError?.message ?? '')) {
-              matchCreatedRef.current = matchId;
-            } else {
-              logger.warn('Match create failed:', createError);
-            }
-          }
-        } else {
-          // Match exists, update it
-          await api.matches.update(matchId, apiMatch, { signal: abortController.signal });
-        }
-        
-        // Update last saved state only on success
-        if (isMounted) {
-          lastSavedStateRef.current = currentStateString;
-        }
+        await persistMatch(match, { signal: abortController.signal });
+        if (isMounted) lastSavedStateRef.current = saveKey;
       } catch (error: any) {
-        // If aborted, exit silently
-        if (error.name === 'AbortError' || !isMounted) return;
-        // Silently fail - don't block the game
-        logger.warn('Match save failed:', error);
+        if (error?.name === 'AbortError' || !isMounted) return;
+        logger.warn('Match save failed:', error); // never block the game
       } finally {
-        // Always reset the saving flag to prevent permanent blocking
         matchSavingRef.current = false;
       }
-    }, 2000); // Increased debounce to 2 seconds to reduce request frequency
+    }, 2000);
 
     return () => {
       isMounted = false;
       clearTimeout(saveTimer);
-      abortController.abort(); // Cancel any in-flight API calls
-      matchSavingRef.current = false; // Reset saving flag on cleanup
+      abortController.abort();
+      matchSavingRef.current = false;
     };
-  }, [state.currentMatch?.id, state.currentMatch?.status, state.currentMatch?.currentLegIndex, state.currentPlayerIndex, state.currentMatch?.legs.length]);
+  }, [saveKey]);
 
   // Reset match created ref when match ID changes
   useEffect(() => {
@@ -887,125 +853,58 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [state.currentMatch?.id]);
 
-  // Save match when paused (before navigating away)
+  // Save match when paused (before navigating away). pauseCurrentMatch saves on
+  // its own and holds matchSavingRef, so this only runs for other pause paths.
   useEffect(() => {
-    if (state.currentMatch?.status === 'paused') {
-      // Skip if already saving to prevent duplicate requests
-      if (matchSavingRef.current) {
-        logger.debug('Skipping paused save - already saving');
-        return;
-      }
-
-      const apiMatch = transformMatchForApi(state.currentMatch);
-      const matchId = state.currentMatch.id;
-
-      matchSavingRef.current = true;
-
-      // Try to save immediately when paused
-      (async () => {
-        try {
-          if (matchCreatedRef.current !== matchId) {
-            await api.matches.create(apiMatch);
-            matchCreatedRef.current = matchId;
-          } else {
-            await api.matches.update(matchId, apiMatch);
-          }
-          logger.success('Paused match saved');
-        } catch (err: any) {
-          // Don't warn on rate limiting - it's not critical
-          if (!err?.message?.includes('429')) {
-            logger.warn('Failed to save paused match:', err);
-          }
-          // Don't throw - allow navigation to continue
-        } finally {
-          matchSavingRef.current = false;
-        }
-      })();
-    }
+    if (state.currentMatch?.status !== 'paused' || matchSavingRef.current) return;
+    const match = state.currentMatch;
+    matchSavingRef.current = true;
+    persistMatch(match)
+      .then(() => logger.success('Paused match saved'))
+      .catch((err: any) => {
+        if (!err?.message?.includes('429')) logger.warn('Failed to save paused match:', err);
+      })
+      .finally(() => { matchSavingRef.current = false; });
   }, [state.currentMatch?.status]);
-  
-  // Sync player statistics to PlayerContext (called during and after match)
-  const syncPlayerStats = (liveUpdate: boolean = false) => {
-    if (!state.currentMatch || !storage) return;
-    
-    // Only save to match history if completed
-    const shouldSaveMatch = state.currentMatch.status === 'completed' && !liveUpdate;
-    
-    // Save completed match to database
-    if (shouldSaveMatch) {
-      const apiMatch = transformMatchForApi(state.currentMatch!);
-      api.matches.create(apiMatch)
-        .then(() => logger.success('Match saved to database'))
-        .catch((err: Error) => logger.error('Failed to save match:', err));
-    }
-    
-    state.currentMatch.players.forEach((matchPlayer) => {
+
+  /**
+   * Adds a finished match to the players' career totals.
+   *
+   * Called once per match id. The totals as they were before are kept, so that
+   * reopening the match (undo) can put them back — ending, undoing and ending
+   * again used to count the match twice.
+   */
+  const statsBeforeRef = React.useRef<Map<string, Map<string, Player['stats']>>>(new Map());
+
+  const countMatchInStats = (match: Match) => {
+    const before = new Map<string, Player['stats']>();
+    match.players.forEach((matchPlayer) => {
       const player = players.find(p => p.id === matchPlayer.playerId);
       if (!player) return;
-      
-      const isWinner = state.currentMatch!.winner === matchPlayer.playerId;
-      const legsWon = matchPlayer.legsWon;
-      const legsPlayed = state.currentMatch!.legs.length;
-      
-      // For live updates, update current performance stats but not permanent records
-      if (liveUpdate) {
-        // Get all checkouts from completed legs
-        const playerLegsWon = state.currentMatch!.legs.filter(
-          leg => leg.winner === matchPlayer.playerId && leg.completedAt
-        );
-        const checkoutsFromLegs = playerLegsWon
-          .map(leg => {
-            const lastThrow = leg.throws[leg.throws.length - 1];
-            return lastThrow?.score || 0;
-          })
-          .filter(score => score > 0);
-        
-        const highestCheckoutThisMatch = Math.max(0, ...checkoutsFromLegs);
-        
-        // Fire and forget - don't block on live updates
-        updatePlayer(matchPlayer.playerId, {
-          stats: {
-            ...player.stats,
-            // Update these live during the game (best performances)
-            bestAverage: Math.max(player.stats.bestAverage, matchPlayer.matchAverage),
-            highestCheckout: Math.max(player.stats.highestCheckout, highestCheckoutThisMatch),
-          },
-        }).catch(err => logger.warn('Live stats update failed:', err));
-        return; // Skip the rest for live updates
-      }
-      
-      // Calculate highest checkout from match
-      const playerLegsWon = state.currentMatch!.legs.filter(
-        leg => leg.winner === matchPlayer.playerId
-      );
-      const checkoutsFromLegs = playerLegsWon
-        .map(leg => {
-          const lastThrow = leg.throws[leg.throws.length - 1];
-          return lastThrow?.score || 0;
-        })
+      before.set(player.id, player.stats);
+
+      const isWinner = match.winner === matchPlayer.playerId;
+      const checkoutsFromLegs = match.legs
+        .filter(leg => leg.winner === matchPlayer.playerId)
+        .map(leg => leg.throws[leg.throws.length - 1]?.score || 0)
         .filter(score => score > 0);
-      
-      const highestCheckout = Math.max(
-        player.stats.highestCheckout,
-        ...checkoutsFromLegs
-      );
-      
-      // Update player stats - fire and forget to not block UI
       const checkoutStats = calculateCheckoutPercentage(
         player.stats.totalCheckoutAttempts || 0,
         player.stats.totalCheckoutHits || 0,
         matchPlayer.checkoutAttempts,
         matchPlayer.checkoutsHit
       );
+      const legsWonInMatch = match.legs.filter(leg => leg.winner === matchPlayer.playerId).length;
 
       updatePlayer(matchPlayer.playerId, {
         stats: {
           ...player.stats,
           gamesPlayed: player.stats.gamesPlayed + 1,
           gamesWon: player.stats.gamesWon + (isWinner ? 1 : 0),
-          totalLegsPlayed: player.stats.totalLegsPlayed + legsPlayed,
-          totalLegsWon: player.stats.totalLegsWon + legsWon,
-          highestCheckout: highestCheckout,
+          totalLegsPlayed: player.stats.totalLegsPlayed + match.legs.filter(l => l.winner).length,
+          // legsWon on the match player resets every set — count the legs.
+          totalLegsWon: player.stats.totalLegsWon + legsWonInMatch,
+          highestCheckout: Math.max(player.stats.highestCheckout, ...checkoutsFromLegs),
           total180s: player.stats.total180s + matchPlayer.match180s,
           total171Plus: player.stats.total171Plus + matchPlayer.match171Plus,
           total140Plus: player.stats.total140Plus + matchPlayer.match140Plus,
@@ -1023,22 +922,59 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         },
       }).catch(err => logger.warn('Final stats update failed:', err));
     });
+    statsBeforeRef.current.set(match.id, before);
   };
-  
-  // Auto-sync when match is completed
+
+  const uncountMatchInStats = (matchId: string) => {
+    const before = statsBeforeRef.current.get(matchId);
+    if (!before) return;
+    statsBeforeRef.current.delete(matchId);
+    before.forEach((stats, playerId) => {
+      updatePlayer(playerId, { stats }).catch(err => logger.warn('Stats rollback failed:', err));
+    });
+  };
+
+  // Live best-performance updates during the game (bestAverage, highestCheckout)
+  const syncPlayerStats = (liveUpdate: boolean = true) => {
+    if (!state.currentMatch || !liveUpdate) return;
+    const match = state.currentMatch;
+    match.players.forEach((matchPlayer) => {
+      const player = players.find(p => p.id === matchPlayer.playerId);
+      if (!player) return;
+      const highestCheckoutThisMatch = Math.max(0, ...match.legs
+        .filter(leg => leg.winner === matchPlayer.playerId && leg.completedAt)
+        .map(leg => leg.throws[leg.throws.length - 1]?.score || 0));
+      const bestAverage = Math.max(player.stats.bestAverage, matchPlayer.matchAverage);
+      const highestCheckout = Math.max(player.stats.highestCheckout, highestCheckoutThisMatch);
+      if (bestAverage === player.stats.bestAverage && highestCheckout === player.stats.highestCheckout) return;
+      updatePlayer(matchPlayer.playerId, {
+        stats: { ...player.stats, bestAverage, highestCheckout },
+      }).catch(err => logger.warn('Live stats update failed:', err));
+    });
+  };
+
+  // Completion: save the finished match, and count it once — only when it was
+  // actually won. An abandoned match (END_MATCH) is not a played game.
+  // Reopening a counted match takes its numbers back out.
   useEffect(() => {
-    if (state.currentMatch?.status === 'completed') {
-      syncPlayerStats(false); // Final sync
+    const match = state.currentMatch;
+    if (!match) return;
+    if (match.status === 'completed') {
+      persistMatch(match)
+        .then(() => logger.success('Match saved to database'))
+        .catch((err: Error) => logger.error('Failed to save match:', err));
+      if (match.winner && !statsBeforeRef.current.has(match.id)) countMatchInStats(match);
+    } else if (match.status === 'in-progress' && statsBeforeRef.current.has(match.id)) {
+      uncountMatchInStats(match.id);
     }
-  }, [state.currentMatch?.status]);
-  
+  }, [state.currentMatch?.status, state.currentMatch?.id]);
+
   // Live sync during game (every throw)
-  // Use specific dependencies to avoid unnecessary re-renders
   const currentLegThrowsCount = state.currentMatch?.legs[state.currentMatch.currentLegIndex]?.throws.length ?? 0;
 
   useEffect(() => {
     if (state.currentMatch && state.currentMatch.status === 'in-progress') {
-      syncPlayerStats(true); // Live update
+      syncPlayerStats(true);
     }
   }, [currentLegThrowsCount, state.currentMatch?.currentLegIndex]);
 
@@ -1068,28 +1004,19 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Pause the current match: dispatch PAUSE_MATCH and wait for DB save
   const pauseCurrentMatch = async (): Promise<void> => {
     if (!state.currentMatch || state.currentMatch.status !== 'in-progress') return;
+    const paused: Match = { ...state.currentMatch, status: 'paused', pausedAt: new Date() };
 
+    // Hold the flag BEFORE dispatching, so the paused-save effect sees it and
+    // skips — both used to POST at once and the second one hit a 409.
+    matchSavingRef.current = true;
     dispatch({ type: 'PAUSE_MATCH' });
-
-    // The paused-save effect will fire, but we also do an immediate save
-    // to guarantee persistence before a new match starts.
-    const apiMatch = transformMatchForApi({
-      ...state.currentMatch,
-      status: 'paused',
-      pausedAt: new Date(),
-    });
-    const matchId = state.currentMatch.id;
-
     try {
-      if (matchCreatedRef.current !== matchId) {
-        await api.matches.create(apiMatch);
-        matchCreatedRef.current = matchId;
-      } else {
-        await api.matches.update(matchId, apiMatch);
-      }
-      logger.success('Match paused and saved:', matchId);
+      await persistMatch(paused);
+      logger.success('Match paused and saved:', paused.id);
     } catch (err) {
       logger.warn('Failed to save paused match (pauseCurrentMatch):', err);
+    } finally {
+      matchSavingRef.current = false;
     }
   };
 
