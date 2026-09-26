@@ -64,7 +64,7 @@ ANALYZE=true npm run build   # Emits dist/bundle-stats.html (rollup-plugin-visua
 | Active match (in-progress X01) | localStorage only | N/A (temporary) |
 | ATC / Shanghai / Cricket state | localStorage only (gameStorage.ts) | N/A (48h expiry) |
 | Debug Flags | DB via API (admin only) | N/A |
-| Tournaments | Not persisted (React state only) — bracket logic in `utils/tournament.ts` | N/A (TODO) |
+| Tournaments | DB via API (`/api/tournaments`, since 0.16.0; `services/tournamentStore.ts`) — bracket logic + (de)serialisation in `utils/tournament.ts` | none (list is fetched) |
 
 ### Frontend State Management
 React Context API with provider hierarchy in `App.tsx`:
@@ -134,7 +134,7 @@ M3 primitive library (barrel `src/components/common/index.ts`). **Prefer these o
 - `Button` — `variant`: `filled|tonal|accent|elevated|outlined|text|danger|success`; `size`: `sm|md|lg`; `fullWidth`, `icon`, `loading`. Pill-shaped, morphs corner on press.
 - `IconButton` — `variant`: `standard|filled|tonal|outlined`; requires `label` (a11y). Children = the lucide icon.
 - `Fab` — extended/regular FAB (`icon`, `label?`, `color`, `size`).
-- `Card` — `variant`: `filled|elevated|outlined`; `interactive` for hover/press.
+- `Card` — `variant`: `filled|elevated|outlined`; `interactive` for hover/press. **A Card with `onClick` becomes a control** (`role="button"`, tab stop, Enter/Space; `selected` → `aria-pressed`). ⚠️ The clickables guard scans lowercase tags only — components must carry their own semantics like this.
 - `TextField` — outlined field with `label`, leading `icon`, `error`.
 - `Switch` — M3 switch (`checked`, `onChange`), thumb grows when on.
 - `Select` — **the app's only dropdown.** Generic in the value type: `<Select<number> value={10} onChange={n => …} options={[{value, label, icon?, text?, disabled?}]} />`. `size`: `sm|md|lg`, `inline` to size to content, `placeholder` for "no selection". Native `<select>` is **banned** (a consistency test fails the build) — its popup is drawn by the OS, so it ignored every token, could not be themed light/dark and could not hold an icon. The menu is **portalled to `<body>` at z-60** so it escapes `overflow-x-auto` tables and dialog stacking contexts, and it re-measures on scroll/resize. Keyboard = APG combobox: arrows/Home/End move, Enter/Space commit, Escape discards, Tab leaves without committing, typing jumps by prefix.
@@ -420,7 +420,8 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **21 tests** currently:
+- Specs in `e2e/`. **22 tests** currently:
+  - `tournament.spec.ts` — create a tournament in the UI, enter a leg, reload, resume, confirm, reload: nothing is lost
   - `a11y.spec.ts` — axe-core on 20 screens and four game modes in play, touch-target sizes, the live announcement, plus a cross-check
   - `contrast.spec.ts` — WCAG AA text contrast on eleven screens in both themes, plus a cross-check that the tool catches a bad element
   - `layout.spec.ts` — a whole turn fits on one screen at phone and desktop size, no horizontal scroll

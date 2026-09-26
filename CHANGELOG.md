@@ -7,6 +7,34 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-09-26
+
+Tournaments are saved.
+
+### Added
+
+- **Tournaments live in the database** (table `tournaments`, `/api/tournaments`).
+  They were React state only: a reload, a closed tab or a phone going to sleep
+  lost the whole bracket. Every confirmed match is saved, legs entered for a
+  match that is not confirmed yet are saved shortly after the last tap.
+- The tournament screen lists running tournaments (resume) and finished ones
+  (with the winner), each can be deleted after a confirmation.
+
+### Fixed
+
+- **Clickable cards were not controls.** A `Card` with `onClick` rendered a bare
+  `div` — tournament modes, the player picker and every other clickable card
+  were out of reach for keyboard and screen readers. It now carries
+  `role="button"`, a tab stop, Enter/Space and `aria-pressed` for selections.
+
+### Tests
+
+- `tournamentStore.test.ts` against the real schema: round trip, update,
+  ordering, tenant isolation (no reading, overwriting or deleting another
+  tenant's tournament), cascade, validation.
+- `e2e/tournament.spec.ts`: create a tournament in the UI, enter a leg, reload,
+  resume, finish the match, reload — the result stays.
+
 ## [0.15.0] - 2026-09-26
 
 The last German on the English screens, and backups that leave the server.
