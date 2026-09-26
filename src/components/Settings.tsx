@@ -8,6 +8,7 @@ import { revealTheme } from '../utils/theme';
 import { useTenant } from '../context/TenantContext';
 import audioSystem from '../utils/audio';
 import { exportTenantData, importTenantData } from '../utils/exportImport';
+import { useInstallPrompt } from '../pwa/installPrompt';
 import { api } from '../services/api';
 import type { BugReport } from '../types';
 import BugReportModal from './bugReport/BugReportModal';
@@ -25,17 +26,10 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
   const { currentTenant, setCurrentTenant } = useTenant();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // PWA Installation
-  interface BeforeInstallPromptEvent extends Event {
-    prompt: () => Promise<void>;
-    userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
-  }
-
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstallable, setIsInstallable] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(() => {
-    return window.matchMedia('(display-mode: standalone)').matches;
-  });
+  // PWA installation — the offer is captured app-wide (pwa/installPrompt).
+  const { installed: isInstalled, canPrompt, needsManualInstall, promptInstall } = useInstallPrompt();
+  const isInstallable = canPrompt || needsManualInstall;
+  const [showIosHint, setShowIosHint] = useState(false);
 
   // Bug Reports
   const [bugReports, setBugReports] = useState<BugReport[]>([]);
@@ -61,47 +55,13 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
     loadBugReports();
   }, [showBugReportModal]); // Reload when modal closes
 
-  useEffect(() => {
-    // Listen for beforeinstallprompt event
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-      setIsInstallable(true);
-    };
-
-    // Listen for appinstalled event
-    const handleAppInstalled = () => {
-      setIsInstalled(true);
-      setIsInstallable(false);
-      setDeferredPrompt(null);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
-    };
-  }, []);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) {
-      alert('ℹ Installation ist derzeit nicht verfügbar.\n\nTipp: Auf iOS verwende"Zum Home-Bildschirm"im Safari-Menü.');
-      return;
-    }
-
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    
-    if (outcome === 'accepted') {
-      console.log('PWA installation accepted');
+    if (canPrompt) {
+      await promptInstall();
     } else {
-      console.log('PWA installation dismissed');
+      setShowIosHint(true);
     }
-    
-    setDeferredPrompt(null);
-    setIsInstallable(false);
   };
 
   const handleExport = () => {
@@ -192,6 +152,9 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                     >
                       {t('settings.install_app')}
                     </Button>
+                    {showIosHint && (
+                      <p role="status" className="mt-3 m3-body-medium text-on-surface-variant">{t('pwa.install_ios')}</p>
+                    )}
 
                     <div className="mt-3 p-3 bg-primary-container rounded-m3-md">
                       <p className="text-sm text-on-primary-container">

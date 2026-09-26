@@ -19,7 +19,8 @@
     "error": "Error",
     "success": "Success",
     "warning": "Warning",
-    "info": "Info"
+    "info": "Info",
+    "beta": "Beta"
   },
   "auth": {
     "login": "Login",
@@ -603,5 +604,14 @@
   },
   "tournament": {
     "bye": "Bye"
+  },
+  "pwa": {
+    "update_available": "A new version is available",
+    "reload": "Reload",
+    "install_title": "Install the app",
+    "install_body": "Home-screen icon, full screen and works offline.",
+    "install_action": "Install",
+    "install_later": "Later",
+    "install_ios": "In Safari, tap “Share”, then “Add to Home Screen”."
   }
 }

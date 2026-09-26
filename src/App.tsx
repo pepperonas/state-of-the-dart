@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect, Suspense, lazy, type ReactNode } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { MotionConfig } from 'framer-motion';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -15,6 +15,8 @@ import BugReportButton from './components/bugReport/BugReportButton';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import ThemeManager from './components/ThemeManager';
 import Footer from './components/Footer';
+import UpdatePrompt from './pwa/UpdatePrompt';
+import { isGameRoute } from './utils/gameRoutes';
 import { logBuffer } from './utils/logBuffer';
 import './index.css';
 
@@ -110,6 +112,16 @@ function RouteLogger() {
 }
 
 /**
+ * Footer and floating report buttons stay off the game screens: a player at
+ * the board needs the input, not a legal footer or a second bug button (the
+ * game header has its own report entry).
+ */
+function OutsideGames({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation();
+  return isGameRoute(pathname) ? null : <>{children}</>;
+}
+
+/**
  * `/` — the one place where landing page and app meet.
  *
  * Signed out → the public landing. Signed in → the app home, exactly as before.
@@ -189,8 +201,11 @@ function AppContent() {
                   <div className="min-h-dvh bg-surface text-on-surface flex flex-col">
                     <AchievementNotification />
                     <OfflineIndicator />
-                    <BugReportButton />
-                    <DebugFlagButton />
+                    <UpdatePrompt />
+                    <OutsideGames>
+                      <BugReportButton />
+                      <DebugFlagButton />
+                    </OutsideGames>
                     <div className="flex-1">
                       <Suspense fallback={<LoadingScreen />}>
                       <Routes>
@@ -360,7 +375,9 @@ function AppContent() {
                       </Routes>
                       </Suspense>
                     </div>
-                    <Footer />
+                    <OutsideGames>
+                      <Footer />
+                    </OutsideGames>
                   </div>
                   </MotionConfig>
                 </GameProvider>

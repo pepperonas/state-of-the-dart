@@ -964,6 +964,10 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .then(() => logger.success('Match saved to database'))
         .catch((err: Error) => logger.error('Failed to save match:', err));
       if (match.winner && !statsBeforeRef.current.has(match.id)) countMatchInStats(match);
+      // Lets the home screen offer installing the app once it has been used.
+      if (match.winner) {
+        try { localStorage.setItem('sotd-finished-a-match', '1'); } catch { /* storage unavailable */ }
+      }
     } else if (match.status === 'in-progress' && statsBeforeRef.current.has(match.id)) {
       uncountMatchInStats(match.id);
     }

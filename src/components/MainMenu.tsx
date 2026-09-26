@@ -12,6 +12,7 @@ import UserGuideModal from './guide/UserGuideModal';
 import ContactModal from './contact/ContactModal';
 import { getLocalGameSummaries } from '../utils/gameStorage';
 import { enterDrop, staggerChild, springSpatialFast } from '../utils/motion';
+import InstallCard from '../pwa/InstallCard';
 
 /** M3 tonal presets — full class strings (Tailwind JIT can't see interpolated names). */
 type Tone = 'primary' | 'secondary' | 'tertiary' | 'success' | 'error';
@@ -53,6 +54,8 @@ const MainMenu: React.FC = () => {
     onClick: () => void;
     tone: Tone;
     badge?: number;
+    /** Shown as a "Beta" label — works partly, not finished. */
+    beta?: boolean;
   };
 
   const menuItems: MenuItem[] = [
@@ -64,7 +67,7 @@ const MainMenu: React.FC = () => {
     { title: t('menu.cricket'), icon: Target, description: t('menu.cricket_desc'), onClick: () => navigate('/cricket'), tone: 'success' },
     { title: t('menu.around_the_clock'), icon: Target, description: t('menu.around_the_clock_desc'), onClick: () => navigate('/around-the-clock'), tone: 'secondary' },
     { title: t('menu.shanghai'), icon: Target, description: t('menu.shanghai_desc'), onClick: () => navigate('/shanghai'), tone: 'tertiary' },
-    { title: t('menu.online_multiplayer'), icon: Target, description: t('menu.online_multiplayer_desc'), onClick: () => navigate('/online'), tone: 'tertiary' },
+    { title: t('menu.online_multiplayer'), icon: Target, description: t('menu.online_multiplayer_desc'), onClick: () => navigate('/online'), tone: 'tertiary', beta: true },
     { title: t('menu.players'), icon: Users, description: t('menu.players_desc'), onClick: () => navigate('/players'), tone: 'secondary' },
     { title: t('menu.statistics'), icon: TrendingUp, description: t('menu.statistics_desc'), onClick: () => navigate('/stats'), tone: 'primary' },
     { title: t('menu.match_history'), icon: ClipboardList, description: t('menu.match_history_desc'), onClick: () => navigate('/match-history'), tone: 'secondary' },
@@ -115,6 +118,8 @@ const MainMenu: React.FC = () => {
           </p>
         </motion.div>
 
+        <InstallCard />
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {menuItems.map((item, index) => {
             const Icon = item.icon;
@@ -138,7 +143,14 @@ const MainMenu: React.FC = () => {
                     <Icon size={30} />
                   </div>
                   <div className="min-w-0">
-                    <h2 className="m3-title-large text-on-surface mb-0.5 truncate">{item.title}</h2>
+                    <h2 className="m3-title-large text-on-surface mb-0.5 flex items-center gap-2 min-w-0">
+                      <span className="truncate">{item.title}</span>
+                      {item.beta && (
+                        <span className="shrink-0 m3-label-small px-2 py-0.5 rounded-m3-full bg-secondary-container text-on-secondary-container">
+                          {t('common.beta')}
+                        </span>
+                      )}
+                    </h2>
                     <p className="m3-body-medium text-on-surface-variant line-clamp-2">{item.description}</p>
                   </div>
                 </div>

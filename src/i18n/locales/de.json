@@ -19,7 +19,8 @@
     "error": "Fehler",
     "success": "Erfolg",
     "warning": "Warnung",
-    "info": "Info"
+    "info": "Info",
+    "beta": "Beta"
   },
   "auth": {
     "login": "Anmelden",
@@ -603,5 +604,14 @@
   },
   "tournament": {
     "bye": "Freilos"
+  },
+  "pwa": {
+    "update_available": "Neue Version verfügbar",
+    "reload": "Neu laden",
+    "install_title": "App installieren",
+    "install_body": "Mit Symbol auf dem Startbildschirm, im Vollbild und offline nutzbar.",
+    "install_action": "Installieren",
+    "install_later": "Später",
+    "install_ios": "In Safari auf „Teilen“ tippen, dann „Zum Home-Bildschirm“."
   }
 }

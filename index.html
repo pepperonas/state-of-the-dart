@@ -48,8 +48,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/images/state-of-the-dart-thumb-alt-xs.jpg" />
     <link rel="mask-icon" href="/favicon.svg" color="#0ea5e9" />
     
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json" />
+    <!-- PWA manifest: generated and linked by vite-plugin-pwa (manifest.webmanifest) -->
     
     <!-- Mobile Optimization -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
@@ -162,48 +161,6 @@
   </head>
   <body>
     <div id="root"></div>
-    
-    <!-- Force unregister old service workers BEFORE loading React -->
-    <script>
-      (async function() {
-        const hasMigrated = localStorage.getItem('sw_migration_v3');
-        
-        if (!hasMigrated) {
-          console.log('🔥 Forcing service worker cleanup...');
-          
-          // Unregister ALL service workers
-          if ('serviceWorker' in navigator) {
-            const registrations = await navigator.serviceWorker.getRegistrations();
-            for (const registration of registrations) {
-              await registration.unregister();
-              console.log('✅ Service worker unregistered');
-            }
-          }
-          
-          // Clear ALL caches
-          if ('caches' in window) {
-            const cacheNames = await caches.keys();
-            for (const cacheName of cacheNames) {
-              await caches.delete(cacheName);
-              console.log('✅ Cache deleted:', cacheName);
-            }
-          }
-          
-          // Clear old tenant data
-          localStorage.removeItem('tenants');
-          localStorage.removeItem('currentTenant');
-          
-          // Mark migration done
-          localStorage.setItem('sw_migration_v3', 'true');
-
-          // NOTE: this block used to hard-redirect every visitor without a token
-          // to /login, before React even started. That made a public page at `/`
-          // impossible — a first-time visitor never saw anything but the login
-          // form. The cleanup above is the actual purpose of this script; who
-          // gets to see what is decided by the router (`HomeRoute` in App.tsx).
-        }
-      })();
-    </script>
     
     <script type="module" src="/src/main.tsx"></script>
   </body>

@@ -17,17 +17,23 @@ export default defineConfig({
       template: 'treemap',
     }),
     VitePWA({
-      registerType: 'autoUpdate',
-      injectRegister: false, // Disable auto-registration
+      // Registered from src/pwa/registerServiceWorker.ts. 'prompt': a new
+      // version waits until the user reloads — never swapped in mid-match.
+      registerType: 'prompt',
+      injectRegister: false,
       includeAssets: ['favicon.svg', 'favicon-32x32.svg', 'sounds/**/*.mp3'],
       manifest: {
         name: 'State of the Dart',
-        short_name: 'Dart Counter',
+        short_name: 'SotD',
+        id: '/',
+        start_url: '/',
+        scope: '/',
         description: 'Professional Dart Scoring System with Multi-User Support',
-        theme_color: '#0ea5e9',
+        theme_color: '#0a0a0a',
         background_color: '#0a0a0a',
         display: 'standalone',
-        orientation: 'portrait',
+        // No orientation lock: a tablet on a stand next to the board is landscape.
+        orientation: 'any',
         icons: [
           {
             src: '/images/state-of-the-dart-thumb-alt-xs.jpg',
@@ -44,6 +50,10 @@ export default defineConfig({
         ]
       },
       workbox: {
+        // ⚠️ No API responses are cached by the service worker. They were
+        // (players/matches/settings, NetworkFirst) — per URL, not per account,
+        // so after an account switch an offline device served the previous
+        // account's data. The app keeps its own per-account cache.
         // mp3 deliberately excluded — runtimeCaching below handles audio lazily.
         // Precaching all 609 sound files (~33 MB) would inflate SW install.
         globPatterns: ['**/*.{js,css,html,svg,png,jpg,jpeg,woff,woff2}'],
@@ -86,51 +96,6 @@ export default defineConfig({
               expiration: {
                 maxEntries: 500,
                 maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
-              }
-            }
-          },
-          {
-            urlPattern: /\/api\/players/,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-players-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 // 1 hour
-              },
-              networkTimeoutSeconds: 5,
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          },
-          {
-            urlPattern: /\/api\/matches/,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-matches-cache',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 // 1 hour
-              },
-              networkTimeoutSeconds: 5,
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          },
-          {
-            urlPattern: /\/api\/settings/,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-settings-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 // 24 hours
-              },
-              networkTimeoutSeconds: 3,
-              cacheableResponse: {
-                statuses: [0, 200]
               }
             }
           }
