@@ -11,7 +11,7 @@
 <!-- Links -->
 [![Live Demo](https://img.shields.io/badge/Live_Demo-stateofthedart.com-22c55e?style=for-the-badge&logo=googlechrome&logoColor=white)](https://stateofthedart.com)
 [![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-a855f7?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://stateofthedart.celox.io)
-[![Version](https://img.shields.io/badge/Version-0.13.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-0.14.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
 
 <!-- Build & Repo (live) -->
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
@@ -46,8 +46,8 @@
 <!-- Qualität -->
 ![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?logo=playwright&logoColor=white)
-![Unit Tests](https://img.shields.io/badge/Unit_Tests-880-brightgreen)
-![E2E Tests](https://img.shields.io/badge/E2E_Tests-18-brightgreen)
+![Unit Tests](https://img.shields.io/badge/Unit_Tests-898-brightgreen)
+![E2E Tests](https://img.shields.io/badge/E2E_Tests-21-brightgreen)
 ![Coverage](https://img.shields.io/badge/Coverage-24%25_stmts_%7C_75%25_branches-yellow)
 ![ESLint](https://img.shields.io/badge/ESLint-configured-4B32C3?logo=eslint&logoColor=white)
 
@@ -795,6 +795,14 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.14.0 (26. September 2026) - Barrierefreiheit und Übersetzung
+
+- **Screenreader hören das Spiel:** jede Aufnahme wird angesagt („Anna: 100, Rest 401"), dazu überworfen, Leg/Match gewonnen, Rückgängig.
+- **Komplett übersetzt:** rund 1070 fest eingebaute deutsche Texte in 55 Komponenten wanderten in die Sprachdateien; auf Englisch erscheint kein Deutsch mehr (außer den verbindlichen deutschen Rechtstexten).
+- **48-px-Trefferflächen** für alle Knöpfe, **Tastaturkürzel** auf `?`, `<html lang>` folgt der Sprache.
+- **Behoben:** Absturz der Trainingsstatistik, Zeilen/Bilder ohne Tastaturzugang, unbenannte Knöpfe, auf dem Handy auf 2 px gequetschte Spielernamen.
+- Neue Wächter: kein fest eingebauter Text, keine klickbaren Nicht-Knöpfe, axe-core im Browser auf 20 Bildschirmen und in allen Spielmodi.
 
 ### v0.13.0 (26. September 2026) - Material 3 Expressive konsequent
 

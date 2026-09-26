@@ -7,6 +7,55 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-09-26
+
+Accessibility and translation — both measured in the running app, both guarded.
+
+### Added
+
+- **Screen readers hear the game**: a polite live region announces every visit
+  ("Anna: 100, Rest 401"), busts, leg and match wins and undos. The app had no
+  `aria-live` in play at all.
+- **Keyboard shortcuts overlay** on `?` (not while typing in a field).
+- **`<html lang>` follows the language** — it was hard-coded to `en` while the
+  app speaks German by default, so screen readers read German with an English
+  voice.
+- **48 px touch targets** for every icon button, chip and button (an invisible
+  hit area; the visual size is unchanged). Footer links, the volume sliders and
+  the achievements filter now meet the WCAG 2.5.8 minimum of 24 px.
+
+### Changed
+
+- **The app is fully translated**: about 1070 hard-coded German strings in 55
+  components moved to `de.json`/`en.json` (1628 keys each). English users no
+  longer see German on the stats, training, game, account, pricing and landing
+  screens or in the user guide. Two hand-written `language === 'de' ?` forks
+  are gone. The German legal texts stay German — that version is binding.
+- Bot names follow the language; dates use the active locale.
+- The user guide is a real dialog now (Escape closes it, focus stays inside).
+
+### Fixed
+
+- **Training statistics crashed** (`ReferenceError`) as soon as a player had
+  training sessions — a helper was used before it was defined.
+- Clickable rows and images that no keyboard could reach (player list,
+  leaderboard, screenshots) are real buttons and links. On phones the player
+  list squeezed the name to 2 px beside the action buttons; they now stack.
+- Unnamed buttons (account avatar, cricket miss, around-the-clock undo),
+  unlabelled volume sliders.
+
+### Tests
+
+- `src/tests/i18n/i18nGuard.test.ts` — no literal text in JSX (TypeScript AST,
+  including `cond ? 'a' : 'b'` and readable attributes), no language forks,
+  identical keys and placeholders in both languages, every static key exists.
+- `src/tests/a11y/clickables.test.ts` — nothing reacts to a click without
+  being a control.
+- `e2e/a11y.spec.ts` — axe-core (WCAG 2.1 A/AA) on 20 screens plus X01,
+  Cricket, Around the Clock and Shanghai in play, touch-target sizes, and the
+  live announcement. Every guard has a cross-check against a deliberately
+  broken case and was mutation-probed.
+
 ## [0.13.0] - 2026-09-26
 
 Material 3 Expressive, consistently — and measured, not eyeballed.

@@ -139,7 +139,7 @@ M3 primitive library (barrel `src/components/common/index.ts`). **Prefer these o
 - `Switch` — M3 switch (`checked`, `onChange`), thumb grows when on.
 - `Select` — **the app's only dropdown.** Generic in the value type: `<Select<number> value={10} onChange={n => …} options={[{value, label, icon?, text?, disabled?}]} />`. `size`: `sm|md|lg`, `inline` to size to content, `placeholder` for "no selection". Native `<select>` is **banned** (a consistency test fails the build) — its popup is drawn by the OS, so it ignored every token, could not be themed light/dark and could not hold an icon. The menu is **portalled to `<body>` at z-60** so it escapes `overflow-x-auto` tables and dialog stacking contexts, and it re-measures on scroll/resize. Keyboard = APG combobox: arrows/Home/End move, Enter/Space commit, Escape discards, Tab leaves without committing, typing jumps by prefix.
 - `Chip` — filter/assist chip (`selected`, `icon`).
-- `Dialog` — scrim + spring-animated container (`open`, `onClose`, `title`, `actions`, `widthClassName`, `hideClose`, `persistent`). Real modal behaviour: initial focus, Tab trap, Escape, focus returns to the opener, labelled by its title. Use it for every overlay.
+- `Dialog` — scrim + spring-animated container (`open`, `onClose`, `title`, `actions`, `widthClassName`, `hideClose`, `persistent`, `ariaLabel`). Real modal behaviour: initial focus, Tab trap, Escape, focus returns to the opener, labelled by its title. Use it for every overlay.
 - `useFeedback()` (`feedbackContext.ts`, provider in App) — `notify(msg)` snackbar and `await confirm({ title, danger })`. `alert`/`confirm` are banned by test.
 - `Snackbar`, `SegmentedButton` (N options, radio group), `LoadingIndicator` (M3 Expressive morphing shape; one for the whole app), `ErrorState` (retry), `TextArea`.
 - `AnimatedNumber` — spring number transition (overdamped → no overshoot/jitter), reduced-motion aware; "tallies" to its new value. Used for in-game scores (`PlayerScore`, `ScoreInput`) and Dashboard KPIs (counts up as async data loads).
@@ -368,10 +368,22 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - "Copy for AI" button formats the entire flag (logs, state, browser info) as structured text for AI analysis
 
 ### Internationalization
-- react-i18next with `de.json` and `en.json` in `src/i18n/locales/`
-- Always use `t('namespace.key')` for user-facing text, never hardcode strings
-- Add new translations to BOTH language files simultaneously
-- Keys organized by feature: `common`, `auth`, `menu`, `game`, `players`, `stats`, `training`, `settings`, `achievements`, `resume`, `contact`, `debug`, `atc`, `online`
+- react-i18next with `de.json` and `en.json` in `src/i18n/locales/`. `<html lang>` follows the active language (`i18n/config.ts`, `languageChanged` listener).
+- Always use `t('namespace.key')` for user-facing text, never hardcode strings. Add every key to BOTH files.
+- Namespaces: the old feature ones (`common`, `game`, `stats`, …) plus one per component since 0.14.0 (`stats_overview`, `game_screen`, `guide`, …). Reuse `common.*` where it fits.
+- **Guarded** by `src/tests/i18n/i18nGuard.test.ts` (scanner `scanLiterals.ts`, TypeScript AST): no literal text in JSX — children, readable attributes (`aria-label`, `title`, `placeholder`, `alt`, `label`) and strings reaching JSX through `?:`/`&&`/`??`; no `language === 'de' ? 'text' : 'text'` forks (locale codes and data fields like `nameDE` are fine); identical keys and `{{placeholders}}` in both languages; every static `t('a.b')`/`i18nKey` exists. Keys built at runtime (template literals) are not checked — keep those few.
+- **Exempt:** the three German legal pages (`components/legal/*`) — the German version is binding.
+- ⚠️ Not covered yet: user-visible text produced in `.ts` data files — achievement names/descriptions, hint messages (`useAchievementHints`), generated bot player names, match names, heatmap segment names, export column headers.
+- Plurals use i18next `_one`/`_other`; rich text uses `<Trans components={{ b: <strong/> }}>`; the English uses "triple" and "visit".
+- **App renders no emoji — also not inside translation strings.**
+
+### Accessibility (0.14.0)
+- **Live region:** `components/game/GameAnnouncer.tsx` + pure `utils/announce.ts` announce visits, busts, leg/match wins and undos (`aria-live="polite"`, visually hidden). Mounted in GameScreen; pinned by `e2e/a11y.spec.ts`.
+- **Touch targets:** `.m3-icon-button`, `.m3-chip`, `.m3-button` get an invisible `::after` hit area of at least 48×48 (`min(0px, (100% - 48px)/2)` offsets). ⚠️ `::before` is the state layer — do not reuse it. Everything else must reach WCAG 2.5.8's 24×24 (a checkbox counts its `<label>`).
+- **Clickable = control:** `src/tests/a11y/clickables.test.ts` fails on any `<div|span|motion.div … onClick>` without a role/key handler. Overlay backdrops carry `data-backdrop` (Escape is their keyboard path). The SVG `Dartboard` is exempt — the dart grid in ScoreInput is its keyboard/screen-reader equivalent.
+- **Shortcuts:** `?` opens `ShortcutsDialog` (mounted in App); uses `shouldHandleGameKey`, so typing `?` in a field does nothing.
+- `Dialog` takes `ariaLabel` when it draws its own header (UserGuideModal).
+- `e2e/a11y.spec.ts` runs axe-core (WCAG 2.1 A/AA, serious+critical; contrast is left to `contrast.spec.ts`) on 20 routes and in play for X01, Cricket, ATC and Shanghai, and measures hit areas. Its cross-check injects an unlabelled slider and two small buttons — keep it; the first version of the target check measured only M3 classes and would have missed the 2-px player name.
 
 ### UI Conventions
 - **Back buttons**: use the `<BackButton>` component (`src/components/common/BackButton.tsx`) — now an M3 tonal button with a leading `<ArrowLeft>` + `t('common.back')`. Pass `label` for custom text. **Do not** inline a new back button. For compact in-game back nav, a `<Button variant="tonal" size="sm" icon={<ArrowLeft size={18}/>}>` is the accepted inline form.
@@ -407,7 +419,8 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **18 tests** currently:
+- Specs in `e2e/`. **21 tests** currently:
+  - `a11y.spec.ts` — axe-core on 20 screens and four game modes in play, touch-target sizes, the live announcement, plus a cross-check
   - `contrast.spec.ts` — WCAG AA text contrast on eleven screens in both themes, plus a cross-check that the tool catches a bad element
   - `layout.spec.ts` — a whole turn fits on one screen at phone and desktop size, no horizontal scroll
   - `game-flow.spec.ts` — full X01 round trip (start, score, pause & leave without reload, resume from the DB) and the one-tap rematch from the home screen
