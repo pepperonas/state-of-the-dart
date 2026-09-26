@@ -7,6 +7,42 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.18.0] - 2026-09-27
+
+The rest of the Material 3 Expressive list — and the game on a phone turned sideways.
+
+### Added
+
+- **Phone landscape layout** (`phoneland`: landscape, ≤ 500 px high): the score
+  input splits into two columns — numpad right, darts/actions left — and the
+  score strip puts name and score on one line. A whole turn now fits on 844×390;
+  before, only the top row of the numpad was on screen and confirm sat at 700 px.
+- **`Menu`** (WAI-ARIA menu button): arrows, Home/End, Enter/Space, Escape with
+  focus return, Tab to leave. The account menu and the stats export menu were
+  hand-built dropdowns that only closed on an outside click.
+- **M3 Expressive shapes** (`utils/shapes.ts`, computed polar curves):
+  achievement badges show their tier by outline — circle, cookie, sunny,
+  clover, gem.
+- `Fab` gained the small (40 px) and secondary variants; the floating bug-report
+  and debug buttons use it. Selected cards carry the selection ring themselves
+  (`<Card selected>`).
+
+### Changed
+
+- Every `transition-all` (60) is gone: it animated layout properties and ran on
+  Tailwind's 150 ms ease. Plain `transition` now runs on the M3 motion tokens.
+- Nested surfaces are separated by tone, not stacked shadows (one elevated card
+  inside an elevated card, in the training menu).
+- Export failures are reported instead of only logged.
+
+### Tests
+
+- Menu keyboard behaviour; shape geometry (inside the box, the circle is round,
+  nine scallops on the cookie); consistency guards for `transition-all` and for
+  nested elevation (with cross-checks); a phone-landscape case in
+  `e2e/layout.spec.ts` (confirm and the whole numpad on screen); axe with the
+  account menu open.
+
 ## [0.17.1] - 2026-09-27
 
 ### Security
