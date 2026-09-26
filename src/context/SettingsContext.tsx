@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo, ReactNode } from 'react';
 import { AppSettings } from '../types/index';
 import { useAuth } from './AuthContext';
 import { api } from '../services/api';
@@ -34,8 +34,24 @@ const normalizeTheme = (theme: any): 'modern' | 'modern-light' => {
 
 const SettingsContext = createContext<SettingsContextType | null>(null);
 
+/** The API row for a full settings object. */
+const toApiSettings = (s: AppSettings) => ({
+  theme: s.theme,
+  language: s.language,
+  show_checkout_suggestions: s.showCheckoutHints,
+  auto_next_player: s.autoNextPlayer,
+  show_dartboard_helper: s.showDartboardHelper,
+  sound_volume: s.soundVolume,
+  caller_volume: s.callerVolume,
+  effects_volume: s.effectsVolume,
+  show_stats_during_game: s.showStatsDuringGame,
+  confirm_scores: s.confirmScores,
+  vibration_enabled: s.vibrationEnabled,
+});
+
 export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user } = useAuth();
+  const userId = user?.id;
   
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
   const [loading, setLoading] = useState(true);
@@ -65,7 +81,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
           showStatsDuringGame: response.show_stats_during_game !== undefined ? !!response.show_stats_during_game : true,
           confirmScores: response.confirm_scores !== undefined ? !!response.confirm_scores : false,
           vibrationEnabled: response.vibration_enabled !== undefined ? !!response.vibration_enabled : true,
-          showDartboardHelper: response.enable_achievements_hints !== 0,
+          // Own column since 2026-09 — it used to live in enable_achievements_hints.
+          showDartboardHelper: (response.show_dartboard_helper ?? response.enable_achievements_hints) !== 0,
         };
         
         setSettings(loadedSettings);
@@ -80,79 +97,79 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     };
 
     loadSettings();
-  }, [user]);
+    // The id, not the object: a fresh user object (refreshUser) must not
+    // reload settings and throw away unsaved local changes.
+  }, [user?.id]);
 
   useEffect(() => {
     i18n.changeLanguage(settings.language);
   }, [settings.language]);
   
-  const updateSettings = async (updates: Partial<AppSettings>) => {
-    if (!user) return;
-    
-    const previousSettings = settings;
-    const newSettings = { ...settings, ...updates };
-    setSettings(newSettings);
-    
-    // Immediately change language if language is updated
-    if (updates.language && updates.language !== settings.language) {
-      console.log('🌍 Changing language from', settings.language, 'to', updates.language);
+  // The latest settings, readable synchronously. updateSettings used to build
+  // on the `settings` of its render: two quick changes (dragging two volume
+  // sliders) each started from the same old object, and the second one sent —
+  // and kept — the first one's old value.
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
+
+  const updateSettings = useCallback(async (updates: Partial<AppSettings>) => {
+    if (!userId) return;
+
+    const previous = settingsRef.current;
+    const next = { ...previous, ...updates };
+    settingsRef.current = next;
+    setSettings(next);
+
+    if (updates.language && updates.language !== previous.language) {
       await i18n.changeLanguage(updates.language);
-      console.log('✅ Language changed to', i18n.language);
     }
-    
+
     try {
-      await api.settings.update({
-        theme: newSettings.theme,
-        language: newSettings.language,
-        show_checkout_suggestions: newSettings.showCheckoutHints,
-        auto_next_player: newSettings.autoNextPlayer,
-        enable_achievements_hints: newSettings.showDartboardHelper,
-        sound_volume: newSettings.soundVolume,
-        caller_volume: newSettings.callerVolume,
-        effects_volume: newSettings.effectsVolume,
-        show_stats_during_game: newSettings.showStatsDuringGame,
-        confirm_scores: newSettings.confirmScores,
-        vibration_enabled: newSettings.vibrationEnabled,
-      });
-      console.log('✅ Settings saved to API');
+      await api.settings.update(toApiSettings(next));
     } catch (error) {
       console.error('Failed to update settings:', error);
-      setSettings(previousSettings);
-      // Rollback language change
-      if (updates.language) {
-        await i18n.changeLanguage(previousSettings.language);
+      // Roll back only what THIS call changed, and only where nothing newer
+      // has overwritten it since.
+      const current = settingsRef.current;
+      const rolledBack = { ...current };
+      let changed = false;
+      (Object.keys(updates) as Array<keyof AppSettings>).forEach(key => {
+        if (current[key] === next[key]) {
+          (rolledBack as Record<string, unknown>)[key] = previous[key];
+          changed = true;
+        }
+      });
+      if (changed) {
+        settingsRef.current = rolledBack;
+        setSettings(rolledBack);
+        if (updates.language && rolledBack.language !== current.language) {
+          await i18n.changeLanguage(rolledBack.language);
+        }
       }
       throw error;
     }
-  };
-  
-  const resetSettings = async () => {
-    if (!user) return;
-    
+  }, [userId]);
+
+  const resetSettings = useCallback(async () => {
+    if (!userId) return;
+    settingsRef.current = defaultSettings;
     setSettings(defaultSettings);
-    
     try {
-      await api.settings.update({
-        theme: defaultSettings.theme,
-        language: defaultSettings.language,
-        show_checkout_suggestions: defaultSettings.showCheckoutHints,
-        auto_next_player: defaultSettings.autoNextPlayer,
-        enable_achievements_hints: defaultSettings.showDartboardHelper,
-        sound_volume: defaultSettings.soundVolume,
-        caller_volume: defaultSettings.callerVolume,
-        effects_volume: defaultSettings.effectsVolume,
-        show_stats_during_game: defaultSettings.showStatsDuringGame,
-        confirm_scores: defaultSettings.confirmScores,
-        vibration_enabled: defaultSettings.vibrationEnabled,
-      });
+      await api.settings.update(toApiSettings(defaultSettings));
     } catch (error) {
       console.error('Failed to reset settings:', error);
       throw error;
     }
-  };
-  
+  }, [userId]);
+
+  // Stable value: every consumer re-rendered on every provider render before.
+  const value = useMemo(
+    () => ({ settings, loading, updateSettings, resetSettings }),
+    [settings, loading, updateSettings, resetSettings],
+  );
+
   return (
-    <SettingsContext.Provider value={{ settings, loading, updateSettings, resetSettings }}>
+    <SettingsContext.Provider value={value}>
       {children}
     </SettingsContext.Provider>
   );

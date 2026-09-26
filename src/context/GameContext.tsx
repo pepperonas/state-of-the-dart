@@ -1,14 +1,17 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Match, Player, Dart, Throw, GameType, MatchSettings } from '../types/index';
-import { calculateThrowScore, isBust, calculateAverage } from '../utils/scoring';
+import { calculateThrowScore, calculateAverage } from '../utils/scoring';
+import { evaluateVisit, rulesOf } from '../utils/visit';
 import { getCheckoutSuggestion } from '../data/checkoutTable';
 import audioSystem from '../utils/audio';
 import { useTenant } from './TenantContext';
 import { usePlayer } from './PlayerContext';
+import { useAuth } from './AuthContext';
 import { api } from '../services/api';
 import logger from '../utils/logger';
 import { logBuffer } from '../utils/logBuffer';
+import { toApiMatch, matchSaveKey } from '../utils/matchApi';
 
 export interface GameState {
   currentMatch: Match | null;
@@ -25,14 +28,15 @@ type GameAction =
   | { type: 'CLEAR_THROW' }
   | { type: 'REPLACE_DART'; payload: { index: number; dart: Dart } }
   | { type: 'CONFIRM_THROW' }
-  | { type: 'UNDO_THROW' }
+  | { type: 'UNDO_THROW'; payload?: { skipBots?: boolean } }
   | { type: 'REMOVE_PLAYER'; payload: { playerId: string } }
   | { type: 'NEXT_PLAYER' }
   | { type: 'END_MATCH' }
   | { type: 'UNDO_END_MATCH' }
   | { type: 'PAUSE_MATCH' }
   | { type: 'RESUME_MATCH' }
-  | { type: 'UPDATE_CHECKOUT_SUGGESTION' };
+  | { type: 'UPDATE_CHECKOUT_SUGGESTION' }
+  | { type: 'RESET_GAME' };
 
 /**
  * A match needs at least two players — REMOVE_PLAYER refuses to strip it down
@@ -47,31 +51,175 @@ export const initialState: GameState = {
   currentThrow: [],
 };
 
+/**
+ * Checkout suggestion for the player at `playerIndex` after `darts` of the
+ * current visit. Goes through evaluateVisit so double-in is respected.
+ */
+const checkoutFor = (match: Match, playerIndex: number, darts: Dart[]): string[] | null => {
+  const player = match.players[playerIndex];
+  const leg = match.legs[match.currentLegIndex];
+  if (!player || !leg) return null;
+  const rules = rulesOf(match.settings);
+  const v = evaluateVisit(rules, leg.throws, player.playerId, darts);
+  if (v.bust || darts.length >= 3) return null;
+  const remaining = v.newRemaining;
+  if (remaining > 170 || remaining < 1) return null;
+  return getCheckoutSuggestion(remaining, 3 - darts.length, rules.doubleOut);
+};
+
+/**
+ * Replays the legs in order to work out legsWon (per SET) and setsWon.
+ * legsWon resets whenever a set is won, so it cannot be counted from the
+ * leg winners of the whole match — that is what corrupted undo in sets
+ * matches. Mirrors the transitions in CONFIRM_THROW exactly.
+ */
+const replaySets = (
+  legs: Match['legs'],
+  playerIds: string[],
+  settings: MatchSettings,
+): { legsWon: Record<string, number>; setsWon: Record<string, number>; setIndex: number } => {
+  const legsToWin = settings.legsToWin || 3;
+  const setsToWin = settings.setsToWin || 1;
+  const isSetsMatch = setsToWin > 1;
+  const legsWon: Record<string, number> = {};
+  const setsWon: Record<string, number> = {};
+  playerIds.forEach(id => { legsWon[id] = 0; setsWon[id] = 0; });
+  let setIndex = 0;
+
+  for (const leg of legs) {
+    const w = leg.winner;
+    if (!w || !(w in legsWon)) continue;
+    legsWon[w]++;
+    if (isSetsMatch && legsWon[w] >= legsToWin) {
+      setsWon[w]++;
+      if (setsWon[w] < setsToWin) {
+        playerIds.forEach(id => { legsWon[id] = 0; });
+        setIndex++;
+      }
+    }
+  }
+  return { legsWon, setsWon, setIndex };
+};
+
+/**
+ * Takes back the last confirmed visit — also across a leg or set boundary,
+ * and out of a completed match. The darts come back into the input so the
+ * player can correct them.
+ */
+const undoLastThrow = (state: GameState): GameState => {
+  const m = state.currentMatch;
+  if (!m) return state;
+  const n = m.players.length;
+
+  let legs = m.legs;
+  let legIndex = m.currentLegIndex;
+  let legStart = m.legStartPlayerIndex ?? 0;
+
+  if (!legs[legIndex] || legs[legIndex].throws.length === 0) {
+    // The current leg is fresh: the visit to take back is the checkout that
+    // closed the previous leg. Only the newest leg can be stepped out of.
+    if (legIndex === 0 || legIndex !== legs.length - 1) return state;
+    legs = legs.slice(0, -1);
+    legIndex -= 1;
+    // Every leg and set transition advances the starter by one.
+    legStart = (legStart - 1 + n) % n;
+  }
+
+  const leg = legs[legIndex];
+  if (!leg || leg.throws.length === 0) return state;
+  const lastThrow = leg.throws[leg.throws.length - 1];
+  const updatedLeg = { ...leg, throws: leg.throws.slice(0, -1), winner: undefined, completedAt: undefined };
+  const updatedLegs = legs.map((l, i) => (i === legIndex ? updatedLeg : l));
+
+  const startScore = m.settings.startScore || 501;
+  const progress = replaySets(updatedLegs, m.players.map(p => p.playerId), m.settings);
+
+  const updatedPlayers = m.players.map(p => {
+    const player = { ...p };
+    player.match180s = 0;
+    player.match171Plus = 0;
+    player.match140Plus = 0;
+    player.match100Plus = 0;
+    player.match60Plus = 0;
+    player.matchHighestScore = 0;
+    player.checkoutsHit = 0;
+    player.checkoutAttempts = 0;
+
+    const allPlayerThrows = updatedLegs.flatMap(l => l.throws.filter(t => t.playerId === player.playerId));
+    allPlayerThrows.forEach(throwData => {
+      const throwScore = throwData.isBust ? 0 : throwData.score;
+      if (throwScore === 180) player.match180s++;
+      else if (throwScore >= 171) player.match171Plus++;
+      else if (throwScore >= 140) player.match140Plus++;
+      else if (throwScore >= 100) player.match100Plus++;
+      else if (throwScore >= 60) player.match60Plus++;
+      if (throwScore > player.matchHighestScore) player.matchHighestScore = throwScore;
+    });
+    player.matchAverage = calculateAverage(allPlayerThrows);
+
+    updatedLegs.forEach(l => {
+      if (l.winner === player.playerId) player.checkoutsHit++;
+      let runningTotal = 0;
+      l.throws.filter(t => t.playerId === player.playerId).forEach(t => {
+        const remainingBefore = startScore - runningTotal;
+        if (remainingBefore <= 170 && remainingBefore > 0) player.checkoutAttempts++;
+        runningTotal += t.score;
+      });
+    });
+
+    player.legsWon = progress.legsWon[player.playerId] ?? 0;
+    player.setsWon = progress.setsWon[player.playerId] ?? 0;
+    return player;
+  });
+
+  const updatedMatch: Match = {
+    ...m,
+    players: updatedPlayers,
+    legs: updatedLegs,
+    currentLegIndex: legIndex,
+    currentSetIndex: progress.setIndex,
+    legStartPlayerIndex: legStart,
+    status: m.status === 'completed' ? 'in-progress' : m.status,
+    winner: undefined,
+    completedAt: undefined,
+  };
+
+  const found = m.players.findIndex(p => p.playerId === lastThrow.playerId);
+  const playerIndex = found >= 0 ? found : state.currentPlayerIndex;
+  const currentThrow = lastThrow.darts || [];
+
+  return {
+    ...state,
+    currentMatch: updatedMatch,
+    currentPlayerIndex: playerIndex,
+    currentThrow,
+    checkoutSuggestion: checkoutFor(updatedMatch, playerIndex, currentThrow),
+  };
+};
+
+/** A saved match must at least have a current leg and players to be playable. */
+const isPlayableMatch = (match: Match | null | undefined): match is Match =>
+  !!match &&
+  Array.isArray(match.players) && match.players.length > 0 &&
+  Array.isArray(match.legs) && !!match.legs[match.currentLegIndex] &&
+  Array.isArray(match.legs[match.currentLegIndex].throws) &&
+  !!match.settings;
+
 export const gameReducer = (state: GameState, action: GameAction): GameState => {
   switch (action.type) {
     case 'LOAD_MATCH': {
       const match = action.payload;
+      // A corrupt or stale localStorage entry must not crash the provider.
+      if (!isPlayableMatch(match)) {
+        logger.warn('LOAD_MATCH: discarding unplayable match', (match as Match | undefined)?.id);
+        return state;
+      }
       const currentLeg = match.legs[match.currentLegIndex];
 
-      // Calculate which player's turn it is based on throw count and leg start player
-      const throwsInLeg = currentLeg.throws.length;
-      const numPlayers = match.players.length;
-      const legStartPlayer = match.legStartPlayerIndex ?? 0;
-
       // Each player throws once per "round", offset by the leg's starting player
-      const currentPlayerIndex = (legStartPlayer + throwsInLeg) % numPlayers;
-
-      const currentPlayer = match.players[currentPlayerIndex];
-      const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
-      const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
-      const startScore = match.settings.startScore || 501;
-      const remaining = startScore - totalScored;
-
-      let checkoutSuggestion = null;
-      const requireDouble = match.settings.doubleOut ?? true;
-      if (remaining <= 170 && remaining >= 1) {
-        checkoutSuggestion = getCheckoutSuggestion(remaining, 3, requireDouble);
-      }
+      const throwsInLeg = currentLeg.throws.length;
+      const legStartPlayer = match.legStartPlayerIndex ?? 0;
+      const currentPlayerIndex = (legStartPlayer + throwsInLeg) % match.players.length;
 
       logger.apiEvent('LOAD_MATCH: throws in leg:', throwsInLeg, 'current player index:', currentPlayerIndex);
 
@@ -80,7 +228,7 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
         currentMatch: match,
         currentPlayerIndex,
         currentThrow: [],
-        checkoutSuggestion,
+        checkoutSuggestion: checkoutFor(match, currentPlayerIndex, []),
       };
     }
     
@@ -144,107 +292,41 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
       logBuffer.log('debug', 'game_event', 'ADD_DART', { segment: action.payload.segment, multiplier: action.payload.multiplier, score: calculateThrowScore([action.payload]), player: state.currentMatch.players[state.currentPlayerIndex]?.name });
 
       const newThrow = [...state.currentThrow, action.payload];
-      const currentPlayer = state.currentMatch.players[state.currentPlayerIndex];
-      const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
-      
-      // Calculate remaining score
-      const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
-      const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
-      const currentThrowScore = calculateThrowScore(newThrow);
-      const startScore = state.currentMatch.settings.startScore || 501;
-      const remaining = startScore - totalScored - currentThrowScore;
-      
-      // Update checkout suggestion
-      let checkoutSuggestion = null;
-      const requireDouble = state.currentMatch.settings.doubleOut ?? true;
-      if (remaining <= 170 && remaining >= 1) {
-        checkoutSuggestion = getCheckoutSuggestion(remaining, 3 - newThrow.length, requireDouble);
-      }
-      
       return {
         ...state,
         currentThrow: newThrow,
-        checkoutSuggestion,
+        checkoutSuggestion: checkoutFor(state.currentMatch, state.currentPlayerIndex, newThrow),
       };
     }
     
     case 'REMOVE_DART': {
       if (state.currentThrow.length === 0) return state;
-      
       const newThrow = state.currentThrow.slice(0, -1);
-      
-      // Recalculate checkout suggestion if needed
       if (!state.currentMatch) return { ...state, currentThrow: newThrow };
-      
-      const currentPlayer = state.currentMatch.players[state.currentPlayerIndex];
-      const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
-      const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
-      const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
-      const currentThrowScore = calculateThrowScore(newThrow);
-      const startScore = state.currentMatch.settings.startScore || 501;
-      const remaining = startScore - totalScored - currentThrowScore;
-
-      let checkoutSuggestion = null;
-      const requireDouble = state.currentMatch.settings.doubleOut ?? true;
-      if (remaining <= 170 && remaining >= 1) {
-        checkoutSuggestion = getCheckoutSuggestion(remaining, 3 - newThrow.length, requireDouble);
-      }
-
       return {
         ...state,
         currentThrow: newThrow,
-        checkoutSuggestion,
+        checkoutSuggestion: checkoutFor(state.currentMatch, state.currentPlayerIndex, newThrow),
       };
     }
     
     case 'REPLACE_DART': {
       if (!state.currentMatch || action.payload.index < 0 || action.payload.index >= state.currentThrow.length) return state;
-
       const replacedThrow = [...state.currentThrow];
       replacedThrow[action.payload.index] = action.payload.dart;
-
-      const rCurrentPlayer = state.currentMatch.players[state.currentPlayerIndex];
-      const rCurrentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
-      const rPlayerThrows = rCurrentLeg.throws.filter(t => t.playerId === rCurrentPlayer.playerId);
-      const rTotalScored = rPlayerThrows.reduce((sum, t) => sum + t.score, 0);
-      const rThrowScore = calculateThrowScore(replacedThrow);
-      const rStartScore = state.currentMatch.settings.startScore || 501;
-      const rRemaining = rStartScore - rTotalScored - rThrowScore;
-
-      let rCheckoutSuggestion = null;
-      const rRequireDouble = state.currentMatch.settings.doubleOut ?? true;
-      if (rRemaining <= 170 && rRemaining >= 1) {
-        rCheckoutSuggestion = getCheckoutSuggestion(rRemaining, 3 - replacedThrow.length, rRequireDouble);
-      }
-
       return {
         ...state,
         currentThrow: replacedThrow,
-        checkoutSuggestion: rCheckoutSuggestion,
+        checkoutSuggestion: checkoutFor(state.currentMatch, state.currentPlayerIndex, replacedThrow),
       };
     }
-
+    
     case 'CLEAR_THROW': {
-      // Clear all darts at once
       if (!state.currentMatch) return { ...state, currentThrow: [], checkoutSuggestion: null };
-      
-      const currentPlayer = state.currentMatch.players[state.currentPlayerIndex];
-      const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
-      const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
-      const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
-      const startScore = state.currentMatch.settings.startScore || 501;
-      const remaining = startScore - totalScored;
-      
-      let checkoutSuggestion = null;
-      const requireDouble = state.currentMatch?.settings.doubleOut ?? true;
-      if (remaining <= 170 && remaining >= 1) {
-        checkoutSuggestion = getCheckoutSuggestion(remaining, 3, requireDouble);
-      }
-      
       return {
         ...state,
         currentThrow: [],
-        checkoutSuggestion,
+        checkoutSuggestion: checkoutFor(state.currentMatch, state.currentPlayerIndex, []),
       };
     }
     
@@ -255,24 +337,18 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
       const currentPlayer = state.currentMatch.players[state.currentPlayerIndex];
       const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
       const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
-      const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
-      const currentThrowScore = calculateThrowScore(state.currentThrow);
-      const startScore = state.currentMatch.settings.startScore || 501;
-      const previousRemaining = startScore - totalScored;
-      const newRemaining = previousRemaining - currentThrowScore;
-      
-      // Check for bust
-      const requiresDouble = state.currentMatch.settings.doubleOut ?? true;
-      const lastDart = state.currentThrow[state.currentThrow.length - 1];
-      const bustOccurred = isBust(previousRemaining, currentThrowScore, requiresDouble, lastDart);
-      
+      const visit = evaluateVisit(rulesOf(state.currentMatch.settings), currentLeg.throws, currentPlayer.playerId, state.currentThrow);
+      const previousRemaining = visit.previousRemaining;
+      const bustOccurred = visit.bust;
+      const currentThrowScore = visit.rawScore;
+
       // Create the throw record
       const newThrow: Throw = {
         id: uuidv4(),
         playerId: currentPlayer.playerId,
         darts: state.currentThrow,
-        score: bustOccurred ? 0 : currentThrowScore,
-        remaining: bustOccurred ? previousRemaining : newRemaining,
+        score: visit.score,
+        remaining: visit.newRemaining,
         timestamp: new Date(),
         isBust: bustOccurred,
         isCheckoutAttempt: previousRemaining <= 170,
@@ -288,7 +364,7 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
       
       // Check for leg win
       let legWon = false;
-      if (newRemaining === 0 && !bustOccurred) {
+      if (visit.checkout) {
         updatedLeg.winner = currentPlayer.playerId;
         updatedLeg.completedAt = new Date();
         legWon = true;
@@ -312,7 +388,7 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
       };
 
       // Update player stats
-      const throwScore = bustOccurred ? 0 : currentThrowScore;
+      const throwScore = visit.score;
       if (throwScore === 180) updatedPlayer.match180s++;
       else if (throwScore >= 171) updatedPlayer.match171Plus++;
       else if (throwScore >= 140) updatedPlayer.match140Plus++;
@@ -435,142 +511,33 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
     
     case 'NEXT_PLAYER': {
       if (!state.currentMatch) return state;
-
-      // Check if current leg is completed - if so, start from player 0 in new leg
-      const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
-      let nextIndex = (state.currentPlayerIndex + 1) % state.currentMatch.players.length;
-
+      const nextIndex = (state.currentPlayerIndex + 1) % state.currentMatch.players.length;
       logger.debug('NEXT_PLAYER:', {
         from: state.currentPlayerIndex,
         to: nextIndex,
-        playerName: state.currentMatch.players[nextIndex].name,
+        playerName: state.currentMatch.players[nextIndex]?.name,
       });
-
-      // Calculate checkout suggestion for next player
-      const nextPlayer = state.currentMatch.players[nextIndex];
-      const playerThrows = currentLeg.throws.filter(t => t.playerId === nextPlayer.playerId);
-      const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
-      const startScore = state.currentMatch.settings.startScore || 501;
-      const remaining = startScore - totalScored;
-
-      let checkoutSuggestion = null;
-      const requireDouble = state.currentMatch?.settings.doubleOut ?? true;
-      if (remaining <= 170 && remaining >= 1) {
-        checkoutSuggestion = getCheckoutSuggestion(remaining, 3, requireDouble);
-      }
-
       return {
         ...state,
         currentPlayerIndex: nextIndex,
         currentThrow: [],
-        checkoutSuggestion,
+        checkoutSuggestion: checkoutFor(state.currentMatch, nextIndex, []),
       };
     }
     
     case 'UNDO_THROW': {
-      if (!state.currentMatch) return state;
-      
-      const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
-      if (currentLeg.throws.length === 0) return state;
-      
-      const lastThrow = currentLeg.throws[currentLeg.throws.length - 1];
-      const updatedThrows = currentLeg.throws.slice(0, -1);
-      
-      const updatedLeg = {
-        ...currentLeg,
-        throws: updatedThrows,
-        winner: undefined,
-        completedAt: undefined,
-      };
-      
-      // Deep copy match with players and legs to avoid mutations
-      const updatedLegs = state.currentMatch.legs.map((l, i) =>
-        i === state.currentMatch!.currentLegIndex ? updatedLeg : l
-      );
-      const updatedPlayers = state.currentMatch.players.map(p => {
-        const player = { ...p };
-        // Reset stats
-        player.match180s = 0;
-        player.match171Plus = 0;
-        player.match140Plus = 0;
-        player.match100Plus = 0;
-        player.match60Plus = 0;
-        player.matchHighestScore = 0;
-        player.legsWon = 0;
-        player.checkoutsHit = 0;
-        player.checkoutAttempts = 0;
-
-        // Recalculate from all throws
-        const allPlayerThrows = updatedLegs.flatMap(l =>
-          l.throws.filter(t => t.playerId === player.playerId)
-        );
-
-        allPlayerThrows.forEach(throwData => {
-          const throwScore = throwData.isBust ? 0 : throwData.score;
-          if (throwScore === 180) player.match180s++;
-          else if (throwScore >= 171) player.match171Plus++;
-          else if (throwScore >= 140) player.match140Plus++;
-          else if (throwScore >= 100) player.match100Plus++;
-          else if (throwScore >= 60) player.match60Plus++;
-
-          if (throwScore > player.matchHighestScore) {
-            player.matchHighestScore = throwScore;
-          }
-        });
-
-        // Recalculate average
-        player.matchAverage = calculateAverage(allPlayerThrows);
-
-        // Recalculate legs won and checkouts
-        updatedLegs.forEach(leg => {
-          if (leg.winner === player.playerId) {
-            player.legsWon++;
-            player.checkoutsHit++;
-          }
-          // Count checkout attempts per throw: check remaining BEFORE each throw
-          const startScore = state.currentMatch!.settings.startScore || 501;
-          let runningTotal = 0;
-          const playerThrowsInLeg = leg.throws.filter(t => t.playerId === player.playerId);
-          playerThrowsInLeg.forEach(t => {
-            const remainingBefore = startScore - runningTotal;
-            if (remainingBefore <= 170 && remainingBefore > 0) {
-              player.checkoutAttempts++;
-            }
-            runningTotal += t.score;
-          });
-        });
-
-        return player;
-      });
-      const updatedMatch = {
-        ...state.currentMatch,
-        players: updatedPlayers,
-        legs: updatedLegs,
-      };
-      
-      // Find the player who threw last
-      const playerIndex = state.currentMatch.players.findIndex(p => p.playerId === lastThrow.playerId);
-      
-      // Recalculate checkout suggestion for the player whose turn it is now
-      const currentPlayer = updatedMatch.players[playerIndex >= 0 ? playerIndex : state.currentPlayerIndex];
-      const playerThrows = updatedLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
-      const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
-      const startScore = updatedMatch.settings.startScore || 501;
-      const remaining = startScore - totalScored;
-      
-      let checkoutSuggestion = null;
-      const requireDouble = updatedMatch.settings.doubleOut ?? true;
-      if (remaining <= 170 && remaining >= 1) {
-        checkoutSuggestion = getCheckoutSuggestion(remaining, 3, requireDouble);
+      let next = undoLastThrow(state);
+      // A human pressing undo wants THEIR last visit back, not to "edit" the
+      // bot's darts — which the bot would then silently re-commit. Keep
+      // stepping back while the visit we landed on belongs to a bot.
+      if (action.payload?.skipBots) {
+        while (next.currentMatch?.players[next.currentPlayerIndex]?.isBot) {
+          const further = undoLastThrow(next);
+          if (further === next) break;
+          next = further;
+        }
       }
-      
-      return {
-        ...state,
-        currentMatch: updatedMatch,
-        currentPlayerIndex: playerIndex >= 0 ? playerIndex : state.currentPlayerIndex,
-        currentThrow: lastThrow.darts || [],
-        checkoutSuggestion,
-      };
+      return next;
     }
     
     case 'REMOVE_PLAYER': {
@@ -630,19 +597,7 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
       // with them, but survive when somebody else was removed.
       const currentThrow = removedWasCurrent ? [] : state.currentThrow;
 
-      const nextPlayer = updatedMatch.players[nextPlayerIndex];
-      const nextLeg = updatedMatch.legs[updatedMatch.currentLegIndex];
-      const scored = (nextLeg?.throws || [])
-        .filter(t => t.playerId === nextPlayer.playerId)
-        .reduce((sum, t) => sum + t.score, 0);
-      const remaining =
-        (updatedMatch.settings.startScore || 501) - scored - calculateThrowScore(currentThrow);
-
-      let checkoutSuggestion = null;
-      const requireDouble = updatedMatch.settings.doubleOut ?? true;
-      if (remaining <= 170 && remaining >= 1) {
-        checkoutSuggestion = getCheckoutSuggestion(remaining, 3 - currentThrow.length, requireDouble);
-      }
+      const checkoutSuggestion = checkoutFor(updatedMatch, nextPlayerIndex, currentThrow);
 
       return {
         ...state,
@@ -669,7 +624,11 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
     
     case 'UNDO_END_MATCH': {
       if (!state.currentMatch || state.currentMatch.status !== 'completed') return state;
-      
+
+      // Won by a checkout: reopening only the status would leave the final leg
+      // with a winner and no way to continue. Take the checkout back instead.
+      if (state.currentMatch.winner) return undoLastThrow(state);
+
       return {
         ...state,
         currentMatch: {
@@ -709,6 +668,9 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
       };
     }
     
+    case 'RESET_GAME':
+      return initialState;
+
     default:
       return state;
   }
@@ -781,6 +743,18 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [state, dispatch] = useReducer(gameReducer, initialState);
 
+  // A match belongs to the account that played it. When the signed-in account
+  // changes (sign-out, or another account on the same device), drop it from
+  // memory too — logout already cleared the device copy.
+  const { user } = useAuth();
+  const accountRef = React.useRef(user?.id);
+  useEffect(() => {
+    if (accountRef.current !== undefined && accountRef.current !== user?.id) {
+      dispatch({ type: 'RESET_GAME' });
+    }
+    accountRef.current = user?.id;
+  }, [user?.id]);
+
   // Restore active match from localStorage on mount
   useEffect(() => {
     const savedMatch = localStorage.getItem(ACTIVE_MATCH_KEY);
@@ -817,19 +791,6 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [state.currentMatch]);
   
-  // Helper: Transform match for API (maps frontend format to API format)
-  const transformMatchForApi = (match: Match) => ({
-    id: match.id,
-    gameType: match.type, // API expects 'gameType', frontend uses 'type'
-    status: match.status,
-    players: match.players,
-    settings: match.settings,
-    startedAt: match.startedAt ? new Date(match.startedAt).getTime() : Date.now(),
-    completedAt: match.completedAt ? new Date(match.completedAt).getTime() : undefined,
-    winner: match.winner,
-    legs: match.legs,
-  });
-
   // Track if match has been created in DB
   const matchCreatedRef = React.useRef<string | null>(null);
   // Track if a create/update operation is in progress to prevent race conditions
@@ -837,92 +798,53 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Track last saved state to prevent unnecessary saves
   const lastSavedStateRef = React.useRef<string>('');
 
-  // Save game state to API with debouncing (during active game)
-  // Save match to API with debouncing and dependency tracking
-  useEffect(() => {
-    if (!state.currentMatch || state.currentMatch.status !== 'in-progress') {
-      return;
+  /** Create on first save, update afterwards. A 409 means it exists already. */
+  const persistMatch = async (match: Match, options?: RequestInit) => {
+    const apiMatch = toApiMatch(match);
+    if (matchCreatedRef.current !== match.id) {
+      try {
+        await api.matches.create(apiMatch, options);
+      } catch (err: any) {
+        if (err?.status !== 409 && !/\b409\b/.test(err?.message ?? '')) throw err;
+      }
+      matchCreatedRef.current = match.id;
+    } else {
+      await api.matches.update(match.id, apiMatch, options);
     }
+  };
 
-    const matchId = state.currentMatch.id;
+  // Save the running match to the API, debounced. The key covers every
+  // throw's id and score — see matchSaveKey.
+  const saveKey = state.currentMatch ? matchSaveKey(state.currentMatch, state.currentPlayerIndex) : '';
+  useEffect(() => {
+    if (!state.currentMatch || state.currentMatch.status !== 'in-progress') return;
+    if (lastSavedStateRef.current === saveKey) return;
+
+    const match = state.currentMatch;
     const abortController = new AbortController();
     let isMounted = true;
 
-    // Create a stable state string for comparison to prevent unnecessary saves
-    const currentStateString = JSON.stringify({
-      id: matchId,
-      status: state.currentMatch.status,
-      currentLegIndex: state.currentMatch.currentLegIndex,
-      currentPlayerIndex: state.currentPlayerIndex,
-      // Player count matters: removing a player may leave leg/throw counts
-      // untouched, and without this the save would be skipped as "unchanged".
-      playersCount: state.currentMatch.players.length,
-      legsCount: state.currentMatch.legs.length,
-      lastLegThrowsCount: state.currentMatch.legs[state.currentMatch.currentLegIndex]?.throws.length || 0,
-    });
-
-    // Only save if state actually changed
-    if (lastSavedStateRef.current === currentStateString) {
-      return;
-    }
-
     const saveTimer = setTimeout(async () => {
-      if (!isMounted) return;
-      
-      // Prevent concurrent save operations
-      if (matchSavingRef.current) {
-        return;
-      }
-
+      if (!isMounted || matchSavingRef.current) return;
       matchSavingRef.current = true;
-      const apiMatch = transformMatchForApi(state.currentMatch!);
-
       try {
-        // If we haven't created this match yet, create it first
-        if (matchCreatedRef.current !== matchId) {
-          try {
-            await api.matches.create(apiMatch, { signal: abortController.signal });
-            matchCreatedRef.current = matchId;
-            logger.success('Match created in DB:', matchId);
-          } catch (createError: any) {
-            // If aborted, exit silently
-            if (createError.name === 'AbortError' || !isMounted) return;
-            // If it already exists (409 conflict), mark as created and continue.
-            // apiClient attaches `status` to the thrown error; older code checked the
-            // non-existent `.response.status`, so this branch never ran.
-            if (createError?.status === 409 || /\b409\b/.test(createError?.message ?? '')) {
-              matchCreatedRef.current = matchId;
-            } else {
-              logger.warn('Match create failed:', createError);
-            }
-          }
-        } else {
-          // Match exists, update it
-          await api.matches.update(matchId, apiMatch, { signal: abortController.signal });
-        }
-        
-        // Update last saved state only on success
-        if (isMounted) {
-          lastSavedStateRef.current = currentStateString;
-        }
+        await persistMatch(match, { signal: abortController.signal });
+        if (isMounted) lastSavedStateRef.current = saveKey;
       } catch (error: any) {
-        // If aborted, exit silently
-        if (error.name === 'AbortError' || !isMounted) return;
-        // Silently fail - don't block the game
-        logger.warn('Match save failed:', error);
+        if (error?.name === 'AbortError' || !isMounted) return;
+        logger.warn('Match save failed:', error); // never block the game
       } finally {
-        // Always reset the saving flag to prevent permanent blocking
         matchSavingRef.current = false;
       }
-    }, 2000); // Increased debounce to 2 seconds to reduce request frequency
+    }, 2000);
 
     return () => {
       isMounted = false;
       clearTimeout(saveTimer);
-      abortController.abort(); // Cancel any in-flight API calls
-      matchSavingRef.current = false; // Reset saving flag on cleanup
+      abortController.abort();
+      matchSavingRef.current = false;
     };
-  }, [state.currentMatch?.id, state.currentMatch?.status, state.currentMatch?.currentLegIndex, state.currentPlayerIndex, state.currentMatch?.legs.length]);
+  }, [saveKey]);
 
   // Reset match created ref when match ID changes
   useEffect(() => {
@@ -931,125 +853,58 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [state.currentMatch?.id]);
 
-  // Save match when paused (before navigating away)
+  // Save match when paused (before navigating away). pauseCurrentMatch saves on
+  // its own and holds matchSavingRef, so this only runs for other pause paths.
   useEffect(() => {
-    if (state.currentMatch?.status === 'paused') {
-      // Skip if already saving to prevent duplicate requests
-      if (matchSavingRef.current) {
-        logger.debug('Skipping paused save - already saving');
-        return;
-      }
-
-      const apiMatch = transformMatchForApi(state.currentMatch);
-      const matchId = state.currentMatch.id;
-
-      matchSavingRef.current = true;
-
-      // Try to save immediately when paused
-      (async () => {
-        try {
-          if (matchCreatedRef.current !== matchId) {
-            await api.matches.create(apiMatch);
-            matchCreatedRef.current = matchId;
-          } else {
-            await api.matches.update(matchId, apiMatch);
-          }
-          logger.success('Paused match saved');
-        } catch (err: any) {
-          // Don't warn on rate limiting - it's not critical
-          if (!err?.message?.includes('429')) {
-            logger.warn('Failed to save paused match:', err);
-          }
-          // Don't throw - allow navigation to continue
-        } finally {
-          matchSavingRef.current = false;
-        }
-      })();
-    }
+    if (state.currentMatch?.status !== 'paused' || matchSavingRef.current) return;
+    const match = state.currentMatch;
+    matchSavingRef.current = true;
+    persistMatch(match)
+      .then(() => logger.success('Paused match saved'))
+      .catch((err: any) => {
+        if (!err?.message?.includes('429')) logger.warn('Failed to save paused match:', err);
+      })
+      .finally(() => { matchSavingRef.current = false; });
   }, [state.currentMatch?.status]);
-  
-  // Sync player statistics to PlayerContext (called during and after match)
-  const syncPlayerStats = (liveUpdate: boolean = false) => {
-    if (!state.currentMatch || !storage) return;
-    
-    // Only save to match history if completed
-    const shouldSaveMatch = state.currentMatch.status === 'completed' && !liveUpdate;
-    
-    // Save completed match to database
-    if (shouldSaveMatch) {
-      const apiMatch = transformMatchForApi(state.currentMatch!);
-      api.matches.create(apiMatch)
-        .then(() => logger.success('Match saved to database'))
-        .catch((err: Error) => logger.error('Failed to save match:', err));
-    }
-    
-    state.currentMatch.players.forEach((matchPlayer) => {
+
+  /**
+   * Adds a finished match to the players' career totals.
+   *
+   * Called once per match id. The totals as they were before are kept, so that
+   * reopening the match (undo) can put them back — ending, undoing and ending
+   * again used to count the match twice.
+   */
+  const statsBeforeRef = React.useRef<Map<string, Map<string, Player['stats']>>>(new Map());
+
+  const countMatchInStats = (match: Match) => {
+    const before = new Map<string, Player['stats']>();
+    match.players.forEach((matchPlayer) => {
       const player = players.find(p => p.id === matchPlayer.playerId);
       if (!player) return;
-      
-      const isWinner = state.currentMatch!.winner === matchPlayer.playerId;
-      const legsWon = matchPlayer.legsWon;
-      const legsPlayed = state.currentMatch!.legs.length;
-      
-      // For live updates, update current performance stats but not permanent records
-      if (liveUpdate) {
-        // Get all checkouts from completed legs
-        const playerLegsWon = state.currentMatch!.legs.filter(
-          leg => leg.winner === matchPlayer.playerId && leg.completedAt
-        );
-        const checkoutsFromLegs = playerLegsWon
-          .map(leg => {
-            const lastThrow = leg.throws[leg.throws.length - 1];
-            return lastThrow?.score || 0;
-          })
-          .filter(score => score > 0);
-        
-        const highestCheckoutThisMatch = Math.max(0, ...checkoutsFromLegs);
-        
-        // Fire and forget - don't block on live updates
-        updatePlayer(matchPlayer.playerId, {
-          stats: {
-            ...player.stats,
-            // Update these live during the game (best performances)
-            bestAverage: Math.max(player.stats.bestAverage, matchPlayer.matchAverage),
-            highestCheckout: Math.max(player.stats.highestCheckout, highestCheckoutThisMatch),
-          },
-        }).catch(err => logger.warn('Live stats update failed:', err));
-        return; // Skip the rest for live updates
-      }
-      
-      // Calculate highest checkout from match
-      const playerLegsWon = state.currentMatch!.legs.filter(
-        leg => leg.winner === matchPlayer.playerId
-      );
-      const checkoutsFromLegs = playerLegsWon
-        .map(leg => {
-          const lastThrow = leg.throws[leg.throws.length - 1];
-          return lastThrow?.score || 0;
-        })
+      before.set(player.id, player.stats);
+
+      const isWinner = match.winner === matchPlayer.playerId;
+      const checkoutsFromLegs = match.legs
+        .filter(leg => leg.winner === matchPlayer.playerId)
+        .map(leg => leg.throws[leg.throws.length - 1]?.score || 0)
         .filter(score => score > 0);
-      
-      const highestCheckout = Math.max(
-        player.stats.highestCheckout,
-        ...checkoutsFromLegs
-      );
-      
-      // Update player stats - fire and forget to not block UI
       const checkoutStats = calculateCheckoutPercentage(
         player.stats.totalCheckoutAttempts || 0,
         player.stats.totalCheckoutHits || 0,
         matchPlayer.checkoutAttempts,
         matchPlayer.checkoutsHit
       );
+      const legsWonInMatch = match.legs.filter(leg => leg.winner === matchPlayer.playerId).length;
 
       updatePlayer(matchPlayer.playerId, {
         stats: {
           ...player.stats,
           gamesPlayed: player.stats.gamesPlayed + 1,
           gamesWon: player.stats.gamesWon + (isWinner ? 1 : 0),
-          totalLegsPlayed: player.stats.totalLegsPlayed + legsPlayed,
-          totalLegsWon: player.stats.totalLegsWon + legsWon,
-          highestCheckout: highestCheckout,
+          totalLegsPlayed: player.stats.totalLegsPlayed + match.legs.filter(l => l.winner).length,
+          // legsWon on the match player resets every set — count the legs.
+          totalLegsWon: player.stats.totalLegsWon + legsWonInMatch,
+          highestCheckout: Math.max(player.stats.highestCheckout, ...checkoutsFromLegs),
           total180s: player.stats.total180s + matchPlayer.match180s,
           total171Plus: player.stats.total171Plus + matchPlayer.match171Plus,
           total140Plus: player.stats.total140Plus + matchPlayer.match140Plus,
@@ -1067,22 +922,59 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         },
       }).catch(err => logger.warn('Final stats update failed:', err));
     });
+    statsBeforeRef.current.set(match.id, before);
   };
-  
-  // Auto-sync when match is completed
+
+  const uncountMatchInStats = (matchId: string) => {
+    const before = statsBeforeRef.current.get(matchId);
+    if (!before) return;
+    statsBeforeRef.current.delete(matchId);
+    before.forEach((stats, playerId) => {
+      updatePlayer(playerId, { stats }).catch(err => logger.warn('Stats rollback failed:', err));
+    });
+  };
+
+  // Live best-performance updates during the game (bestAverage, highestCheckout)
+  const syncPlayerStats = (liveUpdate: boolean = true) => {
+    if (!state.currentMatch || !liveUpdate) return;
+    const match = state.currentMatch;
+    match.players.forEach((matchPlayer) => {
+      const player = players.find(p => p.id === matchPlayer.playerId);
+      if (!player) return;
+      const highestCheckoutThisMatch = Math.max(0, ...match.legs
+        .filter(leg => leg.winner === matchPlayer.playerId && leg.completedAt)
+        .map(leg => leg.throws[leg.throws.length - 1]?.score || 0));
+      const bestAverage = Math.max(player.stats.bestAverage, matchPlayer.matchAverage);
+      const highestCheckout = Math.max(player.stats.highestCheckout, highestCheckoutThisMatch);
+      if (bestAverage === player.stats.bestAverage && highestCheckout === player.stats.highestCheckout) return;
+      updatePlayer(matchPlayer.playerId, {
+        stats: { ...player.stats, bestAverage, highestCheckout },
+      }).catch(err => logger.warn('Live stats update failed:', err));
+    });
+  };
+
+  // Completion: save the finished match, and count it once — only when it was
+  // actually won. An abandoned match (END_MATCH) is not a played game.
+  // Reopening a counted match takes its numbers back out.
   useEffect(() => {
-    if (state.currentMatch?.status === 'completed') {
-      syncPlayerStats(false); // Final sync
+    const match = state.currentMatch;
+    if (!match) return;
+    if (match.status === 'completed') {
+      persistMatch(match)
+        .then(() => logger.success('Match saved to database'))
+        .catch((err: Error) => logger.error('Failed to save match:', err));
+      if (match.winner && !statsBeforeRef.current.has(match.id)) countMatchInStats(match);
+    } else if (match.status === 'in-progress' && statsBeforeRef.current.has(match.id)) {
+      uncountMatchInStats(match.id);
     }
-  }, [state.currentMatch?.status]);
-  
+  }, [state.currentMatch?.status, state.currentMatch?.id]);
+
   // Live sync during game (every throw)
-  // Use specific dependencies to avoid unnecessary re-renders
   const currentLegThrowsCount = state.currentMatch?.legs[state.currentMatch.currentLegIndex]?.throws.length ?? 0;
 
   useEffect(() => {
     if (state.currentMatch && state.currentMatch.status === 'in-progress') {
-      syncPlayerStats(true); // Live update
+      syncPlayerStats(true);
     }
   }, [currentLegThrowsCount, state.currentMatch?.currentLegIndex]);
 
@@ -1112,28 +1004,19 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Pause the current match: dispatch PAUSE_MATCH and wait for DB save
   const pauseCurrentMatch = async (): Promise<void> => {
     if (!state.currentMatch || state.currentMatch.status !== 'in-progress') return;
+    const paused: Match = { ...state.currentMatch, status: 'paused', pausedAt: new Date() };
 
+    // Hold the flag BEFORE dispatching, so the paused-save effect sees it and
+    // skips — both used to POST at once and the second one hit a 409.
+    matchSavingRef.current = true;
     dispatch({ type: 'PAUSE_MATCH' });
-
-    // The paused-save effect will fire, but we also do an immediate save
-    // to guarantee persistence before a new match starts.
-    const apiMatch = transformMatchForApi({
-      ...state.currentMatch,
-      status: 'paused',
-      pausedAt: new Date(),
-    });
-    const matchId = state.currentMatch.id;
-
     try {
-      if (matchCreatedRef.current !== matchId) {
-        await api.matches.create(apiMatch);
-        matchCreatedRef.current = matchId;
-      } else {
-        await api.matches.update(matchId, apiMatch);
-      }
-      logger.success('Match paused and saved:', matchId);
+      await persistMatch(paused);
+      logger.success('Match paused and saved:', paused.id);
     } catch (err) {
       logger.warn('Failed to save paused match (pauseCurrentMatch):', err);
+    } finally {
+      matchSavingRef.current = false;
     }
   };
 

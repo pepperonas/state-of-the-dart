@@ -64,7 +64,7 @@ ANALYZE=true npm run build   # Emits dist/bundle-stats.html (rollup-plugin-visua
 | Active match (in-progress X01) | localStorage only | N/A (temporary) |
 | ATC / Shanghai / Cricket state | localStorage only (gameStorage.ts) | N/A (48h expiry) |
 | Debug Flags | DB via API (admin only) | N/A |
-| Tournaments | Not persisted (React state only) | N/A (TODO) |
+| Tournaments | Not persisted (React state only) — bracket logic in `utils/tournament.ts` | N/A (TODO) |
 
 ### Frontend State Management
 React Context API with provider hierarchy in `App.tsx`:
@@ -246,7 +246,7 @@ These modules used to ship eagerly and were extracted into their own chunks duri
 
 ### Game Modes
 - **X01** (301/501/701) - `GameScreen.tsx` (main game screen, persisted via GameContext + API)
-- **Cricket** - `CricketGame.tsx` (uses GameContext for match shell, localStorage for cricketState)
+- **Cricket** - `CricketGame.tsx` (own turn state + `turnHistory` undo, scoring in `utils/cricket.ts`, localStorage via gameStorage). ⚠️ It must NOT use GameContext: it did, and replaced running X01 matches, posted itself as an X01 match and polluted career stats.
 - **Around the Clock** - `AroundTheClockGame.tsx` (Hit/Miss input, standalone state with turnHistory undo)
 - **Shanghai** - `ShanghaiGame.tsx` (standalone state with turnHistory undo + auto-confirm)
 - **Online Multiplayer** - `OnlineMultiplayer.tsx` (WebSocket via Socket.IO, no persistence). Private rooms show Room ID with copy button; lobby has join-by-code input
@@ -309,11 +309,26 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - Each game type has its own localStorage key (`state-of-the-dart-atc-game`, `-shanghai-game`, `-cricket-game`)
 - 48h staleness threshold — auto-cleared on load if older
 - **Save**: `useEffect` watching game state, gated by `!showSetup && !showWinner`. **CRITICAL**: Never include timer-driven state (like `elapsedTime`) in save useEffect dependencies — this causes 1Hz localStorage thrashing and UI flickering. Compute elapsed time dynamically at save time instead.
-- **Restore**: `useEffect([], [])` on mount — validates saved player IDs still exist in PlayerContext, discards if below minimum
+- **Restore**: validates saved player IDs still exist in PlayerContext, discards if below minimum
 - **Clear**: on `handleStartGame()` (new game) AND on game completion (winner). NOT on Back button (game stays resumable)
 - `ResumeGameScreen` merges localStorage games with API matches, sorted by timestamp
 - `MainMenu` badge count includes localStorage games
-- Cricket restore dispatches `START_MATCH` to reinitialize GameContext, then overlays saved `cricketState`
+- **Restore waits for `usePlayer().loading === false`** (guarded by a `restoredRef`). On mount the player list is still `[]`; restoring then made every saved player look deleted and cleared the save on every reload.
+
+### One source for visit evaluation (`src/utils/visit.ts`)
+`evaluateVisit(rules, legThrows, playerId, darts)` returns previous/new remaining, counted score, bust and checkout — including **double-in** (nothing counts before the first double). The reducer, every GameScreen auto-confirm path and the bot use it. Do not reintroduce a hand-written `remaining - score` check anywhere; six copies drifted apart before, and double-in could not be implemented at all.
+
+### Undo
+`UNDO_THROW` takes back the last visit **across leg and set boundaries** and out of a match won by a checkout. `legsWon` resets every set, so it is recomputed by **replaying the legs** (`replaySets`), never by counting leg winners over the whole match. `{ payload: { skipBots: true } }` (used by the human undo button) steps over bot visits — otherwise the bot would re-commit its own restored darts. `UNDO_END_MATCH` on a checkout-won match delegates to the same undo.
+
+### Match persistence (`server/src/services/matchStore.ts`, `src/utils/matchApi.ts`)
+- `POST /api/matches` is a full upsert: winner, `completed_at`, players and legs/throws are written on **every** save. The upsert branch used to write three columns only — no match in the DB had a winner.
+- `PUT` writes a field only if it is **present** in the body; `null` clears. `toApiMatch()` therefore always sends `winner`/`completedAt` (as `null` when unset — `undefined` vanishes from JSON).
+- All timestamps travel as epoch ms (INTEGER columns). Player rows carry `highestScore`, `dartsThrown`, `first9Average`.
+- Career stats are added **once per match id** when a match is *won*, and rolled back if it is reopened (`statsBeforeRef` in GameProvider). An abandoned match (END_MATCH, no winner) is not a played game.
+
+### Per-account cache
+`TenantStorage` scope = `accountScope(user.id)` = `user_<id>`; `currentTenant.id` is that scope too, so `new TenantStorage(currentTenant.id)` is per account. The first account after the switch takes over the old shared `default` cache (`claimDefaultCache`, runs once). `logout()` clears the device's running games (`clearDeviceGameState`) and GameProvider drops its in-memory match when the account changes.
 
 ### Database Safety
 - `ON DELETE CASCADE` throughout schema - deleting a user/tenant cascades to ALL related data
@@ -367,7 +382,7 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 ## Testing
 
 ### Unit / Integration (Vitest + React Testing Library)
-- Specs in `src/tests/`. Setup `src/tests/setup.ts`. **294 tests**.
+- Specs in `src/tests/`. Setup `src/tests/setup.ts`. Count: see the README badge (pinned by `docsSync`). Server logic that needs a DB runs against the **real schema** on in-memory SQLite (`src/tests/server/matchStore.test.ts`).
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)

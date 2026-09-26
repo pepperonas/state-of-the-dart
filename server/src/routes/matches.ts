@@ -1,6 +1,7 @@
 import express, { Response } from 'express';
 import { getDatabase } from '../database';
 import { AuthRequest, authenticateTenant } from '../middleware/auth';
+import { upsertMatch, updateMatch } from '../services/matchStore';
 
 const router = express.Router();
 
@@ -195,107 +196,17 @@ router.get('/:id', authenticateTenant, (req: AuthRequest, res: Response) => {
 
 // Create match (upsert - creates or updates if exists)
 router.post('/', authenticateTenant, (req: AuthRequest, res: Response) => {
-  const { id, gameType, status, players, settings, startedAt } = req.body;
+  const { id, gameType, players, settings } = req.body;
 
   if (!id || !gameType || !players || !settings) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  const db = getDatabase();
-
   try {
-    // Check if match already exists
-    const existingMatch = db.prepare('SELECT id FROM matches WHERE id = ? AND tenant_id = ?').get(id, req.tenantId);
-
-    if (existingMatch) {
-      // Match exists - update it instead
-      const updateMatch = db.transaction(() => {
-        // Update match
-        db.prepare(`
-          UPDATE matches SET game_type = ?, status = ?, settings = ?
-          WHERE id = ? AND tenant_id = ?
-        `).run(gameType, status || 'setup', JSON.stringify(settings), id, req.tenantId);
-
-        // Update match players (delete and re-insert)
-        db.prepare('DELETE FROM match_players WHERE match_id = ?').run(id);
-
-        const insertPlayer = db.prepare(`
-          INSERT INTO match_players (
-            id, match_id, player_id, match_average, first9_average,
-            highest_score, checkouts_hit, checkout_attempts,
-            match_180s, match_171_plus, match_140_plus, match_100_plus, match_60_plus,
-            darts_thrown, legs_won, sets_won
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `);
-
-        for (const player of players) {
-          insertPlayer.run(
-            player.id || `${id}-${player.playerId}`,
-            id,
-            player.playerId,
-            player.matchAverage || 0,
-            player.first9Average || 0,
-            player.highestScore || 0,
-            player.checkoutsHit || 0,
-            player.checkoutAttempts || 0,
-            player.match180s || 0,
-            player.match171Plus || 0,
-            player.match140Plus || 0,
-            player.match100Plus || 0,
-            player.match60Plus || 0,
-            player.dartsThrown || 0,
-            player.legsWon || 0,
-            player.setsWon || 0
-          );
-        }
-      });
-
-      updateMatch();
+    const outcome = upsertMatch(getDatabase(), req.tenantId!, req.body);
+    if (outcome === 'updated') {
       return res.status(200).json({ id, message: 'Match updated successfully' });
     }
-
-    // Start transaction for new match
-    const createMatch = db.transaction(() => {
-      // Insert match
-      db.prepare(`
-        INSERT INTO matches (id, tenant_id, game_type, status, started_at, settings)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(id, req.tenantId, gameType, status || 'setup', startedAt || Date.now(), JSON.stringify(settings));
-
-      // Insert match players
-      const insertPlayer = db.prepare(`
-        INSERT INTO match_players (
-          id, match_id, player_id, match_average, first9_average,
-          highest_score, checkouts_hit, checkout_attempts,
-          match_180s, match_171_plus, match_140_plus, match_100_plus, match_60_plus,
-          darts_thrown, legs_won, sets_won
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `);
-
-      for (const player of players) {
-        insertPlayer.run(
-          player.id || `${id}-${player.playerId}`,
-          id,
-          player.playerId,
-          player.matchAverage || 0,
-          player.first9Average || 0,
-          player.highestScore || 0,
-          player.checkoutsHit || 0,
-          player.checkoutAttempts || 0,
-          player.match180s || 0,
-          player.match171Plus || 0,
-          player.match140Plus || 0,
-          player.match100Plus || 0,
-          player.match60Plus || 0,
-          player.dartsThrown || 0,
-          player.legsWon || 0,
-          player.setsWon || 0
-        );
-      }
-    });
-
-    createMatch();
-
     res.status(201).json({ id, message: 'Match created successfully' });
   } catch (error) {
     console.error('Error creating match:', error);
@@ -305,212 +216,10 @@ router.post('/', authenticateTenant, (req: AuthRequest, res: Response) => {
 
 // Update match
 router.put('/:id', authenticateTenant, (req: AuthRequest, res: Response) => {
-  const { id } = req.params;
-  const { status, winner, completedAt, players, legs } = req.body;
-
-  const db = getDatabase();
-
   try {
-    // Verify ownership
-    const match = db.prepare('SELECT * FROM matches WHERE id = ? AND tenant_id = ?').get(id, req.tenantId);
-    if (!match) {
+    if (!updateMatch(getDatabase(), req.tenantId!, req.params.id, req.body)) {
       return res.status(404).json({ error: 'Match not found' });
     }
-
-    // Start transaction
-    const updateMatch = db.transaction(() => {
-      // Update match
-      if (status || winner || completedAt) {
-        let query = 'UPDATE matches SET ';
-        const updates: string[] = [];
-        const params: any[] = [];
-
-        if (status) {
-          updates.push('status = ?');
-          params.push(status);
-        }
-        if (winner) {
-          updates.push('winner = ?');
-          params.push(winner);
-        }
-        if (completedAt) {
-          updates.push('completed_at = ?');
-          params.push(completedAt);
-        }
-
-        query += updates.join(', ') + ' WHERE id = ?';
-        params.push(id);
-
-        db.prepare(query).run(...params);
-      }
-
-      // Update players if provided
-      if (players && Array.isArray(players)) {
-        const updatePlayer = db.prepare(`
-          UPDATE match_players SET
-            match_average = ?,
-            first9_average = ?,
-            highest_score = ?,
-            checkouts_hit = ?,
-            checkout_attempts = ?,
-            match_180s = ?,
-            match_171_plus = ?,
-            match_140_plus = ?,
-            match_100_plus = ?,
-            match_60_plus = ?,
-            darts_thrown = ?,
-            legs_won = ?,
-            sets_won = ?
-          WHERE match_id = ? AND player_id = ?
-        `);
-
-        for (const player of players) {
-          updatePlayer.run(
-            player.matchAverage || 0,
-            player.first9Average || 0,
-            player.highestScore || 0,
-            player.checkoutsHit || 0,
-            player.checkoutAttempts || 0,
-            player.match180s || 0,
-            player.match171Plus || 0,
-            player.match140Plus || 0,
-            player.match100Plus || 0,
-            player.match60Plus || 0,
-            player.dartsThrown || 0,
-            player.legsWon || 0,
-            player.setsWon || 0,
-            id,
-            player.playerId
-          );
-        }
-
-        // The payload is the authoritative roster. A player removed from a running
-        // match has to disappear here too — this endpoint used to only UPDATE, so
-        // their row survived and resuming the match from the DB brought them back.
-        // Guarded on a non-empty roster: an empty array is never a legitimate
-        // "wipe every player" instruction.
-        if (players.length > 0) {
-          const keptIds = players.map((p: any) => p.playerId);
-          db.prepare(`
-            DELETE FROM match_players
-            WHERE match_id = ? AND player_id NOT IN (${keptIds.map(() => '?').join(', ')})
-          `).run(id, ...keptIds);
-        }
-      }
-
-      // Update/Insert legs if provided
-      if (legs && Array.isArray(legs)) {
-        for (let legIndex = 0; legIndex < legs.length; legIndex++) {
-          const leg = legs[legIndex];
-          const legNumber = leg.legNumber ?? legIndex + 1; // Use legNumber if provided, otherwise use index+1
-
-          // Scope the lookup to THIS match. Ownership of the match row is verified
-          // above, but legs/throws were previously written by their own primary key
-          // with no match_id check — a caller owning match A could pass a leg.id
-          // from another tenant's match B and overwrite its winner/timestamps (or
-          // hijack throw rows by PK). If the leg id exists under a different match,
-          // refuse to touch it.
-          const existingLeg = db.prepare('SELECT id FROM legs WHERE id = ? AND match_id = ?').get(leg.id, id);
-          const legElsewhere = !existingLeg && db.prepare('SELECT 1 FROM legs WHERE id = ?').get(leg.id);
-          if (legElsewhere) {
-            continue; // leg belongs to a different match — cross-match tamper guard
-          }
-
-          if (existingLeg) {
-            // Update leg
-            db.prepare(`
-              UPDATE legs SET winner = ?, completed_at = ? WHERE id = ?
-            `).run(leg.winner, leg.completedAt, leg.id);
-
-            // Update throws
-            if (leg.throws && Array.isArray(leg.throws)) {
-              // Same story as the roster above: throws that the client dropped —
-              // by taking a throw back, or by removing a player — must go, or a
-              // reload from the DB resurrects them. Scoped to this leg, whose
-              // match ownership was verified above.
-              const keptThrowIds = leg.throws.map((t: any) => t.id);
-              if (keptThrowIds.length > 0) {
-                db.prepare(`
-                  DELETE FROM throws
-                  WHERE leg_id = ? AND id NOT IN (${keptThrowIds.map(() => '?').join(', ')})
-                `).run(leg.id, ...keptThrowIds);
-              } else {
-                db.prepare('DELETE FROM throws WHERE leg_id = ?').run(leg.id);
-              }
-
-              for (const throwData of leg.throws) {
-                // Don't let INSERT OR REPLACE hijack a throw that belongs to a
-                // different leg (overwrite-by-PK across matches/tenants).
-                const throwElsewhere = db.prepare('SELECT 1 FROM throws WHERE id = ? AND leg_id != ?').get(throwData.id, leg.id);
-                if (throwElsewhere) continue;
-                db.prepare(`
-                  INSERT OR REPLACE INTO throws (
-                    id, leg_id, player_id, darts, score, remaining,
-                    timestamp, is_checkout_attempt, is_bust, visit_number,
-                    running_average, first9_average
-                  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                `).run(
-                  throwData.id,
-                  leg.id,
-                  throwData.playerId,
-                  JSON.stringify(throwData.darts),
-                  throwData.score,
-                  throwData.remaining,
-                  throwData.timestamp,
-                  throwData.isCheckoutAttempt ? 1 : 0,
-                  throwData.isBust ? 1 : 0,
-                  throwData.visitNumber,
-                  throwData.runningAverage,
-                  throwData.first9Average
-                );
-              }
-            }
-          } else {
-            // Insert leg
-            db.prepare(`
-              INSERT INTO legs (id, match_id, leg_number, winner, started_at, completed_at)
-              VALUES (?, ?, ?, ?, ?, ?)
-            `).run(leg.id, id, legNumber, leg.winner, leg.startedAt, leg.completedAt);
-
-            // Insert throws
-            if (leg.throws && Array.isArray(leg.throws)) {
-              const insertThrow = db.prepare(`
-                INSERT INTO throws (
-                  id, leg_id, player_id, darts, score, remaining,
-                  timestamp, is_checkout_attempt, is_bust, visit_number,
-                  running_average, first9_average
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-              `);
-
-              for (const throwData of leg.throws) {
-                // A throw id that already exists must belong to another leg (this
-                // leg is brand new) — skip it instead of colliding on / hijacking
-                // the existing primary key.
-                const throwExists = db.prepare('SELECT 1 FROM throws WHERE id = ?').get(throwData.id);
-                if (throwExists) continue;
-                insertThrow.run(
-                  throwData.id,
-                  leg.id,
-                  throwData.playerId,
-                  JSON.stringify(throwData.darts),
-                  throwData.score,
-                  throwData.remaining,
-                  throwData.timestamp,
-                  throwData.isCheckoutAttempt ? 1 : 0,
-                  throwData.isBust ? 1 : 0,
-                  throwData.visitNumber,
-                  throwData.runningAverage,
-                  throwData.first9Average
-                );
-              }
-            }
-          }
-        }
-      }
-    });
-
-    updateMatch();
-
     res.json({ message: 'Match updated successfully' });
   } catch (error) {
     console.error('Error updating match:', error);

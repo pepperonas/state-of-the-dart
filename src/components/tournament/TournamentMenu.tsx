@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { celebrate as confetti } from '../../utils/celebration';
 import { Button, Card, TextField, Chip, IconButton, BackButton } from '../common';
 import { staggerChild } from '../../utils/motion';
+import { BYE, advanceWinner, buildKnockoutBracket, isPlayable, knockoutChampion, recordResult, roundRobinChampion } from '../../utils/tournament';
 
 type TournamentType = 'knockout' | 'round-robin';
 
@@ -53,51 +54,9 @@ const TournamentMenu: React.FC = () => {
     selectedPlayers.length >= (selectedType?.minPlayers || 2) &&
     selectedPlayers.length <= (selectedType?.maxPlayers || 16);
 
-  const generateKnockoutBracket = (participants: TournamentParticipant[]): TournamentMatch[] => {
-    const matches: TournamentMatch[] = [];
-    const numPlayers = participants.length;
-    
-    // Shuffle participants for random seeding
-    const shuffled = [...participants].sort(() => Math.random() - 0.5);
-    
-    // Generate first round matches
-    for (let i = 0; i < numPlayers; i += 2) {
-      matches.push({
-        id: uuidv4(),
-        round: 1,
-        participant1Id: shuffled[i].id,
-        participant2Id: shuffled[i + 1]?.id || 'BYE',
-      });
-    }
-    
-    // Generate subsequent rounds (empty slots)
-    let roundMatches = Math.floor(numPlayers / 4);
-    let round = 2;
-    while (roundMatches >= 1) {
-      for (let i = 0; i < roundMatches; i++) {
-        matches.push({
-          id: uuidv4(),
-          round,
-          participant1Id: '',
-          participant2Id: '',
-        });
-      }
-      roundMatches = Math.floor(roundMatches / 2);
-      round++;
-    }
-    
-    // Add final if needed
-    if (numPlayers > 2) {
-      matches.push({
-        id: uuidv4(),
-        round,
-        participant1Id: '',
-        participant2Id: '',
-      });
-    }
-    
-    return matches;
-  };
+  const generateKnockoutBracket = (participants: TournamentParticipant[]): TournamentMatch[] =>
+    // Random seeding, then a proper power-of-two bracket with byes.
+    buildKnockoutBracket([...participants].sort(() => Math.random() - 0.5).map(p => p.id));
 
   const generateRoundRobinMatches = (participants: TournamentParticipant[]): TournamentMatch[] => {
     const matches: TournamentMatch[] = [];
@@ -165,6 +124,7 @@ const TournamentMenu: React.FC = () => {
 
   const getParticipantName = (participantId: string) => {
     if (!activeTournament) return '';
+    if (participantId === BYE) return t('tournament.bye');
     const participant = activeTournament.participants.find(p => p.id === participantId);
     if (!participant) return 'TBD';
     const player = players.find(p => p.id === participant.playerId);
@@ -180,14 +140,17 @@ const TournamentMenu: React.FC = () => {
 
   const currentMatch = useMemo(() => {
     if (!activeTournament) return null;
-    const pendingMatches = activeTournament.matches.filter(m => !m.winner && m.participant1Id && m.participant2Id);
-    return pendingMatches[currentMatchIndex] || null;
+    return activeTournament.matches.filter(isPlayable)[currentMatchIndex] || null;
   }, [activeTournament, currentMatchIndex]);
+
+  // The tournament's own setting — the create-form control stays editable
+  // while a tournament runs and must not change its rules midway.
+  const tournamentLegsToWin = activeTournament?.settings.matchSettings.legsToWin ?? legsToWin;
 
   const handleScoreChange = (matchId: string, player: 'p1' | 'p2', delta: number) => {
     setMatchScores(prev => {
       const current = prev[matchId] || { p1: 0, p2: 0 };
-      const newScore = Math.max(0, Math.min(legsToWin, current[player] + delta));
+      const newScore = Math.max(0, Math.min(tournamentLegsToWin, current[player] + delta));
       return {
         ...prev,
         [matchId]: { ...current, [player]: newScore }
@@ -197,53 +160,22 @@ const TournamentMenu: React.FC = () => {
 
   const handleConfirmMatch = () => {
     if (!currentMatch || !activeTournament) return;
-    
+
     const scores = matchScores[currentMatch.id] || { p1: 0, p2: 0 };
-    if (scores.p1 !== legsToWin && scores.p2 !== legsToWin) return;
-    
-    const winnerId = scores.p1 === legsToWin ? currentMatch.participant1Id : currentMatch.participant2Id;
-    const loserId = scores.p1 === legsToWin ? currentMatch.participant2Id : currentMatch.participant1Id;
-    
-    // Update match
-    const updatedMatches = activeTournament.matches.map(m => {
-      if (m.id === currentMatch.id) {
-        return { ...m, winner: winnerId, completed: new Date() };
-      }
-      return m;
-    });
-    
-    // Update participants stats
-    const updatedParticipants = activeTournament.participants.map(p => {
-      if (p.id === winnerId) {
-        return { ...p, wins: p.wins + 1, legsFor: p.legsFor + scores.p1, legsAgainst: p.legsAgainst + scores.p2 };
-      }
-      if (p.id === loserId) {
-        return { ...p, losses: p.losses + 1, legsFor: p.legsFor + scores.p2, legsAgainst: p.legsAgainst + scores.p1 };
-      }
-      return p;
-    });
-    
-    // For knockout: advance winner to next round
-    if (activeTournament.type === 'knockout') {
-      const currentRound = currentMatch.round;
-      const nextRoundMatches = updatedMatches.filter(m => m.round === currentRound + 1);
-      
-      // Find empty slot in next round
-      for (const nextMatch of nextRoundMatches) {
-        if (!nextMatch.participant1Id) {
-          nextMatch.participant1Id = winnerId;
-          break;
-        } else if (!nextMatch.participant2Id) {
-          nextMatch.participant2Id = winnerId;
-          break;
-        }
-      }
-    }
-    
-    // Check if tournament is complete
-    const remainingMatches = updatedMatches.filter(m => !m.winner && m.participant1Id && m.participant2Id);
-    const isComplete = remainingMatches.length === 0;
-    
+    if (scores.p1 !== tournamentLegsToWin && scores.p2 !== tournamentLegsToWin) return;
+
+    const p1Won = scores.p1 === tournamentLegsToWin;
+    const winnerId = p1Won ? currentMatch.participant1Id : currentMatch.participant2Id;
+    const loserId = p1Won ? currentMatch.participant2Id : currentMatch.participant1Id;
+    const winnerLegs = p1Won ? scores.p1 : scores.p2;
+    const loserLegs = p1Won ? scores.p2 : scores.p1;
+
+    const updatedMatches = activeTournament.type === 'knockout'
+      ? advanceWinner(activeTournament.matches, currentMatch.id, winnerId)
+      : activeTournament.matches.map(m => (m.id === currentMatch.id ? { ...m, winner: winnerId, completed: new Date() } : m));
+    const updatedParticipants = recordResult(activeTournament.participants, winnerId, loserId, winnerLegs, loserLegs);
+    const isComplete = !updatedMatches.some(isPlayable);
+
     setActiveTournament({
       ...activeTournament,
       matches: updatedMatches,
@@ -251,29 +183,19 @@ const TournamentMenu: React.FC = () => {
       status: isComplete ? 'completed' : 'in-progress',
       completedAt: isComplete ? new Date() : undefined,
     });
-    
+
     if (isComplete) {
       confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
     }
-    
+
     setCurrentMatchIndex(0);
   };
 
   const getTournamentWinner = () => {
     if (!activeTournament || activeTournament.status !== 'completed') return null;
-    
-    if (activeTournament.type === 'knockout') {
-      const finalMatch = activeTournament.matches.find(m => m.winner && 
-        !activeTournament.matches.some(nm => nm.participant1Id === m.winner || nm.participant2Id === m.winner && nm.round > m.round));
-      return finalMatch?.winner;
-    } else {
-      // Round robin: most wins
-      const sorted = [...activeTournament.participants].sort((a, b) => {
-        if (b.wins !== a.wins) return b.wins - a.wins;
-        return (b.legsFor - b.legsAgainst) - (a.legsFor - a.legsAgainst);
-      });
-      return sorted[0]?.id;
-    }
+    return activeTournament.type === 'knockout'
+      ? knockoutChampion(activeTournament.matches)
+      : roundRobinChampion(activeTournament.participants);
   };
 
   // Tournament in progress view
@@ -292,7 +214,7 @@ const TournamentMenu: React.FC = () => {
                 <h2 className="m3-title-large text-on-surface">{activeTournament.name}</h2>
                 <p className="m3-body-medium text-on-surface-variant">
                   {activeTournament.type === 'knockout' ? 'Knockout' : 'Round Robin'} •
-                  Best of {legsToWin * 2 - 1}
+                  Best of {tournamentLegsToWin * 2 - 1}
                 </p>
               </div>
               <div className={`px-4 py-2 rounded-m3-full m3-label-large ${
@@ -410,14 +332,14 @@ const TournamentMenu: React.FC = () => {
                   </div>
                 </div>
 
-                <p className="text-center m3-body-medium text-on-surface-variant mb-4">First to {legsToWin} Legs</p>
+                <p className="text-center m3-body-medium text-on-surface-variant mb-4">First to {tournamentLegsToWin} Legs</p>
 
                 <Button
                   variant="success"
                   fullWidth
                   size="lg"
                   onClick={handleConfirmMatch}
-                  disabled={(matchScores[currentMatch.id]?.p1 || 0) !== legsToWin && (matchScores[currentMatch.id]?.p2 || 0) !== legsToWin}
+                  disabled={(matchScores[currentMatch.id]?.p1 || 0) !== tournamentLegsToWin && (matchScores[currentMatch.id]?.p2 || 0) !== tournamentLegsToWin}
                 >
                   Match bestätigen
                 </Button>

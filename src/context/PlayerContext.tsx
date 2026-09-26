@@ -119,10 +119,11 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     }
   };
 
-  // Load players from API when user is authenticated
+  // Load players from API when user is authenticated. Keyed on the id: a
+  // refreshed user object is the same account and must not reload everything.
   useEffect(() => {
     loadPlayers();
-  }, [user]);
+  }, [user?.id]);
   
   const addPlayer = async (name: string, avatar?: string, isBot?: boolean, botLevel?: number, customId?: string): Promise<Player> => {
     const newPlayer: Player = {
@@ -231,20 +232,27 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     }
   };
   
+  // A stable value, so consumers only re-render when players, the selection,
+  // the loading flag or the account change — not on every provider render.
+  // The functions close over exactly those, so refreshing them with the memo
+  // keeps them current.
+  const value = useMemo(() => ({
+    players: orderedPlayers,
+    currentPlayer,
+    loading,
+    addPlayer,
+    updatePlayer,
+    deletePlayer,
+    setCurrentPlayer,
+    getPlayer,
+    getPlayerHeatmap,
+    updatePlayerHeatmap,
+    refreshPlayers: loadPlayers,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [orderedPlayers, currentPlayer, loading, user?.id, storage]);
+
   return (
-    <PlayerContext.Provider value={{
-      players: orderedPlayers,
-      currentPlayer,
-      loading,
-      addPlayer,
-      updatePlayer,
-      deletePlayer,
-      setCurrentPlayer,
-      getPlayer,
-      getPlayerHeatmap,
-      updatePlayerHeatmap,
-      refreshPlayers: loadPlayers,
-    }}>
+    <PlayerContext.Provider value={value}>
       {children}
     </PlayerContext.Provider>
   );

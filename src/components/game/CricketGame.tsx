@@ -2,17 +2,21 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, RotateCcw, Trophy, Target, X, Check } from 'lucide-react';
-import { useGame } from '../../context/GameContext';
 import { usePlayer } from '../../context/PlayerContext';
 import { Player, CricketState, Dart } from '../../types/index';
 import PlayerAvatar from '../player/PlayerAvatar';
 import { celebrate as confetti } from '../../utils/celebration';
 import { saveGameState, loadGameState, clearGameState, STORAGE_KEYS, CricketSavedState } from '../../utils/gameStorage';
 import { SpinnerWheel } from './SpinnerWheel';
+import { CRICKET_NUMBERS, applyCricketVisit, emptyCricketState, isCricketWinner } from '../../utils/cricket';
 import { BackButton, Button, IconButton, Card, Dialog } from '../common';
 
-// Cricket numbers: 20, 19, 18, 17, 16, 15, Bull
-const CRICKET_NUMBERS = [20, 19, 18, 17, 16, 15, 25];
+/** One confirmed visit, kept so it can be taken back. */
+interface CricketTurn {
+  turn: number;
+  before: CricketState;
+  darts: Dart[];
+}
 
 interface CricketGameProps {
   onBack?: () => void;
@@ -21,8 +25,11 @@ interface CricketGameProps {
 const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { state, dispatch } = useGame();
-  const { players } = usePlayer();
+  // ⚠️ Cricket keeps its own turn state. It used to run on the shared X01
+  // GameContext: START_MATCH replaced a running X01 match, the debounced saver
+  // POSTed the cricket game as a match, and END_MATCH added a 0-average game to
+  // every player's career stats.
+  const { players, loading: playersLoading } = usePlayer();
   
   const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
   const [showSetup, setShowSetup] = useState(true);
@@ -31,6 +38,8 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
   
   // Cricket state per player
   const [cricketState, setCricketState] = useState<CricketState>({});
+  const [turn, setTurn] = useState(0);
+  const [turnHistory, setTurnHistory] = useState<CricketTurn[]>([]);
   const restoredRef = useRef(false);
 
   // Spinner wheel for player order
@@ -40,18 +49,15 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
   // Back confirmation dialog
   const [showBackConfirm, setShowBackConfirm] = useState(false);
 
-  // Restore saved game on mount
+  /* eslint-disable react-hooks/set-state-in-effect -- restoring from localStorage once the
+     async player list has arrived is exactly synchronising with an external system. */
+  // Restore a saved game — once the players have loaded. On mount the list is
+  // still empty, every saved player looked deleted and the game was thrown away.
   useEffect(() => {
-    if (restoredRef.current) return;
+    if (restoredRef.current || playersLoading) return;
+    restoredRef.current = true;
     const saved = loadGameState<CricketSavedState>(STORAGE_KEYS.CRICKET);
     if (!saved) return;
-    const validPlayers = saved.selectedPlayers.filter(sp =>
-      players.some(p => p.id === sp.id)
-    );
-    if (validPlayers.length < 2) {
-      clearGameState(STORAGE_KEYS.CRICKET);
-      return;
-    }
     const restoredPlayers = saved.selectedPlayers
       .map(sp => players.find(p => p.id === sp.id))
       .filter((p): p is Player => !!p);
@@ -59,47 +65,12 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
       clearGameState(STORAGE_KEYS.CRICKET);
       return;
     }
-    restoredRef.current = true;
     setSelectedPlayers(restoredPlayers);
-    // Dispatch START_MATCH to initialize GameContext
-    dispatch({
-      type: 'START_MATCH',
-      payload: {
-        players: restoredPlayers,
-        settings: {
-          cricketMode: 'standard',
-          cricketNumbers: CRICKET_NUMBERS,
-        },
-        gameType: 'cricket',
-      },
-    });
     setCricketState(saved.cricketState);
-    // START_MATCH resets currentPlayerIndex to 0. Re-advance to whose turn it was
-    // when the game was saved — the reducer has no direct set-index action, so we
-    // step NEXT_PLAYER. Without this, every resume silently reset the turn to
-    // player 0, handing a player a stolen extra turn.
-    const savedTurn = (saved.currentPlayerIndex ?? 0) % restoredPlayers.length;
-    for (let i = 0; i < savedTurn; i++) {
-      dispatch({ type: 'NEXT_PLAYER' });
-    }
+    setTurn((saved.currentPlayerIndex ?? 0) % restoredPlayers.length);
     setShowSetup(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Initialize cricket state when match starts (only if not restored)
-  useEffect(() => {
-    if (restoredRef.current) return;
-    if (state.currentMatch?.type === 'cricket' && Object.keys(cricketState).length === 0) {
-      const initialState: CricketState = {};
-      state.currentMatch.players.forEach(player => {
-        initialState[player.playerId] = {
-          '20': 0, '19': 0, '18': 0, '17': 0, '16': 0, '15': 0, '25': 0,
-          points: 0
-        };
-      });
-      setCricketState(initialState);
-    }
-  }, [state.currentMatch, cricketState]);
+  }, [playersLoading, players]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Save game state on changes
   useEffect(() => {
@@ -108,15 +79,17 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
       gameType: 'cricket',
       selectedPlayers: selectedPlayers.map(p => ({ id: p.id, name: p.name, avatar: p.avatar })),
       cricketState,
-      currentPlayerIndex: state.currentPlayerIndex,
+      currentPlayerIndex: turn,
       savedAt: Date.now(),
     });
-  }, [showSetup, showWinner, selectedPlayers, cricketState, state.currentPlayerIndex]);
+  }, [showSetup, showWinner, selectedPlayers, cricketState, turn]);
 
-  const currentPlayer = useMemo(() => {
-    if (!state.currentMatch) return null;
-    return state.currentMatch.players[state.currentPlayerIndex];
-  }, [state.currentMatch, state.currentPlayerIndex]);
+  const matchPlayers = useMemo(
+    () => (showSetup ? [] : selectedPlayers.map(p => ({ playerId: p.id, name: p.name }))),
+    [selectedPlayers, showSetup],
+  );
+  const playerIds = useMemo(() => matchPlayers.map(p => p.playerId), [matchPlayers]);
+  const currentPlayer = matchPlayers[turn] ?? null;
 
   const handleStartGame = () => {
     if (selectedPlayers.length < 2) return;
@@ -130,27 +103,10 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
 
   const initGame = (orderedPlayers: Player[]) => {
     setSelectedPlayers(orderedPlayers);
-
-    dispatch({
-      type: 'START_MATCH',
-      payload: {
-        players: orderedPlayers,
-        settings: {
-          cricketMode: 'standard',
-          cricketNumbers: CRICKET_NUMBERS,
-        },
-        gameType: 'cricket',
-      },
-    });
-
-    const initialState: CricketState = {};
-    orderedPlayers.forEach(player => {
-      initialState[player.id] = {
-        '20': 0, '19': 0, '18': 0, '17': 0, '16': 0, '15': 0, '25': 0,
-        points: 0
-      };
-    });
-    setCricketState(initialState);
+    setCricketState(emptyCricketState(orderedPlayers.map(p => p.id)));
+    setTurn(0);
+    setTurnHistory([]);
+    setCurrentDarts([]);
     setShowSetup(false);
   };
 
@@ -180,94 +136,35 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
 
   const handleConfirmThrow = () => {
     if (!currentPlayer || currentDarts.length === 0) return;
-    
     const playerId = currentPlayer.playerId;
-    const newState = { ...cricketState };
-    
-    // Process each dart
-    currentDarts.forEach(dart => {
-      const num = dart.segment.toString();
-      
-      // Only count cricket numbers (15-20, 25)
-      if (!CRICKET_NUMBERS.includes(dart.segment)) return;
-      
-      const currentMarks = newState[playerId][num] || 0;
-      const marksToAdd = dart.multiplier;
-      
-      if (currentMarks < 3) {
-        // Still need to close this number
-        const marksNeeded = 3 - currentMarks;
-        const actualMarks = Math.min(marksToAdd, marksNeeded);
-        newState[playerId][num] = currentMarks + actualMarks;
-        
-        // Extra marks = points (if opponent hasn't closed)
-        const extraMarks = marksToAdd - actualMarks;
-        if (extraMarks > 0) {
-          // Check if any opponent hasn't closed this number
-          const canScore = state.currentMatch?.players.some(p => {
-            if (p.playerId === playerId) return false;
-            return (newState[p.playerId]?.[num] || 0) < 3;
-          });
-          
-          if (canScore) {
-            const pointValue = dart.segment === 25 ? 25 : dart.segment;
-            newState[playerId].points += extraMarks * pointValue;
-          }
-        }
-      } else {
-        // Already closed - score points if opponent hasn't closed
-        const canScore = state.currentMatch?.players.some(p => {
-          if (p.playerId === playerId) return false;
-          return (newState[p.playerId]?.[num] || 0) < 3;
-        });
-        
-        if (canScore) {
-          const pointValue = dart.segment === 25 ? 25 : dart.segment;
-          newState[playerId].points += marksToAdd * pointValue;
-        }
-      }
-    });
-    
-    setCricketState(newState);
-    
-    // Check for winner
-    const playerState = newState[playerId];
-    const allClosed = CRICKET_NUMBERS.every(num => (playerState[num.toString()] || 0) >= 3);
-    
-    if (allClosed) {
-      // Check if player has equal or more points than all opponents
-      const playerPoints = playerState.points;
-      const hasWon = state.currentMatch?.players.every(p => {
-        if (p.playerId === playerId) return true;
-        return playerPoints >= (newState[p.playerId]?.points || 0);
-      });
-      
-      if (hasWon) {
-        clearGameState(STORAGE_KEYS.CRICKET);
-        setShowWinner(true);
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
-        dispatch({ type: 'END_MATCH' });
-        // Do NOT advance to the next player: the winner dialog renders
-        // `currentPlayer?.name`, and NEXT_PLAYER would increment the index to
-        // the loser, announcing the wrong champion.
-        setCurrentDarts([]);
-        return;
-      }
-    }
+    const newState = applyCricketVisit(cricketState, playerIds, playerId, currentDarts);
 
-    // Next player
+    setTurnHistory(prev => [...prev, { turn, before: cricketState, darts: currentDarts }]);
+    setCricketState(newState);
     setCurrentDarts([]);
-    dispatch({ type: 'NEXT_PLAYER' });
+
+    if (isCricketWinner(newState, playerIds, playerId)) {
+      clearGameState(STORAGE_KEYS.CRICKET);
+      setShowWinner(true);
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      // Keep the turn on the winner: the dialog names `currentPlayer`.
+      return;
+    }
+    setTurn(t => (t + 1) % playerIds.length);
   };
 
+  /** Removes the last pending dart, or takes back the last confirmed visit. */
   const handleUndo = () => {
     if (currentDarts.length > 0) {
       setCurrentDarts(prev => prev.slice(0, -1));
+      return;
     }
+    const last = turnHistory[turnHistory.length - 1];
+    if (!last) return;
+    setTurnHistory(prev => prev.slice(0, -1));
+    setCricketState(last.before);
+    setTurn(last.turn);
+    setCurrentDarts(last.darts);
   };
 
   const getMarkDisplay = (marks: number) => {
@@ -471,11 +368,11 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
               <thead>
                 <tr>
                   <th className="text-left text-on-surface-variant p-2 w-20">Zahl</th>
-                  {state.currentMatch?.players.map((player, idx) => (
+                  {matchPlayers.map((player, idx) => (
                     <th
                       key={player.playerId}
                       className={`text-center p-2 ${
-                        idx === state.currentPlayerIndex
+                        idx === turn
                           ? 'bg-primary-container rounded-t-m3-md'
                           : ''
                       }`}
@@ -500,13 +397,13 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
                     <td className="text-on-surface font-bold p-3 text-lg">
                       {num === 25 ? 'Bull' : num}
                     </td>
-                    {state.currentMatch?.players.map((player, idx) => {
+                    {matchPlayers.map((player, idx) => {
                       const marks = cricketState[player.playerId]?.[num.toString()] || 0;
                       return (
                         <td
                           key={player.playerId}
                           className={`text-center p-3 ${
-                            idx === state.currentPlayerIndex
+                            idx === turn
                               ? 'bg-primary-container/40'
                               : ''
                           }`}
@@ -522,11 +419,11 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
                 {/* Points row */}
                 <tr className="border-t-2 border-[var(--m3-primary)]">
                   <td className="font-bold p-3" style={{ color: 'var(--m3-primary)' }}>Punkte</td>
-                  {state.currentMatch?.players.map((player, idx) => (
+                  {matchPlayers.map((player, idx) => (
                     <td
                       key={player.playerId}
                       className={`text-center p-3 ${
-                        idx === state.currentPlayerIndex
+                        idx === turn
                           ? 'bg-primary-container/40'
                           : ''
                       }`}
@@ -552,7 +449,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
               variant="tonal"
               label="Undo"
               onClick={handleUndo}
-              disabled={currentDarts.length === 0}
+              disabled={currentDarts.length === 0 && turnHistory.length === 0}
             >
               <RotateCcw size={18} />
             </IconButton>

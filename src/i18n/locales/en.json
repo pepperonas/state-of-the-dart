@@ -600,5 +600,8 @@
     "join_private": "Join Private Room",
     "enter_room_id": "Enter Room ID...",
     "join": "Join"
+  },
+  "tournament": {
+    "bye": "Bye"
   }
 }

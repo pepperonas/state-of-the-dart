@@ -195,3 +195,50 @@ export class TenantStorage {
     return clearTenantData(this.tenantId);
   }
 }
+
+/**
+ * Cache scope of one account. Everything used to live under the single scope
+ * `default`, so on a shared device the next account inherited the previous
+ * one's personal bests, achievement cache, last players — and its queue of
+ * unsynced unlocks, which was then POSTed with the wrong token.
+ */
+export const accountScope = (userId: string): string => `user_${userId}`;
+
+const DEFAULT_CLAIMED_KEY = 'sotd-default-cache-claimed';
+
+/**
+ * One-time migration: the first account to sign in after the switch takes
+ * over the old shared `default` cache (on almost every device that cache is
+ * theirs — including unsynced achievement unlocks, which must not be lost).
+ * Later accounts start empty.
+ */
+export const claimDefaultCache = (userId: string): void => {
+  try {
+    if (localStorage.getItem(DEFAULT_CLAIMED_KEY)) return;
+    const target = accountScope(userId);
+    for (const key of getTenantKeys('default')) {
+      const moved = key.replace(/^tenant_default_/, `tenant_${target}_`);
+      if (localStorage.getItem(moved) === null) {
+        const value = localStorage.getItem(key);
+        if (value !== null) localStorage.setItem(moved, value);
+      }
+      localStorage.removeItem(key);
+    }
+    localStorage.setItem(DEFAULT_CLAIMED_KEY, userId);
+  } catch (error) {
+    console.error('Failed to migrate the shared cache', error);
+  }
+};
+
+/** Device-level game saves that belong to whoever is signed in. */
+export const DEVICE_GAME_KEYS = [
+  'state-of-the-dart-active-match',
+  'state-of-the-dart-atc-game',
+  'state-of-the-dart-shanghai-game',
+  'state-of-the-dart-cricket-game',
+];
+
+/** Signing out hands the device on: drop the running games with it. */
+export const clearDeviceGameState = (): void => {
+  DEVICE_GAME_KEYS.forEach(key => safeRemoveItem(key));
+};

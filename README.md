@@ -11,7 +11,7 @@
 <!-- Links -->
 [![Live Demo](https://img.shields.io/badge/Live_Demo-stateofthedart.com-22c55e?style=for-the-badge&logo=googlechrome&logoColor=white)](https://stateofthedart.com)
 [![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-a855f7?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://stateofthedart.celox.io)
-[![Version](https://img.shields.io/badge/Version-0.9.1-3b82f6?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-0.10.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
 
 <!-- Build & Repo (live) -->
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
@@ -46,7 +46,7 @@
 <!-- Qualität -->
 ![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?logo=playwright&logoColor=white)
-![Unit Tests](https://img.shields.io/badge/Unit_Tests-692-brightgreen)
+![Unit Tests](https://img.shields.io/badge/Unit_Tests-820-brightgreen)
 ![E2E Tests](https://img.shields.io/badge/E2E_Tests-11-brightgreen)
 ![Coverage](https://img.shields.io/badge/Coverage-24%25_stmts_%7C_75%25_branches-yellow)
 ![ESLint](https://img.shields.io/badge/ESLint-configured-4B32C3?logo=eslint&logoColor=white)
@@ -795,6 +795,18 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.10.0 (26. September 2026) - Korrektheit: Speicherung, Undo, Regeln
+
+**⚠️ Behoben — Daten:** Kein beendetes Match hatte in der Datenbank einen Gewinner (der Upsert schrieb nur Spieltyp, Status und Einstellungen), dadurch zählten alle Sieg-Achievements 0. Höchste Aufnahme, geworfene Darts und First-9 wurden als 0 gespeichert. Beenden → Undo → Beenden zählte ein Match doppelt in die Karriere-Statistik. Heatmaps zählten jeden Dart doppelt. Gespeicherte ATC-/Shanghai-/Cricket-Spiele verschwanden bei jedem Neuladen. Auf geteilten Geräten erbte das nächste Konto den Cache des vorherigen.
+
+**Spielregeln & Undo**
+- Undo im Satz-Modus stellte die Legs früherer Sätze wieder her — jetzt satzweise neu gezählt; Undo reicht über Leg- und Satzgrenzen und aus einem per Checkout gewonnenen Match heraus.
+- **Double-In** war wählbar, wurde aber nie angewendet. Jetzt gilt es — über eine einzige `evaluateVisit()` für Reducer, Spielbildschirm und Bot.
+- Cricket überschrieb ein laufendes X01-Match; es führt jetzt eigenen Zugzustand mit echtem Undo.
+- K.-o.-Turniere endeten ohne Sieger; Bob's 27 und die Sequenz-Trainings rechnen nach den echten Regeln.
+
+**Stabilität:** Endlosschleife „Maximum update depth exceeded" im Spielbildschirm behoben; der Online-Server kann nicht mehr abstürzen, wenn jemand mitten im Spiel geht.
 
 ### v0.9.1 (28. August 2026) - Material 3 Expressive, eigenes Icon-Set & Scoring-Fix
 

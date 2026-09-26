@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useMemo, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { safeGetItem, safeSetItem, TenantStorage } from '../utils/storage';
+import { TenantStorage, accountScope, claimDefaultCache } from '../utils/storage';
+import { useAuth } from './AuthContext';
 import { toDateOrNow } from '../utils/dateUtils';
 
 export interface Tenant {
@@ -32,22 +33,30 @@ const reviveTenantDates = (tenant: any): Tenant => {
 };
 
 export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Create a default tenant for authenticated users
-  const defaultTenant: Tenant = {
-    id: 'default',
+  // One "tenant" per signed-in account. Its id IS the cache scope, so every
+  // `new TenantStorage(currentTenant.id)` in the app (achievements, export)
+  // lands in the account's own cache — see accountScope.
+  const { user } = useAuth();
+  const userId = user?.id;
+
+  const currentTenant = useMemo<Tenant | null>(() => (userId ? {
+    id: accountScope(userId),
     name: 'Default',
     avatar: 'user',
     createdAt: new Date(),
     lastActive: new Date(),
-  };
-  
-  const [tenants] = useState<Tenant[]>([defaultTenant]);
-  const [currentTenant] = useState<Tenant | null>(defaultTenant);
-  const [storage] = useState<TenantStorage | null>(new TenantStorage('default'));
-  
+  } : null), [userId]);
+  const tenants = useMemo(() => (currentTenant ? [currentTenant] : []), [currentTenant]);
+
+  const storage = useMemo<TenantStorage | null>(() => {
+    if (!userId) return null;
+    claimDefaultCache(userId);
+    return new TenantStorage(accountScope(userId));
+  }, [userId]);
+
   // Dummy functions for compatibility
   const setCurrentTenant = () => {};
-  const addTenant = () => defaultTenant;
+  const addTenant = () => currentTenant as Tenant;
   const deleteTenant = () => {};
   const updateTenant = () => {};
   

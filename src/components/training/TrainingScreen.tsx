@@ -14,6 +14,7 @@ import { useGameAchievements } from '../../hooks/useGameAchievements';
 import BackButton from '../common/BackButton';
 import { Button, Card, AnimatedNumber } from '../common';
 import { Icon, iconForEmoji } from '../icons';
+import { advanceThroughSequence, bobs27Round, BOBS_27_ROUNDS, BOBS_27_BULL } from '../../utils/training';
 
 interface TrainingState {
   currentTarget: number;
@@ -98,7 +99,9 @@ const TrainingScreen: React.FC = () => {
     sessionStartTimeRef.current = new Date();
   };
 
-  const saveSession = async () => {
+  // Stable identity: it only reads refs. Recreated every render, it sat in
+  // handleConfirmThrow's deps and restarted the auto-confirm timer each render.
+  const saveSession = React.useCallback(async () => {
     if (!sessionRef.current) return;
 
     const session = sessionRef.current;
@@ -135,7 +138,7 @@ const TrainingScreen: React.FC = () => {
     }
 
     sessionRef.current = null;
-  };
+  }, []);
 
   const initializeTraining = () => {
     switch (mode) {
@@ -193,7 +196,7 @@ const TrainingScreen: React.FC = () => {
           attempts: 0,
           hits: 0,
           round: 1,
-          totalRounds: 20,
+          totalRounds: BOBS_27_ROUNDS,
           completed: false,
         });
         break;
@@ -234,7 +237,7 @@ const TrainingScreen: React.FC = () => {
       case 'checkout-121':
         return `Checkout ${trainingState.score} verbleibend`;
       case 'bobs-27':
-        return `Punkte: ${trainingState.score} | Ziel: ${trainingState.currentTarget}`;
+        return `Punkte: ${trainingState.score} | Ziel: ${trainingState.currentTarget === BOBS_27_BULL ? 'Bull' : `D${trainingState.currentTarget}`}`;
       case 'score-training':
         return `Erziele ${trainingState.currentTarget}+ in 3 Darts`;
       default:
@@ -278,89 +281,56 @@ const TrainingScreen: React.FC = () => {
 
     switch (mode) {
       case 'doubles': {
-        // Check if any dart hit the double target
-        isHit = currentThrow.some(
-          dart => dart.segment === trainingState.currentTarget && dart.multiplier === 2
-        );
-        
+        const step = advanceThroughSequence(currentThrow, trainingState.currentTarget, { multiplier: 2, last: 20, step: 1 });
+        isHit = step.hits > 0;
         if (isHit) {
           newState.hits++;
-          newState.score += trainingState.currentTarget * 2;
-          audioSystem.announceScore(trainingState.currentTarget * 2);
-          
-          // Move to next double (1-20)
-          if (trainingState.currentTarget < 20) {
-            newState.currentTarget++;
-          } else {
-            // Completed all doubles!
-            newState.completed = true;
-            audioSystem.playSound('/sounds/effects/get_ready.mp3', true);
-          }
+          newState.score += step.points;
+          newState.currentTarget = step.target;
+          audioSystem.announceScore(step.points);
         }
-        
-        // Check if max attempts reached without completing
-        if (newState.attempts >= newState.totalRounds && !newState.completed) {
+        if (step.completed) {
+          newState.completed = true;
+          audioSystem.playSound('/sounds/effects/get_ready.mp3', true);
+        } else if (newState.attempts >= newState.totalRounds) {
           newState.completed = true;
         }
         break;
       }
-
       case 'triples': {
-        // Check if any dart hit the triple target
-        isHit = currentThrow.some(
-          dart => dart.segment === trainingState.currentTarget && dart.multiplier === 3
-        );
-        
+        const step = advanceThroughSequence(currentThrow, trainingState.currentTarget, { multiplier: 3, last: 1, step: -1 });
+        isHit = step.hits > 0;
         if (isHit) {
           newState.hits++;
-          newState.score += trainingState.currentTarget * 3;
-          audioSystem.announceScore(trainingState.currentTarget * 3);
-          
-          // Move to next triple (20, 19, 18... 1)
-          if (trainingState.currentTarget > 1) {
-            newState.currentTarget--;
-          } else {
-            // Completed all triples!
-            newState.completed = true;
-            audioSystem.playSound('/sounds/effects/get_ready.mp3', true);
-          }
+          newState.score += step.points;
+          newState.currentTarget = step.target;
+          audioSystem.announceScore(step.points);
         }
-        
-        // Check if max attempts reached without completing
-        if (newState.attempts >= newState.totalRounds && !newState.completed) {
+        if (step.completed) {
+          newState.completed = true;
+          audioSystem.playSound('/sounds/effects/get_ready.mp3', true);
+        } else if (newState.attempts >= newState.totalRounds) {
           newState.completed = true;
         }
         break;
       }
-
       case 'around-the-clock': {
-        // Check if any dart hit the target number (any multiplier)
-        isHit = currentThrow.some(
-          dart => dart.segment === trainingState.currentTarget
-        );
-        
+        const step = advanceThroughSequence(currentThrow, trainingState.currentTarget, { last: 20, step: 1 });
+        isHit = step.hits > 0;
         if (isHit) {
           newState.hits++;
-          newState.score += throwScore;
-          audioSystem.announceScore(throwScore);
-          
-          // Move to next number (1-20)
-          if (trainingState.currentTarget < 20) {
-            newState.currentTarget++;
-          } else {
-            // Completed around the clock!
-            newState.completed = true;
-            audioSystem.playSound('/sounds/effects/get_ready.mp3', true);
-          }
+          newState.score += step.points;
+          newState.currentTarget = step.target;
+          audioSystem.announceScore(step.points);
         }
-        
-        // Check if max attempts reached without completing
-        if (newState.attempts >= newState.totalRounds && !newState.completed) {
+        if (step.completed) {
+          newState.completed = true;
+          audioSystem.playSound('/sounds/effects/get_ready.mp3', true);
+        } else if (newState.attempts >= newState.totalRounds) {
           newState.completed = true;
         }
         break;
       }
-
       case 'checkout-121': {
         // Checkout practice - need to hit exactly the remaining score
         const lastDart = currentThrow[currentThrow.length - 1];
@@ -389,36 +359,23 @@ const TrainingScreen: React.FC = () => {
       }
 
       case 'bobs-27': {
-        // Bob's 27: Start with 27 points, must hit current target or lose 3 points
-        isHit = currentThrow.some(
-          dart => dart.segment === trainingState.currentTarget
-        );
-        
+        const round = bobs27Round(trainingState.score, trainingState.currentTarget, currentThrow);
+        isHit = round.hits > 0;
         if (isHit) {
           newState.hits++;
-          newState.score += 3;
           audioSystem.playSound('/sounds/OMNI/pop-success.mp3');
         } else {
-          newState.score -= 3;
           audioSystem.playSound('/sounds/caller/0.mp3');
         }
-
-        // Move to next number (1-20, then repeat)
-        newState.currentTarget = (trainingState.currentTarget % 20) + 1;
+        newState.score = Math.max(0, round.score);
+        newState.currentTarget = round.nextTarget;
         newState.round++;
-        
-        // Check completion conditions
-        if (newState.score <= 0) {
+        if (round.completed) {
           newState.completed = true;
-          newState.score = 0;
-          audioSystem.playSound('/sounds/OMNI/woosh.mp3');
-        } else if (newState.round > newState.totalRounds) {
-          newState.completed = true;
-          audioSystem.playSound('/sounds/effects/get_ready.mp3', true);
+          audioSystem.playSound(round.busted ? '/sounds/OMNI/woosh.mp3' : '/sounds/effects/get_ready.mp3', !round.busted);
         }
         break;
       }
-
       case 'score-training': {
         // Score training: try to score 60+ per throw
         isHit = throwScore >= trainingState.currentTarget;
@@ -803,8 +760,9 @@ const TrainingScreen: React.FC = () => {
                 {mode === 'bobs-27' && (
                   <>
                     <p>• Starte mit 27 Punkten</p>
-                    <p>• Triff die Zielzahl: +3 Punkte</p>
-                    <p>• Verfehle das Ziel: -3 Punkte</p>
+                    <p>• Runde für Runde D1 bis D20, zum Schluss Bull</p>
+                    <p>• Jeder Treffer im Doppel: + Doppelwert</p>
+                    <p>• Kein Doppel in der Runde: − Doppelwert</p>
                     <p>• Lass deine Punkte nicht auf 0 fallen!</p>
                   </>
                 )}

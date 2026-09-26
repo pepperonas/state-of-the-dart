@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAchievements } from '../context/AchievementContext';
 import { Achievement } from '../types/achievements';
@@ -20,9 +20,20 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
 }) => {
   const { t } = useTranslation();
   const { getLockedAchievements } = useAchievements();
-  const [hints, setHints] = useState<AchievementHint[]>([]);
 
-  const checkForHints = useCallback(() => {
+  // ⚠️ Depend on the NUMBERS, never on the object. Callers build
+  // `currentMatchData` inline on every render; the previous version keyed a
+  // useCallback on it and pushed the result through setState in an effect —
+  // new object → new callback → effect → setState → render → new object, the
+  // "Maximum update depth exceeded" loop in GameScreen. Derived data does not
+  // belong in state at all, so this is a plain memo now.
+  const matchAverage = currentMatchData?.matchAverage;
+  const score180s = currentMatchData?.score180s;
+  const checkoutRate = currentMatchData?.checkoutRate;
+  const currentWinStreak = currentMatchData?.currentWinStreak;
+
+  return useMemo((): AchievementHint[] => {
+    const data = { matchAverage, score180s, checkoutRate, currentWinStreak };
     if (!playerId) return [];
 
     const lockedAchievements = getLockedAchievements(playerId);
@@ -31,7 +42,7 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
     lockedAchievements.forEach((achievement: Achievement) => {
       switch (achievement.id) {
         case 'high_roller': {
-          const currentAvg = currentMatchData?.matchAverage || 0;
+          const currentAvg = data.matchAverage || 0;
           if (currentAvg >= 55 && currentAvg < 60) {
             newHints.push({
               achievementId: achievement.id,
@@ -46,7 +57,7 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
         }
 
         case 'pro_scorer': {
-          const currentAvg = currentMatchData?.matchAverage || 0;
+          const currentAvg = data.matchAverage || 0;
           if (currentAvg >= 75 && currentAvg < 80) {
             newHints.push({
               achievementId: achievement.id,
@@ -61,7 +72,7 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
         }
 
         case 'world_class': {
-          const currentAvg = currentMatchData?.matchAverage || 0;
+          const currentAvg = data.matchAverage || 0;
           if (currentAvg >= 95 && currentAvg < 100) {
             newHints.push({
               achievementId: achievement.id,
@@ -76,7 +87,7 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
         }
 
         case 'max_out': {
-          const current180s = currentMatchData?.score180s || 0;
+          const current180s = data.score180s || 0;
           if (current180s >= 7 && current180s < 10) {
             newHints.push({
               achievementId: achievement.id,
@@ -91,7 +102,7 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
         }
 
         case 'checkout_king': {
-          const currentRate = currentMatchData?.checkoutRate || 0;
+          const currentRate = data.checkoutRate || 0;
           if (currentRate >= 45 && currentRate < 50) {
             newHints.push({
               achievementId: achievement.id,
@@ -106,7 +117,7 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
         }
 
         case 'winning_streak': {
-          const currentStreak = currentMatchData?.currentWinStreak || 0;
+          const currentStreak = data.currentWinStreak || 0;
           if (currentStreak >= 3 && currentStreak < 5) {
             newHints.push({
               achievementId: achievement.id,
@@ -126,12 +137,5 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
     });
 
     return newHints;
-  }, [playerId, currentMatchData, getLockedAchievements, t]);
-
-  useEffect(() => {
-    const newHints = checkForHints();
-    setHints(newHints);
-  }, [checkForHints]);
-
-  return hints;
+  }, [playerId, matchAverage, score180s, checkoutRate, currentWinStreak, getLockedAchievements, t]);
 };

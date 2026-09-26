@@ -32,24 +32,42 @@ export interface PlayerUpdateRequest {
 }
 
 // Match Types
+/** A player row as the API stores it — the match player plus derived totals. */
+export type ApiMatchPlayer = Match['players'][number] & {
+  highestScore?: number;
+  dartsThrown?: number;
+  first9Average?: number;
+};
+
+/** Legs and throws travel with epoch-ms timestamps (the columns are INTEGER). */
+export interface ApiLeg {
+  id: string;
+  legNumber?: number;
+  winner?: string;
+  startedAt: number | null;
+  completedAt: number | null;
+  throws: Array<Omit<Match['legs'][number]['throws'][number], 'timestamp'> & { timestamp: number | null }>;
+}
+
 export interface MatchCreateRequest {
   id: string;
   gameType: string;
   status: string;
-  players: Match['players'];
+  players: ApiMatchPlayer[];
   settings: Match['settings'];
   startedAt: number;
-  completedAt?: number;
-  winner?: string;
-  legs?: Match['legs'];
+  /** `null` clears — PUT only writes fields that are present. */
+  completedAt?: number | null;
+  winner?: string | null;
+  legs?: ApiLeg[];
 }
 
 export interface MatchUpdateRequest {
   status?: string;
-  winner?: string;
-  completedAt?: number;
-  players?: Match['players'];
-  legs?: Match['legs'];
+  winner?: string | null;
+  completedAt?: number | null;
+  players?: ApiMatchPlayer[];
+  legs?: ApiLeg[];
 }
 
 // Training Session Types
