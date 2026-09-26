@@ -3,6 +3,7 @@ import { Player } from '../../types';
 import { audioSystem } from '../../utils/audio';
 import { Icon, iconForEmoji, ICON_PATHS } from '../icons';
 import { useTranslation } from 'react-i18next';
+import { randomIndex, randomBetween } from '../../utils/random';
 import { Button, Chip } from '../common';
 
 interface SpinnerWheelProps {
@@ -42,6 +43,8 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
   const doneRef = useRef(false);
   const later = (fn: () => void, ms: number) => { timersRef.current.push(setTimeout(fn, ms)); };
   useEffect(() => () => timersRef.current.forEach(clearTimeout), []);
+
+  const skipRandom = () => finish(randomIndex(players.length));
 
   /** Finishes exactly once — by the wheel, a skip, or a chosen starter. */
   const finish = (index: number) => {
@@ -178,7 +181,7 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
 
     // Calculate random winner and rotation using stored players
     const currentPlayers = playersAtSpinRef.current;
-    const winnerIndex = Math.floor(Math.random() * currentPlayers.length);
+    const winnerIndex = randomIndex(currentPlayers.length);
 
     // How the wheel is drawn:
     // - Segment 0 starts at -90° (canvas coordinates) which is at the TOP of the wheel
@@ -201,7 +204,7 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
 
     const segmentCenter = winnerIndex * segmentAngle + segmentAngle / 2;
     const baseRotation = 360 - segmentCenter; // This brings segment N to top
-    const spins = 5 + Math.random() * 3; // 5-8 full rotations for drama
+    const spins = randomBetween(5, 8); // 5-8 full rotations for drama
     const finalRotation = Math.floor(spins) * 360 + baseRotation;
 
     console.log(`🎰 Spinner: players=${players.map(p=>p.name).join(', ')}`);
@@ -298,7 +301,7 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
                 </Chip>
               ))}
             </div>
-            <Button variant="text" onClick={() => finish(Math.floor(Math.random() * players.length))}>
+            <Button variant="text" onClick={skipRandom}>
               {t('game.skip_spinner')}
             </Button>
           </div>

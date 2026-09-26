@@ -7,6 +7,49 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-09-26
+
+Using the app at the board: offline, awake, quicker to start, honest at the end.
+
+### Added
+
+- **The app works offline and updates itself.** The built service worker was
+  never registered — no offline support, no updates. It is now, with an M3
+  snackbar offering a new version; the offer waits while a game is on screen.
+- **Install offer** on the home screen after the first finished match. The
+  browser's install event is caught at startup instead of only while the
+  settings page happened to be open; iOS gets the Share-sheet instructions.
+- **The screen stays awake** on every game screen (Wake Lock, re-acquired
+  after the tab was hidden).
+- **Vibration feedback** on dart entry, confirm, bust and checkout. The
+  vibration setting existed before, but nothing ever vibrated.
+- **Mute button** in the X01 header; remembered, leaves the saved volumes alone.
+- Spinner can be skipped, or a player picked to start.
+- Match-end **undo snackbar** (8 s). The confirmation promised an undo the
+  screen never showed.
+- Winner screen lists **every player** with legs/sets, average, highest and
+  180s, and opens this match's details. A rematch lets the other player start.
+
+### Changed
+
+- New games default to **501 double out** (was 301 without); the last
+  settings, the last players and the input mode (numpad / quick) are remembered.
+- A one-player start reuses one guest profile instead of creating a new
+  "Guest 417" every time.
+- Leaving a game goes through the router instead of reloading the whole app.
+- Footer and floating report buttons are hidden on game screens.
+- Online multiplayer is marked **Beta** (live throws are not implemented yet).
+- The service worker no longer caches API responses (cached per URL, not per
+  account); one web manifest instead of two contradicting ones; no portrait lock.
+
+### Fixed
+
+- "Show checkout hints" did nothing — hints always showed.
+- Pressing Enter on a focused button committed a visit twice; Escape cleared
+  the visit behind an open dialog; auto-repeat and browser shortcuts reached
+  the game.
+- Double-in / double-out are proper M3 switches.
+
 ## [0.10.0] - 2026-09-26
 
 A correctness release: the numbers the app stores and shows are now right.

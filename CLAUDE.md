@@ -285,10 +285,16 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - `isBotPlayingRef.current = false` MUST be set BEFORE `dispatch({ type: 'NEXT_PLAYER' })`
 
 ### Game Navigation
-- Use `window.location.href = '/'` (hard redirect) to leave game screens, NOT `navigate('/')` from React Router
-- `navigate()` doesn't work reliably due to useEffect interference during route transitions
-- Applies to GameScreen, AroundTheClockGame, ShanghaiGame, CricketGame
+- Game screens leave with `navigate('/')` (since 0.11.0). They used a hard `window.location.href = '/'`, i.e. a full reload of the app just to show the menu, citing "useEffect interference" that no longer reproduces. **Pinned by `e2e/game-flow.spec.ts`**: it plays a visit, pauses & leaves, asserts no reload happened (a window marker survives) and resumes the match from the DB. Putting the hard redirect back makes that test fail.
+- Leaving X01 calls `pauseCurrentMatch()` (holds the save flag, one save) before navigating.
 - GameScreen uses multiple `useRef` flags: `isNavigatingAwayRef`, `forceNewGameRef`, `resumeRequestedRef`
+
+### PWA (0.11.0)
+- The service worker is registered in `src/pwa/UpdatePrompt.tsx` (`registerType: 'prompt'`). A new version is offered as a snackbar and **never on a game route** (`utils/gameRoutes.ts`). Before 0.11.0 the built `sw.js` was never registered at all.
+- One manifest: the generated `manifest.webmanifest`. No orientation lock.
+- The service worker caches **no API responses** — they were cached per URL, not per account.
+- `beforeinstallprompt` is captured at startup (`pwa/installPrompt.ts`); the home screen offers install after the first won match (`pwa/InstallCard.tsx`).
+- Tests import `virtual:pwa-register/react` through an alias to `src/tests/stubs/pwa-register-react.ts` (vitest.config).
 
 ### Standalone Game Undo Pattern (ATC, Shanghai)
 - Games outside GameContext (AroundTheClockGame, ShanghaiGame) use a `turnHistory` state stack for undo
@@ -386,7 +392,8 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **11 tests** currently:
+- Specs in `e2e/`. **12 tests** currently:
+  - `game-flow.spec.ts` — full X01 round trip: start, score, pause & leave (no reload), resume from the DB
   - `smoke.spec.ts` — load redirect, asset-count regression guard, no-heavy-chunks-eager guard
   - `login-page.spec.ts` — form render, empty-submit validation, version footer
   - `auth.spec.ts` — real login against backend (200 + JWT), wrong password (401)

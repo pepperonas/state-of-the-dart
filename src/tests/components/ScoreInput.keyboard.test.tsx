@@ -2,7 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 
 import '../../i18n/config';
-import ScoreInput, { shouldHandleGameKey } from '../../components/game/ScoreInput';
+import ScoreInput from '../../components/game/ScoreInput';
+import { shouldHandleGameKey } from '../../utils/gameKeys';
 import type { Dart } from '../../types/index';
 
 const T20: Dart = { segment: 20, multiplier: 3, score: 60 } as Dart;
