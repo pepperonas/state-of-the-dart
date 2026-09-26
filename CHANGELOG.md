@@ -7,6 +7,39 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-09-26
+
+The last German on the English screens, and backups that leave the server.
+
+### Changed
+
+- **Achievements are translated**: all 463 names and descriptions. The German
+  definitions in `types/achievements.ts` stay the source; translations live
+  under `achievement_defs.<id>`, read through `achievementName()` /
+  `achievementDescription()`.
+- Match exports (CSV, Excel, PDF) follow the app language — they were English
+  for everyone. Newly created adaptive bots are named in the active language.
+  The admin activity chart's label is translated.
+
+### Fixed
+
+- "Unlock all 464 achievements" — there are 463. The description now fills in
+  the real target, which was already computed at runtime.
+
+### Operations
+
+- **The database is now backed up off the server.** It lived in no external
+  backup at all: the nightly VPS backup skips `/var/www` as a whole, and the
+  only copies were the ones `deploy.sh` makes on the same disk (deleted after
+  7 days). It is now a named exception in the VPS backup (off-host to the Time
+  Capsule, restore verified) and has a nightly local backup at 03:15.
+
+### Tests
+
+- `achievementDefs.test.ts`: every achievement has both languages, de.json is
+  word for word the definitions, no stale ids, the count is real, and no
+  component renders achievement text around the helpers.
+
 ## [0.14.0] - 2026-09-26
 
 Accessibility and translation — both measured in the running app, both guarded.

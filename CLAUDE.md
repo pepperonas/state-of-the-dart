@@ -373,7 +373,8 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - Namespaces: the old feature ones (`common`, `game`, `stats`, …) plus one per component since 0.14.0 (`stats_overview`, `game_screen`, `guide`, …). Reuse `common.*` where it fits.
 - **Guarded** by `src/tests/i18n/i18nGuard.test.ts` (scanner `scanLiterals.ts`, TypeScript AST): no literal text in JSX — children, readable attributes (`aria-label`, `title`, `placeholder`, `alt`, `label`) and strings reaching JSX through `?:`/`&&`/`??`; no `language === 'de' ? 'text' : 'text'` forks (locale codes and data fields like `nameDE` are fine); identical keys and `{{placeholders}}` in both languages; every static `t('a.b')`/`i18nKey` exists. Keys built at runtime (template literals) are not checked — keep those few.
 - **Exempt:** the three German legal pages (`components/legal/*`) — the German version is binding.
-- ⚠️ Not covered yet: user-visible text produced in `.ts` data files — achievement names/descriptions, hint messages (`useAchievementHints`), generated bot player names, match names, heatmap segment names, export column headers.
+- **Achievements:** German definitions in `types/achievements.ts` are the source; translations under `achievement_defs.<id>.{name,description}`. Render ONLY via `achievementName(a, t)` / `achievementDescription(a, t)` (`utils/achievementText.ts`) — `achievementDefs.test.ts` pins de.json word for word to the definitions and fails on `{achievement.name}` in JSX. After editing an achievement text, update both locale files. `{{target}}` in a description is filled with `requirement.target` (the "all achievements" count is computed at runtime).
+- Exports (`utils/exportImport.ts`) use `i18n.t('export.*')`; adaptive bot names are written in the language active at creation (`bots.player_name`). Match names (`matchNames.ts`) and heatmap bed names are English/darts notation on purpose.
 - Plurals use i18next `_one`/`_other`; rich text uses `<Trans components={{ b: <strong/> }}>`; the English uses "triple" and "visit".
 - **App renders no emoji — also not inside translation strings.**
 
@@ -462,7 +463,7 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - **Backend**: `/var/www/stateofthedart-backend` (api.stateofthedart.com, port 3002)
 - **PM2 Process**: `stateofthedart-backend`
 - **DB**: `/var/www/stateofthedart-backend/data/state-of-the-dart.db`
-- **Backups**: Daily at 3 AM, 7-day retention, script in `backup-db.sh`
+- **Backups** (since 2026-09-26 — before that there were none besides deploy copies): cron `15 3 * * *` runs `backup-db.sh` (local, 7 days); the VPS-wide `/usr/local/sbin/vps-data-backup.sh` (homestack repo) takes the DB off-host as a named exception to its `/var/www` exclusion — if the DB path ever moves, update that script
 - Deploy script creates a backup before PM2 restart
 - **Frontend-only quick deploy** (when only the SPA changed, e.g. UI/audio fixes):
   ```bash
