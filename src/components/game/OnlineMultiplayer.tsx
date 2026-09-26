@@ -70,7 +70,9 @@ const OnlineMultiplayer: React.FC = () => {
   // socket.id, so the server dropped us from our room.
   const mainPlayer = players.find(p => !p.isBot);
   const joinInfoRef = useRef({ name: 'Guest', playerId: undefined as string | undefined });
-  joinInfoRef.current = { name: mainPlayer?.name || user?.email || 'Guest', playerId: mainPlayer?.id };
+  useEffect(() => {
+    joinInfoRef.current = { name: mainPlayer?.name || user?.email || 'Guest', playerId: mainPlayer?.id };
+  }, [mainPlayer?.name, mainPlayer?.id, user?.email]);
 
   // Connect to socket
   useEffect(() => {

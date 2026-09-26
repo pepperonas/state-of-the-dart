@@ -7,6 +7,81 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-09-26
+
+A correctness release: the numbers the app stores and shows are now right.
+
+### Fixed — data that was lost or wrong
+
+- **Finished matches never stored their winner.** The upsert branch of
+  `POST /api/matches` wrote only game type, status and settings: every match
+  landed without `winner`, `completed_at` and its final leg, so every
+  "matches won" achievement query counted zero. Match persistence now lives in
+  `server/services/matchStore.ts` and writes the whole match on every save.
+- `highest_score`, `darts_thrown` and `first9_average` were stored as 0 for
+  every player (the client sent `matchHighestScore` and never the other two).
+- Leg and throw timestamps were written as ISO strings into INTEGER columns.
+- `PUT /api/matches/:id` could not clear `winner` / `completed_at`, so an
+  undone end of match stayed "won" in the database.
+- **Ending, undoing and ending a match again counted it twice** in every
+  player's career stats. Stats are counted once per match and rolled back when
+  it is reopened; an abandoned match is no longer a played game.
+- A corrected visit after an undo was not saved (the save key counted throws).
+- Pausing sent two saves at once; the second hit a 409.
+- **Heatmaps counted every human dart twice.**
+- Saved Around-the-Clock, Shanghai and Cricket games were deleted on every
+  reload — the restore ran while the player list was still empty.
+- **Cricket overwrote a running X01 match**, posted itself as an X01 match and
+  added a 0-average game to every player. It now keeps its own turn state, and
+  confirmed visits can be undone.
+- On a shared device the next account inherited the previous one's cache —
+  personal bests, achievement progress and the queue of unsynced unlocks,
+  which was then sent with the wrong token. The cache is per account now
+  (the first account after the update takes over the old shared cache); signing
+  out clears the device's running games.
+- Achievement progress of several tiers updated in one check was lost; a
+  failed load was never retried; failed meta-achievement unlocks were dropped
+  instead of queued.
+- Two quick settings changes overwrote each other. The dartboard-helper toggle
+  was stored in the `enable_achievements_hints` column; it has its own column.
+- The offline indicator deleted queued actions without sending them.
+
+### Fixed — game rules
+
+- **Undo in a sets match restored the legs of earlier sets**, so the next leg
+  could win a set and the match on the spot. Legs are recounted per set.
+- Undo now reaches back across a leg or set boundary and out of a match won by
+  a checkout. Undoing the end of a checkout-won match no longer freezes the leg.
+- **Double-in** was selectable but never applied. It is now.
+- Undo within the one-second auto-advance window lost the darts it had brought
+  back. Undo also steps over bot visits instead of letting the bot re-commit
+  its old darts; bots clear leftover darts after a pause.
+- A bot at the same seat after removing a player never started its turn.
+- Leg achievements were only checked for the final leg of a match; a resumed
+  match replayed a "leg won" animation.
+- The caller announced "you require …" for bots after a resume.
+- Knockout tournaments ended without a champion (an extra "final" nobody could
+  reach). Brackets now handle any field size with byes; results credit each
+  side's own legs.
+- Training: Around the Clock, doubles and triples advance once per dart that
+  hits in order; Bob's 27 scores the double's value (it added a flat 3 for any
+  hit in the segment) and ends on the bull.
+
+### Fixed — stability
+
+- **"Maximum update depth exceeded" in the game screen**: achievement hints
+  looped (new object → new callback → effect → setState → render).
+- The online server could crash when a player left mid-game; chat accepted any
+  room; the client reconnected (and lost its room) on every player update.
+  Throws are range-checked and double-out applies online too.
+- A corrupt saved match no longer crashes the app on load.
+
+### Changed
+
+- One `evaluateVisit()` (`src/utils/visit.ts`) decides remaining score, bust
+  and checkout for the reducer, the game screen and the bot — it replaced six
+  hand-written copies.
+
 ## [0.9.1] - 2026-08-28
 
 ### Fixed

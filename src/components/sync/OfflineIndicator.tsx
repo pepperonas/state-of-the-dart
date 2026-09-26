@@ -3,6 +3,7 @@ import { Wifi, WifiOff, Cloud, CloudOff, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { springStandardDefault, springSpatialDefault } from '../../utils/motion';
 import offlineSync from '../../utils/offlineSync';
+import { replayOfflineAction } from '../../services/api';
 
 const OfflineIndicator: React.FC = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -47,14 +48,7 @@ const OfflineIndicator: React.FC = () => {
     setIsSyncing(true);
     try {
       // Sync pending actions
-      const result = await offlineSync.syncPendingActions(async (action) => {
-        // This would normally call the API
-        // For now, just return true to clear the queue
-        console.log('Syncing action:', action);
-        return true;
-      });
-      
-      console.log('Sync result:', result);
+      await offlineSync.syncPendingActions(replayOfflineAction);
       const count = await offlineSync.getPendingCount();
       setPendingCount(count);
     } catch (error) {

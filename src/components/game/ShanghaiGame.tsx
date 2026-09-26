@@ -70,6 +70,8 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
     return selectedPlayers[currentPlayerIndex];
   }, [selectedPlayers, currentPlayerIndex]);
 
+  /* eslint-disable react-hooks/set-state-in-effect -- restoring from localStorage once the
+     async player list has arrived is exactly synchronising with an external system. */
   // Restore a saved game — once the players have loaded. On mount the list is
   // still empty, every saved player looked deleted and the game was thrown away.
   useEffect(() => {
@@ -101,6 +103,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
     setTurnHistory(saved.turnHistory || []);
     setShowSetup(false);
   }, [playersLoading, players]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Save game state on changes
   useEffect(() => {

@@ -18,11 +18,16 @@ vi.mock('../../context/TenantContext', () => ({
   useTenant: () => ({ currentTenant: { id: 'user_u1' }, storage: null }),
 }));
 
-import { AchievementProvider, useAchievements, mayLoadAchievements, ACHIEVEMENT_RETRY_MS } from '../../context/AchievementContext';
+import { AchievementProvider, useAchievements } from '../../context/AchievementContext';
+import { mayLoadAchievements, ACHIEVEMENT_RETRY_MS } from '../../utils/achievementLoading';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let ctx: any;
-const Grab = () => { ctx = useAchievements(); return null; };
+const Grab = () => {
+  // eslint-disable-next-line react-hooks/globals -- the probe hands the context to the test
+  ctx = useAchievements();
+  return null;
+};
 
 beforeEach(() => {
   localStorage.clear();

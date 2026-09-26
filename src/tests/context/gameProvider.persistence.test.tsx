@@ -36,7 +36,11 @@ import { GameProvider, useGame } from '../../context/GameContext';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let game: any;
-const Grab = () => { game = useGame(); return null; };
+const Grab = () => {
+  // eslint-disable-next-line react-hooks/globals -- the probe hands the context to the test
+  game = useGame();
+  return null;
+};
 const D1 = { segment: 1, multiplier: 2, score: 2, bed: 'double' };
 
 const mount = () => render(<GameProvider><Grab /></GameProvider>);

@@ -13,7 +13,11 @@ import { SettingsProvider, useSettings } from '../../context/SettingsContext';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let ctx: any;
-const Grab = () => { ctx = useSettings(); return null; };
+const Grab = () => {
+  // eslint-disable-next-line react-hooks/globals -- the probe hands the context to the test
+  ctx = useSettings();
+  return null;
+};
 
 const mount = async () => {
   render(<SettingsProvider><Grab /></SettingsProvider>);

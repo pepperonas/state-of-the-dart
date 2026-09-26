@@ -466,4 +466,26 @@ export const api = {
   },
 };
 
+/**
+ * Replays one action from the offline queue. Returns false on failure so the
+ * queue keeps it and counts a retry — the indicator used to answer `true` for
+ * everything, which silently deleted whatever had been queued.
+ */
+export const replayOfflineAction = async (action: {
+  type: 'create' | 'update' | 'delete';
+  endpoint: string;
+  data?: unknown;
+}): Promise<boolean> => {
+  const method = action.type === 'create' ? 'POST' : action.type === 'update' ? 'PUT' : 'DELETE';
+  try {
+    await apiClient(action.endpoint, {
+      method,
+      ...(action.data !== undefined && method !== 'DELETE' ? { body: JSON.stringify(action.data) } : {}),
+    });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export default api;
