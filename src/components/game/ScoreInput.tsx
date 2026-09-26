@@ -415,9 +415,9 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
             {currentInput ? (
               <span className="text-3xl font-bold text-on-surface">{currentInput}</span>
             ) : (
-              <span className="text-on-surface-variant opacity-70">
+              <span className="text-on-surface-variant">
                 {editingDartIndex !== null
-                  ? 'Neuer Dart-Wert...'
+                  ? t('game.new_dart_value')
                   : t('game.numpad_hint')}
               </span>
             )}

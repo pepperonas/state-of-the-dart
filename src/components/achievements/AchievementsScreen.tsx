@@ -20,6 +20,7 @@ import { formatDate } from '../../utils/dateUtils';
 import logger from '../../utils/logger';
 import { BackButton, Card, Chip, Select } from '../common';
 import { Icon, iconForEmoji } from '../icons';
+import { readableTextOn } from '../../utils/color';
 
 const AchievementsScreen: React.FC = () => {
   const { t } = useTranslation();
@@ -285,8 +286,10 @@ const AchievementCard = React.memo<AchievementCardProps>(({ achievement, unlocke
   return (
     <Card
       variant={unlocked ? 'elevated' : 'filled'}
+      // Locked cards are not dimmed as a whole — that pushed the description
+      // below AA (3.99:1 in the light theme). Only the icon goes grey.
       className={`p-4 transition-all hover:scale-105 ${
-        unlocked ? 'border-2 border-primary' : 'opacity-75'
+        unlocked ? 'border-2 border-primary' : ''
       }`}
     >
       <div className="flex items-start gap-3 mb-3">
@@ -327,36 +330,27 @@ const AchievementCard = React.memo<AchievementCardProps>(({ achievement, unlocke
       <div className="flex items-center justify-between text-xs flex-wrap gap-1">
         <div className="flex items-center gap-2 flex-wrap">
           <span
-            className="px-2 py-1 rounded font-semibold"
-            style={{
-              backgroundColor: getTierColor(achievement.tier) + '33',
-              color: getTierColor(achievement.tier),
-            }}
+            className="px-2 py-1 rounded-m3-full m3-label-small"
+            style={{ backgroundColor: getTierColor(achievement.tier), color: readableTextOn(getTierColor(achievement.tier)) }}
           >
             {achievement.tier.toUpperCase()}
           </span>
           {achievement.rarity && (
             <span
-              className="px-2 py-1 rounded font-semibold"
-              style={{
-                backgroundColor: getRarityColor(achievement.rarity) + '33',
-                color: getRarityColor(achievement.rarity),
-              }}
+              className="px-2 py-1 rounded-m3-full m3-label-small"
+              style={{ backgroundColor: getRarityColor(achievement.rarity), color: readableTextOn(getRarityColor(achievement.rarity)) }}
             >
               {achievement.rarity.toUpperCase()}
             </span>
           )}
           <span
-            className="px-2 py-1 rounded font-semibold"
-            style={{
-              backgroundColor: scopeColor + '33',
-              color: scopeColor,
-            }}
+            className="px-2 py-1 rounded-m3-full m3-label-small"
+            style={{ backgroundColor: scopeColor, color: readableTextOn(scopeColor) }}
           >
             {t(`achievements.scope_${scope}`)}
           </span>
         </div>
-        <div className="flex items-center gap-1 text-tertiary font-bold">
+        <div className="flex items-center gap-1 px-2 py-1 rounded-m3-full bg-tertiary-container text-on-tertiary-container m3-label-medium">
           <Star size={14} />
           {achievement.points}
         </div>

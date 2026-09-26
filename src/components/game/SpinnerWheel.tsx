@@ -231,9 +231,9 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 m3-scrim-enter">
+    <div role="dialog" aria-modal="true" aria-labelledby="spinner-title" className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_85%,transparent)] flex items-center justify-center z-50 m3-scrim-enter">
       <div className="flex flex-col items-center gap-6 p-8 bg-surface-container rounded-m3-lg shadow-m3-3">
-        <h2 className="m3-headline-small text-on-surface text-center">
+        <h2 id="spinner-title" className="m3-headline-small text-on-surface text-center">
           {t('game.who_starts')}
         </h2>
 

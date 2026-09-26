@@ -539,14 +539,14 @@ const TrainingScreen: React.FC = () => {
                         <div className="w-16 h-16 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold ring-2 ring-outline-variant group-hover:ring-[var(--m3-primary)]">
                           {player.avatar
                             ? <Icon name={iconForEmoji(player.avatar)} size={34} />
-                            : <span className="text-2xl">{player.name.charAt(0).toUpperCase()}</span>}
+                            : <span className="m3-headline-small">{player.name.charAt(0).toUpperCase()}</span>}
                         </div>
                       )}
                       <div className="flex-1">
                         <h3 className="m3-title-large text-on-surface group-hover:text-primary transition-colors">
                           {player.name}
                         </h3>
-                        <p className="text-sm text-on-surface-variant">
+                        <p className="m3-body-medium text-on-surface-variant">
                           Average: {player.stats?.averageOverall?.toFixed(1) || '0.0'}
                         </p>
                       </div>
@@ -579,16 +579,16 @@ const TrainingScreen: React.FC = () => {
           <div className="flex items-center justify-between text-on-surface">
             <div className="flex-1">
               <p className="m3-title-large">{getTrainingDescription()}</p>
-              <p className="text-sm text-on-surface-variant">
+              <p className="m3-body-medium text-on-surface-variant">
                 {getProgressInfo()}
               </p>
             </div>
             <div className="text-right">
               <AnimatedNumber
                 value={trainingState.score}
-                className="block m3-headline-small font-bold text-success-400"
+                className="block m3-headline-small m3-emphasized text-success"
               />
-              <p className="text-sm text-on-surface-variant">Punkte</p>
+              <p className="m3-body-medium text-on-surface-variant">Punkte</p>
             </div>
           </div>
         </Card>
@@ -598,22 +598,22 @@ const TrainingScreen: React.FC = () => {
           <Card variant="elevated" className="p-2 sm:p-4 text-center">
             <AnimatedNumber
               value={trainingState.attempts}
-              className="block text-xl sm:text-2xl font-bold text-on-surface"
+              className="block m3-headline-small m3-emphasized text-on-surface"
             />
-            <p className="text-xs sm:text-sm text-on-surface-variant">Versuche</p>
+            <p className="m3-body-small sm:text-sm text-on-surface-variant">Versuche</p>
           </Card>
           <Card variant="elevated" className="p-2 sm:p-4 text-center">
             <AnimatedNumber
               value={trainingState.hits}
-              className="block text-xl sm:text-2xl font-bold text-success-400"
+              className="block m3-headline-small m3-emphasized text-success"
             />
-            <p className="text-xs sm:text-sm text-on-surface-variant">Treffer</p>
+            <p className="m3-body-small sm:text-sm text-on-surface-variant">Treffer</p>
           </Card>
           <Card variant="elevated" className="p-2 sm:p-4 text-center">
-            <p className="text-xl sm:text-2xl font-bold text-primary-400">
+            <p className="m3-headline-small m3-emphasized text-primary">
               <AnimatedNumber value={accuracy} />%
             </p>
-            <p className="text-xs sm:text-sm text-on-surface-variant">Genauigkeit</p>
+            <p className="m3-body-small sm:text-sm text-on-surface-variant">Genauigkeit</p>
           </Card>
         </div>
 
@@ -646,7 +646,7 @@ const TrainingScreen: React.FC = () => {
                 {currentThrow.map((dart, index) => (
                   <div
                     key={index}
-                    className="flex-1 h-16 bg-primary text-on-primary rounded-m3-md flex items-center justify-center font-bold text-xl shadow-m3-1"
+                    className="flex-1 h-16 bg-primary text-on-primary rounded-m3-md flex items-center justify-center m3-title-large m3-emphasized shadow-m3-1"
                   >
                     {dart.score}
                   </div>
@@ -687,37 +687,37 @@ const TrainingScreen: React.FC = () => {
 
             {/* Completion Message */}
             {trainingState.completed && (
-              <Card variant="elevated" className="p-6 border-2 border-primary-500">
+              <Card variant="elevated" className="p-6 border-2 border-[var(--m3-primary)]">
                 <h3 className="m3-headline-small text-on-surface mb-4 text-center">
                   Training Abgeschlossen!
                 </h3>
                 <div className="grid grid-cols-3 gap-4 mb-4">
                   <div className="text-center bg-surface-container-high rounded-m3-md p-3">
-                    <p className="text-2xl font-bold text-on-surface">{trainingState.score}</p>
-                    <p className="text-xs text-on-surface-variant">Endpunktzahl</p>
+                    <p className="m3-headline-small text-on-surface">{trainingState.score}</p>
+                    <p className="m3-body-small text-on-surface-variant">Endpunktzahl</p>
                   </div>
                   <div className="text-center bg-surface-container-high rounded-m3-md p-3">
-                    <p className="text-2xl font-bold text-success-400">{trainingState.hits}</p>
-                    <p className="text-xs text-on-surface-variant">Treffer</p>
+                    <p className="m3-headline-small text-success">{trainingState.hits}</p>
+                    <p className="m3-body-small text-on-surface-variant">Treffer</p>
                   </div>
                   <div className="text-center bg-surface-container-high rounded-m3-md p-3">
-                    <p className="text-2xl font-bold text-primary-400">{accuracy}%</p>
-                    <p className="text-xs text-on-surface-variant">Genauigkeit</p>
+                    <p className="m3-headline-small text-primary">{accuracy}%</p>
+                    <p className="m3-body-small text-on-surface-variant">Genauigkeit</p>
                   </div>
                 </div>
-                <div className="text-sm text-on-surface-variant mb-4 text-center">
+                <div className="m3-body-medium text-on-surface-variant mb-4 text-center">
                   {trainingState.hits} Treffer in {trainingState.attempts} Versuchen
                   {mode === 'doubles' && trainingState.currentTarget === 20 && trainingState.hits === 20 && (
-                    <p className="text-success-400 font-bold mt-2"> Perfekt! Alle Doppel getroffen!</p>
+                    <p className="text-success font-bold mt-2"> Perfekt! Alle Doppel getroffen!</p>
                   )}
                   {mode === 'triples' && trainingState.currentTarget === 1 && trainingState.hits === 20 && (
-                    <p className="text-success-400 font-bold mt-2"> Perfekt! Alle Tripel getroffen!</p>
+                    <p className="text-success font-bold mt-2"> Perfekt! Alle Tripel getroffen!</p>
                   )}
                   {mode === 'around-the-clock' && trainingState.currentTarget === 20 && trainingState.hits === 20 && (
-                    <p className="text-success-400 font-bold mt-2"> Perfekt! Voller Rundgang abgeschlossen!</p>
+                    <p className="text-success font-bold mt-2"> Perfekt! Voller Rundgang abgeschlossen!</p>
                   )}
                   {mode === 'checkout-121' && trainingState.score === 0 && (
-                    <p className="text-success-400 font-bold mt-2"> Checkout erfolgreich!</p>
+                    <p className="text-success font-bold mt-2"> Checkout erfolgreich!</p>
                   )}
                 </div>
                 <div className="flex gap-2">
@@ -734,7 +734,7 @@ const TrainingScreen: React.FC = () => {
             {/* Instructions */}
             <Card variant="elevated" className="p-6">
               <h3 className="m3-title-medium text-on-surface mb-2">Anleitung</h3>
-              <div className="text-sm text-on-surface-variant space-y-1">
+              <div className="m3-body-medium text-on-surface-variant space-y-1">
                 {mode === 'doubles' && (
                   <>
                     <p>• Triff alle Doppel von D1 bis D20</p>

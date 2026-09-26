@@ -41,7 +41,7 @@ const Login: React.FC = () => {
         {/* Logo/Header */}
         <motion.div {...enterDrop} className="text-center mb-8">
           <div className="mb-4 flex justify-center text-primary"><Icon name="target" size={56} /></div>
-          <h1 className="m3-display-small font-bold text-on-surface mb-2">
+          <h1 className="m3-display-small m3-emphasized text-on-surface mb-2">
             {t('common.app_name')}
           </h1>
           <p className="m3-body-large text-on-surface-variant">{t('auth.login_subtitle')}</p>
@@ -50,7 +50,7 @@ const Login: React.FC = () => {
         {/* Login Card */}
         <motion.div {...enterPop}>
           <Card variant="elevated" className="p-8">
-            <h2 className="m3-headline-small font-bold text-on-surface mb-6">{t('auth.login')}</h2>
+            <h2 className="m3-headline-small m3-emphasized text-on-surface mb-6">{t('auth.login')}</h2>
 
             {error && (
               <div className="mb-4 p-4 bg-error-container text-on-error-container rounded-m3-md flex items-center gap-3 m3-error-in">

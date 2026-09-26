@@ -12,22 +12,17 @@ import {
 } from 'recharts';
 import { MatchPlayer, Throw } from '../../types/index';
 import { CHART_MOTION } from '../../utils/motion';
+import { useChartTheme } from '../../utils/chartTheme';
 
 interface ThrowChartProps {
   players: MatchPlayer[];
   chartThrows: Throw[];
 }
 
-const PLAYER_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'];
 
-const TOOLTIP_STYLE = {
-  backgroundColor: '#1f2937',
-  border: '1px solid #374151',
-  borderRadius: '8px',
-  color: '#fff',
-};
 
 const ThrowChart: React.FC<ThrowChartProps> = ({ players, chartThrows }) => {
+  const chart = useChartTheme();
   // Recharts animates SVG attributes from JS; the CSS reduced-motion rule cannot
   // reach it, so the switch has to be explicit.
   const reduce = useReducedMotion();
@@ -64,7 +59,7 @@ const ThrowChart: React.FC<ThrowChartProps> = ({ players, chartThrows }) => {
       key={player.playerId}
       type="monotone"
       dataKey={player.name}
-      stroke={PLAYER_COLORS[index % PLAYER_COLORS.length]}
+      stroke={chart.series[index % chart.series.length]}
       strokeWidth={2}
       dot={{ r: 4 }}
       activeDot={{ r: 6 }}
@@ -82,17 +77,17 @@ const ThrowChart: React.FC<ThrowChartProps> = ({ players, chartThrows }) => {
         <div className="h-[220px] sm:h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={scoreData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
               <XAxis
                 dataKey="throwNumber"
-                stroke="#9ca3af"
-                label={{ value: 'Aufnahme', position: 'insideBottom', offset: -5, fill: '#9ca3af' }}
+                stroke={chart.axis}
+                label={{ value: 'Aufnahme', position: 'insideBottom', offset: -5, fill: chart.axis }}
               />
               <YAxis
-                stroke="#9ca3af"
-                label={{ value: 'Punkte', angle: -90, position: 'insideLeft', fill: '#9ca3af' }}
+                stroke={chart.axis}
+                label={{ value: 'Punkte', angle: -90, position: 'insideLeft', fill: chart.axis }}
               />
-              <Tooltip contentStyle={TOOLTIP_STYLE} />
+              <Tooltip contentStyle={chart.tooltip.contentStyle} />
               <Legend />
               {lines}
             </LineChart>
@@ -105,18 +100,18 @@ const ThrowChart: React.FC<ThrowChartProps> = ({ players, chartThrows }) => {
         <div className="h-[220px] sm:h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={remainingData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
               <XAxis
                 dataKey="throwNumber"
-                stroke="#9ca3af"
-                label={{ value: 'Aufnahme', position: 'insideBottom', offset: -5, fill: '#9ca3af' }}
+                stroke={chart.axis}
+                label={{ value: 'Aufnahme', position: 'insideBottom', offset: -5, fill: chart.axis }}
               />
               <YAxis
-                stroke="#9ca3af"
-                label={{ value: 'Verbleibend', angle: -90, position: 'insideLeft', fill: '#9ca3af' }}
+                stroke={chart.axis}
+                label={{ value: 'Verbleibend', angle: -90, position: 'insideLeft', fill: chart.axis }}
                 reversed
               />
-              <Tooltip contentStyle={TOOLTIP_STYLE} />
+              <Tooltip contentStyle={chart.tooltip.contentStyle} />
               <Legend />
               {lines}
             </LineChart>

@@ -1,6 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { Match, Throw } from '../../types';
-import { X, Calendar, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react';
+import { Calendar, TrendingUp, ChevronDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Dialog } from '../common';
+import { useChartTheme } from '../../utils/chartTheme';
 import { formatDateTime, getTimestampForSort } from '../../utils/dateUtils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { calculateAverage } from '../../utils/scoring';
@@ -12,6 +15,8 @@ interface MatchDetailModalProps {
 }
 
 const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) => {
+  const { t } = useTranslation();
+  const chart = useChartTheme();
   const matchPlayers = match.players || [];
   const [showThrowHistory, setShowThrowHistory] = useState(false);
 
@@ -184,45 +189,23 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-black/70 flex items-start justify-center z-50 p-4 pt-16 overflow-y-auto m3-scrim-enter"
-      onClick={onClose}
+    <Dialog
+      open
+      onClose={onClose}
+      widthClassName="max-w-6xl"
+      title={match.type === 'x01' || !match.type ? String(match.settings?.startScore ?? 'X01') : match.type}
     >
-      <div
-        className="m3-card m3-elevated rounded-2xl p-6 max-w-6xl w-full mb-8 m3-dialog-enter"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-2xl font-bold text-on-surface flex items-center gap-2">
-              {(() => {
-                let gameType: string = match.type || 'x01';
-                if (gameType === 'x01' && match.settings?.startScore) {
-                  gameType = match.settings.startScore.toString();
-                }
-                return gameType;
-              })()}
-            </h2>
-            <p className="text-sm text-on-surface-variant flex items-center gap-2 mt-1">
-              <Calendar size={14} />
-              {formatDateTime(match.startedAt)}
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-surface-container-high rounded-lg transition-colors text-on-surface"
-          >
-            <X size={24} />
-          </button>
-        </div>
+        <p className="m3-body-medium text-on-surface-variant flex items-center gap-2 -mt-3 mb-6">
+          <Calendar size={14} aria-hidden="true" />
+          {formatDateTime(match.startedAt)}
+        </p>
 
         {/* Players */}
         <div className="mb-6 flex items-center justify-center gap-8">
           {playersWithThrows.map((player, index) => (
             <React.Fragment key={player.playerId}>
               <div className="text-center">
-                <div className={`text-4xl font-bold ${match.winner === player.playerId ? 'text-success-400' : 'text-red-500'}`}>
+                <div className={`m3-display-small m3-emphasized ${match.winner === player.playerId ? 'text-success' : 'text-on-surface-variant'}`}>
                   {player.legsWon ?? 0}
                 </div>
                 <div className="text-on-surface font-semibold mt-1">{player.name}</div>
@@ -236,45 +219,38 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
 
         {/* Warning if some players were filtered out */}
         {matchPlayers.length > playersWithThrows.length && (
-          <div className="mb-4 p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
-            <p className="text-sm text-orange-300">
-              ℹ️ Hinweis: {matchPlayers.length - playersWithThrows.length} Spieler ohne Würfe in diesem Match werden nicht angezeigt.
+          <div className="mb-4 p-3 rounded-m3-md bg-secondary-container text-on-secondary-container">
+            <p className="m3-body-medium">
+              {t('match_detail.hidden_players', { count: matchPlayers.length - playersWithThrows.length })}
             </p>
           </div>
         )}
 
         {/* Round-by-Round Chart */}
-        <div className="m3-card m3-elevated p-6 rounded-xl mb-6">
-          <h4 className="font-bold text-on-surface mb-4 flex items-center gap-2">
-            <TrendingUp size={20} className="text-primary-400" />
-            Runden-Verlauf
-          </h4>
+        <div className="rounded-m3-lg bg-surface-container p-4 sm:p-6 mb-6">
+          <h3 className="m3-title-medium text-on-surface mb-4 flex items-center gap-2">
+            <TrendingUp size={20} className="text-primary" aria-hidden="true" />
+            {t('match_detail.round_chart')}
+          </h3>
           {chartData.length > 0 ? (
-            <div className="bg-surface-container-low rounded-lg p-4">
+            <div className="rounded-m3-md p-2">
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
+                  <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
                   <XAxis
                     dataKey="round"
-                    stroke="#737373"
+                    stroke={chart.axis}
                     style={{ fontSize: '12px' }}
-                    label={{ value: 'Runde', position: 'insideBottom', offset: -5, fill: '#737373' }}
+                    label={{ value: t('match_detail.round'), position: 'insideBottom', offset: -5, fill: chart.axis }}
                   />
                   <YAxis
-                    stroke="#737373"
+                    stroke={chart.axis}
                     style={{ fontSize: '12px' }}
-                    label={{ value: 'Punkte', angle: -90, position: 'insideLeft', fill: '#737373' }}
+                    label={{ value: t('match_detail.points'), angle: -90, position: 'insideLeft', fill: chart.axis }}
                   />
                   <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#0a0a0a',
-                      border: '1px solid #404040',
-                      borderRadius: '8px',
-                      padding: '12px'
-                    }}
-                    labelStyle={{ color: '#fff', fontWeight: 'bold' }}
-                    itemStyle={{ color: '#fff' }}
-                    formatter={(value: number) => [`${value} Punkte`, '']}
+                    {...chart.tooltip}
+                    formatter={(value: number) => [t('match_detail.points_value', { count: value }), '']}
                   />
                   <Legend
                     wrapperStyle={{ paddingTop: '20px' }}
@@ -285,9 +261,9 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
                       key={p.playerId}
                       type="monotone"
                       dataKey={p.playerId}
-                      stroke={index === 0 ? '#0ea5e9' : '#a855f7'}
+                      stroke={chart.series[index % chart.series.length]}
                       strokeWidth={3}
-                      dot={{ fill: index === 0 ? '#0ea5e9' : '#a855f7', r: 5 }}
+                      dot={{ fill: chart.series[index % chart.series.length], r: 5 }}
                       activeDot={{ r: 7 }}
                       name={p.name}
                     />
@@ -296,14 +272,10 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="bg-surface-container-low rounded-lg p-8 text-center">
-              <div className="text-on-surface-variant mb-3">
-                <TrendingUp size={48} className="mx-auto opacity-30" />
-              </div>
-              <p className="text-on-surface-variant font-medium">Keine Runden-Daten verfügbar</p>
-              <p className="text-on-surface-variant text-sm mt-2">
-                Dieses Match wurde möglicherweise vor dem Tracking-Update gespielt
-              </p>
+            <div className="rounded-m3-md p-8 text-center">
+              <TrendingUp size={48} className="mx-auto mb-3 text-on-surface-variant" aria-hidden="true" />
+              <p className="m3-title-small text-on-surface-variant">{t('match_detail.no_rounds')}</p>
+              <p className="m3-body-medium text-on-surface-variant mt-2">{t('match_detail.no_rounds_hint')}</p>
             </div>
           )}
         </div>
@@ -312,9 +284,7 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
         <div className={`grid ${playersWithThrows.length > 1 ? 'md:grid-cols-2' : 'md:grid-cols-1'} gap-6 mb-6`}>
           {playersWithThrows.map((player) => (
             <div key={player.playerId}>
-              <h4 className="font-bold text-gray-800 dark:text-on-surface mb-3">
-                {player.name}
-              </h4>
+              <h3 className="m3-title-medium text-on-surface mb-3">{player.name}</h3>
               <div className="grid grid-cols-2 gap-3">
                 <StatBox label="Average" value={(player.matchAverage ?? 0).toFixed(2)} />
                 <StatBox label="Highest Score" value={player.matchHighestScore ?? 0} />
@@ -338,14 +308,15 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
         <div className="mt-6">
           <button
             onClick={() => setShowThrowHistory(!showThrowHistory)}
-            className="w-full m3-card m3-elevated rounded-xl p-4 flex items-center justify-between hover:bg-surface-container-high transition-all"
+            aria-expanded={showThrowHistory}
+            className="m3-state-layer w-full rounded-m3-lg bg-surface-container p-4 flex items-center justify-between"
           >
-            <h3 className="text-lg font-bold text-on-surface">Wurf-Verlauf</h3>
-            {showThrowHistory ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+            <span className="m3-title-medium text-on-surface">{t('match_detail.throw_history')}</span>
+            <ChevronDown size={24} aria-hidden="true" className={`m3-chevron ${showThrowHistory ? 'm3-open' : ''}`} />
           </button>
 
           {showThrowHistory && (
-            <div className="m3-card m3-elevated rounded-xl p-4 sm:p-6 mt-2 animate-fade-in space-y-4">
+            <div className="rounded-m3-lg bg-surface-container p-4 sm:p-6 mt-2 m3-enter space-y-4">
               {(match.legs || []).map((leg, legIdx) => {
                 const throws = leg.throws || [];
                 if (throws.length === 0) return null;
@@ -401,9 +372,8 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
                                     <div className="font-mono text-on-surface-variant text-xs">
                                       {(thr.darts || []).map((d, i) => (
                                         <span key={i} className={`${
-                                          d.multiplier === 3 ? 'text-green-400' :
-                                          d.multiplier === 2 ? 'text-red-400' :
-                                          d.score === 0 ? 'text-on-surface-variant' : 'text-on-surface-variant'
+                                          d.multiplier === 3 ? 'text-tertiary font-semibold' :
+                                          d.multiplier === 2 ? 'text-primary font-semibold' : 'text-on-surface-variant'
                                         }${i > 0 ? ' ml-1' : ''}`}>
                                           {formatDart(d)}
                                         </span>
@@ -411,9 +381,9 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
                                     </div>
                                     <div className="flex items-center justify-center gap-1 mt-0.5">
                                       <span className={`font-bold ${
-                                        thr.isBust ? 'text-red-400' :
-                                        thr.score >= 140 ? 'text-orange-400' :
-                                        thr.score >= 100 ? 'text-blue-400' : 'text-on-surface'
+                                        thr.isBust ? 'text-error' :
+                                        thr.score >= 140 ? 'text-tertiary' :
+                                        thr.score >= 100 ? 'text-primary' : 'text-on-surface'
                                       }`}>
                                         {thr.isBust ? '0' : thr.score}
                                       </span>
@@ -437,34 +407,31 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
         {/* Leg-by-Leg Breakdown */}
         {match.legs && match.legs.length > 0 && (
           <div className="pt-4 border-t border-outline-variant">
-            <h5 className="font-semibold text-sm text-gray-700 dark:text-gray-300 mb-2">
-              Leg Details
-            </h5>
+            <h3 className="m3-title-small text-on-surface-variant mb-2">{t('match_detail.legs')}</h3>
             <div className="flex gap-2 flex-wrap">
               {match.legs.map((leg, index) => (
                 <div
                   key={leg.id}
-                  className={`px-3 py-1 rounded text-sm ${
+                  className={`px-3 py-1 rounded-m3-full m3-label-large ${
                     leg.winner === playersWithThrows[0]?.playerId
-                      ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                      : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                      ? 'bg-primary-container text-on-primary-container'
+                      : 'bg-tertiary-container text-on-tertiary-container'
                   }`}
                 >
-                  Leg {index + 1}: {playersWithThrows.find(p => p.playerId === leg.winner)?.name || 'Unbekannt'}
+                  {t('match_detail.leg_winner', { n: index + 1, name: playersWithThrows.find(p => p.playerId === leg.winner)?.name || t('match_detail.unknown') })}
                 </div>
               ))}
             </div>
           </div>
         )}
-      </div>
-    </div>
+    </Dialog>
   );
 };
 
 const StatBox: React.FC<{ label: string; value: string | number }> = ({ label, value }) => (
-  <div className="bg-gray-100 dark:bg-gray-700 rounded p-2">
-    <div className="text-xs text-gray-600 dark:text-gray-400">{label}</div>
-    <div className="text-lg font-bold text-gray-800 dark:text-on-surface">{value}</div>
+  <div className="bg-surface-container-high rounded-m3-sm p-2">
+    <div className="text-xs text-on-surface-variant">{label}</div>
+    <div className="text-lg font-bold text-on-surface">{value}</div>
   </div>
 );
 

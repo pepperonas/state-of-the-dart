@@ -1,7 +1,8 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Loader, Mail, AlertTriangle } from 'lucide-react';
+import { Mail, AlertTriangle } from 'lucide-react';
+import LoadingIndicator from '../common/LoadingIndicator';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -21,7 +22,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return (
       <div className="min-h-dvh flex items-center justify-center gradient-mesh">
         <div className="bg-surface-container rounded-m3-lg px-8 py-6 text-center shadow-m3-1 m3-enter-pop">
-          <Loader className="animate-spin text-primary mx-auto mb-4" size={48} />
+          <LoadingIndicator size={48} />
           <p className="text-on-surface m3-title-medium">Lade...</p>
         </div>
       </div>
@@ -42,7 +43,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             <Mail className="text-on-tertiary-container" size={40} />
           </div>
 
-          <h2 className="m3-headline-small font-bold text-on-surface mb-4">
+          <h2 className="m3-headline-small m3-emphasized text-on-surface mb-4">
             E-Mail-Bestätigung erforderlich
           </h2>
 

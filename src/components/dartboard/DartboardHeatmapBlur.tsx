@@ -3,6 +3,7 @@ import { HeatmapData } from '../../types';
 import { Flame, Target, TrendingUp, Crosshair, CircleDot, Percent } from 'lucide-react';
 import { formatSegmentName } from '../../utils/heatmap';
 import Card from '../common/Card';
+import { readableTextOn } from '../../utils/color';
 
 interface DartboardHeatmapBlurProps {
   heatmapData: HeatmapData;
@@ -640,8 +641,8 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
         <Card variant="filled" className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-green-500 flex items-center justify-center">
-                <CircleDot size={24} className="text-white" />
+              <div className="w-12 h-12 rounded-full bg-tertiary-container text-on-tertiary-container flex items-center justify-center">
+                <CircleDot size={24} aria-hidden="true" />
               </div>
               <div>
                 <div className="m3-label-medium text-on-surface-variant">Bull & Outer Bull</div>
@@ -712,9 +713,10 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
                   <div className="relative flex items-center justify-between p-3 bg-surface-container-high">
                     <div className="flex items-center gap-3">
                       <div
-                        className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-lg"
+                        className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-m3-2"
                         style={{
                           backgroundColor: color,
+                          color: readableTextOn(color),
                           boxShadow: `0 0 15px ${color}80`
                         }}
                       >

@@ -27,12 +27,14 @@ import { staggerChild } from '../../utils/motion';
 import { Card, Button, Chip, Select } from '../common';
 import { Icon, iconForEmoji } from '../icons';
 import ErrorState from '../common/ErrorState';
+import { useChartTheme } from '../../utils/chartTheme';
 
 const VALID_TABS = ['overview', 'progress', 'history', 'compare', 'heatmap'] as const;
 type TabType = typeof VALID_TABS[number];
 type TimeInterval = 'daily' | 'weekly' | 'monthly' | 'yearly';
 
 const StatsOverview: React.FC = () => {
+  const chart = useChartTheme();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -219,8 +221,8 @@ const StatsOverview: React.FC = () => {
   const winLossData = useMemo(() => {
     if (!selectedPlayer) return [];
     return [
-      { name: 'Gewonnen', value: selectedPlayer.stats.gamesWon, color: '#22c55e' },
-      { name: 'Verloren', value: selectedPlayer.stats.gamesPlayed - selectedPlayer.stats.gamesWon, color: '#ef4444' },
+      { name: 'Gewonnen', value: selectedPlayer.stats.gamesWon, color: chart.success },
+      { name: 'Verloren', value: selectedPlayer.stats.gamesPlayed - selectedPlayer.stats.gamesWon, color: chart.error },
     ];
   }, [selectedPlayer]);
 
@@ -412,10 +414,10 @@ const StatsOverview: React.FC = () => {
             {playerMatches.length >= 10 && (
               <Card variant="elevated" className={`p-6 mb-6 border-2 ${
                 improvement.trend === 'improving'
-                  ? 'border-success-500 bg-success-container'
+                  ? 'border-[var(--m3-primary)] bg-primary-container'
                   : improvement.trend === 'declining'
-                  ? 'border-error-500 bg-error-container'
-                  : 'border-primary-500 bg-primary-container'
+                  ? 'border-error bg-error-container'
+                  : 'border-[var(--m3-primary)] bg-primary-container'
               }`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
@@ -537,34 +539,34 @@ const StatsOverview: React.FC = () => {
                         <div className="bg-surface-container rounded-m3-md p-4">
                           <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                             <RadarChart data={performanceRadar}>
-                              <PolarGrid stroke="#404040" />
+                              <PolarGrid stroke={chart.grid} />
                               <PolarAngleAxis 
                                 dataKey="metric" 
-                                stroke="#a3a3a3"
+                                stroke={chart.axis}
                                 style={{ fontSize: '12px', fontWeight: 'bold' }}
                               />
                               <PolarRadiusAxis 
                                 angle={90} 
                                 domain={[0, 100]}
-                                stroke="#737373"
+                                stroke={chart.axis}
                                 style={{ fontSize: '10px' }}
                               />
                               <Radar 
                                 name="Performance" 
                                 dataKey="value" 
-                                stroke="#0ea5e9" 
-                                fill="#0ea5e9" 
+                                stroke={chart.series[0]} 
+                                fill={chart.series[0]} 
                                 fillOpacity={0.6}
                                 strokeWidth={2}
                               />
                               <Tooltip 
                                 contentStyle={{ 
-                                  backgroundColor: '#0a0a0a', 
-                                  border: '1px solid #404040',
+                                  backgroundColor: chart.tooltip.contentStyle.backgroundColor, 
+                                  border: chart.tooltip.contentStyle.border as string,
                                   borderRadius: '8px',
                                   padding: '12px'
                                 }}
-                                labelStyle={{ color: '#fff', fontWeight: 'bold' }}
+                                labelStyle={{ color: chart.text, fontWeight: 'bold' }}
                                 formatter={(value: number) => [`${value.toFixed(1)}%`, 'Score']}
                               />
                             </RadarChart>
@@ -588,7 +590,7 @@ const StatsOverview: React.FC = () => {
                                 labelLine={false}
                                 label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                                 outerRadius={100}
-                                fill="#8884d8"
+                                fill={chart.series[1]}
                                 dataKey="value"
                               >
                                 {winLossData.map((entry, index) => (
@@ -597,12 +599,12 @@ const StatsOverview: React.FC = () => {
                               </Pie>
                               <Tooltip 
                                 contentStyle={{ 
-                                  backgroundColor: '#0a0a0a', 
-                                  border: '1px solid #404040',
+                                  backgroundColor: chart.tooltip.contentStyle.backgroundColor, 
+                                  border: chart.tooltip.contentStyle.border as string,
                                   borderRadius: '8px',
                                   padding: '12px'
                                 }}
-                                labelStyle={{ color: '#fff', fontWeight: 'bold' }}
+                                labelStyle={{ color: chart.text, fontWeight: 'bold' }}
                               />
                             </PieChart>
                           </ResponsiveContainer></div>
@@ -623,26 +625,26 @@ const StatsOverview: React.FC = () => {
                               data={scoreDistribution}
                               layout="vertical"
                             >
-                              <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
+                              <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
                               <XAxis 
                                 type="number"
-                                stroke="#737373"
+                                stroke={chart.axis}
                                 style={{ fontSize: '12px' }}
                               />
                               <YAxis 
                                 type="category"
                                 dataKey="name"
-                                stroke="#737373"
+                                stroke={chart.axis}
                                 style={{ fontSize: '12px' }}
                               />
                               <Tooltip 
                                 contentStyle={{ 
-                                  backgroundColor: '#0a0a0a', 
-                                  border: '1px solid #404040',
+                                  backgroundColor: chart.tooltip.contentStyle.backgroundColor, 
+                                  border: chart.tooltip.contentStyle.border as string,
                                   borderRadius: '8px',
                                   padding: '12px'
                                 }}
-                                labelStyle={{ color: '#fff', fontWeight: 'bold' }}
+                                labelStyle={{ color: chart.text, fontWeight: 'bold' }}
                                 cursor={{ fill: 'rgba(255, 255, 255, 0.1)' }}
                               />
                               <Bar 
@@ -690,33 +692,33 @@ const StatsOverview: React.FC = () => {
                           <div className="bg-surface-container rounded-m3-md p-4">
                             <div className="h-[250px] sm:h-[350px]"><ResponsiveContainer width="100%" height="100%">
                               <ComposedChart data={timeSeriesData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
+                                <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
                                 <XAxis
                                   dataKey="period"
-                                  stroke="#737373"
+                                  stroke={chart.axis}
                                   style={{ fontSize: '12px' }}
                                 />
                                 <YAxis
                                   yAxisId="left"
-                                  stroke="#737373"
+                                  stroke={chart.axis}
                                   style={{ fontSize: '12px' }}
-                                  label={{ value: 'Average', angle: -90, position: 'insideLeft', fill: '#a3a3a3' }}
+                                  label={{ value: 'Average', angle: -90, position: 'insideLeft', fill: chart.axis }}
                                 />
                                 <YAxis
                                   yAxisId="right"
                                   orientation="right"
-                                  stroke="#737373"
+                                  stroke={chart.axis}
                                   style={{ fontSize: '12px' }}
-                                  label={{ value: 'Win Rate %', angle: 90, position: 'insideRight', fill: '#a3a3a3' }}
+                                  label={{ value: 'Win Rate %', angle: 90, position: 'insideRight', fill: chart.axis }}
                                 />
                                 <Tooltip
                                   contentStyle={{
-                                    backgroundColor: '#0a0a0a',
-                                    border: '1px solid #404040',
+                                    backgroundColor: chart.tooltip.contentStyle.backgroundColor,
+                                    border: chart.tooltip.contentStyle.border as string,
                                     borderRadius: '8px',
                                     padding: '12px'
                                   }}
-                                  labelStyle={{ color: '#fff', fontWeight: 'bold' }}
+                                  labelStyle={{ color: chart.text, fontWeight: 'bold' }}
                                 />
                                 <Legend
                                   wrapperStyle={{ paddingTop: '20px' }}
@@ -725,20 +727,20 @@ const StatsOverview: React.FC = () => {
                                   yAxisId="left"
                                   type="monotone"
                                   dataKey="average"
-                                  fill="#0ea5e9"
+                                  fill={chart.series[0]}
                                   fillOpacity={0.3}
-                                  stroke="#0ea5e9"
+                                  stroke={chart.series[0]}
                                   strokeWidth={2}
-                                  dot={{ fill: '#0ea5e9', r: timeSeriesData.length <= 2 ? 8 : 4 }}
+                                  dot={{ fill: chart.series[0], r: timeSeriesData.length <= 2 ? 8 : 4 }}
                                   name="Durchschnitt"
                                 />
                                 <Line
                                   yAxisId="right"
                                   type="monotone"
                                   dataKey="winRate"
-                                  stroke="#22c55e"
+                                  stroke={chart.success}
                                   strokeWidth={3}
-                                  dot={{ fill: '#22c55e', r: timeSeriesData.length <= 2 ? 8 : 4 }}
+                                  dot={{ fill: chart.success, r: timeSeriesData.length <= 2 ? 8 : 4 }}
                                   name="Win Rate %"
                                 />
                               </ComposedChart>
@@ -784,41 +786,41 @@ const StatsOverview: React.FC = () => {
                       <div className="bg-surface-container rounded-m3-md p-4">
                         <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <LineChart data={progressData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
+                            <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
                             <XAxis
                               dataKey="date"
-                              stroke="#a3a3a3"
+                              stroke={chart.axis}
                               style={{ fontSize: '12px' }}
-                              tick={{ fill: '#a3a3a3' }}
+                              tick={{ fill: chart.axis }}
                             />
                             <YAxis
-                              stroke="#a3a3a3"
+                              stroke={chart.axis}
                               style={{ fontSize: '12px' }}
-                              tick={{ fill: '#a3a3a3' }}
+                              tick={{ fill: chart.axis }}
                               tickFormatter={(value) => value.toFixed(1)}
                             />
                             <Tooltip
                               contentStyle={{
-                                backgroundColor: '#0a0a0a',
-                                border: '1px solid #404040',
+                                backgroundColor: chart.tooltip.contentStyle.backgroundColor,
+                                border: chart.tooltip.contentStyle.border as string,
                                 borderRadius: '8px',
                                 padding: '12px'
                               }}
-                              labelStyle={{ color: '#fff', fontWeight: 'bold' }}
-                              itemStyle={{ color: '#0ea5e9' }}
+                              labelStyle={{ color: chart.text, fontWeight: 'bold' }}
+                              itemStyle={{ color: chart.series[0] }}
                               formatter={(value: number) => value.toFixed(1)}
                             />
                             <Legend
                               wrapperStyle={{ paddingTop: '20px' }}
                               iconType="line"
-                              formatter={(value) => <span style={{ color: '#fff' }}>{value}</span>}
+                              formatter={(value) => <span style={{ color: chart.text }}>{value}</span>}
                             />
                             <Line
                               type="monotone"
                               dataKey="average"
-                              stroke="#0ea5e9"
+                              stroke={chart.series[0]}
                               strokeWidth={3}
-                              dot={{ fill: '#0ea5e9', r: 4 }}
+                              dot={{ fill: chart.series[0], r: 4 }}
                               activeDot={{ r: 6 }}
                               name="Durchschnitt"
                             />
@@ -833,41 +835,41 @@ const StatsOverview: React.FC = () => {
                       <div className="bg-surface-container rounded-m3-md p-4">
                         <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <LineChart data={progressData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
+                            <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
                             <XAxis
                               dataKey="date"
-                              stroke="#a3a3a3"
+                              stroke={chart.axis}
                               style={{ fontSize: '12px' }}
-                              tick={{ fill: '#a3a3a3' }}
+                              tick={{ fill: chart.axis }}
                             />
                             <YAxis
-                              stroke="#a3a3a3"
+                              stroke={chart.axis}
                               style={{ fontSize: '12px' }}
                               domain={[0, 100]}
-                              tick={{ fill: '#a3a3a3' }}
+                              tick={{ fill: chart.axis }}
                             />
                             <Tooltip
                               contentStyle={{
-                                backgroundColor: '#0a0a0a',
-                                border: '1px solid #404040',
+                                backgroundColor: chart.tooltip.contentStyle.backgroundColor,
+                                border: chart.tooltip.contentStyle.border as string,
                                 borderRadius: '8px',
                                 padding: '12px'
                               }}
-                              labelStyle={{ color: '#fff', fontWeight: 'bold' }}
-                              itemStyle={{ color: '#22c55e' }}
+                              labelStyle={{ color: chart.text, fontWeight: 'bold' }}
+                              itemStyle={{ color: chart.success }}
                               formatter={(value: number) => [`${value.toFixed(1)}%`, 'Checkout %']}
                             />
                             <Legend
                               wrapperStyle={{ paddingTop: '20px' }}
                               iconType="line"
-                              formatter={(value) => <span style={{ color: '#fff' }}>{value}</span>}
+                              formatter={(value) => <span style={{ color: chart.text }}>{value}</span>}
                             />
                             <Line
                               type="monotone"
                               dataKey="checkoutPercent"
-                              stroke="#22c55e"
+                              stroke={chart.success}
                               strokeWidth={3}
-                              dot={{ fill: '#22c55e', r: 4 }}
+                              dot={{ fill: chart.success, r: 4 }}
                               activeDot={{ r: 6 }}
                               name="Checkout %"
                             />
@@ -882,48 +884,48 @@ const StatsOverview: React.FC = () => {
                       <div className="bg-surface-container rounded-m3-md p-4">
                         <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <BarChart data={progressData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
+                            <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
                             <XAxis
                               dataKey="date"
-                              stroke="#a3a3a3"
+                              stroke={chart.axis}
                               style={{ fontSize: '12px' }}
-                              tick={{ fill: '#a3a3a3' }}
+                              tick={{ fill: chart.axis }}
                             />
                             <YAxis
-                              stroke="#a3a3a3"
+                              stroke={chart.axis}
                               style={{ fontSize: '12px' }}
-                              tick={{ fill: '#a3a3a3' }}
+                              tick={{ fill: chart.axis }}
                             />
                             <Tooltip
                               contentStyle={{
-                                backgroundColor: '#0a0a0a',
-                                border: '1px solid #404040',
+                                backgroundColor: chart.tooltip.contentStyle.backgroundColor,
+                                border: chart.tooltip.contentStyle.border as string,
                                 borderRadius: '8px',
                                 padding: '12px'
                               }}
-                              labelStyle={{ color: '#fff', fontWeight: 'bold' }}
-                              itemStyle={{ color: '#fff' }}
+                              labelStyle={{ color: chart.text, fontWeight: 'bold' }}
+                              itemStyle={{ color: chart.text }}
                               cursor={{ fill: 'rgba(255, 255, 255, 0.1)' }}
                             />
                             <Legend
                               wrapperStyle={{ paddingTop: '20px' }}
-                              formatter={(value) => <span style={{ color: '#fff' }}>{value}</span>}
+                              formatter={(value) => <span style={{ color: chart.text }}>{value}</span>}
                             />
                             <Bar
                               dataKey="score180s"
-                              fill="#a855f7"
+                              fill={chart.series[1]}
                               name="180s"
                               radius={[8, 8, 0, 0]}
                             />
                             <Bar
                               dataKey="score140"
-                              fill="#0ea5e9"
+                              fill={chart.series[0]}
                               name="140+"
                               radius={[8, 8, 0, 0]}
                             />
                             <Bar
                               dataKey="score100"
-                              fill="#22c55e"
+                              fill={chart.success}
                               name="100+"
                               radius={[8, 8, 0, 0]}
                             />
@@ -938,38 +940,38 @@ const StatsOverview: React.FC = () => {
                       <div className="bg-surface-container rounded-m3-md p-4">
                         <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={progressData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
+                            <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
                             <XAxis
                               dataKey="date"
-                              stroke="#a3a3a3"
+                              stroke={chart.axis}
                               style={{ fontSize: '12px' }}
-                              tick={{ fill: '#a3a3a3' }}
+                              tick={{ fill: chart.axis }}
                             />
                             <YAxis
-                              stroke="#a3a3a3"
+                              stroke={chart.axis}
                               style={{ fontSize: '12px' }}
-                              tick={{ fill: '#a3a3a3' }}
+                              tick={{ fill: chart.axis }}
                             />
                             <Tooltip
                               contentStyle={{
-                                backgroundColor: '#0a0a0a',
-                                border: '1px solid #404040',
+                                backgroundColor: chart.tooltip.contentStyle.backgroundColor,
+                                border: chart.tooltip.contentStyle.border as string,
                                 borderRadius: '8px',
                                 padding: '12px'
                               }}
-                              labelStyle={{ color: '#fff', fontWeight: 'bold' }}
-                              itemStyle={{ color: '#fff' }}
+                              labelStyle={{ color: chart.text, fontWeight: 'bold' }}
+                              itemStyle={{ color: chart.text }}
                             />
                             <Legend
-                              wrapperStyle={{ paddingTop: '20px', color: '#fff' }}
-                              formatter={(value) => <span style={{ color: '#fff' }}>{value}</span>}
+                              wrapperStyle={{ paddingTop: '20px', color: chart.text }}
+                              formatter={(value) => <span style={{ color: chart.text }}>{value}</span>}
                             />
                             <Area
                               type="monotone"
                               dataKey="legsWon"
                               stackId="1"
-                              stroke="#22c55e"
-                              fill="#22c55e"
+                              stroke={chart.success}
+                              fill={chart.success}
                               fillOpacity={0.8}
                               name="Legs Gewonnen"
                             />
@@ -977,8 +979,8 @@ const StatsOverview: React.FC = () => {
                               type="monotone"
                               dataKey="legsLost"
                               stackId="2"
-                              stroke="#ef4444"
-                              fill="#ef4444"
+                              stroke={chart.error}
+                              fill={chart.error}
                               fillOpacity={0.8}
                               name="Legs Verloren"
                             />
@@ -993,32 +995,32 @@ const StatsOverview: React.FC = () => {
                       <div className="bg-surface-container rounded-m3-md p-4">
                         <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <ComposedChart data={progressData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
+                            <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
                             <XAxis
                               dataKey="date"
-                              stroke="#a3a3a3"
+                              stroke={chart.axis}
                               style={{ fontSize: '12px' }}
-                              tick={{ fill: '#a3a3a3' }}
+                              tick={{ fill: chart.axis }}
                             />
                             <YAxis
-                              stroke="#a3a3a3"
+                              stroke={chart.axis}
                               style={{ fontSize: '12px' }}
                               domain={[0, 180]}
-                              tick={{ fill: '#a3a3a3' }}
+                              tick={{ fill: chart.axis }}
                             />
                             <Tooltip
                               contentStyle={{
-                                backgroundColor: '#0a0a0a',
-                                border: '1px solid #404040',
+                                backgroundColor: chart.tooltip.contentStyle.backgroundColor,
+                                border: chart.tooltip.contentStyle.border as string,
                                 borderRadius: '8px',
                                 padding: '12px'
                               }}
-                              labelStyle={{ color: '#fff', fontWeight: 'bold' }}
-                              itemStyle={{ color: '#fff' }}
+                              labelStyle={{ color: chart.text, fontWeight: 'bold' }}
+                              itemStyle={{ color: chart.text }}
                             />
                             <Legend
-                              wrapperStyle={{ paddingTop: '20px', color: '#fff' }}
-                              formatter={(value) => <span style={{ color: '#fff' }}>{value}</span>}
+                              wrapperStyle={{ paddingTop: '20px', color: chart.text }}
+                              formatter={(value) => <span style={{ color: chart.text }}>{value}</span>}
                             />
                             <Bar
                               dataKey="highestScore"
@@ -1029,15 +1031,15 @@ const StatsOverview: React.FC = () => {
                             <Line
                               type="monotone"
                               dataKey="average"
-                              stroke="#0ea5e9"
+                              stroke={chart.series[0]}
                               strokeWidth={2}
-                              dot={{ fill: '#0ea5e9', r: 3 }}
+                              dot={{ fill: chart.series[0], r: 3 }}
                               name="Durchschnitt"
                             />
                             <defs>
                               <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#a855f7" stopOpacity={1}/>
-                                <stop offset="100%" stopColor="#ec4899" stopOpacity={1}/>
+                                <stop offset="0%" stopColor={chart.series[1]} stopOpacity={1}/>
+                                <stop offset="100%" stopColor={chart.series[7]} stopOpacity={1}/>
                               </linearGradient>
                             </defs>
                           </ComposedChart>
@@ -1059,7 +1061,7 @@ const StatsOverview: React.FC = () => {
                               )}
                               <span className="text-on-surface-variant m3-body-small">Average</span>
                             </div>
-                            <div className={`m3-title-large font-bold ${
+                            <div className={`m3-title-large m3-emphasized ${
                               improvement.averageImprovement >= 0 ? 'text-success' : 'text-error'
                             }`}>
                               {improvement.averageImprovement >= 0 ? '+' : ''}{improvement.averageImprovement.toFixed(2)}
@@ -1074,7 +1076,7 @@ const StatsOverview: React.FC = () => {
                               )}
                               <span className="text-on-surface-variant m3-body-small">Checkout %</span>
                             </div>
-                            <div className={`m3-title-large font-bold ${
+                            <div className={`m3-title-large m3-emphasized ${
                               improvement.checkoutImprovement >= 0 ? 'text-success' : 'text-error'
                             }`}>
                               {improvement.checkoutImprovement >= 0 ? '+' : ''}{improvement.checkoutImprovement.toFixed(1)}%
@@ -1085,7 +1087,7 @@ const StatsOverview: React.FC = () => {
                               <Activity size={20} className="text-primary" />
                               <span className="text-on-surface-variant m3-body-small">Spiele</span>
                             </div>
-                            <div className="m3-title-large font-bold text-on-surface">
+                            <div className="m3-title-large m3-emphasized text-on-surface">
                               {playerMatches.length}
                             </div>
                           </div>
@@ -1145,14 +1147,14 @@ const StatsOverview: React.FC = () => {
                       <motion.div {...staggerChild(0)}>
                         <Card variant="filled" className="p-6">
                           <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">Total Würfe</div>
-                          <div className="m3-headline-medium font-bold text-on-surface">{heatmapData.totalDarts}</div>
+                          <div className="m3-headline-medium m3-emphasized text-on-surface">{heatmapData.totalDarts}</div>
                           <div className="m3-body-small text-on-surface-variant mt-2">Alle aufgezeichneten Darts</div>
                         </Card>
                       </motion.div>
                       <motion.div {...staggerChild(1)}>
                         <Card variant="filled" className="p-6">
                           <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">Segments getroffen</div>
-                          <div className="m3-headline-medium font-bold text-on-surface">
+                          <div className="m3-headline-medium m3-emphasized text-on-surface">
                             {Object.keys(heatmapData.segments || {}).length}
                           </div>
                           <div className="m3-body-small text-on-surface-variant mt-2">Unterschiedliche Felder</div>
@@ -1161,7 +1163,7 @@ const StatsOverview: React.FC = () => {
                       <motion.div {...staggerChild(2)}>
                         <Card variant="filled" className="p-6">
                           <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">Präzision</div>
-                          <div className="m3-headline-medium font-bold text-on-surface">
+                          <div className="m3-headline-medium m3-emphasized text-on-surface">
                             {selectedPlayer ? selectedPlayer.stats.checkoutPercentage.toFixed(1) : 0}%
                           </div>
                           <div className="m3-body-small text-on-surface-variant mt-2">Checkout Rate</div>
@@ -1170,7 +1172,7 @@ const StatsOverview: React.FC = () => {
                       <motion.div {...staggerChild(3)}>
                         <Card variant="filled" className="p-6">
                           <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">180s</div>
-                          <div className="m3-headline-medium font-bold text-on-surface">
+                          <div className="m3-headline-medium m3-emphasized text-on-surface">
                             {selectedPlayer?.stats.total180s || 0}
                           </div>
                           <div className="m3-body-small text-on-surface-variant mt-2">Maximum Scores</div>
@@ -1234,7 +1236,7 @@ const StatCard: React.FC<{ label: string; value: string | number; color?: string
   return (
     <div className={`rounded-m3-lg shadow-m3-1 p-6 ${tone}`}>
       <div className="m3-label-large opacity-80 mb-2">{label}</div>
-      <div className="m3-headline-small font-bold flex items-center gap-2">
+      <div className="m3-headline-small m3-emphasized flex items-center gap-2">
         {icon && <span className="text-2xl">{icon}</span>}
         {value}
       </div>
@@ -1250,6 +1252,7 @@ const PlayerComparisonView: React.FC<{
   matches: Match[];
   storage: any;
 }> = ({ players, comparePlayerIds, setComparePlayerIds, matches }) => {
+  const chart = useChartTheme();
   
   const togglePlayer = (playerId: string) => {
     if (comparePlayerIds.includes(playerId)) {
@@ -1323,7 +1326,7 @@ const PlayerComparisonView: React.FC<{
     });
   }, [comparisonData]);
 
-  const colors = ['#0ea5e9', '#a855f7', '#22c55e', '#f59e0b'];
+  const colors = chart.series;
 
   if (players.length === 0) {
     return (
@@ -1351,7 +1354,7 @@ const PlayerComparisonView: React.FC<{
               disabled={!comparePlayerIds.includes(player.id) && comparePlayerIds.length >= 4}
               className={`p-5 rounded-m3-lg border-2 transition-all ${
                 comparePlayerIds.includes(player.id)
-                  ? 'border-success-500 bg-success-container shadow-m3-2'
+                  ? 'border-[var(--m3-primary)] bg-primary-container shadow-m3-2'
                   : 'border-outline-variant bg-surface-container hover:bg-surface-container-high'
               } ${
                 !comparePlayerIds.includes(player.id) && comparePlayerIds.length >= 4
@@ -1384,9 +1387,9 @@ const PlayerComparisonView: React.FC<{
             <div className="bg-surface-container rounded-m3-md p-4">
               <div className="h-[280px] sm:h-[400px]"><ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData}>
-                  <PolarGrid stroke="#404040" />
-                  <PolarAngleAxis dataKey="category" stroke="#737373" style={{ fontSize: '12px' }} />
-                  <PolarRadiusAxis angle={90} domain={[0, 100]} stroke="#404040" />
+                  <PolarGrid stroke={chart.grid} />
+                  <PolarAngleAxis dataKey="category" stroke={chart.axis} style={{ fontSize: '12px' }} />
+                  <PolarRadiusAxis angle={90} domain={[0, 100]} stroke={chart.grid} />
                   {comparisonData.map((data, index) => (
                     <Radar
                       key={index}
@@ -1399,8 +1402,8 @@ const PlayerComparisonView: React.FC<{
                   ))}
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#0a0a0a',
-                      border: '1px solid #404040',
+                      backgroundColor: chart.tooltip.contentStyle.backgroundColor,
+                      border: chart.tooltip.contentStyle.border as string,
                       borderRadius: '8px',
                     }}
                   />
@@ -1511,13 +1514,13 @@ const PlayerComparisonView: React.FC<{
                     },
                   ]}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
-                  <XAxis dataKey="name" stroke="#737373" />
-                  <YAxis stroke="#737373" />
+                  <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
+                  <XAxis dataKey="name" stroke={chart.axis} />
+                  <YAxis stroke={chart.axis} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#0a0a0a',
-                      border: '1px solid #404040',
+                      backgroundColor: chart.tooltip.contentStyle.backgroundColor,
+                      border: chart.tooltip.contentStyle.border as string,
                       borderRadius: '8px',
                     }}
                   />

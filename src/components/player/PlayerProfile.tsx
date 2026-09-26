@@ -15,8 +15,10 @@ import { ACHIEVEMENTS } from '../../types/achievements';
 import PlayerAvatar from './PlayerAvatar';
 import { BackButton, Card, Button, Dialog } from '../common';
 import { Icon, iconForEmoji } from '../icons';
+import { useChartTheme } from '../../utils/chartTheme';
 
 const PlayerProfile: React.FC = () => {
+  const chart = useChartTheme();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { playerId } = useParams<{ playerId: string }>();
@@ -201,7 +203,7 @@ const PlayerProfile: React.FC = () => {
                   <Star size={18} />
                   <span className="m3-label-large">{achievementProgress?.totalPoints || 0} Punkte</span>
                 </div>
-                <div className="flex items-center gap-2 text-success-500">
+                <div className="flex items-center gap-2 text-success">
                   <Award size={18} />
                   <span className="m3-label-large">{achievements.length}/{ACHIEVEMENTS.length} Achievements</span>
                 </div>
@@ -213,7 +215,7 @@ const PlayerProfile: React.FC = () => {
                 </div>
                 <div className="bg-surface-container rounded-m3-md p-3">
                   <div className="m3-body-small text-on-surface-variant mb-1">Siegrate</div>
-                  <div className="m3-title-large text-success-500">{winRate.toFixed(1)}%</div>
+                  <div className="m3-title-large text-success">{winRate.toFixed(1)}%</div>
                 </div>
                 <div className="bg-surface-container rounded-m3-md p-3">
                   <div className="m3-body-small text-on-surface-variant mb-1">Best Avg</div>
@@ -321,22 +323,22 @@ const PlayerProfile: React.FC = () => {
               <div className="bg-surface-container rounded-m3-md p-4">
                 <div className="h-[180px] sm:h-[250px]"><ResponsiveContainer width="100%" height="100%">
                   <LineChart data={performanceData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
-                    <XAxis dataKey="game" stroke="#737373" style={{ fontSize: '12px' }} />
-                    <YAxis stroke="#737373" style={{ fontSize: '12px' }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
+                    <XAxis dataKey="game" stroke={chart.axis} style={{ fontSize: '12px' }} />
+                    <YAxis stroke={chart.axis} style={{ fontSize: '12px' }} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: '#0a0a0a',
-                        border: '1px solid #404040',
+                        backgroundColor: chart.tooltip.contentStyle.backgroundColor,
+                        border: chart.tooltip.contentStyle.border as string,
                         borderRadius: '8px',
                       }}
                     />
                     <Legend />
-                    <Line type="monotone" dataKey="average" stroke="#0ea5e9" strokeWidth={2} name="Average" />
+                    <Line type="monotone" dataKey="average" stroke={chart.series[0]} strokeWidth={2} name="Average" />
                     <Line
                       type="monotone"
                       dataKey="checkoutRate"
-                      stroke="#22c55e"
+                      stroke={chart.success}
                       strokeWidth={2}
                       name="Checkout %"
                     />
@@ -357,20 +359,20 @@ const PlayerProfile: React.FC = () => {
             <div className="bg-surface-container rounded-m3-md p-4">
               <div className="h-[180px] sm:h-[250px]"><ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData}>
-                  <PolarGrid stroke="#404040" />
-                  <PolarAngleAxis dataKey="skill" stroke="#737373" style={{ fontSize: '12px' }} />
-                  <PolarRadiusAxis angle={90} domain={[0, 100]} stroke="#404040" />
+                  <PolarGrid stroke={chart.grid} />
+                  <PolarAngleAxis dataKey="skill" stroke={chart.axis} style={{ fontSize: '12px' }} />
+                  <PolarRadiusAxis angle={90} domain={[0, 100]} stroke={chart.grid} />
                   <Radar
                     name="Skills"
                     dataKey="value"
-                    stroke="#0ea5e9"
-                    fill="#0ea5e9"
+                    stroke={chart.series[0]}
+                    fill={chart.series[0]}
                     fillOpacity={0.5}
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#0a0a0a',
-                      border: '1px solid #404040',
+                      backgroundColor: chart.tooltip.contentStyle.backgroundColor,
+                      border: chart.tooltip.contentStyle.border as string,
                       borderRadius: '8px',
                     }}
                   />
@@ -400,7 +402,7 @@ const PlayerProfile: React.FC = () => {
                   </div>
                   <div className="bg-surface-container rounded-m3-md p-3 text-center">
                     <div className="m3-body-small text-on-surface-variant mb-1">Triple Rate</div>
-                    <div className="m3-title-large text-success-500">
+                    <div className="m3-title-large text-success">
                       {accuracyStats.tripleRate.toFixed(1)}%
                     </div>
                   </div>
@@ -513,7 +515,7 @@ const PlayerProfile: React.FC = () => {
                 <div className="m3-body-small text-on-surface-variant mt-1">Spiele</div>
               </div>
               <div className="text-center">
-                <div className="m3-title-large text-success-500">{personalBests.totalWins}</div>
+                <div className="m3-title-large text-success">{personalBests.totalWins}</div>
                 <div className="m3-body-small text-on-surface-variant mt-1">Siege</div>
               </div>
               <div className="text-center">

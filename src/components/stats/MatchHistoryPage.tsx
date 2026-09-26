@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo, useCallback, Suspense, lazy } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, Target, Award, ChevronDown, ChevronUp, TrendingUp, Loader, Search, ChevronLeft, ChevronRight, Clock, Users, Filter } from 'lucide-react';
+import { ArrowLeft, Calendar, Target, Award, ChevronDown, ChevronUp, TrendingUp, Search, ChevronLeft, ChevronRight, Clock, Users, Filter } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Match, Throw } from '../../types';
 import { formatDate, getTimestampForSort } from '../../utils/dateUtils';
 import { api } from '../../services/api';
+import LoadingIndicator from '../common/LoadingIndicator';
 
 const MatchChart = lazy(() => import('./MatchChart'));
 import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
@@ -183,7 +184,7 @@ const MatchHistoryPage: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh flex items-center justify-center">
-        <Loader className="animate-spin text-primary" size={48} />
+        <LoadingIndicator size={48} />
       </div>
     );
   }
@@ -194,7 +195,7 @@ const MatchHistoryPage: React.FC = () => {
         {/* Back button */}
         <BackButton onClick={() => { window.location.href = '/'; }} />
 
-        <h1 className="m3-headline-medium font-bold text-on-surface mb-6">{t('match_history.title', 'Spielhistorie')}</h1>
+        <h1 className="m3-headline-medium m3-emphasized text-on-surface mb-6">{t('match_history.title', 'Spielhistorie')}</h1>
 
         {/* Filters */}
         <div className="mb-6 space-y-3">
@@ -356,7 +357,7 @@ const MatchHistoryPage: React.FC = () => {
                     <div className="border-t border-outline-variant p-4 space-y-6">
                       {loadingDetails[match.id] ? (
                         <div className="flex items-center justify-center py-12">
-                          <Loader className="animate-spin text-primary" size={32} />
+                          <LoadingIndicator size={32} />
                         </div>
                       ) : detail ? (
                         <>
@@ -569,7 +570,7 @@ const ThrowHistory: React.FC<{ detail: any; players: any[] }> = ({ detail, playe
                                   <span className={`font-bold ${thr.isBust ? 'text-error' : thr.score >= 100 ? 'text-tertiary' : 'text-on-surface'}`}>
                                     {thr.isBust ? '0' : thr.score}
                                   </span>
-                                  <span className="text-on-surface-variant opacity-70">→{thr.remaining}</span>
+                                  <span className="text-on-surface-variant">→{thr.remaining}</span>
                                 </div>
                               </td>
                             );

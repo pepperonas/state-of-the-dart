@@ -9,8 +9,11 @@ import PlayerAvatar from './PlayerAvatar';
 import AvatarPicker from './AvatarPicker';
 import { BackButton, Button, TextField, Card, IconButton, PageShell } from '../common';
 import { staggerChild } from '../../utils/motion';
+import LoadingIndicator from '../common/LoadingIndicator';
+import { useFeedback } from '../common/feedbackContext';
 
 const PlayerManagement: React.FC = () => {
+  const { notify, confirm } = useFeedback();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { players, loading, addPlayer, deletePlayer, updatePlayer } = usePlayer();
@@ -49,7 +52,7 @@ const PlayerManagement: React.FC = () => {
         setShowAddPlayer(false);
       } catch (error) {
         console.error('Failed to add player:', error);
-        alert('Fehler beim Erstellen des Spielers');
+        notify(t('players.error_create'));
       }
     }
   };
@@ -63,7 +66,7 @@ const PlayerManagement: React.FC = () => {
         setEditAvatar(undefined);
       } catch (error) {
         console.error('Failed to update player:', error);
-        alert('Fehler beim Aktualisieren des Spielers');
+        notify(t('players.error_update'));
       }
     }
   };
@@ -75,7 +78,7 @@ const PlayerManagement: React.FC = () => {
       setShowEmojiPicker(null);
     } catch (error) {
       console.error('Failed to update avatar:', error);
-      alert('Fehler beim Aktualisieren des Avatars');
+      notify(t('players.error_avatar'));
     }
   };
 
@@ -93,7 +96,7 @@ const PlayerManagement: React.FC = () => {
       setMainPlayerId(playerId);
     } catch (error) {
       console.error('Failed to set main player:', error);
-      alert('Fehler beim Setzen des Haupt-Profils');
+      notify(t('players.error_main'));
     }
   };
 
@@ -202,7 +205,7 @@ const PlayerManagement: React.FC = () => {
           <div className="space-y-3">
             {loading ? (
               <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-500 mx-auto mb-4"></div>
+                <LoadingIndicator size={56} className="mb-4" />
                 <p className="text-on-surface m3-title-medium">{t('players.loading_players')}</p>
               </div>
             ) : filteredPlayers.length === 0 ? (
@@ -239,7 +242,7 @@ const PlayerManagement: React.FC = () => {
                       title="Emoji ändern"
                     >
                       <PlayerAvatar avatar={player.avatar} name={player.name} size="md" />
-                      <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <div className="absolute inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_50%,transparent)] rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <Smile size={16} className="text-on-surface" />
                       </div>
                     </div>
@@ -285,7 +288,7 @@ const PlayerManagement: React.FC = () => {
                     </IconButton>
                     <IconButton
                       label="Statistiken anzeigen"
-                      className="text-success-400"
+                      className="text-success"
                       onClick={(e) => {
                         e.stopPropagation();
                         // Set player as selected and navigate to stats
@@ -324,12 +327,12 @@ const PlayerManagement: React.FC = () => {
                       className="text-error"
                       onClick={async (e) => {
                         e.stopPropagation();
-                        if (confirm(`${t('players.delete_confirm')} "${player.name}"?`)) {
+                        if (await confirm({ title: `${t('players.delete_confirm')} "${player.name}"?`, danger: true, confirmLabel: t('common.delete') })) {
                           try {
                             await deletePlayer(player.id);
                           } catch (error) {
                             console.error('Failed to delete player:', error);
-                            alert('Fehler beim Löschen des Spielers');
+                            notify(t('players.error_delete'));
                           }
                         }
                       }}

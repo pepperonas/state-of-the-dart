@@ -63,7 +63,7 @@ const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
         />
       ) : isLetter ? (
         <div className={disc}>
-          <span className="m3-title-medium font-bold">{avatar}</span>
+          <span className="m3-title-medium m3-emphasized">{avatar}</span>
         </div>
       ) : avatar ? (
         <div className={disc}>
@@ -71,7 +71,7 @@ const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
         </div>
       ) : (
         <div className={disc}>
-          <span className="m3-title-medium font-bold">{initial}</span>
+          <span className="m3-title-medium m3-emphasized">{initial}</span>
         </div>
       )}
       {showBadge && !isUrl && (

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, AlertCircle } from 'lucide-react';
 import api from '../../services/api';
 import { Card, Button } from '../common';
 import BackToLanding from './BackToLanding';
+import LoadingIndicator from '../common/LoadingIndicator';
 
 const VerifyEmail: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -44,7 +45,7 @@ const VerifyEmail: React.FC = () => {
         <div className="w-full max-w-md m3-enter-pop">
           <BackToLanding />
           <Card variant="elevated" className="p-8 text-center">
-            <Loader2 className="animate-spin text-primary mx-auto mb-4" size={48} />
+            <LoadingIndicator size={48} />
             <h2 className="m3-headline-small text-on-surface mb-2">
               Verifiziere Email...
             </h2>

@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { dialogMotion, effectsDefault, springSpatialDefault } from '../../utils/motion';
 import { ArrowLeft, RotateCcw, Trophy, Clock, Check, X } from 'lucide-react';
 import { usePlayer } from '../../context/PlayerContext';
 import { useSettings } from '../../context/SettingsContext';
@@ -13,7 +11,7 @@ import audioSystem from '../../utils/audio';
 import { saveGameState, loadGameState, clearGameState, STORAGE_KEYS, ATCSavedState } from '../../utils/gameStorage';
 import { SpinnerWheel } from './SpinnerWheel';
 import BackButton from '../common/BackButton';
-import { Button, Card } from '../common';
+import { Button, Card, Dialog } from '../common';
 import { useWakeLock } from '../../hooks/useWakeLock';
 import { haptic } from '../../utils/haptics';
 
@@ -576,7 +574,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
                     }}
                     className={`p-3 rounded-m3-lg border transition-all ${
                       selectedPlayers.find(p => p.id === player.id)
-                        ? 'border-success-500 bg-surface-container-high ring-2 ring-success-500 shadow-m3-1'
+                        ? 'border-[var(--m3-primary)] bg-surface-container-high ring-2 ring-[var(--m3-primary)] shadow-m3-1'
                         : 'border-outline-variant bg-surface-container hover:bg-surface-container-high'
                     }`}
                   >
@@ -635,111 +633,68 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
   // Game screen
   return (
     <div className="min-h-dvh p-2 sm:p-4 gradient-mesh">
-      {/* Winner Modal */}
-      <AnimatePresence>
-        {showWinner && winner && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={effectsDefault}
-            className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_70%,transparent)] flex items-center justify-center z-50 p-4"
-          >
-            <motion.div
-              initial={dialogMotion.initial}
-              animate={dialogMotion.animate}
-              exit={dialogMotion.exit}
-              transition={springSpatialDefault}
-              className="m3-dialog rounded-m3-xl p-6 sm:p-8 text-center max-w-md w-full"
-            >
+      {/* Winner */}
+      <Dialog open={showWinner && !!winner} onClose={() => {}} hideClose persistent widthClassName="max-w-md">
+        {winner && (
+          <div className="text-center">
               <Trophy className="w-16 h-16 sm:w-20 sm:h-20 text-tertiary mx-auto mb-4" />
-              <h2 className="m3-headline-medium text-on-surface mb-2">
-                {t('atc.winner_title', { name: winner.name })}
-              </h2>
-              <p className="text-on-surface-variant mb-4">
-                {t('atc.winner_time', { time: formatTime(elapsedTime) })}
-              </p>
-              <div className="grid grid-cols-2 gap-3 mb-6">
-                <div className="bg-surface-container rounded-m3-lg p-3">
-                  <p className="m3-title-large" style={{ color: 'var(--m3-primary)' }}>{playerDarts[winner.id]}</p>
-                  <p className="m3-body-small text-on-surface-variant">{t('game.darts')}</p>
-                </div>
-                <div className="bg-surface-container rounded-m3-lg p-3">
-                  <p className="m3-title-large text-success-400">
-                    {playerDarts[winner.id] > 0
-                      ? Math.round((playerHits[winner.id] / playerDarts[winner.id]) * 100)
-                      : 0}%
-                  </p>
-                  <p className="m3-body-small text-on-surface-variant">{t('training.accuracy')}</p>
-                </div>
-                <div className="bg-surface-container rounded-m3-lg p-3">
-                  <p className="m3-title-large text-tertiary">{formatTime(elapsedTime)}</p>
-                  <p className="m3-body-small text-on-surface-variant">{t('training.duration')}</p>
-                </div>
-                <div className="bg-surface-container rounded-m3-lg p-3">
-                  <p className="m3-title-large text-accent-400">
-                    {targets.length > 0
-                      ? (playerDarts[winner.id] / targets.length).toFixed(1)
-                      : '0'}
-                  </p>
-                  <p className="m3-body-small text-on-surface-variant">{t('game.darts')}/{t('atc.current_target').toLowerCase()}</p>
-                </div>
+            <h2 className="m3-headline-medium text-on-surface mb-2">
+              {t('atc.winner_title', { name: winner.name })}
+            </h2>
+            <p className="text-on-surface-variant mb-4">
+              {t('atc.winner_time', { time: formatTime(elapsedTime) })}
+            </p>
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              <div className="bg-surface-container rounded-m3-lg p-3">
+                <p className="m3-title-large" style={{ color: 'var(--m3-primary)' }}>{playerDarts[winner.id]}</p>
+                <p className="m3-body-small text-on-surface-variant">{t('game.darts')}</p>
               </div>
-              <Button
-                variant="filled"
-                fullWidth
-                onClick={() => {
-                  setShowWinner(false);
-                  setShowSetup(true);
-                  setWinner(null);
-                  setCurrentDarts([]);
-                }}
-              >
-                {t('atc.new_game')}
-              </Button>
-            </motion.div>
-          </motion.div>
+              <div className="bg-surface-container rounded-m3-lg p-3">
+                <p className="m3-title-large text-success">
+                  {playerDarts[winner.id] > 0
+                    ? Math.round((playerHits[winner.id] / playerDarts[winner.id]) * 100)
+                    : 0}%
+                </p>
+                <p className="m3-body-small text-on-surface-variant">{t('training.accuracy')}</p>
+              </div>
+              <div className="bg-surface-container rounded-m3-lg p-3">
+                <p className="m3-title-large text-tertiary">{formatTime(elapsedTime)}</p>
+                <p className="m3-body-small text-on-surface-variant">{t('training.duration')}</p>
+              </div>
+              <div className="bg-surface-container rounded-m3-lg p-3">
+                <p className="m3-title-large text-secondary">
+                  {targets.length > 0
+                    ? (playerDarts[winner.id] / targets.length).toFixed(1)
+                    : '0'}
+                </p>
+                <p className="m3-body-small text-on-surface-variant">{t('game.darts')}/{t('atc.current_target').toLowerCase()}</p>
+              </div>
+            </div>
+            <Button
+              variant="filled"
+              fullWidth
+              onClick={() => {
+                setShowWinner(false);
+                setShowSetup(true);
+                setWinner(null);
+                setCurrentDarts([]);
+              }}
+            >
+              {t('atc.new_game')}
+            </Button>
+          </div>
         )}
-      </AnimatePresence>
+      </Dialog>
 
       {/* Back Confirmation Dialog */}
-      <AnimatePresence>
-        {showBackConfirm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={effectsDefault}
-            className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_70%,transparent)] flex items-center justify-center z-50 p-4"
-          >
-            <motion.div
-              initial={dialogMotion.initial}
-              animate={dialogMotion.animate}
-              exit={dialogMotion.exit}
-              transition={dialogMotion.transition}
-              className="m3-dialog rounded-m3-xl p-6 max-w-sm w-full text-center"
-            >
-              <h3 className="m3-title-large text-on-surface mb-3">
-                {t('resume.pause_title')}
-              </h3>
-              <p className="text-on-surface-variant mb-6">
-                {t('resume.pause_message')}
-              </p>
-              <div className="flex flex-col gap-3">
-                <Button variant="filled" fullWidth onClick={handleConfirmBack}>
-                  {t('resume.pause_and_leave')}
-                </Button>
-                <Button variant="danger" fullWidth onClick={handleEndGame}>
-                  {t('resume.end_game')}
-                </Button>
-                <Button variant="tonal" fullWidth onClick={() => setShowBackConfirm(false)}>
-                  {t('common.cancel')}
-                </Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Dialog open={showBackConfirm} onClose={() => setShowBackConfirm(false)} title={t('resume.pause_title')} widthClassName="max-w-sm">
+        <p className="text-on-surface-variant mb-6">{t('resume.pause_message')}</p>
+        <div className="flex flex-col gap-3">
+          <Button variant="filled" fullWidth onClick={handleConfirmBack}>{t('resume.pause_and_leave')}</Button>
+          <Button variant="danger" fullWidth onClick={handleEndGame}>{t('resume.end_game')}</Button>
+          <Button variant="tonal" fullWidth onClick={() => setShowBackConfirm(false)}>{t('common.cancel')}</Button>
+        </div>
+      </Dialog>
 
       {/* Header */}
       <div className="max-w-4xl mx-auto mb-3">
@@ -776,9 +731,9 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
                   key={`${target.label}-${idx}`}
                   className={`w-9 h-9 sm:w-10 sm:h-10 rounded-m3-full flex items-center justify-center font-bold text-xs sm:text-sm transition-all ${
                     isPast
-                      ? 'bg-success-500 text-on-surface'
+                      ? 'bg-success text-on-surface'
                       : isPending
-                      ? 'bg-success-container text-on-success-container ring-1 ring-success-400'
+                      ? 'bg-success-container text-on-success-container ring-1 ring-[var(--m3-primary)]'
                       : isCurrent
                       ? 'bg-primary-container text-on-primary-container ring-2 ring-[var(--m3-primary)] animate-pulse'
                       : 'bg-surface-container text-on-surface-variant'
@@ -878,8 +833,8 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
                   className={`flex-1 h-12 sm:h-14 rounded-m3-md flex items-center justify-center text-base sm:text-lg font-bold ${
                     slot
                       ? slot.hit
-                        ? 'bg-success-container text-on-success-container border-2 border-success-500'
-                        : 'bg-error-container text-on-error-container border-2 border-error-500'
+                        ? 'bg-success-container text-on-success-container border-2 border-[var(--m3-primary)]'
+                        : 'bg-error-container text-on-error-container border-2 border-error'
                       : 'bg-surface-container text-on-surface-variant border-2 border-dashed border-outline-variant'
                   }`}
                 >

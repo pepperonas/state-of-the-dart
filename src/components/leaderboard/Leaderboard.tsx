@@ -159,11 +159,11 @@ const Leaderboard: React.FC = () => {
   const getMedalIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return <Trophy size={24} className="text-amber-400" />;
+        return <Trophy size={24} className="text-[var(--m3-medal-gold)]" />;
       case 2:
-        return <Medal size={24} className="text-gray-300" />;
+        return <Medal size={24} className="text-[var(--m3-medal-silver)]" />;
       case 3:
-        return <Medal size={24} className="text-orange-500" />;
+        return <Medal size={24} className="text-[var(--m3-medal-bronze)]" />;
       default:
         return <div className="text-lg font-bold text-on-surface-variant">#{rank}</div>;
     }
@@ -172,11 +172,11 @@ const Leaderboard: React.FC = () => {
   const getRankColor = (rank: number) => {
     switch (rank) {
       case 1:
-        return 'border-amber-400 bg-amber-500/10';
+        return 'border-[var(--m3-medal-gold)] bg-[color-mix(in_srgb,var(--m3-medal-gold)_12%,transparent)]';
       case 2:
-        return 'border-gray-300 bg-gray-400/10';
+        return 'border-[var(--m3-medal-silver)] bg-[color-mix(in_srgb,var(--m3-medal-silver)_12%,transparent)]';
       case 3:
-        return 'border-orange-500 bg-orange-500/10';
+        return 'border-[var(--m3-medal-bronze)] bg-[color-mix(in_srgb,var(--m3-medal-bronze)_12%,transparent)]';
       default:
         return 'border-outline-variant bg-surface-container';
     }
@@ -192,7 +192,7 @@ const Leaderboard: React.FC = () => {
 
         <Card variant="elevated" className="p-6 md:p-8">
           <div className="flex items-center gap-3 mb-6">
-            <Trophy size={32} className="text-amber-400" />
+            <Trophy size={32} className="text-[var(--m3-medal-gold)]" />
             <h1 className="m3-headline-medium text-on-surface">Leaderboard</h1>
           </div>
 
@@ -280,7 +280,7 @@ const Leaderboard: React.FC = () => {
                   <div className="m3-label-large text-on-surface-variant mt-1">Ø Spiele</div>
                 </div>
                 <div className="text-center">
-                  <div className="m3-title-large text-amber-400">
+                  <div className="m3-title-large text-[var(--m3-medal-gold)]">
                     {sortedData.reduce((sum, p) => sum + p.total180s, 0)}
                   </div>
                   <div className="m3-label-large text-on-surface-variant mt-1">Total 180s</div>

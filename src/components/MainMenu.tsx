@@ -124,7 +124,7 @@ const MainMenu: React.FC = () => {
       </a>
       <div className="max-w-6xl mx-auto" id="main-menu">
         <motion.header {...enterDrop} className="flex items-center justify-between gap-3 mb-6">
-          <h1 className="m3-headline-medium font-bold text-on-surface truncate">
+          <h1 className="m3-headline-medium m3-emphasized text-on-surface truncate">
             {t('common.app_name')}
           </h1>
           <div className="flex items-center gap-2 shrink-0">
@@ -150,7 +150,7 @@ const MainMenu: React.FC = () => {
                 <Play size={32} aria-hidden="true" />
               </span>
               <span className="min-w-0">
-                <span className="block m3-headline-small font-bold">
+                <span className="block m3-headline-small m3-emphasized">
                   {lastPlayers.length > 0 ? t('home.rematch') : t('home.new_game')}
                 </span>
                 <span className="block m3-body-large opacity-90 truncate">

@@ -59,7 +59,7 @@ const ResetPassword: React.FC = () => {
           <motion.div {...enterPop}>
             <Card variant="elevated" className="p-8 text-center">
               <AlertCircle className="text-error mx-auto mb-4" size={48} />
-              <h2 className="m3-headline-small font-bold text-on-surface mb-4">
+              <h2 className="m3-headline-small m3-emphasized text-on-surface mb-4">
                 Ungültiger Link
               </h2>
               <p className="m3-body-large text-on-surface-variant mb-6">
@@ -87,7 +87,7 @@ const ResetPassword: React.FC = () => {
               <div className="w-16 h-16 bg-success-container rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="text-on-success-container" size={32} />
               </div>
-              <h2 className="m3-headline-small font-bold text-on-surface mb-4">
+              <h2 className="m3-headline-small m3-emphasized text-on-surface mb-4">
                 Passwort erfolgreich geändert!
               </h2>
               <p className="m3-body-large text-on-surface-variant mb-6">
@@ -111,7 +111,7 @@ const ResetPassword: React.FC = () => {
         <BackToLanding />
         <motion.div {...enterDrop} className="text-center mb-8">
           <div className="mb-4 flex justify-center text-primary"><Icon name="key" size={56} /></div>
-          <h1 className="m3-display-small font-bold text-on-surface mb-2">
+          <h1 className="m3-display-small m3-emphasized text-on-surface mb-2">
             Neues Passwort setzen
           </h1>
         </motion.div>

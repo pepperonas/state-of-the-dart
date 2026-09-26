@@ -86,7 +86,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
                   </div>
                   <div>
                     <h4 className="m3-title-medium text-on-surface mb-1">Spieler erstellen</h4>
-                    <p className="text-on-surface-variant text-sm">
+                    <p className="text-on-surface-variant m3-body-medium">
                       Gehe zu <strong>Spieler</strong> → <strong>+ Neuer Spieler</strong>.
                       Wähle einen Namen und Avatar. Spieler-Statistiken werden automatisch getrackt.
                     </p>
@@ -101,7 +101,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
                   </div>
                   <div>
                     <h4 className="m3-title-medium text-on-surface mb-1">Match starten</h4>
-                    <p className="text-on-surface-variant text-sm">
+                    <p className="text-on-surface-variant m3-body-medium">
                       Klicke auf <strong>Quick Match</strong> → Wähle Spieler → Wähle Spielmodus (z.B. 501) → <strong>Spiel starten</strong>
                     </p>
                   </div>
@@ -115,7 +115,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
                   </div>
                   <div>
                     <h4 className="m3-title-medium text-on-surface mb-1">Würfe eingeben</h4>
-                    <p className="text-on-surface-variant text-sm">
+                    <p className="text-on-surface-variant m3-body-medium">
                       Klicke auf der Dartscheibe die getroffenen Felder an. Nach 3 Darts → <strong>Bestätigen</strong>.
                       Die App berechnet automatisch Scores, Averages und mehr.
                     </p>
@@ -130,7 +130,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
                   </div>
                   <div>
                     <h4 className="m3-title-medium text-on-surface mb-1">Statistiken ansehen</h4>
-                    <p className="text-on-surface-variant text-sm">
+                    <p className="text-on-surface-variant m3-body-medium">
                       Nach dem Match: <strong>Statistiken</strong> → Sieh Heatmaps, Charts, Averages und mehr!
                     </p>
                   </div>
@@ -139,7 +139,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
             </div>
 
             <div className="rounded-m3-md p-4 bg-success-container text-on-success-container">
-              <p className="m3-body-medium text-sm">
+              <p className="m3-body-medium m3-body-medium">
                 <strong> Fertig!</strong> Du bist bereit für dein erstes Match. Viel Erfolg!
               </p>
             </div>
@@ -157,11 +157,11 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
                   <Target className="text-primary" size={20} />
                   501 (Standard)
                 </h4>
-                <p className="text-on-surface-variant text-sm mb-3">
+                <p className="text-on-surface-variant m3-body-medium mb-3">
                   Jeder Spieler startet mit 501 Punkten. Ziel: Auf exakt 0 runterzählen.
                   Letzter Dart muss ein Doppel sein (Double-Out).
                 </p>
-                <div className="bg-surface-container p-3 rounded-m3-sm space-y-1 text-xs text-on-surface-variant">
+                <div className="bg-surface-container p-3 rounded-m3-sm space-y-1 m3-body-small text-on-surface-variant">
                   <p><strong>Einstellungen:</strong></p>
                   <p>• First to: Anzahl Legs zum Gewinnen (Best of 3, 5, 7, etc.)</p>
                   <p>• Double Out: Erforderlich (Standard) oder Deaktiviert</p>
@@ -171,10 +171,10 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Cricket</h4>
-                <p className="text-on-surface-variant text-sm mb-2">
+                <p className="text-on-surface-variant m3-body-medium mb-2">
                   Strategie-Spiel: Schließe Zahlen 15-20 + Bull. Punkte sammeln durch offene Zahlen.
                 </p>
-                <div className="bg-surface-container p-3 rounded-m3-sm space-y-1 text-xs text-on-surface-variant">
+                <div className="bg-surface-container p-3 rounded-m3-sm space-y-1 m3-body-small text-on-surface-variant">
                   <p>• 3 Treffer schließen eine Zahl</p>
                   <p>• Weitere Treffer bringen Punkte (nur wenn Gegner noch offen)</p>
                   <p>• Gewinner: Alle Zahlen geschlossen + meiste Punkte</p>
@@ -183,7 +183,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Around the Clock</h4>
-                <p className="text-on-surface-variant text-sm">
+                <p className="text-on-surface-variant m3-body-medium">
                   Treffe alle Zahlen von 1-20 in Reihenfolge. Schnellster gewinnt!
                 </p>
               </div>
@@ -193,10 +193,10 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
                   <Gamepad2 className="text-tertiary" size={20} />
                   KI-Gegner (Bots)
                 </h4>
-                <p className="text-on-surface-variant text-sm mb-2">
+                <p className="text-on-surface-variant m3-body-medium mb-2">
                   Trainiere gegen adaptive KI mit 10 Schwierigkeitsstufen:
                 </p>
-                <ul className="text-on-surface-variant text-xs space-y-1">
+                <ul className="text-on-surface-variant m3-body-small space-y-1">
                   <li>• <strong>Level 1-3:</strong> Anfänger (30-50 Average)</li>
                   <li>• <strong>Level 4-6:</strong> Amateur (50-70 Average)</li>
                   <li>• <strong>Level 7-8:</strong> Fortgeschritten (70-85 Average)</li>
@@ -215,10 +215,10 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
             <div className="space-y-4">
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Spieler erstellen</h4>
-                <p className="text-on-surface-variant text-sm mb-3">
+                <p className="text-on-surface-variant m3-body-medium mb-3">
                   <strong>Spieler</strong> → <strong>+ Neuer Spieler</strong>
                 </p>
-                <ul className="text-on-surface-variant text-sm space-y-1">
+                <ul className="text-on-surface-variant m3-body-medium space-y-1">
                   <li>• Name eingeben</li>
                   <li>• <strong>Emoji wählen:</strong> WhatsApp-Style Emoji-Picker mit 8 Kategorien</li>
                   <li>• Emoji ersetzt den Anfangsbuchstaben als Avatar</li>
@@ -228,44 +228,44 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Haupt-Profil (Main Player)</h4>
-                <p className="text-on-surface-variant text-sm mb-2">
+                <p className="text-on-surface-variant m3-body-medium mb-2">
                   Setze einen Spieler als Haupt-Profil, um dessen Stats im Dashboard zu sehen.
                 </p>
-                <p className="text-on-surface-variant text-sm">
+                <p className="text-on-surface-variant m3-body-medium">
                   <strong>Klicke auf die Krone</strong> neben einem Spieler, um ihn als Main Player zu setzen.
                 </p>
               </div>
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Spieler-Profile</h4>
-                <p className="text-on-surface-variant text-sm mb-3">
+                <p className="text-on-surface-variant m3-body-medium mb-3">
                   <strong>Klicke auf einen Spieler-Eintrag</strong> in der Liste, um sein vollständiges Profil zu sehen:
                 </p>
-                <ul className="text-on-surface-variant text-sm space-y-1">
+                <ul className="text-on-surface-variant m3-body-medium space-y-1">
                   <li>• <strong>Statistiken:</strong> Average, 180s, Checkout-Rate</li>
                   <li>• <strong>Heatmap:</strong> L.A. Style Heatmap mit smooth Blur-Effekten</li>
                   <li>• <strong>Match History:</strong> Alle gespielten Matches</li>
                   <li>• <strong>Personal Bests:</strong> Beste Leistungen</li>
                   <li>• <strong>Avatar:</strong> Professionelles Design mit geschwungener Schrift oder Emoji</li>
                 </ul>
-                <p className="text-on-surface-variant text-sm mt-2">
+                <p className="text-on-surface-variant m3-body-medium mt-2">
                   <strong>Tipp:</strong> Der gesamte Listeneintrag ist klickbar - nicht nur das Auge-Icon!
                 </p>
               </div>
 
               <div className="rounded-m3-md p-4 bg-primary-container text-on-primary-container">
                 <h4 className="m3-title-medium text-on-surface mb-2"> Suchfunktion & Pagination</h4>
-                <p className="text-on-surface-variant text-sm mb-2">
+                <p className="text-on-surface-variant m3-body-medium mb-2">
                   <strong>Suche nach Spielern:</strong> Nutze das Suchfeld, um schnell einen Spieler zu finden.
                 </p>
-                <p className="text-on-surface-variant text-sm mb-2">
+                <p className="text-on-surface-variant m3-body-medium mb-2">
                   <strong>Blättere durch Seiten:</strong> Wähle 10/20/50/100 Items pro Seite und nutze die Navigation, um durch große Listen zu blättern.
                 </p>
               </div>
 
               <div className="rounded-m3-md p-4 bg-secondary-container text-on-secondary-container">
                 <h4 className="m3-title-medium text-on-surface mb-2"> Tipp: Multi-Tenant</h4>
-                <p className="text-on-surface-variant text-sm">
+                <p className="text-on-surface-variant m3-body-medium">
                   Du kannst mehrere <strong>Profile/Tenants</strong> erstellen (z.B. Familie, Verein, Freunde).
                   Wechsle zwischen Profilen in den <strong>Einstellungen</strong>.
                 </p>
@@ -282,52 +282,52 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
             <div className="space-y-4">
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Doubles Training</h4>
-                <p className="text-on-surface-variant text-sm">
+                <p className="text-on-surface-variant m3-body-medium">
                   Trainiere alle Doppel von D1 bis D20. Verbessere deine Checkout-Skills!
                 </p>
               </div>
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Triples Training</h4>
-                <p className="text-on-surface-variant text-sm">
+                <p className="text-on-surface-variant m3-body-medium">
                   Trainiere alle Tripel von T20 bis T1. Perfektioniere deine hohen Scores.
                 </p>
               </div>
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Around the Clock</h4>
-                <p className="text-on-surface-variant text-sm">
+                <p className="text-on-surface-variant m3-body-medium">
                   Triff alle Zahlen 1-20 in Reihenfolge. Jedes Segment zählt (Single, Double, Triple).
                 </p>
               </div>
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Checkout Training</h4>
-                <p className="text-on-surface-variant text-sm">
+                <p className="text-on-surface-variant m3-body-medium">
                   Übe häufige Checkout-Kombinationen (40, 60, 80, etc.). Verbessere deine Finish-Rate!
                 </p>
               </div>
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Bob's 27</h4>
-                <p className="text-on-surface-variant text-sm mb-2">
+                <p className="text-on-surface-variant m3-body-medium mb-2">
                   Starte mit 27 Punkten. Zielzahl treffen: +3 Punkte. Verfehlen: -3 Punkte.
                 </p>
-                <p className="text-on-surface-variant text-sm">
+                <p className="text-on-surface-variant m3-body-medium">
                   <strong>Ziel:</strong> Punkte nicht auf 0 fallen lassen!
                 </p>
               </div>
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Score Training</h4>
-                <p className="text-on-surface-variant text-sm">
+                <p className="text-on-surface-variant m3-body-medium">
                   Erziele 60+ Punkte pro Wurf. Baue Konstanz und Power auf!
                 </p>
               </div>
 
               <div className="rounded-m3-md p-4 bg-success-container text-on-success-container">
                 <h4 className="m3-title-medium text-on-surface mb-2"> Training-Stats</h4>
-                <p className="text-on-surface-variant text-sm">
+                <p className="text-on-surface-variant m3-body-medium">
                   Alle Training-Sessions werden gespeichert und in deiner <strong>Heatmap</strong> berücksichtigt!
                   Sieh deinen Fortschritt in den Statistiken.
                 </p>
@@ -344,10 +344,10 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
             <div className="space-y-4">
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Heatmap</h4>
-                <p className="text-on-surface-variant text-sm mb-2">
+                <p className="text-on-surface-variant m3-body-medium mb-2">
                   Visuelle Darstellung aller deiner Würfe. Sieh auf einen Blick:
                 </p>
-                <ul className="text-on-surface-variant text-sm space-y-1">
+                <ul className="text-on-surface-variant m3-body-medium space-y-1">
                   <li>• Welche Felder du am häufigsten triffst</li>
                   <li>• Deine Stärken und Schwächen</li>
                   <li>• Trefferverteilung über alle Matches</li>
@@ -356,17 +356,17 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Average-Charts</h4>
-                <p className="text-on-surface-variant text-sm">
+                <p className="text-on-surface-variant m3-body-medium">
                   Verfolge deine Average-Entwicklung über Zeit. Filter nach Zeitraum (7/30/90/365 Tage).
                 </p>
               </div>
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Checkout-Statistiken</h4>
-                <p className="text-on-surface-variant text-sm mb-2">
+                <p className="text-on-surface-variant m3-body-medium mb-2">
                   Detaillierte Checkout-Analyse:
                 </p>
-                <ul className="text-on-surface-variant text-sm space-y-1">
+                <ul className="text-on-surface-variant m3-body-medium space-y-1">
                   <li>• Checkout-Prozentsatz</li>
                   <li>• Häufigste Checkouts</li>
                   <li>• Beste Checkout-Kombinationen</li>
@@ -376,11 +376,11 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Match History</h4>
-                <p className="text-on-surface-variant text-sm mb-2">
+                <p className="text-on-surface-variant m3-body-medium mb-2">
                   Alle gespielten Matches mit Details: Gegner, Score, Datum, Average, 180s.
                   Klicke auf ein Match für detaillierte Statistiken.
                 </p>
-                <ul className="text-on-surface-variant text-sm space-y-1 mt-2">
+                <ul className="text-on-surface-variant m3-body-medium space-y-1 mt-2">
                   <li>• <strong>Suchfunktion:</strong> Suche nach Gegner, Datum oder Spieltyp</li>
                   <li>• <strong>Pagination:</strong> Blättere durch Seiten (10/20/50/100 pro Seite)</li>
                   <li>• <strong>Wurfverlauf:</strong> Im Detail-Modal siehst du alle Würfe pro Spieler</li>
@@ -389,7 +389,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
 
               <div className="rounded-m3-md p-4 bg-primary-container text-on-primary-container">
                 <h4 className="m3-title-medium text-on-surface mb-2"> Export-Funktion</h4>
-                <p className="text-on-surface-variant text-sm">
+                <p className="text-on-surface-variant m3-body-medium">
                   Exportiere deine Stats in verschiedenen Formaten: CSV, Excel, PDF, JSON.
                   Perfekt für eigene Analysen!
                 </p>
@@ -410,7 +410,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
             <div className="space-y-4">
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Achievement-Kategorien</h4>
-                <ul className="text-on-surface-variant text-sm space-y-2">
+                <ul className="text-on-surface-variant m3-body-medium space-y-2">
                   <li>• <strong>Einsteiger:</strong> Erste Schritte (Erstes Match, Erster Sieg)</li>
                   <li>• <strong>Skill-Based:</strong> 180, 171+, hohe Checkouts</li>
                   <li>• <strong>Konsistenz:</strong> Win Streaks, Perfect Legs</li>
@@ -424,26 +424,26 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
                 <div className="space-y-3">
                   <div className="bg-surface-container p-3 rounded-m3-sm">
                     <p className="text-on-surface m3-title-medium"> Erste Schritte</p>
-                    <p className="text-on-surface-variant text-sm">Erstes Match abgeschlossen</p>
+                    <p className="text-on-surface-variant m3-body-medium">Erstes Match abgeschlossen</p>
                   </div>
                   <div className="bg-surface-container p-3 rounded-m3-sm">
                     <p className="text-on-surface m3-title-medium"> Century</p>
-                    <p className="text-on-surface-variant text-sm">100+ Punkte in einem Wurf</p>
+                    <p className="text-on-surface-variant m3-body-medium">100+ Punkte in einem Wurf</p>
                   </div>
                   <div className="bg-surface-container p-3 rounded-m3-sm">
                     <p className="text-on-surface m3-title-medium"> Maximum</p>
-                    <p className="text-on-surface-variant text-sm">180 Punkte (3x T20)</p>
+                    <p className="text-on-surface-variant m3-body-medium">180 Punkte (3x T20)</p>
                   </div>
                   <div className="bg-surface-container p-3 rounded-m3-sm">
                     <p className="text-on-surface m3-title-medium"> Hot Streak</p>
-                    <p className="text-on-surface-variant text-sm">5 Spiele in Folge gewonnen</p>
+                    <p className="text-on-surface-variant m3-body-medium">5 Spiele in Folge gewonnen</p>
                   </div>
                 </div>
               </div>
 
               <div className="rounded-m3-md p-4 bg-tertiary-container text-on-tertiary-container">
                 <h4 className="m3-title-medium text-on-surface mb-2"> Benachrichtigungen</h4>
-                <p className="text-on-surface-variant text-sm">
+                <p className="text-on-surface-variant m3-body-medium">
                   Achievements werden während des Spiels automatisch freigeschaltet und angezeigt!
                   Aktiviere Sound & Benachrichtigungen in den Einstellungen.
                 </p>
@@ -460,7 +460,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
             <div className="space-y-4">
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Audio & Sound</h4>
-                <ul className="text-on-surface-variant text-sm space-y-1">
+                <ul className="text-on-surface-variant m3-body-medium space-y-1">
                   <li>• <strong>Caller Volume:</strong> Professionelle Ansagen (Scores, Checkouts)</li>
                   <li>• <strong>Effects Volume:</strong> Dart-Treffer, Erfolge</li>
                   <li>• <strong>Getrennte Lautstärke:</strong> Caller und Effekte separat regelbar</li>
@@ -469,24 +469,24 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Theme / Aussehen</h4>
-                <p className="text-on-surface-variant text-sm">
+                <p className="text-on-surface-variant m3-body-medium">
                   Wähle zwischen <strong>Dark Mode</strong> und <strong>Light Mode</strong>.
                 </p>
               </div>
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Sprache</h4>
-                <p className="text-on-surface-variant text-sm">
+                <p className="text-on-surface-variant m3-body-medium">
                   Verfügbare Sprachen: <strong>Deutsch</strong> und <strong>English</strong>.
                 </p>
               </div>
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Progressive Web App (PWA)</h4>
-                <p className="text-on-surface-variant text-sm mb-2">
+                <p className="text-on-surface-variant m3-body-medium mb-2">
                   Installiere die App auf deinem Gerät:
                 </p>
-                <ul className="text-on-surface-variant text-sm space-y-1">
+                <ul className="text-on-surface-variant m3-body-medium space-y-1">
                   <li>• <strong>iOS:</strong> Safari → Teilen → "Zum Home-Bildschirm"</li>
                   <li>• <strong>Android:</strong> Chrome → Menü → "App installieren"</li>
                   <li>• <strong>Desktop:</strong> Chrome/Edge → Adresszeile → Install-Icon</li>
@@ -495,7 +495,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Daten-Management</h4>
-                <ul className="text-on-surface-variant text-sm space-y-1">
+                <ul className="text-on-surface-variant m3-body-medium space-y-1">
                   <li>• <strong>Profile/Tenants:</strong> Wechsle zwischen verschiedenen Profilen</li>
                   <li>• <strong>Neues Profil:</strong> Erstelle separate Umgebungen</li>
                   <li>• <strong>Demo-Daten:</strong> Generiere Test-Daten zum Ausprobieren</li>
@@ -504,7 +504,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
 
               <div className="rounded-m3-md p-4 bg-error-container text-on-error-container">
                 <h4 className="m3-title-medium text-on-surface mb-2"> Gefahrenzone</h4>
-                <p className="text-on-surface-variant text-sm">
+                <p className="text-on-surface-variant m3-body-medium">
                   <strong>Alle Daten löschen:</strong> Vorsicht! Löscht alle Matches, Spieler und Statistiken unwiderruflich.
                 </p>
               </div>
@@ -518,7 +518,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
             <h3 className="m3-headline-small text-on-surface">Admin-Panel </h3>
 
             <div className="rounded-m3-md p-4 bg-tertiary-container text-on-tertiary-container">
-              <p className="m3-body-medium text-sm">
+              <p className="m3-body-medium m3-body-medium">
                 <strong>Hinweis:</strong> Dieser Bereich ist nur für Administratoren sichtbar.
               </p>
             </div>
@@ -526,7 +526,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
             <div className="space-y-4">
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Benutzer-Verwaltung</h4>
-                <ul className="text-on-surface-variant text-sm space-y-1">
+                <ul className="text-on-surface-variant m3-body-medium space-y-1">
                   <li>• Alle registrierten Benutzer anzeigen</li>
                   <li>• Subscription-Status verwalten</li>
                   <li>• Lifetime-Zugang gewähren</li>
@@ -537,10 +537,10 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Abonnement-Verwaltung</h4>
-                <p className="text-on-surface-variant text-sm mb-2">
+                <p className="text-on-surface-variant m3-body-medium mb-2">
                   Vollständige Kontrolle über Subscriptions:
                 </p>
-                <ul className="text-on-surface-variant text-sm space-y-1">
+                <ul className="text-on-surface-variant m3-body-medium space-y-1">
                   <li>• Status ändern: Active, Trial, Expired, Lifetime</li>
                   <li>• Plan ändern: Monthly, Annual, Lifetime</li>
                   <li>• Ablaufdatum setzen</li>
@@ -549,7 +549,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Bug-Report-Verwaltung</h4>
-                <ul className="text-on-surface-variant text-sm space-y-1">
+                <ul className="text-on-surface-variant m3-body-medium space-y-1">
                   <li>• Alle Bug-Reports einsehen</li>
                   <li>• Status ändern: Open → In Progress → Resolved</li>
                   <li>• Admin-Notizen hinzufügen</li>
@@ -560,7 +560,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2">Statistiken</h4>
-                <p className="text-on-surface-variant text-sm">
+                <p className="text-on-surface-variant m3-body-medium">
                   Übersicht: Gesamtanzahl User, Active Subscriptions, Trial User, Expired User.
                 </p>
               </div>
@@ -576,7 +576,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
             <div className="space-y-4">
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2"> Für Anfänger</h4>
-                <ul className="text-on-surface-variant text-sm space-y-2">
+                <ul className="text-on-surface-variant m3-body-medium space-y-2">
                   <li>• Starte mit <strong>Bot-Gegnern Level 1-3</strong> zum Üben</li>
                   <li>• Nutze <strong>Trainingsmodi</strong> um spezifische Skills zu verbessern</li>
                   <li>• Sieh dir die <strong>Checkout-Tabelle</strong> an (im Spiel angezeigt)</li>
@@ -586,7 +586,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2"> Stats nutzen</h4>
-                <ul className="text-on-surface-variant text-sm space-y-2">
+                <ul className="text-on-surface-variant m3-body-medium space-y-2">
                   <li>• Prüfe deine <strong>Heatmap</strong> um Schwächen zu erkennen</li>
                   <li>• Verfolge deine <strong>Average-Entwicklung</strong> über Zeit</li>
                   <li>• Analysiere deine <strong>Checkout-Rate</strong> pro Doppel</li>
@@ -596,7 +596,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2"> Schnelle Eingabe & Undo</h4>
-                <ul className="text-on-surface-variant text-sm space-y-2">
+                <ul className="text-on-surface-variant m3-body-medium space-y-2">
                   <li>• Nach 3 Darts wird automatisch bestätigt (600ms Delay)</li>
                   <li>• <strong>Undo-Button:</strong> Macht den letzten Wurf rückgängig</li>
                   <li>• <strong>Undo Match-Ende:</strong> Versehentlich beendete Matches können fortgesetzt werden</li>
@@ -608,7 +608,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
 
               <div className="bg-surface-container-high rounded-m3-md p-4 shadow-m3-1">
                 <h4 className="m3-title-medium text-on-surface mb-2"> Achievements farmen</h4>
-                <ul className="text-on-surface-variant text-sm space-y-2">
+                <ul className="text-on-surface-variant m3-body-medium space-y-2">
                   <li>• Spiele verschiedene Modi für unterschiedliche Achievements</li>
                   <li>• Nutze <strong>Training</strong> für skill-basierte Erfolge</li>
                   <li>• Sieh dir die <strong>Achievement-Liste</strong> an für Inspiration</li>
@@ -617,7 +617,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
 
               <div className="rounded-m3-md p-4 bg-secondary-container text-on-secondary-container">
                 <h4 className="m3-title-medium text-on-surface mb-2"> Probleme melden</h4>
-                <p className="text-on-surface-variant text-sm">
+                <p className="text-on-surface-variant m3-body-medium">
                   Bug gefunden? Nutze den <strong>Bug-Report-Button</strong> (neben Undo im Spiel).
                   Screenshots werden automatisch erstellt!
                 </p>
@@ -625,7 +625,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
 
               <div className="rounded-m3-md p-4 bg-success-container text-on-success-container">
                 <h4 className="m3-title-medium text-on-surface mb-2"> Pro-Tipp</h4>
-                <p className="text-on-surface-variant text-sm">
+                <p className="text-on-surface-variant m3-body-medium">
                   Erstelle separate <strong>Tenants/Profile</strong> für verschiedene Szenarien:
                   Familie, Verein, Solo-Training. So bleiben deine Stats organisiert!
                 </p>
@@ -679,7 +679,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
                     }`}
                   >
                     <Icon size={18} className="flex-shrink-0 md:[&]:w-5 md:[&]:h-5" />
-                    <span className="m3-label-large text-sm md:text-base">{section.title}</span>
+                    <span className="m3-label-large m3-body-medium md:text-base">{section.title}</span>
                     {activeSection === section.id && (
                       <ChevronRight size={16} className="ml-auto hidden md:block" />
                     )}

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import { IconButton, Chip, TextField } from '../common';
@@ -36,6 +37,7 @@ const GROUPS: { name: string; icons: IconName[] }[] = [
 const ALL = GROUPS.flatMap((g) => g.icons);
 
 const AvatarPicker: React.FC<AvatarPickerProps> = ({ onSelect, onClose, currentEmoji }) => {
+  const { t } = useTranslation();
   const [group, setGroup] = useState(0);
   const [query, setQuery] = useState('');
   const current = currentEmoji ? iconForEmoji(currentEmoji) : undefined;
@@ -47,11 +49,18 @@ const AvatarPicker: React.FC<AvatarPickerProps> = ({ onSelect, onClose, currentE
   }, [group, query]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm m3-scrim-enter p-4">
-      <div className="bg-surface-container-high rounded-m3-xl border border-outline-variant shadow-m3-3 w-full max-w-md md:max-w-lg max-h-[80vh] flex flex-col m3-dialog-enter">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--m3-scrim)_60%,transparent)] backdrop-blur-sm m3-scrim-enter p-4" onClick={onClose}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="avatar-picker-title"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+        className="bg-surface-container-high rounded-m3-xl border border-outline-variant shadow-m3-3 w-full max-w-md md:max-w-lg max-h-[80vh] flex flex-col m3-dialog-enter"
+      >
         <div className="flex items-center justify-between p-4 border-b border-outline-variant">
-          <h3 className="m3-title-large text-on-surface">Avatar wählen</h3>
-          <IconButton label="Schließen" onClick={onClose}>
+          <h3 id="avatar-picker-title" className="m3-title-large text-on-surface">{t('players.choose_avatar')}</h3>
+          <IconButton label={t('common.close')} onClick={onClose}>
             <X size={20} />
           </IconButton>
         </div>
@@ -61,8 +70,9 @@ const AvatarPicker: React.FC<AvatarPickerProps> = ({ onSelect, onClose, currentE
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Suchen…"
-            aria-label="Avatar suchen"
+            placeholder={t('common.search')}
+            aria-label={t('players.search_avatar')}
+            autoFocus
           />
         </div>
 

@@ -116,7 +116,14 @@
     "reset_stats_confirm_title": "Statistiken zurücksetzen?",
     "reset_stats_confirm_text": "Alle Statistiken, Match-Daten, Heatmap, Training und Achievements von {{name}} werden unwiderruflich gelöscht. Der Spieler selbst bleibt erhalten.",
     "reset_stats_success": "Statistiken wurden zurückgesetzt",
-    "reset_stats_error": "Fehler beim Zurücksetzen der Statistiken"
+    "reset_stats_error": "Fehler beim Zurücksetzen der Statistiken",
+    "error_create": "Spieler konnte nicht angelegt werden.",
+    "error_update": "Spieler konnte nicht gespeichert werden.",
+    "error_avatar": "Avatar konnte nicht gespeichert werden.",
+    "error_main": "Haupt-Profil konnte nicht gesetzt werden.",
+    "error_delete": "Spieler konnte nicht gelöscht werden.",
+    "choose_avatar": "Avatar wählen",
+    "search_avatar": "Avatar suchen"
   },
   "game": {
     "game": "Spiel",
@@ -204,7 +211,12 @@
     "edit_dart": "Dart {{n}}: {{score}} – antippen zum Ändern",
     "empty_dart": "Dart {{n}}: leer",
     "scoreboard": "Spielstand",
-    "numpad_hint": "Summe tippen, ↵ übernimmt"
+    "numpad_hint": "Summe tippen, ↵ übernimmt",
+    "new_game_short": "Neues Spiel",
+    "stats_scope": "Zeitraum",
+    "current_leg": "Aktuelles Leg",
+    "whole_match": "Gesamtes Spiel",
+    "new_dart_value": "Neuer Dart-Wert …"
   },
   "stats": {
     "statistics": "Statistiken",
@@ -308,7 +320,16 @@
     "status": "Status",
     "created_at": "Erstellt am",
     "profile": "Profil",
-    "profile_info": "Profilinformationen"
+    "profile_info": "Profilinformationen",
+    "export_done": "Daten exportiert.",
+    "export_failed": "Export fehlgeschlagen. Bitte erneut versuchen.",
+    "import_pick_json": "Bitte eine JSON-Datei wählen.",
+    "import_confirm_title": "Daten importieren?",
+    "import_confirm_body": "Der Import überschreibt alle aktuellen Daten. Exportiere vorher ein Backup, wenn du sie behalten willst.",
+    "import_confirm_action": "Importieren",
+    "import_done": "Daten importiert – die Seite wird neu geladen.",
+    "import_failed": "Import fehlgeschlagen. Bitte die Datei prüfen.",
+    "delete_bug_confirm": "Bug-Report wirklich löschen?"
   },
   "user": {
     "account": "Account",
@@ -423,7 +444,8 @@
     "table_last_seen": "Zuletzt aktiv",
     "never_seen": "nie",
     "usage_summary": "{{total}} Spiele",
-    "user_label": "Nutzer"
+    "user_label": "Nutzer",
+    "action_failed": "Aktion fehlgeschlagen: {{error}}"
   },
   "debug": {
     "title": "Debug Flag",
@@ -682,5 +704,52 @@
     "step_match": "Erstes 501 spielen",
     "dismiss": "Einführung ausblenden",
     "done": "erledigt"
+  },
+  "shanghai": {
+    "points": "{{count}} Punkte"
+  },
+  "bug": {
+    "title": "Bug melden",
+    "fill_required": "Bitte Titel und Beschreibung ausfüllen.",
+    "send_failed": "Der Bug-Report konnte nicht gesendet werden.",
+    "severity_low": "Niedrig",
+    "severity_medium": "Mittel",
+    "severity_high": "Hoch",
+    "severity_critical": "Kritisch",
+    "category_gameplay": "Gameplay",
+    "category_ui": "Benutzeroberfläche",
+    "category_audio": "Audio/Sound",
+    "category_performance": "Performance",
+    "category_auth": "Login/Authentifizierung",
+    "category_data": "Daten/Speicherung",
+    "category_achievements": "Achievements",
+    "category_other": "Sonstiges",
+    "thanks": "Vielen Dank!",
+    "sent": "Dein Bug-Report wurde übermittelt.",
+    "field_title": "Titel",
+    "field_title_placeholder": "Kurze Zusammenfassung des Problems",
+    "field_description": "Beschreibung",
+    "field_description_placeholder": "Was hast du erwartet, und was ist stattdessen passiert?",
+    "field_severity": "Schweregrad",
+    "field_category": "Kategorie",
+    "field_screenshot": "Screenshot (optional)",
+    "remove_screenshot": "Screenshot entfernen",
+    "capturing": "Erfasse Screenshot …",
+    "capture": "Screenshot erfassen",
+    "sending": "Wird gesendet …",
+    "submit": "Bug melden"
+  },
+  "match_detail": {
+    "hidden_players": "{{count}} Spieler ohne Würfe in diesem Match werden nicht angezeigt.",
+    "round_chart": "Runden-Verlauf",
+    "round": "Runde",
+    "points": "Punkte",
+    "points_value": "{{count}} Punkte",
+    "no_rounds": "Keine Runden-Daten verfügbar",
+    "no_rounds_hint": "Dieses Match wurde vermutlich vor dem Tracking-Update gespielt.",
+    "throw_history": "Wurf-Verlauf",
+    "legs": "Legs",
+    "leg_winner": "Leg {{n}}: {{name}}",
+    "unknown": "Unbekannt"
   }
 }

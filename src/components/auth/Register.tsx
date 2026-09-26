@@ -63,7 +63,7 @@ const Register: React.FC = () => {
               <div className="w-16 h-16 bg-success-container rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="text-on-success-container" size={32} />
               </div>
-              <h2 className="m3-headline-small font-bold text-on-surface mb-4">
+              <h2 className="m3-headline-small m3-emphasized text-on-surface mb-4">
                 Registrierung erfolgreich!
               </h2>
               <p className="m3-body-large text-on-surface-variant mb-6">
@@ -99,7 +99,7 @@ const Register: React.FC = () => {
         {/* Logo/Header */}
         <motion.div {...enterDrop} className="text-center mb-8">
           <div className="mb-4 flex justify-center text-primary"><Icon name="target" size={56} /></div>
-          <h1 className="m3-display-small font-bold text-on-surface mb-2">
+          <h1 className="m3-display-small m3-emphasized text-on-surface mb-2">
             State of the Dart
           </h1>
           <p className="m3-body-large text-on-surface-variant">Erstelle deinen kostenlosen Account</p>
@@ -108,7 +108,7 @@ const Register: React.FC = () => {
         {/* Register Card */}
         <motion.div {...enterPop}>
           <Card variant="elevated" className="p-8">
-            <h2 className="m3-headline-small font-bold text-on-surface mb-2">Registrieren</h2>
+            <h2 className="m3-headline-small m3-emphasized text-on-surface mb-2">Registrieren</h2>
             <p className="m3-body-medium text-on-surface-variant mb-6">
               <strong style={{ color:'var(--m3-primary)'}}>30 Tage kostenlos</strong> testen!
             </p>

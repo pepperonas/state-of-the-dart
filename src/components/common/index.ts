@@ -18,3 +18,8 @@ export { default as Snackbar } from './Snackbar';
 export { default as SegmentedButton } from './SegmentedButton';
 export type { SegmentOption } from './SegmentedButton';
 export { default as ErrorState } from './ErrorState';
+export { default as LoadingIndicator } from './LoadingIndicator';
+export { default as TextArea } from './TextArea';
+export { FeedbackProvider } from './Feedback';
+export { useFeedback } from './feedbackContext';
+export type { ConfirmOptions } from './feedbackContext';
