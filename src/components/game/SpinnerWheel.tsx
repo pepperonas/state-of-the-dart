@@ -139,9 +139,9 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
     ctx.fillStyle = '#f0e130';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('SPIN', centerX, centerY);
+    ctx.fillText(t('spinner.spin'), centerX, centerY);
 
-  }, [players, segmentAngle]);
+  }, [players, segmentAngle, t]);
 
   // Auto-start spin after component mounts
   useEffect(() => {
@@ -286,7 +286,7 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
               {winner.name}
             </div>
             <div className="m3-body-large text-on-surface-variant mt-1">
-              wirft zuerst!
+              {t('spinner.throws_first')}
             </div>
           </div>
         )}

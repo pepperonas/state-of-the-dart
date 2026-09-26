@@ -35,7 +35,7 @@ type ResumableItem =
   | { kind: 'local'; game: LocalGameSummary; timestamp: number };
 
 const ResumeGameScreen: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { state, dispatch, loadMatchFromDb } = useGame();
 
@@ -116,7 +116,7 @@ const ResumeGameScreen: React.FC = () => {
 
   const formatDate = (ts: number) => {
     const d = new Date(ts < 10000000000 ? ts * 1000 : ts);
-    return d.toLocaleDateString('de-DE', {
+    return d.toLocaleDateString(i18n.language, {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -128,7 +128,7 @@ const ResumeGameScreen: React.FC = () => {
   const getLegsProgress = (match: ResumableMatch) => {
     const legsToWin = match.settings.legsToWin || 3;
     const scores = match.players.map((p) => `${p.legsWon}`).join(' : ');
-    return `${scores} (Best of ${legsToWin * 2 - 1})`;
+    return t('resume_screen.legs_progress', { scores, count: legsToWin * 2 - 1 });
   };
 
   const getGameTypeLabel = (gameType: LocalGameSummary['gameType']) => {
@@ -222,7 +222,7 @@ const ResumeGameScreen: React.FC = () => {
                           <Target size={14} />
                           <span>
                             {match.settings.startScore || 501}
-                            {match.settings.doubleOut !== false ? ' DO' : ''}
+                            {match.settings.doubleOut !== false ? ` ${t('resume_screen.double_out_short')}` : ''}
                             {' · '}
                             {getLegsProgress(match)}
                           </span>

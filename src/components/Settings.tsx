@@ -22,7 +22,7 @@ interface SettingsProps {
 
 const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
   const { notify, confirm } = useFeedback();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { settings, updateSettings } = useSettings();
   const { currentTenant, setCurrentTenant } = useTenant();
@@ -57,6 +57,24 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
     loadBugReports();
   }, [showBugReportModal]); // Reload when modal closes
 
+
+  const statusLabel = (status: BugReport['status']) =>
+    status === 'in_progress' ? t('admin.status_in_progress') :
+    status === 'resolved' ? t('admin.status_resolved') :
+    status === 'closed' ? t('admin.status_closed') : t('admin.status_open');
+
+  const severityLabel = (severity: BugReport['severity']) =>
+    severity === 'critical' ? t('bug.severity_critical') :
+    severity === 'high' ? t('bug.severity_high') :
+    severity === 'medium' ? t('bug.severity_medium') : t('bug.severity_low');
+
+  const categoryLabel = (category: BugReport['category']) =>
+    category === 'gameplay' ? t('bug.category_gameplay') :
+    category === 'ui' ? t('bug.category_ui') :
+    category === 'audio' ? t('bug.category_audio') :
+    category === 'performance' ? t('bug.category_performance') :
+    category === 'auth' ? t('bug.category_auth') :
+    category === 'data' ? t('bug.category_data') : t('bug.category_other');
 
   const handleInstallClick = async () => {
     if (canPrompt) {
@@ -141,7 +159,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                       </div>
                       <div>
                         <p className="text-on-success-container font-semibold">{t('settings.app_installed')} </p>
-                        <p className="text-on-success-container m3-body-medium">Die App läuft als eigenständige Anwendung.</p>
+                        <p className="text-on-success-container m3-body-medium">{t('settings_page.app_standalone')}</p>
                       </div>
                     </div>
                   </div>
@@ -174,8 +192,8 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
 
                     <div className="mt-3 p-3 bg-surface-container rounded-m3-md">
                       <p className="m3-body-small text-on-surface-variant">
-                        <strong>iOS:</strong> {t('settings.pwa_ios_tip')}<br/>
-                        <strong>Android:</strong> {t('settings.pwa_android_tip')}
+                        {t('settings.pwa_ios_tip')}<br/>
+                        {t('settings.pwa_android_tip')}
                       </p>
                     </div>
                   </>
@@ -260,7 +278,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               <div className="space-y-4">
                 {/* Caller Volume */}
                 <div>
-                  <label className="flex items-center justify-between mb-2">
+                  <label htmlFor="caller-volume" className="flex items-center justify-between mb-2">
                     <span className="text-on-surface-variant">{t('settings.caller_volume')}</span>
                     <span className="m3-body-medium text-on-surface-variant">{settings.callerVolume ?? settings.soundVolume}%</span>
                   </label>
@@ -268,19 +286,20 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                     type="range"
                     min="0"
                     max="100"
+                    id="caller-volume"
                     value={settings.callerVolume ?? settings.soundVolume}
                     onChange={(e) => {
                       const volume = parseInt(e.target.value);
                       updateSettings({ callerVolume: volume });
                       audioSystem.setCallerVolume(volume);
                     }}
-                    className="w-full accent-primary"
+                    className="w-full h-6 accent-primary"
                   />
                 </div>
 
                 {/* Effects Volume */}
                 <div>
-                  <label className="flex items-center justify-between mb-2">
+                  <label htmlFor="effects-volume" className="flex items-center justify-between mb-2">
                     <span className="text-on-surface-variant">{t('settings.effects_volume')}</span>
                     <span className="m3-body-medium text-on-surface-variant">{settings.effectsVolume ?? settings.soundVolume}%</span>
                   </label>
@@ -288,13 +307,14 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                     type="range"
                     min="0"
                     max="100"
+                    id="effects-volume"
                     value={settings.effectsVolume ?? settings.soundVolume}
                     onChange={(e) => {
                       const volume = parseInt(e.target.value);
                       updateSettings({ effectsVolume: volume });
                       audioSystem.setEffectsVolume(volume);
                     }}
-                    className="w-full accent-primary"
+                    className="w-full h-6 accent-primary"
                   />
                 </div>
 
@@ -379,14 +399,14 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
             <div className="pb-6 border-b border-outline-variant">
               <h3 className="m3-title-large mb-4 flex items-center gap-2 text-on-surface">
                 <Globe size={20} />
-                Language / Sprache
+                {t('settings_page.language_label')}
               </h3>
 
               <Select<'de' | 'en'>
                 value={settings.language}
                 onChange={(language) => updateSettings({ language })}
                 size="lg"
-                aria-label="Language / Sprache"
+                aria-label={t('settings_page.language_label')}
                 options={[
  { value:'de', label:' Deutsch' },
  { value:'en', label:' English' },
@@ -394,7 +414,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               />
 
               <p className="m3-body-medium text-on-surface-variant mt-2">
-                Language changes are applied instantly
+                {t('settings_page.language_instant')}
               </p>
             </div>
             
@@ -412,7 +432,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                   icon={<Download size={20} />}
                   onClick={handleExport}
                 >
-                  {t('settings.export')} (JSON)
+                  {t('settings_page.export_json')}
                 </Button>
 
                 <Button
@@ -421,7 +441,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                   icon={<Upload size={20} />}
                   onClick={handleImportClick}
                 >
-                  {t('settings.import')} (JSON)
+                  {t('settings_page.import_json')}
                 </Button>
 
                 <input
@@ -485,32 +505,21 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                           report.status === 'resolved' ? 'bg-success-container text-on-success-container' :
                           'bg-surface-container-high text-on-surface-variant'
                         }`}>
-                          {report.status === 'in_progress' ? 'in Bearbeitung' :
-                           report.status === 'resolved' ? 'Gelöst' :
-                           report.status === 'closed' ? 'Geschlossen' : 'Offen'}
+                          {statusLabel(report.status)}
                         </span>
                       </div>
                       <p className="m3-body-medium text-on-surface-variant mb-2 line-clamp-2">{report.description}</p>
                       <div className="flex items-center gap-3 m3-body-small text-on-surface-variant">
-                        <span>{new Date(report.createdAt).toLocaleDateString('de-DE')}</span>
+                        <span>{new Date(report.createdAt).toLocaleDateString(i18n.language)}</span>
                         <span className={`px-2 py-0.5 rounded ${
                           report.severity === 'critical' ? 'bg-error-container text-on-error-container' :
                           report.severity === 'high' ? 'bg-tertiary-container text-on-tertiary-container' :
                           report.severity === 'medium' ? 'bg-secondary-container text-on-secondary-container' :
                           'bg-primary-container text-on-primary-container'
                         }`}>
-                          {report.severity === 'critical' ? 'Kritisch' :
-                           report.severity === 'high' ? 'Hoch' :
-                           report.severity === 'medium' ? 'Mittel' : 'Niedrig'}
+                          {severityLabel(report.severity)}
                         </span>
-                        <span className="capitalize">{
-                          report.category === 'gameplay' ? 'Gameplay' :
-                          report.category === 'ui' ? 'UI' :
-                          report.category === 'audio' ? 'Audio' :
-                          report.category === 'performance' ? 'Performance' :
-                          report.category === 'auth' ? 'Auth' :
-                          report.category === 'data' ? 'Daten' : 'Sonstiges'
-                        }</span>
+                        <span>{categoryLabel(report.category)}</span>
                       </div>
                     </Card>
                   ))}
@@ -544,7 +553,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                   <div>
                     <p className="font-semibold text-on-surface">{currentTenant?.name}</p>
                     <p className="m3-body-medium text-on-surface-variant">
-                      Aktives Profil
+                      {t('settings_page.active_profile')}
                     </p>
                   </div>
                 </div>
@@ -563,7 +572,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
           title={
             <span className="flex items-center gap-3">
               <AlertCircle className="text-tertiary" size={28} />
-              <span className="m3-title-large text-on-surface">Bug Report Details</span>
+              <span className="m3-title-large text-on-surface">{t('admin.bug_report_details')}</span>
             </span>
           }
           actions={
@@ -588,7 +597,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                   }
                 }}
               >
-                Löschen
+                {t('common.delete')}
               </Button>
             </>
           }
@@ -596,7 +605,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
             <div className="space-y-5">
               {/* Title */}
               <div>
-                <label className="block m3-label-large text-on-surface-variant mb-2">Titel</label>
+                <label className="block m3-label-large text-on-surface-variant mb-2">{t('bug.field_title')}</label>
                 <p className="text-on-surface m3-title-medium">{selectedBugReport.title}</p>
               </div>
 
@@ -610,9 +619,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                     selectedBugReport.status === 'resolved' ? 'bg-success-container text-on-success-container' :
                     'bg-surface-container-high text-on-surface-variant'
                   }`}>
-                    {selectedBugReport.status === 'in_progress' ? 'In Bearbeitung' :
-                     selectedBugReport.status === 'resolved' ? 'Gelöst' :
-                     selectedBugReport.status === 'closed' ? 'Geschlossen' : 'Offen'}
+                    {statusLabel(selectedBugReport.status)}
                   </span>
                 </div>
 
@@ -624,9 +631,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                     selectedBugReport.severity === 'medium' ? 'bg-secondary-container text-on-secondary-container' :
                     'bg-primary-container text-on-primary-container'
                   }`}>
-                    {selectedBugReport.severity === 'critical' ? 'Kritisch' :
-                     selectedBugReport.severity === 'high' ? 'Hoch' :
-                     selectedBugReport.severity === 'medium' ? 'Mittel' : 'Niedrig'}
+                    {severityLabel(selectedBugReport.severity)}
                   </span>
                 </div>
               </div>
@@ -635,20 +640,15 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block m3-label-large text-on-surface-variant mb-2">{t('settings.category')}</label>
-                  <p className="text-on-surface capitalize">
-                    {selectedBugReport.category === 'gameplay' ? 'Gameplay' :
-                     selectedBugReport.category === 'ui' ? 'Benutzeroberfläche' :
-                     selectedBugReport.category === 'audio' ? 'Audio' :
-                     selectedBugReport.category === 'performance' ? 'Performance' :
-                     selectedBugReport.category === 'auth' ? 'Authentifizierung' :
-                     selectedBugReport.category === 'data' ? 'Daten' : 'Sonstiges'}
+                  <p className="text-on-surface">
+                    {categoryLabel(selectedBugReport.category)}
                   </p>
                 </div>
 
                 <div>
                   <label className="block m3-label-large text-on-surface-variant mb-2">{t('settings.created_at')}</label>
                   <p className="text-on-surface">
-                    {new Date(selectedBugReport.createdAt).toLocaleString('de-DE', {
+                    {new Date(selectedBugReport.createdAt).toLocaleString(i18n.language, {
                       day: '2-digit',
                       month: '2-digit',
                       year: 'numeric',
@@ -661,7 +661,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
 
               {/* Description */}
               <div>
-                <label className="block m3-label-large text-on-surface-variant mb-2">Beschreibung</label>
+                <label className="block m3-label-large text-on-surface-variant mb-2">{t('bug.field_description')}</label>
                 <p className="text-on-surface bg-surface-container rounded-m3-md p-4 whitespace-pre-wrap">
                   {selectedBugReport.description}
                 </p>
@@ -670,14 +670,15 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               {/* Screenshot */}
               {selectedBugReport.screenshotUrl && (
                 <div>
-                  <label className="block m3-label-large text-on-surface-variant mb-2">Screenshot</label>
+                  <label className="block m3-label-large text-on-surface-variant mb-2">{t('admin.screenshot')}</label>
                   <div className="relative group">
-                    <img
-                      src={selectedBugReport.screenshotUrl}
-                      alt="Bug screenshot"
-                      className="w-full rounded-m3-md border border-outline-variant cursor-pointer hover:border-primary transition-colors"
-                      onClick={() => window.open(selectedBugReport.screenshotUrl, '_blank')}
-                    />
+                    <a href={selectedBugReport.screenshotUrl} target="_blank" rel="noopener noreferrer" className="block">
+                      <img
+                        src={selectedBugReport.screenshotUrl}
+                        alt={t('settings_page.bug_screenshot_alt')}
+                        className="w-full rounded-m3-md border border-outline-variant hover:border-primary transition-colors"
+                      />
+                    </a>
                     <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <a
                         href={selectedBugReport.screenshotUrl}
@@ -685,7 +686,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                         className="px-3 py-1 bg-surface-container-highest hover:bg-surface-container-high text-on-surface m3-body-medium rounded-m3-sm transition-colors"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        Download
+                        {t('admin.download')}
                       </a>
                     </div>
                   </div>
@@ -695,16 +696,16 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               {/* Browser Info */}
               {selectedBugReport.browserInfo && (
                 <div>
-                  <label className="block m3-label-large text-on-surface-variant mb-2">Browser-Informationen</label>
+                  <label className="block m3-label-large text-on-surface-variant mb-2">{t('settings_page.browser_info')}</label>
                   <div className="bg-surface-container rounded-m3-md p-4 m3-body-medium">
                     <p className="text-on-surface-variant mb-1">
-                      <span className="text-on-surface font-medium">User Agent:</span> {selectedBugReport.browserInfo.userAgent}
+                      <span className="text-on-surface font-medium">{t('settings_page.user_agent')}</span> {selectedBugReport.browserInfo.userAgent}
                     </p>
                     <p className="text-on-surface-variant mb-1">
-                      <span className="text-on-surface font-medium">Bildschirm:</span> {selectedBugReport.browserInfo.screenResolution}
+                      <span className="text-on-surface font-medium">{t('settings_page.screen')}</span> {selectedBugReport.browserInfo.screenResolution}
                     </p>
                     <p className="text-on-surface-variant">
-                      <span className="text-on-surface font-medium">Viewport:</span> {selectedBugReport.browserInfo.viewport}
+                      <span className="text-on-surface font-medium">{t('settings_page.viewport')}</span> {selectedBugReport.browserInfo.viewport}
                     </p>
                   </div>
                 </div>
@@ -713,7 +714,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               {/* Admin Notes */}
               {selectedBugReport.adminNotes && (
                 <div>
-                  <label className="block m3-label-large text-on-surface-variant mb-2">Admin-Notizen</label>
+                  <label className="block m3-label-large text-on-surface-variant mb-2">{t('admin.admin_notes')}</label>
                   <p className="text-on-surface bg-primary-container rounded-m3-md p-4 whitespace-pre-wrap">
                     {selectedBugReport.adminNotes}
                   </p>

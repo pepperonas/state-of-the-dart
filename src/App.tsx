@@ -38,6 +38,7 @@ import Pricing from './components/payment/Pricing';
 import PaymentSuccess from './components/payment/PaymentSuccess';
 import LoadingIndicator from './components/common/LoadingIndicator';
 import { FeedbackProvider } from './components/common/Feedback';
+import ShortcutsDialog from './components/common/ShortcutsDialog';
 
 // Lazy load helper with auto-reload on chunk load failure
 const lazyWithRetry = (componentImport: () => Promise<any>) =>
@@ -225,6 +226,7 @@ function AppContent() {
                     <AchievementNotification />
                     <OfflineIndicator />
                     <UpdatePrompt />
+                    <ShortcutsDialog />
                     <OutsideGames>
                       <BugReportButton />
                       <DebugFlagButton />

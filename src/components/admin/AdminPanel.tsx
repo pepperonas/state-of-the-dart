@@ -109,7 +109,7 @@ const AdminPanel: React.FC = () => {
       setStats(statsData);
       setError(null);
     } catch (err: any) {
-      setError(err.message || 'Failed to load admin data');
+      setError(err.message || t('admin_panel.load_failed'));
     } finally {
       setLoading(false);
     }
@@ -262,13 +262,13 @@ const AdminPanel: React.FC = () => {
 
     // Validate: lifetime should not have an end date
     if (editFormData.subscriptionStatus === 'lifetime' && editFormData.subscriptionEndsAt) {
-      notify(t('admin.error_lifetime_with_end_date', 'Lifetime subscriptions should not have an end date.'));
+      notify(t('admin_panel.error_lifetime_with_end_date'));
       return;
     }
 
     // Validate: end date should be in the future (if provided)
     if (editFormData.subscriptionEndsAt && new Date(editFormData.subscriptionEndsAt) < new Date()) {
-      notify(t('admin.error_past_end_date', 'End date must be in the future.'));
+      notify(t('admin_panel.error_past_end_date'));
       return;
     }
 
@@ -306,7 +306,7 @@ const AdminPanel: React.FC = () => {
   };
 
   const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleDateString(i18n.language === 'de' ? 'de-DE' : 'en-US', {
+    return new Date(timestamp).toLocaleDateString(i18n.language, {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -494,7 +494,7 @@ const AdminPanel: React.FC = () => {
                             {u.name}
                             {u.is_admin === 1 && (
                               <span className="px-2 py-0.5 bg-tertiary-container text-on-tertiary-container m3-body-small rounded-m3-full font-medium flex items-center gap-1">
-                                <Crown size={10} /> Admin
+                                <Crown size={10} /> {t('admin_panel.admin_badge')}
                               </span>
                             )}
                           </p>
@@ -1060,12 +1060,13 @@ const AdminPanel: React.FC = () => {
                 {selectedDebugFlag.screenshotUrl && (
                   <div>
                     <label className="block m3-label-large text-on-surface-variant mb-2">{t('admin.screenshot')}</label>
-                    <img
-                      src={selectedDebugFlag.screenshotUrl}
-                      alt="Debug screenshot"
-                      className="w-full rounded-m3-md border border-outline-variant cursor-pointer hover:border-[var(--m3-primary)] transition-colors"
-                      onClick={() => window.open(selectedDebugFlag.screenshotUrl, '_blank')}
-                    />
+                    <a href={selectedDebugFlag.screenshotUrl} target="_blank" rel="noopener noreferrer" className="block">
+                      <img
+                        src={selectedDebugFlag.screenshotUrl}
+                        alt={t('admin_panel.debug_screenshot_alt')}
+                        className="w-full rounded-m3-md border border-outline-variant hover:border-[var(--m3-primary)] transition-colors"
+                      />
+                    </a>
                   </div>
                 )}
 
@@ -1323,12 +1324,13 @@ const AdminPanel: React.FC = () => {
                   <div>
                     <label className="block m3-label-large text-on-surface-variant mb-2">{t('admin.screenshot')}</label>
                     <div className="relative group">
-                      <img
-                        src={selectedBugReport.screenshotUrl}
-                        alt="Bug screenshot"
-                        className="w-full rounded-m3-md border border-outline-variant cursor-pointer hover:border-[var(--m3-primary)] transition-colors"
-                        onClick={() => window.open(selectedBugReport.screenshotUrl, '_blank')}
-                      />
+                      <a href={selectedBugReport.screenshotUrl} target="_blank" rel="noopener noreferrer" className="block">
+                        <img
+                          src={selectedBugReport.screenshotUrl}
+                          alt={t('settings_page.bug_screenshot_alt')}
+                          className="w-full rounded-m3-md border border-outline-variant hover:border-[var(--m3-primary)] transition-colors"
+                        />
+                      </a>
                       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <a
                           href={selectedBugReport.screenshotUrl}

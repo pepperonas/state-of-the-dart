@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Star } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { IconButton } from '../common';
 import { celebrate as confetti } from '../../utils/celebration';
 import { useAchievements } from '../../context/AchievementContext';
@@ -17,12 +18,13 @@ const TIER_CONFETTI_COUNT: Record<AchievementTier, number> = {
   diamond: 200,
 };
 
-const TIER_LABELS: Record<AchievementTier, string> = {
-  bronze: 'BRONZE',
-  silver: 'SILBER',
-  gold: 'GOLD',
-  platinum: 'PLATIN',
-  diamond: 'DIAMANT',
+/** i18n keys of the tier names (rendered upper-case). */
+const TIER_LABEL_KEYS: Record<AchievementTier, string> = {
+  bronze: 'achievement_toast.tier_bronze',
+  silver: 'achievement_toast.tier_silver',
+  gold: 'achievement_toast.tier_gold',
+  platinum: 'achievement_toast.tier_platinum',
+  diamond: 'achievement_toast.tier_diamond',
 };
 
 function getTierColors(tier: AchievementTier): string[] {
@@ -51,6 +53,7 @@ const NotificationCard: React.FC<{
   onDismiss: () => void;
   index: number;
 }> = ({ notification, onDismiss, index }) => {
+  const { t } = useTranslation();
   const { getPlayer } = usePlayer();
   const confettiFiredRef = useRef(false);
 
@@ -59,15 +62,15 @@ const NotificationCard: React.FC<{
   const tierColor = getTierColor(tier);
   const totalAchievements = ACHIEVEMENTS.length;
   const player = getPlayer(playerId);
-  const playerName = player?.name || 'Spieler';
+  const playerName = player?.name || t('achievements.player');
 
-  const fireConfetti = useCallback((t: AchievementTier) => {
+  const fireConfetti = useCallback((tierArg: AchievementTier) => {
     if (confettiFiredRef.current) return;
     confettiFiredRef.current = true;
 
-    const count = TIER_CONFETTI_COUNT[t];
-    const colors = getTierColors(t);
-    const spread = t === 'diamond' ? 160 : t === 'platinum' ? 140 : 120;
+    const count = TIER_CONFETTI_COUNT[tierArg];
+    const colors = getTierColors(tierArg);
+    const spread = tierArg === 'diamond' ? 160 : tierArg === 'platinum' ? 140 : 120;
 
     confetti({
       particleCount: Math.floor(count * 0.6),
@@ -81,7 +84,7 @@ const NotificationCard: React.FC<{
       disableForReducedMotion: true,
     });
 
-    if (t === 'gold' || t === 'platinum' || t === 'diamond') {
+    if (tierArg === 'gold' || tierArg === 'platinum' || tierArg === 'diamond') {
       setTimeout(() => {
         confetti({
           particleCount: Math.floor(count * 0.2),
@@ -104,7 +107,7 @@ const NotificationCard: React.FC<{
       }, 200);
     }
 
-    if (t === 'diamond') {
+    if (tierArg === 'diamond') {
       for (let i = 0; i < 3; i++) {
         setTimeout(() => {
           confetti({
@@ -175,11 +178,11 @@ const NotificationCard: React.FC<{
               animate={{ opacity: [0.7, 1, 0.7] }}
               transition={{ duration: 2, repeat: Infinity }}
             >
-              {playerName} — Achievement Freigeschaltet
+              {t('achievement_toast.unlocked_by', { name: playerName })}
             </motion.span>
             <IconButton
               onClick={onDismiss}
-              label="Schliessen"
+              label={t('common.close')}
               className="ml-2 flex-shrink-0"
             >
               <X size={18} />
@@ -224,7 +227,7 @@ const NotificationCard: React.FC<{
                 border: `1px solid ${tierColor}30`,
               }}
             >
-              {TIER_LABELS[tier]}
+              {t(TIER_LABEL_KEYS[tier]).toUpperCase()}
             </span>
             {achievement.rarity && (
               <span
@@ -235,7 +238,7 @@ const NotificationCard: React.FC<{
                   border: `1px solid ${getRarityColor(achievement.rarity)}30`,
                 }}
               >
-                {achievement.rarity.toUpperCase()}
+                {t(`achievements.${achievement.rarity}`).toUpperCase()}
               </span>
             )}
             {(() => {
@@ -250,22 +253,22 @@ const NotificationCard: React.FC<{
                     border: `1px solid ${sc}30`,
                   }}
                 >
-                  {scope.toUpperCase()}
+                  {t(`achievements.scope_${scope}`).toUpperCase()}
                 </span>
               );
             })()}
             <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-surface-container-highest text-on-surface-variant flex items-center gap-1 border border-outline-variant">
               <Star size={10} />
-              {achievement.points} Pkt.
+              {t('achievement_toast.points_short', { count: achievement.points })}
             </span>
           </div>
 
           {/* Achievement progress bar */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className="m3-label-medium text-on-surface-variant">Fortschritt</span>
+              <span className="m3-label-medium text-on-surface-variant">{t('achievements.progress')}</span>
               <span className="m3-label-medium text-on-surface-variant">
-                {unlockedCount}/{totalAchievements} Achievements
+                {t('achievement_toast.unlocked_count', { count: unlockedCount, total: totalAchievements })}
               </span>
             </div>
             <div className="h-1.5 bg-surface-container-highest rounded-m3-full overflow-hidden">
@@ -286,6 +289,7 @@ const NotificationCard: React.FC<{
 
 // Main component: shows all active notifications stacked
 const AchievementNotification: React.FC = () => {
+  const { t } = useTranslation();
   const { currentNotification, notificationQueue, dismissNotification, dismissAllNotifications } = useAchievements();
   const [showFlash, setShowFlash] = useState(false);
   const lastNotificationRef = useRef<string | null>(null);
@@ -337,7 +341,7 @@ const AchievementNotification: React.FC = () => {
             onClick={dismissAllNotifications}
             className="self-end px-3 py-1.5 rounded-m3-full text-xs font-bold tracking-wide text-on-surface-variant hover:text-on-surface bg-surface-container-high hover:bg-surface-container-highest backdrop-blur-sm border border-outline-variant transition-all"
           >
-            Alle schließen ({allNotifications.length})
+            {t('achievement_toast.close_all', { count: allNotifications.length })}
           </motion.button>
         )}
         <AnimatePresence mode="popLayout">

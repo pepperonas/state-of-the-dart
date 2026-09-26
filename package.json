@@ -1,7 +1,7 @@
 {
   "name": "state-of-the-dart",
   "private": true,
-  "version": "0.13.0",
+  "version": "0.14.0",
   "type": "module",
   "description": "Professional Dart Scoring System with Multi-User Support",
   "repository": {
@@ -47,6 +47,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^9.39.1",
     "@playwright/test": "^1.60.0",
     "@testing-library/jest-dom": "^6.6.3",

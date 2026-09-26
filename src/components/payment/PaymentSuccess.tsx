@@ -4,9 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Home } from 'lucide-react';
 import { Card, Button } from '../common';
 import { enterPop } from '../../utils/motion';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 
 const PaymentSuccess: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { refreshUser } = useAuth();
 
@@ -25,11 +27,11 @@ const PaymentSuccess: React.FC = () => {
             </div>
 
             <h1 className="m3-headline-medium text-on-surface mb-4">
-              Zahlung erfolgreich!
+              {t('payment_success.title')}
             </h1>
 
             <p className="m3-body-medium text-on-surface-variant mb-8">
-              Vielen Dank für dein Vertrauen! Dein Abo ist jetzt aktiv und du hast vollen Zugriff auf alle Features.
+              {t('payment_success.body')}
             </p>
 
             <div className="space-y-3">
@@ -39,7 +41,7 @@ const PaymentSuccess: React.FC = () => {
                 icon={<Home size={20} />}
                 onClick={() => navigate('/')}
               >
-                Zur App
+                {t('payment_success.to_app')}
               </Button>
 
               <Button
@@ -47,13 +49,13 @@ const PaymentSuccess: React.FC = () => {
                 fullWidth
                 onClick={() => navigate('/settings')}
               >
-                Zu den Einstellungen
+                {t('payment_success.to_settings')}
               </Button>
             </div>
 
             <div className="mt-8 p-4 bg-primary-container text-on-primary-container rounded-m3-md">
               <p className="m3-body-small">
-                Tipp: Du kannst dein Abo jederzeit in den Einstellungen verwalten.
+                {t('payment_success.tip')}
               </p>
             </div>
           </Card>

@@ -126,13 +126,13 @@ const PlayerProfile: React.FC = () => {
     
     const stats = player.stats;
     return [
-      { skill: 'Average', value: Math.min((stats.averageOverall / 80) * 100, 100), max: 100 },
-      { skill: 'Checkout', value: stats.checkoutPercentage || 0, max: 100 },
+      { skill: t('player_profile.skill_average'), value: Math.min((stats.averageOverall / 80) * 100, 100), max: 100 },
+      { skill: t('player_profile.skill_checkout'), value: stats.checkoutPercentage || 0, max: 100 },
       { skill: '180s', value: Math.min((stats.total180s / 20) * 100, 100), max: 100 },
-      { skill: 'Consistency', value: stats.gamesPlayed > 0 ? (stats.gamesWon / stats.gamesPlayed) * 100 : 0, max: 100 },
-      { skill: 'Achievements', value: achievementProgress ? (achievementProgress.unlockedAchievements.length / ACHIEVEMENTS.length) * 100 : 0, max: 100 },
+      { skill: t('player_profile.skill_consistency'), value: stats.gamesPlayed > 0 ? (stats.gamesWon / stats.gamesPlayed) * 100 : 0, max: 100 },
+      { skill: t('player_profile.skill_achievements'), value: achievementProgress ? (achievementProgress.unlockedAchievements.length / ACHIEVEMENTS.length) * 100 : 0, max: 100 },
     ];
-  }, [player, achievementProgress]);
+  }, [player, achievementProgress, t]);
 
   // Heatmap data
   const heatmapData = useMemo(() => {
@@ -171,7 +171,7 @@ const PlayerProfile: React.FC = () => {
         <div className="max-w-6xl mx-auto m3-view">
           <BackButton onClick={() => navigate('/players')} />
           <Card variant="elevated" className="p-8 text-center">
-            <h2 className="m3-headline-small text-on-surface mb-2">Spieler nicht gefunden</h2>
+            <h2 className="m3-headline-small text-on-surface mb-2">{t('player_profile.not_found')}</h2>
           </Card>
         </div>
       </div>
@@ -197,34 +197,34 @@ const PlayerProfile: React.FC = () => {
               <div className="flex flex-wrap gap-3 mb-4">
                 <div className="flex items-center gap-2 text-primary">
                   <Trophy size={18} />
-                  <span className="m3-label-large">{personalBests.totalWins} Siege</span>
+                  <span className="m3-label-large">{t('player_profile.wins_count', { count: personalBests.totalWins })}</span>
                 </div>
                 <div className="flex items-center gap-2 text-tertiary">
                   <Star size={18} />
-                  <span className="m3-label-large">{achievementProgress?.totalPoints || 0} Punkte</span>
+                  <span className="m3-label-large">{t('player_profile.points_count', { count: achievementProgress?.totalPoints || 0 })}</span>
                 </div>
                 <div className="flex items-center gap-2 text-success">
                   <Award size={18} />
-                  <span className="m3-label-large">{achievements.length}/{ACHIEVEMENTS.length} Achievements</span>
+                  <span className="m3-label-large">{t('player_profile.achievements_count', { unlocked: achievements.length, total: ACHIEVEMENTS.length })}</span>
                 </div>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-surface-container rounded-m3-md p-3">
-                  <div className="m3-body-small text-on-surface-variant mb-1">Spiele</div>
+                  <div className="m3-body-small text-on-surface-variant mb-1">{t('player_profile.games')}</div>
                   <div className="m3-title-large text-on-surface">{personalBests.totalGamesPlayed}</div>
                 </div>
                 <div className="bg-surface-container rounded-m3-md p-3">
-                  <div className="m3-body-small text-on-surface-variant mb-1">Siegrate</div>
+                  <div className="m3-body-small text-on-surface-variant mb-1">{t('player_profile.win_rate')}</div>
                   <div className="m3-title-large text-success">{winRate.toFixed(1)}%</div>
                 </div>
                 <div className="bg-surface-container rounded-m3-md p-3">
-                  <div className="m3-body-small text-on-surface-variant mb-1">Best Avg</div>
+                  <div className="m3-body-small text-on-surface-variant mb-1">{t('player_profile.best_avg')}</div>
                   <div className="m3-title-large text-primary">
                     {personalBests.bestAverage.value.toFixed(2)}
                   </div>
                 </div>
                 <div className="bg-surface-container rounded-m3-md p-3">
-                  <div className="m3-body-small text-on-surface-variant mb-1">Total 180s</div>
+                  <div className="m3-body-small text-on-surface-variant mb-1">{t('player_profile.total_180s')}</div>
                   <div className="m3-title-large text-tertiary">{personalBests.total180s}</div>
                 </div>
               </div>
@@ -236,18 +236,18 @@ const PlayerProfile: React.FC = () => {
         <Card variant="elevated" className="p-6 mb-6">
           <h2 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
             <Zap className="text-tertiary" size={24} />
-            Personal Bests
+            {t('player_profile.personal_bests')}
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-tertiary-container text-on-tertiary-container rounded-m3-md p-4">
-              <div className="m3-body-small mb-1"> Höchster Score</div>
+              <div className="m3-body-small mb-1">{t('player_profile.highest_score')}</div>
               <div className="m3-title-large text-on-surface">{personalBests.highestScore.value}</div>
               <div className="m3-body-small opacity-70 mt-1">
                 {formatDate(personalBests.highestScore.date)}
               </div>
             </div>
             <div className="bg-primary-container text-on-primary-container rounded-m3-md p-4">
-              <div className="m3-body-small mb-1"> Bester Average</div>
+              <div className="m3-body-small mb-1">{t('player_profile.best_average')}</div>
               <div className="m3-title-large text-on-surface">
                 {personalBests.bestAverage.value.toFixed(2)}
               </div>
@@ -256,14 +256,14 @@ const PlayerProfile: React.FC = () => {
               </div>
             </div>
             <div className="bg-tertiary-container text-on-tertiary-container rounded-m3-md p-4">
-              <div className="m3-body-small mb-1"> Meiste 180s</div>
+              <div className="m3-body-small mb-1">{t('player_profile.most_180s')}</div>
               <div className="m3-title-large text-on-surface">{personalBests.most180s.value}</div>
               <div className="m3-body-small opacity-70 mt-1">
                 {formatDate(personalBests.most180s.date)}
               </div>
             </div>
             <div className="bg-success-container text-on-success-container rounded-m3-md p-4">
-              <div className="m3-body-small mb-1"> Höchster Checkout</div>
+              <div className="m3-body-small mb-1">{t('player_profile.highest_checkout')}</div>
               <div className="m3-title-large text-on-surface">{personalBests.highestCheckout.value}</div>
               <div className="m3-body-small opacity-70 mt-1">
                 {personalBests.highestCheckout.value > 0
@@ -272,7 +272,7 @@ const PlayerProfile: React.FC = () => {
               </div>
             </div>
             <div className="bg-primary-container text-on-primary-container rounded-m3-md p-4">
-              <div className="m3-body-small mb-1"> Beste Checkout-Quote</div>
+              <div className="m3-body-small mb-1">{t('player_profile.best_checkout_rate')}</div>
               <div className="m3-title-large text-on-surface">
                 {personalBests.bestCheckoutRate.value.toFixed(1)}%
               </div>
@@ -283,9 +283,9 @@ const PlayerProfile: React.FC = () => {
               </div>
             </div>
             <div className="bg-tertiary-container text-on-tertiary-container rounded-m3-md p-4">
-              <div className="m3-body-small mb-1"> Kürzestes Leg</div>
+              <div className="m3-body-small mb-1">{t('player_profile.shortest_leg')}</div>
               <div className="m3-title-large text-on-surface">
-                {personalBests.shortestLeg.darts < 999 ? `${personalBests.shortestLeg.darts} Darts` : '-'}
+                {personalBests.shortestLeg.darts < 999 ? t('player_profile.darts_count', { count: personalBests.shortestLeg.darts }) : '-'}
               </div>
               <div className="m3-body-small opacity-70 mt-1">
                 {personalBests.shortestLeg.darts < 999
@@ -294,14 +294,14 @@ const PlayerProfile: React.FC = () => {
               </div>
             </div>
             <div className="bg-success-container text-on-success-container rounded-m3-md p-4">
-              <div className="m3-body-small mb-1"> Längste Siegesserie</div>
+              <div className="m3-body-small mb-1">{t('player_profile.longest_streak')}</div>
               <div className="m3-title-large text-on-surface">{personalBests.longestWinningStreak.value}</div>
               <div className="m3-body-small opacity-70 mt-1">
-                {personalBests.longestWinningStreak.value > 0 ? 'Spiele' : '-'}
+                {personalBests.longestWinningStreak.value > 0 ? t('player_profile.streak_unit', { count: personalBests.longestWinningStreak.value }) : '-'}
               </div>
             </div>
             <div className="bg-tertiary-container text-on-tertiary-container rounded-m3-md p-4">
-              <div className="m3-body-small mb-1"> Meiste Legs gewonnen</div>
+              <div className="m3-body-small mb-1">{t('player_profile.most_legs_won')}</div>
               <div className="m3-title-large text-on-surface">{personalBests.mostLegsWon.value}</div>
               <div className="m3-body-small opacity-70 mt-1">
                 {personalBests.mostLegsWon.value > 0
@@ -317,7 +317,7 @@ const PlayerProfile: React.FC = () => {
           <Card variant="elevated" className="p-6">
             <h3 className="m3-title-medium text-on-surface mb-4 flex items-center gap-2">
               <TrendingUp size={20} />
-              Performance Entwicklung
+              {t('player_profile.performance_trend')}
             </h3>
             {performanceData.length > 0 ? (
               <div className="bg-surface-container rounded-m3-md p-4">
@@ -334,19 +334,19 @@ const PlayerProfile: React.FC = () => {
                       }}
                     />
                     <Legend />
-                    <Line type="monotone" dataKey="average" stroke={chart.series[0]} strokeWidth={2} name="Average" />
+                    <Line type="monotone" dataKey="average" stroke={chart.series[0]} strokeWidth={2} name={t('player_profile.average')} />
                     <Line
                       type="monotone"
                       dataKey="checkoutRate"
                       stroke={chart.success}
                       strokeWidth={2}
-                      name="Checkout %"
+                      name={t('player_profile.checkout_rate')}
                     />
                   </LineChart>
                 </ResponsiveContainer></div>
               </div>
             ) : (
-              <div className="text-center text-on-surface-variant py-8">Noch keine Matches gespielt</div>
+              <div className="text-center text-on-surface-variant py-8">{t('player_profile.no_matches')}</div>
             )}
           </Card>
 
@@ -354,7 +354,7 @@ const PlayerProfile: React.FC = () => {
           <Card variant="elevated" className="p-6">
             <h3 className="m3-title-medium text-on-surface mb-4 flex items-center gap-2">
               <Target size={20} />
-              Skill Profile
+              {t('player_profile.skill_profile')}
             </h3>
             <div className="bg-surface-container rounded-m3-md p-4">
               <div className="h-[180px] sm:h-[250px]"><ResponsiveContainer width="100%" height="100%">
@@ -363,7 +363,7 @@ const PlayerProfile: React.FC = () => {
                   <PolarAngleAxis dataKey="skill" stroke={chart.axis} style={{ fontSize: '12px' }} />
                   <PolarRadiusAxis angle={90} domain={[0, 100]} stroke={chart.grid} />
                   <Radar
-                    name="Skills"
+                    name={t('player_profile.skills')}
                     dataKey="value"
                     stroke={chart.series[0]}
                     fill={chart.series[0]}
@@ -386,7 +386,7 @@ const PlayerProfile: React.FC = () => {
         <Card variant="elevated" className="p-6 mb-6">
           <h2 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
             <Flame className="text-primary" size={24} />
-            Wurf-Heatmap
+            {t('player_profile.throw_heatmap')}
           </h2>
           
           {heatmapData && heatmapData.totalDarts > 0 ? (
@@ -395,31 +395,31 @@ const PlayerProfile: React.FC = () => {
               {accuracyStats && (
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
                   <div className="bg-surface-container rounded-m3-md p-3 text-center">
-                    <div className="m3-body-small text-on-surface-variant mb-1">Miss Rate</div>
+                    <div className="m3-body-small text-on-surface-variant mb-1">{t('player_profile.miss_rate')}</div>
                     <div className="m3-title-large text-error">
                       {accuracyStats.missRate.toFixed(1)}%
                     </div>
                   </div>
                   <div className="bg-surface-container rounded-m3-md p-3 text-center">
-                    <div className="m3-body-small text-on-surface-variant mb-1">Triple Rate</div>
+                    <div className="m3-body-small text-on-surface-variant mb-1">{t('player_profile.triple_rate')}</div>
                     <div className="m3-title-large text-success">
                       {accuracyStats.tripleRate.toFixed(1)}%
                     </div>
                   </div>
                   <div className="bg-surface-container rounded-m3-md p-3 text-center">
-                    <div className="m3-body-small text-on-surface-variant mb-1">Double Rate</div>
+                    <div className="m3-body-small text-on-surface-variant mb-1">{t('player_profile.double_rate')}</div>
                     <div className="m3-title-large text-primary">
                       {accuracyStats.doubleRate.toFixed(1)}%
                     </div>
                   </div>
                   <div className="bg-surface-container rounded-m3-md p-3 text-center">
-                    <div className="m3-body-small text-on-surface-variant mb-1">Lieblings-Feld</div>
+                    <div className="m3-body-small text-on-surface-variant mb-1">{t('player_profile.favorite_segment')}</div>
                     <div className="m3-title-large text-tertiary">
                       {accuracyStats.favoriteSegment || '-'}
                     </div>
                   </div>
                   <div className="bg-surface-container rounded-m3-md p-3 text-center">
-                    <div className="m3-body-small text-on-surface-variant mb-1">Total Darts</div>
+                    <div className="m3-body-small text-on-surface-variant mb-1">{t('player_profile.total_darts')}</div>
                     <div className="m3-title-large text-on-surface">
                       {heatmapData.totalDarts}
                     </div>
@@ -432,21 +432,21 @@ const PlayerProfile: React.FC = () => {
           ) : (
             <div className="bg-surface-container rounded-m3-md p-8 text-center border-2 border-dashed border-outline-variant">
               <div className="mb-4 flex justify-center text-on-surface-variant"><Icon name="board" size={56} /></div>
-              <h3 className="m3-title-medium text-on-surface mb-2">Noch keine Wurf-Daten</h3>
+              <h3 className="m3-title-medium text-on-surface mb-2">{t('player_profile.no_throw_data')}</h3>
               <p className="m3-body-medium text-on-surface-variant mb-4">
-                Spiele ein Match, um deine Wurf-Heatmap zu sehen!
+                {t('player_profile.no_throw_data_hint')}
               </p>
               <p className="m3-body-small text-on-surface-variant">
-                Die Heatmap zeigt dir, wo du am häufigsten triffst:
+                {t('player_profile.heatmap_explainer')}
               </p>
               <div className="flex items-center justify-center gap-4 mt-4 m3-body-small">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 rounded bg-red-500"></div>
-                  <span className="text-on-surface-variant">Hot-Zones (oft getroffen)</span>
+                  <span className="text-on-surface-variant">{t('player_profile.hot_zones')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 rounded bg-blue-500"></div>
-                  <span className="text-on-surface-variant">Cold-Zones (selten getroffen)</span>
+                  <span className="text-on-surface-variant">{t('player_profile.cold_zones')}</span>
                 </div>
               </div>
             </div>
@@ -458,7 +458,7 @@ const PlayerProfile: React.FC = () => {
           <Card variant="elevated" className="p-6 mb-6">
             <h2 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
               <Award className="text-tertiary" size={24} />
-              Neueste Achievements ({achievements.length}/{ACHIEVEMENTS.length})
+              {t('player_profile.recent_achievements', { unlocked: achievements.length, total: ACHIEVEMENTS.length })}
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
               {achievements.slice(0, 10).map((achievement) => (
@@ -479,7 +479,7 @@ const PlayerProfile: React.FC = () => {
                 onClick={() => navigate('/achievements')}
                 className="mt-4"
               >
-                Alle {achievements.length} Achievements anzeigen →
+                {t('player_profile.show_all_achievements', { count: achievements.length })}
               </Button>
             )}
           </Card>
@@ -490,18 +490,18 @@ const PlayerProfile: React.FC = () => {
           <Card variant="elevated" className="p-6 mb-6">
             <h2 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
               <Calendar size={24} />
-              Karriere
+              {t('player_profile.career')}
             </h2>
             <div className="flex items-center justify-between text-on-surface-variant">
               <div>
-                <div className="m3-body-small text-on-surface-variant">Erstes Spiel</div>
+                <div className="m3-body-small text-on-surface-variant">{t('player_profile.first_game')}</div>
                 <div className="m3-title-medium text-on-surface">
                   {formatDate(personalBests.firstGameDate, { year: 'numeric', month: 'long', day: 'numeric' })}
                 </div>
               </div>
               <div className="flex-1 mx-4 h-1 bg-primary rounded-full" />
               <div className="text-right">
-                <div className="m3-body-small text-on-surface-variant">Letztes Spiel</div>
+                <div className="m3-body-small text-on-surface-variant">{t('player_profile.last_game')}</div>
                 <div className="m3-title-medium text-on-surface">
                   {personalBests.lastGameDate
                     ? formatDate(personalBests.lastGameDate, { year: 'numeric', month: 'long', day: 'numeric' })
@@ -512,19 +512,19 @@ const PlayerProfile: React.FC = () => {
             <div className="mt-6 grid grid-cols-3 md:grid-cols-6 gap-4">
               <div className="text-center">
                 <div className="m3-title-large text-on-surface">{personalBests.totalGamesPlayed}</div>
-                <div className="m3-body-small text-on-surface-variant mt-1">Spiele</div>
+                <div className="m3-body-small text-on-surface-variant mt-1">{t('player_profile.games')}</div>
               </div>
               <div className="text-center">
                 <div className="m3-title-large text-success">{personalBests.totalWins}</div>
-                <div className="m3-body-small text-on-surface-variant mt-1">Siege</div>
+                <div className="m3-body-small text-on-surface-variant mt-1">{t('player_profile.wins')}</div>
               </div>
               <div className="text-center">
                 <div className="m3-title-large text-on-surface-variant">{personalBests.totalLosses}</div>
-                <div className="m3-body-small text-on-surface-variant mt-1">Niederlagen</div>
+                <div className="m3-body-small text-on-surface-variant mt-1">{t('player_profile.losses')}</div>
               </div>
               <div className="text-center">
                 <div className="m3-title-large text-primary">{personalBests.totalLegsWon}</div>
-                <div className="m3-body-small text-on-surface-variant mt-1">Legs Gewonnen</div>
+                <div className="m3-body-small text-on-surface-variant mt-1">{t('player_profile.legs_won')}</div>
               </div>
               <div className="text-center">
                 <div className="m3-title-large text-tertiary">{personalBests.total180s}</div>
@@ -532,7 +532,7 @@ const PlayerProfile: React.FC = () => {
               </div>
               <div className="text-center">
                 <div className="m3-title-large text-tertiary">{personalBests.totalCheckouts}</div>
-                <div className="m3-body-small text-on-surface-variant mt-1">Checkouts</div>
+                <div className="m3-body-small text-on-surface-variant mt-1">{t('player_profile.checkouts')}</div>
               </div>
             </div>
           </Card>

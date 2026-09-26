@@ -26,12 +26,12 @@ interface AvatarPickerProps {
  * `iconForEmoji` resolves it to the equivalent glyph for the "currently selected"
  * state.
  */
-const GROUPS: { name: string; icons: IconName[] }[] = [
-  { name: 'Darts', icons: ['target', 'bullseye', 'board', 'dart', 'dice', 'slot', 'percent', 'hash'] },
-  { name: 'Auszeichnungen', icons: ['trophy', 'medal', 'crown', 'ribbon', 'star', 'sparkle', 'gem', 'shield'] },
-  { name: 'Energie', icons: ['flame', 'bolt', 'rocket', 'party', 'heart', 'brain', 'wave', 'bulb'] },
-  { name: 'Figuren', icons: ['user', 'users', 'robot', 'ghost', 'skull', 'eye', 'moon', 'sun'] },
-  { name: 'Sonstiges', icons: ['sprout', 'snow', 'globe', 'flag', 'music', 'gift', 'key', 'book', 'clock', 'calendar', 'home', 'phone', 'search', 'gear', 'scale', 'broom'] },
+const GROUPS: { key: string; icons: IconName[] }[] = [
+  { key: 'darts', icons: ['target', 'bullseye', 'board', 'dart', 'dice', 'slot', 'percent', 'hash'] },
+  { key: 'awards', icons: ['trophy', 'medal', 'crown', 'ribbon', 'star', 'sparkle', 'gem', 'shield'] },
+  { key: 'energy', icons: ['flame', 'bolt', 'rocket', 'party', 'heart', 'brain', 'wave', 'bulb'] },
+  { key: 'figures', icons: ['user', 'users', 'robot', 'ghost', 'skull', 'eye', 'moon', 'sun'] },
+  { key: 'other', icons: ['sprout', 'snow', 'globe', 'flag', 'music', 'gift', 'key', 'book', 'clock', 'calendar', 'home', 'phone', 'search', 'gear', 'scale', 'broom'] },
 ];
 
 const ALL = GROUPS.flatMap((g) => g.icons);
@@ -49,7 +49,7 @@ const AvatarPicker: React.FC<AvatarPickerProps> = ({ onSelect, onClose, currentE
   }, [group, query]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--m3-scrim)_60%,transparent)] backdrop-blur-sm m3-scrim-enter p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--m3-scrim)_60%,transparent)] backdrop-blur-sm m3-scrim-enter p-4" onClick={onClose} data-backdrop>
       <div
         role="dialog"
         aria-modal="true"
@@ -79,8 +79,8 @@ const AvatarPicker: React.FC<AvatarPickerProps> = ({ onSelect, onClose, currentE
         {!query && (
           <div className="flex gap-2 overflow-x-auto px-4 py-3 border-b border-outline-variant">
             {GROUPS.map((g, i) => (
-              <Chip key={g.name} selected={i === group} onClick={() => setGroup(i)}>
-                {g.name}
+              <Chip key={g.key} selected={i === group} onClick={() => setGroup(i)}>
+                {t(`avatar_picker.group_${g.key}`)}
               </Chip>
             ))}
           </div>
@@ -109,7 +109,7 @@ const AvatarPicker: React.FC<AvatarPickerProps> = ({ onSelect, onClose, currentE
             })}
           </div>
           {shown.length === 0 && (
-            <p className="m3-body-medium text-on-surface-variant text-center py-8">Nichts gefunden</p>
+            <p className="m3-body-medium text-on-surface-variant text-center py-8">{t('avatar_picker.nothing_found')}</p>
           )}
         </div>
       </div>

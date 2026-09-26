@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Bug } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import BugReportModal from './BugReportModal';
 
@@ -15,6 +16,7 @@ import BugReportModal from './BugReportModal';
  * Sits beside `DebugFlagButton`, which stays admin-only.
  */
 const BugReportButton: React.FC = () => {
+  const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
 
@@ -25,8 +27,8 @@ const BugReportButton: React.FC = () => {
       <button
         onClick={() => setOpen(true)}
         className="fixed bottom-24 left-4 md:bottom-4 md:left-24 z-30 w-12 h-12 rounded-m3-full bg-secondary-container text-on-secondary-container shadow-m3-3 hover:shadow-m3-4 flex items-center justify-center transition-all m3-enter-pop m3-ripple m3-state-layer"
-        title="Bug melden"
-        aria-label="Bug melden"
+        title={t('bug_button.label')}
+        aria-label={t('bug_button.label')}
       >
         <Bug size={18} />
       </button>

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useReducedMotion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import {
   LineChart,
   Line,
@@ -22,6 +23,7 @@ interface ThrowChartProps {
 
 
 const ThrowChart: React.FC<ThrowChartProps> = ({ players, chartThrows }) => {
+  const { t } = useTranslation();
   const chart = useChartTheme();
   // Recharts animates SVG attributes from JS; the CSS reduced-motion rule cannot
   // reach it, so the switch has to be explicit.
@@ -73,7 +75,7 @@ const ThrowChart: React.FC<ThrowChartProps> = ({ players, chartThrows }) => {
   return (
     <>
       <div className="mb-8 bg-surface-container rounded-m3-md p-4">
-        <h4 className="m3-title-small text-on-surface mb-4">Geworfene Punkte pro Aufnahme</h4>
+        <h4 className="m3-title-small text-on-surface mb-4">{t('throw_chart.scored_per_visit')}</h4>
         <div className="h-[220px] sm:h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={scoreData}>
@@ -81,11 +83,11 @@ const ThrowChart: React.FC<ThrowChartProps> = ({ players, chartThrows }) => {
               <XAxis
                 dataKey="throwNumber"
                 stroke={chart.axis}
-                label={{ value: 'Aufnahme', position: 'insideBottom', offset: -5, fill: chart.axis }}
+                label={{ value: t('throw_chart.visit'), position: 'insideBottom', offset: -5, fill: chart.axis }}
               />
               <YAxis
                 stroke={chart.axis}
-                label={{ value: 'Punkte', angle: -90, position: 'insideLeft', fill: chart.axis }}
+                label={{ value: t('throw_chart.points'), angle: -90, position: 'insideLeft', fill: chart.axis }}
               />
               <Tooltip contentStyle={chart.tooltip.contentStyle} />
               <Legend />
@@ -96,7 +98,7 @@ const ThrowChart: React.FC<ThrowChartProps> = ({ players, chartThrows }) => {
       </div>
 
       <div className="bg-surface-container rounded-m3-md p-4">
-        <h4 className="m3-title-small text-on-surface mb-4">Verbleibende Punkte</h4>
+        <h4 className="m3-title-small text-on-surface mb-4">{t('throw_chart.remaining_points')}</h4>
         <div className="h-[220px] sm:h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={remainingData}>
@@ -104,11 +106,11 @@ const ThrowChart: React.FC<ThrowChartProps> = ({ players, chartThrows }) => {
               <XAxis
                 dataKey="throwNumber"
                 stroke={chart.axis}
-                label={{ value: 'Aufnahme', position: 'insideBottom', offset: -5, fill: chart.axis }}
+                label={{ value: t('throw_chart.visit'), position: 'insideBottom', offset: -5, fill: chart.axis }}
               />
               <YAxis
                 stroke={chart.axis}
-                label={{ value: 'Verbleibend', angle: -90, position: 'insideLeft', fill: chart.axis }}
+                label={{ value: t('throw_chart.remaining'), angle: -90, position: 'insideLeft', fill: chart.axis }}
                 reversed
               />
               <Tooltip contentStyle={chart.tooltip.contentStyle} />

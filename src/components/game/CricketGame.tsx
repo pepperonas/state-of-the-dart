@@ -264,12 +264,12 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
             </div>
 
             <div className="bg-surface-container rounded-m3-md p-4 mb-6">
-              <h3 className="m3-title-small text-on-surface mb-2"> Cricket Regeln:</h3>
+              <h3 className="m3-title-small text-on-surface mb-2">{t('cricket_game.rules_title')}</h3>
               <ul className="text-on-surface-variant text-sm space-y-1">
-                <li>• Zahlen 15-20 und Bull müssen 3x getroffen werden</li>
-                <li>• Triple = 3 Marks, Double = 2 Marks, Single = 1 Mark</li>
-                <li>• Nach dem Schließen: Punkte sammeln (solange Gegner offen)</li>
-                <li>• Gewinner: Alle Zahlen geschlossen + meiste Punkte</li>
+                <li>• {t('cricket_game.rule_close')}</li>
+                <li>• {t('cricket_game.rule_marks')}</li>
+                <li>• {t('cricket_game.rule_points')}</li>
+                <li>• {t('cricket_game.rule_winner')}</li>
               </ul>
             </div>
 
@@ -281,8 +281,8 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
               disabled={selectedPlayers.length < 2}
             >
               {selectedPlayers.length < 2
-                ? `${t('game.select_players')} (${selectedPlayers.length}/2)`
-                :'Cricket starten'
+                ? t('cricket_game.select_players_count', { count: selectedPlayers.length, min: 2 })
+                : t('cricket_game.start')
               }
             </Button>
           </Card>
@@ -308,10 +308,10 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
         <div className="text-center">
           <Trophy className="w-20 h-20 text-[var(--m3-medal-gold)] mx-auto mb-4" aria-hidden="true" />
           <h2 className="m3-headline-small text-on-surface mb-2">
-            {currentPlayer?.name} gewinnt!
+            {t('cricket_game.wins', { name: currentPlayer?.name })}
           </h2>
           <p className="text-on-surface-variant mb-6">
-            Cricket Match beendet
+            {t('cricket_game.match_over')}
           </p>
           <Button
             variant="filled"
@@ -322,7 +322,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
               setCricketState({});
             }}
           >
-            Neues Spiel
+            {t('cricket_game.new_game')}
           </Button>
         </div>
       </Dialog>
@@ -374,7 +374,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
             <table className="w-full">
               <thead>
                 <tr>
-                  <th className="text-left text-on-surface-variant p-2 w-20">Zahl</th>
+                  <th className="text-left text-on-surface-variant p-2 w-20">{t('cricket_game.number')}</th>
                   {matchPlayers.map((player, idx) => (
                     <th
                       key={player.playerId}
@@ -425,7 +425,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
                 ))}
                 {/* Points row */}
                 <tr className="border-t-2 border-[var(--m3-primary)]">
-                  <td className="font-bold p-3" style={{ color: 'var(--m3-primary)' }}>Punkte</td>
+                  <td className="font-bold p-3" style={{ color: 'var(--m3-primary)' }}>{t('cricket_game.points')}</td>
                   {matchPlayers.map((player, idx) => (
                     <td
                       key={player.playerId}
@@ -450,11 +450,11 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
         <Card variant="elevated" className="rounded-m3-lg p-4 mb-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="m3-title-small text-on-surface">
-              {currentPlayer?.name}'s Wurf ({currentDarts.length}/3)
+              {t('cricket_game.player_visit', { name: currentPlayer?.name, count: currentDarts.length })}
             </h3>
             <IconButton
               variant="tonal"
-              label="Undo"
+              label={t('common.undo')}
               onClick={handleUndo}
               disabled={currentDarts.length === 0 && turnHistory.length === 0}
             >
@@ -492,13 +492,13 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
             onClick={handleConfirmThrow}
             disabled={currentDarts.length === 0}
           >
-            Wurf bestätigen
+            {t('cricket_game.confirm_visit')}
           </Button>
         </Card>
 
         {/* Cricket Dartboard Input */}
         <Card variant="elevated" className="rounded-m3-lg p-4">
-          <h3 className="m3-title-small text-on-surface mb-4 text-center">Treffer eingeben</h3>
+          <h3 className="m3-title-small text-on-surface mb-4 text-center">{t('cricket_game.enter_hits')}</h3>
 
           {/* Quick buttons for cricket numbers */}
           <div className="grid grid-cols-4 gap-3">
@@ -543,10 +543,11 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
 
             {/* Miss button */}
             <div className="space-y-2">
-              <div className="text-center text-on-surface-variant text-sm font-medium">Miss</div>
+              <div className="text-center text-on-surface-variant text-sm font-medium">{t('cricket_game.miss')}</div>
               <button
                 onClick={() => handleDartHit(0, 0 as any)}
                 disabled={currentDarts.length >= 3}
+                aria-label={t('cricket_game.miss')}
                 className="w-full py-8 rounded-m3-md bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-medium disabled:opacity-50"
               >
                 <X size={24} className="mx-auto" />

@@ -152,7 +152,7 @@ const DebugFlagModal: React.FC<DebugFlagModalProps> = ({ onClose }) => {
               <label className="block m3-label-large text-on-surface-variant mb-2">{t('debug.screenshot_preview')}</label>
               <img
                 src={screenshotUrl}
-                alt="Screenshot"
+                alt={t('debug.screenshot_preview')}
                 className="w-full rounded-m3-sm border border-outline-variant max-h-40 object-cover"
               />
             </div>

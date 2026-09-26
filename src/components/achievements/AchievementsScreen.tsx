@@ -230,12 +230,12 @@ const AchievementsScreen: React.FC = () => {
           </div>
 
           {/* Show Only Unlocked Toggle */}
-          <label className="flex items-center gap-2 cursor-pointer">
+          <label className="flex items-center gap-2 cursor-pointer min-h-12">
             <input
               type="checkbox"
               checked={showOnlyUnlocked}
               onChange={(e) => setShowOnlyUnlocked(e.target.checked)}
-              className="w-4 h-4 rounded"
+              className="w-5 h-5 rounded accent-[var(--m3-primary)]"
             />
             <span className="m3-body-medium text-on-surface-variant">{t('achievements.show_unlocked_only')}</span>
           </label>

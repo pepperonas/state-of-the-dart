@@ -281,7 +281,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
           </button>
         ))}
         <div className="flex flex-col justify-center items-center bg-tertiary-container rounded-m3-md px-3">
-          <span className="m3-label-small text-on-tertiary-container opacity-80">Total</span>
+          <span className="m3-label-small text-on-tertiary-container opacity-80">{t('score_input.total')}</span>
           <span className="text-2xl font-bold text-on-tertiary-container">{currentScore}</span>
         </div>
       </div>
@@ -404,7 +404,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
             <button
               onClick={() => handleNumpadClick('enter')}
               className="p-3 lg:p-4 min-h-[48px] text-lg font-bold rounded-m3-md bg-primary-container text-on-primary-container transition-all active:scale-95"
-              title={editingDartIndex !== null ? 'Dart ersetzen' : 'Wurf-Summe übernehmen und bestätigen'}
+              title={editingDartIndex !== null ? t('score_input.replace_dart') : t('score_input.submit_total')}
             >
               {editingDartIndex !== null ? t('game.set_dart') : '↵'}
             </button>
@@ -488,7 +488,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
           }`}
         >
           <Check size={20} />
-          <span>{isCheckout ? 'Checkout!' : isEditingThrow ? t('game.confirm_correction') : t('game.confirm_visit')}</span>
+          <span>{isCheckout ? t('score_input.checkout') : isEditingThrow ? t('game.confirm_correction') : t('game.confirm_visit')}</span>
         </button>
       </div>
 

@@ -286,13 +286,13 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
             <div key={player.playerId}>
               <h3 className="m3-title-medium text-on-surface mb-3">{player.name}</h3>
               <div className="grid grid-cols-2 gap-3">
-                <StatBox label="Average" value={(player.matchAverage ?? 0).toFixed(2)} />
-                <StatBox label="Highest Score" value={player.matchHighestScore ?? 0} />
+                <StatBox label={t('match_detail_extra.average')} value={(player.matchAverage ?? 0).toFixed(2)} />
+                <StatBox label={t('match_detail_extra.highest_score')} value={player.matchHighestScore ?? 0} />
                 <StatBox label="180s" value={player.match180s ?? 0} />
                 <StatBox label="140+" value={player.match140Plus ?? 0} />
                 <StatBox label="100+" value={player.match100Plus ?? 0} />
                 <StatBox
-                  label="Checkout %"
+                  label={t('match_detail_extra.checkout_rate')}
                   value={
                     (player.checkoutAttempts ?? 0) > 0
                       ? `${(((player.checkoutsHit ?? 0) / player.checkoutAttempts) * 100).toFixed(1)}%`
@@ -346,7 +346,7 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
                 return (
                   <div key={leg.id || legIdx}>
                     {(match.legs || []).length > 1 && (
-                      <div className="text-xs text-on-surface-variant font-semibold mb-2">Leg {legIdx + 1}</div>
+                      <div className="text-xs text-on-surface-variant font-semibold mb-2">{t('match_detail_extra.leg', { n: legIdx + 1 })}</div>
                     )}
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">

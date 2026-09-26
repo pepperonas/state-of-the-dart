@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HeatmapData } from '../../types';
 import { Flame, Target, TrendingUp, Crosshair, CircleDot, Percent } from 'lucide-react';
 import { formatSegmentName } from '../../utils/heatmap';
@@ -30,6 +31,7 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
   size = 600,
   compact = false
 }) => {
+  const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dartboardRef = useRef<HTMLCanvasElement>(null);
 
@@ -595,29 +597,29 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
           <Card variant="filled" className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <Crosshair size={18} className="text-primary" />
-              <span className="m3-label-medium text-on-surface-variant">Cluster-Zentrum</span>
+              <span className="m3-label-medium text-on-surface-variant">{t('heatmap.cluster_center')}</span>
             </div>
             <div className="m3-title-medium text-on-surface">
-              {heatmapStats.scatterRadiusPercent < 15 ?'Sehr präzise':
-               heatmapStats.scatterRadiusPercent < 25 ?'Präzise':'↔ Gestreut'}
+              {heatmapStats.scatterRadiusPercent < 15 ? t('heatmap.very_precise') :
+               heatmapStats.scatterRadiusPercent < 25 ? t('heatmap.precise') : `↔ ${t('heatmap.scattered')}`}
             </div>
           </Card>
 
           <Card variant="filled" className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <CircleDot size={18} className="text-tertiary" />
-              <span className="m3-label-medium text-on-surface-variant">Streuungsradius</span>
+              <span className="m3-label-medium text-on-surface-variant">{t('heatmap.scatter_radius')}</span>
             </div>
             <div className="m3-title-medium text-on-surface">
               {heatmapStats.scatterRadiusPercent.toFixed(1)}%
             </div>
-            <div className="m3-body-small text-on-surface-variant">vom Scheibendurchmesser</div>
+            <div className="m3-body-small text-on-surface-variant">{t('heatmap.of_board_diameter')}</div>
           </Card>
 
           <Card variant="filled" className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <Target size={18} className="text-error" />
-              <span className="m3-label-medium text-on-surface-variant">Triple-Rate</span>
+              <span className="m3-label-medium text-on-surface-variant">{t('heatmap.triple_rate')}</span>
             </div>
             <div className="m3-title-medium text-on-surface">
               {heatmapStats.tripleRate.toFixed(1)}%
@@ -627,7 +629,7 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
           <Card variant="filled" className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <Percent size={18} className="text-success" />
-              <span className="m3-label-medium text-on-surface-variant">Double-Rate</span>
+              <span className="m3-label-medium text-on-surface-variant">{t('heatmap.double_rate')}</span>
             </div>
             <div className="m3-title-medium text-on-surface">
               {heatmapStats.doubleRate.toFixed(1)}%
@@ -645,12 +647,12 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
                 <CircleDot size={24} aria-hidden="true" />
               </div>
               <div>
-                <div className="m3-label-medium text-on-surface-variant">Bull & Outer Bull</div>
+                <div className="m3-label-medium text-on-surface-variant">{t('heatmap.bull_and_outer')}</div>
                 <div className="m3-title-medium text-on-surface">{heatmapStats.bullRate.toFixed(1)}%</div>
               </div>
             </div>
             <div className="text-right">
-              <div className="m3-body-small text-on-surface-variant">Inner Bull</div>
+              <div className="m3-body-small text-on-surface-variant">{t('heatmap.inner_bull')}</div>
               <div className="m3-title-small text-error">{heatmapStats.innerBullRate.toFixed(1)}%</div>
             </div>
           </div>
@@ -661,25 +663,25 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
       <Card variant="filled" className="p-4">
         <h4 className="font-bold text-on-surface mb-3 flex items-center gap-2 m3-title-medium">
           <Flame size={20} className="text-tertiary" />
-          Heatmap Legende
+          {t('heatmap.legend')}
         </h4>
         <div className="flex items-center justify-between gap-2">
           <div className="flex flex-col items-center">
             <div className="w-10 h-10 rounded-full bg-blue-500 shadow-lg" style={{ boxShadow: '0 0 15px #3b82f680' }} />
-            <span className="m3-label-medium text-on-surface font-semibold mt-2">Kalt</span>
-            <span className="text-[10px] text-on-surface-variant">Selten</span>
+            <span className="m3-label-medium text-on-surface font-semibold mt-2">{t('heatmap.cold')}</span>
+            <span className="text-[10px] text-on-surface-variant">{t('heatmap.rare')}</span>
           </div>
           <div className="flex-1 h-6 rounded-m3-sm" style={{
             background: 'linear-gradient(to right, #3b82f6, #06b6d4, #22c55e, #eab308, #f97316, #ef4444)'
           }} />
           <div className="flex flex-col items-center">
             <div className="w-10 h-10 rounded-full bg-red-500 shadow-lg" style={{ boxShadow: '0 0 15px #ef444480' }} />
-            <span className="m3-label-medium text-on-surface font-semibold mt-2">Heiß</span>
-            <span className="text-[10px] text-on-surface-variant">Häufig</span>
+            <span className="m3-label-medium text-on-surface font-semibold mt-2">{t('heatmap.hot')}</span>
+            <span className="text-[10px] text-on-surface-variant">{t('heatmap.frequent')}</span>
           </div>
         </div>
         <div className="mt-3 m3-body-small text-on-surface-variant text-center">
-          ⊕ Fadenkreuz = Schwerpunkt der Würfe · ○ Gestrichelter Kreis = Streuungsradius
+          {t('heatmap.legend_hint')}
         </div>
       </Card>
 
@@ -688,7 +690,7 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
         <Card variant="filled" className="p-4">
           <h4 className="font-bold text-on-surface mb-4 flex items-center gap-2 m3-title-medium">
             <TrendingUp size={20} className="text-primary" />
-            Top {compact ? 3 : 5} Hotspots
+            {t('heatmap.top_hotspots', { count: compact ? 3 : 5 })}
           </h4>
           <div className="space-y-2">
             {topSegments.map((seg, index) => {
@@ -727,7 +729,7 @@ export const DartboardHeatmapBlur: React.FC<DartboardHeatmapBlurProps> = ({
                           {formatSegmentName(seg.segment, seg.multiplier)}
                         </div>
                         <div className="m3-body-small text-on-surface-variant">
-                          {seg.count} Treffer · {percentage.toFixed(1)}%
+                          {t('heatmap.hits', { count: seg.count })} · {percentage.toFixed(1)}%
                         </div>
                       </div>
                     </div>

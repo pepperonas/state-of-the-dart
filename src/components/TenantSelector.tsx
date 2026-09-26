@@ -3,9 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Plus, X, LogIn, Trash2 } from 'lucide-react';
 import { useTenant } from '../context/TenantContext';
 import { formatDate } from '../utils/dateUtils';
+import { useTranslation } from 'react-i18next';
 import { Icon, iconForEmoji } from './icons';
 
 const TenantSelector: React.FC = () => {
+  const { t } = useTranslation();
   const { tenants, currentTenant, setCurrentTenant, addTenant, deleteTenant } = useTenant();
   const [showNewTenant, setShowNewTenant] = useState(false);
   const [newTenantName, setNewTenantName] = useState('');
@@ -60,10 +62,10 @@ const TenantSelector: React.FC = () => {
               color: 'transparent',
             }}
           >
-            Wähle dein Profil
+            {t('tenant_selector.title')}
           </h1>
           <p className="text-on-surface-variant m3-body-large">
-            Deine Statistiken und Spiele werden separat gespeichert
+            {t('tenant_selector.subtitle')}
           </p>
         </div>
 
@@ -73,8 +75,8 @@ const TenantSelector: React.FC = () => {
               <div className="inline-block p-4 bg-surface-container-high rounded-m3-full mb-4">
                 <Users size={48} className="text-on-surface-variant" />
               </div>
-              <p className="text-on-surface font-semibold m3-title-medium">Noch keine Profile vorhanden</p>
-              <p className="text-on-surface-variant m3-body-small mt-2">Erstelle dein erstes Profil um zu starten</p>
+              <p className="text-on-surface font-semibold m3-title-medium">{t('tenant_selector.empty_title')}</p>
+              <p className="text-on-surface-variant m3-body-small mt-2">{t('tenant_selector.empty_body')}</p>
             </div>
           ) : (
             tenants.map((tenant) => (
@@ -97,7 +99,7 @@ const TenantSelector: React.FC = () => {
                     <h3 className="m3-title-large m3-emphasized text-on-surface mb-1">{tenant.name}</h3>
                     <p className="m3-body-small text-on-surface-variant flex items-center gap-2">
                       <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
-                      Zuletzt aktiv: {formatDate(tenant.lastActive)}
+                      {t('tenant_selector.last_active', { date: formatDate(tenant.lastActive) })}
                     </p>
                   </div>
                   <LogIn size={28} className="text-on-surface-variant group-hover:text-primary transition-colors" />
@@ -109,7 +111,8 @@ const TenantSelector: React.FC = () => {
                     setShowDeleteConfirm(tenant.id);
                   }}
                   className="absolute top-3 right-3 p-2.5 bg-error-container hover:opacity-90 rounded-m3-md opacity-0 group-hover:opacity-100 transition-all"
-                  title="Profil löschen"
+                  title={t('tenant_selector.delete_profile')}
+                  aria-label={t('tenant_selector.delete_profile')}
                 >
                   <Trash2 size={18} className="text-on-error-container" />
                 </button>
@@ -129,23 +132,23 @@ const TenantSelector: React.FC = () => {
                           <Trash2 size={32} className="text-on-error-container" />
                         </div>
                         <p className="text-on-surface m3-title-medium m3-emphasized mb-2">
-                          Profil "{tenant.name}" wirklich löschen?
+                          {t('tenant_selector.delete_confirm', { name: tenant.name })}
                         </p>
                         <p className="text-error m3-body-small mb-6">
-                          Alle Daten gehen unwiderruflich verloren!
+                          {t('tenant_selector.delete_warning')}
                         </p>
                         <div className="flex gap-3 justify-center">
                           <button
                             onClick={() => handleDeleteTenant(tenant.id)}
                             className="px-6 py-2.5 bg-error hover:opacity-90 text-on-error rounded-m3-full font-semibold transition-all shadow-m3-1"
                           >
-                            Löschen
+                            {t('common.delete')}
                           </button>
                           <button
                             onClick={() => setShowDeleteConfirm(null)}
                             className="px-6 py-2.5 bg-surface-container-high hover:bg-surface-container-highest text-on-surface rounded-m3-full font-semibold transition-all"
                           >
-                            Abbrechen
+                            {t('common.cancel')}
                           </button>
                         </div>
                       </div>
@@ -165,7 +168,7 @@ const TenantSelector: React.FC = () => {
             className="w-full py-5 bg-primary hover:opacity-90 text-on-primary rounded-m3-full font-bold text-lg flex items-center justify-center gap-3 transition-all shadow-m3-1"
           >
             <Plus size={28} />
-            Neues Profil erstellen
+            {t('tenant_selector.create_new')}
           </motion.button>
         ) : (
           <motion.div
@@ -175,13 +178,14 @@ const TenantSelector: React.FC = () => {
             className="bg-surface-container rounded-m3-lg p-6 space-y-5 border border-outline-variant"
           >
             <div className="flex items-center justify-between">
-              <h3 className="m3-title-large m3-emphasized text-on-surface">Neues Profil</h3>
+              <h3 className="m3-title-large m3-emphasized text-on-surface">{t('tenant_selector.new_profile')}</h3>
               <button
                 onClick={() => {
                   setShowNewTenant(false);
                   setNewTenantName('');
                   setNewTenantAvatar('user');
                 }}
+                aria-label={t('common.close')}
                 className="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-m3-md transition-all"
               >
                 <X size={22} />
@@ -190,7 +194,7 @@ const TenantSelector: React.FC = () => {
 
             <div>
               <label className="block m3-label-large font-semibold text-on-surface mb-3">
-                Avatar wählen
+                {t('tenant_selector.choose_avatar')}
               </label>
               <div className="grid grid-cols-6 gap-3">
                 {avatarOptions.map((avatar) => (
@@ -213,7 +217,7 @@ const TenantSelector: React.FC = () => {
 
             <div>
               <label className="block m3-label-large font-semibold text-on-surface mb-3">
-                Profilname
+                {t('tenant_selector.profile_name')}
               </label>
               <input
                 type="text"
@@ -222,7 +226,7 @@ const TenantSelector: React.FC = () => {
                 onKeyPress={(e) => {
                   if (e.key === 'Enter') handleAddTenant();
                 }}
-                placeholder="Dein Name..."
+                placeholder={t('tenant_selector.name_placeholder')}
                 className="w-full px-4 py-3 bg-surface-container-high border border-outline rounded-m3-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-[var(--m3-primary)] transition-all"
                 autoFocus
               />
@@ -235,7 +239,7 @@ const TenantSelector: React.FC = () => {
               disabled={!newTenantName.trim()}
               className="w-full py-4 bg-success hover:opacity-90 disabled:bg-surface-container-high disabled:text-on-surface-variant disabled:cursor-not-allowed text-on-success rounded-m3-full font-bold text-lg transition-all shadow-m3-1 disabled:shadow-none"
             >
-              Profil erstellen
+              {t('tenant_selector.create')}
             </motion.button>
           </motion.div>
         )}

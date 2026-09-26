@@ -195,11 +195,11 @@ const StatsOverview: React.FC = () => {
     const maxGames = Math.max(50, selectedPlayer.stats.gamesPlayed);
     
     return [{
-      metric: 'Average',
+      metric: t('stats_overview.average'),
       value: (selectedPlayer.stats.averageOverall / maxAvg) * 100,
       fullMark: 100,
     }, {
-      metric: 'Checkout %',
+      metric: t('stats_overview.checkout_rate'),
       value: selectedPlayer.stats.checkoutPercentage,
       fullMark: 100,
     }, {
@@ -207,24 +207,24 @@ const StatsOverview: React.FC = () => {
       value: (selectedPlayer.stats.total180s / max180s) * 100,
       fullMark: 100,
     }, {
-      metric: 'Win Rate',
+      metric: t('stats_overview.win_rate'),
       value: (selectedPlayer.stats.gamesWon / selectedPlayer.stats.gamesPlayed) * 100,
       fullMark: 100,
     }, {
-      metric: 'Erfahrung',
+      metric: t('stats_overview.experience'),
       value: (selectedPlayer.stats.gamesPlayed / maxGames) * 100,
       fullMark: 100,
     }];
-  }, [selectedPlayer]);
+  }, [selectedPlayer, t]);
 
   // Win/Loss data
   const winLossData = useMemo(() => {
     if (!selectedPlayer) return [];
     return [
-      { name: 'Gewonnen', value: selectedPlayer.stats.gamesWon, color: chart.success },
-      { name: 'Verloren', value: selectedPlayer.stats.gamesPlayed - selectedPlayer.stats.gamesWon, color: chart.error },
+      { name: t('stats_overview.won'), value: selectedPlayer.stats.gamesWon, color: chart.success },
+      { name: t('stats_overview.lost'), value: selectedPlayer.stats.gamesPlayed - selectedPlayer.stats.gamesWon, color: chart.error },
     ];
-  }, [selectedPlayer]);
+  }, [selectedPlayer, t, chart.success, chart.error]);
 
   // Time series performance data (daily/weekly/monthly/yearly)
   const timeSeriesData = useMemo(() => {
@@ -238,7 +238,7 @@ const StatsOverview: React.FC = () => {
           const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
           const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
           const weekNumber = Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-          return `${date.getFullYear()} W${weekNumber}`;
+          return t('stats_overview.week_key', { year: date.getFullYear(), week: weekNumber });
         }
         case 'monthly':
           return formatDate(timestamp, { year: 'numeric', month: 'short' });
@@ -287,7 +287,7 @@ const StatsOverview: React.FC = () => {
         timestamp: stats.timestamp,
       }))
       .sort((a, b) => a.timestamp - b.timestamp);
-  }, [playerMatches, selectedPlayerId, timeInterval]);
+  }, [playerMatches, selectedPlayerId, timeInterval, t]);
   
   const handleExportCSV = () => {
     if (!selectedPlayer) return;
@@ -325,13 +325,13 @@ const StatsOverview: React.FC = () => {
           <Card variant="elevated" className="p-12">
             <div className="text-center py-12">
               <Activity size={64} className="mx-auto text-on-surface-variant mb-6" />
-              <p className="text-on-surface m3-headline-small mb-2">Keine Statistiken verfügbar</p>
+              <p className="text-on-surface m3-headline-small mb-2">{t('stats_overview.no_stats')}</p>
               <p className="text-on-surface-variant m3-body-large mt-2">
-                Erstelle einen Spieler und spiele einige Matches, um Statistiken zu sehen
+                {t('stats_overview.no_stats_hint')}
               </p>
               <div className="mt-6 flex justify-center">
                 <Button variant="filled" onClick={() => navigate('/players')}>
-                  Spieler erstellen
+                  {t('stats_overview.create_player')}
                 </Button>
               </div>
             </div>
@@ -358,7 +358,7 @@ const StatsOverview: React.FC = () => {
               icon={<Download size={18} />}
               onClick={() => setShowExportMenu(!showExportMenu)}
             >
-              Export
+              {t('stats_overview.export')}
             </Button>
 
             {showExportMenu && (
@@ -368,21 +368,21 @@ const StatsOverview: React.FC = () => {
                   className="w-full flex items-center gap-3 px-4 py-3 text-on-surface hover:bg-surface-container-highest transition-colors text-left"
                 >
                   <FileText size={18} />
-                  <span>CSV Export</span>
+                  <span>{t('stats_overview.export_csv')}</span>
                 </button>
                 <button
                   onClick={handleExportExcel}
                   className="w-full flex items-center gap-3 px-4 py-3 text-on-surface hover:bg-surface-container-highest transition-colors text-left"
                 >
                   <FileSpreadsheet size={18} />
-                  <span>Excel Export</span>
+                  <span>{t('stats_overview.export_excel')}</span>
                 </button>
                 <button
                   onClick={handleExportPDF}
                   className="w-full flex items-center gap-3 px-4 py-3 text-on-surface hover:bg-surface-container-highest transition-colors text-left"
                 >
                   <FileText size={18} />
-                  <span>PDF Export</span>
+                  <span>{t('stats_overview.export_pdf')}</span>
                 </button>
               </div>
             )}
@@ -392,12 +392,12 @@ const StatsOverview: React.FC = () => {
         {/* Player Selector */}
         <Card variant="elevated" className="p-4 mb-6">
           <div className="flex items-center gap-4">
-            <label className="text-on-surface m3-label-large">Spieler:</label>
+            <label className="text-on-surface m3-label-large">{t('stats_overview.player_label')}</label>
             <Select<string>
               value={selectedPlayerId}
               onChange={setSelectedPlayerId}
               className="flex-1 max-w-xs"
-              aria-label={t('stats.select_player', 'Spieler')}
+              aria-label={t('stats.select_player')}
               options={players.map(player => ({
                 value: player.id,
                 label: player.name,
@@ -430,14 +430,14 @@ const StatsOverview: React.FC = () => {
                     )}
                     <div>
                       <h3 className="m3-title-large text-on-surface">
-                        {improvement.trend ==='improving'&&'Du verbesserst dich!'}
-                        {improvement.trend ==='declining'&&'Leichter Rückgang'}
-                        {improvement.trend ==='stable'&&'Stabile Performance'}
+                        {improvement.trend === 'improving' && t('stats_overview.trend_improving')}
+                        {improvement.trend === 'declining' && t('stats_overview.trend_declining')}
+                        {improvement.trend === 'stable' && t('stats_overview.trend_stable')}
                       </h3>
                       <p className="m3-body-small text-on-surface-variant mt-1">
-                        Aktuell: <span className="font-bold text-on-surface">{improvement.recentAverage.toFixed(2)}</span> |
-                        Historisch: <span className="font-bold text-on-surface">{improvement.historicAverage.toFixed(2)}</span> |
-                        Differenz: <span className={`font-bold ${improvement.averageImprovement > 0 ? 'text-success' : 'text-error'}`}>
+                        {t('stats_overview.current_label')} <span className="font-bold text-on-surface">{improvement.recentAverage.toFixed(2)}</span> |
+                        {t('stats_overview.historic_label')} <span className="font-bold text-on-surface">{improvement.historicAverage.toFixed(2)}</span> |
+                        {t('stats_overview.difference_label')} <span className={`font-bold ${improvement.averageImprovement > 0 ? 'text-success' : 'text-error'}`}>
                           {improvement.averageImprovement > 0 ? '+' : ''}{improvement.averageImprovement.toFixed(2)}
                         </span>
                       </p>
@@ -450,27 +450,27 @@ const StatsOverview: React.FC = () => {
             {/* Tabs */}
             <div className="flex flex-wrap gap-2 mb-6">
               <Chip selected={selectedTab === 'overview'} onClick={() => setSelectedTab('overview')}>
-                Übersicht
+                {t('stats.overview')}
               </Chip>
               <Chip selected={selectedTab === 'progress'} onClick={() => setSelectedTab('progress')}>
-                Fortschritt
+                {t('stats.progress')}
               </Chip>
               <Chip selected={selectedTab === 'history'} onClick={() => setSelectedTab('history')}>
-                Verlauf ({playerMatches.length})
+                {t('stats_overview.history_tab', { count: playerMatches.length })}
               </Chip>
               <Chip
                 selected={selectedTab === 'compare'}
                 icon={<Users size={16} />}
                 onClick={() => setSelectedTab('compare')}
               >
-                Vergleich
+                {t('stats.comparison')}
               </Chip>
               <Chip
                 selected={selectedTab === 'heatmap'}
                 icon={<Flame size={16} />}
                 onClick={() => setSelectedTab('heatmap')}
               >
-                Heatmap
+                {t('stats_overview.heatmap_tab')}
               </Chip>
             </div>
 
@@ -480,14 +480,14 @@ const StatsOverview: React.FC = () => {
                 {/* Stats Grid */}
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <motion.div {...staggerChild(0)}>
-                    <StatCard label="Spiele" value={selectedPlayer.stats.gamesPlayed} />
+                    <StatCard label={t('stats_overview.games')} value={selectedPlayer.stats.gamesPlayed} />
                   </motion.div>
                   <motion.div {...staggerChild(1)}>
-                    <StatCard label="Gewonnen" value={selectedPlayer.stats.gamesWon} color="green" />
+                    <StatCard label={t('stats_overview.won')} value={selectedPlayer.stats.gamesWon} color="green" />
                   </motion.div>
                   <motion.div {...staggerChild(2)}>
                     <StatCard
-                      label="Win Rate"
+                      label={t('stats_overview.win_rate')}
                       value={
                         selectedPlayer.stats.gamesPlayed > 0
                           ? `${((selectedPlayer.stats.gamesWon / selectedPlayer.stats.gamesPlayed) * 100).toFixed(1)}%`
@@ -497,31 +497,31 @@ const StatsOverview: React.FC = () => {
                     />
                   </motion.div>
                   <motion.div {...staggerChild(3)}>
-                    <StatCard label="Durchschnitt" value={selectedPlayer.stats.averageOverall.toFixed(2)} color="purple" />
+                    <StatCard label={t('stats_overview.average_long')} value={selectedPlayer.stats.averageOverall.toFixed(2)} color="purple" />
                   </motion.div>
                   <motion.div {...staggerChild(4)}>
-                    <StatCard label="Bester Avg" value={selectedPlayer.stats.bestAverage.toFixed(2)} color="yellow" />
+                    <StatCard label={t('stats_overview.best_avg')} value={selectedPlayer.stats.bestAverage.toFixed(2)} color="yellow" />
                   </motion.div>
                   <motion.div {...staggerChild(5)}>
-                    <StatCard label="180s"value={selectedPlayer.stats.total180s} icon=""/>
+                    <StatCard label="180s" value={selectedPlayer.stats.total180s} icon=""/>
                   </motion.div>
                   <motion.div {...staggerChild(6)}>
-                    <StatCard label="High Checkout" value={selectedPlayer.stats.highestCheckout || '-'} />
+                    <StatCard label={t('stats_overview.high_checkout')} value={selectedPlayer.stats.highestCheckout || '-'} />
                   </motion.div>
                   <motion.div {...staggerChild(7)}>
-                    <StatCard label="Checkout %" value={`${selectedPlayer.stats.checkoutPercentage.toFixed(1)}%`} />
+                    <StatCard label={t('stats_overview.checkout_rate')} value={`${selectedPlayer.stats.checkoutPercentage.toFixed(1)}%`} />
                   </motion.div>
                   <motion.div {...staggerChild(8)}>
-                    <StatCard label="140+ Scores" value={selectedPlayer.stats.total140Plus} />
+                    <StatCard label={t('stats_overview.scores_140')} value={selectedPlayer.stats.total140Plus} />
                   </motion.div>
                   <motion.div {...staggerChild(9)}>
-                    <StatCard label="100+ Scores" value={selectedPlayer.stats.total100Plus} />
+                    <StatCard label={t('stats_overview.scores_100')} value={selectedPlayer.stats.total100Plus} />
                   </motion.div>
                   <motion.div {...staggerChild(10)}>
-                    <StatCard label="60+ Scores" value={selectedPlayer.stats.total60Plus} />
+                    <StatCard label={t('stats_overview.scores_60')} value={selectedPlayer.stats.total60Plus} />
                   </motion.div>
                   <motion.div {...staggerChild(11)}>
-                    <StatCard label="9-Darters"value={selectedPlayer.stats.nineDartFinishes} icon=""/>
+                    <StatCard label={t('stats_overview.nine_darters')} value={selectedPlayer.stats.nineDartFinishes} icon=""/>
                   </motion.div>
                 </div>
 
@@ -534,7 +534,7 @@ const StatsOverview: React.FC = () => {
                       <Card variant="elevated" className="p-6">
                         <h3 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
                             <Icon name="target" size={22} />
-                          Performance-Profil
+                          {t('stats_overview.performance_profile')}
                         </h3>
                         <div className="bg-surface-container rounded-m3-md p-4">
                           <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
@@ -552,7 +552,7 @@ const StatsOverview: React.FC = () => {
                                 style={{ fontSize: '10px' }}
                               />
                               <Radar 
-                                name="Performance" 
+                                name={t('stats_overview.performance')} 
                                 dataKey="value" 
                                 stroke={chart.series[0]} 
                                 fill={chart.series[0]} 
@@ -567,7 +567,7 @@ const StatsOverview: React.FC = () => {
                                   padding: '12px'
                                 }}
                                 labelStyle={{ color: chart.text, fontWeight: 'bold' }}
-                                formatter={(value: number) => [`${value.toFixed(1)}%`, 'Score']}
+                                formatter={(value: number) => [`${value.toFixed(1)}%`, t('stats_overview.score')]}
                               />
                             </RadarChart>
                           </ResponsiveContainer></div>
@@ -578,7 +578,7 @@ const StatsOverview: React.FC = () => {
                       <Card variant="elevated" className="p-6">
                         <h3 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
                             <Icon name="trophy" size={22} />
-                          Sieg-Statistik
+                          {t('stats_overview.win_stats')}
                         </h3>
                         <div className="bg-surface-container rounded-m3-md p-4">
                           <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
@@ -617,7 +617,7 @@ const StatsOverview: React.FC = () => {
                       <Card variant="elevated" className="p-6">
                         <h3 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
                             <Icon name="chartBar" size={22} />
-                          Score-Verteilung
+                          {t('stats_overview.score_distribution')}
                         </h3>
                         <div className="bg-surface-container rounded-m3-md p-4">
                           <div className="h-[250px] sm:h-[350px]"><ResponsiveContainer width="100%" height="100%">
@@ -667,24 +667,24 @@ const StatsOverview: React.FC = () => {
                         <div className="flex items-center justify-between mb-4">
                           <h3 className="m3-title-large text-on-surface flex items-center gap-2">
                             <Icon name="chartLine" size={22} />
-                            Entwicklung im Zeitverlauf
+                            {t('stats_overview.trend_over_time')}
                             {timeSeriesData.length === 1 && (
-                              <span className="m3-body-small text-tertiary ml-2">(Nur 1 Datenpunkt - spiele mehr für Entwicklung!)</span>
+                              <span className="m3-body-small text-tertiary ml-2">{t('stats_overview.single_datapoint')}</span>
                             )}
                             {timeSeriesData.length === 0 && playerMatches.length > 0 && (
-                              <span className="m3-body-small text-error ml-2">(Keine gültigen Zeitstempel in Match-Daten)</span>
+                              <span className="m3-body-small text-error ml-2">{t('stats_overview.no_timestamps')}</span>
                             )}
                           </h3>
                           <Select<TimeInterval>
                             value={timeInterval}
                             onChange={setTimeInterval}
                             inline
-                            aria-label="Zeitraum"
+                            aria-label={t('stats_overview.time_range')}
                             options={[
-                              { value: 'daily', label: 'Täglich' },
-                              { value: 'weekly', label: 'Wöchentlich' },
-                              { value: 'monthly', label: 'Monatlich' },
-                              { value: 'yearly', label: 'Jährlich' },
+                              { value: 'daily', label: t('stats_overview.daily') },
+                              { value: 'weekly', label: t('stats_overview.weekly') },
+                              { value: 'monthly', label: t('stats_overview.monthly') },
+                              { value: 'yearly', label: t('stats_overview.yearly') },
                             ]}
                           />
                         </div>
@@ -702,14 +702,14 @@ const StatsOverview: React.FC = () => {
                                   yAxisId="left"
                                   stroke={chart.axis}
                                   style={{ fontSize: '12px' }}
-                                  label={{ value: 'Average', angle: -90, position: 'insideLeft', fill: chart.axis }}
+                                  label={{ value: t('stats_overview.average'), angle: -90, position: 'insideLeft', fill: chart.axis }}
                                 />
                                 <YAxis
                                   yAxisId="right"
                                   orientation="right"
                                   stroke={chart.axis}
                                   style={{ fontSize: '12px' }}
-                                  label={{ value: 'Win Rate %', angle: 90, position: 'insideRight', fill: chart.axis }}
+                                  label={{ value: t('stats_overview.win_rate_percent'), angle: 90, position: 'insideRight', fill: chart.axis }}
                                 />
                                 <Tooltip
                                   contentStyle={{
@@ -732,7 +732,7 @@ const StatsOverview: React.FC = () => {
                                   stroke={chart.series[0]}
                                   strokeWidth={2}
                                   dot={{ fill: chart.series[0], r: timeSeriesData.length <= 2 ? 8 : 4 }}
-                                  name="Durchschnitt"
+                                  name={t('stats_overview.average_long')}
                                 />
                                 <Line
                                   yAxisId="right"
@@ -741,7 +741,7 @@ const StatsOverview: React.FC = () => {
                                   stroke={chart.success}
                                   strokeWidth={3}
                                   dot={{ fill: chart.success, r: timeSeriesData.length <= 2 ? 8 : 4 }}
-                                  name="Win Rate %"
+                                  name={t('stats_overview.win_rate_percent')}
                                 />
                               </ComposedChart>
                             </ResponsiveContainer></div>
@@ -749,9 +749,9 @@ const StatsOverview: React.FC = () => {
                         ) : (
                           <div className="bg-surface-container rounded-m3-md p-12 text-center">
                             <Activity size={48} className="mx-auto mb-4 text-on-surface-variant" />
-                            <p className="text-on-surface m3-body-large font-semibold mb-2">Keine Zeitverlaufs-Daten verfügbar</p>
+                            <p className="text-on-surface m3-body-large font-semibold mb-2">{t('stats_overview.no_time_series')}</p>
                             <p className="text-on-surface-variant m3-body-small">
-                              Die Match-Daten haben keine gültigen Zeitstempel. Neue Matches werden korrekt erfasst.
+                              {t('stats_overview.no_time_series_hint')}
                             </p>
                           </div>
                         )}
@@ -763,8 +763,8 @@ const StatsOverview: React.FC = () => {
                 {selectedPlayer.stats.gamesPlayed === 0 && (
                   <Card variant="elevated" className="p-12 text-center">
                     <Activity size={64} className="mx-auto mb-4 text-on-surface-variant" />
-                    <p className="text-on-surface m3-title-medium font-semibold mb-2">Keine Spieldaten vorhanden</p>
-                    <p className="text-on-surface-variant">Spiele einige Matches, um detaillierte Charts und Statistiken zu sehen</p>
+                    <p className="text-on-surface m3-title-medium font-semibold mb-2">{t('stats_overview.no_game_data')}</p>
+                    <p className="text-on-surface-variant">{t('stats_overview.no_game_data_hint')}</p>
                   </Card>
                 )}
               </div>
@@ -775,14 +775,14 @@ const StatsOverview: React.FC = () => {
                 {playerMatches.length === 0 ? (
                   <Card variant="elevated" className="p-12 text-center">
                     <Activity size={64} className="mx-auto mb-4 text-on-surface-variant" />
-                    <p className="text-on-surface m3-body-large font-semibold">Noch keine Spiele für diesen Spieler</p>
-                    <p className="text-on-surface-variant m3-body-small mt-2">Spiele einige Matches, um deine Fortschritte zu sehen</p>
+                    <p className="text-on-surface m3-body-large font-semibold">{t('stats_overview.no_games_for_player')}</p>
+                    <p className="text-on-surface-variant m3-body-small mt-2">{t('stats_overview.no_games_for_player_hint')}</p>
                   </Card>
                 ) : (
                   <>
                     {/* Average Progress Chart */}
                     <Card variant="elevated" className="p-6">
-                      <h3 className="m3-title-large text-on-surface mb-4"> Average-Entwicklung</h3>
+                      <h3 className="m3-title-large text-on-surface mb-4">{t('stats_overview.average_trend')}</h3>
                       <div className="bg-surface-container rounded-m3-md p-4">
                         <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <LineChart data={progressData}>
@@ -822,7 +822,7 @@ const StatsOverview: React.FC = () => {
                               strokeWidth={3}
                               dot={{ fill: chart.series[0], r: 4 }}
                               activeDot={{ r: 6 }}
-                              name="Durchschnitt"
+                              name={t('stats_overview.average_long')}
                             />
                           </LineChart>
                         </ResponsiveContainer></div>
@@ -831,7 +831,7 @@ const StatsOverview: React.FC = () => {
 
                     {/* Checkout Percentage Chart */}
                     <Card variant="elevated" className="p-6">
-                      <h3 className="m3-title-large text-on-surface mb-4"> Checkout-Quote</h3>
+                      <h3 className="m3-title-large text-on-surface mb-4">{t('stats_overview.checkout_quote')}</h3>
                       <div className="bg-surface-container rounded-m3-md p-4">
                         <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <LineChart data={progressData}>
@@ -857,7 +857,7 @@ const StatsOverview: React.FC = () => {
                               }}
                               labelStyle={{ color: chart.text, fontWeight: 'bold' }}
                               itemStyle={{ color: chart.success }}
-                              formatter={(value: number) => [`${value.toFixed(1)}%`, 'Checkout %']}
+                              formatter={(value: number) => [`${value.toFixed(1)}%`, t('stats_overview.checkout_rate')]}
                             />
                             <Legend
                               wrapperStyle={{ paddingTop: '20px' }}
@@ -871,7 +871,7 @@ const StatsOverview: React.FC = () => {
                               strokeWidth={3}
                               dot={{ fill: chart.success, r: 4 }}
                               activeDot={{ r: 6 }}
-                              name="Checkout %"
+                              name={t('stats_overview.checkout_rate')}
                             />
                           </LineChart>
                         </ResponsiveContainer></div>
@@ -880,7 +880,7 @@ const StatsOverview: React.FC = () => {
 
                     {/* Score Distribution Chart */}
                     <Card variant="elevated" className="p-6">
-                      <h3 className="m3-title-large text-on-surface mb-4"> Score-Verteilung pro Match</h3>
+                      <h3 className="m3-title-large text-on-surface mb-4">{t('stats_overview.score_distribution_per_match')}</h3>
                       <div className="bg-surface-container rounded-m3-md p-4">
                         <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <BarChart data={progressData}>
@@ -936,7 +936,7 @@ const StatsOverview: React.FC = () => {
 
                     {/* Legs Won/Lost Trend */}
                     <Card variant="elevated" className="p-6">
-                      <h3 className="m3-title-large text-on-surface mb-4"> Legs Gewonnen vs. Verloren</h3>
+                      <h3 className="m3-title-large text-on-surface mb-4">{t('stats_overview.legs_won_vs_lost')}</h3>
                       <div className="bg-surface-container rounded-m3-md p-4">
                         <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={progressData}>
@@ -973,7 +973,7 @@ const StatsOverview: React.FC = () => {
                               stroke={chart.success}
                               fill={chart.success}
                               fillOpacity={0.8}
-                              name="Legs Gewonnen"
+                              name={t('stats_overview.legs_won')}
                             />
                             <Area
                               type="monotone"
@@ -982,7 +982,7 @@ const StatsOverview: React.FC = () => {
                               stroke={chart.error}
                               fill={chart.error}
                               fillOpacity={0.8}
-                              name="Legs Verloren"
+                              name={t('stats_overview.legs_lost')}
                             />
                           </AreaChart>
                         </ResponsiveContainer></div>
@@ -991,7 +991,7 @@ const StatsOverview: React.FC = () => {
 
                     {/* Highest Score per Match */}
                     <Card variant="elevated" className="p-6">
-                      <h3 className="m3-title-large text-on-surface mb-4"> Höchste Scores</h3>
+                      <h3 className="m3-title-large text-on-surface mb-4">{t('stats_overview.highest_scores')}</h3>
                       <div className="bg-surface-container rounded-m3-md p-4">
                         <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                           <ComposedChart data={progressData}>
@@ -1025,7 +1025,7 @@ const StatsOverview: React.FC = () => {
                             <Bar
                               dataKey="highestScore"
                               fill="url(#colorGradient)"
-                              name="Höchster Score"
+                              name={t('stats_overview.highest_score')}
                               radius={[8, 8, 0, 0]}
                             />
                             <Line
@@ -1034,7 +1034,7 @@ const StatsOverview: React.FC = () => {
                               stroke={chart.series[0]}
                               strokeWidth={2}
                               dot={{ fill: chart.series[0], r: 3 }}
-                              name="Durchschnitt"
+                              name={t('stats_overview.average_long')}
                             />
                             <defs>
                               <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
@@ -1050,7 +1050,7 @@ const StatsOverview: React.FC = () => {
                     {/* Performance Improvement Summary */}
                     {improvement && (
                       <Card variant="elevated" className="p-6">
-                        <h3 className="m3-title-large text-on-surface mb-4"> Verbesserungs-Trend</h3>
+                        <h3 className="m3-title-large text-on-surface mb-4">{t('stats_overview.improvement_trend')}</h3>
                         <div className="grid md:grid-cols-3 gap-4">
                           <div className="bg-surface-container rounded-m3-md p-4">
                             <div className="flex items-center gap-2 mb-2">
@@ -1059,7 +1059,7 @@ const StatsOverview: React.FC = () => {
                               ) : (
                                 <TrendingDown size={20} className="text-error" />
                               )}
-                              <span className="text-on-surface-variant m3-body-small">Average</span>
+                              <span className="text-on-surface-variant m3-body-small">{t('stats_overview.average')}</span>
                             </div>
                             <div className={`m3-title-large m3-emphasized ${
                               improvement.averageImprovement >= 0 ? 'text-success' : 'text-error'
@@ -1074,7 +1074,7 @@ const StatsOverview: React.FC = () => {
                               ) : (
                                 <TrendingDown size={20} className="text-error" />
                               )}
-                              <span className="text-on-surface-variant m3-body-small">Checkout %</span>
+                              <span className="text-on-surface-variant m3-body-small">{t('stats_overview.checkout_rate')}</span>
                             </div>
                             <div className={`m3-title-large m3-emphasized ${
                               improvement.checkoutImprovement >= 0 ? 'text-success' : 'text-error'
@@ -1085,7 +1085,7 @@ const StatsOverview: React.FC = () => {
                           <div className="bg-surface-container rounded-m3-md p-4">
                             <div className="flex items-center gap-2 mb-2">
                               <Activity size={20} className="text-primary" />
-                              <span className="text-on-surface-variant m3-body-small">Spiele</span>
+                              <span className="text-on-surface-variant m3-body-small">{t('stats_overview.games')}</span>
                             </div>
                             <div className="m3-title-large m3-emphasized text-on-surface">
                               {playerMatches.length}
@@ -1101,12 +1101,12 @@ const StatsOverview: React.FC = () => {
 
             {selectedTab === 'history' && (
               <Card variant="elevated" className="p-6 m3-enter">
-                <h3 className="m3-title-large text-on-surface mb-4"> Match-Verlauf</h3>
+                <h3 className="m3-title-large text-on-surface mb-4">{t('stats_overview.match_history')}</h3>
                 {playerMatches.length === 0 ? (
                   <div className="text-center py-12">
                     <Activity size={64} className="mx-auto mb-4 text-on-surface-variant" />
-                    <p className="text-on-surface m3-body-large font-semibold">Noch keine Matches gespielt</p>
-                    <p className="text-on-surface-variant m3-body-small mt-2">Starte ein Spiel, um deinen Verlauf zu sehen</p>
+                    <p className="text-on-surface m3-body-large font-semibold">{t('stats_overview.no_matches')}</p>
+                    <p className="text-on-surface-variant m3-body-small mt-2">{t('stats_overview.no_matches_hint')}</p>
                   </div>
                 ) : (
                   <MatchHistory matches={playerMatches} playerId={selectedPlayerId} />
@@ -1131,11 +1131,11 @@ const StatsOverview: React.FC = () => {
                   <div className="flex items-center justify-between mb-2">
                     <h2 className="m3-headline-small text-on-surface flex items-center gap-3">
                       <Flame size={32} className="text-tertiary" />
-                      Wurf-Heatmap
+                      {t('stats_overview.throw_heatmap')}
                     </h2>
                   </div>
                   <p className="text-on-surface-variant m3-body-large">
-                    Visualisierung aller Würfe von <span className="font-bold text-primary">{selectedPlayer?.name}</span>
+                    {t('stats_overview.heatmap_subtitle')} <span className="font-bold text-primary">{selectedPlayer?.name}</span>
                   </p>
                 </Card>
 
@@ -1146,27 +1146,27 @@ const StatsOverview: React.FC = () => {
                     <div className="grid md:grid-cols-4 gap-4">
                       <motion.div {...staggerChild(0)}>
                         <Card variant="filled" className="p-6">
-                          <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">Total Würfe</div>
+                          <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">{t('stats_overview.total_throws')}</div>
                           <div className="m3-headline-medium m3-emphasized text-on-surface">{heatmapData.totalDarts}</div>
-                          <div className="m3-body-small text-on-surface-variant mt-2">Alle aufgezeichneten Darts</div>
+                          <div className="m3-body-small text-on-surface-variant mt-2">{t('stats_overview.all_recorded_darts')}</div>
                         </Card>
                       </motion.div>
                       <motion.div {...staggerChild(1)}>
                         <Card variant="filled" className="p-6">
-                          <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">Segments getroffen</div>
+                          <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">{t('stats_overview.segments_hit')}</div>
                           <div className="m3-headline-medium m3-emphasized text-on-surface">
                             {Object.keys(heatmapData.segments || {}).length}
                           </div>
-                          <div className="m3-body-small text-on-surface-variant mt-2">Unterschiedliche Felder</div>
+                          <div className="m3-body-small text-on-surface-variant mt-2">{t('stats_overview.distinct_beds')}</div>
                         </Card>
                       </motion.div>
                       <motion.div {...staggerChild(2)}>
                         <Card variant="filled" className="p-6">
-                          <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">Präzision</div>
+                          <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">{t('stats_overview.precision')}</div>
                           <div className="m3-headline-medium m3-emphasized text-on-surface">
                             {selectedPlayer ? selectedPlayer.stats.checkoutPercentage.toFixed(1) : 0}%
                           </div>
-                          <div className="m3-body-small text-on-surface-variant mt-2">Checkout Rate</div>
+                          <div className="m3-body-small text-on-surface-variant mt-2">{t('stats_overview.checkout_rate_long')}</div>
                         </Card>
                       </motion.div>
                       <motion.div {...staggerChild(3)}>
@@ -1175,7 +1175,7 @@ const StatsOverview: React.FC = () => {
                           <div className="m3-headline-medium m3-emphasized text-on-surface">
                             {selectedPlayer?.stats.total180s || 0}
                           </div>
-                          <div className="m3-body-small text-on-surface-variant mt-2">Maximum Scores</div>
+                          <div className="m3-body-small text-on-surface-variant mt-2">{t('stats_overview.maximum_scores')}</div>
                         </Card>
                       </motion.div>
                     </div>
@@ -1188,23 +1188,23 @@ const StatsOverview: React.FC = () => {
                 ) : (
                   <Card variant="outlined" className="p-12 text-center border-2 border-dashed border-outline-variant">
                     <div className="text-8xl mb-6"></div>
-                    <h3 className="m3-headline-small text-on-surface mb-4">Noch keine Wurf-Daten</h3>
+                    <h3 className="m3-headline-small text-on-surface mb-4">{t('stats_overview.no_throw_data')}</h3>
                     <p className="text-on-surface-variant m3-body-large mb-6">
-                      Spiele ein Match, um deine Wurf-Heatmap zu sehen!
+                      {t('stats_overview.no_throw_data_hint')}
                     </p>
                     <p className="text-on-surface-variant mb-6">
-                      Die Heatmap zeigt dir auf einen Blick, wo du am häufigsten triffst:
+                      {t('stats_overview.heatmap_explainer')}
                     </p>
                     <div className="flex items-center justify-center gap-6 m3-body-large">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-red-500 shadow-lg" style={{ boxShadow: '0 0 20px #ef444480' }}></div>
-                        <span className="text-on-surface font-semibold">Hot-Zones</span>
-                        <span className="text-on-surface-variant">(oft getroffen)</span>
+                        <span className="text-on-surface font-semibold">{t('stats_overview.hot_zones')}</span>
+                        <span className="text-on-surface-variant">{t('stats_overview.hit_often')}</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-blue-500 shadow-lg" style={{ boxShadow: '0 0 20px #3b82f680' }}></div>
-                        <span className="text-on-surface font-semibold">Cold-Zones</span>
-                        <span className="text-on-surface-variant">(selten getroffen)</span>
+                        <span className="text-on-surface font-semibold">{t('stats_overview.cold_zones')}</span>
+                        <span className="text-on-surface-variant">{t('stats_overview.hit_rarely')}</span>
                       </div>
                     </div>
                   </Card>
@@ -1252,6 +1252,7 @@ const PlayerComparisonView: React.FC<{
   matches: Match[];
   storage: any;
 }> = ({ players, comparePlayerIds, setComparePlayerIds, matches }) => {
+  const { t } = useTranslation();
   const chart = useChartTheme();
   
   const togglePlayer = (playerId: string) => {
@@ -1288,34 +1289,35 @@ const PlayerComparisonView: React.FC<{
   const radarData = useMemo(() => {
     if (comparisonData.length === 0) return [];
 
+    // `id` drives the maths, `category` is the translated axis label.
     const categories = [
-      { category: 'Average', max: 100 },
-      { category: 'Win Rate', max: 100 },
-      { category: 'Checkout %', max: 100 },
-      { category: '180s', max: 20 },
-      { category: 'Consistency', max: 100 },
+      { id: 'average', category: t('stats_overview.average'), max: 100 },
+      { id: 'winRate', category: t('stats_overview.win_rate'), max: 100 },
+      { id: 'checkout', category: t('stats_overview.checkout_rate'), max: 100 },
+      { id: '180s', category: '180s', max: 20 },
+      { id: 'consistency', category: t('stats_overview.consistency'), max: 100 },
     ];
 
     return categories.map(cat => {
       const dataPoint: any = { category: cat.category };
       comparisonData.forEach((data, index) => {
         let value = 0;
-        switch (cat.category) {
-          case 'Average':
+        switch (cat.id) {
+          case 'average':
             // Normalize to 0-100 (max average = 80)
             value = Math.min((data!.avgScore / 80) * 100, 100);
             break;
-          case 'Win Rate':
+          case 'winRate':
             value = data!.winRate;
             break;
-          case 'Checkout %':
+          case 'checkout':
             value = data!.checkoutRate;
             break;
           case '180s':
             // Normalize to 0-100 (max = 20 180s)
             value = Math.min((data!.total180s / 20) * 100, 100);
             break;
-          case 'Consistency':
+          case 'consistency':
             // Normalize to 0-100 (max = 50 games)
             value = data!.totalGames > 0 ? Math.min((data!.totalGames / 50) * 100, 100) : 0;
             break;
@@ -1324,7 +1326,7 @@ const PlayerComparisonView: React.FC<{
       });
       return dataPoint;
     });
-  }, [comparisonData]);
+  }, [comparisonData, t]);
 
   const colors = chart.series;
 
@@ -1332,8 +1334,8 @@ const PlayerComparisonView: React.FC<{
     return (
       <Card variant="elevated" className="p-8 text-center">
         <Users size={64} className="mx-auto mb-4 text-on-surface-variant" />
-        <p className="text-on-surface m3-body-large font-semibold">Keine Spieler vorhanden</p>
-        <p className="text-on-surface-variant m3-body-small mt-2">Erstelle Spieler, um sie zu vergleichen</p>
+        <p className="text-on-surface m3-body-large font-semibold">{t('stats_overview.no_players')}</p>
+        <p className="text-on-surface-variant m3-body-small mt-2">{t('stats_overview.no_players_hint')}</p>
       </Card>
     );
   }
@@ -1344,7 +1346,7 @@ const PlayerComparisonView: React.FC<{
       <Card variant="elevated" className="p-6">
         <h3 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
           <Users size={24} />
-          Spieler auswählen (max. 4)
+          {t('stats_overview.select_players_max', { max: 4 })}
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {players.map((player) => (
@@ -1365,7 +1367,7 @@ const PlayerComparisonView: React.FC<{
               <div className="mb-3 flex justify-center"><Icon name={iconForEmoji(player.avatar)} size={40} /></div>
               <div className="font-bold text-on-surface m3-body-large">{player.name}</div>
               {comparePlayerIds.includes(player.id) && (
-                <div className="m3-body-small text-primary mt-2 font-semibold"> Ausgewählt</div>
+                <div className="m3-body-small text-primary mt-2 font-semibold">{t('stats_overview.selected')}</div>
               )}
             </button>
           ))}
@@ -1374,8 +1376,8 @@ const PlayerComparisonView: React.FC<{
 
       {comparePlayerIds.length < 2 && (
         <Card variant="elevated" className="p-8 text-center">
-          <p className="text-on-surface m3-body-large font-semibold">Wähle mindestens 2 Spieler zum Vergleichen</p>
-          <p className="text-on-surface-variant m3-body-small mt-2">Klicke auf die Spieler oben, um sie auszuwählen</p>
+          <p className="text-on-surface m3-body-large font-semibold">{t('stats_overview.pick_at_least', { min: 2 })}</p>
+          <p className="text-on-surface-variant m3-body-small mt-2">{t('stats_overview.pick_hint')}</p>
         </Card>
       )}
 
@@ -1383,7 +1385,7 @@ const PlayerComparisonView: React.FC<{
         <>
           {/* Radar Comparison */}
           <Card variant="elevated" className="p-6">
-            <h3 className="m3-title-large text-on-surface mb-4"> Leistungsvergleich</h3>
+            <h3 className="m3-title-large text-on-surface mb-4">{t('stats_overview.performance_comparison')}</h3>
             <div className="bg-surface-container rounded-m3-md p-4">
               <div className="h-[280px] sm:h-[400px]"><ResponsiveContainer width="100%" height="100%">
                 <RadarChart data={radarData}>
@@ -1415,12 +1417,12 @@ const PlayerComparisonView: React.FC<{
 
           {/* Stats Comparison Table */}
           <Card variant="elevated" className="p-6">
-            <h3 className="m3-title-large text-on-surface mb-4"> Statistik-Vergleich</h3>
+            <h3 className="m3-title-large text-on-surface mb-4">{t('stats_overview.stats_comparison')}</h3>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[500px]">
                 <thead>
                   <tr className="border-b border-outline-variant">
-                    <th className="text-left p-3 text-on-surface-variant font-semibold">Kategorie</th>
+                    <th className="text-left p-3 text-on-surface-variant font-semibold">{t('stats_overview.category')}</th>
                     {comparisonData.map((data, index) => (
                       <th key={index} className="text-center p-3 text-on-surface font-semibold">
                         <div className="flex flex-col items-center gap-2">
@@ -1433,7 +1435,7 @@ const PlayerComparisonView: React.FC<{
                 </thead>
                 <tbody>
                   <tr className="border-b border-outline-variant">
-                    <td className="p-3 text-on-surface-variant">Spiele</td>
+                    <td className="p-3 text-on-surface-variant">{t('stats_overview.games')}</td>
                     {comparisonData.map((data, index) => (
                       <td key={index} className="p-3 text-center text-on-surface font-bold">
                         {data!.totalGames}
@@ -1441,7 +1443,7 @@ const PlayerComparisonView: React.FC<{
                     ))}
                   </tr>
                   <tr className="border-b border-outline-variant">
-                    <td className="p-3 text-on-surface-variant">Siege</td>
+                    <td className="p-3 text-on-surface-variant">{t('stats_overview.wins')}</td>
                     {comparisonData.map((data, index) => (
                       <td key={index} className="p-3 text-center text-success font-bold">
                         {data!.wins}
@@ -1449,7 +1451,7 @@ const PlayerComparisonView: React.FC<{
                     ))}
                   </tr>
                   <tr className="border-b border-outline-variant">
-                    <td className="p-3 text-on-surface-variant">Siegrate</td>
+                    <td className="p-3 text-on-surface-variant">{t('stats_overview.win_rate')}</td>
                     {comparisonData.map((data, index) => (
                       <td key={index} className="p-3 text-center text-primary font-bold">
                         {data!.winRate.toFixed(1)}%
@@ -1457,7 +1459,7 @@ const PlayerComparisonView: React.FC<{
                     ))}
                   </tr>
                   <tr className="border-b border-outline-variant">
-                    <td className="p-3 text-on-surface-variant">Durchschnitt</td>
+                    <td className="p-3 text-on-surface-variant">{t('stats_overview.average_long')}</td>
                     {comparisonData.map((data, index) => (
                       <td key={index} className="p-3 text-center text-on-surface font-bold">
                         {data!.avgScore.toFixed(2)}
@@ -1473,7 +1475,7 @@ const PlayerComparisonView: React.FC<{
                     ))}
                   </tr>
                   <tr className="border-b border-outline-variant">
-                    <td className="p-3 text-on-surface-variant">Checkout-Quote</td>
+                    <td className="p-3 text-on-surface-variant">{t('stats_overview.checkout_quote')}</td>
                     {comparisonData.map((data, index) => (
                       <td key={index} className="p-3 text-center text-success font-bold">
                         {data!.checkoutRate.toFixed(1)}%
@@ -1481,7 +1483,7 @@ const PlayerComparisonView: React.FC<{
                     ))}
                   </tr>
                   <tr>
-                    <td className="p-3 text-on-surface-variant">Höchster Score</td>
+                    <td className="p-3 text-on-surface-variant">{t('stats_overview.highest_score')}</td>
                     {comparisonData.map((data, index) => (
                       <td key={index} className="p-3 text-center text-tertiary font-bold">
                         {data!.highestScore}
@@ -1495,21 +1497,21 @@ const PlayerComparisonView: React.FC<{
 
           {/* Bar Chart Comparison */}
           <Card variant="elevated" className="p-6">
-            <h3 className="m3-title-large text-on-surface mb-4"> Direktvergleich</h3>
+            <h3 className="m3-title-large text-on-surface mb-4">{t('stats_overview.head_to_head')}</h3>
             <div className="bg-surface-container rounded-m3-md p-4">
               <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={[
                     {
-                      name: 'Average',
+                      name: t('stats_overview.average'),
                       ...Object.fromEntries(comparisonData.map((d, i) => [`player${i}`, d!.avgScore])),
                     },
                     {
-                      name: 'Win Rate %',
+                      name: t('stats_overview.win_rate_percent'),
                       ...Object.fromEntries(comparisonData.map((d, i) => [`player${i}`, d!.winRate])),
                     },
                     {
-                      name: 'Checkout %',
+                      name: t('stats_overview.checkout_rate'),
                       ...Object.fromEntries(comparisonData.map((d, i) => [`player${i}`, d!.checkoutRate])),
                     },
                   ]}

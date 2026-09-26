@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * The way out of the auth screens.
@@ -14,14 +15,17 @@ import { ArrowLeft } from 'lucide-react';
  * user who signed in in another tab would otherwise be bounced into the app
  * instead of the page they asked for.
  */
-const BackToLanding: React.FC<{ className?: string }> = ({ className = '' }) => (
+const BackToLanding: React.FC<{ className?: string }> = ({ className = '' }) => {
+  const { t } = useTranslation();
+  return (
   <Link
     to="/willkommen"
     className={`inline-flex items-center gap-1.5 mb-4 m3-label-large text-on-surface-variant hover:text-on-surface transition-colors ${className}`}
   >
     <ArrowLeft size={16} />
-    Zur Startseite
+    {t('back_to_landing.label')}
   </Link>
-);
+  );
+};
 
 export default BackToLanding;
