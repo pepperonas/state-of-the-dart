@@ -2030,5 +2030,1899 @@
     "match_won": "{{name}} checks out {{score}} and wins the match",
     "undo": "Visit taken back",
     "undo_to": "Visit taken back, {{name}} is on {{remaining}} again"
+  },
+  "export": {
+    "date": "Date",
+    "player": "Player",
+    "opponent": "Opponent",
+    "result": "Result",
+    "score": "Score",
+    "average": "Average",
+    "highest_score": "Highest score",
+    "checkout_pct": "Checkout %",
+    "darts_thrown": "Darts thrown",
+    "first9_avg": "First 9 average",
+    "legs_won": "Legs won",
+    "legs_lost": "Legs lost",
+    "win": "Win",
+    "loss": "Loss",
+    "win_short": "W",
+    "loss_short": "L",
+    "wl": "W/L",
+    "avg": "Avg",
+    "co_pct": "CO %",
+    "sheet_history": "Match history",
+    "sheet_summary": "Summary",
+    "player_summary": "Player summary",
+    "player_name": "Player name",
+    "total_matches": "Total matches",
+    "wins": "Wins",
+    "losses": "Losses",
+    "win_rate": "Win rate",
+    "total_180s": "Total 180s",
+    "export_date": "Export date",
+    "report_title": "Match history report"
+  },
+  "bots": {
+    "player_name": "Bot {{number}} ({{level}})"
+  },
+  "activity": {
+    "none": "No activity in the last {{days}} days",
+    "summary_one": "{{count}} game on {{active}} of {{days}} days, peak {{peak}} in a day",
+    "summary_other": "{{count}} games on {{active}} of {{days}} days, peak {{peak}} in a day"
+  },
+  "achievement_defs": {
+    "first_game": {
+      "name": "First Steps",
+      "description": "Finish your first game"
+    },
+    "rookie": {
+      "name": "Rookie",
+      "description": "Play 10 games"
+    },
+    "veteran": {
+      "name": "Veteran",
+      "description": "Play 50 games"
+    },
+    "centurion": {
+      "name": "Centurion",
+      "description": "Play 100 games"
+    },
+    "legend": {
+      "name": "Legend",
+      "description": "Play 500 games"
+    },
+    "ton_80": {
+      "name": "Ton 80",
+      "description": "Score your first 180"
+    },
+    "max_out": {
+      "name": "Max Out",
+      "description": "Score 10x a 180"
+    },
+    "high_roller": {
+      "name": "High Roller",
+      "description": "Reach an average of 60 in a game"
+    },
+    "pro_scorer": {
+      "name": "Pro Scorer",
+      "description": "Reach an average of 80 in a game"
+    },
+    "world_class": {
+      "name": "World Class",
+      "description": "Reach an average of 100 in a game"
+    },
+    "checkout_king": {
+      "name": "Checkout King",
+      "description": "Reach a checkout rate of 50% (min. 10 attempts)"
+    },
+    "big_fish": {
+      "name": "Big Fish",
+      "description": "Check out 170"
+    },
+    "bullseye_master": {
+      "name": "Bullseye Master",
+      "description": "Check out on the double bull"
+    },
+    "perfect_finish": {
+      "name": "Perfect Finish",
+      "description": "Check out an exact score without busting"
+    },
+    "trainee": {
+      "name": "Trainee",
+      "description": "Complete your first training session"
+    },
+    "dedicated": {
+      "name": "Dedicated",
+      "description": "Complete 50 training sessions"
+    },
+    "master_trainer": {
+      "name": "Master Trainer",
+      "description": "Complete all 6 training modes"
+    },
+    "winning_streak": {
+      "name": "Winning Streak",
+      "description": "Win 5 games in a row"
+    },
+    "no_bust": {
+      "name": "No Bust",
+      "description": "Win a leg without a single bust"
+    },
+    "nine_darter": {
+      "name": "9-Darter",
+      "description": "Finish a leg in just 9 darts (501)"
+    },
+    "ton_plus": {
+      "name": "Ton Plus",
+      "description": "Score 100+"
+    },
+    "century_club": {
+      "name": "Century Club",
+      "description": "Score 100+ 100 times"
+    },
+    "consistent_scorer": {
+      "name": "Consistent Scorer",
+      "description": "Score 60+ in 10 visits in a row"
+    },
+    "triple_master": {
+      "name": "Triple Master",
+      "description": "Hit 100 triples"
+    },
+    "perfect_round": {
+      "name": "Perfect Round",
+      "description": "Hit 3x triple 20 in one visit (180)"
+    },
+    "Shanghai": {
+      "name": "Shanghai",
+      "description": "Hit the single, double and triple of the same number"
+    },
+    "low_ton": {
+      "name": "Low Ton",
+      "description": "Score exactly 100 points"
+    },
+    "checkout_novice": {
+      "name": "Checkout Novice",
+      "description": "Check out your first game"
+    },
+    "madhouse": {
+      "name": "Madhouse",
+      "description": "Check out on double 1"
+    },
+    "century_checkout": {
+      "name": "Century Checkout",
+      "description": "Check out 100 or more"
+    },
+    "double_trouble": {
+      "name": "Double Trouble",
+      "description": "Check out on 10 different doubles"
+    },
+    "favorite_double": {
+      "name": "Favourite Double",
+      "description": "Check out 25x on the same double"
+    },
+    "quick_finish": {
+      "name": "Quick Finish",
+      "description": "Check out in under 12 darts (301)"
+    },
+    "checkout_master": {
+      "name": "Checkout Master",
+      "description": "Reach 100 successful checkouts"
+    },
+    "big_40": {
+      "name": "Big 40",
+      "description": "Check out exactly 40 (D20)"
+    },
+    "comeback_king": {
+      "name": "Comeback King",
+      "description": "Win a game after trailing in legs"
+    },
+    "unstoppable": {
+      "name": "Unstoppable",
+      "description": "Win 10 games in a row"
+    },
+    "perfect_leg": {
+      "name": "Perfect Leg",
+      "description": "Win a leg with an average over 100"
+    },
+    "clutch_player": {
+      "name": "Clutch Player",
+      "description": "Win 5 games in a deciding leg"
+    },
+    "never_give_up": {
+      "name": "Never Give Up",
+      "description": "Come back from a deficit of 200+ points"
+    },
+    "clean_sweep": {
+      "name": "Clean Sweep",
+      "description": "Win a match without dropping a set (best of 5)"
+    },
+    "training_addict": {
+      "name": "Training Addict",
+      "description": "Complete 100 training sessions"
+    },
+    "around_the_clock": {
+      "name": "Around the Clock",
+      "description": "Hit every number from 1-20 in one training session"
+    },
+    "training_perfectionist": {
+      "name": "Training Perfectionist",
+      "description": "Reach 100% in a training session"
+    },
+    "early_bird": {
+      "name": "Early Bird",
+      "description": "Complete a training session before 8 am"
+    },
+    "hat_trick": {
+      "name": "Hat Trick",
+      "description": "Score 3x 180 in one game"
+    },
+    "twelve_darter": {
+      "name": "12-Darter",
+      "description": "Finish a leg in just 12 darts (501)"
+    },
+    "grand_master": {
+      "name": "Grandmaster",
+      "description": "Reach 10,000 achievement points"
+    },
+    "all_rounder": {
+      "name": "All-Rounder",
+      "description": "Win 10 games each in 301, 501 and 701"
+    },
+    "speed_demon": {
+      "name": "Speed Demon",
+      "description": "Finish a game in under 5 minutes"
+    },
+    "first_win": {
+      "name": "First Win",
+      "description": "Win your first game"
+    },
+    "champion": {
+      "name": "Champion",
+      "description": "Win 25 games"
+    },
+    "master_champion": {
+      "name": "Master Champion",
+      "description": "Win 100 games"
+    },
+    "ultimate_champion": {
+      "name": "Ultimate Champion",
+      "description": "Win 250 games"
+    },
+    "millennium": {
+      "name": "Millennium",
+      "description": "Play 1000 games"
+    },
+    "social_player": {
+      "name": "Social Player",
+      "description": "Play against 10 different opponents"
+    },
+    "popular": {
+      "name": "Popular",
+      "description": "Play against 50 different opponents"
+    },
+    "night_owl": {
+      "name": "Night Owl",
+      "description": "Play a match after midnight"
+    },
+    "weekend_warrior": {
+      "name": "Weekend Warrior",
+      "description": "Play 25 games at the weekend"
+    },
+    "daily_grind": {
+      "name": "Daily Grind",
+      "description": "Play 7 days in a row"
+    },
+    "ton_40": {
+      "name": "Ton 40",
+      "description": "Score 140"
+    },
+    "triple_twenty": {
+      "name": "Triple 20 Pro",
+      "description": "Hit triple 20 500 times"
+    },
+    "triple_nineteen": {
+      "name": "Triple 19 Specialist",
+      "description": "Hit triple 19 250 times"
+    },
+    "triple_collector": {
+      "name": "Triple Collector",
+      "description": "Hit every triple at least once"
+    },
+    "high_ton": {
+      "name": "High Ton",
+      "description": "Score 150+"
+    },
+    "super_scorer": {
+      "name": "Super Scorer",
+      "description": "Score 150+ 50 times"
+    },
+    "bullseye_hunter": {
+      "name": "Bullseye Hunter",
+      "description": "Hit the bullseye 50 times"
+    },
+    "bullseye_legend": {
+      "name": "Bullseye Legend",
+      "description": "Hit the bullseye 200 times"
+    },
+    "bed_and_breakfast": {
+      "name": "Bed & Breakfast",
+      "description": "Score 26 points (5, 20, 1)"
+    },
+    "double_master": {
+      "name": "Double Master",
+      "description": "Hit 200 doubles"
+    },
+    "single_precision": {
+      "name": "Single Precision",
+      "description": "Hit 1000 singles"
+    },
+    "average_joe": {
+      "name": "Average Joe",
+      "description": "Reach an average of 45 in a game"
+    },
+    "consistent_average": {
+      "name": "Consistent Average",
+      "description": "Average 50+ in 10 games in a row"
+    },
+    "elite_scorer": {
+      "name": "Elite Scorer",
+      "description": "Reach an average of 90 in a game"
+    },
+    "ton_machine": {
+      "name": "Ton Machine",
+      "description": "Score 50x a 180"
+    },
+    "triple_triple": {
+      "name": "Triple Triple",
+      "description": "Hit 3 triples in one visit (not 180)"
+    },
+    "perfect_visit": {
+      "name": "Perfect Visit",
+      "description": "Land all 3 darts in the same segment"
+    },
+    "unlucky": {
+      "name": "Unlucky",
+      "description": "Hit the 1 with all 3 darts in one visit"
+    },
+    "lucky_seven": {
+      "name": "Lucky Sevens",
+      "description": "Score exactly 77 points"
+    },
+    "scoring_streak": {
+      "name": "Scoring Streak",
+      "description": "Score 45+ in 20 visits in a row"
+    },
+    "checkout_apprentice": {
+      "name": "Checkout Apprentice",
+      "description": "Reach 10 successful checkouts"
+    },
+    "checkout_expert": {
+      "name": "Checkout Expert",
+      "description": "Reach 50 successful checkouts"
+    },
+    "tops": {
+      "name": "Tops",
+      "description": "Check out on double 20"
+    },
+    "favorite_tops": {
+      "name": "Tops Lover",
+      "description": "Check out 50x on double 20"
+    },
+    "double_16": {
+      "name": "Double 16 Specialist",
+      "description": "Check out 25x on double 16"
+    },
+    "big_checkout": {
+      "name": "Big Checkout",
+      "description": "Check out 120 or more"
+    },
+    "massive_checkout": {
+      "name": "Massive Checkout",
+      "description": "Check out 150 or more"
+    },
+    "checkout_efficiency": {
+      "name": "Checkout Efficiency",
+      "description": "Reach a checkout rate of 40% (min. 20 attempts)"
+    },
+    "checkout_legend": {
+      "name": "Checkout Legend",
+      "description": "Reach a checkout rate of 60% (min. 20 attempts)"
+    },
+    "one_dart_finish": {
+      "name": "One-Dart Finish",
+      "description": "Check out with a single dart"
+    },
+    "two_dart_finish": {
+      "name": "Two-Dart Finish",
+      "description": "Check out with just two darts"
+    },
+    "bogey_number": {
+      "name": "Bogey Number",
+      "description": "Check out 169 (highest odd number)"
+    },
+    "checkout_variety": {
+      "name": "Checkout Variety",
+      "description": "Check out 15 different scores"
+    },
+    "clutch_checkout": {
+      "name": "Clutch Checkout",
+      "description": "Check out while your opponent is on a finish"
+    },
+    "double_bull_lover": {
+      "name": "Double Bull Lover",
+      "description": "Check out 10x on the double bull"
+    },
+    "double_digit_wins": {
+      "name": "Double Digits",
+      "description": "Win 10 games"
+    },
+    "fifty_wins": {
+      "name": "Fifty Club",
+      "description": "Win 50 games"
+    },
+    "win_streak_3": {
+      "name": "Hat Trick",
+      "description": "Win 3 games in a row"
+    },
+    "iron_will": {
+      "name": "Iron Will",
+      "description": "Win a game after trailing 0-1 (best of 3)"
+    },
+    "domination": {
+      "name": "Domination",
+      "description": "Win 5 games in a row without dropping a set"
+    },
+    "efficient_winner": {
+      "name": "Efficient Winner",
+      "description": "Win a game with under 15 darts per leg (average)"
+    },
+    "perfect_match": {
+      "name": "Perfect Match",
+      "description": "Win a match without a single bust"
+    },
+    "rally_master": {
+      "name": "Rally Master",
+      "description": "Play a leg with at least 20 visits"
+    },
+    "nail_biter": {
+      "name": "Nail-Biter",
+      "description": "Win a game by a margin of one point"
+    },
+    "marathon_man": {
+      "name": "Marathon Man",
+      "description": "Play a match lasting over 30 minutes"
+    },
+    "late_bloomer": {
+      "name": "Late Bloomer",
+      "description": "Win a leg after trailing by 100+ points"
+    },
+    "perfect_start": {
+      "name": "Perfect Start",
+      "description": "Win the first leg in 10 games in a row"
+    },
+    "finisher": {
+      "name": "Finisher",
+      "description": "Win the final leg in 10 games in a row"
+    },
+    "reverse_sweep": {
+      "name": "Reverse Sweep",
+      "description": "Win a best of 5 after trailing 0-2"
+    },
+    "no_mercy": {
+      "name": "No Mercy",
+      "description": "Win 3 games in a row without dropping a set"
+    },
+    "training_enthusiast": {
+      "name": "Training Enthusiast",
+      "description": "Complete 25 training sessions"
+    },
+    "training_legend": {
+      "name": "Training Legend",
+      "description": "Complete 250 training sessions"
+    },
+    "doubles_master": {
+      "name": "Doubles Master",
+      "description": "Reach 80% in a doubles training session"
+    },
+    "scoring_trainer": {
+      "name": "Scoring Trainer",
+      "description": "Average 100+ in 10 scoring training sessions"
+    },
+    "training_variety": {
+      "name": "Training Variety",
+      "description": "Complete every training type at least 5 times"
+    },
+    "late_night_training": {
+      "name": "Night Training",
+      "description": "Complete a training session after 22:00"
+    },
+    "morning_routine": {
+      "name": "Morning Routine",
+      "description": "Complete 10 training sessions before 10 am"
+    },
+    "training_marathon": {
+      "name": "Training Marathon",
+      "description": "Complete 5 training sessions in one day"
+    },
+    "checkout_training": {
+      "name": "Checkout Training Pro",
+      "description": "Reach 90% in a checkout training session"
+    },
+    "around_the_board": {
+      "name": "Around the Board",
+      "description": "Complete 50 Around the Clock training sessions"
+    },
+    "training_streak": {
+      "name": "Training Streak",
+      "description": "Train 14 days in a row"
+    },
+    "weekend_training": {
+      "name": "Weekend Training",
+      "description": "Complete 25 training sessions at the weekend"
+    },
+    "quick_learner": {
+      "name": "Quick Learner",
+      "description": "Improve your training result by 50% in one mode"
+    },
+    "triple_training": {
+      "name": "Triple Training",
+      "description": "Hit 100 triples in one training session"
+    },
+    "training_consistency": {
+      "name": "Training Consistency",
+      "description": "Reach 80%+ in the same training 3 times in a row"
+    },
+    "fifteen_darter": {
+      "name": "15-Darter",
+      "description": "Finish a leg in just 15 darts (501)"
+    },
+    "eighteen_darter": {
+      "name": "18-Darter",
+      "description": "Finish a leg in just 18 darts (501)"
+    },
+    "quick_301": {
+      "name": "Quick 301",
+      "description": "Finish a 301 leg in under 9 darts"
+    },
+    "perfect_301": {
+      "name": "Perfect 301",
+      "description": "Finish a 301 leg in 6 darts"
+    },
+    "double_180": {
+      "name": "Double 180",
+      "description": "Score 2x 180 in one game"
+    },
+    "ton_80_streak": {
+      "name": "180 Streak",
+      "description": "Score a 180 in 3 games in a row"
+    },
+    "all_180s": {
+      "name": "180 Collector",
+      "description": "Score 100x a 180"
+    },
+    "new_year_player": {
+      "name": "New Year Player",
+      "description": "Play on 1 January"
+    },
+    "christmas_special": {
+      "name": "Christmas Special",
+      "description": "Play at Christmas (24-26 December)"
+    },
+    "midnight_winner": {
+      "name": "Midnight Winner",
+      "description": "Win a game between 00:00 and 01:00"
+    },
+    "shutout": {
+      "name": "Shutout",
+      "description": "Win a leg before your opponent can check out (301)"
+    },
+    "robbery": {
+      "name": "Daylight Robbery",
+      "description": "Win a leg with your first checkout attempt"
+    },
+    "mirror_match": {
+      "name": "Mirror Match",
+      "description": "Finish a leg on exactly the same score as your opponent"
+    },
+    "speed_round": {
+      "name": "Speed Round",
+      "description": "Finish a game in under 3 minutes"
+    },
+    "rising_star": {
+      "name": "Rising Star",
+      "description": "Reach 2,500 achievement points"
+    },
+    "seasoned_pro": {
+      "name": "Seasoned Pro",
+      "description": "Reach 5,000 achievement points"
+    },
+    "elite_player": {
+      "name": "Elite Player",
+      "description": "Reach 7,500 achievement points"
+    },
+    "completionist": {
+      "name": "Completionist",
+      "description": "Unlock 50 achievements"
+    },
+    "achievement_hunter": {
+      "name": "Achievement Hunter",
+      "description": "Unlock 100 achievements"
+    },
+    "perfectionist": {
+      "name": "Perfectionist",
+      "description": "Unlock all {{target}} achievements"
+    },
+    "triple_threat": {
+      "name": "Triple Threat",
+      "description": "Win 50 games each in 301, 501 and 701"
+    },
+    "jack_of_all_trades": {
+      "name": "Jack of All Trades",
+      "description": "Reach gold tier in every category"
+    },
+    "dedication": {
+      "name": "Dedication",
+      "description": "Play on 100 different days"
+    },
+    "ultimate_master": {
+      "name": "Ultimate Master",
+      "description": "Reach 20,000 achievement points"
+    },
+    "ton_60": {
+      "name": "Ton 60",
+      "description": "Score 160"
+    },
+    "ton_71": {
+      "name": "Ton 71",
+      "description": "Score 171"
+    },
+    "single_bull_master": {
+      "name": "Single Bull Master",
+      "description": "Hit the single bull (25) 100 times"
+    },
+    "outer_bull": {
+      "name": "Outer Bull",
+      "description": "Hit the outer bull 25 times"
+    },
+    "three_in_a_bed": {
+      "name": "Three in a Bed",
+      "description": "Hit the same number 3 times in one visit"
+    },
+    "robin_hood": {
+      "name": "Robin Hood",
+      "description": "Throw 3 darts into exactly the same bed (same number, same multiplier)"
+    },
+    "low_blow": {
+      "name": "Low Blow",
+      "description": "Score fewer than 10 points in a visit"
+    },
+    "ton_26": {
+      "name": "Ton 26",
+      "description": "Score 126"
+    },
+    "ton_41": {
+      "name": "Ton 41",
+      "description": "Score 141"
+    },
+    "ninety_nine": {
+      "name": "Ninety-Nine",
+      "description": "Score exactly 99 points"
+    },
+    "double_double": {
+      "name": "Double Double",
+      "description": "Hit 2 doubles in one visit"
+    },
+    "triple_single_double": {
+      "name": "Triple-Single-Double",
+      "description": "Hit a triple, a single and a double in one visit"
+    },
+    "five_tons": {
+      "name": "Five Tons",
+      "description": "Score 5 visits over 100 in one match"
+    },
+    "ton_plus_streak": {
+      "name": "Ton Plus Streak",
+      "description": "Score 100+ 5 times in a row"
+    },
+    "sixty_club": {
+      "name": "60 Club",
+      "description": "Score 60+ 500 times"
+    },
+    "eighty_club": {
+      "name": "80 Club",
+      "description": "Score 80+ 200 times"
+    },
+    "triple_eighteen": {
+      "name": "Triple 18 Lover",
+      "description": "Hit triple 18 100 times"
+    },
+    "triple_seventeen": {
+      "name": "Triple 17 Fan",
+      "description": "Hit triple 17 100 times"
+    },
+    "century_average": {
+      "name": "Century Average",
+      "description": "Reach a rounded average of exactly 100"
+    },
+    "checkout_32": {
+      "name": "Double 16",
+      "description": "Check out exactly 32"
+    },
+    "checkout_50": {
+      "name": "Bulls Out",
+      "description": "Check out exactly 50"
+    },
+    "checkout_110": {
+      "name": "Tops & Tops",
+      "description": "Check out exactly 110 (T20, T20, D25)"
+    },
+    "checkout_121": {
+      "name": "Bull Finish",
+      "description": "Check out exactly 121"
+    },
+    "checkout_141": {
+      "name": "Maximum Checkout",
+      "description": "Check out exactly 141"
+    },
+    "checkout_160": {
+      "name": "Big Bull Finish",
+      "description": "Check out exactly 160"
+    },
+    "checkout_167": {
+      "name": "Maximum Checkout",
+      "description": "Check out exactly 167 (T20, T19, Bull)"
+    },
+    "first_visit_checkout": {
+      "name": "First Visit Finish",
+      "description": "Check out in the first visit of a leg"
+    },
+    "pressure_checkout": {
+      "name": "Pressure Checkout",
+      "description": "Check out when your opponent has fewer than 40 points left"
+    },
+    "checkout_artist": {
+      "name": "Checkout Artist",
+      "description": "Check out 20 different scores"
+    },
+    "three_dart_checkout_streak": {
+      "name": "3-Dart Checkout Streak",
+      "description": "Check out with 3 darts 3 times in a row"
+    },
+    "double_twelve": {
+      "name": "Double 12 Lover",
+      "description": "Check out 15x on double 12"
+    },
+    "double_eighteen": {
+      "name": "Double 18 Fan",
+      "description": "Check out 15x on double 18"
+    },
+    "checkout_streak_5": {
+      "name": "Checkout Streak",
+      "description": "Check out 5 legs in a row"
+    },
+    "checkout_percentage_70": {
+      "name": "Checkout God",
+      "description": "Reach a checkout rate of 70% (min. 30 attempts)"
+    },
+    "impossible_checkout": {
+      "name": "Impossible Checkout",
+      "description": "Check out 163, 166 or 169"
+    },
+    "checkout_180": {
+      "name": "Checkout After 180",
+      "description": "Check out in the visit right after a 180"
+    },
+    "missed_double_comeback": {
+      "name": "Missed Double Comeback",
+      "description": "Check out after 5+ missed doubles"
+    },
+    "checkout_collection": {
+      "name": "Checkout Collection",
+      "description": "Check out 25 different scores"
+    },
+    "checkout_50_plus": {
+      "name": "Checkout 50+",
+      "description": "Reach 250 successful checkouts"
+    },
+    "win_streak_15": {
+      "name": "15-Game Streak",
+      "description": "Win 15 games in a row"
+    },
+    "win_streak_20": {
+      "name": "20-Game Streak",
+      "description": "Win 20 games in a row"
+    },
+    "hundred_wins_fast": {
+      "name": "Fast 100",
+      "description": "Reach 100 wins in under 30 days"
+    },
+    "no_bust_match": {
+      "name": "No-Bust Run",
+      "description": "Win 10 legs in a row without a bust"
+    },
+    "consistency_king": {
+      "name": "Consistency King",
+      "description": "Average 40+ in 20 games in a row"
+    },
+    "quick_legs": {
+      "name": "Quick Legs",
+      "description": "Win 10 legs in under 15 darts"
+    },
+    "unbeatable": {
+      "name": "Unbeatable",
+      "description": "Win 25 games in a row"
+    },
+    "month_champion": {
+      "name": "Monthly Champion",
+      "description": "Win at least 1 game on every day of a month"
+    },
+    "perfect_week": {
+      "name": "Perfect Week",
+      "description": "Win at least 3 games a day for 7 days in a row"
+    },
+    "comeback_specialist": {
+      "name": "Comeback Specialist",
+      "description": "Win 10 games after trailing"
+    },
+    "best_of_five_king": {
+      "name": "Best of 5 King",
+      "description": "Win 25 best of 5 matches"
+    },
+    "decider_master": {
+      "name": "Decider Master",
+      "description": "Win 25 games in a deciding leg"
+    },
+    "whitewash_specialist": {
+      "name": "Whitewash Specialist",
+      "description": "Win 10 games without dropping a set"
+    },
+    "close_call_master": {
+      "name": "Close Call Master",
+      "description": "Win 15 games by a margin of 1 point"
+    },
+    "flawless_victory": {
+      "name": "Flawless Victory",
+      "description": "Win a game with an average over 100 and no busts"
+    },
+    "training_dedication": {
+      "name": "Training Dedication",
+      "description": "Complete 500 training sessions"
+    },
+    "training_month": {
+      "name": "Training Month",
+      "description": "Train 30 days in a row"
+    },
+    "doubles_perfectionist": {
+      "name": "Doubles Perfectionist",
+      "description": "Reach 100% in a doubles training session"
+    },
+    "scoring_machine": {
+      "name": "Scoring Machine",
+      "description": "Average 120+ in a scoring training session"
+    },
+    "all_training_gold": {
+      "name": "All Gold",
+      "description": "Reach at least 90% in every training type"
+    },
+    "training_improvement": {
+      "name": "Training Improvement",
+      "description": "Improve your training score by 100% in one mode"
+    },
+    "speed_training": {
+      "name": "Speed Training",
+      "description": "Complete a training session in under 5 minutes with 80%+"
+    },
+    "hundred_triples_training": {
+      "name": "100 Triples Training",
+      "description": "Hit 100 triples in one training session (average 95%+)"
+    },
+    "checkout_training_master": {
+      "name": "Checkout Training Master",
+      "description": "Reach 95% in a checkout training session"
+    },
+    "training_variety_master": {
+      "name": "Training Variety Master",
+      "description": "Complete every training type at least 25 times"
+    },
+    "twenty_one_darter": {
+      "name": "21-Darter",
+      "description": "Finish a leg in just 21 darts (501)"
+    },
+    "twenty_four_darter": {
+      "name": "24-Darter",
+      "description": "Finish a leg in just 24 darts (501)"
+    },
+    "four_180s": {
+      "name": "Four of a Kind",
+      "description": "Score 4x 180 in one game"
+    },
+    "five_180s": {
+      "name": "High Five",
+      "description": "Score 5x 180 in one game"
+    },
+    "back_to_back_180": {
+      "name": "Back to Back 180",
+      "description": "Score 2x 180 in a row"
+    },
+    "triple_180": {
+      "name": "Triple 180",
+      "description": "Score 3x 180 in a row"
+    },
+    "quick_701": {
+      "name": "Quick 701",
+      "description": "Finish a 701 leg in under 21 darts"
+    },
+    "perfect_501_game": {
+      "name": "Perfect 501 Game",
+      "description": "Win a 501 match without a single bust"
+    },
+    "halloween_special": {
+      "name": "Halloween Special",
+      "description": "Play on Halloween (31 October)"
+    },
+    "valentines_win": {
+      "name": "Valentine's Win",
+      "description": "Win on Valentine's Day (14 February)"
+    },
+    "late_night_warrior": {
+      "name": "Late Night Warrior",
+      "description": "Play 25 matches after 23:00"
+    },
+    "early_bird_champion": {
+      "name": "Early Bird Champion",
+      "description": "Win 25 games before 8 am"
+    },
+    "lunch_break_player": {
+      "name": "Lunch Break Player",
+      "description": "Play 50 matches between 12:00-14:00"
+    },
+    "weekend_grinder": {
+      "name": "Weekend Grinder",
+      "description": "Win 100 games at the weekend"
+    },
+    "lucky_thirteen": {
+      "name": "Lucky Thirteen",
+      "description": "Win a game in exactly 13 visits"
+    },
+    "perfect_nine": {
+      "name": "Perfect Nine",
+      "description": "Score over 60 in 9 consecutive visits"
+    },
+    "world_record_pace": {
+      "name": "World Record Pace",
+      "description": "Finish a game in under 2 minutes"
+    },
+    "bouncer": {
+      "name": "Bouncer",
+      "description": "Hit outside the board 100 times"
+    },
+    "loyalty": {
+      "name": "Loyalty",
+      "description": "Play with the app for 365 days"
+    },
+    "five_hundred_wins": {
+      "name": "500 Wins Club",
+      "description": "Win 500 games"
+    },
+    "two_thousand_games": {
+      "name": "2K Club",
+      "description": "Play 2000 games"
+    },
+    "hundred_opponents": {
+      "name": "100 Opponents",
+      "description": "Play against 100 different opponents"
+    },
+    "bot_slayer": {
+      "name": "Bot Slayer",
+      "description": "Win 50 games against bots"
+    },
+    "human_champion": {
+      "name": "Human Champion",
+      "description": "Win 100 games against real players"
+    },
+    "monthly_player": {
+      "name": "Monthly Player",
+      "description": "Play 30 days in a row"
+    },
+    "year_one": {
+      "name": "Year One",
+      "description": "Play on 180 different days"
+    },
+    "game_modes_master": {
+      "name": "Game Modes Master",
+      "description": "Play 100 games each in 301, 501 and 701"
+    },
+    "versatile_player": {
+      "name": "Versatile Player",
+      "description": "Play every available game mode"
+    },
+    "daily_champion": {
+      "name": "Daily Champion",
+      "description": "Win on 50 different days"
+    },
+    "achievement_god": {
+      "name": "Achievement God",
+      "description": "Reach 30,000 achievement points"
+    },
+    "achievement_collector": {
+      "name": "Achievement Collector",
+      "description": "Unlock 150 achievements"
+    },
+    "diamond_collector": {
+      "name": "Diamond Collector",
+      "description": "Unlock every diamond-tier achievement"
+    },
+    "legend_status": {
+      "name": "Legend Status",
+      "description": "Unlock 50 legendary-rarity achievements"
+    },
+    "the_one": {
+      "name": "The One",
+      "description": "Reach rank 1 in every category"
+    },
+    "ton_collector": {
+      "name": "Ton Collector",
+      "description": "Throw 500 scores of 100 or more"
+    },
+    "ton_hoarder": {
+      "name": "Ton Hoarder",
+      "description": "Throw 2000 scores of 100 or more"
+    },
+    "fifty_180s": {
+      "name": "Fifty Maximums",
+      "description": "Throw a total of 50 maximum 180s"
+    },
+    "hundred_180s": {
+      "name": "Century of Maximums",
+      "description": "Throw a total of 100 maximum 180s"
+    },
+    "five_hundred_180s": {
+      "name": "Maximum Legend",
+      "description": "Throw a total of 500 maximum 180s"
+    },
+    "triple_crown": {
+      "name": "Triple Crown",
+      "description": "Throw 3 consecutive 180s in one match"
+    },
+    "sixty_slinger": {
+      "name": "Sixty Slinger",
+      "description": "Throw 1000 scores of 60 or more"
+    },
+    "eighty_addict": {
+      "name": "Eighty Addict",
+      "description": "Throw 500 scores of 80 or more"
+    },
+    "the_mathematiker": {
+      "name": "The Mathematician",
+      "description": "Throw exactly 100 points in one visit"
+    },
+    "unlucky_score": {
+      "name": "Unlucky for Some",
+      "description": "Throw a score of exactly 13"
+    },
+    "devils_number": {
+      "name": "Devil's Number",
+      "description": "Throw a score of exactly 66"
+    },
+    "the_answer": {
+      "name": "The Answer",
+      "description": "Throw exactly 42 points — the answer to everything"
+    },
+    "one_fifty_plus_club": {
+      "name": "150+ Club",
+      "description": "Throw 200 scores of 150 or more"
+    },
+    "average_sixty": {
+      "name": "Solid Foundation",
+      "description": "Reach a match average of at least 60"
+    },
+    "average_eighty": {
+      "name": "Pro Average",
+      "description": "Reach a match average of at least 80"
+    },
+    "average_hundred": {
+      "name": "Ton Average",
+      "description": "Reach a match average of at least 100"
+    },
+    "five_tons_match": {
+      "name": "Ton Parade",
+      "description": "Throw 5 tons (100+) in a single match"
+    },
+    "ten_tons_match": {
+      "name": "Ton Festival",
+      "description": "Throw 10 tons (100+) in a single match"
+    },
+    "checkout_master_fifty": {
+      "name": "Checkout Machine",
+      "description": "Successfully finish 50 legs"
+    },
+    "checkout_legend_200": {
+      "name": "Checkout Legend",
+      "description": "Successfully finish 200 legs"
+    },
+    "checkout_god_500": {
+      "name": "Checkout God",
+      "description": "Successfully finish 500 legs"
+    },
+    "bullseye_finisher": {
+      "name": "Bullseye Finisher",
+      "description": "Check out on the bullseye 10 times"
+    },
+    "bullseye_surgeon": {
+      "name": "Bullseye Surgeon",
+      "description": "Check out on the bullseye 50 times"
+    },
+    "one_dart_specialist": {
+      "name": "One-Dart Specialist",
+      "description": "Check out 25 times with a single dart"
+    },
+    "two_dart_wizard": {
+      "name": "Two-Dart Wizard",
+      "description": "Check out 50 times with just two darts"
+    },
+    "ice_cold_finisher": {
+      "name": "Ice Cold",
+      "description": "Check out under pressure 25 times (opponent on a finish)"
+    },
+    "nerves_of_steel": {
+      "name": "Nerves of Steel",
+      "description": "Check out under pressure 50 times (opponent on a finish)"
+    },
+    "after_the_storm": {
+      "name": "After the Storm",
+      "description": "Check out right after a 180"
+    },
+    "storm_chaser": {
+      "name": "Storm Chaser",
+      "description": "Check out right after a 180 10 times"
+    },
+    "perfect_legs_ten": {
+      "name": "Flawless Ten",
+      "description": "Win 10 legs without a single bust"
+    },
+    "perfect_legs_fifty": {
+      "name": "Perfection",
+      "description": "Win 50 legs without a single bust"
+    },
+    "double_tops_lover": {
+      "name": "Tops Lover",
+      "description": "Check out on double 20 100 times"
+    },
+    "double_16_specialist": {
+      "name": "D16 Specialist",
+      "description": "Check out on double 16 75 times"
+    },
+    "impossible_three": {
+      "name": "The Impossible Trio",
+      "description": "Check out a supposedly impossible finish 3 times (163/166/169)"
+    },
+    "checkout_variety_master": {
+      "name": "Variety Master",
+      "description": "Check out on 20 different doubles"
+    },
+    "ten_game_streak": {
+      "name": "Ten-Game Streak",
+      "description": "Win 10 games in a row"
+    },
+    "hundred_wins": {
+      "name": "100 Wins",
+      "description": "Win a total of 100 games"
+    },
+    "two_fifty_wins": {
+      "name": "250 Wins",
+      "description": "Win a total of 250 games"
+    },
+    "thousand_wins": {
+      "name": "Thousandth Win",
+      "description": "Win a total of 1000 games"
+    },
+    "five_hundred_games": {
+      "name": "500-Game Mark",
+      "description": "Play 500 games"
+    },
+    "thousand_games": {
+      "name": "Thousand Up",
+      "description": "Play 1000 games"
+    },
+    "five_thousand_games": {
+      "name": "Marathon Player",
+      "description": "Play 5000 games"
+    },
+    "daily_devotion": {
+      "name": "Daily Devotion",
+      "description": "Play on 100 different days"
+    },
+    "year_round_player": {
+      "name": "Year-Round Player",
+      "description": "Play on 365 different days"
+    },
+    "whitewash_five": {
+      "name": "Whitewash Series",
+      "description": "Win 5 matches without conceding a leg"
+    },
+    "whitewash_twenty": {
+      "name": "Dominator",
+      "description": "Win 20 matches by whitewash"
+    },
+    "close_match_expert": {
+      "name": "Heart-Stopper",
+      "description": "Win 25 close matches (1-leg margin)"
+    },
+    "decider_king": {
+      "name": "Decider King",
+      "description": "Win 30 deciding legs (last leg with scores level)"
+    },
+    "comeback_legend": {
+      "name": "Comeback Legend",
+      "description": "Win 20 matches after trailing"
+    },
+    "triple_master_5k": {
+      "name": "Triple Master",
+      "description": "Hit a total of 5000 triples"
+    },
+    "double_master_5k": {
+      "name": "Double Master",
+      "description": "Hit a total of 5000 doubles"
+    },
+    "bullseye_500": {
+      "name": "500 Bullseyes",
+      "description": "Hit a total of 500 bullseyes"
+    },
+    "single_bull_500": {
+      "name": "500 Single Bulls",
+      "description": "Hit a total of 500 single bulls (outer bull)"
+    },
+    "shanghai_artist": {
+      "name": "Shanghai Artist",
+      "description": "Throw 10 Shanghai combinations (S+D+T of the same number)"
+    },
+    "robin_hood_10": {
+      "name": "Robin Hood x10",
+      "description": "Throw three identical darts 10 times (same number + same multiplier)"
+    },
+    "missed_board_ten": {
+      "name": "Off Target!",
+      "description": "Miss the board 10 times"
+    },
+    "missed_board_hundred": {
+      "name": "Blind Shooter",
+      "description": "Miss the board 100 times"
+    },
+    "low_scorer_50": {
+      "name": "Low Profile",
+      "description": "Score fewer than 10 points in a visit 50 times"
+    },
+    "shutout_master": {
+      "name": "Shutout Master",
+      "description": "Win 10 legs in which your opponent had more than 170 left"
+    },
+    "first_leg_ace": {
+      "name": "First Blood",
+      "description": "Win the first leg of a match 20 times"
+    },
+    "last_leg_hero": {
+      "name": "Last-Leg Hero",
+      "description": "Win the final deciding leg 20 times"
+    },
+    "mixed_visit": {
+      "name": "All-Round Visit",
+      "description": "Throw a triple, single and double in one visit 100 times"
+    },
+    "two_doubles_fifty": {
+      "name": "Double Double",
+      "description": "Throw two doubles in one visit 50 times"
+    },
+    "same_number_lover": {
+      "name": "True to the Number",
+      "description": "Throw all 3 darts at the same number 50 times"
+    },
+    "three_ones_again": {
+      "name": "The Magic Trio",
+      "description": "Throw S1-S1-S1 (three ones) 15 times"
+    },
+    "night_owl_20": {
+      "name": "Night Owl",
+      "description": "Play 20 games after 22:00"
+    },
+    "night_owl_100": {
+      "name": "Creature of the Night",
+      "description": "Play 100 games after 22:00"
+    },
+    "early_riser_10": {
+      "name": "Early Riser",
+      "description": "Win 10 games before 8 am"
+    },
+    "lunch_regular": {
+      "name": "Lunch Break Regular",
+      "description": "Play 50 games during your lunch break (12:00-14:00)"
+    },
+    "weekend_champion": {
+      "name": "Weekend Champion",
+      "description": "Play 100 games at the weekend"
+    },
+    "speed_finish_120": {
+      "name": "Blitz Match",
+      "description": "Finish a match in under 2 minutes"
+    },
+    "speed_finish_60": {
+      "name": "Speed Demon",
+      "description": "Finish a match in under 1 minute"
+    },
+    "marathon_match_60": {
+      "name": "Endless Match",
+      "description": "Play a match lasting longer than 60 minutes"
+    },
+    "triple_20_thousand": {
+      "name": "T20 Machine",
+      "description": "Hit triple 20 1000 times"
+    },
+    "triple_19_500": {
+      "name": "T19 Expert",
+      "description": "Hit triple 19 500 times"
+    },
+    "triple_18_500": {
+      "name": "T18 Virtuoso",
+      "description": "Hit triple 18 500 times"
+    },
+    "singles_10k": {
+      "name": "Single Collector",
+      "description": "Hit a total of 10,000 singles"
+    },
+    "doubles_1k": {
+      "name": "Double Enthusiast",
+      "description": "Hit a total of 1000 doubles"
+    },
+    "triples_1k": {
+      "name": "Triple Enthusiast",
+      "description": "Hit a total of 1000 triples"
+    },
+    "twelve_dart_leg": {
+      "name": "12-Darter",
+      "description": "Win a 501 leg in just 12 darts"
+    },
+    "eleven_dart_leg": {
+      "name": "11-Darter",
+      "description": "Win a leg in just 11 darts"
+    },
+    "ten_dart_leg": {
+      "name": "10-Darter",
+      "description": "Win a leg in just 10 darts"
+    },
+    "legs_under_15_fifty": {
+      "name": "Efficiency Monster",
+      "description": "Win 50 legs in fewer than 15 darts"
+    },
+    "legs_under_15_200": {
+      "name": "Efficiency Genius",
+      "description": "Win 200 legs in fewer than 15 darts"
+    },
+    "leg_average_80": {
+      "name": "Strong Leg",
+      "description": "Reach a leg average of at least 80"
+    },
+    "leg_average_100": {
+      "name": "Perfect Leg",
+      "description": "Reach a leg average of at least 100"
+    },
+    "leg_average_120": {
+      "name": "Superhuman Leg",
+      "description": "Reach a leg average of at least 120"
+    },
+    "training_25": {
+      "name": "Training Routine",
+      "description": "Complete 25 training sessions"
+    },
+    "training_100": {
+      "name": "Training Junkie",
+      "description": "Complete 100 training sessions"
+    },
+    "training_500": {
+      "name": "Training Obsessed",
+      "description": "Complete 500 training sessions"
+    },
+    "training_1000": {
+      "name": "Training God",
+      "description": "Complete 1000 training sessions"
+    },
+    "bot_destroyer_50": {
+      "name": "Bot Destroyer",
+      "description": "Beat bots in 50 games"
+    },
+    "bot_annihilator": {
+      "name": "Bot Annihilator",
+      "description": "Beat bots in 200 games"
+    },
+    "human_rival_50": {
+      "name": "Human Hunter",
+      "description": "Beat human opponents in 50 games"
+    },
+    "human_rival_200": {
+      "name": "Human Whisperer",
+      "description": "Beat human opponents in 200 games"
+    },
+    "opponent_variety": {
+      "name": "Sociable",
+      "description": "Play against 25 different opponents"
+    },
+    "opponent_collector": {
+      "name": "Rival Collector",
+      "description": "Play against 50 different opponents"
+    },
+    "perfect_checkout_50": {
+      "name": "Flawless Finishes",
+      "description": "Check out 50 times without an earlier bust in the leg"
+    },
+    "checkout_percentage_80": {
+      "name": "Checkout Precision",
+      "description": "Reach a checkout rate of 80% in a match (min. 10 attempts)"
+    },
+    "three_180_match": {
+      "name": "Triple Maximum",
+      "description": "Throw 3 x 180 in a single match"
+    },
+    "five_180_match": {
+      "name": "Maximum Rush",
+      "description": "Throw 5 x 180 in a single match"
+    },
+    "no_bust_match_win": {
+      "name": "Error-Free",
+      "description": "Win 10 matches completely without a bust"
+    },
+    "score_69": {
+      "name": "Nice!",
+      "description": "Throw exactly 69 points in one visit"
+    },
+    "score_111": {
+      "name": "Nelson",
+      "description": "Throw exactly 111 points in one visit"
+    },
+    "score_123": {
+      "name": "One-Two-Three",
+      "description": "Throw exactly 123 points in one visit"
+    },
+    "score_7": {
+      "name": "Lucky Number",
+      "description": "Throw exactly 7 points in one visit"
+    },
+    "score_3": {
+      "name": "Minimalist",
+      "description": "Throw exactly 3 points in one visit (with 3 darts)"
+    },
+    "score_170": {
+      "name": "Highest Checkout",
+      "description": "Throw exactly 170 points (T20+T20+Bull possible!)"
+    },
+    "three_triples_50": {
+      "name": "Triple Trifecta",
+      "description": "Throw three triples in one visit 50 times (not 180)"
+    },
+    "five_best_of_five": {
+      "name": "Best-of-Five Veteran",
+      "description": "Win 50 best-of-five matches"
+    },
+    "checkout_d12_50": {
+      "name": "D12 Specialist",
+      "description": "Check out on double 12 50 times"
+    },
+    "checkout_d18_50": {
+      "name": "D18 Specialist",
+      "description": "Check out on double 18 50 times"
+    },
+    "checkout_d1_25": {
+      "name": "Madhouse Expert",
+      "description": "Check out on double 1 25 times"
+    },
+    "score_consecutive_60": {
+      "name": "Consistent Scorer",
+      "description": "Score 60+ in a visit 500 times"
+    },
+    "perfect_checkout_100": {
+      "name": "Flawless Finisher",
+      "description": "Check out 100 times without an earlier bust in the leg"
+    },
+    "all_achievements_v2": {
+      "name": "Completionist V2",
+      "description": "Unlock all {{target}} achievements"
+    },
+    "first_miss": {
+      "name": "Off Target!",
+      "description": "Miss the board for the first time"
+    },
+    "miss_10": {
+      "name": "Air Guitarist",
+      "description": "Miss the board 10 times"
+    },
+    "miss_25": {
+      "name": "Wind Tunnel",
+      "description": "Miss the board 25 times"
+    },
+    "miss_50": {
+      "name": "Ghost Darts",
+      "description": "Miss the board 50 times"
+    },
+    "miss_100": {
+      "name": "Blind Thrower",
+      "description": "Miss the board 100 times"
+    },
+    "miss_250": {
+      "name": "Phantom Thrower",
+      "description": "Miss the board 250 times"
+    },
+    "first_zero_visit": {
+      "name": "Big Fat Zero",
+      "description": "Score 0 points in a visit (3 misses)"
+    },
+    "zero_visit_5": {
+      "name": "Invisible",
+      "description": "Score 5 zero visits (3 misses)"
+    },
+    "zero_visit_10": {
+      "name": "Air Acrobat",
+      "description": "Score 10 zero visits"
+    },
+    "zero_visit_25": {
+      "name": "The Invisible Man",
+      "description": "Score 25 zero visits"
+    },
+    "zero_visit_50": {
+      "name": "Nothing at All",
+      "description": "Score 50 zero visits"
+    },
+    "zero_visit_100": {
+      "name": "Master of the Void",
+      "description": "Score 100 zero visits"
+    },
+    "air_dart": {
+      "name": "Air Dart",
+      "description": "Miss 3 darts in a row in one leg"
+    },
+    "miss_streak_5": {
+      "name": "Missing Streak",
+      "description": "Miss 5 darts in a row"
+    },
+    "double_zero": {
+      "name": "Double Zero",
+      "description": "Score 2 zero visits in one match"
+    },
+    "triple_zero": {
+      "name": "Triple Zero",
+      "description": "Score 3 zero visits in one match"
+    },
+    "miss_opening": {
+      "name": "False Start",
+      "description": "Start a leg with a zero visit"
+    },
+    "miss_opening_5": {
+      "name": "Chronic False Starter",
+      "description": "Start 5 legs with a zero visit"
+    },
+    "miss_under_pressure": {
+      "name": "Jitters",
+      "description": "Miss the board on a checkout attempt"
+    },
+    "miss_under_pressure_10": {
+      "name": "Checkout Phobia",
+      "description": "Miss the board 10 times on checkout attempts"
+    },
+    "first_bust": {
+      "name": "Bust!",
+      "description": "Suffer your first bust"
+    },
+    "bust_5": {
+      "name": "Bust Beginner",
+      "description": "Suffer 5 busts"
+    },
+    "bust_10": {
+      "name": "Bust Pro",
+      "description": "Suffer 10 busts"
+    },
+    "bust_25": {
+      "name": "Bust Expert",
+      "description": "Suffer 25 busts"
+    },
+    "bust_50": {
+      "name": "Bust King",
+      "description": "Suffer 50 busts"
+    },
+    "bust_100": {
+      "name": "Bust Legend",
+      "description": "Suffer 100 busts"
+    },
+    "bust_high_score": {
+      "name": "So Near Yet So Far",
+      "description": "Bust with more than 100 left"
+    },
+    "bust_high_score_10": {
+      "name": "Overeager Thrower",
+      "description": "Bust 10 times with more than 100 left"
+    },
+    "bust_low_score": {
+      "name": "Almost There",
+      "description": "Bust with fewer than 20 left"
+    },
+    "bust_low_score_10": {
+      "name": "A Miss Is as Good as a Mile",
+      "description": "Bust 10 times with fewer than 20 left"
+    },
+    "bust_on_2": {
+      "name": "Madhouse Bust",
+      "description": "Bust on 2 (missed D1)"
+    },
+    "bust_on_2_multi": {
+      "name": "Madhouse Regular",
+      "description": "Bust 5 times on 2"
+    },
+    "bust_series_2": {
+      "name": "Double Bust",
+      "description": "Bust 2 times in one match"
+    },
+    "bust_series_3": {
+      "name": "Bust Hat Trick",
+      "description": "Bust 3 times in one match"
+    },
+    "bust_series_5": {
+      "name": "Bust Machine",
+      "description": "Bust 5 times in one match"
+    },
+    "bust_after_180": {
+      "name": "180 and Then Bust",
+      "description": "Bust in the visit right after a 180"
+    },
+    "bust_twice_same_leg": {
+      "name": "Deja Bust",
+      "description": "Bust 2 times in the same leg"
+    },
+    "bust_three_same_leg": {
+      "name": "Triple Bust Leg",
+      "description": "Bust 3 times in the same leg"
+    },
+    "bust_on_checkout": {
+      "name": "Checkout Botched",
+      "description": "Bust when you had a checkout attempt"
+    },
+    "bust_on_checkout_10": {
+      "name": "Checkout Flop",
+      "description": "Bust 10 times on a checkout attempt"
+    },
+    "score_1": {
+      "name": "Minimal Score",
+      "description": "Score exactly 1 point in a visit"
+    },
+    "score_1_multi": {
+      "name": "Single 1 Expert",
+      "description": "Score exactly 1 point in a visit 10 times"
+    },
+    "score_3_ones": {
+      "name": "Three Ones",
+      "description": "Throw the 1 with all 3 darts in one visit (score = 3)"
+    },
+    "low_score_under_10": {
+      "name": "Single Digits",
+      "description": "Score fewer than 10 points 5 times"
+    },
+    "low_score_under_10_25": {
+      "name": "Consistently Bad",
+      "description": "Score fewer than 10 points 25 times"
+    },
+    "low_score_under_10_50": {
+      "name": "Rock-Bottom Collector",
+      "description": "Score fewer than 10 points 50 times"
+    },
+    "low_score_under_10_100": {
+      "name": "Bottomless Pit",
+      "description": "Score fewer than 10 points 100 times"
+    },
+    "worst_visit_under_5": {
+      "name": "Rock Bottom",
+      "description": "Worst visit in a match under 5 points"
+    },
+    "worst_visit_under_5_10": {
+      "name": "Can't Go Lower",
+      "description": "Worst visit under 5 in 10 matches"
+    },
+    "worst_visit_under_5_25": {
+      "name": "Basement Dweller",
+      "description": "Worst visit under 5 in 25 matches"
+    },
+    "average_under_20": {
+      "name": "Sub-20 Average",
+      "description": "Finish a match with an average under 20"
+    },
+    "average_under_30": {
+      "name": "Sub-30 Average",
+      "description": "Finish a match with an average under 30"
+    },
+    "average_under_30_5": {
+      "name": "Chronically Under 30",
+      "description": "Finish 5 matches with an average under 30"
+    },
+    "three_low_in_row": {
+      "name": "Low-Score Streak",
+      "description": "Score under 20 points 3 times in a row"
+    },
+    "score_exactly_3": {
+      "name": "Triple Fail",
+      "description": "Score exactly 3 points in a visit"
+    },
+    "low_first_dart": {
+      "name": "Bad Start",
+      "description": "Start 10 visits with a miss"
+    },
+    "descending_visit": {
+      "name": "Downward Spiral",
+      "description": "Every dart lower than the one before (3 darts, no misses)"
+    },
+    "all_different_low": {
+      "name": "Variety in Failure",
+      "description": "Hit 3 different beds under 5 in one visit"
+    },
+    "same_low_score_repeat": {
+      "name": "Broken Record",
+      "description": "Score the same low score (<20) 3x in a row"
+    },
+    "low_score_after_high": {
+      "name": "Crash Landing",
+      "description": "Score under 10 right after a 100+ score"
+    },
+    "first_leg_lost": {
+      "name": "First Defeat",
+      "description": "Lose your first leg"
+    },
+    "legs_lost_5": {
+      "name": "Leg Loser",
+      "description": "Lose 5 legs"
+    },
+    "legs_lost_10": {
+      "name": "Losing Streak",
+      "description": "Lose 10 legs"
+    },
+    "legs_lost_25": {
+      "name": "Leg Donor",
+      "description": "Lose 25 legs"
+    },
+    "legs_lost_50": {
+      "name": "King of Losses",
+      "description": "Lose 50 legs"
+    },
+    "legs_lost_100": {
+      "name": "Losing Legend",
+      "description": "Lose 100 legs"
+    },
+    "first_match_lost": {
+      "name": "Not My Day",
+      "description": "Lose your first match"
+    },
+    "matches_lost_5": {
+      "name": "Serial Loser",
+      "description": "Lose 5 matches"
+    },
+    "matches_lost_10": {
+      "name": "Perpetual Loser",
+      "description": "Lose 10 matches"
+    },
+    "matches_lost_25": {
+      "name": "Professional Loser",
+      "description": "Lose 25 matches"
+    },
+    "matches_lost_50": {
+      "name": "Master of Defeat",
+      "description": "Lose 50 matches"
+    },
+    "leg_lost_on_checkout": {
+      "name": "Checkout Missed",
+      "description": "Lose a leg despite a checkout attempt"
+    },
+    "leg_lost_on_checkout_10": {
+      "name": "Checkout Tragedy",
+      "description": "Lose 10 legs despite a checkout attempt"
+    },
+    "leg_lost_on_checkout_25": {
+      "name": "Eternal Runner-Up",
+      "description": "Lose 25 legs despite a checkout attempt"
+    },
+    "whitewash_loss": {
+      "name": "Whitewashed",
+      "description": "Lose a match without winning a single leg"
+    },
+    "whitewash_loss_5": {
+      "name": "Whitewash Collector",
+      "description": "Lose 5 matches without winning a leg"
+    },
+    "whitewash_loss_10": {
+      "name": "Wiped Clean",
+      "description": "Lose 10 matches without winning a leg"
+    },
+    "lost_with_higher_avg": {
+      "name": "Lost the Better Way",
+      "description": "Lose a match despite having the higher average"
+    },
+    "lost_big_average_diff": {
+      "name": "Out of Your League",
+      "description": "Lose a match with an average gap of 50+ to your opponent"
+    },
+    "last_place": {
+      "name": "Last Place",
+      "description": "Finish last in a match with 3+ players"
+    },
+    "first_missed_checkout": {
+      "name": "First Miss",
+      "description": "Miss your first checkout attempt"
+    },
+    "missed_checkout_5": {
+      "name": "Checkout Grump",
+      "description": "Miss 5 checkout attempts"
+    },
+    "missed_checkout_10": {
+      "name": "Checkout Anxiety",
+      "description": "Miss 10 checkout attempts"
+    },
+    "missed_checkout_25": {
+      "name": "Checkout Neurotic",
+      "description": "Miss 25 checkout attempts"
+    },
+    "missed_checkout_50": {
+      "name": "Checkout Phobia V2",
+      "description": "Miss 50 checkout attempts"
+    },
+    "checkout_attempts_no_hit": {
+      "name": "Wasted Effort",
+      "description": "3+ checkout attempts in a leg without a hit"
+    },
+    "checkout_attempts_no_hit_5": {
+      "name": "5+ Attempts, No Hit",
+      "description": "5+ checkout attempts in a leg without a hit"
+    },
+    "low_checkout_pct": {
+      "name": "Checkout Dud",
+      "description": "Checkout rate under 10% in a match (min. 5 attempts)"
+    },
+    "low_checkout_pct_5": {
+      "name": "Checkout Disaster",
+      "description": "Checkout rate under 10% in 5 matches"
+    },
+    "missed_match_dart": {
+      "name": "Match Dart Missed",
+      "description": "Miss a match dart (final leg, checkout possible)"
+    },
+    "worse_than_bot_1": {
+      "name": "Worse Than a Bot",
+      "description": "Lose to a bot (level 1-3)"
+    },
+    "worse_than_bot_5": {
+      "name": "Bot Fodder",
+      "description": "Lose to a bot (level 1-3) 5 times"
+    },
+    "losing_streak_3": {
+      "name": "Bad Luck Streak",
+      "description": "Lose 3 matches in a row"
+    },
+    "losing_streak_5": {
+      "name": "Black Run",
+      "description": "Lose 5 matches in a row"
+    },
+    "losing_streak_10": {
+      "name": "Endless Bad Luck",
+      "description": "Lose 10 matches in a row"
+    },
+    "opposite_day": {
+      "name": "Opposite Day",
+      "description": "Lose despite throwing more legs than your opponent (multiplayer)"
+    },
+    "lead_blown": {
+      "name": "Lead Blown",
+      "description": "Lose a match after leading 2-0 (best of 5+)"
+    },
+    "worst_match_ever": {
+      "name": "Worst. Match. Ever.",
+      "description": "Finish a match with an average under 15"
+    },
+    "no_ton_match": {
+      "name": "Ton-Less",
+      "description": "Finish a match without a score over 60"
+    },
+    "fail_collector": {
+      "name": "Fail Collector",
+      "description": "Unlock 50 fail achievements"
+    }
   }
 }

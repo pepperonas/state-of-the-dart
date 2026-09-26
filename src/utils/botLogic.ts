@@ -1,5 +1,6 @@
 import { Dart, Player, PlayerStats } from '../types';
 import { isBogeyNumber } from './scoring';
+import i18n from '../i18n/config';
 
 /**
  * Bot difficulty presets
@@ -267,7 +268,12 @@ export function createAdaptiveBotPlayer(
 
   return {
     id: `bot-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    name: `Bot ${botNumber} (${config?.nameDE || preset.nameDE})`,
+    // The name is stored with the player, so it is written in the language
+    // active when the bot is created (it used to be German for everyone).
+    name: i18n.t('bots.player_name', {
+      number: botNumber,
+      level: i18n.language?.startsWith('de') ? (config?.nameDE || preset.nameDE) : (config?.name || preset.name),
+    }),
     avatar: config?.icon || 'robot',
     createdAt: new Date(),
     stats: {

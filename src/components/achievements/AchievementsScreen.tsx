@@ -21,6 +21,7 @@ import logger from '../../utils/logger';
 import { BackButton, Card, Chip, Select } from '../common';
 import { Icon, iconForEmoji } from '../icons';
 import { readableTextOn } from '../../utils/color';
+import { achievementName, achievementDescription } from '../../utils/achievementText';
 
 const AchievementsScreen: React.FC = () => {
   const { t } = useTranslation();
@@ -301,11 +302,11 @@ const AchievementCard = React.memo<AchievementCardProps>(({ achievement, unlocke
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="m3-title-medium text-on-surface flex items-center gap-2 truncate">
-            <span className="truncate">{isHidden ? '???' : achievement.name}</span>
+            <span className="truncate">{isHidden ? '???' : achievementName(achievement, t)}</span>
             {unlocked && <Award size={16} className="text-primary flex-shrink-0" />}
           </h3>
           <p className="m3-body-medium text-on-surface-variant mt-1 line-clamp-2">
-            {isHidden ? t('achievements.hidden_achievement') : achievement.description}
+            {isHidden ? t('achievements.hidden_achievement') : achievementDescription(achievement, t)}
           </p>
         </div>
       </div>

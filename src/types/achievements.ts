@@ -1706,7 +1706,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'perfectionist',
     name: 'Perfektionist',
-    description: 'Schalte alle 464 Achievements frei',
+    description: 'Schalte alle {{target}} Erfolge frei',
     category: 'master',
     tier: 'diamond',
     icon: 'bullseye',
@@ -4152,7 +4152,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'all_achievements_v2',
     name: 'Kompletionist V2',
-    description: 'Schalte alle 464 Achievements frei',
+    description: 'Schalte alle {{target}} Erfolge frei',
     category: 'master',
     tier: 'diamond',
     icon: 'sparkle',
@@ -5312,7 +5312,8 @@ export const ACHIEVEMENTS: Achievement[] = [
 ];
 
 // Patch self-referencing achievements so their target stays in sync with the array length.
-// This avoids hardcoding 464 which would break when achievements are added/removed.
+// Their description says "{{target}}" — achievementDescription() fills in this
+// target (it said a hard-coded 464 while there were 463).
 ACHIEVEMENTS
   .filter(a => a.requirement.metric === 'achievements_unlocked' && a.requirement.type === 'special')
   .forEach(a => { a.requirement.target = ACHIEVEMENTS.length; });

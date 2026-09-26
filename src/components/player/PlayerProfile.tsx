@@ -16,6 +16,7 @@ import PlayerAvatar from './PlayerAvatar';
 import { BackButton, Card, Button, Dialog } from '../common';
 import { Icon, iconForEmoji } from '../icons';
 import { useChartTheme } from '../../utils/chartTheme';
+import { achievementName } from '../../utils/achievementText';
 
 const PlayerProfile: React.FC = () => {
   const chart = useChartTheme();
@@ -467,7 +468,7 @@ const PlayerProfile: React.FC = () => {
                   className="bg-surface-container rounded-m3-md p-3 text-center hover:bg-surface-container-high transition-colors"
                 >
                   <div className="mb-2 flex justify-center"><Icon name={iconForEmoji(achievement.icon)} size={30} /></div>
-                  <div className="m3-body-medium text-on-surface mb-1">{achievement.name}</div>
+                  <div className="m3-body-medium text-on-surface mb-1">{achievementName(achievement, t)}</div>
                   <div className="m3-body-small text-tertiary">+{achievement.points}</div>
                 </div>
               ))}
