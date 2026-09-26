@@ -12,10 +12,10 @@ import PlayerAvatar from '../player/PlayerAvatar';
 import { Button, Card, TextField, Dialog, IconButton, Chip, BackButton } from '../common';
 import { useFeedback } from '../common/feedbackContext';
 import OnlineGamePanel, { type OnlineVisit } from './OnlineGamePanel';
-import { getOnlineClientId } from '../../utils/onlineVisit';
+import { getOnlineClientSecret } from '../../utils/onlineVisit';
 
 interface OnlinePlayer {
-  /** Stable client id (see getOnlineClientId), not the socket id. */
+  /** Public seat id (a hash of our client secret, see getOnlineClientSecret), not the socket id. */
   id: string;
   name: string;
   socketId: string;
@@ -65,8 +65,10 @@ const OnlineMultiplayer: React.FC = () => {
   const [visits, setVisits] = useState<OnlineVisit[]>([]);
   const [winnerId, setWinnerId] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState('');
-  // Stable across reconnects: the server gives this id its seat back.
-  const myId = useMemo(() => getOnlineClientId(), []);
+  // The secret proves our seat on reconnect; it is never broadcast. Our public
+  // seat id (a hash of it) comes back from the server.
+  const clientSecret = useMemo(() => getOnlineClientSecret(), []);
+  const [myId, setMyId] = useState('');
   const tRef = useRef(t);
   useEffect(() => { tRef.current = t; }, [t]);
   
@@ -86,10 +88,10 @@ const OnlineMultiplayer: React.FC = () => {
   // update, and each change used to close and reopen the socket — a new
   // socket.id, so the server dropped us from our room.
   const mainPlayer = players.find(p => !p.isBot);
-  const joinInfoRef = useRef({ name: t('online_game.guest'), playerId: undefined as string | undefined, clientId: myId });
+  const joinInfoRef = useRef({ name: t('online_game.guest'), playerId: undefined as string | undefined, clientId: clientSecret });
   useEffect(() => {
-    joinInfoRef.current = { name: mainPlayer?.name || user?.email || t('online_game.guest'), playerId: mainPlayer?.id, clientId: myId };
-  }, [mainPlayer?.name, mainPlayer?.id, user?.email, t, myId]);
+    joinInfoRef.current = { name: mainPlayer?.name || user?.email || t('online_game.guest'), playerId: mainPlayer?.id, clientId: clientSecret };
+  }, [mainPlayer?.name, mainPlayer?.id, user?.email, t, clientSecret]);
 
   // Connect to socket
   useEffect(() => {
@@ -109,6 +111,10 @@ const OnlineMultiplayer: React.FC = () => {
     newSocket.on('disconnect', () => {
       console.log('[Socket.IO] Disconnected');
       setConnected(false);
+    });
+
+    newSocket.on('session:identity', (data: { id: string }) => {
+      setMyId(data.id);
     });
 
     newSocket.on('players:online', (players: OnlinePlayer[]) => {

@@ -7,6 +7,18 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.17.1] - 2026-09-27
+
+### Security
+
+- **Online seats could be taken over.** 0.17.0 keyed a seat by the client id
+  the browser sent — and the same id was broadcast to everyone in the lobby
+  and the room. Joining with a copied id rebound the seat: another player could
+  throw for you. The browser now keeps a secret that is sent only to the
+  server; the public seat id is its SHA-256 hash (`seatIdFromSecret`), so a
+  broadcast id cannot be replayed. Found by an automated security review of
+  the 0.17.0 commit; live in 0.17.0 for about an hour.
+
 ## [0.17.0] - 2026-09-27
 
 Online multiplayer, playable.

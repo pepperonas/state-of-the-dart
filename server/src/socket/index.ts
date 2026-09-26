@@ -4,7 +4,7 @@ import { config } from '../config';
 
 import {
   OnlinePlayer, GameRoom, isMember, removeFromRoom, applyThrow, cleanChatMessage,
-  markDisconnected, reconnectPlayer, restartMatch, sanitizeClientId,
+  markDisconnected, reconnectPlayer, restartMatch, seatIdForJoin,
 } from './rooms';
 
 /** How long a seat is held for a player whose connection dropped mid-game. */
@@ -46,14 +46,17 @@ export function setupSocketIO(server: HttpServer): Server {
     // Player joins with their info
     socket.on('player:join', safe('player:join', (data: { name: string; playerId?: string; clientId?: string }) => {
       const player: OnlinePlayer = {
-        // A stable id from the client's localStorage; the socket id changes on every reconnect.
-        id: sanitizeClientId(data?.clientId) ?? socket.id,
+        // Stable across reconnects (the socket id is not), derived from a secret
+        // the client never shares — so a broadcast seat id cannot be replayed.
+        id: seatIdForJoin(data, socket.id),
         name: typeof data?.name === 'string' && data.name.trim() ? data.name.trim().slice(0, 40) : 'Guest',
         socketId: socket.id,
         playerId: data.playerId,
         connected: true,
       };
       onlinePlayers.set(socket.id, player);
+      // The client learns its public seat id from the server (it only holds the secret).
+      socket.emit('session:identity', { id: player.id });
 
       // Back from a dropped connection: take the held seat again.
       gameRooms.forEach((room, roomId) => {

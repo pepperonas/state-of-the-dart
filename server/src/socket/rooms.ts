@@ -1,3 +1,5 @@
+import { createHash } from 'crypto';
+
 /**
  * Room bookkeeping for online play, free of Socket.IO so it can be tested.
  *
@@ -47,9 +49,24 @@ export const isMember = (room: GameRoom | undefined, playerId: string): boolean 
 export const playerForSocket = (room: GameRoom, socketId: string): OnlinePlayer | undefined =>
   room.players.find(p => p.socketId === socketId);
 
-/** A client id from localStorage: 8–64 chars of letters, digits and dashes. */
+/** A client secret from localStorage: 8–64 chars of letters, digits and dashes. */
 export const sanitizeClientId = (value: unknown): string | null =>
   typeof value === 'string' && /^[A-Za-z0-9-]{8,64}$/.test(value) ? value : null;
+
+/**
+ * The public seat id for a client secret. Seat ids are broadcast (lobby list,
+ * room updates); the secret never is. Deriving the id from the secret means
+ * only its holder can claim the seat — when the raw client id was the seat id,
+ * anyone could copy it from a broadcast and take another player's place.
+ */
+export const seatIdFromSecret = (secret: unknown): string | null => {
+  const clean = sanitizeClientId(secret);
+  return clean ? `s-${createHash('sha256').update(clean).digest('hex').slice(0, 24)}` : null;
+};
+
+/** The seat id a `player:join` gets: derived from the client secret, else the socket. */
+export const seatIdForJoin = (data: { clientId?: unknown } | undefined, socketId: string): string =>
+  seatIdFromSecret(data?.clientId) ?? socketId;
 
 export type LeaveOutcome = 'deleted' | 'updated' | 'not-member';
 

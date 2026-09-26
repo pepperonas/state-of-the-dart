@@ -29,10 +29,11 @@ export function checkOnlineVisit(score: number, remaining: number, doubleOut = t
 const CLIENT_ID_KEY = 'sotd-online-client-id';
 
 /**
- * A stable id for this browser, so the server can give a reconnecting player
- * their seat back. Not a secret and not tied to the account.
+ * A stable secret for this browser, so the server can give a reconnecting
+ * player their seat back. It is sent only to the server and never shown to
+ * other players: the public seat id is a hash of it (server: seatIdFromSecret).
  */
-export function getOnlineClientId(): string {
+export function getOnlineClientSecret(): string {
   try {
     const existing = localStorage.getItem(CLIENT_ID_KEY);
     if (existing && /^[A-Za-z0-9-]{8,64}$/.test(existing)) return existing;
