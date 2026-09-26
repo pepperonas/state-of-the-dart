@@ -21,7 +21,8 @@ import BugReportModal from '../bugReport/BugReportModal';
 import PlayerAvatar from '../player/PlayerAvatar';
 import AvatarPicker from '../player/AvatarPicker';
 import { Dart, Player, GameType, MatchSettings, Throw, HeatmapData } from '../../types/index';
-import { calculateThrowScore, isBogeyNumber } from '../../utils/scoring';
+import { calculateThrowScore } from '../../utils/scoring';
+import { evaluateVisit, rulesOf } from '../../utils/visit';
 import { getCheckoutAlternatives } from '../../data/checkoutTable';
 import { PersonalBests, createEmptyPersonalBests, updatePersonalBests } from '../../types/personalBests';
 import audioSystem from '../../utils/audio';
@@ -40,7 +41,7 @@ const GameScreen: React.FC = () => {
   const forceNewGameRef = useRef(searchParams.get('new') === '1');
   const resumeRequestedRef = useRef(searchParams.get('resume') === '1');
   const { state, dispatch, pauseCurrentMatch } = useGame();
-  const { players, addPlayer, updatePlayerHeatmap } = usePlayer();
+  const { players, addPlayer } = usePlayer();
   const { settings } = useSettings();
   const { storage } = useTenant();
   const { checkMatchAchievements, checkLegAchievements, checkThrowAchievements, checkCalendarAchievements } = useGameAchievements();
@@ -97,65 +98,54 @@ const GameScreen: React.FC = () => {
     legsWon: number;
     legsTotal: number;
   } | null>(null);
-  const lastLegIndexRef = React.useRef<number>(0);
+  // Seeded with the match that is already loaded, so resuming a match at leg N
+  // does not replay a "leg won" animation for leg N-1.
+  const lastLegIndexRef = React.useRef<number>(state.currentMatch?.currentLegIndex ?? 0);
+  const lastLegMatchIdRef = React.useRef<string | undefined>(state.currentMatch?.id);
 
-  // Detect leg win and show animation (ONLY when leg changes, not on every player turn)
+  // Detect a leg win: the leg index moved forward within the same match.
   useEffect(() => {
-    if (!state.currentMatch || state.currentMatch.status !== 'in-progress') return;
-
-    const currentLegIndex = state.currentMatch.currentLegIndex;
-    const legs = state.currentMatch.legs;
-
-    // Check if we moved to a new leg (meaning previous leg was won)
-    // currentLegIndex is now pointing to the NEW leg, so the completed leg is at currentLegIndex - 1
-    if (currentLegIndex > lastLegIndexRef.current && legs.length > 1) {
-      const completedLegIndex = currentLegIndex - 1;
-      const completedLeg = legs[completedLegIndex];
-
-      if (completedLeg?.winner) {
-        const winnerPlayer = state.currentMatch.players.find(p => p.playerId === completedLeg.winner);
-
-        if (winnerPlayer) {
-          console.log('🏆 Leg won animation triggered:', {
-            legNumber: completedLegIndex + 1,
-            winner: winnerPlayer.name,
-            legsWon: winnerPlayer.legsWon,
-          });
-
-          // Get full player data to access avatar
-          const fullPlayer = players.find(p => p.id === winnerPlayer.playerId);
-
-          setLegWonAnimation({
-            show: true,
-            winnerName: winnerPlayer.name,
-            winnerAvatar: fullPlayer?.avatar,
-            winnerId: winnerPlayer.playerId,
-            legNumber: completedLegIndex + 1, // Convert to 1-indexed for display (Leg 1, Leg 2, etc.)
-            legsWon: winnerPlayer.legsWon,
-            legsTotal: state.currentMatch.settings.legsToWin || 3,
-          });
-
-          // Hide animation after 5 seconds
-          const timer = setTimeout(() => {
-            setLegWonAnimation(null);
-          }, 5000);
-
-          // Cleanup on unmount
-          return () => clearTimeout(timer);
-        }
-      }
-    }
-
-    // Check leg achievements for the completed leg
-    if (lastLegIndexRef.current !== null && lastLegIndexRef.current < currentLegIndex) {
-      const completedLeg = state.currentMatch?.legs[lastLegIndexRef.current];
-      if (completedLeg?.winner && state.currentMatch) {
-        checkLegAchievements(completedLeg, state.currentMatch, completedLeg.winner);
-      }
-    }
-
+    const match = state.currentMatch;
+    if (!match) return;
+    const currentLegIndex = match.currentLegIndex;
+    const previousIndex = lastLegIndexRef.current;
+    const sameMatch = lastLegMatchIdRef.current === match.id;
     lastLegIndexRef.current = currentLegIndex;
-  }, [state.currentMatch?.currentLegIndex]);
+    lastLegMatchIdRef.current = match.id;
+
+    // A different match (new, resumed or loaded): just re-anchor.
+    if (!sameMatch) return;
+    // Stepped back by an undo: the win it announced no longer exists.
+    if (currentLegIndex < previousIndex) {
+      setLegWonAnimation(null);
+      return;
+    }
+    if (currentLegIndex === previousIndex || match.status !== 'in-progress') return;
+
+    const completedLeg = match.legs[currentLegIndex - 1];
+    if (!completedLeg?.winner) return;
+
+    // ⚠️ Before the animation's early return — this used to sit after it, so
+    // leg achievements were only ever checked for the final leg of a match.
+    checkLegAchievements(completedLeg, match, completedLeg.winner);
+
+    const winnerPlayer = match.players.find(p => p.playerId === completedLeg.winner);
+    if (!winnerPlayer) return;
+    const fullPlayer = players.find(p => p.id === winnerPlayer.playerId);
+
+    setLegWonAnimation({
+      show: true,
+      winnerName: winnerPlayer.name,
+      winnerAvatar: fullPlayer?.avatar,
+      winnerId: winnerPlayer.playerId,
+      legNumber: currentLegIndex, // 1-indexed number of the leg just won
+      legsWon: winnerPlayer.legsWon,
+      legsTotal: match.settings.legsToWin || 3,
+    });
+
+    const timer = setTimeout(() => setLegWonAnimation(null), 5000);
+    return () => clearTimeout(timer);
+  }, [state.currentMatch?.currentLegIndex, state.currentMatch?.id]);
 
   // Check achievements when match is completed (only once per match)
   useEffect(() => {
@@ -299,6 +289,26 @@ const GameScreen: React.FC = () => {
   const isBotPlayingRef = useRef(false);
   const botTimersRef = useRef<NodeJS.Timeout[]>([]);
   const isNavigatingAwayRef = useRef(false);
+  // The auto-advance after a confirmed visit. Kept so an undo inside that
+  // one-second window can cancel it — otherwise NEXT_PLAYER fired anyway and
+  // threw away the darts the undo had just brought back.
+  const autoNextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cancelAutoNext = () => {
+    if (autoNextTimerRef.current) {
+      clearTimeout(autoNextTimerRef.current);
+      autoNextTimerRef.current = null;
+    }
+  };
+  useEffect(() => cancelAutoNext, []);
+
+  /** What the given darts do for the player at the oche — see utils/visit. */
+  const evaluateCurrent = (darts: Dart[]) => {
+    const match = state.currentMatch;
+    const player = match?.players[state.currentPlayerIndex];
+    const leg = match?.legs[match.currentLegIndex];
+    if (!match || !player || !leg) return null;
+    return evaluateVisit(rulesOf(match.settings), leg.throws, player.playerId, darts);
+  };
 
   // Calculate total throws count for dependency tracking
   const totalThrowsCount = state.currentMatch?.legs.reduce(
@@ -356,15 +366,11 @@ const GameScreen: React.FC = () => {
     const currentPlayer = state.currentMatch.players[state.currentPlayerIndex];
     if (!currentPlayer) return;
 
-    // Skip announcement for bots
-    const playerInfo = selectedPlayers.find(p => p.id === currentPlayer.playerId);
-    if (playerInfo?.isBot) return;
+    // Skip announcement for bots. Read it off the match player: `selectedPlayers`
+    // is empty after a resume, which made the caller speak for bots.
+    if (currentPlayer.isBot) return;
 
-    // Calculate remaining score for current player
-    const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
-    const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
-    const startScore = state.currentMatch.settings.startScore || 501;
-    const remaining = startScore - totalScored;
+    const remaining = evaluateCurrent([])?.previousRemaining ?? 0;
 
     // Announce "You require X" only if player can checkout (2-170)
     if (remaining >= 2 && remaining <= 170) {
@@ -374,140 +380,97 @@ const GameScreen: React.FC = () => {
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [state.currentPlayerIndex, state.currentMatch?.currentLegIndex, selectedPlayers]);
+  }, [state.currentPlayerIndex, state.currentMatch?.currentLegIndex]);
 
   // Bot auto-play: When it's a bot's turn, automatically generate and play throws
+  const currentTurnPlayerId = state.currentMatch?.players[state.currentPlayerIndex]?.playerId;
   useEffect(() => {
-    console.log('🤖 Bot auto-play check:', {
-      hasMatch: !!state.currentMatch,
-      status: state.currentMatch?.status,
-      isBotPlaying: isBotPlayingRef.current,
-      currentPlayerIndex: state.currentPlayerIndex,
-      currentLegIndex: state.currentMatch?.currentLegIndex,
-    });
+    const match = state.currentMatch;
+    if (!match || match.status !== 'in-progress') return;
+    if (isBotPlayingRef.current) return; // Prevent multiple concurrent bot plays
 
-    if (!state.currentMatch || state.currentMatch.status !== 'in-progress') {
-      console.log('🚫 No match or not in progress');
-      return;
-    }
-    if (isBotPlayingRef.current) {
-      console.log('🚫 Bot already playing');
-      return; // Prevent multiple concurrent bot plays
-    }
-
-    const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
+    const currentLeg = match.legs[match.currentLegIndex];
     if (!currentLeg || currentLeg.winner) return;
 
-    const currentMatchPlayer = state.currentMatch.players[state.currentPlayerIndex];
-    if (!currentMatchPlayer) return;
+    const currentMatchPlayer = match.players[state.currentPlayerIndex];
+    if (!currentMatchPlayer?.isBot || !currentMatchPlayer.botLevel) return;
 
-    console.log('🤖 Current player:', {
-      name: currentMatchPlayer.name,
-      isBot: currentMatchPlayer.isBot,
-      botLevel: currentMatchPlayer.botLevel,
-    });
-
-    // Check if current player is a bot using match player data
-    if (!currentMatchPlayer.isBot || !currentMatchPlayer.botLevel) return;
-
-    // Calculate remaining score
-    const playerThrows = currentLeg.throws.filter(t => t.playerId === currentMatchPlayer.playerId);
-    const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
-    const startScore = state.currentMatch.settings.startScore || 501;
-    const remaining = startScore - totalScored;
-
+    const rules = rulesOf(match.settings);
+    const legThrows = currentLeg.throws;
+    const botId = currentMatchPlayer.playerId;
+    const remaining = rules.startScore - legThrows
+      .filter(t => t.playerId === botId)
+      .reduce((sum, t) => sum + t.score, 0);
     if (remaining <= 0) return;
 
-    console.log('🎯 Bot is playing!', {
-      botName: currentMatchPlayer.name,
-      botLevel: currentMatchPlayer.botLevel,
-      remaining,
-    });
+    // A bot never edits a visit. Darts left in the input — after a pause mid-turn,
+    // or an undo that landed on the bot — are cleared, and the bot throws a fresh
+    // turn. Otherwise ADD_DART was ignored at three darts and the stale darts got
+    // committed, mixed with the new ones.
+    setIsEditingThrow(false);
+    setEditingDartIndex(null);
+    if (state.currentThrow.length > 0) dispatch({ type: 'CLEAR_THROW' });
 
     isBotPlayingRef.current = true;
-    let isCancelled = false; // Cancellation flag for cleanup
+    let isCancelled = false;
 
-    // Generate bot turn with delay for visual effect
     const botTurn = generateBotTurn(currentMatchPlayer.botLevel, remaining);
-    console.log('🎲 Bot turn generated:', botTurn);
     let dartIndex = 0;
 
-    const playNextDart = () => {
-      if (isCancelled) return; // Stop if cancelled
-
-      if (dartIndex >= botTurn.length) {
-        // All darts thrown — check if this was a checkout before confirming
-        const totalBotScore = botTurn.reduce((sum, d) => sum + d.score, 0);
-        const lastBotDart = botTurn[botTurn.length - 1];
-        const requireDouble = state.currentMatch?.settings.doubleOut ?? true;
-        const botCheckedOut = totalBotScore === remaining && (!requireDouble || lastBotDart?.multiplier === 2);
-
-        const timer1 = setTimeout(() => {
-          if (isCancelled) return;
-          dispatch({ type: 'CONFIRM_THROW' });
-          // Skip NEXT_PLAYER if bot checked out (CONFIRM_THROW already handles leg/match transition)
-          if (!botCheckedOut) {
-            const timer2 = setTimeout(() => {
-              if (isCancelled) return;
-              isBotPlayingRef.current = false;
-              dispatch({ type: 'NEXT_PLAYER' });
-            }, 800);
-            botTimersRef.current.push(timer2);
-          } else {
+    const confirmTurn = (checkedOut: boolean) => {
+      const timer1 = setTimeout(() => {
+        if (isCancelled) return;
+        dispatch({ type: 'CONFIRM_THROW' });
+        // On a checkout CONFIRM_THROW already handles the leg/match transition.
+        if (!checkedOut) {
+          const timer2 = setTimeout(() => {
+            if (isCancelled) return;
             isBotPlayingRef.current = false;
-          }
-        }, 400);
-        botTimersRef.current.push(timer1);
+            dispatch({ type: 'NEXT_PLAYER' });
+          }, 800);
+          botTimersRef.current.push(timer2);
+        } else {
+          isBotPlayingRef.current = false;
+        }
+      }, 400);
+      botTimersRef.current.push(timer1);
+    };
+
+    const playNextDart = () => {
+      if (isCancelled) return;
+      if (dartIndex >= botTurn.length) {
+        confirmTurn(evaluateVisit(rules, legThrows, botId, botTurn).checkout);
         return;
       }
 
-      const dart = botTurn[dartIndex];
-      console.log(`🎯 Throwing dart ${dartIndex + 1}:`, dart);
-      dispatch({ type: 'ADD_DART', payload: dart });
-
-      // Play dart sound
+      dispatch({ type: 'ADD_DART', payload: botTurn[dartIndex] });
       audioSystem.playSound('/sounds/OMNI/pop.mp3', false);
-
       dartIndex++;
 
-      // Check if checkout happened
-      const newRemaining = remaining - botTurn.slice(0, dartIndex).reduce((sum, d) => sum + d.score, 0);
-      const requireDouble = state.currentMatch?.settings.doubleOut ?? true;
-      const isValidCheckout = newRemaining === 0 && (!requireDouble || dart.multiplier === 2);
-
-      if (isValidCheckout) {
-        // Checkout! Stop throwing more darts — don't dispatch NEXT_PLAYER
-        // (CONFIRM_THROW handles leg/match transition and sets correct player index)
-        console.log('🎉 Bot checked out!');
-        const timer1 = setTimeout(() => {
-          if (isCancelled) return;
-          dispatch({ type: 'CONFIRM_THROW' });
-          isBotPlayingRef.current = false;
-        }, 400);
-        botTimersRef.current.push(timer1);
+      // Stop at a checkout — no more darts after the leg is won.
+      if (evaluateVisit(rules, legThrows, botId, botTurn.slice(0, dartIndex)).checkout) {
+        confirmTurn(true);
         return;
       }
 
-      // Continue with next dart after delay
       const timer = setTimeout(playNextDart, 600);
       botTimersRef.current.push(timer);
     };
 
-    // Start bot turn after a short delay
     const startDelay = setTimeout(() => {
       if (!isCancelled) playNextDart();
     }, 1000);
     botTimersRef.current.push(startDelay);
 
     return () => {
-      console.log('🧹 Cleaning up bot auto-play effect');
-      isCancelled = true; // Cancel all pending operations
-      // Clear all timers
+      isCancelled = true;
       botTimersRef.current.forEach(timer => clearTimeout(timer));
       botTimersRef.current = [];
       isBotPlayingRef.current = false;
     };
-  }, [state.currentPlayerIndex, state.currentMatch?.currentLegIndex, state.currentMatch?.status, dispatch]);
+    // currentTurnPlayerId: REMOVE_PLAYER can put a bot at the same index — the
+    // index alone did not change, so the bot never started.
+  }, [state.currentPlayerIndex, currentTurnPlayerId, state.currentMatch?.currentLegIndex, state.currentMatch?.status, dispatch]);
 
   useEffect(() => {
     // Don't auto-resume if we're navigating away (user clicked "Pause")
@@ -621,170 +584,74 @@ const GameScreen: React.FC = () => {
   // Define handleConfirmThrow with useCallback BEFORE useEffects that use it
   const handleConfirmThrow = React.useCallback(() => {
     const currentScore = calculateThrowScore(state.currentThrow);
-
-    // Check if this will be a checkout or bust BEFORE confirming
-    // so we can skip the score announcement if it's going to be a special sound
     const currentPlayer = state.currentMatch?.players[state.currentPlayerIndex];
     const currentLeg = state.currentMatch?.legs[state.currentMatch.currentLegIndex];
+    const visit = evaluateCurrent(state.currentThrow);
 
-    // Track whether this throw wins the leg (checkout) - if so, CONFIRM_THROW
-    // already handles the player transition, so we must NOT dispatch NEXT_PLAYER
-    let isLegWinningThrow = false;
-
-    if (currentPlayer && currentLeg) {
-      const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
-      const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
-      const startScore = state.currentMatch?.settings.startScore || 501;
-      const remaining = startScore - totalScored;
-      const newRemaining = remaining - currentScore;
-
-      // Check for checkout and bust
-      const requiresDouble = state.currentMatch?.settings.doubleOut ?? true;
-      const lastDart = state.currentThrow[state.currentThrow.length - 1];
-
-      // Don't announce score if it's a valid checkout (will be announced by GameContext)
-      const isValidCheckout = newRemaining === 0 &&
-                              state.currentThrow.length > 0 &&
-                              (!requiresDouble || lastDart?.multiplier === 2);
-
-      // Don't announce score if it's a bust (will be announced by GameContext)
-      const willBust = newRemaining < 0 ||
-                       (newRemaining === 1 && requiresDouble) ||
-                       (newRemaining === 0 && requiresDouble && lastDart?.multiplier !== 2) ||
-                       (requiresDouble && isBogeyNumber(newRemaining));
-
-      isLegWinningThrow = isValidCheckout;
-
-      // Only announce score if not checkout or bust
-      if (!isValidCheckout && !willBust) {
-        if (currentScore === 180) {
-          setShowConfetti(true);
-          audioSystem.announceScore(180);
-          setTimeout(() => setShowConfetti(false), 3000);
-        } else {
-          // Always announce the score (0-180)
-          audioSystem.announceScore(currentScore);
-        }
-      } else if (isValidCheckout) {
-        console.log('🎯 Valid checkout - skipping score announcement, GameContext will announce');
-        // Still show confetti for 180s even if it's a checkout
-        if (currentScore === 180) {
-          setShowConfetti(true);
-          setTimeout(() => setShowConfetti(false), 3000);
-        }
-      } else if (willBust) {
-        console.log('💥 Bust - skipping score announcement, GameContext will announce');
-      }
-
-      // Update heatmap for this player with the current darts
-      if (state.currentThrow.length > 0) {
-        updatePlayerHeatmap(currentPlayer.playerId, state.currentThrow);
-      }
-    } else {
-      // Fallback: just announce the score (but avoid if it might be a checkout/bust)
-      // This fallback should rarely be hit, but better safe than sorry
-      console.log('⚠️ Fallback score announcement - no currentPlayer/currentLeg');
-      if (currentScore === 180) {
-        setShowConfetti(true);
-        audioSystem.announceScore(180);
-        setTimeout(() => setShowConfetti(false), 3000);
-      } else if (currentScore > 0) {
-        // Only announce if score > 0 (avoid announcing checkout scores)
-        audioSystem.announceScore(currentScore);
-      }
+    // A checkout is announced by GameContext, a bust too — only plain scores here.
+    if (visit && !visit.checkout && !visit.bust) {
+      audioSystem.announceScore(visit.score);
+    }
+    if (currentScore === 180) {
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 3000);
     }
 
     dispatch({ type: 'CONFIRM_THROW' });
 
     // Check throw achievements (180s, checkouts, etc.)
-    if (currentPlayer && currentLeg) {
-      const playerThrowsForCheckout = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
-      const totalScoredForCheckout = playerThrowsForCheckout.reduce((sum, t) => sum + t.score, 0);
-      const startScoreForCheckout = state.currentMatch?.settings.startScore || 501;
-      const remainingBeforeThrow = startScoreForCheckout - totalScoredForCheckout;
-      const newRemainingAfterThrow = remainingBeforeThrow - currentScore;
-      const requiresDoubleForCheckout = state.currentMatch?.settings.doubleOut ?? true;
-      const lastDartForCheckout = state.currentThrow[state.currentThrow.length - 1];
-      const isCheckout = newRemainingAfterThrow === 0 && (!requiresDoubleForCheckout || lastDartForCheckout?.multiplier === 2);
+    if (currentPlayer && currentLeg && visit) {
+      const playerThrowsInLeg = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
+      const previousThrow = playerThrowsInLeg[playerThrowsInLeg.length - 1];
+      const startScore = state.currentMatch?.settings.startScore || 501;
 
-      // Build match context for advanced achievement checks
-      const previousThrow = playerThrowsForCheckout[playerThrowsForCheckout.length - 1];
-      const visitNumber = playerThrowsForCheckout.length + 1;
-
-      // Calculate opponent remaining
       let opponentRemaining: number | undefined;
-      const otherPlayers = state.currentMatch?.players.filter(p => p.playerId !== currentPlayer.playerId) || [];
-      if (otherPlayers.length > 0) {
-        const opponentId = otherPlayers[0].playerId;
-        const opponentThrows = currentLeg.throws.filter(t => t.playerId === opponentId);
-        const opponentScored = opponentThrows.reduce((sum, t) => sum + t.score, 0);
-        opponentRemaining = startScoreForCheckout - opponentScored;
+      const opponent = state.currentMatch?.players.find(p => p.playerId !== currentPlayer.playerId);
+      if (opponent) {
+        opponentRemaining = startScore - currentLeg.throws
+          .filter(t => t.playerId === opponent.playerId)
+          .reduce((sum, t) => sum + t.score, 0);
       }
-
-      // Check if player had any busts in this leg
-      const hadBustInLeg = playerThrowsForCheckout.some(t => t.isBust);
-
-      // Bust detection for current throw
-      const isBust = newRemainingAfterThrow < 0 ||
-        newRemainingAfterThrow === 1 ||
-        (newRemainingAfterThrow === 0 && requiresDoubleForCheckout && lastDartForCheckout?.multiplier !== 2);
-
-      // Checkout attempt: remaining was <=170 before this throw
-      const isCheckoutAttempt = remainingBeforeThrow <= 170 && remainingBeforeThrow > 0;
 
       checkThrowAchievements(
         currentPlayer.playerId,
         [...state.currentThrow],
-        currentScore,
-        isCheckout,
-        isCheckout ? currentScore : undefined,
+        visit.score,
+        visit.checkout,
+        visit.checkout ? visit.score : undefined,
         state.currentMatch?.id,
         {
           previousThrowScore: previousThrow?.score,
-          visitNumber,
+          visitNumber: playerThrowsInLeg.length + 1,
           opponentRemaining,
-          hadBustInLeg,
-          isBust,
-          isCheckoutAttempt,
+          hadBustInLeg: playerThrowsInLeg.some(t => t.isBust),
+          isBust: visit.bust,
+          isCheckoutAttempt: visit.previousRemaining <= 170 && visit.previousRemaining > 0,
         }
       );
     }
 
-    // Note: "You require X" is now announced when the player's turn STARTS (not after throwing)
-    // This is handled in handleNextPlayer()
-
-    // Clear editing state
     setIsEditingThrow(false);
     setEditingDartIndex(null);
 
     // Auto-advance to next player, but NOT after a checkout/leg-win
     // (CONFIRM_THROW already sets currentPlayerIndex for the new leg)
-    if (settings.autoNextPlayer && !isLegWinningThrow) {
-      setTimeout(() => {
+    cancelAutoNext();
+    if (settings.autoNextPlayer && !visit?.checkout) {
+      autoNextTimerRef.current = setTimeout(() => {
+        autoNextTimerRef.current = null;
         dispatch({ type: 'NEXT_PLAYER' });
       }, 1000);
     }
-  }, [state.currentThrow, state.currentPlayerIndex, state.currentMatch, settings.autoNextPlayer, dispatch, updatePlayerHeatmap, isEditingThrow]);
+  }, [state.currentThrow, state.currentPlayerIndex, state.currentMatch, settings.autoNextPlayer, dispatch]);
 
   // Auto-confirm after 3rd dart (skip for bots and editing mode)
   useEffect(() => {
-    if (state.currentThrow.length === 3) {
-      // Skip auto-confirm for bots
-      const currentPlayer = state.currentMatch?.players[state.currentPlayerIndex];
-      if (currentPlayer?.isBot) {
-        console.log('⏭️ Skipping auto-confirm for bot');
-        return;
-      }
-
-      // Skip auto-confirm when editing a throw
-      if (isEditingThrow) return;
-
-      // Auto-confirm after a short delay to show the 3rd dart
-      const timer = setTimeout(() => {
-        handleConfirmThrow();
-      }, 600);
-      return () => clearTimeout(timer);
-    }
+    if (state.currentThrow.length !== 3) return;
+    if (state.currentMatch?.players[state.currentPlayerIndex]?.isBot) return;
+    if (isEditingThrow) return;
+    const timer = setTimeout(() => handleConfirmThrow(), 600);
+    return () => clearTimeout(timer);
   }, [state.currentThrow.length, isEditingThrow]);
 
   // Detect checkout state for pulsing button (when < 3 darts produce a valid checkout)
@@ -796,22 +663,10 @@ const GameScreen: React.FC = () => {
   const isEarlyCheckout = useMemo(() => {
     if (!state.currentMatch || state.currentThrow.length === 0 || state.currentThrow.length >= 3) return false;
     if (isEditingThrow) return false;
-
     const currentPlayer = state.currentMatch.players[state.currentPlayerIndex];
     const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
-    if (!currentPlayer || !currentLeg || currentLeg.winner) return false;
-    if (currentPlayer.isBot) return false;
-
-    const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
-    const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
-    const startScore = state.currentMatch.settings.startScore || 501;
-    const remainingScore = startScore - totalScored;
-    const currentScore = calculateThrowScore(state.currentThrow);
-    const newRemaining = remainingScore - currentScore;
-
-    const requiresDouble = state.currentMatch.settings.doubleOut ?? true;
-    const lastDart = state.currentThrow[state.currentThrow.length - 1];
-    return newRemaining === 0 && (!requiresDouble || lastDart?.multiplier === 2);
+    if (!currentPlayer || !currentLeg || currentLeg.winner || currentPlayer.isBot) return false;
+    return evaluateCurrent(state.currentThrow)?.checkout ?? false;
   }, [state.currentThrow, state.currentMatch, state.currentPlayerIndex, isEditingThrow]);
 
   // The last confirmed throw of the current leg — labels the undo button so the
@@ -820,8 +675,11 @@ const GameScreen: React.FC = () => {
   const lastThrowInfo = useMemo(() => {
     const match = state.currentMatch;
     if (!match || match.status !== 'in-progress') return null;
-    const leg = match.legs[match.currentLegIndex];
-    const last = leg?.throws[leg.throws.length - 1];
+    // Mirrors UNDO_THROW: a fresh leg reaches back to the checkout that closed
+    // the previous one, and bot visits are stepped over.
+    const history = match.legs.slice(0, match.currentLegIndex + 1).flatMap(l => l.throws);
+    const isBot = (id: string) => match.players.find(p => p.playerId === id)?.isBot;
+    const last = [...history].reverse().find(t => !isBot(t.playerId)) ?? history[history.length - 1];
     if (!last) return null;
     return {
       playerName: match.players.find(p => p.playerId === last.playerId)?.name ?? '?',
@@ -830,96 +688,34 @@ const GameScreen: React.FC = () => {
     };
   }, [state.currentMatch]);
 
-  // Auto-confirm on checkout ONLY when all 3 darts have been thrown
-  useEffect(() => {
-    if (!state.currentMatch || state.currentThrow.length < 3) return;
-
-    const currentPlayer = state.currentMatch.players[state.currentPlayerIndex];
-    const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
-    if (!currentPlayer || !currentLeg || currentLeg.winner) return;
-
-    // Skip auto-checkout for bots - they handle their own confirm/next
-    if (currentPlayer.isBot) return;
-
-    // Skip auto-checkout when editing a throw
-    if (isEditingThrow) return;
-
-    // Calculate remaining score
-    const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
-    const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
-    const startScore = state.currentMatch.settings.startScore || 501;
-    const remainingScore = startScore - totalScored;
-    const currentScore = calculateThrowScore(state.currentThrow);
-    const newRemaining = remainingScore - currentScore;
-
-    // Check if this is a valid checkout
-    const requiresDouble = state.currentMatch.settings.doubleOut ?? true;
-    const lastDart = state.currentThrow[state.currentThrow.length - 1];
-    const isValidCheckout = newRemaining === 0 &&
-      (!requiresDouble || lastDart?.multiplier === 2);
-
-    if (isValidCheckout) {
-      // Auto-confirm checkout after short delay
-      const timer = setTimeout(() => {
-        handleConfirmThrow();
-      }, 400);
-      return () => clearTimeout(timer);
-    }
-  }, [state.currentThrow, isEditingThrow]);
-
-  // Auto-confirm on bust
+  // Auto-confirm a bust at once, and a checkout once all three darts are in.
+  // (An early checkout with fewer darts waits for the player — the OK button pulses.)
   useEffect(() => {
     if (!state.currentMatch || state.currentThrow.length === 0) return;
-
     const currentPlayer = state.currentMatch.players[state.currentPlayerIndex];
     const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
     if (!currentPlayer || !currentLeg || currentLeg.winner) return;
-
-    // Skip auto-bust for bots - they handle their own confirm/next
-    if (currentPlayer.isBot) return;
-
-    // Skip auto-bust when editing a throw
+    if (currentPlayer.isBot) return; // bots confirm their own turns
     if (isEditingThrow) return;
 
-    // Calculate remaining score
-    const playerThrows = currentLeg.throws.filter(t => t.playerId === currentPlayer.playerId);
-    const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
-    const startScore = state.currentMatch.settings.startScore || 501;
-    const remaining = startScore - totalScored;
-    const currentScore = calculateThrowScore(state.currentThrow);
-    const newRemaining = remaining - currentScore;
-
-    // Check if this is a bust (must match isBust() in scoring.ts exactly)
-    const requiresDouble = state.currentMatch.settings.doubleOut ?? true;
-    const lastDart = state.currentThrow[state.currentThrow.length - 1];
-    const bustDetected = newRemaining < 0 ||
-                   (newRemaining === 1 && requiresDouble) ||
-                   (newRemaining === 0 && requiresDouble && lastDart?.multiplier !== 2) ||
-                   (requiresDouble && isBogeyNumber(newRemaining));
-
-    if (bustDetected) {
-      console.log('💥 Auto-confirming bust:', { remaining, currentScore, newRemaining });
-      // Auto-confirm bust after short delay
-      const timer = setTimeout(() => {
-        handleConfirmThrow();
-      }, 800);
-      return () => clearTimeout(timer);
-    }
+    const visit = evaluateCurrent(state.currentThrow);
+    if (!visit) return;
+    const delay = visit.bust ? 800 : visit.checkout && state.currentThrow.length === 3 ? 400 : null;
+    if (delay === null) return;
+    const timer = setTimeout(() => handleConfirmThrow(), delay);
+    return () => clearTimeout(timer);
   }, [state.currentThrow, isEditingThrow]);
 
   const handleUndoThrow = () => {
-    if (!state.currentMatch) return;
-
-    const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
-    if (currentLeg.throws.length === 0) return;
-
+    if (!state.currentMatch || !lastThrowInfo) return;
+    // An undo inside the auto-advance window must win over the pending NEXT_PLAYER.
+    cancelAutoNext();
     // Enter editing mode - darts will be loaded into currentThrow by the reducer
     setIsEditingThrow(true);
     setEditingDartIndex(null);
-
-    dispatch({ type: 'UNDO_THROW' });
+    dispatch({ type: 'UNDO_THROW', payload: { skipBots: true } });
   };
-  
+
   // Stable identity: PlayerScore is memoized, an inline arrow would re-render every card.
   const handleRequestRemovePlayer = React.useCallback((playerId: string) => {
     setPlayerToRemoveId(playerId);

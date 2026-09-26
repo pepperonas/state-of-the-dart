@@ -26,7 +26,7 @@ type GameAction =
   | { type: 'CLEAR_THROW' }
   | { type: 'REPLACE_DART'; payload: { index: number; dart: Dart } }
   | { type: 'CONFIRM_THROW' }
-  | { type: 'UNDO_THROW' }
+  | { type: 'UNDO_THROW'; payload?: { skipBots?: boolean } }
   | { type: 'REMOVE_PLAYER'; payload: { playerId: string } }
   | { type: 'NEXT_PLAYER' }
   | { type: 'END_MATCH' }
@@ -70,7 +70,7 @@ const checkoutFor = (match: Match, playerIndex: number, darts: Dart[]): string[]
  * leg winners of the whole match — that is what corrupted undo in sets
  * matches. Mirrors the transitions in CONFIRM_THROW exactly.
  */
-export const replaySets = (
+const replaySets = (
   legs: Match['legs'],
   playerIds: string[],
   settings: MatchSettings,
@@ -522,8 +522,20 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
       };
     }
     
-    case 'UNDO_THROW':
-      return undoLastThrow(state);
+    case 'UNDO_THROW': {
+      let next = undoLastThrow(state);
+      // A human pressing undo wants THEIR last visit back, not to "edit" the
+      // bot's darts — which the bot would then silently re-commit. Keep
+      // stepping back while the visit we landed on belongs to a bot.
+      if (action.payload?.skipBots) {
+        while (next.currentMatch?.players[next.currentPlayerIndex]?.isBot) {
+          const further = undoLastThrow(next);
+          if (further === next) break;
+          next = further;
+        }
+      }
+      return next;
+    }
     
     case 'REMOVE_PLAYER': {
       if (!state.currentMatch) return state;

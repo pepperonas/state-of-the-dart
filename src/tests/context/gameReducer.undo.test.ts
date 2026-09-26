@@ -152,3 +152,49 @@ describe('double-in', () => {
     expect(s.currentMatch!.legs[0].throws[0].score).toBe(120);
   });
 });
+
+describe('LOAD_MATCH with a corrupt saved match', () => {
+  it('keeps the current state instead of crashing when the current leg is missing', () => {
+    const broken = { ...start({}).currentMatch!, legs: [], currentLegIndex: 3 };
+    expect(() => gameReducer(initialState, { type: 'LOAD_MATCH', payload: broken } as any)).not.toThrow();
+    expect(gameReducer(initialState, { type: 'LOAD_MATCH', payload: broken } as any)).toBe(initialState);
+  });
+
+  it('rejects a match without players', () => {
+    const broken = { ...start({}).currentMatch!, players: [] };
+    expect(gameReducer(initialState, { type: 'LOAD_MATCH', payload: broken } as any)).toBe(initialState);
+  });
+});
+
+describe('UNDO_THROW with skipBots', () => {
+  const vsBot = () => gameReducer(initialState, {
+    type: 'START_MATCH',
+    payload: {
+      players: [
+        { id: 'h', name: 'Human', isBot: false },
+        { id: 'r', name: 'Robo', isBot: true, botLevel: 3 },
+      ],
+      settings: { startScore: 501, legsToWin: 1, setsToWin: 1, doubleOut: true, doubleIn: false },
+      gameType: 'x01',
+    },
+  } as any);
+
+  it('steps past the bot visit back to the human', () => {
+    let s = vsBot();
+    s = visit(s, T20); s = next(s);     // human 60
+    s = visit(s, T20); s = next(s);     // bot 60, back to human
+    s = gameReducer(s, { type: 'UNDO_THROW', payload: { skipBots: true } } as any);
+    expect(s.currentPlayerIndex).toBe(0);
+    expect(s.currentMatch!.legs[0].throws).toHaveLength(0);
+    expect(s.currentThrow).toEqual([T20]);
+  });
+
+  it('without the flag only one visit is taken back', () => {
+    let s = vsBot();
+    s = visit(s, T20); s = next(s);
+    s = visit(s, T20); s = next(s);
+    s = undo(s);
+    expect(s.currentPlayerIndex).toBe(1);
+    expect(s.currentMatch!.legs[0].throws).toHaveLength(1);
+  });
+});
