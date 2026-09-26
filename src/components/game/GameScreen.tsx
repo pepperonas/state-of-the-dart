@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, Suspense, lazy } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, X, Bot, ChevronDown, AlertTriangle, Smile, Flame, UserMinus } from 'lucide-react';
+import { ArrowLeft, RotateCcw, X, Bot, ChevronDown, AlertTriangle, Smile, Flame, UserMinus, Volume2, VolumeX } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 const Confetti = lazy(() => import('react-confetti'));
 const ThrowChart = lazy(() => import('./ThrowChart'));
@@ -23,6 +23,8 @@ import AvatarPicker from '../player/AvatarPicker';
 import { Dart, Player, GameType, MatchSettings, Throw, HeatmapData } from '../../types/index';
 import { calculateThrowScore } from '../../utils/scoring';
 import { evaluateVisit, rulesOf } from '../../utils/visit';
+import { haptic } from '../../utils/haptics';
+import { useWakeLock } from '../../hooks/useWakeLock';
 import { getCheckoutAlternatives } from '../../data/checkoutTable';
 import { PersonalBests, createEmptyPersonalBests, updatePersonalBests } from '../../types/personalBests';
 import audioSystem from '../../utils/audio';
@@ -60,11 +62,22 @@ const GameScreen: React.FC = () => {
     } : undefined
   ).filter(hint => !dismissedHints.has(hint.achievementId));
   
+  // In-game mute: silences the caller for this device without touching the
+  // saved volumes. Remembered, because a player who muted at the board wants
+  // the next match quiet too.
+  const [muted, setMuted] = useState(() => {
+    try { return localStorage.getItem('sotd-muted') === '1'; } catch { return false; }
+  });
+  const toggleMuted = () => setMuted(m => {
+    try { localStorage.setItem('sotd-muted', m ? '0' : '1'); } catch { /* storage unavailable */ }
+    return !m;
+  });
+
   useEffect(() => {
-    audioSystem.setEnabled(settings.soundVolume > 0 || (settings.callerVolume ?? 0) > 0 || (settings.effectsVolume ?? 0) > 0);
+    audioSystem.setEnabled(!muted && (settings.soundVolume > 0 || (settings.callerVolume ?? 0) > 0 || (settings.effectsVolume ?? 0) > 0));
     audioSystem.setCallerVolume(settings.callerVolume ?? settings.soundVolume);
     audioSystem.setEffectsVolume(settings.effectsVolume ?? settings.soundVolume);
-  }, [settings.soundVolume, settings.callerVolume, settings.effectsVolume]);
+  }, [settings.soundVolume, settings.callerVolume, settings.effectsVolume, muted]);
 
   // Reset navigation flag when component mounts (user returns to game)
   useEffect(() => {
@@ -235,6 +248,9 @@ const GameScreen: React.FC = () => {
     !state.currentMatch || forceNewGameRef.current ||
     (state.currentMatch?.status === 'paused' && !resumeRequestedRef.current)
   );
+
+  // Keep the screen on while a match is being played.
+  useWakeLock(!showSetup && state.currentMatch?.status === 'in-progress');
 
   // Clear ?new=1 or ?resume=1 from URL after consuming it
   useEffect(() => {
@@ -579,7 +595,8 @@ const GameScreen: React.FC = () => {
     }
     // Play a subtle click sound for dart hit feedback
     audioSystem.playSound('/sounds/OMNI/pop.mp3', false);
-  }, [editingDartIndex, dispatch]);
+    haptic('dart', settings.vibrationEnabled);
+  }, [editingDartIndex, dispatch, settings.vibrationEnabled]);
 
   // Define handleConfirmThrow with useCallback BEFORE useEffects that use it
   const handleConfirmThrow = React.useCallback(() => {
@@ -597,6 +614,7 @@ const GameScreen: React.FC = () => {
       setTimeout(() => setShowConfetti(false), 3000);
     }
 
+    haptic(visit?.checkout ? 'checkout' : visit?.bust ? 'bust' : 'confirm', settings.vibrationEnabled);
     dispatch({ type: 'CONFIRM_THROW' });
 
     // Check throw achievements (180s, checkouts, etc.)
@@ -643,7 +661,7 @@ const GameScreen: React.FC = () => {
         dispatch({ type: 'NEXT_PLAYER' });
       }, 1000);
     }
-  }, [state.currentThrow, state.currentPlayerIndex, state.currentMatch, settings.autoNextPlayer, dispatch]);
+  }, [state.currentThrow, state.currentPlayerIndex, state.currentMatch, settings.autoNextPlayer, settings.vibrationEnabled, dispatch]);
 
   // Auto-confirm after 3rd dart (skip for bots and editing mode)
   useEffect(() => {
@@ -1254,6 +1272,14 @@ const GameScreen: React.FC = () => {
           <BackButton onClick={handleBackToMenu} inline />
           
           <div className="flex gap-2">
+            <IconButton
+              variant="tonal"
+              label={muted ? t('game.unmute') : t('game.mute')}
+              aria-pressed={muted}
+              onClick={toggleMuted}
+            >
+              {muted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+            </IconButton>
             <IconButton
               variant="tonal"
               label="Bug melden"

@@ -10,6 +10,9 @@ import { saveGameState, loadGameState, clearGameState, STORAGE_KEYS, CricketSave
 import { SpinnerWheel } from './SpinnerWheel';
 import { CRICKET_NUMBERS, applyCricketVisit, emptyCricketState, isCricketWinner } from '../../utils/cricket';
 import { BackButton, Button, IconButton, Card, Dialog } from '../common';
+import { useWakeLock } from '../../hooks/useWakeLock';
+import { haptic } from '../../utils/haptics';
+import { useSettings } from '../../context/SettingsContext';
 
 /** One confirmed visit, kept so it can be taken back. */
 interface CricketTurn {
@@ -35,6 +38,9 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
   const [showSetup, setShowSetup] = useState(true);
   const [currentDarts, setCurrentDarts] = useState<Dart[]>([]);
   const [showWinner, setShowWinner] = useState(false);
+  const { settings } = useSettings();
+  // Keep the screen on while the game is running.
+  useWakeLock(!showSetup && !showWinner);
   
   // Cricket state per player
   const [cricketState, setCricketState] = useState<CricketState>({});
@@ -122,6 +128,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
   };
 
   const handleDartHit = (segment: number, multiplier: 1 | 2 | 3) => {
+    haptic('dart', settings.vibrationEnabled);
     if (!currentPlayer || currentDarts.length >= 3) return;
     
     const dart: Dart = {

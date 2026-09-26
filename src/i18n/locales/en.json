@@ -163,7 +163,9 @@
     "remove_player_body": "Every throw {{name}} made in this match is deleted. The match continues with the remaining players.",
     "remove_player_irreversible": "This cannot be undone.",
     "remove_player_min": "A match needs at least 2 players",
-    "more_scores": "More scores (0–180)…"
+    "more_scores": "More scores (0–180)…",
+    "mute": "Mute",
+    "unmute": "Unmute"
   },
   "stats": {
     "statistics": "Statistics",

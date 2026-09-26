@@ -163,7 +163,9 @@
     "remove_player_body": "Alle Würfe von {{name}} in diesem Match werden gelöscht. Das Match läuft mit den übrigen Spielern weiter.",
     "remove_player_irreversible": "Das lässt sich nicht rückgängig machen.",
     "remove_player_min": "Ein Match braucht mindestens 2 Spieler",
-    "more_scores": "Weitere Punktzahlen (0–180)…"
+    "more_scores": "Weitere Punktzahlen (0–180)…",
+    "mute": "Ton aus",
+    "unmute": "Ton an"
   },
   "stats": {
     "statistics": "Statistiken",

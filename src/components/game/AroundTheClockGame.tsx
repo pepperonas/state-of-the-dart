@@ -13,6 +13,8 @@ import { saveGameState, loadGameState, clearGameState, STORAGE_KEYS, ATCSavedSta
 import { SpinnerWheel } from './SpinnerWheel';
 import BackButton from '../common/BackButton';
 import { Button, Card } from '../common';
+import { useWakeLock } from '../../hooks/useWakeLock';
+import { haptic } from '../../utils/haptics';
 
 interface AroundTheClockGameProps {
   onBack?: () => void;
@@ -56,6 +58,8 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
   const [playerHits, setPlayerHits] = useState<Record<string, number>>({});
   const [currentDarts, setCurrentDarts] = useState<Dart[]>([]);
   const [showWinner, setShowWinner] = useState(false);
+  // Keep the screen on while the game is running.
+  useWakeLock(!showSetup && !showWinner);
   const [winner, setWinner] = useState<Player | null>(null);
   const [gameStartTime, setGameStartTime] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -315,6 +319,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
   }, [currentDarts.length, confirmThrow]);
 
   const handleHit = () => {
+    haptic('dart', settings.vibrationEnabled);
     if (!currentPlayer || currentDarts.length >= 3) return;
 
     const target = targets[(playerProgress[currentPlayer.id] || 0) +

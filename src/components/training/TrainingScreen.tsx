@@ -15,6 +15,8 @@ import BackButton from '../common/BackButton';
 import { Button, Card, AnimatedNumber } from '../common';
 import { Icon, iconForEmoji } from '../icons';
 import { advanceThroughSequence, bobs27Round, BOBS_27_ROUNDS, BOBS_27_BULL } from '../../utils/training';
+import { useWakeLock } from '../../hooks/useWakeLock';
+import { haptic } from '../../utils/haptics';
 
 interface TrainingState {
   currentTarget: number;
@@ -261,8 +263,12 @@ const TrainingScreen: React.FC = () => {
     }
   };
 
+  // Keep the screen on while training.
+  useWakeLock(!trainingState.completed);
+
   const handleDartHit = (dart: Dart) => {
     if (trainingState.completed || currentThrow.length >= 3) return;
+    haptic('dart', settings.vibrationEnabled);
 
     setCurrentThrow(prev => [...prev, dart]);
     audioSystem.playSound('/sounds/OMNI/pop.mp3');
