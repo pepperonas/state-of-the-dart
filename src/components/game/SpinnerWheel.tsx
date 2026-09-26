@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Player } from '../../types';
 import { audioSystem } from '../../utils/audio';
 import { Icon, iconForEmoji, ICON_PATHS } from '../icons';
+import { useTranslation } from 'react-i18next';
+import { Button, Chip } from '../common';
 
 interface SpinnerWheelProps {
   players: Player[];
@@ -34,6 +36,21 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
   const [showResult, setShowResult] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const hasStarted = useRef(false);
+  const { t } = useTranslation();
+  // Every pending timeout, so skipping can cancel the spin cleanly.
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const doneRef = useRef(false);
+  const later = (fn: () => void, ms: number) => { timersRef.current.push(setTimeout(fn, ms)); };
+  useEffect(() => () => timersRef.current.forEach(clearTimeout), []);
+
+  /** Finishes exactly once — by the wheel, a skip, or a chosen starter. */
+  const finish = (index: number) => {
+    if (doneRef.current) return;
+    doneRef.current = true;
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+    onComplete(index);
+  };
 
   // Store players at spin start to prevent race conditions
   const playersAtSpinRef = useRef<Player[]>(players);
@@ -133,7 +150,7 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
       audioSystem.playSound(introSound, true);
 
       // Start spinning after intro
-      setTimeout(() => {
+      later(() => {
         startSpin();
       }, 1500);
     }
@@ -194,21 +211,19 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
     setRotation(finalRotation);
 
     // Show result after spin completes
-    setTimeout(() => {
+    later(() => {
       const storedPlayers = playersAtSpinRef.current;
       setIsSpinning(false);
       setWinner(storedPlayers[winnerIndex]);
       setShowResult(true);
 
       // Play winner announcement after a short delay
-      setTimeout(() => {
+      later(() => {
         audioSystem.playSound('/sounds/effects/accepted_invite.mp3', true);
       }, 300);
 
       // Proceed to game after showing result
-      setTimeout(() => {
-        onComplete(winnerIndex);
-      }, 2500);
+      later(() => finish(winnerIndex), 2500);
     }, 4000); // Spin duration
   };
 
@@ -216,7 +231,7 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
     <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 m3-scrim-enter">
       <div className="flex flex-col items-center gap-6 p-8 bg-surface-container rounded-m3-lg shadow-m3-3">
         <h2 className="m3-headline-small text-on-surface text-center">
-          Wer wirft zuerst?
+          {t('game.who_starts')}
         </h2>
 
         {/* Wheel Container */}
@@ -273,10 +288,19 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
           </div>
         )}
 
-        {/* Loading indicator */}
-        {isSpinning && (
-          <div className="m3-body-medium text-on-surface-variant animate-pulse">
-            Das Rad dreht sich...
+        {/* The wheel runs for several seconds on every game — never force it. */}
+        {!showResult && (
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-wrap justify-center gap-2" role="group" aria-label={t('game.who_starts')}>
+              {players.map((p, i) => (
+                <Chip key={p.id} onClick={() => finish(i)}>
+                  {t('game.starts', { name: p.name })}
+                </Chip>
+              ))}
+            </div>
+            <Button variant="text" onClick={() => finish(Math.floor(Math.random() * players.length))}>
+              {t('game.skip_spinner')}
+            </Button>
           </div>
         )}
       </div>

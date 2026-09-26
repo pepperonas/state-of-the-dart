@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { dialogMotion, effectsDefault, springSpatialDefault } from '../../utils/motion';
 import { ArrowLeft, RotateCcw, Trophy, Clock, Check, X } from 'lucide-react';
@@ -33,6 +34,7 @@ interface Target {
 
 const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { players, loading: playersLoading } = usePlayer();
   const restoredRef = useRef(false);
   const { settings } = useSettings();
@@ -443,20 +445,20 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
     if (onBack) {
       onBack();
     } else {
-      window.location.href = '/';
+      navigate('/');
     }
   };
 
   const handleConfirmBack = () => {
     setShowBackConfirm(false);
     // State is already saved in localStorage via the save useEffect
-    window.location.href = '/';
+    navigate('/');
   };
 
   const handleEndGame = () => {
     setShowBackConfirm(false);
     clearGameState(STORAGE_KEYS.ATC);
-    window.location.href = '/';
+    navigate('/');
   };
 
   // Segmented button component with descriptions

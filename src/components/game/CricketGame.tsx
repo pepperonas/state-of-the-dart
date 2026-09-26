@@ -195,19 +195,19 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
     if (onBack) {
       onBack();
     } else {
-      window.location.href = '/';
+      navigate('/');
     }
   };
 
   const handleConfirmBack = () => {
     setShowBackConfirm(false);
-    window.location.href = '/';
+    navigate('/');
   };
 
   const handleEndGame = () => {
     setShowBackConfirm(false);
     clearGameState(STORAGE_KEYS.CRICKET);
-    window.location.href = '/';
+    navigate('/');
   };
 
   // Spinner screen
@@ -227,7 +227,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
     return (
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-4xl mx-auto m3-view">
-          <BackButton onClick={onBack || (() => { window.location.href = '/'; })} />
+          <BackButton onClick={onBack || (() => { navigate('/'); })} />
 
           <Card variant="elevated" className="rounded-m3-lg p-6">
             <h1 className="m3-headline-medium text-on-surface mb-6 flex items-center gap-3">

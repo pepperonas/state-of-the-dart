@@ -32,7 +32,9 @@ import { api } from '../../services/api';
 import { createAdaptiveBotPlayer, getAdaptiveBotConfigs, generateBotTurn, AdaptiveBotCategory } from '../../utils/botLogic';
 import BackButton from '../common/BackButton';
 import { motion } from 'framer-motion';
-import { Button, IconButton, Card, Dialog, Select } from '../common';
+import { Button, IconButton, Card, Dialog, Select, Switch, Snackbar } from '../common';
+import { loadLastGameSettings, saveLastGameSettings, rotateForRematch, standings, findReusableGuest, GUEST_NAME } from '../../utils/matchSetup';
+const MatchDetailModal = lazy(() => import('../dashboard/MatchDetailModal'));
 import { staggerChild, springSpatialDefault, springSpatialFast } from '../../utils/motion';
 import { Icon, iconForEmoji } from '../icons';
 
@@ -295,13 +297,24 @@ const GameScreen: React.FC = () => {
     }
   };
   const [showConfetti, setShowConfetti] = useState(false);
-  const [gameSettings, setGameSettings] = useState<MatchSettings>({
-    startScore: 301,
-    legsToWin: 3,
-    setsToWin: 1,
-    doubleOut: false,
-    doubleIn: false,
-  });
+  // The last settings are remembered; a fresh device starts with the standard
+  // game (501, double out) — it used to be 301 without double out.
+  const [gameSettings, setGameSettings] = useState<MatchSettings>(loadLastGameSettings);
+
+  // Pre-select the last players once the list has loaded: a rematch of the
+  // usual pairing should not start with a hunt through the list.
+  const preselectedRef = useRef(false);
+  useEffect(() => {
+    if (preselectedRef.current || players.length === 0 || selectedPlayers.length > 0) return;
+    preselectedRef.current = true;
+    loadLastPlayers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [players.length]);
+
+  // "Match ended — undo" (the dialog promised an undo nobody could reach: the
+  // screen switched to the setup, where the undo button was never rendered).
+  const [endedMatchId, setEndedMatchId] = useState<string | null>(null);
+  const [showMatchDetail, setShowMatchDetail] = useState(false);
   const isBotPlayingRef = useRef(false);
   const botTimersRef = useRef<NodeJS.Timeout[]>([]);
   const isNavigatingAwayRef = useRef(false);
@@ -526,9 +539,10 @@ const GameScreen: React.FC = () => {
     let finalPlayers = selectedPlayers;
 
     if (selectedPlayers.length < 2) {
-      // Add a guest player if only one selected
+      // Add a guest player if only one selected — reusing the existing one.
       try {
-        const guestPlayer = await addPlayer(`Guest ${Date.now() % 1000}`, 'user');
+        const guestPlayer = findReusableGuest(players, selectedPlayers.map(p => p.id))
+          ?? await addPlayer(GUEST_NAME, 'user');
         finalPlayers = [...selectedPlayers, guestPlayer];
         setSelectedPlayers(finalPlayers);
       } catch (error) {
@@ -538,8 +552,9 @@ const GameScreen: React.FC = () => {
       }
     }
 
-    // Save last players for quick select
+    // Save last players and settings for quick select
     saveLastPlayers(finalPlayers.map(p => p.id));
+    saveLastGameSettings(gameSettings);
 
     // Show spinner wheel to determine starting player
     setPendingGameStart({
@@ -783,13 +798,11 @@ const GameScreen: React.FC = () => {
     // Close dialog
     setShowBackConfirm(false);
     
-    // Pause the match (this saves it to localStorage via GameContext)
-    dispatch({ type: 'PAUSE_MATCH' });
-    
-    console.log('🔙 Match paused, navigating to home...');
-    
-    // Hard redirect - most reliable method
-    window.location.href = '/';
+    // Pause and save (localStorage at once, the API in the background), then
+    // leave through the router. This used to be a hard page reload — the
+    // whole app booted again just to show the menu.
+    void pauseCurrentMatch();
+    navigate('/');
   };
 
   const handleEndMatch = () => {
@@ -797,23 +810,35 @@ const GameScreen: React.FC = () => {
   };
   
   const confirmEndMatch = () => {
+    if (state.currentMatch) setEndedMatchId(state.currentMatch.id);
     dispatch({ type: 'END_MATCH' });
     setShowEndConfirm(false);
-    // Don't navigate immediately - allow undo
   };
-  
+
   const handleUndoEndMatch = () => {
+    const match = state.currentMatch;
+    setEndedMatchId(null);
+    // Only the match that was just ended — a new match may have started since.
+    if (!match || match.id !== endedMatchId || match.status !== 'completed') return;
     dispatch({ type: 'UNDO_END_MATCH' });
+    setShowSetup(false);
   };
   
   if (showSetup) {
     return (
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
+        <Snackbar
+          open={endedMatchId !== null && state.currentMatch?.id === endedMatchId}
+          message={t('game.match_ended')}
+          actionLabel={t('common.undo')}
+          onAction={handleUndoEndMatch}
+          onClose={() => setEndedMatchId(null)}
+        />
         <div className="max-w-4xl mx-auto">
           <BackButton onClick={() => {
               forceNewGameRef.current = false;
               isNavigatingAwayRef.current = true;
-              window.location.href = '/';
+              navigate('/');
             }} />
           
           <Card variant="elevated" className="p-6 md:p-8">
@@ -1083,25 +1108,22 @@ const GameScreen: React.FC = () => {
             </div>
             
             <div className="space-y-3 mb-6">
-              <label className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={gameSettings.doubleOut}
-                  onChange={(e) => setGameSettings({ ...gameSettings, doubleOut: e.target.checked })}
-                  className="w-4 h-4"
-                />
+              <div className="flex items-center justify-between gap-3 min-h-[48px]">
                 <span className="text-on-surface">{t('game.double_out')}</span>
-              </label>
-
-              <label className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={gameSettings.doubleIn}
-                  onChange={(e) => setGameSettings({ ...gameSettings, doubleIn: e.target.checked })}
-                  className="w-4 h-4"
+                <Switch
+                  checked={gameSettings.doubleOut ?? true}
+                  onChange={(doubleOut) => setGameSettings({ ...gameSettings, doubleOut })}
+                  label={t('game.double_out')}
                 />
+              </div>
+              <div className="flex items-center justify-between gap-3 min-h-[48px]">
                 <span className="text-on-surface">{t('game.double_in')}</span>
-              </label>
+                <Switch
+                  checked={gameSettings.doubleIn ?? false}
+                  onChange={(doubleIn) => setGameSettings({ ...gameSettings, doubleIn })}
+                  label={t('game.double_in')}
+                />
+              </div>
             </div>
 
             <Button
@@ -1136,7 +1158,7 @@ const GameScreen: React.FC = () => {
           <p className="m3-title-large text-on-surface-variant mb-4">No active game</p>
           <Button
             variant="filled"
-            onClick={() => { window.location.href = '/'; }}
+            onClick={() => { navigate('/'); }}
           >
             {t('common.back')}
           </Button>
@@ -1148,9 +1170,10 @@ const GameScreen: React.FC = () => {
   // Check if match is completed - show winner screen
   if (state.currentMatch.status === 'completed' && state.currentMatch.winner) {
     const currentMatch = state.currentMatch;
-    const winner = currentMatch.players.find(p => p.playerId === currentMatch.winner);
-    const loser = currentMatch.players.find(p => p.playerId !== currentMatch.winner);
-    
+    const table = standings(currentMatch);
+    const winner = table[0];
+    const isSetsMatch = (currentMatch.settings.setsToWin ?? 1) > 1;
+
     return (
       <div className="min-h-dvh p-4 gradient-mesh flex items-center justify-center">
         <div className="fixed inset-0 pointer-events-none z-0">
@@ -1160,89 +1183,91 @@ const GameScreen: React.FC = () => {
         </div>
         <div className="max-w-4xl w-full relative z-10">
           <motion.div
-            className="m3-card m3-elevated p-12 text-center"
+            className="m3-card m3-elevated p-6 sm:p-12 text-center"
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={springSpatialDefault}
           >
             <div className="mb-8">
-              <motion.h1
+              <motion.div
                 initial={{ scale: 0, rotate: -25 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ ...springSpatialDefault, delay: 0.15 }}
-                className="text-6xl md:text-8xl font-bold mb-4"
+                className="mx-auto mb-4 w-20 h-20 rounded-m3-full bg-tertiary-container text-on-tertiary-container grid place-items-center"
+                aria-hidden="true"
               >
-                
-              </motion.h1>
-              <h2 className="text-4xl md:text-6xl font-bold text-on-surface mb-2">
-                {winner?.name} gewinnt!
+                <Icon name="trophy" size={44} />
+              </motion.div>
+              <h2 className="m3-display-small font-bold text-on-surface mb-2">
+                {t('game.winner_title', { name: winner.name })}
               </h2>
-              <p className="text-2xl text-on-surface-variant">
-                {winner?.legsWon} - {loser?.legsWon}
+              <p className="m3-title-large text-on-surface-variant">
+                {table.map(p => (isSetsMatch ? p.setsWon : p.legsWon)).join(' – ')}
               </p>
             </div>
 
-            {/* Winner Stats */}
-            <div className="grid md:grid-cols-3 gap-4 mb-8">
-              <motion.div {...staggerChild(3)}>
-                <Card variant="filled" className="p-4">
-                  <div className="text-on-surface-variant m3-body-small mb-1">Average</div>
-                  <div className="text-3xl font-bold text-on-surface">
-                    {winner?.matchAverage.toFixed(2)}
-                  </div>
-                </Card>
-              </motion.div>
-              <motion.div {...staggerChild(4)}>
-                <Card variant="filled" className="p-4">
-                  <div className="text-on-surface-variant m3-body-small mb-1">Highest Score</div>
-                  <div className="text-3xl font-bold text-on-surface">
-                    {winner?.matchHighestScore}
-                  </div>
-                </Card>
-              </motion.div>
-              <motion.div {...staggerChild(5)}>
-                <Card variant="filled" className="p-4">
-                  <div className="text-on-surface-variant m3-body-small mb-1">180s</div>
-                  <div className="text-3xl font-bold text-on-surface">
-                    {winner?.match180s}
-                  </div>
-                </Card>
-              </motion.div>
+            {/* Standings — every player, not just "the one who is not the winner" */}
+            <div className="overflow-x-auto mb-8">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="m3-label-large text-on-surface-variant">
+                    <th className="py-2 pr-3">#</th>
+                    <th className="py-2 pr-3">{t('game.player')}</th>
+                    {isSetsMatch && <th className="py-2 pr-3 text-right">{t('game.sets')}</th>}
+                    <th className="py-2 pr-3 text-right">{t('game.legs')}</th>
+                    <th className="py-2 pr-3 text-right">{t('game.average')}</th>
+                    <th className="py-2 pr-3 text-right">{t('game.highest')}</th>
+                    <th className="py-2 text-right">180</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {table.map((p, i) => (
+                    <tr key={p.playerId} className={`border-t border-outline-variant ${i === 0 ? 'text-on-surface font-semibold' : 'text-on-surface-variant'}`}>
+                      <td className="py-2 pr-3">{i + 1}</td>
+                      <td className="py-2 pr-3 truncate max-w-[10rem]">{p.name}</td>
+                      {isSetsMatch && <td className="py-2 pr-3 text-right tabular-nums">{p.setsWon}</td>}
+                      <td className="py-2 pr-3 text-right tabular-nums">{p.legsWon}</td>
+                      <td className="py-2 pr-3 text-right tabular-nums">{p.matchAverage.toFixed(2)}</td>
+                      <td className="py-2 pr-3 text-right tabular-nums">{p.matchHighestScore}</td>
+                      <td className="py-2 text-right tabular-nums">{p.match180s}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            
+
             <div className="flex flex-col md:flex-row gap-4 justify-center">
               <Button
                 variant="success"
                 size="lg"
                 onClick={() => {
+                  // The other player throws first in the rematch.
+                  const rematchPlayers = rotateForRematch(currentMatch.players)
+                    .map(mp => players.find(p => p.id === mp.playerId))
+                    .filter((p): p is Player => !!p);
                   dispatch({ type: 'START_MATCH', payload: {
-                    players: currentMatch.players.map(mp =>
-                      players.find(p => p.id === mp.playerId)!
-                    ),
+                    players: rematchPlayers,
                     settings: currentMatch.settings,
-                    gameType: currentMatch.type
+                    gameType: currentMatch.type,
                   }});
                 }}
               >
-                Rematch
+                {t('game.rematch')}
               </Button>
-              <Button
-                variant="filled"
-                size="lg"
-                onClick={() => navigate('/stats')}
-              >
-                Statistiken
+              <Button variant="filled" size="lg" onClick={() => setShowMatchDetail(true)}>
+                {t('game.match_details')}
               </Button>
-              <Button
-                variant="tonal"
-                size="lg"
-                onClick={() => navigate('/')}
-              >
-                Hauptmenü
+              <Button variant="tonal" size="lg" onClick={() => navigate('/')}>
+                {t('game.main_menu')}
               </Button>
             </div>
           </motion.div>
         </div>
+        {showMatchDetail && (
+          <Suspense fallback={null}>
+            <MatchDetailModal match={currentMatch} onClose={() => setShowMatchDetail(false)} />
+          </Suspense>
+        )}
       </div>
     );
   }
@@ -1344,7 +1369,8 @@ const GameScreen: React.FC = () => {
               lastThrow={lastThrowInfo}
             />
 
-            {state.checkoutSuggestion && (
+            {/* The setting existed but was never read — hints always showed. */}
+            {settings.showCheckoutHints && state.checkoutSuggestion && (
               <CheckoutSuggestion
                 suggestion={state.checkoutSuggestion}
                 alternatives={getCheckoutAlternatives(remaining, 3 - state.currentThrow.length, state.currentMatch?.settings.doubleOut ?? true)}
@@ -1785,81 +1811,34 @@ const GameScreen: React.FC = () => {
       )}
 
       {/* Back to Menu Confirmation Dialog */}
-      {showBackConfirm && (
-        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_70%,transparent)] flex items-center justify-center z-50 p-4 m3-scrim-enter" onClick={(e) => e.stopPropagation()}>
-          <div className="m3-dialog m3-dialog-enter max-w-md w-full">
-            <h3 className="m3-headline-small text-on-surface mb-4">Match verlassen?</h3>
-            <p className="text-on-surface-variant mb-2">
-              <strong className="text-primary">Pausieren & Verlassen:</strong> Dein Match wird gespeichert und kann jederzeit aus dem Hauptmenü fortgesetzt werden.
-            </p>
-            <p className="text-on-surface-variant mb-6">
-              <strong className="text-on-surface">Abbrechen:</strong> Zurück zum laufenden Spiel.
-            </p>
-            <div className="flex gap-3">
-              <Button
-                variant="tonal"
-                fullWidth
-                onClick={() => {
-                  setShowBackConfirm(false);
-                }}
-              >
-                Abbrechen
-              </Button>
-              <Button
-                variant="filled"
-                fullWidth
-                onClick={() => {
-                  confirmBackToMenu();
-                }}
-              >
-                Pausieren & Verlassen
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Dialog
+        open={showBackConfirm}
+        onClose={() => setShowBackConfirm(false)}
+        title={t('game.leave_title')}
+        actions={
+          <>
+            <Button variant="text" onClick={() => setShowBackConfirm(false)}>{t('common.cancel')}</Button>
+            <Button variant="filled" onClick={confirmBackToMenu}>{t('game.pause_and_leave')}</Button>
+          </>
+        }
+      >
+        <p className="text-on-surface-variant">{t('game.leave_body')}</p>
+      </Dialog>
 
       {/* End Match Confirmation Dialog */}
-      {showEndConfirm && (
-        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_70%,transparent)] flex items-center justify-center z-50 p-4 m3-scrim-enter">
-          <div className="m3-dialog m3-dialog-enter max-w-md w-full">
-            <h3 className="m3-headline-small text-on-surface mb-4"> Match beenden?</h3>
-            <p className="text-on-surface-variant mb-6">
-              Das Match wird als abgebrochen markiert. Du kannst es später rückgängig machen.
-            </p>
-            <div className="flex gap-3">
-              <Button
-                variant="tonal"
-                fullWidth
-                onClick={() => setShowEndConfirm(false)}
-              >
-                Abbrechen
-              </Button>
-              <Button
-                variant="danger"
-                fullWidth
-                onClick={confirmEndMatch}
-              >
-                Match beenden
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Undo End Match Button - Show when match is completed */}
-      {state.currentMatch?.status === 'completed' && !state.currentMatch.winner && (
-        <div className="fixed bottom-4 right-4 z-40">
-          <Button
-            variant="elevated"
-            onClick={handleUndoEndMatch}
-            title="Match-Ende rückgängig machen"
-            icon={<RotateCcw size={20} />}
-          >
-            Rückgängig
-          </Button>
-        </div>
-      )}
+      <Dialog
+        open={showEndConfirm}
+        onClose={() => setShowEndConfirm(false)}
+        title={t('game.end_title')}
+        actions={
+          <>
+            <Button variant="text" onClick={() => setShowEndConfirm(false)}>{t('common.cancel')}</Button>
+            <Button variant="danger" onClick={confirmEndMatch}>{t('game.end_match')}</Button>
+          </>
+        }
+      >
+        <p className="text-on-surface-variant">{t('game.end_body')}</p>
+      </Dialog>
 
       {/* Remove Player Confirmation */}
       <Dialog

@@ -27,6 +27,30 @@ interface ScoreInputProps {
   lastThrow?: { playerName: string; score: number; isBust?: boolean } | null;
 }
 
+const INPUT_MODE_KEY = 'sotd-input-mode';
+
+/**
+ * Whether a global keydown belongs to the score input.
+ *
+ * - Typing in a field is the field's business.
+ * - Enter or Space on a focused button already fires that button's click;
+ *   handling it here as well committed a visit twice (tap OK, then press Enter).
+ * - While a dialog is open, keys belong to the dialog — Escape used to clear the
+ *   visit behind an open "leave match?" dialog.
+ * - Auto-repeat and modifier chords (except undo) are ignored.
+ */
+export const shouldHandleGameKey = (e: KeyboardEvent): boolean => {
+  if (e.defaultPrevented || e.repeat) return false;
+  const target = e.target as HTMLElement | null;
+  if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement) return false;
+  if (target?.isContentEditable) return false;
+  if ((e.key === 'Enter' || e.key === ' ') && target?.closest?.('button, a, [role="button"], [role="option"]')) return false;
+  if (typeof document !== 'undefined' && document.querySelector('[role="dialog"], [aria-modal="true"]')) return false;
+  const isUndoChord = (e.key === 'z' || e.key === 'Z') && (e.ctrlKey || e.metaKey);
+  if ((e.ctrlKey || e.metaKey || e.altKey) && !isUndoChord) return false;
+  return true;
+};
+
 const ScoreInput: React.FC<ScoreInputProps> = ({
   currentThrow,
   onAddDart,
@@ -44,7 +68,14 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
 }) => {
   const { t } = useTranslation();
   const [currentInput, setCurrentInput] = useState('');
-  const [inputMode, setInputMode] = useState<'quick' | 'numpad'>('numpad');
+  // Remembered per device — it used to reset to numpad on every visit.
+  const [inputMode, setInputModeState] = useState<'quick' | 'numpad'>(() => {
+    try { return localStorage.getItem(INPUT_MODE_KEY) === 'quick' ? 'quick' : 'numpad'; } catch { return 'numpad'; }
+  });
+  const setInputMode = (mode: 'quick' | 'numpad') => {
+    setInputModeState(mode);
+    try { localStorage.setItem(INPUT_MODE_KEY, mode); } catch { /* storage unavailable */ }
+  };
   const setEditingDartIndex = onSetEditingDartIndex;
   const confirmBtnRef = useRef<HTMLButtonElement>(null);
 
@@ -81,12 +112,12 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   // Keyboard support
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      // Don't capture if user is typing in an input field or textarea
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return;
+      if (!shouldHandleGameKey(e)) return;
       
       if (e.key >= '0' && e.key <= '9') {
         handleNumpadClick(e.key);
       } else if (e.key === 'Enter') {
+        e.preventDefault();
         if (inputMode === 'numpad' && currentThrow.length < 3) {
           // In numpad mode, Enter adds the score (or 0 if empty)
           handleNumpadClick('enter');
@@ -95,6 +126,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
           onConfirm();
         }
       } else if (e.key === 'Backspace') {
+        e.preventDefault();
         if (currentInput) {
           setCurrentInput(currentInput.slice(0, -1));
         } else if (currentThrow.length > 0) {

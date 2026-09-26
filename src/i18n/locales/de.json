@@ -20,7 +20,8 @@
     "success": "Erfolg",
     "warning": "Warnung",
     "info": "Info",
-    "beta": "Beta"
+    "beta": "Beta",
+    "undo": "Rückgängig"
   },
   "auth": {
     "login": "Anmelden",
@@ -165,7 +166,23 @@
     "remove_player_min": "Ein Match braucht mindestens 2 Spieler",
     "more_scores": "Weitere Punktzahlen (0–180)…",
     "mute": "Ton aus",
-    "unmute": "Ton an"
+    "unmute": "Ton an",
+    "match_ended": "Match beendet",
+    "winner_title": "{{name}} gewinnt!",
+    "sets": "Sets",
+    "legs": "Legs",
+    "highest": "Höchste",
+    "rematch": "Revanche",
+    "match_details": "Match-Details",
+    "main_menu": "Hauptmenü",
+    "leave_title": "Match verlassen?",
+    "pause_and_leave": "Pausieren & verlassen",
+    "leave_body": "Das Match wird gespeichert und kann jederzeit unter „Fortsetzen\" weitergespielt werden.",
+    "end_title": "Match beenden?",
+    "end_body": "Das Match wird ohne Sieger beendet und zählt nicht in die Statistik. Direkt danach kannst du es noch rückgängig machen.",
+    "who_starts": "Wer wirft zuerst?",
+    "starts": "{{name}} beginnt",
+    "skip_spinner": "Überspringen (zufällig)"
   },
   "stats": {
     "statistics": "Statistiken",
