@@ -11,7 +11,7 @@
 <!-- Links -->
 [![Live Demo](https://img.shields.io/badge/Live_Demo-stateofthedart.com-22c55e?style=for-the-badge&logo=googlechrome&logoColor=white)](https://stateofthedart.com)
 [![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-a855f7?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://stateofthedart.celox.io)
-[![Version](https://img.shields.io/badge/Version-0.12.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-0.13.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
 
 <!-- Build & Repo (live) -->
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
@@ -46,8 +46,8 @@
 <!-- Qualität -->
 ![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?logo=playwright&logoColor=white)
-![Unit Tests](https://img.shields.io/badge/Unit_Tests-867-brightgreen)
-![E2E Tests](https://img.shields.io/badge/E2E_Tests-15-brightgreen)
+![Unit Tests](https://img.shields.io/badge/Unit_Tests-880-brightgreen)
+![E2E Tests](https://img.shields.io/badge/E2E_Tests-18-brightgreen)
 ![Coverage](https://img.shields.io/badge/Coverage-24%25_stmts_%7C_75%25_branches-yellow)
 ![ESLint](https://img.shields.io/badge/ESLint-configured-4B32C3?logo=eslint&logoColor=white)
 
@@ -795,6 +795,13 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.13.0 (26. September 2026) - Material 3 Expressive konsequent
+
+- **Kontrast gemessen:** WCAG AA auf elf Bildschirmen in beiden Themes, im Browser gemessen (neuer E2E-Test). Gefunden u. a.: gedimmte gesperrte Erfolge (3,99:1), Gold-Chips im hellen Theme (1,05:1).
+- **Wirkungslose Klassen behoben:** Fehlertexte ohne Fehlerfarbe, `dark:`-Klassen, die nie griffen, weißer Ladebildschirm im hellen Theme.
+- **Diagramme folgen dem Theme**, **keine Browser-Dialoge mehr** (36 × `alert`/`confirm` → M3-Snackbar/Dialog), **Dialoge mit Fokusführung**, **eine Ladeanzeige** statt sechs.
+- Farben nur noch aus M3-Rollen, Typografie auf der M3-Skala, Seitenwechsel mit Fade-Through.
 
 ### v0.12.0 (26. September 2026) - Struktur: Revanche mit einem Tipp, Navigation, Handy-Layout
 
