@@ -231,9 +231,10 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   };
   
   return (
-    <div className="m3-card m3-elevated rounded-m3-lg p-4 md:p-6 w-full max-w-md">
+    <div className="m3-card m3-elevated rounded-m3-lg p-3 sm:p-4 md:p-5 w-full max-w-md">
       {/* Header with Remaining Score */}
-      <div className="mb-4 text-center">
+      {/* On phones the score strip above already shows the remaining score. */}
+      <div className="mb-3 text-center hidden lg:block">
         <div className="m3-label-medium text-on-surface-variant mb-1 uppercase tracking-wide">{t('game.remaining')}</div>
         <AnimatedNumber
           value={remaining}
@@ -243,7 +244,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
       </div>
 
       {/* Current Throw Display */}
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2 mb-3 lg:mb-4">
         {[0, 1, 2].map((index) => (
           <button
             type="button"
@@ -256,7 +257,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
                 setEditingDartIndex(editingDartIndex === index ? null : index);
               }
             }}
-            className={`flex-1 h-16 rounded-m3-md border flex items-center justify-center transition-all ${
+            className={`flex-1 h-14 lg:h-16 rounded-m3-md border flex items-center justify-center transition-all ${
               editingDartIndex === index
                 ? 'border-tertiary bg-tertiary-container ring-2 ring-[var(--m3-tertiary)]'
                 : currentThrow[index]
@@ -376,12 +377,12 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
       ) : (
         <>
           {/* Numpad */}
-          <div className="grid grid-cols-3 gap-2 mb-4">
+          <div className="grid grid-cols-3 gap-2 mb-3 lg:mb-4">
             {[7, 8, 9, 4, 5, 6, 1, 2, 3].map((num) => (
               <button
                 key={num}
                 onClick={() => handleNumpadClick(num.toString())}
-                className="p-4 text-xl font-bold rounded-m3-md bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition-all active:scale-95"
+                className="p-3 lg:p-4 min-h-[48px] text-xl font-bold rounded-m3-md bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition-all active:scale-95"
               >
                 {num}
               </button>
@@ -390,19 +391,19 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
               onClick={() => handleNumpadClick('clear')}
               aria-label={t('game.clear_input')}
               title={t('game.clear_input')}
-              className="p-4 text-lg font-bold rounded-m3-md bg-surface-container-highest text-on-surface transition-all active:scale-95"
+              className="p-3 lg:p-4 min-h-[48px] text-lg font-bold rounded-m3-md bg-surface-container-highest text-on-surface transition-all active:scale-95"
             >
               C
             </button>
             <button
               onClick={() => handleNumpadClick('0')}
-              className="p-4 text-xl font-bold rounded-m3-md bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition-all active:scale-95"
+              className="p-3 lg:p-4 min-h-[48px] text-xl font-bold rounded-m3-md bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition-all active:scale-95"
             >
               0
             </button>
             <button
               onClick={() => handleNumpadClick('enter')}
-              className="p-4 text-lg font-bold rounded-m3-md bg-primary-container text-on-primary-container transition-all active:scale-95"
+              className="p-3 lg:p-4 min-h-[48px] text-lg font-bold rounded-m3-md bg-primary-container text-on-primary-container transition-all active:scale-95"
               title={editingDartIndex !== null ? 'Dart ersetzen' : 'Wurf-Summe übernehmen und bestätigen'}
             >
               {editingDartIndex !== null ? t('game.set_dart') : '↵'}
@@ -410,14 +411,14 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
           </div>
 
           {/* Current Input Display */}
-          <div className="mb-4 p-4 bg-surface-container rounded-m3-md text-center border border-outline-variant">
+          <div className="mb-3 lg:mb-4 p-2 lg:p-4 min-h-[48px] flex items-center justify-center bg-surface-container rounded-m3-md text-center border border-outline-variant">
             {currentInput ? (
               <span className="text-3xl font-bold text-on-surface">{currentInput}</span>
             ) : (
               <span className="text-on-surface-variant opacity-70">
                 {editingDartIndex !== null
                   ? 'Neuer Dart-Wert...'
-                  : 'Wurf-Summe (0–180) eintippen und OK'}
+                  : t('game.numpad_hint')}
               </span>
             )}
           </div>
@@ -492,7 +493,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
       </div>
 
       {/* Keyboard Shortcuts Hint */}
-      <div className="mt-3 text-center m3-body-small text-on-surface-variant">
+      <div className="mt-3 text-center m3-body-small text-on-surface-variant hidden lg:block">
         {t('game.keyboard_hint')}
       </div>
     </div>

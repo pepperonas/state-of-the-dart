@@ -1303,7 +1303,7 @@ const GameScreen: React.FC = () => {
   const showSets = (state.currentMatch.settings.setsToWin || 1) > 1;
   
   return (
-    <div className="min-h-dvh p-4 md:p-8 gradient-mesh overflow-x-hidden">
+    <div className="min-h-dvh p-4 md:p-6 gradient-mesh overflow-x-hidden">
       {showConfetti && (
         <Suspense fallback={null}>
           <Confetti recycle={false} numberOfPieces={300} gravity={0.3} />
@@ -1311,7 +1311,7 @@ const GameScreen: React.FC = () => {
       )}
 
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-3 lg:mb-4">
           <BackButton onClick={handleBackToMenu} inline />
           
           <div className="flex gap-2">

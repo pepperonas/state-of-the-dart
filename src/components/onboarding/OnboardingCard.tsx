@@ -3,30 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CheckCircle2, Circle, X } from 'lucide-react';
 import { usePlayer } from '../../context/PlayerContext';
-import { isGeneratedPlayer } from '../../utils/playerOrder';
+import { onboardingState } from './onboardingState';
 import { FINISHED_MATCH_KEY } from '../../pwa/InstallCard';
 
 const DISMISSED_KEY = 'sotd-onboarding-dismissed';
 const read = (k: string) => { try { return localStorage.getItem(k); } catch { return null; } };
-
-export interface OnboardingState {
-  hasOwnPlayer: boolean;
-  hasOpponent: boolean;
-  hasFinishedMatch: boolean;
-}
-
-/** Pure: which first-run steps are done. */
-export const onboardingState = (
-  players: Array<{ name: string; isBot?: boolean }>,
-  finished: boolean,
-): OnboardingState => {
-  const people = players.filter(p => !p.isBot && !isGeneratedPlayer(p));
-  return {
-    hasOwnPlayer: people.length > 0,
-    hasOpponent: players.length >= 2,
-    hasFinishedMatch: finished,
-  };
-};
 
 /**
  * First-run checklist. A new account used to land on a grid of tiles with no

@@ -203,7 +203,8 @@
     "remaining": "Remaining",
     "edit_dart": "Dart {{n}}: {{score}} – tap to change",
     "empty_dart": "Dart {{n}}: empty",
-    "scoreboard": "Scoreboard"
+    "scoreboard": "Scoreboard",
+    "numpad_hint": "Type the total, ↵ commits"
   },
   "stats": {
     "statistics": "Statistics",

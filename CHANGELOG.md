@@ -7,6 +7,38 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-09-26
+
+The app's structure: one tap to play again, a real navigation, and a game
+screen that fits a phone.
+
+### Added
+
+- **Home screen rebuilt.** A large "Rematch" button starts the last pairing
+  with the last settings in one tap (it took about seven taps plus the
+  spinner); a paused game sits right next to it; the other modes and the
+  statistics are grouped. Guide and contact moved into the account menu.
+- **M3 navigation**: a bottom bar on phones, a rail from tablet width —
+  Home, Stats, Awards, Players. Hidden on game screens and public pages.
+- **Score strip on phones**: all players' remaining scores in one row. The
+  stacked player cards used to push the confirm button below the fold
+  (918 px on an 844 px screen); now score, input and confirm fit on one
+  screen. Pinned by `e2e/layout.spec.ts` at phone and desktop size.
+- **Dart grid input**: a third input mode — S/D/T plus 1–20, 25, Bull and
+  Miss, one tap per dart with the exact bed; more accurate than tapping a
+  phone-sized dartboard and reachable by keyboard.
+- **First-run checklist** on the home screen (profile, opponent, first 501).
+- Load errors in Statistics and Dashboard say so and offer a retry — they
+  used to look like "no matches yet".
+- `SegmentedButton` and `ErrorState` primitives.
+
+### Changed
+
+- Clearer input buttons: numpad `C` clears the typed number, the visit
+  actions read "Clear" and "Confirm" (visible on phones too), the dart slots
+  are real buttons.
+- Floating report buttons moved clear of the navigation bar and grew to 48 px.
+
 ## [0.11.0] - 2026-09-26
 
 Using the app at the board: offline, awake, quicker to start, honest at the end.

@@ -203,7 +203,8 @@
     "remaining": "Rest",
     "edit_dart": "Dart {{n}}: {{score}} – antippen zum Ändern",
     "empty_dart": "Dart {{n}}: leer",
-    "scoreboard": "Spielstand"
+    "scoreboard": "Spielstand",
+    "numpad_hint": "Summe tippen, ↵ übernimmt"
   },
   "stats": {
     "statistics": "Statistiken",

@@ -289,6 +289,12 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - Leaving X01 calls `pauseCurrentMatch()` (holds the save flag, one save) before navigating.
 - GameScreen uses multiple `useRef` flags: `isNavigatingAwayRef`, `forceNewGameRef`, `resumeRequestedRef`
 
+### Navigation & home (0.12.0)
+- `components/navigation/AppNavigation.tsx`: M3 bottom bar (< md) / rail (≥ md); visibility from `navVisibility.ts` (signed in, not a game route, not a public page). `NavAwareContent` in App.tsx pads the content for it.
+- Home (`MainMenu.tsx`): the rematch button navigates to `/game?new=1&quick=1`; GameScreen then pre-selects the last players (`lastPlayerIds`) and starts with the last settings (`utils/matchSetup.ts`). Pinned by `e2e/game-flow.spec.ts`.
+- Game screen below `lg`: `ScoreStrip` replaces the stacked `PlayerScore` cards and ScoreInput hides its own "remaining" header. `e2e/layout.spec.ts` asserts the confirm button and all scores are on screen at 390×844 and 1280×800. ⚠️ Locators like `getByText('501')` must add `.locator('visible=true')` — the strip exists (hidden) on desktop too.
+- ScoreInput has three modes (`numpad` / `darts` / `quick`, remembered in `sotd-input-mode`); the dart grid adds exact beds.
+
 ### PWA (0.11.0)
 - The service worker is registered in `src/pwa/UpdatePrompt.tsx` (`registerType: 'prompt'`). A new version is offered as a snackbar and **never on a game route** (`utils/gameRoutes.ts`). Before 0.11.0 the built `sw.js` was never registered at all.
 - One manifest: the generated `manifest.webmanifest`. No orientation lock.
@@ -392,8 +398,9 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **12 tests** currently:
-  - `game-flow.spec.ts` — full X01 round trip: start, score, pause & leave (no reload), resume from the DB
+- Specs in `e2e/`. **15 tests** currently:
+  - `layout.spec.ts` — a whole turn fits on one screen at phone and desktop size, no horizontal scroll
+  - `game-flow.spec.ts` — full X01 round trip (start, score, pause & leave without reload, resume from the DB) and the one-tap rematch from the home screen
   - `smoke.spec.ts` — load redirect, asset-count regression guard, no-heavy-chunks-eager guard
   - `login-page.spec.ts` — form render, empty-submit validation, version footer
   - `auth.spec.ts` — real login against backend (200 + JWT), wrong password (401)

@@ -6,7 +6,7 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }
 import { showsAppNavigation } from '../../components/navigation/navVisibility';
 import SegmentedButton from '../../components/common/SegmentedButton';
 import ScoreStrip from '../../components/game/ScoreStrip';
-import { onboardingState } from '../../components/onboarding/OnboardingCard';
+import { onboardingState } from '../../components/onboarding/onboardingState';
 
 describe('showsAppNavigation', () => {
   it('shows on app screens when signed in', () => {

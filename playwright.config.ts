@@ -68,7 +68,7 @@ export default defineConfig({
       url: `http://localhost:${FRONTEND_PORT}`,
       reuseExistingServer: !process.env.CI,
       // Generous: this now includes a full production build (~70s and growing).
-      timeout: 240_000,
+      timeout: 420_000, // a full build: ~70 s normally, nearly 4 min measured on a loaded machine
     },
     {
       // Isolated backend on its own SQLite file.
