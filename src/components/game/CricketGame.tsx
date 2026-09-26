@@ -10,6 +10,9 @@ import { saveGameState, loadGameState, clearGameState, STORAGE_KEYS, CricketSave
 import { SpinnerWheel } from './SpinnerWheel';
 import { CRICKET_NUMBERS, applyCricketVisit, emptyCricketState, isCricketWinner } from '../../utils/cricket';
 import { BackButton, Button, IconButton, Card, Dialog } from '../common';
+import { useWakeLock } from '../../hooks/useWakeLock';
+import { haptic } from '../../utils/haptics';
+import { useSettings } from '../../context/SettingsContext';
 
 /** One confirmed visit, kept so it can be taken back. */
 interface CricketTurn {
@@ -35,6 +38,9 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
   const [showSetup, setShowSetup] = useState(true);
   const [currentDarts, setCurrentDarts] = useState<Dart[]>([]);
   const [showWinner, setShowWinner] = useState(false);
+  const { settings } = useSettings();
+  // Keep the screen on while the game is running.
+  useWakeLock(!showSetup && !showWinner);
   
   // Cricket state per player
   const [cricketState, setCricketState] = useState<CricketState>({});
@@ -122,6 +128,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
   };
 
   const handleDartHit = (segment: number, multiplier: 1 | 2 | 3) => {
+    haptic('dart', settings.vibrationEnabled);
     if (!currentPlayer || currentDarts.length >= 3) return;
     
     const dart: Dart = {
@@ -188,19 +195,19 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
     if (onBack) {
       onBack();
     } else {
-      window.location.href = '/';
+      navigate('/');
     }
   };
 
   const handleConfirmBack = () => {
     setShowBackConfirm(false);
-    window.location.href = '/';
+    navigate('/');
   };
 
   const handleEndGame = () => {
     setShowBackConfirm(false);
     clearGameState(STORAGE_KEYS.CRICKET);
-    window.location.href = '/';
+    navigate('/');
   };
 
   // Spinner screen
@@ -220,7 +227,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
     return (
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-4xl mx-auto m3-view">
-          <BackButton onClick={onBack || (() => { window.location.href = '/'; })} />
+          <BackButton onClick={onBack || (() => { navigate('/'); })} />
 
           <Card variant="elevated" className="rounded-m3-lg p-6">
             <h1 className="m3-headline-medium text-on-surface mb-6 flex items-center gap-3">

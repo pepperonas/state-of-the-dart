@@ -12,6 +12,9 @@ import { saveGameState, loadGameState, clearGameState, STORAGE_KEYS, ShanghaiSav
 import { SpinnerWheel } from './SpinnerWheel';
 import BackButton from '../common/BackButton';
 import { Button, Card, Dialog } from '../common';
+import { useWakeLock } from '../../hooks/useWakeLock';
+import { haptic } from '../../utils/haptics';
+import { useSettings } from '../../context/SettingsContext';
 
 interface ShanghaiGameProps {
   onBack?: () => void;
@@ -35,6 +38,9 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
   const [roundScores, setRoundScores] = useState<Record<string, Record<number, number>>>({});
   const [currentDarts, setCurrentDarts] = useState<Dart[]>([]);
   const [showWinner, setShowWinner] = useState(false);
+  const { settings } = useSettings();
+  // Keep the screen on while the game is running.
+  useWakeLock(!showSetup && !showWinner);
   const [winner, setWinner] = useState<Player | null>(null);
   const [shanghaiWinner, setShanghaiWinner] = useState<Player | null>(null);
 
@@ -162,6 +168,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
   };
 
   const handleDartHit = (segment: number, multiplier: 1 | 2 | 3) => {
+    haptic('dart', settings.vibrationEnabled);
     if (!currentPlayer || currentDarts.length >= 3) return;
     
     const dart: Dart = {
@@ -337,19 +344,19 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
     if (onBack) {
       onBack();
     } else {
-      window.location.href = '/';
+      navigate('/');
     }
   };
 
   const handleConfirmBack = () => {
     setShowBackConfirm(false);
-    window.location.href = '/';
+    navigate('/');
   };
 
   const handleEndGame = () => {
     setShowBackConfirm(false);
     clearGameState(STORAGE_KEYS.SHANGHAI);
-    window.location.href = '/';
+    navigate('/');
   };
 
   // Spinner screen
@@ -369,7 +376,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
     return (
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-4xl mx-auto">
-          <BackButton onClick={onBack || (() => { window.location.href = '/'; })} />
+          <BackButton onClick={onBack || (() => { navigate('/'); })} />
 
           <Card variant="elevated" className="p-6">
             <h1 className="m3-headline-medium font-bold text-on-surface mb-6 flex items-center gap-3">

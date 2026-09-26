@@ -19,7 +19,9 @@
     "error": "Fehler",
     "success": "Erfolg",
     "warning": "Warnung",
-    "info": "Info"
+    "info": "Info",
+    "beta": "Beta",
+    "undo": "Rückgängig"
   },
   "auth": {
     "login": "Anmelden",
@@ -162,7 +164,25 @@
     "remove_player_body": "Alle Würfe von {{name}} in diesem Match werden gelöscht. Das Match läuft mit den übrigen Spielern weiter.",
     "remove_player_irreversible": "Das lässt sich nicht rückgängig machen.",
     "remove_player_min": "Ein Match braucht mindestens 2 Spieler",
-    "more_scores": "Weitere Punktzahlen (0–180)…"
+    "more_scores": "Weitere Punktzahlen (0–180)…",
+    "mute": "Ton aus",
+    "unmute": "Ton an",
+    "match_ended": "Match beendet",
+    "winner_title": "{{name}} gewinnt!",
+    "sets": "Sets",
+    "legs": "Legs",
+    "highest": "Höchste",
+    "rematch": "Revanche",
+    "match_details": "Match-Details",
+    "main_menu": "Hauptmenü",
+    "leave_title": "Match verlassen?",
+    "pause_and_leave": "Pausieren & verlassen",
+    "leave_body": "Das Match wird gespeichert und kann jederzeit unter „Fortsetzen\" weitergespielt werden.",
+    "end_title": "Match beenden?",
+    "end_body": "Das Match wird ohne Sieger beendet und zählt nicht in die Statistik. Direkt danach kannst du es noch rückgängig machen.",
+    "who_starts": "Wer wirft zuerst?",
+    "starts": "{{name}} beginnt",
+    "skip_spinner": "Überspringen (zufällig)"
   },
   "stats": {
     "statistics": "Statistiken",
@@ -603,5 +623,14 @@
   },
   "tournament": {
     "bye": "Freilos"
+  },
+  "pwa": {
+    "update_available": "Neue Version verfügbar",
+    "reload": "Neu laden",
+    "install_title": "App installieren",
+    "install_body": "Mit Symbol auf dem Startbildschirm, im Vollbild und offline nutzbar.",
+    "install_action": "Installieren",
+    "install_later": "Später",
+    "install_ios": "In Safari auf „Teilen“ tippen, dann „Zum Home-Bildschirm“."
   }
 }

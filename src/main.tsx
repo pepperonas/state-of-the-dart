@@ -7,9 +7,13 @@ import './styles/m3.css'
 import './styles/motion.css'
 import './i18n/config'
 import { initRipple } from './utils/ripple'
+import { captureInstallPrompt } from './pwa/installPrompt'
 
 // One delegated listener for every `.m3-ripple` surface in the app.
 initRipple()
+
+// The browser's install offer fires once, early — catch it before any route renders.
+captureInstallPrompt()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

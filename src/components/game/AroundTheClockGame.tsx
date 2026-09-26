@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { dialogMotion, effectsDefault, springSpatialDefault } from '../../utils/motion';
 import { ArrowLeft, RotateCcw, Trophy, Clock, Check, X } from 'lucide-react';
@@ -13,6 +14,8 @@ import { saveGameState, loadGameState, clearGameState, STORAGE_KEYS, ATCSavedSta
 import { SpinnerWheel } from './SpinnerWheel';
 import BackButton from '../common/BackButton';
 import { Button, Card } from '../common';
+import { useWakeLock } from '../../hooks/useWakeLock';
+import { haptic } from '../../utils/haptics';
 
 interface AroundTheClockGameProps {
   onBack?: () => void;
@@ -31,6 +34,7 @@ interface Target {
 
 const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { players, loading: playersLoading } = usePlayer();
   const restoredRef = useRef(false);
   const { settings } = useSettings();
@@ -56,6 +60,8 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
   const [playerHits, setPlayerHits] = useState<Record<string, number>>({});
   const [currentDarts, setCurrentDarts] = useState<Dart[]>([]);
   const [showWinner, setShowWinner] = useState(false);
+  // Keep the screen on while the game is running.
+  useWakeLock(!showSetup && !showWinner);
   const [winner, setWinner] = useState<Player | null>(null);
   const [gameStartTime, setGameStartTime] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -315,6 +321,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
   }, [currentDarts.length, confirmThrow]);
 
   const handleHit = () => {
+    haptic('dart', settings.vibrationEnabled);
     if (!currentPlayer || currentDarts.length >= 3) return;
 
     const target = targets[(playerProgress[currentPlayer.id] || 0) +
@@ -438,20 +445,20 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
     if (onBack) {
       onBack();
     } else {
-      window.location.href = '/';
+      navigate('/');
     }
   };
 
   const handleConfirmBack = () => {
     setShowBackConfirm(false);
     // State is already saved in localStorage via the save useEffect
-    window.location.href = '/';
+    navigate('/');
   };
 
   const handleEndGame = () => {
     setShowBackConfirm(false);
     clearGameState(STORAGE_KEYS.ATC);
-    window.location.href = '/';
+    navigate('/');
   };
 
   // Segmented button component with descriptions

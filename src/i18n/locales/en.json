@@ -19,7 +19,9 @@
     "error": "Error",
     "success": "Success",
     "warning": "Warning",
-    "info": "Info"
+    "info": "Info",
+    "beta": "Beta",
+    "undo": "Undo"
   },
   "auth": {
     "login": "Login",
@@ -162,7 +164,25 @@
     "remove_player_body": "Every throw {{name}} made in this match is deleted. The match continues with the remaining players.",
     "remove_player_irreversible": "This cannot be undone.",
     "remove_player_min": "A match needs at least 2 players",
-    "more_scores": "More scores (0–180)…"
+    "more_scores": "More scores (0–180)…",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "match_ended": "Match ended",
+    "winner_title": "{{name}} wins!",
+    "sets": "Sets",
+    "legs": "Legs",
+    "highest": "Highest",
+    "rematch": "Rematch",
+    "match_details": "Match details",
+    "main_menu": "Main menu",
+    "leave_title": "Leave the match?",
+    "pause_and_leave": "Pause & leave",
+    "leave_body": "The match is saved and can be picked up any time under \"Resume\".",
+    "end_title": "End the match?",
+    "end_body": "The match ends without a winner and does not count in the statistics. You can still undo it right afterwards.",
+    "who_starts": "Who throws first?",
+    "starts": "{{name}} starts",
+    "skip_spinner": "Skip (random)"
   },
   "stats": {
     "statistics": "Statistics",
@@ -603,5 +623,14 @@
   },
   "tournament": {
     "bye": "Bye"
+  },
+  "pwa": {
+    "update_available": "A new version is available",
+    "reload": "Reload",
+    "install_title": "Install the app",
+    "install_body": "Home-screen icon, full screen and works offline.",
+    "install_action": "Install",
+    "install_later": "Later",
+    "install_ios": "In Safari, tap “Share”, then “Add to Home Screen”."
   }
 }
