@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { TournamentMatch, TournamentParticipant } from '../types/index';
+import { Tournament, TournamentMatch, TournamentParticipant } from '../types/index';
 
 export const BYE = 'BYE';
 
@@ -88,3 +88,52 @@ export const recordResult = (
     if (p.id === loserId) return { ...p, losses: p.losses + 1, legsFor: p.legsFor + loserLegs, legsAgainst: p.legsAgainst + winnerLegs };
     return p;
   });
+
+/* ------------------------------------------------------------------ */
+/* Persistence (0.16.0) — tournaments are stored via /api/tournaments. */
+
+export type TournamentScores = Record<string, { p1: number; p2: number }>;
+export type StoredTournament = Omit<Tournament, 'createdAt' | 'startedAt' | 'completedAt' | 'matches'> & {
+  createdAt: string;
+  startedAt?: string;
+  completedAt?: string;
+  matches: (Omit<TournamentMatch, 'completed' | 'scheduled'> & { completed?: string; scheduled?: string })[];
+  /** Legs entered for matches that are not confirmed yet. */
+  scores?: TournamentScores;
+  updatedAt?: number;
+};
+
+const iso = (d: Date | string | undefined) => (d === undefined ? undefined : new Date(d).toISOString());
+const date = (s: string | undefined) => (s === undefined ? undefined : new Date(s));
+
+/** Tournament + half-entered scores → the JSON body the API stores. */
+export const toStoredTournament = (t: Tournament, scores: TournamentScores = {}): StoredTournament => ({
+  ...t,
+  createdAt: iso(t.createdAt)!,
+  startedAt: iso(t.startedAt),
+  completedAt: iso(t.completedAt),
+  matches: t.matches.map(m => ({ ...m, completed: iso(m.completed), scheduled: iso(m.scheduled) })),
+  scores,
+});
+
+/** Stored JSON → a live tournament with real Dates, plus its pending scores. */
+export const fromStoredTournament = (s: StoredTournament): { tournament: Tournament; scores: TournamentScores } => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { scores, updatedAt, ...rest } = s;
+  return {
+    tournament: {
+      ...rest,
+      createdAt: date(s.createdAt) ?? new Date(),
+      startedAt: date(s.startedAt),
+      completedAt: date(s.completedAt),
+      matches: s.matches.map(m => ({ ...m, completed: date(m.completed), scheduled: date(m.scheduled) })),
+    },
+    scores: scores ?? {},
+  };
+};
+
+/** Played / playable-in-total, for the overview (byes are not matches). */
+export const tournamentProgress = (t: Pick<Tournament, 'matches'> | StoredTournament) => {
+  const real = t.matches.filter(m => m.participant1Id !== BYE && m.participant2Id !== BYE);
+  return { played: real.filter(m => m.winner).length, total: real.length };
+};

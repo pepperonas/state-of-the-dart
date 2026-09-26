@@ -1885,7 +1885,19 @@
     "title": "Turniere",
     "subtitle_menu": "Organisiere Dart-Wettbewerbe",
     "available_modes": "Verfügbare Modi",
-    "player_range": "{{min}}–{{max}} Spieler"
+    "player_range": "{{min}}–{{max}} Spieler",
+    "save_failed": "Turnier konnte nicht gespeichert werden – die nächste Änderung versucht es erneut.",
+    "to_overview": "Zur Turnierübersicht",
+    "delete_confirm": "Turnier „{{name}}“ löschen?",
+    "delete_failed": "Turnier konnte nicht gelöscht werden.",
+    "load_failed": "Turniere konnten nicht geladen werden.",
+    "won_by": "Sieger: {{name}}",
+    "progress": "{{played}} von {{total}} Spielen",
+    "open": "Ansehen",
+    "resume": "Fortsetzen",
+    "delete": "Turnier {{name}} löschen",
+    "running_title": "Laufende Turniere",
+    "finished_title": "Abgeschlossene Turniere"
   },
   "online_game": {
     "guest": "Gast",

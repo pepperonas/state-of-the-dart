@@ -141,6 +141,16 @@ SMTP_FROM=State of the Dart <noreply@example.com>
 | DELETE | `/sessions/:id` | Session löschen |
 | GET | `/stats/:playerId` | Trainings-Statistiken |
 
+### Tournaments (`/api/tournaments`)
+Seit 0.16.0 in der Datenbank (Tabelle `tournaments`; Turnierbaum, Tabelle und halb eingegebene Stände als JSON in `data`). Pro Mandant getrennt; eine fremde ID liefert 404, auch beim Überschreiben.
+
+| Method | Endpoint | Beschreibung |
+|--------|----------|--------------|
+| GET | `/` | Turniere des Mandanten, zuletzt geändert zuerst |
+| GET | `/:id` | Ein Turnier |
+| PUT | `/:id` | Anlegen oder ersetzen (validiert: Name, Modus, Status, Größe) |
+| DELETE | `/:id` | Löschen |
+
 ### Achievements (`/api/achievements`)
 | Method | Endpoint | Beschreibung |
 |--------|----------|--------------|

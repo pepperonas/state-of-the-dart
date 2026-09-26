@@ -293,6 +293,21 @@ export const api = {
       }),
   },
 
+  // Tournaments (DB-backed since 0.16.0)
+  tournaments: {
+    getAll: () => apiClient('/api/tournaments'),
+    getById: (id: string) => apiClient(`/api/tournaments/${id}`),
+    save: (tournament: { id: string } & Record<string, unknown>) =>
+      apiClient(`/api/tournaments/${tournament.id}`, {
+        method: 'PUT',
+        body: JSON.stringify(tournament),
+      }),
+    delete: (id: string) =>
+      apiClient(`/api/tournaments/${id}`, {
+        method: 'DELETE',
+      }),
+  },
+
   // Achievements
   achievements: {
     getAll: () => apiClient('/api/achievements'),

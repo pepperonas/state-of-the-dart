@@ -1885,7 +1885,19 @@
     "title": "Tournaments",
     "subtitle_menu": "Organise darts competitions",
     "available_modes": "Available formats",
-    "player_range": "{{min}}–{{max}} players"
+    "player_range": "{{min}}–{{max}} players",
+    "save_failed": "The tournament could not be saved — the next change will try again.",
+    "to_overview": "Back to tournaments",
+    "delete_confirm": "Delete tournament “{{name}}”?",
+    "delete_failed": "The tournament could not be deleted.",
+    "load_failed": "Tournaments could not be loaded.",
+    "won_by": "Winner: {{name}}",
+    "progress": "{{played}} of {{total}} matches",
+    "open": "View",
+    "resume": "Resume",
+    "delete": "Delete tournament {{name}}",
+    "running_title": "Running tournaments",
+    "finished_title": "Finished tournaments"
   },
   "online_game": {
     "guest": "Guest",

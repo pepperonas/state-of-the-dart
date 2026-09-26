@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, Users, Calendar, Star, Play, Plus, Minus, Trash2, Settings, ChevronRight } from 'lucide-react';
@@ -8,9 +8,10 @@ import { Player, Tournament, TournamentSettings, TournamentParticipant, Tourname
 import PlayerAvatar from '../player/PlayerAvatar';
 import { v4 as uuidv4 } from 'uuid';
 import { celebrate as confetti } from '../../utils/celebration';
-import { Button, Card, TextField, Chip, IconButton, BackButton } from '../common';
+import { Button, Card, TextField, Chip, IconButton, BackButton, LoadingIndicator, ErrorState, useFeedback } from '../common';
+import { useTournaments } from '../../hooks/useTournaments';
 import { staggerChild } from '../../utils/motion';
-import { BYE, advanceWinner, buildKnockoutBracket, isPlayable, knockoutChampion, recordResult, roundRobinChampion } from '../../utils/tournament';
+import { BYE, advanceWinner, buildKnockoutBracket, fromStoredTournament, isPlayable, knockoutChampion, recordResult, roundRobinChampion, tournamentProgress, type StoredTournament, type TournamentScores } from '../../utils/tournament';
 
 type TournamentType = 'knockout' | 'round-robin';
 
@@ -29,6 +30,46 @@ const TournamentMenu: React.FC = () => {
   const [activeTournament, setActiveTournament] = useState<Tournament | null>(null);
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
   const [matchScores, setMatchScores] = useState<Record<string, { p1: number; p2: number }>>({});
+
+  // Stored in the database since 0.16.0 — a reload used to lose the bracket.
+  const { list: savedTournaments, loading: listLoading, error: listError, reload, save, remove } = useTournaments();
+  const { notify, confirm } = useFeedback();
+  const scoresDirty = useRef(false);
+
+  const persist = useCallback(async (tour: Tournament, scores: TournamentScores) => {
+    scoresDirty.current = false;
+    if (!(await save(tour, scores))) notify(t('tournament_menu.save_failed'));
+  }, [save, notify, t]);
+
+  // Legs entered for a match are saved shortly after the last tap, so a
+  // half-played match survives a reload too.
+  useEffect(() => {
+    if (!activeTournament || !scoresDirty.current) return;
+    const timer = setTimeout(() => { void persist(activeTournament, matchScores); }, 600);
+    return () => clearTimeout(timer);
+  }, [matchScores, activeTournament, persist]);
+
+  const openTournament = (stored: StoredTournament) => {
+    const { tournament, scores } = fromStoredTournament(stored);
+    scoresDirty.current = false;
+    setActiveTournament(tournament);
+    setMatchScores(scores);
+    setCurrentMatchIndex(0);
+  };
+
+  const leaveTournament = () => {
+    if (activeTournament && scoresDirty.current) void persist(activeTournament, matchScores);
+    setActiveTournament(null);
+  };
+
+  const handleDeleteTournament = async (stored: StoredTournament) => {
+    const ok = await confirm({
+      title: t('tournament_menu.delete_confirm', { name: stored.name }),
+      danger: true,
+      confirmLabel: t('common.delete'),
+    });
+    if (ok && !(await remove(stored.id))) notify(t('tournament_menu.delete_failed'));
+  };
 
   const tournamentTypes = [
     {
@@ -120,6 +161,7 @@ const TournamentMenu: React.FC = () => {
     setCurrentMatchIndex(0);
     setMatchScores({});
     setShowCreate(false);
+    void persist(tournament, {});
   };
 
   const getParticipantName = (participantId: string) => {
@@ -148,6 +190,7 @@ const TournamentMenu: React.FC = () => {
   const tournamentLegsToWin = activeTournament?.settings.matchSettings.legsToWin ?? legsToWin;
 
   const handleScoreChange = (matchId: string, player: 'p1' | 'p2', delta: number) => {
+    scoresDirty.current = true;
     setMatchScores(prev => {
       const current = prev[matchId] || { p1: 0, p2: 0 };
       const newScore = Math.max(0, Math.min(tournamentLegsToWin, current[player] + delta));
@@ -176,13 +219,15 @@ const TournamentMenu: React.FC = () => {
     const updatedParticipants = recordResult(activeTournament.participants, winnerId, loserId, winnerLegs, loserLegs);
     const isComplete = !updatedMatches.some(isPlayable);
 
-    setActiveTournament({
+    const next: Tournament = {
       ...activeTournament,
       matches: updatedMatches,
       participants: updatedParticipants,
       status: isComplete ? 'completed' : 'in-progress',
       completedAt: isComplete ? new Date() : undefined,
-    });
+    };
+    setActiveTournament(next);
+    void persist(next, matchScores);
 
     if (isComplete) {
       confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
@@ -206,7 +251,7 @@ const TournamentMenu: React.FC = () => {
     return (
       <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
         <div className="max-w-4xl mx-auto">
-          <BackButton onClick={() => setActiveTournament(null)} label={t('tournament_menu.end_tournament')} />
+          <BackButton onClick={leaveTournament} label={t('tournament_menu.to_overview')} />
 
           <Card variant="elevated" className="p-6 mb-6 mt-6">
             <div className="flex items-center justify-between mb-4">
@@ -406,6 +451,7 @@ const TournamentMenu: React.FC = () => {
                       key={type.id}
                       variant={tournamentType === type.id ? 'filled' : 'outlined'}
                       interactive
+                      selected={tournamentType === type.id}
                       onClick={() => setTournamentType(type.id)}
                       className={`p-4 text-left ${tournamentType === type.id ? 'ring-2 ring-primary' : ''}`}
                     >
@@ -448,6 +494,7 @@ const TournamentMenu: React.FC = () => {
                     <Card
                       variant={isSelected ? 'filled' : 'outlined'}
                       interactive
+                      selected={isSelected}
                       onClick={() => {
                         if (selectedPlayers.find(p => p.id === player.id)) {
                           setSelectedPlayers(prev => prev.filter(p => p.id !== player.id));
@@ -517,6 +564,21 @@ const TournamentMenu: React.FC = () => {
             {t('tournament_menu.create')}
           </Button>
 
+          <SavedTournaments
+            items={savedTournaments}
+            loading={listLoading}
+            error={listError}
+            onRetry={reload}
+            onOpen={openTournament}
+            onDelete={handleDeleteTournament}
+            winnerName={(stored) => {
+              const { tournament } = fromStoredTournament(stored);
+              const champion = tournament.type === 'knockout' ? knockoutChampion(tournament.matches) : roundRobinChampion(tournament.participants);
+              const participant = tournament.participants.find(p => p.id === champion);
+              return players.find(p => p.id === participant?.playerId)?.name;
+            }}
+          />
+
           <h3 className="m3-title-medium text-on-surface mb-4">{t('tournament_menu.available_modes')}</h3>
 
           <div className="space-y-4">
@@ -551,6 +613,75 @@ const TournamentMenu: React.FC = () => {
           </div>
         </Card>
       </div>
+    </div>
+  );
+};
+
+interface SavedTournamentsProps {
+  items: StoredTournament[];
+  loading: boolean;
+  error: boolean;
+  onRetry: () => void;
+  onOpen: (t: StoredTournament) => void;
+  onDelete: (t: StoredTournament) => void;
+  winnerName: (t: StoredTournament) => string | undefined;
+}
+
+/** Running and finished tournaments from the database. */
+const SavedTournaments: React.FC<SavedTournamentsProps> = ({ items, loading, error, onRetry, onOpen, onDelete, winnerName }) => {
+  const { t, i18n } = useTranslation();
+  if (loading) return <div className="py-6 flex justify-center"><LoadingIndicator /></div>;
+  if (error) return <ErrorState message={t('tournament_menu.load_failed')} onRetry={onRetry} className="mb-8" />;
+  if (items.length === 0) return null;
+
+  const running = items.filter(x => x.status !== 'completed');
+  const finished = items.filter(x => x.status === 'completed');
+  const row = (x: StoredTournament) => {
+    const { played, total } = tournamentProgress(x);
+    const done = x.status === 'completed';
+    const champion = done ? winnerName(x) : undefined;
+    return (
+      <li key={x.id}>
+        <Card variant="filled" className="p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <h4 className="m3-title-small text-on-surface truncate">{x.name}</h4>
+            <p className="m3-body-small text-on-surface-variant">
+              {x.type === 'knockout' ? t('tournament_menu.knockout') : t('tournament_menu.round_robin')}
+              {' · '}
+              {done && champion
+                ? t('tournament_menu.won_by', { name: champion })
+                : t('tournament_menu.progress', { played, total })}
+              {' · '}
+              {new Date(x.createdAt).toLocaleDateString(i18n.language)}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 self-end sm:self-auto">
+            <Button variant={done ? 'tonal' : 'filled'} size="sm" icon={done ? <Trophy size={18} /> : <Play size={18} />} onClick={() => onOpen(x)}>
+              {done ? t('tournament_menu.open') : t('tournament_menu.resume')}
+            </Button>
+            <IconButton label={t('tournament_menu.delete', { name: x.name })} onClick={() => onDelete(x)} className="text-error">
+              <Trash2 size={18} />
+            </IconButton>
+          </div>
+        </Card>
+      </li>
+    );
+  };
+
+  return (
+    <div className="mb-8 space-y-6">
+      {running.length > 0 && (
+        <section aria-labelledby="tournaments-running">
+          <h3 id="tournaments-running" className="m3-title-medium text-on-surface mb-3">{t('tournament_menu.running_title')}</h3>
+          <ul className="space-y-3">{running.map(row)}</ul>
+        </section>
+      )}
+      {finished.length > 0 && (
+        <section aria-labelledby="tournaments-finished">
+          <h3 id="tournaments-finished" className="m3-title-medium text-on-surface mb-3">{t('tournament_menu.finished_title')}</h3>
+          <ul className="space-y-3">{finished.map(row)}</ul>
+        </section>
+      )}
     </div>
   );
 };
