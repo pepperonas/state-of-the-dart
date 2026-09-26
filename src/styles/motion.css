@@ -464,7 +464,10 @@ textarea {
   top: var(--m3-seg-pad);
   bottom: var(--m3-seg-pad);
   left: var(--m3-seg-pad);
-  width: calc((100% - 2 * var(--m3-seg-pad) - var(--m3-seg-gap)) / 2);
+  /* --m3-seg-count / --m3-seg-index let one rule serve any number of segments;
+     the defaults keep the original two-option markup working unchanged. */
+  width: calc((100% - 2 * var(--m3-seg-pad) - (var(--m3-seg-count, 2) - 1) * var(--m3-seg-gap)) / var(--m3-seg-count, 2));
+  transform: translateX(calc(var(--m3-seg-index, 0) * (100% + var(--m3-seg-gap))));
   border-radius: inherit;
   background-color: var(--m3-seg-fill, var(--m3-secondary-container));
   transition: transform var(--m3-dur-medium-2) var(--m3-ease-emphasized),

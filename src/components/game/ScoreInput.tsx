@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { calculateThrowScore, convertScoreToDarts } from '../../utils/scoring';
 import AnimatedNumber from '../common/AnimatedNumber';
 import Select from '../common/Select';
+import SegmentedButton from '../common/SegmentedButton';
 import { springSpatialFast } from '../../utils/motion';
 import { shouldHandleGameKey } from '../../utils/gameKeys';
 
@@ -29,6 +30,7 @@ interface ScoreInputProps {
 }
 
 const INPUT_MODE_KEY = 'sotd-input-mode';
+type InputMode = 'numpad' | 'darts' | 'quick';
 
 
 const ScoreInput: React.FC<ScoreInputProps> = ({
@@ -49,10 +51,16 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   const { t } = useTranslation();
   const [currentInput, setCurrentInput] = useState('');
   // Remembered per device — it used to reset to numpad on every visit.
-  const [inputMode, setInputModeState] = useState<'quick' | 'numpad'>(() => {
-    try { return localStorage.getItem(INPUT_MODE_KEY) === 'quick' ? 'quick' : 'numpad'; } catch { return 'numpad'; }
+  const [inputMode, setInputModeState] = useState<InputMode>(() => {
+    try {
+      const saved = localStorage.getItem(INPUT_MODE_KEY);
+      return saved === 'quick' || saved === 'darts' ? saved : 'numpad';
+    } catch { return 'numpad'; }
   });
-  const setInputMode = (mode: 'quick' | 'numpad') => {
+  // Multiplier for the dart grid; falls back to single after every dart, the
+  // way a player calls them ("treble 20, 5, 1").
+  const [multiplier, setMultiplier] = useState<'1' | '2' | '3'>('1');
+  const setInputMode = (mode: InputMode) => {
     setInputModeState(mode);
     try { localStorage.setItem(INPUT_MODE_KEY, mode); } catch { /* storage unavailable */ }
   };
@@ -201,6 +209,23 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
     setCurrentInput('');
   };
   
+  /** One dart from the S/D/T grid: exact bed, no reconstruction needed. */
+  const addGridDart = (segment: number) => {
+    const m = Number(multiplier) as 1 | 2 | 3;
+    const dart: Dart =
+      segment === 0 ? { segment: 0, multiplier: 0, score: 0, bed: 'miss' }
+      : segment === 25 ? { segment: 25, multiplier: 1, score: 25, bed: 'outer-bull' }
+      : segment === 50 ? { segment: 50, multiplier: 2, score: 50, bed: 'bull' }
+      : { segment, multiplier: m, score: segment * m, bed: m === 3 ? 'triple' : m === 2 ? 'double' : 'single' };
+    if (editingDartIndex !== null && onReplaceDart) {
+      onReplaceDart(editingDartIndex, dart);
+      setEditingDartIndex(null);
+    } else if (currentThrow.length < 3) {
+      onAddDart(dart);
+    }
+    setMultiplier('1');
+  };
+
   const handleQuickScore = (score: number) => {
     addScore(score);
   };
@@ -209,7 +234,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
     <div className="m3-card m3-elevated rounded-m3-lg p-4 md:p-6 w-full max-w-md">
       {/* Header with Remaining Score */}
       <div className="mb-4 text-center">
-        <div className="m3-label-medium text-on-surface-variant mb-1 uppercase tracking-wide">Remaining</div>
+        <div className="m3-label-medium text-on-surface-variant mb-1 uppercase tracking-wide">{t('game.remaining')}</div>
         <AnimatedNumber
           value={remaining}
           className="block text-5xl font-bold"
@@ -220,8 +245,12 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
       {/* Current Throw Display */}
       <div className="flex gap-2 mb-4">
         {[0, 1, 2].map((index) => (
-          <div
+          <button
+            type="button"
             key={index}
+            disabled={!currentThrow[index] || !onReplaceDart}
+            aria-pressed={editingDartIndex === index}
+            aria-label={currentThrow[index] ? t('game.edit_dart', { n: index + 1, score: currentThrow[index].score }) : t('game.empty_dart', { n: index + 1 })}
             onClick={() => {
               if (currentThrow[index] && onReplaceDart) {
                 setEditingDartIndex(editingDartIndex === index ? null : index);
@@ -248,7 +277,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
             ) : (
               <span className="text-on-surface-variant text-xl opacity-50">-</span>
             )}
-          </div>
+          </button>
         ))}
         <div className="flex flex-col justify-center items-center bg-tertiary-container rounded-m3-md px-3">
           <span className="m3-label-small text-on-tertiary-container opacity-80">Total</span>
@@ -256,35 +285,59 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
         </div>
       </div>
 
-      {/* Mode Switcher (M3 segmented — one pill glides between the two options) */}
-      <div className="flex gap-1 mb-4 p-1 bg-surface-container rounded-m3-full m3-segmented">
-        <span
-          className="m3-segmented-indicator"
-          data-pos={inputMode === 'numpad' ? '0' : '1'}
-          aria-hidden="true"
-        />
-        <button
-          onClick={() => setInputMode('numpad')}
-          aria-pressed={inputMode === 'numpad'}
-          className={`flex-1 py-2 rounded-m3-full m3-label-large transition-colors flex items-center justify-center gap-2 ${
-            inputMode === 'numpad' ? 'text-on-secondary-container' : 'text-on-surface-variant'
-          }`}
-        >
-          <Keyboard size={16} />
-          Numpad
-        </button>
-        <button
-          onClick={() => setInputMode('quick')}
-          aria-pressed={inputMode === 'quick'}
-          className={`flex-1 py-2 rounded-m3-full m3-label-large transition-colors ${
-            inputMode === 'quick' ? 'text-on-secondary-container' : 'text-on-surface-variant'
-          }`}
-        >
-          Quick Scores
-        </button>
-      </div>
+      {/* Mode switcher */}
+      <SegmentedButton<InputMode>
+        className="mb-4"
+        label={t('game.input_mode')}
+        value={inputMode}
+        onChange={setInputMode}
+        options={[
+          { value: 'numpad', label: t('game.mode_numpad'), icon: <Keyboard size={16} /> },
+          { value: 'darts', label: t('game.mode_darts') },
+          { value: 'quick', label: t('game.mode_quick') },
+        ]}
+      />
 
-      {inputMode === 'quick' ? (
+      {inputMode === 'darts' ? (
+        <>
+          {/* S/D/T grid: one tap per dart, exact beds — more accurate than
+              tapping a phone-sized dartboard, and reachable by keyboard. */}
+          <SegmentedButton<'1' | '2' | '3'>
+            className="mb-3"
+            size="sm"
+            label={t('game.multiplier')}
+            value={multiplier}
+            onChange={setMultiplier}
+            options={[
+              { value: '1', label: 'S', ariaLabel: t('game.single') },
+              { value: '2', label: 'D', ariaLabel: t('game.double') },
+              { value: '3', label: 'T', ariaLabel: t('game.triple') },
+            ]}
+          />
+          <div className="grid grid-cols-5 gap-1.5 mb-1.5">
+            {Array.from({ length: 20 }, (_, i) => i + 1).map(n => (
+              <button
+                key={n}
+                type="button"
+                onClick={() => addGridDart(n)}
+                disabled={currentThrow.length >= 3 && editingDartIndex === null}
+                aria-label={`${multiplier === '3' ? t('game.triple') : multiplier === '2' ? t('game.double') : t('game.single')} ${n}`}
+                className="m3-state-layer min-h-[44px] rounded-m3-md bg-surface-container-high text-on-surface text-lg font-bold disabled:opacity-30"
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+          <div className="grid grid-cols-3 gap-1.5 mb-4">
+            <button type="button" onClick={() => addGridDart(25)} disabled={currentThrow.length >= 3 && editingDartIndex === null}
+              className="m3-state-layer min-h-[44px] rounded-m3-md bg-surface-container-high text-on-surface font-bold disabled:opacity-30">25</button>
+            <button type="button" onClick={() => addGridDart(50)} disabled={currentThrow.length >= 3 && editingDartIndex === null}
+              className="m3-state-layer min-h-[44px] rounded-m3-md bg-primary-container text-on-primary-container font-bold disabled:opacity-30">Bull</button>
+            <button type="button" onClick={() => addGridDart(0)} disabled={currentThrow.length >= 3 && editingDartIndex === null}
+              className="m3-state-layer min-h-[44px] rounded-m3-md bg-surface-container text-on-surface-variant font-bold disabled:opacity-30">{t('game.miss')}</button>
+          </div>
+        </>
+      ) : inputMode === 'quick' ? (
         <>
           {/* Common Scores - Large Buttons */}
           <div className="grid grid-cols-5 gap-1.5 sm:gap-2 mb-3">
@@ -335,9 +388,11 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
             ))}
             <button
               onClick={() => handleNumpadClick('clear')}
-              className="p-4 text-lg font-bold rounded-m3-md bg-error-container text-on-error-container transition-all active:scale-95"
+              aria-label={t('game.clear_input')}
+              title={t('game.clear_input')}
+              className="p-4 text-lg font-bold rounded-m3-md bg-surface-container-highest text-on-surface transition-all active:scale-95"
             >
-              Clear
+              C
             </button>
             <button
               onClick={() => handleNumpadClick('0')}
@@ -350,7 +405,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
               className="p-4 text-lg font-bold rounded-m3-md bg-primary-container text-on-primary-container transition-all active:scale-95"
               title={editingDartIndex !== null ? 'Dart ersetzen' : 'Wurf-Summe übernehmen und bestätigen'}
             >
-              {editingDartIndex !== null ? 'Set' : 'OK'}
+              {editingDartIndex !== null ? t('game.set_dart') : '↵'}
             </button>
           </div>
 
@@ -411,10 +466,12 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
         <button
           onClick={onClearThrow}
           disabled={currentThrow.length === 0}
+          aria-label={t('game.clear_visit_long')}
+          title={t('game.clear_visit_long')}
           className="flex items-center justify-center gap-1 p-3 rounded-m3-full bg-error-container text-on-error-container disabled:opacity-30 disabled:cursor-not-allowed transition-all font-bold"
         >
           <X size={18} />
-          <span className="hidden sm:inline">Clear</span>
+          <span>{t('game.clear_visit')}</span>
         </button>
 
         <button
@@ -430,7 +487,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
           }`}
         >
           <Check size={20} />
-          <span>{isCheckout ? 'Checkout!' : isEditingThrow ? 'Korrektur' : 'OK'}</span>
+          <span>{isCheckout ? 'Checkout!' : isEditingThrow ? t('game.confirm_correction') : t('game.confirm_visit')}</span>
         </button>
       </div>
 

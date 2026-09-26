@@ -14,6 +14,7 @@ import Dartboard from '../dartboard/Dartboard';
 import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
 import ScoreInput from './ScoreInput';
 import PlayerScore from './PlayerScore';
+import ScoreStrip from './ScoreStrip';
 import CheckoutSuggestion from '../dartboard/CheckoutSuggestion';
 import AchievementHint from '../achievements/AchievementHint';
 import SpinnerWheel from './SpinnerWheel';
@@ -44,6 +45,9 @@ const GameScreen: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const forceNewGameRef = useRef(searchParams.get('new') === '1');
   const resumeRequestedRef = useRef(searchParams.get('resume') === '1');
+  // `?quick=1` — the home screen's rematch button: start with the last players
+  // and settings straight away.
+  const quickStartRef = useRef(searchParams.get('quick') === '1');
   const { state, dispatch, pauseCurrentMatch } = useGame();
   const { players, addPlayer } = usePlayer();
   const { settings } = useSettings();
@@ -564,6 +568,13 @@ const GameScreen: React.FC = () => {
     setShowSetup(false);
     setShowSpinner(true);
   };
+
+  useEffect(() => {
+    if (!quickStartRef.current || !showSetup || selectedPlayers.length === 0) return;
+    quickStartRef.current = false;
+    handleStartGame();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPlayers, showSetup]);
 
   const handleSpinnerComplete = async (startingPlayerIndex: number) => {
     if (!pendingGameStart) return;
@@ -1283,6 +1294,13 @@ const GameScreen: React.FC = () => {
   const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
   const currentThrowScore = calculateThrowScore(state.currentThrow);
   const remaining = (state.currentMatch.settings.startScore || 501) - totalScored - currentThrowScore;
+  const remainingOf = (index: number) => {
+    if (index === state.currentPlayerIndex) return remaining;
+    const player = state.currentMatch!.players[index];
+    const scored = currentLeg.throws.filter(t => t.playerId === player.playerId).reduce((sum, t) => sum + t.score, 0);
+    return (state.currentMatch!.settings.startScore || 501) - scored;
+  };
+  const showSets = (state.currentMatch.settings.setsToWin || 1) > 1;
   
   return (
     <div className="min-h-dvh p-4 md:p-8 gradient-mesh overflow-x-hidden">
@@ -1324,27 +1342,33 @@ const GameScreen: React.FC = () => {
           </div>
         </div>
         
+        {/* Phone/tablet: all scores in one row, so the input stays on screen. */}
+        <ScoreStrip
+          className="lg:hidden sticky top-0 z-20 -mx-4 px-4 py-2 mb-4 bg-[color-mix(in_srgb,var(--m3-surface)_92%,transparent)] backdrop-blur"
+          showSets={showSets}
+          players={state.currentMatch.players.map((p, i) => ({
+            playerId: p.playerId,
+            name: p.name,
+            remaining: remainingOf(i),
+            legsWon: p.legsWon,
+            setsWon: p.setsWon,
+            isActive: i === state.currentPlayerIndex,
+          }))}
+        />
+
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Players Section */}
-          <div className="lg:col-span-1 space-y-4">
+          {/* Players Section (desktop) */}
+          <div className="hidden lg:block lg:col-span-1 space-y-4">
             {state.currentMatch.players.map((player, index) => (
               <PlayerScore
                 key={player.playerId}
                 player={player}
-                remaining={
-                  index === state.currentPlayerIndex
-                    ? remaining
-                    : (() => {
-                        const throws = currentLeg.throws.filter(t => t.playerId === player.playerId);
-                        const scored = throws.reduce((sum, t) => sum + t.score, 0);
-                        return (state.currentMatch!.settings.startScore || 501) - scored;
-                      })()
-                }
+                remaining={remainingOf(index)}
                 isActive={index === state.currentPlayerIndex}
                 average={player.matchAverage}
                 legsWon={player.legsWon}
                 setsWon={player.setsWon}
-                showSets={(state.currentMatch!.settings.setsToWin || 1) > 1}
+                showSets={showSets}
                 onRemove={canRemovePlayers ? handleRequestRemovePlayer : undefined}
                 removeLabel={t('game.remove_player')}
               />

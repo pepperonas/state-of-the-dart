@@ -14,7 +14,7 @@ const DebugFlagButton: React.FC = () => {
     <>
       <button
         onClick={() => setShowModal(true)}
-        className="fixed bottom-4 left-[4.5rem] z-40 w-10 h-10 rounded-m3-full bg-tertiary-container text-tertiary shadow-m3-3 hover:shadow-m3-4 flex items-center justify-center transition-all m3-enter-pop m3-ripple m3-state-layer"
+        className="fixed bottom-24 left-[4.5rem] md:bottom-4 md:left-[9.5rem] z-30 w-12 h-12 rounded-m3-full bg-tertiary-container text-tertiary shadow-m3-3 hover:shadow-m3-4 flex items-center justify-center transition-all m3-enter-pop m3-ripple m3-state-layer"
         title="Debug Flag"
         aria-label="Debug Flag"
       >

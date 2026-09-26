@@ -21,7 +21,9 @@
     "warning": "Warning",
     "info": "Info",
     "beta": "Beta",
-    "undo": "Undo"
+    "undo": "Undo",
+    "load_failed": "Could not load. Check your connection.",
+    "retry": "Try again"
   },
   "auth": {
     "login": "Login",
@@ -182,7 +184,26 @@
     "end_body": "The match ends without a winner and does not count in the statistics. You can still undo it right afterwards.",
     "who_starts": "Who throws first?",
     "starts": "{{name}} starts",
-    "skip_spinner": "Skip (random)"
+    "skip_spinner": "Skip (random)",
+    "input_mode": "Input mode",
+    "mode_numpad": "Numpad",
+    "mode_darts": "Darts",
+    "mode_quick": "Quick",
+    "multiplier": "Multiplier",
+    "single": "Single",
+    "double": "Double",
+    "triple": "Treble",
+    "miss": "Miss",
+    "clear_input": "Clear input",
+    "set_dart": "Set",
+    "clear_visit": "Clear",
+    "clear_visit_long": "Clear visit",
+    "confirm_visit": "Confirm",
+    "confirm_correction": "Confirm correction",
+    "remaining": "Remaining",
+    "edit_dart": "Dart {{n}}: {{score}} – tap to change",
+    "empty_dart": "Dart {{n}}: empty",
+    "scoreboard": "Scoreboard"
   },
   "stats": {
     "statistics": "Statistics",
@@ -632,5 +653,33 @@
     "install_action": "Install",
     "install_later": "Later",
     "install_ios": "In Safari, tap “Share”, then “Add to Home Screen”."
+  },
+  "nav": {
+    "label": "Main navigation",
+    "home": "Home",
+    "stats": "Stats",
+    "achievements": "Awards",
+    "players": "Players"
+  },
+  "home": {
+    "rematch": "Rematch",
+    "new_game": "New game",
+    "new_setup": "New setup",
+    "first_to_legs": "First to {{count}} legs",
+    "first_to_sets": "First to {{count}} sets",
+    "section_play": "More games",
+    "section_review": "Review",
+    "section_admin": "Administration",
+    "skip_to_content": "Skip to content",
+    "account_menu": "Account menu"
+  },
+  "onboarding": {
+    "title": "Welcome!",
+    "body": "Three steps to your first game:",
+    "step_player": "Create your player profile",
+    "step_opponent": "Add an opponent or a bot",
+    "step_match": "Play your first 501",
+    "dismiss": "Hide the introduction",
+    "done": "done"
   }
 }
