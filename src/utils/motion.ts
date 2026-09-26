@@ -83,3 +83,16 @@ export const dialogMotion = {
  * sluggish next to everything else on screen.
  */
 export const CHART_MOTION = { duration: 600, easing: 'ease-out' } as const;
+
+/**
+ * M3 fade-through for moving between top-level destinations. Entrance only —
+ * an exit animation would hold the old route on screen and delay every
+ * navigation. ⚠️ Opacity only: a transform on the route wrapper would make it
+ * the containing block of every `position: fixed` child (dialogs, snackbars,
+ * the leg-won overlay) for the duration of the animation.
+ */
+export const fadeThrough = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  transition: { duration: 0.22, ease: [0.2, 0, 0, 1] } as Transition,
+};

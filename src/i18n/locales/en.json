@@ -116,7 +116,14 @@
     "reset_stats_confirm_title": "Reset Statistics?",
     "reset_stats_confirm_text": "All statistics, match data, heatmap, training and achievements of {{name}} will be permanently deleted. The player itself will be kept.",
     "reset_stats_success": "Statistics have been reset",
-    "reset_stats_error": "Failed to reset statistics"
+    "reset_stats_error": "Failed to reset statistics",
+    "error_create": "Could not create the player.",
+    "error_update": "Could not save the player.",
+    "error_avatar": "Could not save the avatar.",
+    "error_main": "Could not set the main profile.",
+    "error_delete": "Could not delete the player.",
+    "choose_avatar": "Choose avatar",
+    "search_avatar": "Search avatars"
   },
   "game": {
     "game": "Game",
@@ -204,7 +211,12 @@
     "edit_dart": "Dart {{n}}: {{score}} – tap to change",
     "empty_dart": "Dart {{n}}: empty",
     "scoreboard": "Scoreboard",
-    "numpad_hint": "Type the total, ↵ commits"
+    "numpad_hint": "Type the total, ↵ commits",
+    "new_game_short": "New game",
+    "stats_scope": "Scope",
+    "current_leg": "Current leg",
+    "whole_match": "Whole match",
+    "new_dart_value": "New dart value…"
   },
   "stats": {
     "statistics": "Statistics",
@@ -308,7 +320,16 @@
     "status": "Status",
     "created_at": "Created at",
     "profile": "Profile",
-    "profile_info": "Profile Information"
+    "profile_info": "Profile Information",
+    "export_done": "Data exported.",
+    "export_failed": "Export failed. Please try again.",
+    "import_pick_json": "Please choose a JSON file.",
+    "import_confirm_title": "Import data?",
+    "import_confirm_body": "Importing replaces all current data. Export a backup first if you want to keep it.",
+    "import_confirm_action": "Import",
+    "import_done": "Data imported – reloading the page.",
+    "import_failed": "Import failed. Please check the file.",
+    "delete_bug_confirm": "Really delete this bug report?"
   },
   "user": {
     "account": "Account",
@@ -423,7 +444,8 @@
     "table_last_seen": "Last seen",
     "never_seen": "never",
     "usage_summary": "{{total}} games",
-    "user_label": "User"
+    "user_label": "User",
+    "action_failed": "Action failed: {{error}}"
   },
   "debug": {
     "title": "Debug Flag",
@@ -682,5 +704,52 @@
     "step_match": "Play your first 501",
     "dismiss": "Hide the introduction",
     "done": "done"
+  },
+  "shanghai": {
+    "points": "{{count}} points"
+  },
+  "bug": {
+    "title": "Report a bug",
+    "fill_required": "Please fill in title and description.",
+    "send_failed": "The bug report could not be sent.",
+    "severity_low": "Low",
+    "severity_medium": "Medium",
+    "severity_high": "High",
+    "severity_critical": "Critical",
+    "category_gameplay": "Gameplay",
+    "category_ui": "User interface",
+    "category_audio": "Audio/sound",
+    "category_performance": "Performance",
+    "category_auth": "Login/authentication",
+    "category_data": "Data/storage",
+    "category_achievements": "Achievements",
+    "category_other": "Other",
+    "thanks": "Thank you!",
+    "sent": "Your bug report has been sent.",
+    "field_title": "Title",
+    "field_title_placeholder": "Short summary of the problem",
+    "field_description": "Description",
+    "field_description_placeholder": "What did you expect, and what happened instead?",
+    "field_severity": "Severity",
+    "field_category": "Category",
+    "field_screenshot": "Screenshot (optional)",
+    "remove_screenshot": "Remove screenshot",
+    "capturing": "Capturing screenshot…",
+    "capture": "Capture screenshot",
+    "sending": "Sending…",
+    "submit": "Report bug"
+  },
+  "match_detail": {
+    "hidden_players": "{{count}} players without throws in this match are not shown.",
+    "round_chart": "Rounds",
+    "round": "Round",
+    "points": "Points",
+    "points_value": "{{count}} points",
+    "no_rounds": "No round data available",
+    "no_rounds_hint": "This match was probably played before round tracking existed.",
+    "throw_history": "Throw history",
+    "legs": "Legs",
+    "leg_winner": "Leg {{n}}: {{name}}",
+    "unknown": "Unknown"
   }
 }

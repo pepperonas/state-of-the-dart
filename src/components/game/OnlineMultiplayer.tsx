@@ -10,6 +10,7 @@ import { usePlayer } from '../../context/PlayerContext';
 import { useAuth } from '../../context/AuthContext';
 import PlayerAvatar from '../player/PlayerAvatar';
 import { Button, Card, TextField, Dialog, IconButton, Chip, BackButton } from '../common';
+import { useFeedback } from '../common/feedbackContext';
 
 interface OnlinePlayer {
   id: string;
@@ -40,6 +41,10 @@ interface ChatMessage {
 }
 
 const OnlineMultiplayer: React.FC = () => {
+  const { notify } = useFeedback();
+  // The socket handlers are registered once; read notify through a ref.
+  const notifyRef = useRef(notify);
+  useEffect(() => { notifyRef.current = notify; }, [notify]);
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { players } = usePlayer();
@@ -125,7 +130,7 @@ const OnlineMultiplayer: React.FC = () => {
 
     newSocket.on('error', (error: { message: string }) => {
       console.error('[Socket.IO] Error:', error.message);
-      alert(error.message);
+      notifyRef.current(error.message);
     });
 
     setSocket(newSocket);

@@ -12,8 +12,10 @@ import { toDateOrNow, formatDateTime, formatDateShort } from '../../utils/dateUt
 import { staggerChild } from '../../utils/motion';
 import { BackButton, Button, Card, Select } from '../common';
 import { Icon, iconForEmoji } from '../icons';
+import { useChartTheme } from '../../utils/chartTheme';
 
 const TrainingStats: React.FC = () => {
+  const chart = useChartTheme();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { currentPlayer, setCurrentPlayer, players } = usePlayer();
@@ -144,7 +146,7 @@ const TrainingStats: React.FC = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const COLORS = ['#0ea5e9', '#22c55e', '#f59e0b', '#a855f7', '#ec4899', '#ef4444'];
+  const COLORS = chart.series;
 
   if (!currentPlayer) {
     return (
@@ -297,19 +299,19 @@ const TrainingStats: React.FC = () => {
               <div className="bg-surface-container-low rounded-m3-md p-4">
                 <div className="h-[180px] sm:h-[250px]"><ResponsiveContainer width="100%" height="100%">
                   <LineChart data={performanceData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
-                    <XAxis dataKey="date" stroke="#737373" style={{ fontSize: '12px' }} />
-                    <YAxis stroke="#737373" style={{ fontSize: '12px' }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
+                    <XAxis dataKey="date" stroke={chart.axis} style={{ fontSize: '12px' }} />
+                    <YAxis stroke={chart.axis} style={{ fontSize: '12px' }} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: '#0a0a0a',
-                        border: '1px solid #404040',
+                        backgroundColor: chart.tooltip.contentStyle.backgroundColor,
+                        border: chart.tooltip.contentStyle.border as string,
                         borderRadius: '8px',
                       }}
                     />
                     <Legend />
-                    <Line type="monotone" dataKey="score" stroke="#22c55e" strokeWidth={2} name="Score" />
-                    <Line type="monotone" dataKey="accuracy" stroke="#0ea5e9" strokeWidth={2} name="Genauigkeit %" />
+                    <Line type="monotone" dataKey="score" stroke={chart.success} strokeWidth={2} name="Score" />
+                    <Line type="monotone" dataKey="accuracy" stroke={chart.series[0]} strokeWidth={2} name="Genauigkeit %" />
                   </LineChart>
                 </ResponsiveContainer></div>
               </div>
@@ -334,7 +336,7 @@ const TrainingStats: React.FC = () => {
                         labelLine={false}
                         label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                         outerRadius={80}
-                        fill="#8884d8"
+                        fill={chart.series[1]}
                         dataKey="value"
                       >
                         {typeDistribution.map((_, index) => (
@@ -343,8 +345,8 @@ const TrainingStats: React.FC = () => {
                       </Pie>
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: '#0a0a0a',
-                          border: '1px solid #404040',
+                          backgroundColor: chart.tooltip.contentStyle.backgroundColor,
+                          border: chart.tooltip.contentStyle.border as string,
                           borderRadius: '8px',
                         }}
                       />

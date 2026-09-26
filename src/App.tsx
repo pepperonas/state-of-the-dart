@@ -1,6 +1,7 @@
 import { useState, useEffect, Suspense, lazy, type ReactNode } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { MotionConfig } from 'framer-motion';
+import { MotionConfig, motion } from 'framer-motion';
+import { fadeThrough } from './utils/motion';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { TenantProvider } from './context/TenantContext';
 import { GameProvider } from './context/GameContext';
@@ -35,6 +36,8 @@ import UserSettings from './components/auth/UserSettings';
 // Payment components
 import Pricing from './components/payment/Pricing';
 import PaymentSuccess from './components/payment/PaymentSuccess';
+import LoadingIndicator from './components/common/LoadingIndicator';
+import { FeedbackProvider } from './components/common/Feedback';
 
 // Lazy load helper with auto-reload on chunk load failure
 const lazyWithRetry = (componentImport: () => Promise<any>) =>
@@ -88,12 +91,11 @@ const Datenschutz = lazyWithRetry(() => import('./components/legal/Datenschutz')
 const Nutzungsbedingungen = lazyWithRetry(() => import('./components/legal/Nutzungsbedingungen'));
 
 // Loading component
+// Loading component. It was a legacy glass card with white text — white on a
+// light background in the light theme — and a hardcoded "Loading...".
 const LoadingScreen = () => (
   <div className="min-h-dvh flex items-center justify-center gradient-mesh">
-    <div className="glass-card p-8 text-center">
-      <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-500 mx-auto mb-4"></div>
-      <p className="text-white text-lg">Loading...</p>
-    </div>
+    <LoadingIndicator size={56} />
   </div>
 );
 
@@ -118,6 +120,16 @@ function RouteLogger() {
  * the board needs the input, not a legal footer or a second bug button (the
  * game header has its own report entry).
  */
+/** Each route change fades through (M3); keyed by path so it replays per screen. */
+function RouteFade({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation();
+  return (
+    <motion.div key={pathname} className="flex-1" {...fadeThrough}>
+      {children}
+    </motion.div>
+  );
+}
+
 /** Room for the navigation: the bar at the bottom (phone), the rail on the left. */
 function NavAwareContent({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
@@ -208,6 +220,7 @@ function AppContent() {
               <AchievementProvider>
                 <GameProvider>
                   <MotionConfig reducedMotion="user">
+                  <FeedbackProvider>
                   <div className="min-h-dvh bg-surface text-on-surface flex flex-col">
                     <AchievementNotification />
                     <OfflineIndicator />
@@ -218,7 +231,7 @@ function AppContent() {
                     </OutsideGames>
                     <AppNavigation />
                     <NavAwareContent>
-                      <div className="flex-1">
+                      <RouteFade>
                       <Suspense fallback={<LoadingScreen />}>
                       <Routes>
                       {/* Public Auth Routes */}
@@ -386,12 +399,13 @@ function AppContent() {
                       <Route path="*" element={<Navigate to="/" replace />} />
                       </Routes>
                       </Suspense>
-                      </div>
+                      </RouteFade>
                       <OutsideGames>
                         <Footer />
                       </OutsideGames>
                     </NavAwareContent>
                   </div>
+                  </FeedbackProvider>
                   </MotionConfig>
                 </GameProvider>
               </AchievementProvider>

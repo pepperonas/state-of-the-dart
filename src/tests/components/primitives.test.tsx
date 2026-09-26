@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import {
@@ -148,7 +149,47 @@ describe('Dialog', () => {
 
   it('hideClose removes the close button', () => {
     render(<Dialog open onClose={vi.fn()} title="Titel" hideClose>Inhalt</Dialog>);
-    expect(screen.queryByRole('button', { name: /close/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /close|schließen/i })).toBeNull();
+  });
+
+  it('is labelled by its title', () => {
+    render(<Dialog open onClose={vi.fn()} title="Match beenden?">Inhalt</Dialog>);
+    expect(screen.getByRole('dialog', { name: 'Match beenden?' })).toBeInTheDocument();
+  });
+
+  it('moves focus in, keeps Tab inside, and hands focus back on close', async () => {
+    const Harness = () => {
+      const [open, setOpen] = React.useState(false);
+      return (
+        <>
+          <button onClick={() => setOpen(true)}>open</button>
+          <Dialog open={open} onClose={() => setOpen(false)} title="T" hideClose
+            actions={<><button>first</button><button>last</button></>}>
+            body
+          </Dialog>
+        </>
+      );
+    };
+    render(<Harness />);
+    const opener = screen.getByRole('button', { name: 'open' });
+    await userEvent.click(opener);
+    await waitFor(() => expect(screen.getByRole('button', { name: 'first' })).toHaveFocus());
+    await userEvent.tab();
+    expect(screen.getByRole('button', { name: 'last' })).toHaveFocus();
+    await userEvent.tab(); // wraps instead of leaving the dialog
+    expect(screen.getByRole('button', { name: 'first' })).toHaveFocus();
+    await userEvent.tab({ shift: true });
+    expect(screen.getByRole('button', { name: 'last' })).toHaveFocus();
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(opener).toHaveFocus());
+  });
+
+  it('persistent ignores scrim clicks', async () => {
+    const onClose = vi.fn();
+    const { container } = render(<Dialog open onClose={onClose} title="T" persistent>x</Dialog>);
+    await userEvent.click(document.querySelector('.m3-scrim') as HTMLElement);
+    expect(onClose).not.toHaveBeenCalled();
+    void container;
   });
 });
 

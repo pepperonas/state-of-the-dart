@@ -122,6 +122,13 @@ The entire app is themed with a **Material 3 Expressive** token layer. **Use it 
 - **Motion**: `src/utils/motion.ts` exports M3-Expressive spring configs for framer-motion (`springSpatial*` with overshoot, `springStandard*`, `effects*` no-overshoot) + presets (`enterRise`, `enterPop`, `enterDrop`, `staggerChild(i)`, `pressable`, `dialogMotion`). The app is wrapped in `<MotionConfig reducedMotion="user">` (`App.tsx`), so **every** framer animation honours `prefers-reduced-motion` automatically — no per-component guard needed. For long lists, cap the stagger delay: `staggerChild(Math.min(index, 10))`. For gesture feedback prefer `whileTap`/`whileHover` with their own transition (don't let a delayed entrance `transition` leak into the gesture).
 - **State layer**: interactive primitives carry `.m3-state-layer` (a `::before` hover/press overlay tinted with `currentColor`). The `:where(.m3-state-layer) > *` rule lifts content above the overlay at **zero specificity**, so a child's own Tailwind position utility (e.g. `absolute` on a corner badge) still wins — don't fight it.
 
+### M3 rules that are tested (0.13.0)
+- `src/tests/consistency/pageConsistency.test.ts` (components **and App.tsx**) forbids: numbered error colours, `dark:` variants, `text-white`, `font-black/extrabold`, responsive prefixes on `m3-*` type classes, numbered legacy role colours (`primary-500` …), raw Tailwind palette outside an allowlist (heatmap legends, theme previews, leg-win gold), and `alert(`/`confirm(`.
+- `e2e/contrast.spec.ts` measures every text node on eleven screens in both themes (canvas-rasterised colours, background composed over ancestors, opacity folded in, reduced motion, players created first). ⚠️ Its first version was blind twice over — staggered entrances left cards at opacity 0 and screens without players rendered empty states; only a deliberate regression caught that. **Never dim text with `opacity`** — it multiplies into the colour; dim the surface or use a lower-emphasis token.
+- Colours on data-coloured chips: `readableTextOn(hex)` (`utils/color.ts`) picks black/white by luminance.
+- Charts: `useChartTheme()` (`utils/chartTheme.ts`) — never literal greys or a hard-coded tooltip.
+- Ranks: `--m3-medal-gold/silver/bronze` (per theme).
+
 ### Shared UI Components (`src/components/common/`)
 M3 primitive library (barrel `src/components/common/index.ts`). **Prefer these over ad-hoc styled elements.** Each carries an M3 state layer (`.m3-state-layer`) and token colors.
 - `Button` — `variant`: `filled|tonal|accent|elevated|outlined|text|danger|success`; `size`: `sm|md|lg`; `fullWidth`, `icon`, `loading`. Pill-shaped, morphs corner on press.
@@ -132,7 +139,9 @@ M3 primitive library (barrel `src/components/common/index.ts`). **Prefer these o
 - `Switch` — M3 switch (`checked`, `onChange`), thumb grows when on.
 - `Select` — **the app's only dropdown.** Generic in the value type: `<Select<number> value={10} onChange={n => …} options={[{value, label, icon?, text?, disabled?}]} />`. `size`: `sm|md|lg`, `inline` to size to content, `placeholder` for "no selection". Native `<select>` is **banned** (a consistency test fails the build) — its popup is drawn by the OS, so it ignored every token, could not be themed light/dark and could not hold an icon. The menu is **portalled to `<body>` at z-60** so it escapes `overflow-x-auto` tables and dialog stacking contexts, and it re-measures on scroll/resize. Keyboard = APG combobox: arrows/Home/End move, Enter/Space commit, Escape discards, Tab leaves without committing, typing jumps by prefix.
 - `Chip` — filter/assist chip (`selected`, `icon`).
-- `Dialog` — scrim + spring-animated container (`open`, `onClose`, `title`, `actions`, `widthClassName`, `hideClose`); closes on scrim/Escape.
+- `Dialog` — scrim + spring-animated container (`open`, `onClose`, `title`, `actions`, `widthClassName`, `hideClose`, `persistent`). Real modal behaviour: initial focus, Tab trap, Escape, focus returns to the opener, labelled by its title. Use it for every overlay.
+- `useFeedback()` (`feedbackContext.ts`, provider in App) — `notify(msg)` snackbar and `await confirm({ title, danger })`. `alert`/`confirm` are banned by test.
+- `Snackbar`, `SegmentedButton` (N options, radio group), `LoadingIndicator` (M3 Expressive morphing shape; one for the whole app), `ErrorState` (retry), `TextArea`.
 - `AnimatedNumber` — spring number transition (overdamped → no overshoot/jitter), reduced-motion aware; "tallies" to its new value. Used for in-game scores (`PlayerScore`, `ScoreInput`) and Dashboard KPIs (counts up as async data loads).
 - `ErrorBoundary` — top-level React error boundary. Wraps `<App>` in `main.tsx` so a render-time throw (bad `JSON.parse` in match reconstruction, failed lazy chunk, etc.) shows an M3 recovery screen (reload / back-to-menu) instead of white-screening the PWA. The `window.error`/`unhandledrejection` handlers in `App.tsx` only log — they do NOT catch render errors, so don't remove the boundary.
 - `BackButton.tsx` — canonical back button. **Always use this** for screen-level back navigation. An M3 **tonal** button with a leading `<ArrowLeft>`. In **block mode (default)** it wraps itself in a `mb-6` block so the gap to the page heading is uniform across all screens; pass **`inline`** when it sits in a flex header row / form (opts out of the wrapper — the row/form controls spacing). Override text via `label`.
@@ -398,7 +407,8 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **15 tests** currently:
+- Specs in `e2e/`. **18 tests** currently:
+  - `contrast.spec.ts` — WCAG AA text contrast on eleven screens in both themes, plus a cross-check that the tool catches a bad element
   - `layout.spec.ts` — a whole turn fits on one screen at phone and desktop size, no horizontal scroll
   - `game-flow.spec.ts` — full X01 round trip (start, score, pause & leave without reload, resume from the DB) and the one-tap rematch from the home screen
   - `smoke.spec.ts` — load redirect, asset-count regression guard, no-heavy-chunks-eager guard

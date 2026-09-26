@@ -13,6 +13,8 @@ import ActivitySparkline from './ActivitySparkline';
 import { relativeTime, recencyOf } from '../../utils/activity';
 import { reporterOptions, filterByReporter } from '../../utils/reporters';
 import { staggerChild } from '../../utils/motion';
+import LoadingIndicator from '../common/LoadingIndicator';
+import { useFeedback } from '../common/feedbackContext';
 
 interface AdminUser {
   id: string;
@@ -47,6 +49,7 @@ interface AdminStats {
 }
 
 const AdminPanel: React.FC = () => {
+  const { notify, confirm } = useFeedback();
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -145,7 +148,7 @@ const AdminPanel: React.FC = () => {
       await api.debugFlags.updateStatus(flagId, newStatus);
     } catch (err: any) {
       await loadDebugFlags();
-      alert('Failed to update status: ' + err.message);
+      notify(t('admin.action_failed', { error: err.message }));
     }
   };
 
@@ -154,18 +157,18 @@ const AdminPanel: React.FC = () => {
       await api.debugFlags.updateNotes(flagId, notes);
       await loadDebugFlags();
     } catch (err: any) {
-      alert('Failed to update notes: ' + err.message);
+      notify(t('admin.action_failed', { error: err.message }));
     }
   };
 
   const handleDeleteDebugFlag = async (flagId: string) => {
-    if (!confirm(t('debug.confirm_delete'))) return;
+    if (!(await confirm({ title: t('debug.confirm_delete'), danger: true, confirmLabel: t('common.delete') }))) return;
     try {
       await api.debugFlags.delete(flagId);
       await loadDebugFlags();
       setSelectedDebugFlag(null);
     } catch (err: any) {
-      alert('Failed to delete debug flag: ' + err.message);
+      notify(t('admin.action_failed', { error: err.message }));
     }
   };
 
@@ -187,7 +190,7 @@ const AdminPanel: React.FC = () => {
     } catch (err: any) {
       // Revert on failure
       await loadBugReports();
-      alert('Failed to update status: ' + err.message);
+      notify(t('admin.action_failed', { error: err.message }));
     }
   };
 
@@ -196,52 +199,52 @@ const AdminPanel: React.FC = () => {
       await api.bugReports.updateNotes(reportId, notes);
       await loadBugReports();
     } catch (err: any) {
-      alert('Failed to update notes: ' + err.message);
+      notify(t('admin.action_failed', { error: err.message }));
     }
   };
 
   const handleDeleteBugReport = async (reportId: string) => {
-    if (!confirm(t('admin.confirm_delete_bug'))) return;
+    if (!(await confirm({ title: t('admin.confirm_delete_bug'), danger: true, confirmLabel: t('common.delete') }))) return;
 
     try {
       await api.bugReports.delete(reportId);
       await loadBugReports();
       setSelectedBugReport(null);
     } catch (err: any) {
-      alert('Failed to delete bug report: ' + err.message);
+      notify(t('admin.action_failed', { error: err.message }));
     }
   };
 
   const handleGrantLifetime = async (userId: string) => {
-    if (!confirm(t('admin.confirm_grant_lifetime'))) return;
+    if (!(await confirm({ title: t('admin.confirm_grant_lifetime') }))) return;
     
     try {
       await api.admin.grantLifetime(userId);
       loadData();
     } catch (err: any) {
-      alert(`Error: ${err.message}`);
+      notify(t('admin.action_failed', { error: err.message }));
     }
   };
 
   const handleRevokeAccess = async (userId: string) => {
-    if (!confirm(t('admin.confirm_revoke_access'))) return;
+    if (!(await confirm({ title: t('admin.confirm_revoke_access'), danger: true }))) return;
     
     try {
       await api.admin.revokeAccess(userId);
       loadData();
     } catch (err: any) {
-      alert(`Error: ${err.message}`);
+      notify(t('admin.action_failed', { error: err.message }));
     }
   };
 
   const handleDeleteUser = async (userId: string) => {
-    if (!confirm(t('admin.confirm_delete_user'))) return;
+    if (!(await confirm({ title: t('admin.confirm_delete_user'), danger: true, confirmLabel: t('common.delete') }))) return;
     
     try {
       await api.admin.deleteUser(userId);
       loadData();
     } catch (err: any) {
-      alert(`Error: ${err.message}`);
+      notify(t('admin.action_failed', { error: err.message }));
     }
   };
 
@@ -259,13 +262,13 @@ const AdminPanel: React.FC = () => {
 
     // Validate: lifetime should not have an end date
     if (editFormData.subscriptionStatus === 'lifetime' && editFormData.subscriptionEndsAt) {
-      alert(t('admin.error_lifetime_with_end_date', 'Lifetime subscriptions should not have an end date.'));
+      notify(t('admin.error_lifetime_with_end_date', 'Lifetime subscriptions should not have an end date.'));
       return;
     }
 
     // Validate: end date should be in the future (if provided)
     if (editFormData.subscriptionEndsAt && new Date(editFormData.subscriptionEndsAt) < new Date()) {
-      alert(t('admin.error_past_end_date', 'End date must be in the future.'));
+      notify(t('admin.error_past_end_date', 'End date must be in the future.'));
       return;
     }
 
@@ -278,7 +281,7 @@ const AdminPanel: React.FC = () => {
       await loadData();
       setEditingUser(null);
     } catch (err: any) {
-      alert(`Error: ${err.message}`);
+      notify(t('admin.action_failed', { error: err.message }));
     }
   };
 
@@ -319,7 +322,7 @@ const AdminPanel: React.FC = () => {
     return (
       <div className="min-h-dvh flex items-center justify-center gradient-mesh">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-primary-500 mx-auto mb-4"></div>
+          <LoadingIndicator size={56} className="mb-4" />
           <p className="text-on-surface-variant">{t('admin.loading_panel')}</p>
         </div>
       </div>
@@ -330,7 +333,7 @@ const AdminPanel: React.FC = () => {
     return (
       <div className="min-h-dvh flex items-center justify-center gradient-mesh">
         <Card variant="elevated" className="p-8 text-center">
-          <p className="text-error-500 text-xl mb-4">{error}</p>
+          <p className="text-error m3-title-large mb-4">{error}</p>
           <Button variant="filled" onClick={loadData}>
             {t('admin.retry')}
           </Button>
@@ -374,45 +377,45 @@ const AdminPanel: React.FC = () => {
                 <div className="p-2 rounded-m3-md bg-primary-container text-on-primary-container">
                   <Users size={20} />
                 </div>
-                <p className="text-2xl md:text-3xl font-bold text-on-surface">{stats.totalUsers}</p>
+                <p className="m3-headline-medium m3-emphasized text-on-surface">{stats.totalUsers}</p>
               </div>
-              <p className="text-on-surface-variant text-sm">{t('admin.total')}</p>
+              <p className="text-on-surface-variant m3-body-medium">{t('admin.total')}</p>
             </Card>
             <Card variant="elevated" className="p-4 md:p-6">
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 rounded-m3-md bg-success-container text-on-success-container">
                   <Zap size={20} />
                 </div>
-                <p className="text-2xl md:text-3xl font-bold text-success-500">{stats.activeSubscriptions}</p>
+                <p className="m3-headline-medium m3-emphasized text-success">{stats.activeSubscriptions}</p>
               </div>
-              <p className="text-on-surface-variant text-sm">{t('admin.active_subscriptions')}</p>
+              <p className="text-on-surface-variant m3-body-medium">{t('admin.active_subscriptions')}</p>
             </Card>
             <Card variant="elevated" className="p-4 md:p-6">
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 rounded-m3-md bg-tertiary-container text-on-tertiary-container">
                   <Crown size={20} />
                 </div>
-                <p className="text-2xl md:text-3xl font-bold text-tertiary">{stats.lifetimeSubscriptions}</p>
+                <p className="m3-headline-medium m3-emphasized text-tertiary">{stats.lifetimeSubscriptions}</p>
               </div>
-              <p className="text-on-surface-variant text-sm">{t('admin.lifetime')}</p>
+              <p className="text-on-surface-variant m3-body-medium">{t('admin.lifetime')}</p>
             </Card>
             <Card variant="elevated" className="p-4 md:p-6">
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 rounded-m3-md bg-secondary-container text-on-secondary-container">
                   <Clock size={20} />
                 </div>
-                <p className="text-2xl md:text-3xl font-bold text-on-surface">{stats.trialUsers}</p>
+                <p className="m3-headline-medium m3-emphasized text-on-surface">{stats.trialUsers}</p>
               </div>
-              <p className="text-on-surface-variant text-sm">{t('admin.trial')}</p>
+              <p className="text-on-surface-variant m3-body-medium">{t('admin.trial')}</p>
             </Card>
             <Card variant="elevated" className="p-4 md:p-6 col-span-2 sm:col-span-1">
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 rounded-m3-md bg-error-container text-on-error-container">
                   <XCircle size={20} />
                 </div>
-                <p className="text-2xl md:text-3xl font-bold text-error-500">{stats.expiredUsers}</p>
+                <p className="m3-headline-medium m3-emphasized text-error">{stats.expiredUsers}</p>
               </div>
-              <p className="text-on-surface-variant text-sm">{t('admin.expired')}</p>
+              <p className="text-on-surface-variant m3-body-medium">{t('admin.expired')}</p>
             </Card>
           </motion.div>
         )}
@@ -456,13 +459,13 @@ const AdminPanel: React.FC = () => {
             <table className="w-full">
               <thead className="bg-surface-container-high">
                 <tr className="text-left">
-                  <th className="px-6 py-4 font-semibold text-on-surface-variant text-sm uppercase tracking-wide">{t('admin.table_user')}</th>
-                  <th className="px-6 py-4 font-semibold text-on-surface-variant text-sm uppercase tracking-wide">{t('admin.table_status')}</th>
-                  <th className="px-6 py-4 font-semibold text-on-surface-variant text-sm uppercase tracking-wide hidden md:table-cell">{t('admin.table_plan')}</th>
-                  <th className="px-6 py-4 font-semibold text-on-surface-variant text-sm uppercase tracking-wide hidden lg:table-cell">{t('admin.table_created')}</th>
-                  <th className="px-6 py-4 font-semibold text-on-surface-variant text-sm uppercase tracking-wide hidden md:table-cell">{t('admin.table_activity')}</th>
-                  <th className="px-6 py-4 font-semibold text-on-surface-variant text-sm uppercase tracking-wide hidden sm:table-cell">{t('admin.table_last_seen')}</th>
-                  <th className="px-6 py-4 font-semibold text-on-surface-variant text-sm uppercase tracking-wide">{t('admin.table_actions')}</th>
+                  <th className="px-6 py-4 m3-label-large text-on-surface-variant uppercase">{t('admin.table_user')}</th>
+                  <th className="px-6 py-4 m3-label-large text-on-surface-variant uppercase">{t('admin.table_status')}</th>
+                  <th className="px-6 py-4 m3-label-large text-on-surface-variant uppercase hidden md:table-cell">{t('admin.table_plan')}</th>
+                  <th className="px-6 py-4 m3-label-large text-on-surface-variant uppercase hidden lg:table-cell">{t('admin.table_created')}</th>
+                  <th className="px-6 py-4 m3-label-large text-on-surface-variant uppercase hidden md:table-cell">{t('admin.table_activity')}</th>
+                  <th className="px-6 py-4 m3-label-large text-on-surface-variant uppercase hidden sm:table-cell">{t('admin.table_last_seen')}</th>
+                  <th className="px-6 py-4 m3-label-large text-on-surface-variant uppercase">{t('admin.table_actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -482,7 +485,7 @@ const AdminPanel: React.FC = () => {
                             onError={() => setFailedAvatars(prev => new Set(prev).add(u.id))}
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center text-xl font-bold">
+                          <div className="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center m3-title-large">
                             {u.avatar && !u.avatar.startsWith('http') ? u.avatar : u.name.charAt(0).toUpperCase()}
                           </div>
                         )}
@@ -490,12 +493,12 @@ const AdminPanel: React.FC = () => {
                           <p className="font-semibold text-on-surface flex items-center gap-2">
                             {u.name}
                             {u.is_admin === 1 && (
-                              <span className="px-2 py-0.5 bg-tertiary-container text-on-tertiary-container text-xs rounded-m3-full font-medium flex items-center gap-1">
+                              <span className="px-2 py-0.5 bg-tertiary-container text-on-tertiary-container m3-body-small rounded-m3-full font-medium flex items-center gap-1">
                                 <Crown size={10} /> Admin
                               </span>
                             )}
                           </p>
-                          <p className="text-sm text-on-surface-variant">{u.email}</p>
+                          <p className="m3-body-medium text-on-surface-variant">{u.email}</p>
                         </div>
                       </div>
                     </td>
@@ -561,7 +564,7 @@ const AdminPanel: React.FC = () => {
                         {u.subscription_status !== 'expired' && (
                           <IconButton
                             onClick={() => handleRevokeAccess(u.id)}
-                            className="text-error-500"
+                            className="text-error"
                             label={t('admin.revoke_access')}
                           >
                             <XCircle size={16} />
@@ -570,7 +573,7 @@ const AdminPanel: React.FC = () => {
                         {u.id !== user?.id && (
                           <IconButton
                             onClick={() => handleDeleteUser(u.id)}
-                            className="text-error-500"
+                            className="text-error"
                             label={t('admin.delete_user')}
                           >
                             <Trash2 size={16} />
@@ -610,9 +613,9 @@ const AdminPanel: React.FC = () => {
           >
             <div className="flex items-center gap-3">
               <AlertCircle className="text-tertiary" size={28} />
-              <h2 className="text-2xl font-bold text-on-surface">{t('admin.bug_reports')}</h2>
+              <h2 className="m3-headline-small text-on-surface">{t('admin.bug_reports')}</h2>
               {bugReports.length > 0 && (
-                <span className="text-sm bg-surface-container-highest text-on-surface-variant px-2.5 py-0.5 rounded-m3-full">{bugReports.length}</span>
+                <span className="m3-body-medium bg-surface-container-highest text-on-surface-variant px-2.5 py-0.5 rounded-m3-full">{bugReports.length}</span>
               )}
             </div>
             <ChevronDown size={24} className={`text-on-surface-variant transform transition-transform ${bugReportsOpen ? 'rotate-180' : ''}`} />
@@ -628,8 +631,8 @@ const AdminPanel: React.FC = () => {
                   <AlertCircle size={20} />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-on-surface">{bugReports.length}</p>
-                  <p className="text-sm text-on-surface-variant">{t('admin.total_reports')}</p>
+                  <p className="m3-headline-small text-on-surface">{bugReports.length}</p>
+                  <p className="m3-body-medium text-on-surface-variant">{t('admin.total_reports')}</p>
                 </div>
               </div>
             </div>
@@ -639,8 +642,8 @@ const AdminPanel: React.FC = () => {
                   <XCircle size={20} />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-on-surface">{bugReports.filter(r => r.status === 'open').length}</p>
-                  <p className="text-sm text-on-surface-variant">{t('admin.open')}</p>
+                  <p className="m3-headline-small text-on-surface">{bugReports.filter(r => r.status === 'open').length}</p>
+                  <p className="m3-body-medium text-on-surface-variant">{t('admin.open')}</p>
                 </div>
               </div>
             </div>
@@ -650,8 +653,8 @@ const AdminPanel: React.FC = () => {
                   <Edit size={20} />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-on-surface">{bugReports.filter(r => r.status === 'in_progress').length}</p>
-                  <p className="text-sm text-on-surface-variant">{t('admin.in_progress')}</p>
+                  <p className="m3-headline-small text-on-surface">{bugReports.filter(r => r.status === 'in_progress').length}</p>
+                  <p className="m3-body-medium text-on-surface-variant">{t('admin.in_progress')}</p>
                 </div>
               </div>
             </div>
@@ -661,8 +664,8 @@ const AdminPanel: React.FC = () => {
                   <CheckCircle size={20} />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-on-surface">{bugReports.filter(r => r.status === 'resolved').length}</p>
-                  <p className="text-sm text-on-surface-variant">{t('admin.resolved')}</p>
+                  <p className="m3-headline-small text-on-surface">{bugReports.filter(r => r.status === 'resolved').length}</p>
+                  <p className="m3-body-medium text-on-surface-variant">{t('admin.resolved')}</p>
                 </div>
               </div>
             </div>
@@ -671,7 +674,7 @@ const AdminPanel: React.FC = () => {
           {/* Filters */}
           <div className="flex gap-4 mb-6">
             <div>
-              <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.status_label')}</label>
+              <label className="block m3-label-large text-on-surface-variant mb-2">{t('admin.status_label')}</label>
               <Select<string>
                 value={bugFilter}
                 onChange={setBugFilter}
@@ -686,7 +689,7 @@ const AdminPanel: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.severity_label')}</label>
+              <label className="block m3-label-large text-on-surface-variant mb-2">{t('admin.severity_label')}</label>
               <Select<string>
                 value={bugSeverityFilter}
                 onChange={setBugSeverityFilter}
@@ -701,7 +704,7 @@ const AdminPanel: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.user_label')}</label>
+              <label className="block m3-label-large text-on-surface-variant mb-2">{t('admin.user_label')}</label>
               <Select<string>
                 value={bugUserFilter}
                 onChange={setBugUserFilter}
@@ -721,13 +724,13 @@ const AdminPanel: React.FC = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-outline-variant">
-                    <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('admin.table_title')}</th>
-                    <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('admin.table_reporter')}</th>
-                    <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('admin.table_severity')}</th>
-                    <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('admin.table_bug_status')}</th>
-                    <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('admin.table_category')}</th>
-                    <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('admin.table_date')}</th>
-                    <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('admin.table_actions')}</th>
+                    <th className="text-left py-3 px-4 text-on-surface-variant m3-label-large">{t('admin.table_title')}</th>
+                    <th className="text-left py-3 px-4 text-on-surface-variant m3-label-large">{t('admin.table_reporter')}</th>
+                    <th className="text-left py-3 px-4 text-on-surface-variant m3-label-large">{t('admin.table_severity')}</th>
+                    <th className="text-left py-3 px-4 text-on-surface-variant m3-label-large">{t('admin.table_bug_status')}</th>
+                    <th className="text-left py-3 px-4 text-on-surface-variant m3-label-large">{t('admin.table_category')}</th>
+                    <th className="text-left py-3 px-4 text-on-surface-variant m3-label-large">{t('admin.table_date')}</th>
+                    <th className="text-left py-3 px-4 text-on-surface-variant m3-label-large">{t('admin.table_actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -748,9 +751,9 @@ const AdminPanel: React.FC = () => {
                       >
                         <td className="py-3 px-4 text-on-surface font-medium">{report.title}</td>
                         <td className="py-3 px-4">
-                          <div className="text-sm">
+                          <div className="m3-body-medium">
                             <p className="text-on-surface">{report.userName}</p>
-                            <p className="text-on-surface-variant text-xs">{report.userEmail}</p>
+                            <p className="text-on-surface-variant m3-body-small">{report.userEmail}</p>
                           </div>
                         </td>
                         <td className="py-3 px-4">
@@ -785,7 +788,7 @@ const AdminPanel: React.FC = () => {
                           />
                         </td>
                         <td className="py-3 px-4 text-on-surface-variant capitalize">{report.category}</td>
-                        <td className="py-3 px-4 text-on-surface-variant text-sm">
+                        <td className="py-3 px-4 text-on-surface-variant m3-body-medium">
                           {new Date(report.createdAt).toLocaleDateString()}
                         </td>
                         <td className="py-3 px-4">
@@ -818,7 +821,7 @@ const AdminPanel: React.FC = () => {
                             </IconButton>
                             <IconButton
                               onClick={() => handleDeleteBugReport(report.id)}
-                              className="text-error-500"
+                              className="text-error"
                               label={t('common.delete')}
                             >
                               <Trash2 size={16} />
@@ -849,9 +852,9 @@ const AdminPanel: React.FC = () => {
           >
             <div className="flex items-center gap-3">
               <Flag className="text-tertiary" size={28} />
-              <h2 className="text-2xl font-bold text-on-surface">{t('debug.debug_flags')}</h2>
+              <h2 className="m3-headline-small text-on-surface">{t('debug.debug_flags')}</h2>
               {debugFlags.length > 0 && (
-                <span className="text-sm bg-surface-container-highest text-on-surface-variant px-2.5 py-0.5 rounded-m3-full">{debugFlags.length}</span>
+                <span className="m3-body-medium bg-surface-container-highest text-on-surface-variant px-2.5 py-0.5 rounded-m3-full">{debugFlags.length}</span>
               )}
             </div>
             <ChevronDown size={24} className={`text-on-surface-variant transform transition-transform ${debugFlagsOpen ? 'rotate-180' : ''}`} />
@@ -866,8 +869,8 @@ const AdminPanel: React.FC = () => {
                     <Flag size={20} />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-on-surface">{debugFlags.length}</p>
-                    <p className="text-sm text-on-surface-variant">{t('debug.total_flags')}</p>
+                    <p className="m3-headline-small text-on-surface">{debugFlags.length}</p>
+                    <p className="m3-body-medium text-on-surface-variant">{t('debug.total_flags')}</p>
                   </div>
                 </div>
               </div>
@@ -877,8 +880,8 @@ const AdminPanel: React.FC = () => {
                     <XCircle size={20} />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-on-surface">{debugFlags.filter(f => f.status === 'open').length}</p>
-                    <p className="text-sm text-on-surface-variant">{t('admin.open')}</p>
+                    <p className="m3-headline-small text-on-surface">{debugFlags.filter(f => f.status === 'open').length}</p>
+                    <p className="m3-body-medium text-on-surface-variant">{t('admin.open')}</p>
                   </div>
                 </div>
               </div>
@@ -888,8 +891,8 @@ const AdminPanel: React.FC = () => {
                     <Search size={20} />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-on-surface">{debugFlags.filter(f => f.status === 'investigating').length}</p>
-                    <p className="text-sm text-on-surface-variant">{t('debug.investigating')}</p>
+                    <p className="m3-headline-small text-on-surface">{debugFlags.filter(f => f.status === 'investigating').length}</p>
+                    <p className="m3-body-medium text-on-surface-variant">{t('debug.investigating')}</p>
                   </div>
                 </div>
               </div>
@@ -899,8 +902,8 @@ const AdminPanel: React.FC = () => {
                     <CheckCircle size={20} />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-on-surface">{debugFlags.filter(f => f.status === 'resolved').length}</p>
-                    <p className="text-sm text-on-surface-variant">{t('admin.resolved')}</p>
+                    <p className="m3-headline-small text-on-surface">{debugFlags.filter(f => f.status === 'resolved').length}</p>
+                    <p className="m3-body-medium text-on-surface-variant">{t('admin.resolved')}</p>
                   </div>
                 </div>
               </div>
@@ -909,7 +912,7 @@ const AdminPanel: React.FC = () => {
             {/* Filter */}
             <div className="flex gap-4 mb-6">
               <div>
-                <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.status_label')}</label>
+                <label className="block m3-label-large text-on-surface-variant mb-2">{t('admin.status_label')}</label>
                 <Select<string>
                   value={debugFilter}
                   onChange={setDebugFilter}
@@ -924,7 +927,7 @@ const AdminPanel: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.user_label')}</label>
+                <label className="block m3-label-large text-on-surface-variant mb-2">{t('admin.user_label')}</label>
                 <Select<string>
                   value={debugUserFilter}
                   onChange={setDebugUserFilter}
@@ -942,11 +945,11 @@ const AdminPanel: React.FC = () => {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-outline-variant">
-                      <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('debug.table_comment')}</th>
-                      <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('debug.table_route')}</th>
-                      <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('debug.table_status')}</th>
-                      <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('debug.table_date')}</th>
-                      <th className="text-left py-3 px-4 text-on-surface-variant font-semibold text-sm">{t('debug.table_actions')}</th>
+                      <th className="text-left py-3 px-4 text-on-surface-variant m3-label-large">{t('debug.table_comment')}</th>
+                      <th className="text-left py-3 px-4 text-on-surface-variant m3-label-large">{t('debug.table_route')}</th>
+                      <th className="text-left py-3 px-4 text-on-surface-variant m3-label-large">{t('debug.table_status')}</th>
+                      <th className="text-left py-3 px-4 text-on-surface-variant m3-label-large">{t('debug.table_date')}</th>
+                      <th className="text-left py-3 px-4 text-on-surface-variant m3-label-large">{t('debug.table_actions')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -962,7 +965,7 @@ const AdminPanel: React.FC = () => {
                       .map(flag => (
                         <tr key={flag.id} className="border-b border-outline-variant hover:bg-surface-container transition-colors">
                           <td className="py-3 px-4 text-on-surface font-medium max-w-xs truncate">{flag.comment}</td>
-                          <td className="py-3 px-4 text-on-surface-variant font-mono text-sm">{flag.route || '-'}</td>
+                          <td className="py-3 px-4 text-on-surface-variant font-mono m3-body-medium">{flag.route || '-'}</td>
                           <td className="py-3 px-4">
                             <Select<string>
                               value={flag.status}
@@ -984,7 +987,7 @@ const AdminPanel: React.FC = () => {
                               ]}
                             />
                           </td>
-                          <td className="py-3 px-4 text-on-surface-variant text-sm">
+                          <td className="py-3 px-4 text-on-surface-variant m3-body-medium">
                             {new Date(flag.createdAt).toLocaleDateString()}
                           </td>
                           <td className="py-3 px-4">
@@ -999,14 +1002,14 @@ const AdminPanel: React.FC = () => {
                               <IconButton
                                 variant="tonal"
                                 onClick={() => handleCopyForAI(flag)}
-                                className={copiedFlagId === flag.id ? 'text-success-500' : 'text-tertiary'}
+                                className={copiedFlagId === flag.id ? 'text-success' : 'text-tertiary'}
                                 label={t('debug.copy_for_ai')}
                               >
                                 <Copy size={16} />
                               </IconButton>
                               <IconButton
                                 onClick={() => handleDeleteDebugFlag(flag.id)}
-                                className="text-error-500"
+                                className="text-error"
                                 label={t('common.delete')}
                               >
                                 <Trash2 size={16} />
@@ -1028,7 +1031,7 @@ const AdminPanel: React.FC = () => {
           <div className="m3-scrim">
             <div className="m3-dialog max-w-4xl w-full max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-on-surface">{t('debug.flag_details')}</h3>
+                <h3 className="m3-headline-small text-on-surface">{t('debug.flag_details')}</h3>
                 <div className="flex items-center gap-2">
                   <Button
                     size="sm"
@@ -1047,7 +1050,7 @@ const AdminPanel: React.FC = () => {
               <div className="space-y-6">
                 {/* Comment */}
                 <div>
-                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.description')}</label>
+                  <label className="block m3-label-large text-on-surface-variant mb-2">{t('admin.description')}</label>
                   <p className="text-on-surface bg-surface-container rounded-m3-md p-4 border border-outline-variant whitespace-pre-wrap">
                     {selectedDebugFlag.comment}
                   </p>
@@ -1056,11 +1059,11 @@ const AdminPanel: React.FC = () => {
                 {/* Screenshot */}
                 {selectedDebugFlag.screenshotUrl && (
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.screenshot')}</label>
+                    <label className="block m3-label-large text-on-surface-variant mb-2">{t('admin.screenshot')}</label>
                     <img
                       src={selectedDebugFlag.screenshotUrl}
                       alt="Debug screenshot"
-                      className="w-full rounded-m3-md border border-outline-variant cursor-pointer hover:border-primary-500 transition-colors"
+                      className="w-full rounded-m3-md border border-outline-variant cursor-pointer hover:border-[var(--m3-primary)] transition-colors"
                       onClick={() => window.open(selectedDebugFlag.screenshotUrl, '_blank')}
                     />
                   </div>
@@ -1069,8 +1072,8 @@ const AdminPanel: React.FC = () => {
                 {/* Browser Info */}
                 {selectedDebugFlag.browserInfo && (
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.browser_info')}</label>
-                    <div className="bg-surface-container rounded-m3-md p-4 border border-outline-variant text-sm">
+                    <label className="block m3-label-large text-on-surface-variant mb-2">{t('admin.browser_info')}</label>
+                    <div className="bg-surface-container rounded-m3-md p-4 border border-outline-variant m3-body-medium">
                       <p className="text-on-surface-variant mb-1"><span className="text-on-surface font-medium">{t('admin.user_agent')}:</span> {selectedDebugFlag.browserInfo.userAgent}</p>
                       <p className="text-on-surface-variant mb-1"><span className="text-on-surface font-medium">{t('admin.screen')}:</span> {selectedDebugFlag.browserInfo.screenResolution}</p>
                       <p className="text-on-surface-variant"><span className="text-on-surface font-medium">{t('admin.viewport')}:</span> {selectedDebugFlag.browserInfo.viewport}</p>
@@ -1081,8 +1084,8 @@ const AdminPanel: React.FC = () => {
                 {/* Route */}
                 {selectedDebugFlag.route && (
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.route')}</label>
-                    <p className="text-on-surface bg-surface-container rounded-m3-md p-3 border border-outline-variant font-mono text-sm">
+                    <label className="block m3-label-large text-on-surface-variant mb-2">{t('admin.route')}</label>
+                    <p className="text-on-surface bg-surface-container rounded-m3-md p-3 border border-outline-variant font-mono m3-body-medium">
                       {selectedDebugFlag.route}
                     </p>
                   </div>
@@ -1091,8 +1094,8 @@ const AdminPanel: React.FC = () => {
                 {/* Game State */}
                 {!!selectedDebugFlag.gameState && (
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('debug.game_state')}</label>
-                    <pre className="text-on-surface bg-surface-container rounded-m3-md p-4 border border-outline-variant font-mono text-xs overflow-x-auto">
+                    <label className="block m3-label-large text-on-surface-variant mb-2">{t('debug.game_state')}</label>
+                    <pre className="text-on-surface bg-surface-container rounded-m3-md p-4 border border-outline-variant font-mono m3-body-small overflow-x-auto">
                       {JSON.stringify(selectedDebugFlag.gameState, null, 2)}
                     </pre>
                   </div>
@@ -1100,21 +1103,21 @@ const AdminPanel: React.FC = () => {
 
                 {/* Log Entries */}
                 <div>
-                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">
+                  <label className="block m3-label-large text-on-surface-variant mb-2">
                     {t('debug.log_entries')} ({selectedDebugFlag.logEntries?.length || 0})
                   </label>
                   {selectedDebugFlag.logEntries && selectedDebugFlag.logEntries.length > 0 ? (
-                    <div className="bg-surface-container-low rounded-m3-md border border-outline-variant max-h-80 overflow-y-auto p-3 font-mono text-xs">
+                    <div className="bg-surface-container-low rounded-m3-md border border-outline-variant max-h-80 overflow-y-auto p-3 font-mono m3-body-small">
                       {selectedDebugFlag.logEntries.map((entry, i) => (
                         <div key={i} className={`py-0.5 ${
-                          entry.level === 'error' ? 'text-error-500' :
+                          entry.level === 'error' ? 'text-error' :
                           entry.level === 'warn' ? 'text-tertiary' :
                           'text-on-surface-variant'
                         }`}>
                           <span className="text-on-surface-variant/60">[{entry.timestamp.split('T')[1]?.slice(0, 12)}]</span>
                           {' '}
                           <span className={`font-semibold ${
-                            entry.level === 'error' ? 'text-error-500' :
+                            entry.level === 'error' ? 'text-error' :
                             entry.level === 'warn' ? 'text-tertiary' :
                             entry.level === 'info' ? 'text-primary' :
                             'text-on-surface-variant/60'
@@ -1132,17 +1135,17 @@ const AdminPanel: React.FC = () => {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-on-surface-variant text-sm">{t('debug.no_logs')}</p>
+                    <p className="text-on-surface-variant m3-body-medium">{t('debug.no_logs')}</p>
                   )}
                 </div>
 
                 {/* Admin Notes */}
                 <div>
-                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.admin_notes')}</label>
+                  <label className="block m3-label-large text-on-surface-variant mb-2">{t('admin.admin_notes')}</label>
                   <textarea
                     defaultValue={selectedDebugFlag.adminNotes || ''}
                     onBlur={(e) => handleUpdateDebugNotes(selectedDebugFlag.id, e.target.value)}
-                    className="w-full px-4 py-3 bg-surface-container border border-outline-variant rounded-m3-md text-on-surface placeholder-on-surface-variant focus:outline-none focus:border-primary-500 resize-none"
+                    className="w-full px-4 py-3 bg-surface-container border border-outline-variant rounded-m3-md text-on-surface placeholder-on-surface-variant focus:outline-none focus:border-[var(--m3-primary)] resize-none"
                     rows={3}
                     placeholder={t('admin.admin_notes_placeholder')}
                   />
@@ -1150,7 +1153,7 @@ const AdminPanel: React.FC = () => {
 
                 {/* Status Update */}
                 <div>
-                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.update_status')}</label>
+                  <label className="block m3-label-large text-on-surface-variant mb-2">{t('admin.update_status')}</label>
                   <div className="flex gap-2">
                     {(['open', 'investigating', 'resolved', 'dismissed'] as const).map(status => (
                       <Button
@@ -1199,20 +1202,20 @@ const AdminPanel: React.FC = () => {
                         className="w-12 h-12 rounded-full object-cover ring-2 ring-outline-variant"
                       />
                     ) : (
-                      <div className="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center text-xl font-bold">
+                      <div className="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center m3-title-large">
                         {editingUser.avatar || editingUser.name.charAt(0).toUpperCase()}
                       </div>
                     )}
                     <div>
                       <p className="font-semibold text-on-surface">{editingUser.name}</p>
-                      <p className="text-sm text-on-surface-variant">{editingUser.email}</p>
+                      <p className="m3-body-medium text-on-surface-variant">{editingUser.email}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Status */}
                 <div>
-                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">
+                  <label className="block m3-label-large text-on-surface-variant mb-2">
                     {t('admin.status_required')}
                   </label>
                   <Select<string>
@@ -1231,7 +1234,7 @@ const AdminPanel: React.FC = () => {
 
                 {/* Plan */}
                 <div>
-                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">
+                  <label className="block m3-label-large text-on-surface-variant mb-2">
                     {t('admin.plan_label')}
                   </label>
                   <Select<string>
@@ -1250,16 +1253,16 @@ const AdminPanel: React.FC = () => {
 
                 {/* Ends At */}
                 <div>
-                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">
+                  <label className="block m3-label-large text-on-surface-variant mb-2">
                     {t('admin.expiry_date')}
                   </label>
                   <input
                     type="datetime-local"
                     value={editFormData.subscriptionEndsAt}
                     onChange={(e) => setEditFormData({ ...editFormData, subscriptionEndsAt: e.target.value })}
-                    className="w-full px-4 py-3 bg-surface-container border border-outline-variant rounded-m3-md text-on-surface focus:outline-none focus:border-primary-500"
+                    className="w-full px-4 py-3 bg-surface-container border border-outline-variant rounded-m3-md text-on-surface focus:outline-none focus:border-[var(--m3-primary)]"
                   />
-                  <p className="text-xs text-on-surface-variant mt-1">
+                  <p className="m3-body-small text-on-surface-variant mt-1">
                     {t('admin.expiry_hint')}
                   </p>
                 </div>
@@ -1272,7 +1275,7 @@ const AdminPanel: React.FC = () => {
           <div className="m3-scrim">
             <div className="m3-dialog max-w-3xl w-full max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-on-surface">{t('admin.bug_report_details')}</h3>
+                <h3 className="m3-headline-small text-on-surface">{t('admin.bug_report_details')}</h3>
                 <IconButton label={t('common.close')} onClick={() => setSelectedBugReport(null)}>
                   <XCircle size={24} />
                 </IconButton>
@@ -1283,11 +1286,11 @@ const AdminPanel: React.FC = () => {
                 <div>
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <h4 className="text-xl font-bold text-on-surface mb-2">{selectedBugReport.title}</h4>
-                      <p className="text-on-surface-variant text-sm">
+                      <h4 className="m3-title-large text-on-surface mb-2">{selectedBugReport.title}</h4>
+                      <p className="text-on-surface-variant m3-body-medium">
                         {t('admin.reported_by')} {selectedBugReport.userName} ({selectedBugReport.userEmail})
                       </p>
-                      <p className="text-on-surface-variant text-sm">
+                      <p className="text-on-surface-variant m3-body-medium">
                         {new Date(selectedBugReport.createdAt).toLocaleString()}
                       </p>
                     </div>
@@ -1300,7 +1303,7 @@ const AdminPanel: React.FC = () => {
                       }`}>
                         {selectedBugReport.severity.toUpperCase()}
                       </span>
-                      <span className="px-3 py-1 rounded-m3-sm font-semibold text-sm bg-surface-container-highest text-on-surface-variant capitalize">
+                      <span className="px-3 py-1 rounded-m3-sm m3-label-large bg-surface-container-highest text-on-surface-variant capitalize">
                         {selectedBugReport.category}
                       </span>
                     </div>
@@ -1309,7 +1312,7 @@ const AdminPanel: React.FC = () => {
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.description')}</label>
+                  <label className="block m3-label-large text-on-surface-variant mb-2">{t('admin.description')}</label>
                   <p className="text-on-surface bg-surface-container rounded-m3-md p-4 border border-outline-variant whitespace-pre-wrap">
                     {selectedBugReport.description}
                   </p>
@@ -1318,19 +1321,19 @@ const AdminPanel: React.FC = () => {
                 {/* Screenshot */}
                 {selectedBugReport.screenshotUrl && (
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.screenshot')}</label>
+                    <label className="block m3-label-large text-on-surface-variant mb-2">{t('admin.screenshot')}</label>
                     <div className="relative group">
                       <img
                         src={selectedBugReport.screenshotUrl}
                         alt="Bug screenshot"
-                        className="w-full rounded-m3-md border border-outline-variant cursor-pointer hover:border-primary-500 transition-colors"
+                        className="w-full rounded-m3-md border border-outline-variant cursor-pointer hover:border-[var(--m3-primary)] transition-colors"
                         onClick={() => window.open(selectedBugReport.screenshotUrl, '_blank')}
                       />
                       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <a
                           href={selectedBugReport.screenshotUrl}
                           download={`bug-report-${selectedBugReport.id}.png`}
-                          className="px-3 py-1 bg-surface-container-highest hover:bg-surface-container-high text-on-surface text-sm rounded-m3-md transition-colors"
+                          className="px-3 py-1 bg-surface-container-highest hover:bg-surface-container-high text-on-surface m3-body-medium rounded-m3-md transition-colors"
                           onClick={(e) => e.stopPropagation()}
                         >
                           {t('admin.download')}
@@ -1343,8 +1346,8 @@ const AdminPanel: React.FC = () => {
                 {/* Browser Info */}
                 {selectedBugReport.browserInfo && (
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.browser_info')}</label>
-                    <div className="bg-surface-container rounded-m3-md p-4 border border-outline-variant text-sm">
+                    <label className="block m3-label-large text-on-surface-variant mb-2">{t('admin.browser_info')}</label>
+                    <div className="bg-surface-container rounded-m3-md p-4 border border-outline-variant m3-body-medium">
                       <p className="text-on-surface-variant mb-1"><span className="text-on-surface font-medium">{t('admin.user_agent')}:</span> {selectedBugReport.browserInfo.userAgent}</p>
                       <p className="text-on-surface-variant mb-1"><span className="text-on-surface font-medium">{t('admin.screen')}:</span> {selectedBugReport.browserInfo.screenResolution}</p>
                       <p className="text-on-surface-variant"><span className="text-on-surface font-medium">{t('admin.viewport')}:</span> {selectedBugReport.browserInfo.viewport}</p>
@@ -1355,8 +1358,8 @@ const AdminPanel: React.FC = () => {
                 {/* Route */}
                 {selectedBugReport.route && (
                   <div>
-                    <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.route')}</label>
-                    <p className="text-on-surface bg-surface-container rounded-m3-md p-3 border border-outline-variant font-mono text-sm">
+                    <label className="block m3-label-large text-on-surface-variant mb-2">{t('admin.route')}</label>
+                    <p className="text-on-surface bg-surface-container rounded-m3-md p-3 border border-outline-variant font-mono m3-body-medium">
                       {selectedBugReport.route}
                     </p>
                   </div>
@@ -1364,11 +1367,11 @@ const AdminPanel: React.FC = () => {
 
                 {/* Admin Notes */}
                 <div>
-                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.admin_notes')}</label>
+                  <label className="block m3-label-large text-on-surface-variant mb-2">{t('admin.admin_notes')}</label>
                   <textarea
                     defaultValue={selectedBugReport.adminNotes || ''}
                     onBlur={(e) => handleUpdateBugNotes(selectedBugReport.id, e.target.value)}
-                    className="w-full px-4 py-3 bg-surface-container border border-outline-variant rounded-m3-md text-on-surface placeholder-on-surface-variant focus:outline-none focus:border-primary-500 resize-none"
+                    className="w-full px-4 py-3 bg-surface-container border border-outline-variant rounded-m3-md text-on-surface placeholder-on-surface-variant focus:outline-none focus:border-[var(--m3-primary)] resize-none"
                     rows={4}
                     placeholder={t('admin.admin_notes_placeholder')}
                   />
@@ -1376,7 +1379,7 @@ const AdminPanel: React.FC = () => {
 
                 {/* Status Update */}
                 <div>
-                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('admin.update_status')}</label>
+                  <label className="block m3-label-large text-on-surface-variant mb-2">{t('admin.update_status')}</label>
                   <div className="flex gap-2">
                     <Button
                       fullWidth

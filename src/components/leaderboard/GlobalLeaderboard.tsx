@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, TrendingUp, Target, Award, Loader, RefreshCw } from 'lucide-react';
+import { Trophy, TrendingUp, Target, Award, RefreshCw } from 'lucide-react';
 import api from '../../services/api';
 import { BackButton, Card, Chip, Button, IconButton, PageShell } from '../common';
 import { useAuth } from '../../context/AuthContext';
 import { motion } from 'framer-motion';
 import { staggerChild } from '../../utils/motion';
 import { Icon } from '../icons';
+import LoadingIndicator from '../common/LoadingIndicator';
 
 interface LeaderboardEntry {
   playerId: string;
@@ -66,9 +67,9 @@ const GlobalLeaderboard: React.FC = () => {
   };
 
   const getRankColor = (rank: number) => {
-    if (rank === 1) return 'text-amber-400';
-    if (rank === 2) return 'text-gray-300';
-    if (rank === 3) return 'text-orange-500';
+    if (rank === 1) return 'text-[var(--m3-medal-gold)]';
+    if (rank === 2) return 'text-[var(--m3-medal-silver)]';
+    if (rank === 3) return 'text-[var(--m3-medal-bronze)]';
     return 'text-on-surface-variant';
   };
 
@@ -95,7 +96,7 @@ const GlobalLeaderboard: React.FC = () => {
         />
 
         <div className="text-center mb-8">
-          <h1 className="m3-headline-medium md:m3-headline-large text-on-surface mb-2">
+          <h1 className="m3-headline-medium text-on-surface mb-2">
             Global Leaderboard
           </h1>
           <p className="m3-title-medium text-on-surface-variant">
@@ -126,14 +127,14 @@ const GlobalLeaderboard: React.FC = () => {
         {/* Loading State */}
         {loading && (
           <div className="flex items-center justify-center py-20">
-            <Loader className="animate-spin text-primary" size={48} />
+            <LoadingIndicator size={48} />
           </div>
         )}
 
         {/* Error State */}
         {error && (
           <Card variant="elevated" className="p-8 text-center">
-            <p className="text-error-400 mb-4">{error}</p>
+            <p className="text-error mb-4">{error}</p>
             <Button
               variant="filled"
               icon={<RefreshCw size={20} />}

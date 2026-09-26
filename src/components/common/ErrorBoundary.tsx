@@ -43,7 +43,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
       <div className="min-h-dvh flex items-center justify-center gradient-mesh p-4">
         <div className="m3-card m3-elevated rounded-m3-xl p-8 max-w-md w-full text-center m3-enter-pop">
           <div className="mb-4 flex justify-center text-error"><Icon name="warning" size={56} /></div>
-          <h1 className="m3-headline-small font-bold text-on-surface mb-2">
+          <h1 className="m3-headline-small m3-emphasized text-on-surface mb-2">
             Etwas ist schiefgelaufen
           </h1>
           <p className="m3-body-medium text-on-surface-variant mb-6">

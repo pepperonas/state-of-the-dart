@@ -7,6 +7,52 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-09-26
+
+Material 3 Expressive, consistently — and measured, not eyeballed.
+
+### Fixed — display bugs
+
+- **Eleven classes did nothing**: `text-error-500`/`-400` and `border-error-500`
+  (the `error` colour has no number scale) — error text in the admin panel,
+  leaderboard and game setup showed in the default colour.
+- `dark:` classes in the match details never applied (the app never sets
+  `dark`): dark grey text on dark surfaces.
+- The loading screen for every lazy route was a legacy glass card with white
+  text — white on white in the light theme.
+- Unloaded font weights (`font-black`, `font-extrabold`), an undefined
+  animation class, a responsive prefix on an M3 type class.
+- **Text contrast now meets WCAG AA on eleven screens in both themes**,
+  measured in the browser (new `e2e/contrast.spec.ts`). Fixes it forced:
+  locked achievement cards and the inactive player card were dimmed with
+  `opacity`, which multiplied into every text colour (3.99:1); tier and rarity
+  chips painted their colour as text on a 20 % tint of itself (1.05:1 for gold
+  in the light theme); the footer version was faded to 3.98:1.
+
+### Changed
+
+- **Charts follow the theme**: a shared `useChartTheme()` feeds the M3 tokens
+  into all seven chart files (grid, axes, series, tooltip) — they had
+  hard-coded dark greys and a black tooltip.
+- **No more browser `alert()`/`confirm()`** (36 calls): an app-wide
+  `useFeedback()` gives M3 snackbars and confirm dialogs, translated.
+- **Dialogs behave like modals**: focus moves in, Tab stays inside, Escape
+  closes, focus returns to the opener, the title labels the dialog. The
+  hand-built overlays (Around the Clock, Shanghai, bug report, match details)
+  use the shared dialog; the rest got dialog semantics.
+- **One loading indicator** (M3 Expressive morphing shape) instead of six
+  spinner styles.
+- Colours come from the M3 roles: the numbered legacy scales are gone, ranks
+  use gold/silver/bronze tokens tuned per theme, selection uses the primary
+  ring, scrims use the scrim token.
+- Admin panel, guide, settings and training on the M3 type scale (the admin
+  panel went from 105 ad-hoc font sizes to 3 responsive ones); an
+  `m3-emphasized` style replaces 58 `m3-* font-bold` combinations.
+- Route changes fade through (M3).
+- New primitives: `TextArea`, `LoadingIndicator`, `useFeedback`.
+- The consistency test now also covers `App.tsx` and forbids dead classes,
+  theme-blind colours, numbered legacy colours and native dialogs.
+
 ## [0.12.0] - 2026-09-26
 
 The app's structure: one tap to play again, a real navigation, and a game

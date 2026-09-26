@@ -183,8 +183,8 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
 
   const getMarkColor = (marks: number) => {
     if (marks === 0) return 'text-on-surface-variant/40';
-    if (marks < 3) return 'text-yellow-400';
-    return 'text-success-400';
+    if (marks < 3) return 'text-tertiary';
+    return 'text-success';
   };
 
   const handleBack = () => {
@@ -306,7 +306,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
         widthClassName="max-w-md"
       >
         <div className="text-center">
-          <Trophy className="w-20 h-20 text-yellow-400 mx-auto mb-4" />
+          <Trophy className="w-20 h-20 text-[var(--m3-medal-gold)] mx-auto mb-4" aria-hidden="true" />
           <h2 className="m3-headline-small text-on-surface mb-2">
             {currentPlayer?.name} gewinnt!
           </h2>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Trophy, Target, Award, TrendingUp, Flame, Calendar,
-  ArrowRight, Loader, Play, Users, Dumbbell, ArrowLeft, Crown, Clock
+  ArrowRight, Play, Users, Dumbbell, ArrowLeft, Crown, Clock
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
@@ -17,6 +17,7 @@ import { BackButton, Button, Card, AnimatedNumber } from '../common';
 import { staggerChild } from '../../utils/motion';
 import { Icon, iconForEmoji } from '../icons';
 import ErrorState from '../common/ErrorState';
+import LoadingIndicator from '../common/LoadingIndicator';
 
 interface RecentActivity {
   id: string;
@@ -271,19 +272,16 @@ const Dashboard: React.FC = () => {
     {
       title: 'Quick Game',
       icon: Play,
-      gradient: 'from-primary-500 to-primary-600',
       onClick: () => navigate('/game'),
     },
     {
       title: 'Training',
       icon: Dumbbell,
-      gradient: 'from-accent-500 to-accent-600',
       onClick: () => navigate('/training'),
     },
     {
       title: 'Players',
       icon: Users,
-      gradient: 'from-success-500 to-success-600',
       onClick: () => navigate('/players'),
     },
   ];
@@ -291,7 +289,7 @@ const Dashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-dvh flex items-center justify-center gradient-mesh">
-        <Loader className="animate-spin text-primary" size={48} />
+        <LoadingIndicator size={48} />
       </div>
     );
   }
@@ -305,7 +303,7 @@ const Dashboard: React.FC = () => {
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="m3-headline-medium font-bold text-on-surface mb-2">
+          <h1 className="m3-headline-medium m3-emphasized text-on-surface mb-2">
             Willkommen zurück, {user?.name}!
           </h1>
           <p className="text-on-surface-variant">
@@ -341,7 +339,7 @@ const Dashboard: React.FC = () => {
                   <Clock size={24} className="text-primary" />
                 </div>
                 <div>
-                  <p className="m3-title-medium font-bold text-on-primary-container">
+                  <p className="m3-title-medium m3-emphasized text-on-primary-container">
                     Premium-Trial: Noch {trialDaysLeft} {trialDaysLeft === 1 ? 'Tag' : 'Tage'}
                   </p>
                   <p className="m3-body-small text-on-primary-container">
@@ -366,7 +364,7 @@ const Dashboard: React.FC = () => {
           <motion.div {...staggerChild(0)}>
             <Card variant="elevated" className="p-4">
               <div className="mb-2 flex justify-center"><Icon name="board" size={30} /></div>
-              <p className="m3-headline-small font-bold text-on-surface"><AnimatedNumber value={stats.totalMatches} /></p>
+              <p className="m3-headline-small m3-emphasized text-on-surface"><AnimatedNumber value={stats.totalMatches} /></p>
               <p className="m3-body-small text-on-surface-variant">Matches</p>
             </Card>
           </motion.div>
@@ -374,7 +372,7 @@ const Dashboard: React.FC = () => {
           <motion.div {...staggerChild(1)}>
             <Card variant="elevated" className="p-4">
               <div className="mb-2 flex justify-center"><Icon name="trophy" size={30} /></div>
-              <p className="m3-headline-small font-bold text-on-surface"><AnimatedNumber value={stats.totalWins} /></p>
+              <p className="m3-headline-small m3-emphasized text-on-surface"><AnimatedNumber value={stats.totalWins} /></p>
               <p className="m3-body-small text-on-surface-variant">Siege</p>
             </Card>
           </motion.div>
@@ -382,7 +380,7 @@ const Dashboard: React.FC = () => {
           <motion.div {...staggerChild(2)}>
             <Card variant="elevated" className="p-4">
               <div className="mb-2 flex justify-center"><Icon name="percent" size={30} /></div>
-              <p className="m3-headline-small font-bold text-on-surface"><AnimatedNumber value={stats.winRate} />%</p>
+              <p className="m3-headline-small m3-emphasized text-on-surface"><AnimatedNumber value={stats.winRate} />%</p>
               <p className="m3-body-small text-on-surface-variant">Win Rate</p>
             </Card>
           </motion.div>
@@ -390,7 +388,7 @@ const Dashboard: React.FC = () => {
           <motion.div {...staggerChild(3)}>
             <Card variant="elevated" className="p-4">
               <div className="mb-2 flex justify-center"><Icon name="flame" size={30} /></div>
-              <p className="m3-headline-small font-bold text-on-surface"><AnimatedNumber value={stats.currentStreak} /></p>
+              <p className="m3-headline-small m3-emphasized text-on-surface"><AnimatedNumber value={stats.currentStreak} /></p>
               <p className="m3-body-small text-on-surface-variant">Streak</p>
             </Card>
           </motion.div>
@@ -398,7 +396,7 @@ const Dashboard: React.FC = () => {
           <motion.div {...staggerChild(4)}>
             <Card variant="elevated" className="p-4">
               <div className="mb-2 flex justify-center"><Icon name="chartUp" size={30} /></div>
-              <p className="m3-headline-small font-bold text-on-surface"><AnimatedNumber value={stats.averageScore} decimals={1} /></p>
+              <p className="m3-headline-small m3-emphasized text-on-surface"><AnimatedNumber value={stats.averageScore} decimals={1} /></p>
               <p className="m3-body-small text-on-surface-variant">Average</p>
             </Card>
           </motion.div>
@@ -406,7 +404,7 @@ const Dashboard: React.FC = () => {
           <motion.div {...staggerChild(5)}>
             <Card variant="elevated" className="p-4">
               <div className="mb-2 flex justify-center"><Icon name="target" size={30} /></div>
-              <p className="m3-headline-small font-bold text-on-surface"><AnimatedNumber value={stats.total180s} /></p>
+              <p className="m3-headline-small m3-emphasized text-on-surface"><AnimatedNumber value={stats.total180s} /></p>
               <p className="m3-body-small text-on-surface-variant">180s</p>
             </Card>
           </motion.div>
@@ -416,7 +414,7 @@ const Dashboard: React.FC = () => {
           {/* Recent Activity */}
           <div className="lg:col-span-2">
             <Card variant="elevated" className="p-6">
-              <h2 className="m3-title-large font-bold text-on-surface mb-6 flex items-center gap-2">
+              <h2 className="m3-title-large m3-emphasized text-on-surface mb-6 flex items-center gap-2">
                 <Calendar size={24} />
                 Letzte Aktivitäten
               </h2>
@@ -471,7 +469,7 @@ const Dashboard: React.FC = () => {
           {/* Quick Actions */}
           <div>
             <Card variant="elevated" className="p-6 mb-6">
-              <h2 className="m3-title-large font-bold text-on-surface mb-4">Quick Actions</h2>
+              <h2 className="m3-title-large m3-emphasized text-on-surface mb-4">Quick Actions</h2>
               <div className="space-y-3">
                 {quickActions.map((action, index) => {
                   const Icon = action.icon;
@@ -495,7 +493,7 @@ const Dashboard: React.FC = () => {
             <Card variant="filled" className="p-6 bg-primary-container text-on-primary-container">
               <div className="text-center">
                 <div className="mb-3 flex justify-center"><Icon name="flame" size={44} /></div>
-                <h3 className="m3-title-medium font-bold text-on-primary-container mb-2">
+                <h3 className="m3-title-medium m3-emphasized text-on-primary-container mb-2">
                   {stats.currentStreak > 0 ? (
                     <>Du bist on fire! </>
                   ) : stats.totalMatches === 0 ? (
@@ -526,8 +524,8 @@ const Dashboard: React.FC = () => {
 
         {/* Loading Overlay for Match */}
         {loadingMatch && (
-          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 m3-scrim-enter">
-            <Loader className="animate-spin text-primary" size={48} />
+          <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_60%,transparent)] flex items-center justify-center z-50 m3-scrim-enter" aria-busy="true">
+            <LoadingIndicator size={48} />
           </div>
         )}
       </div>

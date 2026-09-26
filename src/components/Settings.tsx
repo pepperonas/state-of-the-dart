@@ -13,6 +13,7 @@ import { api } from '../services/api';
 import type { BugReport } from '../types';
 import BugReportModal from './bugReport/BugReportModal';
 import { Icon, iconForEmoji } from './icons';
+import { useFeedback } from './common/feedbackContext';
 
 interface SettingsProps {
   darkMode: boolean;
@@ -20,6 +21,7 @@ interface SettingsProps {
 }
 
 const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
+  const { notify, confirm } = useFeedback();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { settings, updateSettings } = useSettings();
@@ -69,9 +71,9 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
     
     try {
       exportTenantData(currentTenant.id, currentTenant.name);
-      alert('Daten erfolgreich exportiert!');
+      notify(t('settings.export_done'));
     } catch (error) {
-      alert('Export fehlgeschlagen. Bitte versuche es erneut.');
+      notify(t('settings.export_failed'));
       console.error(error);
     }
   };
@@ -85,14 +87,16 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
     if (!file || !currentTenant) return;
 
     if (!file.name.endsWith('.json')) {
-      alert('Bitte wähle eine JSON-Datei aus.');
+      notify(t('settings.import_pick_json'));
       return;
     }
 
-    const confirmed = window.confirm(
-      'Achtung: Der Import überschreibt alle aktuellen Daten!\n\n'+
-      'Möchtest du vorher ein Backup exportieren?'
-    );
+    const confirmed = await confirm({
+      title: t('settings.import_confirm_title'),
+      message: t('settings.import_confirm_body'),
+      confirmLabel: t('settings.import_confirm_action'),
+      danger: true,
+    });
 
     if (!confirmed) {
       event.target.value = '';
@@ -101,10 +105,10 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
 
     try {
       await importTenantData(file, currentTenant.id);
-      alert('Daten erfolgreich importiert!\n\nDie Seite wird neu geladen...');
-      window.location.reload();
+      notify(t('settings.import_done'));
+      setTimeout(() => window.location.reload(), 1200);
     } catch (error) {
-      alert('Import fehlgeschlagen. Bitte überprüfe die Datei.');
+      notify(t('settings.import_failed'));
       console.error(error);
     }
 
@@ -137,7 +141,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                       </div>
                       <div>
                         <p className="text-on-success-container font-semibold">{t('settings.app_installed')} </p>
-                        <p className="text-on-success-container text-sm">Die App läuft als eigenständige Anwendung.</p>
+                        <p className="text-on-success-container m3-body-medium">Die App läuft als eigenständige Anwendung.</p>
                       </div>
                     </div>
                   </div>
@@ -157,10 +161,10 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                     )}
 
                     <div className="mt-3 p-3 bg-primary-container rounded-m3-md">
-                      <p className="text-sm text-on-primary-container">
+                      <p className="m3-body-medium text-on-primary-container">
                         <strong className="text-on-primary-container">{t('settings.pwa_benefits')}</strong>
                       </p>
-                      <ul className="text-sm text-on-primary-container mt-2 space-y-1 ml-4 list-disc">
+                      <ul className="m3-body-medium text-on-primary-container mt-2 space-y-1 ml-4 list-disc">
                         <li>{t('settings.pwa_benefit_offline')}</li>
                         <li>{t('settings.pwa_benefit_homescreen')}</li>
                         <li>{t('settings.pwa_benefit_native')}</li>
@@ -169,7 +173,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                     </div>
 
                     <div className="mt-3 p-3 bg-surface-container rounded-m3-md">
-                      <p className="text-xs text-on-surface-variant">
+                      <p className="m3-body-small text-on-surface-variant">
                         <strong>iOS:</strong> {t('settings.pwa_ios_tip')}<br/>
                         <strong>Android:</strong> {t('settings.pwa_android_tip')}
                       </p>
@@ -223,7 +227,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-m3-md bg-gradient-to-br from-gray-100 to-gray-300 border border-outline-variant flex items-center justify-center">
-                      <Sun size={24} className="text-primary-600" />
+                      <Sun size={24} className="text-primary" />
                     </div>
                     <div className="flex-1 text-left">
                       <p className={`font-semibold ${settings.theme === 'modern-light' ? 'text-on-primary-container' : 'text-on-surface'}`}>{t('settings.modern_light')}</p>
@@ -238,7 +242,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 </button>
 
                 <div className="mt-3 p-3 bg-primary-container rounded-m3-md">
-                  <p className="text-xs text-on-primary-container flex items-center gap-2">
+                  <p className="m3-body-small text-on-primary-container flex items-center gap-2">
                     <Sparkles size={14} />
                     {t('settings.theme_instant')}
                   </p>
@@ -258,7 +262,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 <div>
                   <label className="flex items-center justify-between mb-2">
                     <span className="text-on-surface-variant">{t('settings.caller_volume')}</span>
-                    <span className="text-sm text-on-surface-variant">{settings.callerVolume ?? settings.soundVolume}%</span>
+                    <span className="m3-body-medium text-on-surface-variant">{settings.callerVolume ?? settings.soundVolume}%</span>
                   </label>
                   <input
                     type="range"
@@ -278,7 +282,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 <div>
                   <label className="flex items-center justify-between mb-2">
                     <span className="text-on-surface-variant">{t('settings.effects_volume')}</span>
-                    <span className="text-sm text-on-surface-variant">{settings.effectsVolume ?? settings.soundVolume}%</span>
+                    <span className="m3-body-medium text-on-surface-variant">{settings.effectsVolume ?? settings.soundVolume}%</span>
                   </label>
                   <input
                     type="range"
@@ -389,7 +393,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 ]}
               />
 
-              <p className="text-sm text-on-surface-variant mt-2">
+              <p className="m3-body-medium text-on-surface-variant mt-2">
                 Language changes are applied instantly
               </p>
             </div>
@@ -429,7 +433,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 />
 
                 <div className="p-3 bg-tertiary-container rounded-m3-md">
-                  <p className="text-sm text-on-tertiary-container">
+                  <p className="m3-body-medium text-on-tertiary-container">
                     ℹ {t('settings.export_info')}
                   </p>
                 </div>
@@ -446,7 +450,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                   <AlertCircle size={20} />
                   {t('settings.bug_reports')}
                   {bugReports.length > 0 && (
-                    <span className="text-xs bg-surface-container-high text-on-surface-variant px-2 py-0.5 rounded-full">{bugReports.length}</span>
+                    <span className="m3-body-small bg-surface-container-high text-on-surface-variant px-2 py-0.5 rounded-full">{bugReports.length}</span>
                   )}
                 </span>
                 <ChevronDown size={20} className={`transform transition-transform ${bugReportsOpen ? 'rotate-180' : ''}`} />
@@ -486,8 +490,8 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                            report.status === 'closed' ? 'Geschlossen' : 'Offen'}
                         </span>
                       </div>
-                      <p className="text-sm text-on-surface-variant mb-2 line-clamp-2">{report.description}</p>
-                      <div className="flex items-center gap-3 text-xs text-on-surface-variant">
+                      <p className="m3-body-medium text-on-surface-variant mb-2 line-clamp-2">{report.description}</p>
+                      <div className="flex items-center gap-3 m3-body-small text-on-surface-variant">
                         <span>{new Date(report.createdAt).toLocaleDateString('de-DE')}</span>
                         <span className={`px-2 py-0.5 rounded ${
                           report.severity === 'critical' ? 'bg-error-container text-on-error-container' :
@@ -534,12 +538,12 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
 
               <div className="bg-surface-container rounded-m3-md p-4 mb-4">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-2xl">
+                  <div className="w-12 h-12 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center m3-headline-small">
                     <Icon name={iconForEmoji(currentTenant?.avatar)} size={26} />
                   </div>
                   <div>
                     <p className="font-semibold text-on-surface">{currentTenant?.name}</p>
-                    <p className="text-sm text-on-surface-variant">
+                    <p className="m3-body-medium text-on-surface-variant">
                       Aktives Profil
                     </p>
                   </div>
@@ -573,7 +577,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               <Button
                 variant="danger"
                 onClick={async () => {
-                  if (confirm('Bug Report wirklich löschen?')) {
+                  if (await confirm({ title: t('settings.delete_bug_confirm'), danger: true, confirmLabel: t('common.delete') })) {
                     try {
                       await api.bugReports.delete(selectedBugReport.id);
                       setBugReports(prev => prev.filter(r => r.id !== selectedBugReport.id));
@@ -592,14 +596,14 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
             <div className="space-y-5">
               {/* Title */}
               <div>
-                <label className="block text-sm font-semibold text-on-surface-variant mb-2">Titel</label>
-                <p className="text-on-surface text-lg font-semibold">{selectedBugReport.title}</p>
+                <label className="block m3-label-large text-on-surface-variant mb-2">Titel</label>
+                <p className="text-on-surface m3-title-medium">{selectedBugReport.title}</p>
               </div>
 
               {/* Status and Severity */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('settings.status')}</label>
+                  <label className="block m3-label-large text-on-surface-variant mb-2">{t('settings.status')}</label>
                   <span className={`inline-block px-3 py-1.5 text-sm rounded-full font-semibold uppercase ${
                     selectedBugReport.status === 'open' ? 'bg-error-container text-on-error-container' :
                     selectedBugReport.status === 'in_progress' ? 'bg-primary-container text-on-primary-container' :
@@ -613,7 +617,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('settings.severity')}</label>
+                  <label className="block m3-label-large text-on-surface-variant mb-2">{t('settings.severity')}</label>
                   <span className={`inline-block px-3 py-1.5 text-sm rounded font-semibold ${
                     selectedBugReport.severity === 'critical' ? 'bg-error-container text-on-error-container' :
                     selectedBugReport.severity === 'high' ? 'bg-tertiary-container text-on-tertiary-container' :
@@ -630,7 +634,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               {/* Category and Date */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('settings.category')}</label>
+                  <label className="block m3-label-large text-on-surface-variant mb-2">{t('settings.category')}</label>
                   <p className="text-on-surface capitalize">
                     {selectedBugReport.category === 'gameplay' ? 'Gameplay' :
                      selectedBugReport.category === 'ui' ? 'Benutzeroberfläche' :
@@ -642,7 +646,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">{t('settings.created_at')}</label>
+                  <label className="block m3-label-large text-on-surface-variant mb-2">{t('settings.created_at')}</label>
                   <p className="text-on-surface">
                     {new Date(selectedBugReport.createdAt).toLocaleString('de-DE', {
                       day: '2-digit',
@@ -657,7 +661,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-semibold text-on-surface-variant mb-2">Beschreibung</label>
+                <label className="block m3-label-large text-on-surface-variant mb-2">Beschreibung</label>
                 <p className="text-on-surface bg-surface-container rounded-m3-md p-4 whitespace-pre-wrap">
                   {selectedBugReport.description}
                 </p>
@@ -666,7 +670,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               {/* Screenshot */}
               {selectedBugReport.screenshotUrl && (
                 <div>
-                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">Screenshot</label>
+                  <label className="block m3-label-large text-on-surface-variant mb-2">Screenshot</label>
                   <div className="relative group">
                     <img
                       src={selectedBugReport.screenshotUrl}
@@ -678,7 +682,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                       <a
                         href={selectedBugReport.screenshotUrl}
                         download={`bug-report-${selectedBugReport.id}.png`}
-                        className="px-3 py-1 bg-surface-container-highest hover:bg-surface-container-high text-on-surface text-sm rounded-m3-sm transition-colors"
+                        className="px-3 py-1 bg-surface-container-highest hover:bg-surface-container-high text-on-surface m3-body-medium rounded-m3-sm transition-colors"
                         onClick={(e) => e.stopPropagation()}
                       >
                         Download
@@ -691,8 +695,8 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               {/* Browser Info */}
               {selectedBugReport.browserInfo && (
                 <div>
-                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">Browser-Informationen</label>
-                  <div className="bg-surface-container rounded-m3-md p-4 text-sm">
+                  <label className="block m3-label-large text-on-surface-variant mb-2">Browser-Informationen</label>
+                  <div className="bg-surface-container rounded-m3-md p-4 m3-body-medium">
                     <p className="text-on-surface-variant mb-1">
                       <span className="text-on-surface font-medium">User Agent:</span> {selectedBugReport.browserInfo.userAgent}
                     </p>
@@ -709,7 +713,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               {/* Admin Notes */}
               {selectedBugReport.adminNotes && (
                 <div>
-                  <label className="block text-sm font-semibold text-on-surface-variant mb-2">Admin-Notizen</label>
+                  <label className="block m3-label-large text-on-surface-variant mb-2">Admin-Notizen</label>
                   <p className="text-on-surface bg-primary-container rounded-m3-md p-4 whitespace-pre-wrap">
                     {selectedBugReport.adminNotes}
                   </p>

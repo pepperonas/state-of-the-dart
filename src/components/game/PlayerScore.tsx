@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Trophy, Target, UserMinus } from 'lucide-react';
@@ -34,6 +35,7 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
   onRemove,
   removeLabel = 'Spieler entfernen',
 }) => {
+  const { t } = useTranslation();
   const { players } = usePlayer();
   
   // Get full player data to access avatar
@@ -43,10 +45,10 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
 
   return (
     <motion.div
-      animate={{
-        scale: isActive ? 1.05 : 1,
-        opacity: isActive ? 1 : 0.75,
-      }}
+      // The inactive card is not faded: opacity multiplies into every text
+      // colour and pushed the stat labels below AA. Surface tone and the
+      // primary ring carry the distinction.
+      animate={{ scale: isActive ? 1.03 : 1 }}
       transition={springSpatialDefault}
       className={`m3-card m3-elevated p-4 ${
         isActive
@@ -79,19 +81,19 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
 
       <AnimatedNumber
         value={remaining}
-        className={`block text-4xl font-bold text-center mb-3 ${
+        className={`block m3-display-small m3-emphasized text-center mb-3 tabular-nums ${
           remaining <= 170 ? 'text-primary' : 'text-on-surface'
         }`}
       />
 
       <div className={`grid ${showSets ? 'grid-cols-3' : 'grid-cols-2'} gap-2 text-sm`}>
         <div className="bg-surface-container-highest rounded-m3-sm p-2">
-          <div className="text-on-surface-variant text-xs">Average</div>
+          <div className="text-on-surface-variant m3-label-medium">{t('game.average')}</div>
           <div className="font-semibold text-on-surface">{average.toFixed(2)}</div>
         </div>
 
         <div className="bg-surface-container-highest rounded-m3-sm p-2">
-          <div className="text-on-surface-variant text-xs">Legs</div>
+          <div className="text-on-surface-variant m3-label-medium">{t('game.legs')}</div>
           <div className="font-semibold text-on-surface flex items-center gap-1">
             {legsWon}
             <Trophy size={14} className="text-tertiary" />
@@ -100,7 +102,7 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
 
         {showSets && (
           <div className="bg-surface-container-highest rounded-m3-sm p-2">
-            <div className="text-on-surface-variant text-xs">Sets</div>
+            <div className="text-on-surface-variant m3-label-medium">{t('game.sets')}</div>
             <div className="font-semibold text-on-surface flex items-center gap-1">
               {setsWon}
               <Trophy size={14} className="text-primary" />

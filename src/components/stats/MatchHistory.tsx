@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Match, Throw } from '../../types';
-import { Calendar, Target, Award, ChevronDown, ChevronUp, TrendingUp, Loader, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, Target, Award, ChevronDown, ChevronUp, TrendingUp, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatDate, getTimestampForSort } from '../../utils/dateUtils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { api } from '../../services/api';
 import { Card, TextField, IconButton, Button, Select } from '../common';
 import { Icon } from '../icons';
+import LoadingIndicator from '../common/LoadingIndicator';
+import { useChartTheme } from '../../utils/chartTheme';
 
 interface MatchHistoryProps {
   matches: Match[];
@@ -13,6 +15,7 @@ interface MatchHistoryProps {
 }
 
 const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
+  const chart = useChartTheme();
   const [expandedMatch, setExpandedMatch] = useState<string | null>(null);
   const [matchDetails, setMatchDetails] = useState<Record<string, Match>>({});
   const [loadingDetails, setLoadingDetails] = useState<Record<string, boolean>>({});
@@ -285,7 +288,7 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
 
                   {/* Match Info */}
                   <div className="flex-1 text-left">
-                    <div className="m3-title-medium font-bold text-on-surface">
+                    <div className="m3-title-medium m3-emphasized text-on-surface">
                       {player.name} vs {opponent?.name || 'Unbekannt'}
                     </div>
                     <div className="m3-body-small text-on-surface-variant flex items-center gap-3">
@@ -323,13 +326,13 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                 <div className="border-t border-outline-variant p-4 bg-surface-container-low space-y-6">
                   {/* Round-by-Round Chart */}
                   <Card variant="filled" className="p-6">
-                    <h4 className="m3-title-medium font-bold text-on-surface mb-4 flex items-center gap-2">
+                    <h4 className="m3-title-medium m3-emphasized text-on-surface mb-4 flex items-center gap-2">
                       <TrendingUp size={20} className="text-primary" />
                       Runden-Verlauf
                     </h4>
                     {loadingDetails[match.id] ? (
                       <div className="bg-surface-container-high rounded-m3-md p-12 text-center">
-                        <Loader className="mx-auto mb-4 text-primary animate-spin" size={48} />
+                        <LoadingIndicator size={48} />
                         <p className="text-on-surface-variant m3-body-medium">Lade Match-Details...</p>
                       </div>
                     ) : matchDetails[match.id] ? (
@@ -337,27 +340,27 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                         {prepareRoundData(matchDetails[match.id]).length > 0 ? (
                           <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
                             <LineChart data={prepareRoundData(matchDetails[match.id])}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#262626" />
+                          <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
                           <XAxis 
                             dataKey="round" 
-                            stroke="#737373" 
+                            stroke={chart.axis} 
                             style={{ fontSize: '12px' }}
-                            label={{ value: 'Runde', position: 'insideBottom', offset: -5, fill: '#737373' }}
+                            label={{ value: 'Runde', position: 'insideBottom', offset: -5, fill: chart.axis }}
                           />
                           <YAxis 
-                            stroke="#737373" 
+                            stroke={chart.axis} 
                             style={{ fontSize: '12px' }}
-                            label={{ value: 'Punkte', angle: -90, position: 'insideLeft', fill: '#737373' }}
+                            label={{ value: 'Punkte', angle: -90, position: 'insideLeft', fill: chart.axis }}
                           />
                           <Tooltip 
                             contentStyle={{ 
-                              backgroundColor: '#0a0a0a', 
-                              border: '1px solid #404040', 
+                              backgroundColor: chart.tooltip.contentStyle.backgroundColor, 
+                              border: chart.tooltip.contentStyle.border as string, 
                               borderRadius: '8px', 
                               padding: '12px' 
                             }} 
-                            labelStyle={{ color: '#fff', fontWeight: 'bold' }}
-                            itemStyle={{ color: '#fff' }}
+                            labelStyle={{ color: chart.text, fontWeight: 'bold' }}
+                            itemStyle={{ color: chart.text }}
                             formatter={(value: number) => [`${value} Punkte`, '']}
                           />
                           <Legend 
@@ -369,9 +372,9 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                               key={p.playerId}
                               type="monotone"
                               dataKey={p.playerId}
-                              stroke={index === 0 ? '#0ea5e9' : '#a855f7'}
+                              stroke={chart.series[index % chart.series.length]}
                               strokeWidth={3}
-                              dot={{ fill: index === 0 ? '#0ea5e9' : '#a855f7', r: 5 }}
+                              dot={{ fill: chart.series[index % chart.series.length], r: 5 }}
                               activeDot={{ r: 7 }}
                               name={p.name}
                             />
@@ -382,7 +385,7 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                           <div className="bg-surface-container-high rounded-m3-md p-8 text-center">
                             <TrendingUp size={48} className="mx-auto mb-3 text-on-surface-variant opacity-30" />
                             <p className="text-on-surface-variant m3-body-medium">Keine Runden-Daten verfügbar</p>
-                            <p className="text-on-surface-variant opacity-70 m3-body-small mt-2">
+                            <p className="text-on-surface-variant m3-body-small mt-2">
                               Dieses Match wurde möglicherweise vor dem Tracking-Update gespielt
                             </p>
                           </div>
@@ -399,7 +402,7 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                   <div className={`grid ${opponent ? 'md:grid-cols-2' : 'md:grid-cols-1'} gap-6`}>
                     {/* Player Stats */}
                     <div>
-                      <h4 className="m3-title-medium font-bold text-on-surface mb-3">
+                      <h4 className="m3-title-medium m3-emphasized text-on-surface mb-3">
                         {player.name}
                       </h4>
                       <div className="grid grid-cols-2 gap-3">
@@ -422,7 +425,7 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
                     {/* Opponent Stats - only show if opponent exists */}
                     {opponent && (
                       <div>
-                        <h4 className="m3-title-medium font-bold text-on-surface mb-3">
+                        <h4 className="m3-title-medium m3-emphasized text-on-surface mb-3">
                           {opponent.name}
                         </h4>
                         <div className="grid grid-cols-2 gap-3">
@@ -479,7 +482,7 @@ const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, playerId }) => {
 const StatBox: React.FC<{ label: string; value: string | number }> = ({ label, value }) => (
   <div className="bg-surface-container-highest rounded-m3-sm p-2">
     <div className="m3-body-small text-on-surface-variant">{label}</div>
-    <div className="m3-title-medium font-bold text-on-surface">{value}</div>
+    <div className="m3-title-medium m3-emphasized text-on-surface">{value}</div>
   </div>
 );
 

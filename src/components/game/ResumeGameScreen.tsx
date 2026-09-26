@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Play, Trash2, Clock, Users, Target, Loader2 } from 'lucide-react';
+import { ArrowLeft, Play, Trash2, Clock, Users, Target } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../services/api';
 import { useGame } from '../../context/GameContext';
@@ -9,6 +9,7 @@ import { generateMatchName } from '../../utils/matchNames';
 import { reconstructMatch } from '../../utils/matchReconstruction';
 import { getLocalGameSummaries, clearGameState, LocalGameSummary } from '../../utils/gameStorage';
 import { BackButton, Button, Card, PageShell } from '../common';
+import LoadingIndicator from '../common/LoadingIndicator';
 
 interface ResumableMatch {
   id: string;
@@ -168,7 +169,7 @@ const ResumeGameScreen: React.FC = () => {
 
         {loading ? (
           <div className="flex justify-center py-16">
-            <Loader2 className="animate-spin text-on-surface" size={40} />
+            <LoadingIndicator size={40} />
           </div>
         ) : isEmpty ? (
           <Card variant="filled" className="p-8 text-center">

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
 import { setAuthToken } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import LoadingIndicator from '../common/LoadingIndicator';
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
@@ -57,7 +57,7 @@ const AuthCallback: React.FC = () => {
           </>
         ) : (
           <>
-            <Loader2 className="animate-spin text-primary mx-auto mb-4" size={48} />
+            <LoadingIndicator size={48} />
             <h2 className="m3-headline-small text-on-surface mb-2">
               Anmeldung läuft...
             </h2>

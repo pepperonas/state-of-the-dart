@@ -45,6 +45,10 @@
 
   /* Success — semantic (resolved/done, checkout, win states) */
   --m3-success: #7edb97;
+  /* Rank colours, tuned for contrast on dark surfaces. */
+  --m3-medal-gold: #f5c542;
+  --m3-medal-silver: #c9ced6;
+  --m3-medal-bronze: #e0955a;
   --m3-on-success: #00391d;
   --m3-success-container: #00522e;
   --m3-on-success-container: #99f7b1;
@@ -107,6 +111,10 @@
   --m3-on-error-container: #410002;
 
   --m3-success: #006d3c;
+  /* …and on light surfaces. */
+  --m3-medal-gold: #8a6100;
+  --m3-medal-silver: #5c6470;
+  --m3-medal-bronze: #8f4a14;
   --m3-on-success: #ffffff;
   --m3-success-container: #99f7b1;
   --m3-on-success-container: #00210f;
@@ -231,6 +239,10 @@ body {
 .m3-label-large     { font-size: 0.875rem;  line-height: 1.25rem; font-weight: 600; letter-spacing: 0.00625rem; }
 .m3-label-medium    { font-size: 0.75rem;   line-height: 1rem;    font-weight: 600; letter-spacing: 0.03125rem; }
 .m3-label-small     { font-size: 0.6875rem; line-height: 1rem;    font-weight: 600; letter-spacing: 0.03125rem; }
+/* M3 Expressive emphasized type: the same size, a heavier cut and slightly
+   tighter tracking — for hero numbers and titles that should carry weight.
+   Replaces the ad-hoc `m3-headline-* font-bold` combinations. */
+.m3-emphasized { font-weight: 700; letter-spacing: -0.01em; }
 
 /* ----------------------------------------------------------------------------
    6. STATE LAYER — shared overlay used by interactive components
@@ -468,6 +480,8 @@ button.m3-chip {
               box-shadow var(--m3-duration-short) var(--m3-easing-standard);
 }
 .m3-text-field.m3-has-icon { padding-left: 2.75rem; }
+/* Multi-line: grows with its rows instead of the fixed 56px field height. */
+.m3-text-field.m3-text-area { height: auto; min-height: 7rem; padding-top: 0.875rem; padding-bottom: 0.875rem; resize: vertical; line-height: 1.5; }
 .m3-text-field::placeholder { color: var(--m3-on-surface-variant); opacity: 0.7; }
 .m3-text-field:hover { border-color: var(--m3-on-surface); }
 /* ⚠️ One ring only. This used to stack three: the 1px border, an *inset*

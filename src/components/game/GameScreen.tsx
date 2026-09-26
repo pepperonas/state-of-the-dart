@@ -33,13 +33,14 @@ import { api } from '../../services/api';
 import { createAdaptiveBotPlayer, getAdaptiveBotConfigs, generateBotTurn, AdaptiveBotCategory } from '../../utils/botLogic';
 import BackButton from '../common/BackButton';
 import { motion } from 'framer-motion';
-import { Button, IconButton, Card, Dialog, Select, Switch, Snackbar } from '../common';
+import { Button, IconButton, Card, Dialog, Select, Switch, Snackbar, SegmentedButton, LoadingIndicator, useFeedback } from '../common';
 import { loadLastGameSettings, saveLastGameSettings, rotateForRematch, standings, findReusableGuest, GUEST_NAME } from '../../utils/matchSetup';
 const MatchDetailModal = lazy(() => import('../dashboard/MatchDetailModal'));
 import { staggerChild, springSpatialDefault, springSpatialFast } from '../../utils/motion';
 import { Icon, iconForEmoji } from '../icons';
 
 const GameScreen: React.FC = () => {
+  const { notify } = useFeedback();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -551,7 +552,7 @@ const GameScreen: React.FC = () => {
         setSelectedPlayers(finalPlayers);
       } catch (error) {
         console.error('Failed to create guest player:', error);
-        alert('Fehler beim Erstellen eines Gastspielers');
+        notify(t('players.error_create'));
         return;
       }
     }
@@ -886,7 +887,7 @@ const GameScreen: React.FC = () => {
                     }}
                     className={`p-3 rounded-m3-lg border-2 transition-colors ${
                       selectedPlayers.find(p => p.id === player.id)
-                        ? 'border-success-500 bg-success-container shadow-m3-1'
+                        ? 'border-[var(--m3-primary)] bg-primary-container shadow-m3-1'
                         : 'border-outline-variant hover:border-outline'
                     }`}
                   >
@@ -901,7 +902,7 @@ const GameScreen: React.FC = () => {
                   <button
                     key={bot.id}
                     onClick={() => setSelectedPlayers(selectedPlayers.filter(p => p.id !== bot.id))}
-                    className="p-3 rounded-m3-lg border-2 border-primary-500 bg-primary-container shadow-m3-1 relative group"
+                    className="p-3 rounded-m3-lg border-2 border-[var(--m3-primary)] bg-primary-container shadow-m3-1 relative group"
                     title="Klicken zum Entfernen"
                   >
                     <div className="absolute top-1 right-1 text-primary opacity-0 group-hover:opacity-100 transition-opacity">
@@ -924,14 +925,14 @@ const GameScreen: React.FC = () => {
                     </button>
                     <button
                       onClick={() => setShowBotSelector(true)}
-                      className="p-3 rounded-m3-lg border-2 border-dashed border-primary-700 hover:border-primary-500 transition-all bg-primary-container/40"
+                      className="p-3 rounded-m3-lg border-2 border-dashed border-outline hover:border-[var(--m3-primary)] transition-all bg-primary-container/40"
                     >
                       <div className="mb-1 flex justify-center"><Icon name="robot" size={24} /></div>
                       <div className="m3-label-large text-primary">{t('game.add_bot')}</div>
                     </button>
                   </>
                 ) : showBotSelector ? (
-                  <div className="p-4 rounded-m3-lg border-2 border-primary-500 bg-primary-container/40 col-span-2 md:col-span-3">
+                  <div className="p-4 rounded-m3-lg border-2 border-[var(--m3-primary)] bg-primary-container/40 col-span-2 md:col-span-3">
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <span className="text-on-surface m3-title-small flex items-center gap-2">
@@ -970,7 +971,7 @@ const GameScreen: React.FC = () => {
 
                               setShowBotSelector(false);
                             }}
-                            className="p-3 rounded-m3-lg bg-surface-container-high hover:bg-surface-container-highest border-2 border-transparent hover:border-primary-500 transition-all text-center"
+                            className="p-3 rounded-m3-lg bg-surface-container-high hover:bg-surface-container-highest border-2 border-transparent hover:border-[var(--m3-primary)] transition-all text-center"
                           >
                             <div className="mb-2 flex justify-center"><Icon name={iconForEmoji(config.icon)} size={30} /></div>
                             <div className="m3-label-large text-on-surface">{config.nameDE}</div>
@@ -981,7 +982,7 @@ const GameScreen: React.FC = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="p-3 rounded-m3-lg border-2 border-success-500 bg-success-container">
+                  <div className="p-3 rounded-m3-lg border-2 border-[var(--m3-primary)] bg-primary-container">
                     <div className="space-y-2">
                       <div className="flex items-center gap-3">
                         <div className="flex-1">
@@ -1022,7 +1023,7 @@ const GameScreen: React.FC = () => {
                               setShowPlayerNameInput(false);
                             } catch (error) {
                               console.error('Failed to add player:', error);
-                              alert('Fehler beim Erstellen des Spielers');
+                              notify(t('players.error_create'));
                             }
                           }
                         }}
@@ -1045,7 +1046,7 @@ const GameScreen: React.FC = () => {
                                 setShowPlayerNameInput(false);
                               } catch (error) {
                                 console.error('Failed to add player:', error);
-                                alert('Fehler beim Erstellen des Spielers');
+                                notify(t('players.error_create'));
                               }
                             }
                           }}
@@ -1209,7 +1210,7 @@ const GameScreen: React.FC = () => {
               >
                 <Icon name="trophy" size={44} />
               </motion.div>
-              <h2 className="m3-display-small font-bold text-on-surface mb-2">
+              <h2 className="m3-display-small m3-emphasized text-on-surface mb-2">
                 {t('game.winner_title', { name: winner.name })}
               </h2>
               <p className="m3-title-large text-on-surface-variant">
@@ -1487,34 +1488,16 @@ const GameScreen: React.FC = () => {
           {showThrowHistory && (
             <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
               {/* Leg/Match Toggle */}
-              <div
-                className="flex gap-1 mb-4 p-1 bg-surface-container rounded-m3-lg m3-segmented"
-                style={{ '--m3-seg-fill': 'var(--m3-primary)' } as React.CSSProperties}
-              >
-                <span
-                  className="m3-segmented-indicator"
-                  data-pos={statsView === 'leg' ? '0' : '1'}
-                  aria-hidden="true"
-                />
-                <button
-                  onClick={() => setStatsView('leg')}
-                  aria-pressed={statsView === 'leg'}
-                  className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm m3-tab ${
-                    statsView === 'leg' ? 'text-on-primary' : 'text-on-surface-variant'
-                  }`}
-                >
-                  Aktuelles Leg
-                </button>
-                <button
-                  onClick={() => setStatsView('match')}
-                  aria-pressed={statsView === 'match'}
-                  className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm m3-tab ${
-                    statsView === 'match' ? 'text-on-primary' : 'text-on-surface-variant'
-                  }`}
-                >
-                  Gesamtes Spiel
-                </button>
-              </div>
+              <SegmentedButton<'leg' | 'match'>
+                className="mb-4"
+                label={t('game.stats_scope')}
+                value={statsView}
+                onChange={setStatsView}
+                options={[
+                  { value: 'leg', label: t('game.current_leg') },
+                  { value: 'match', label: t('game.whole_match') },
+                ]}
+              />
               {state.currentMatch.players.map((player) => {
                 const allPlayerThrowsView = statsView === 'leg'
                   ? currentLeg.throws.filter(t => t.playerId === player.playerId)
@@ -1553,9 +1536,9 @@ const GameScreen: React.FC = () => {
                                   throwData.isBust
                                     ? 'text-error line-through'
                                     : throwData.score >= 140
-                                      ? 'text-orange-400'
+                                      ? 'text-tertiary'
                                       : throwData.score >= 100
-                                        ? 'text-blue-400'
+                                        ? 'text-primary'
                                         : 'text-on-surface'
                                 }`}>
                                   {throwData.score}
@@ -1572,12 +1555,12 @@ const GameScreen: React.FC = () => {
                                   key={dartIndex}
                                   className={`flex-1 text-center py-2 rounded-m3-sm ${
                                     dart.multiplier === 3
-                                      ? 'bg-green-500/20 text-green-400'
+                                      ? 'bg-success-container text-on-success-container'
                                       : dart.multiplier === 2
-                                        ? 'bg-red-500/20 text-red-400'
+                                        ? 'bg-error-container text-on-error-container'
                                         : dart.score === 0
                                           ? 'bg-surface-container-highest text-on-surface-variant'
-                                          : 'bg-blue-500/20 text-blue-400'
+                                          : 'bg-primary-container text-on-primary-container'
                                   }`}
                                 >
                                   <span className="text-xs font-semibold">
@@ -1621,35 +1604,17 @@ const GameScreen: React.FC = () => {
             return (
               <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
                 {/* Leg/Match Toggle */}
-                <div
-                  className="flex gap-1 mb-4 p-1 bg-surface-container rounded-m3-lg m3-segmented"
-                  style={{ '--m3-seg-fill': 'var(--m3-primary)' } as React.CSSProperties}
-                >
-                  <span
-                    className="m3-segmented-indicator"
-                    data-pos={statsView === 'leg' ? '0' : '1'}
-                    aria-hidden="true"
-                  />
-                  <button
-                    onClick={() => setStatsView('leg')}
-                    aria-pressed={statsView === 'leg'}
-                    className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm m3-tab ${
-                      statsView === 'leg' ? 'text-on-primary' : 'text-on-surface-variant'
-                    }`}
-                  >
-                    Aktuelles Leg
-                  </button>
-                  <button
-                    onClick={() => setStatsView('match')}
-                    aria-pressed={statsView === 'match'}
-                    className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm m3-tab ${
-                      statsView === 'match' ? 'text-on-primary' : 'text-on-surface-variant'
-                    }`}
-                  >
-                    Gesamtes Spiel
-                  </button>
-                </div>
-                <Suspense fallback={<div className="h-[600px] flex items-center justify-center text-on-surface-variant">Lade Chart…</div>}>
+                <SegmentedButton<'leg' | 'match'>
+                  className="mb-4"
+                  label={t('game.stats_scope')}
+                  value={statsView}
+                  onChange={setStatsView}
+                  options={[
+                    { value: 'leg', label: t('game.current_leg') },
+                    { value: 'match', label: t('game.whole_match') },
+                  ]}
+                />
+                <Suspense fallback={<div className="h-[600px] flex items-center justify-center"><LoadingIndicator /></div>}>
                   <ThrowChart players={state.currentMatch.players} chartThrows={chartThrows} />
                 </Suspense>
               </div>
@@ -1664,7 +1629,7 @@ const GameScreen: React.FC = () => {
             className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition-all"
           >
             <div className="flex items-center gap-3">
-              <Flame size={24} className="text-orange-400" />
+              <Flame size={24} className="text-tertiary" aria-hidden="true" />
               <h3 className="m3-title-medium text-on-surface">Live-Heatmap (aktuelles Spiel)</h3>
             </div>
             <ChevronDown size={24} className={`m3-chevron ${showLiveHeatmap ? 'm3-open' : ''}`} />
@@ -1767,7 +1732,7 @@ const GameScreen: React.FC = () => {
           <div className="text-center animate-scale-in">
             {/* Confetti burst effect */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              <div className="animate-confetti-burst">
+              <div>
                 {[...Array(20)].map((_, i) => (
                   <div
                     key={i}
@@ -1795,7 +1760,7 @@ const GameScreen: React.FC = () => {
             </div>
 
             {/* LEG text with glow */}
-            <div className="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 animate-pulse mb-2"
+            <div className="text-6xl md:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 animate-pulse mb-2"
                  style={{ textShadow: '0 0 40px rgba(245, 158, 11, 0.5)' }}>
               LEG {legWonAnimation.legNumber}
             </div>

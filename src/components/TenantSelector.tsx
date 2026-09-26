@@ -52,7 +52,7 @@ const TenantSelector: React.FC = () => {
             </div>
           </motion.div>
           <h1
-            className="m3-display-small font-extrabold mb-3"
+            className="m3-display-small m3-emphasized mb-3"
             style={{
               background: 'linear-gradient(135deg, var(--m3-primary), var(--m3-tertiary))',
               WebkitBackgroundClip: 'text',
@@ -94,7 +94,7 @@ const TenantSelector: React.FC = () => {
                     <Icon name={iconForEmoji(tenant.avatar)} size={26} />
                   </div>
                   <div className="flex-1 text-left">
-                    <h3 className="m3-title-large font-bold text-on-surface mb-1">{tenant.name}</h3>
+                    <h3 className="m3-title-large m3-emphasized text-on-surface mb-1">{tenant.name}</h3>
                     <p className="m3-body-small text-on-surface-variant flex items-center gap-2">
                       <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
                       Zuletzt aktiv: {formatDate(tenant.lastActive)}
@@ -128,7 +128,7 @@ const TenantSelector: React.FC = () => {
                         <div className="inline-block p-3 bg-error-container rounded-m3-full mb-4">
                           <Trash2 size={32} className="text-on-error-container" />
                         </div>
-                        <p className="text-on-surface font-bold m3-title-medium mb-2">
+                        <p className="text-on-surface m3-title-medium m3-emphasized mb-2">
                           Profil "{tenant.name}" wirklich löschen?
                         </p>
                         <p className="text-error m3-body-small mb-6">
@@ -175,7 +175,7 @@ const TenantSelector: React.FC = () => {
             className="bg-surface-container rounded-m3-lg p-6 space-y-5 border border-outline-variant"
           >
             <div className="flex items-center justify-between">
-              <h3 className="m3-title-large font-bold text-on-surface">Neues Profil</h3>
+              <h3 className="m3-title-large m3-emphasized text-on-surface">Neues Profil</h3>
               <button
                 onClick={() => {
                   setShowNewTenant(false);

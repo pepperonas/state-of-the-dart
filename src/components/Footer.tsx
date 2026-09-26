@@ -67,7 +67,7 @@ const Footer: React.FC = () => {
           </a>
         </div>
 
-        <p className="m3-label-medium text-on-surface-variant opacity-70">
+        <p className="m3-label-medium text-on-surface-variant">
           Version {packageJson.version}
         </p>
       </div>

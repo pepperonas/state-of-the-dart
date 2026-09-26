@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
-import { dialogMotion, effectsDefault, springSpatialDefault } from '../../utils/motion';
 import { ArrowLeft, RotateCcw, Trophy, Zap, Check, X } from 'lucide-react';
 import { usePlayer } from '../../context/PlayerContext';
 import { Player, Dart } from '../../types/index';
@@ -379,7 +377,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
           <BackButton onClick={onBack || (() => { navigate('/'); })} />
 
           <Card variant="elevated" className="p-6">
-            <h1 className="m3-headline-medium font-bold text-on-surface mb-6 flex items-center gap-3">
+            <h1 className="m3-headline-medium m3-emphasized text-on-surface mb-6 flex items-center gap-3">
               <Zap className="text-tertiary" />
               Shanghai
             </h1>
@@ -446,7 +444,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
                     }}
                     className={`p-3 rounded-m3-md border transition-all ${
                       selectedPlayers.find(p => p.id === player.id)
-                        ? 'border-success-500 bg-success-container shadow-m3-1'
+                        ? 'border-[var(--m3-primary)] bg-primary-container shadow-m3-1'
                         : 'border-outline-variant hover:border-outline'
                     }`}
                   >
@@ -492,88 +490,45 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
   return (
     <div className="min-h-dvh p-4 gradient-mesh">
       {/* Winner Modal */}
-      <AnimatePresence>
-        {showWinner && winner && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={effectsDefault}
-            className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_50%,transparent)] flex items-center justify-center z-50"
-          >
-            <motion.div
-              initial={dialogMotion.initial}
-              animate={dialogMotion.animate}
-              exit={dialogMotion.exit}
-              transition={springSpatialDefault}
-              className="m3-dialog p-8 text-center max-w-md"
+      <Dialog open={showWinner && !!winner} onClose={() => {}} hideClose persistent widthClassName="max-w-md">
+        {winner && (
+          <div className="text-center">
+            <Trophy className="w-20 h-20 text-tertiary mx-auto mb-4" />
+            <h2 className="m3-headline-medium m3-emphasized text-on-surface mb-2">
+              {t('game.winner_title', { name: winner.name })}
+            </h2>
+            {shanghaiWinner && (
+              <div className="bg-tertiary-container rounded-m3-lg p-3 mb-4">
+                <p className="text-on-tertiary-container font-bold text-xl">SHANGHAI!</p>
+              </div>
+            )}
+            <p className="text-2xl font-bold mb-6" style={{ color: 'var(--m3-primary)' }}>
+              {t('shanghai.points', { count: playerScores[winner.id] })}
+            </p>
+            <Button
+              variant="filled"
+              onClick={() => {
+                setShowWinner(false);
+                setShowSetup(true);
+                setWinner(null);
+                setShanghaiWinner(null);
+              }}
             >
-              <Trophy className="w-20 h-20 text-tertiary mx-auto mb-4" />
-              <h2 className="m3-headline-medium font-bold text-on-surface mb-2">
-                {winner.name} gewinnt!
-              </h2>
-              {shanghaiWinner && (
-                <div className="bg-tertiary-container rounded-m3-lg p-3 mb-4">
-                  <p className="text-on-tertiary-container font-bold text-xl"> SHANGHAI! </p>
-                </div>
-              )}
-              <p className="text-2xl font-bold mb-6" style={{ color: 'var(--m3-primary)' }}>
-                {playerScores[winner.id]} Punkte
-              </p>
-              <Button
-                variant="filled"
-                onClick={() => {
-                  setShowWinner(false);
-                  setShowSetup(true);
-                  setWinner(null);
-                  setShanghaiWinner(null);
-                }}
-              >
-                Neues Spiel
-              </Button>
-            </motion.div>
-          </motion.div>
+              {t('game.new_game_short')}
+            </Button>
+          </div>
         )}
-      </AnimatePresence>
+      </Dialog>
 
       {/* Back Confirmation Dialog */}
-      <AnimatePresence>
-        {showBackConfirm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={effectsDefault}
-            className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_50%,transparent)] flex items-center justify-center z-50 p-4"
-          >
-            <motion.div
-              initial={dialogMotion.initial}
-              animate={dialogMotion.animate}
-              exit={dialogMotion.exit}
-              transition={dialogMotion.transition}
-              className="m3-dialog p-6 max-w-sm w-full text-center"
-            >
-              <h3 className="m3-title-large font-bold text-on-surface mb-3">
-                {t('resume.pause_title')}
-              </h3>
-              <p className="text-on-surface-variant mb-6">
-                {t('resume.pause_message')}
-              </p>
-              <div className="flex flex-col gap-3">
-                <Button variant="filled" fullWidth onClick={handleConfirmBack}>
-                  {t('resume.pause_and_leave')}
-                </Button>
-                <Button variant="danger" fullWidth onClick={handleEndGame}>
-                  {t('resume.end_game')}
-                </Button>
-                <Button variant="tonal" fullWidth onClick={() => setShowBackConfirm(false)}>
-                  {t('common.cancel')}
-                </Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Dialog open={showBackConfirm} onClose={() => setShowBackConfirm(false)} title={t('resume.pause_title')} widthClassName="max-w-sm">
+        <p className="text-on-surface-variant mb-6">{t('resume.pause_message')}</p>
+        <div className="flex flex-col gap-3">
+          <Button variant="filled" fullWidth onClick={handleConfirmBack}>{t('resume.pause_and_leave')}</Button>
+          <Button variant="danger" fullWidth onClick={handleEndGame}>{t('resume.end_game')}</Button>
+          <Button variant="tonal" fullWidth onClick={() => setShowBackConfirm(false)}>{t('common.cancel')}</Button>
+        </div>
+      </Dialog>
 
       {/* Header */}
       <div className="max-w-4xl mx-auto mb-4">
@@ -587,7 +542,7 @@ const ShanghaiGame: React.FC<ShanghaiGameProps> = ({ onBack }) => {
             {t('common.back')}
           </Button>
           <div className="text-center">
-            <h1 className="m3-title-large font-bold text-on-surface"> Shanghai</h1>
+            <h1 className="m3-title-large m3-emphasized text-on-surface"> Shanghai</h1>
             <p className="text-on-surface-variant text-sm">Runde {currentRound + 1}/{rounds}</p>
           </div>
           <div className="w-10" />

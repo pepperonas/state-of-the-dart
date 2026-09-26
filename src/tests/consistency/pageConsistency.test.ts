@@ -11,6 +11,9 @@ const walk = (dir: string): string[] =>
   });
 
 const FILES = walk(ROOT).map((p) => [path.relative(ROOT, p), fs.readFileSync(p, 'utf8')] as const);
+/** Components plus the app shell — the loading screen lived in App.tsx and escaped every check. */
+const APP_FILE = path.resolve(__dirname, '../../App.tsx');
+const ALL_FILES = [...FILES, ['../App.tsx', fs.readFileSync(APP_FILE, 'utf8')] as const];
 
 /** Comments quote the very rules these tests forbid — strip them first. */
 const stripComments = (src: string) =>
@@ -57,6 +60,72 @@ describe('page consistency', () => {
       for (const c of legacy) if (code.includes(c)) offenders.push(`${rel}: ${c}`);
     }
     expect(offenders, `Legacy classes:\n${offenders.join('\n')}`).toEqual([]);
+  });
+
+  /**
+   * Classes that silently do nothing or break the light theme. Each of these
+   * was found in the M3 audit (2026-09):
+   * - `error-500`/`error-400`: the Tailwind `error` colour has no number scale,
+   *   so error text rendered in the default colour;
+   * - `dark:` variants: the app never sets the `dark` class, so the light-theme
+   *   greys always won — dark grey text on dark surfaces;
+   * - `text-white`: white on the light theme's light surfaces;
+   * - `font-black`/`font-extrabold`: weights the Inter import does not load;
+   * - `md:m3-*`: the M3 type scale is plain CSS, responsive prefixes do nothing.
+   */
+  it('no dead or theme-blind classes', () => {
+    const rules: Array<[RegExp, string]> = [
+      [/\b(text|border|bg|ring)-error-\d{2,3}\b/, 'numbered error colour'],
+      [/(^|[\s"'`])dark:/, 'dark: variant'],
+      [/\btext-white\b/, 'text-white'],
+      [/\bfont-(black|extrabold)\b/, 'unloaded font weight'],
+      [/\b(sm|md|lg|xl):m3-/, 'responsive prefix on an m3 type class'],
+      [/\bglass-card\b/, 'glass-card'],
+    ];
+    const offenders: string[] = [];
+    for (const [rel, src] of ALL_FILES) {
+      const code = stripComments(src);
+      for (const [re, what] of rules) if (re.test(code)) offenders.push(`${rel}: ${what}`);
+    }
+    expect(offenders, `Dead/theme-blind classes:\n${offenders.join('\n')}`).toEqual([]);
+  });
+
+  /**
+   * Colours come from the M3 roles. The numbered legacy scales (`primary-500`,
+   * `success-400`, …) predate the token layer and ignore the light theme; the
+   * raw Tailwind palette is allowed only where the colour IS the data or the
+   * point: heatmap legends (cold→hot), the theme preview tiles, the gold of a
+   * leg win.
+   */
+  it('colours come from M3 roles', () => {
+    const numbered = /\b(?:text|bg|border|ring|from|to|via|fill|stroke|shadow)-(?:primary|secondary|success|warning|accent|error|tertiary|danger|info)-\d{2,3}\b/;
+    const raw = /\b(?:text|bg|border|ring|from|to|via|fill|stroke|shadow|divide)-(?:gray|red|blue|green|yellow|amber|orange|purple|pink|slate|zinc|neutral|emerald|sky|indigo|violet|rose|lime|teal|cyan|fuchsia|stone)-\d{2,3}\b/;
+    const RAW_ALLOWED = new Set([
+      'dartboard/DartboardHeatmapBlur.tsx', // cold→hot legend
+      'stats/StatsOverview.tsx', // heatmap legend dots
+      'player/PlayerProfile.tsx', // heatmap legend dots
+      'Settings.tsx', // theme preview tiles show the themes themselves
+      'game/GameScreen.tsx', // leg-win gold
+    ]);
+    const offenders: string[] = [];
+    for (const [rel, src] of ALL_FILES) {
+      const code = stripComments(src);
+      if (numbered.test(code)) offenders.push(`${rel}: numbered legacy colour`);
+      if (!RAW_ALLOWED.has(rel) && raw.test(code)) offenders.push(`${rel}: raw palette colour`);
+    }
+    expect(offenders, `Off-token colours:\n${offenders.join('\n')}`).toEqual([]);
+  });
+
+  /** Browser alert/confirm boxes ignore the theme and the language. Use useFeedback(). */
+  it('no window.alert / window.confirm', () => {
+    const offenders: string[] = [];
+    for (const [rel, src] of ALL_FILES) {
+      if (rel === 'common/Feedback.tsx') continue;
+      const code = stripComments(src);
+      if (/(^|[^.\w])(window\.)?alert\(/m.test(code)) offenders.push(`${rel}: alert(`);
+      if (/window\.confirm\(|(^|[^.\w])(?<!await\s)confirm\(/m.test(code.replace(/await confirm\(/g, ''))) offenders.push(`${rel}: confirm(`);
+    }
+    expect(offenders, `Native dialogs:\n${offenders.join('\n')}`).toEqual([]);
   });
 
   it('PageShell is the single definition of the width scale', () => {
