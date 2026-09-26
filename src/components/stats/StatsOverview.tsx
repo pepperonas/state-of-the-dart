@@ -26,6 +26,7 @@ import BackButton from '../common/BackButton';
 import { staggerChild } from '../../utils/motion';
 import { Card, Button, Chip, Select } from '../common';
 import { Icon, iconForEmoji } from '../icons';
+import ErrorState from '../common/ErrorState';
 
 const VALID_TABS = ['overview', 'progress', 'history', 'compare', 'heatmap'] as const;
 type TabType = typeof VALID_TABS[number];
@@ -62,25 +63,23 @@ const StatsOverview: React.FC = () => {
     localStorage.setItem('stats_selected_tab', tab);
   };
   
-  // Load matches from API (Database-First!)
-  useEffect(() => {
-    const loadMatches = async () => {
-      try {
-        setLoadingMatches(true);
-        const fetchedMatches = await api.matches.getAll();
-        setMatches(fetchedMatches);
-        console.log('✅ Matches loaded from API:', fetchedMatches.length);
-      } catch (error) {
-        console.error('❌ Failed to load matches:', error);
-        setMatches([]);
-      } finally {
-        setLoadingMatches(false);
-      }
-    };
-    
-    loadMatches();
+  // Load matches from API (Database-First!). A failure is shown as such — it
+  // used to set an empty list, which read as "no matches played".
+  const [loadError, setLoadError] = useState(false);
+  const loadMatches = React.useCallback(async () => {
+    try {
+      setLoadingMatches(true);
+      setLoadError(false);
+      setMatches(await api.matches.getAll());
+    } catch (error) {
+      console.error('❌ Failed to load matches:', error);
+      setLoadError(true);
+    } finally {
+      setLoadingMatches(false);
+    }
   }, []);
-  
+  useEffect(() => { loadMatches(); }, [loadMatches]);
+
   // Load selected player from localStorage on mount
   React.useEffect(() => {
     const savedPlayerId = localStorage.getItem('stats_selected_player_id');
@@ -343,6 +342,7 @@ const StatsOverview: React.FC = () => {
   return (
     <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
       <div className="max-w-7xl mx-auto">
+        {loadError && <ErrorState className="mb-4" onRetry={loadMatches} />}
         {/* Header */}
         <div className="flex items-center justify-between mb-6 gap-4">
           <div className="flex items-center gap-3 min-w-0">

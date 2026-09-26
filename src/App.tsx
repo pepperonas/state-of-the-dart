@@ -16,6 +16,8 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import ThemeManager from './components/ThemeManager';
 import Footer from './components/Footer';
 import UpdatePrompt from './pwa/UpdatePrompt';
+import AppNavigation from './components/navigation/AppNavigation';
+import { showsAppNavigation } from './components/navigation/navVisibility';
 import { isGameRoute } from './utils/gameRoutes';
 import { logBuffer } from './utils/logBuffer';
 import './index.css';
@@ -116,6 +118,14 @@ function RouteLogger() {
  * the board needs the input, not a legal footer or a second bug button (the
  * game header has its own report entry).
  */
+/** Room for the navigation: the bar at the bottom (phone), the rail on the left. */
+function NavAwareContent({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation();
+  const { isAuthenticated } = useAuth();
+  const withNav = showsAppNavigation(pathname, isAuthenticated);
+  return <div className={`flex-1 flex flex-col ${withNav ? 'pb-24 md:pb-0 md:pl-20' : ''}`}>{children}</div>;
+}
+
 function OutsideGames({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
   return isGameRoute(pathname) ? null : <>{children}</>;
@@ -206,7 +216,9 @@ function AppContent() {
                       <BugReportButton />
                       <DebugFlagButton />
                     </OutsideGames>
-                    <div className="flex-1">
+                    <AppNavigation />
+                    <NavAwareContent>
+                      <div className="flex-1">
                       <Suspense fallback={<LoadingScreen />}>
                       <Routes>
                       {/* Public Auth Routes */}
@@ -374,10 +386,11 @@ function AppContent() {
                       <Route path="*" element={<Navigate to="/" replace />} />
                       </Routes>
                       </Suspense>
-                    </div>
-                    <OutsideGames>
-                      <Footer />
-                    </OutsideGames>
+                      </div>
+                      <OutsideGames>
+                        <Footer />
+                      </OutsideGames>
+                    </NavAwareContent>
                   </div>
                   </MotionConfig>
                 </GameProvider>

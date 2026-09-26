@@ -56,7 +56,7 @@ describe('ScoreInput keyboard', () => {
 
   it('remembers the input mode', () => {
     setup();
-    fireEvent.click(screen.getAllByRole('button').find(b => /quick|schnell/i.test(b.textContent || ''))!);
+    fireEvent.click(screen.getByRole('radio', { name: /schnell/i }));
     expect(localStorage.getItem('sotd-input-mode')).toBe('quick');
   });
 });
@@ -75,5 +75,36 @@ describe('shouldHandleGameKey', () => {
   });
   it('ignores typing in a field', () => {
     expect(shouldHandleGameKey(ev({ key: '5' }, document.createElement('input')))).toBe(false);
+  });
+});
+
+describe('ScoreInput dart grid', () => {
+  const grid = () => {
+    localStorage.setItem('sotd-input-mode', 'darts');
+    return setup({ currentThrow: [] });
+  };
+
+  it('adds the exact bed: treble 20', () => {
+    const props = grid();
+    fireEvent.click(screen.getByRole('radio', { name: 'Triple' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Triple 20' }));
+    expect(props.onAddDart).toHaveBeenCalledWith(expect.objectContaining({ segment: 20, multiplier: 3, score: 60 }));
+  });
+
+  it('falls back to single after each dart', () => {
+    const props = grid();
+    fireEvent.click(screen.getByRole('radio', { name: 'Double' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Double 16' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Single 5' }));
+    expect(props.onAddDart).toHaveBeenLastCalledWith(expect.objectContaining({ segment: 5, multiplier: 1, score: 5 }));
+  });
+
+  it('bull is a double 50, outer bull a single 25, miss scores nothing', () => {
+    const props = grid();
+    fireEvent.click(screen.getByRole('button', { name: 'Bull' }));
+    fireEvent.click(screen.getByRole('button', { name: '25' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Miss' }));
+    expect(vi.mocked(props.onAddDart).mock.calls.map(c => [c[0].score, c[0].multiplier]))
+      .toEqual([[50, 2], [25, 1], [0, 0]]);
   });
 });

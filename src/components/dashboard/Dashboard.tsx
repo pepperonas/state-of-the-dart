@@ -16,6 +16,7 @@ import { motion } from 'framer-motion';
 import { BackButton, Button, Card, AnimatedNumber } from '../common';
 import { staggerChild } from '../../utils/motion';
 import { Icon, iconForEmoji } from '../icons';
+import ErrorState from '../common/ErrorState';
 
 interface RecentActivity {
   id: string;
@@ -43,6 +44,8 @@ const Dashboard: React.FC = () => {
   const { players } = usePlayer();
   
   const [loading, setLoading] = useState(true);
+  // A failed load used to leave zeros on screen, indistinguishable from a new account.
+  const [loadError, setLoadError] = useState(false);
   const [activities, setActivities] = useState<RecentActivity[]>([]);
   const [mainPlayerId, setMainPlayerId] = useState<string | null>(null);
   const [mainPlayerLoaded, setMainPlayerLoaded] = useState(false);
@@ -79,6 +82,7 @@ const Dashboard: React.FC = () => {
 
   const loadDashboardData = async () => {
     setLoading(true);
+    setLoadError(false);
 
     try {
       // Load matches from API (Database-First!)
@@ -239,6 +243,7 @@ const Dashboard: React.FC = () => {
       setActivities(recentActivities.slice(0, 10));
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -296,6 +301,7 @@ const Dashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         {/* Back Button */}
         <BackButton onClick={() => navigate('/')} />
+        {loadError && <ErrorState className="mb-6" onRetry={loadDashboardData} />}
 
         {/* Header */}
         <div className="mb-8">

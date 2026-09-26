@@ -1,12 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, LogOut, Settings, CreditCard, Crown, Clock } from 'lucide-react';
+import { User, LogOut, Settings, CreditCard, Crown, Clock, BookOpen, Mail } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 
-const UserMenu: React.FC = () => {
+interface UserMenuProps {
+  /** Guide and contact moved here from the home-screen tile grid. */
+  onOpenGuide?: () => void;
+  onOpenContact?: () => void;
+}
+
+const UserMenu: React.FC<UserMenuProps> = ({ onOpenGuide, onOpenContact }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, logout, hasActiveSubscription, trialDaysLeft } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen]);
 
   if (!user) return null;
 
@@ -20,6 +35,9 @@ const UserMenu: React.FC = () => {
       {/* User Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+        aria-label={t('home.account_menu')}
         className="flex items-center gap-2 bg-surface-container px-4 py-2 rounded-m3-full shadow-m3-1 hover:bg-surface-container-high transition-all"
       >
         <div className="w-8 h-8 rounded-m3-full bg-primary text-on-primary flex items-center justify-center font-bold">
@@ -123,6 +141,25 @@ const UserMenu: React.FC = () => {
                 <CreditCard size={18} />
                 {user.subscriptionStatus === 'lifetime' ? 'Lifetime-Lizenz' : hasActiveSubscription ? 'Abo verwalten' : 'Upgrade'}
               </button>
+
+              {onOpenGuide && (
+                <button
+                  onClick={() => { onOpenGuide(); setIsOpen(false); }}
+                  className="w-full px-4 py-2 text-left flex items-center gap-2 text-on-surface hover:bg-surface-container-highest transition-colors"
+                >
+                  <BookOpen size={18} />
+                  {t('menu.guide')}
+                </button>
+              )}
+              {onOpenContact && (
+                <button
+                  onClick={() => { onOpenContact(); setIsOpen(false); }}
+                  className="w-full px-4 py-2 text-left flex items-center gap-2 text-on-surface hover:bg-surface-container-highest transition-colors"
+                >
+                  <Mail size={18} />
+                  {t('menu.contact')}
+                </button>
+              )}
 
               <div className="border-t border-outline-variant my-2" />
 

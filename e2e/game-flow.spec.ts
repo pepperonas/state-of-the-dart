@@ -39,10 +39,10 @@ test('start, score, pause & leave without a reload, then resume', async ({ page 
   await page.getByRole('button', { name: new RegExp(`${alice} beginnt`) }).click();
 
   // Score 60 on the numpad: type and Enter commits the visit.
-  await expect(page.getByText('501').first()).toBeVisible();
+  await expect(page.getByText('501', { exact: true }).locator('visible=true').first()).toBeVisible();
   await page.keyboard.type('60');
   await page.keyboard.press('Enter');
-  await expect(page.getByText('441').first()).toBeVisible();
+  await expect(page.getByText('441', { exact: true }).locator('visible=true').first()).toBeVisible();
 
   // Marker that survives client-side navigation but not a reload.
   await page.evaluate(() => { (window as unknown as { __noReload: boolean }).__noReload = true; });
@@ -61,5 +61,31 @@ test('start, score, pause & leave without a reload, then resume', async ({ page 
   const resume = page.getByRole('button', { name: /Fortsetzen/i }).first();
   if (await resume.isVisible()) await resume.click();
   await expect(page).toHaveURL(/\/game/);
-  await expect(page.getByText('441').first()).toBeVisible();
+  await expect(page.getByText('441', { exact: true }).locator('visible=true').first()).toBeVisible();
+});
+
+test('the home screen rematch starts the last pairing with one tap', async ({ page }) => {
+  await login(page);
+  const suffix = String(Date.now()).slice(-5);
+  const alice = `Ann${suffix}`;
+  const bob = `Ben${suffix}`;
+  await createPlayer(page, alice);
+  await createPlayer(page, bob);
+
+  // Play once so the pairing is remembered.
+  await page.goto('/game?new=1');
+  await page.getByRole('button', { name: new RegExp(alice) }).first().click();
+  await page.getByRole('button', { name: new RegExp(bob) }).first().click();
+  await page.getByRole('button', { name: /Spiel starten/i }).click();
+  await page.getByRole('button', { name: new RegExp(`${alice} beginnt`) }).click();
+  await expect(page.getByText('501', { exact: true }).locator('visible=true').first()).toBeVisible();
+
+  // Home: the rematch card names the pairing; one tap lands in the spinner.
+  await page.getByRole('button', { name: /^Zurück$/ }).first().click();
+  await page.getByRole('button', { name: /Pausieren & verlassen/i }).click();
+  await expect(page).toHaveURL(/\/$/);
+  const rematch = page.getByRole('button', { name: new RegExp(`Revanche.*${alice} vs\\. ${bob}`) });
+  await expect(rematch).toBeVisible();
+  await rematch.click();
+  await expect(page.getByRole('button', { name: new RegExp(`${bob} beginnt`) })).toBeVisible();
 });

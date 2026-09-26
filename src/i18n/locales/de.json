@@ -21,7 +21,9 @@
     "warning": "Warnung",
     "info": "Info",
     "beta": "Beta",
-    "undo": "Rückgängig"
+    "undo": "Rückgängig",
+    "load_failed": "Konnte nicht geladen werden. Prüfe die Verbindung.",
+    "retry": "Erneut versuchen"
   },
   "auth": {
     "login": "Anmelden",
@@ -182,7 +184,27 @@
     "end_body": "Das Match wird ohne Sieger beendet und zählt nicht in die Statistik. Direkt danach kannst du es noch rückgängig machen.",
     "who_starts": "Wer wirft zuerst?",
     "starts": "{{name}} beginnt",
-    "skip_spinner": "Überspringen (zufällig)"
+    "skip_spinner": "Überspringen (zufällig)",
+    "input_mode": "Eingabemodus",
+    "mode_numpad": "Numpad",
+    "mode_darts": "Darts",
+    "mode_quick": "Schnell",
+    "multiplier": "Multiplikator",
+    "single": "Single",
+    "double": "Double",
+    "triple": "Triple",
+    "miss": "Miss",
+    "clear_input": "Eingabe löschen",
+    "set_dart": "Setzen",
+    "clear_visit": "Leeren",
+    "clear_visit_long": "Aufnahme leeren",
+    "confirm_visit": "Bestätigen",
+    "confirm_correction": "Korrektur bestätigen",
+    "remaining": "Rest",
+    "edit_dart": "Dart {{n}}: {{score}} – antippen zum Ändern",
+    "empty_dart": "Dart {{n}}: leer",
+    "scoreboard": "Spielstand",
+    "numpad_hint": "Summe tippen, ↵ übernimmt"
   },
   "stats": {
     "statistics": "Statistiken",
@@ -632,5 +654,33 @@
     "install_action": "Installieren",
     "install_later": "Später",
     "install_ios": "In Safari auf „Teilen“ tippen, dann „Zum Home-Bildschirm“."
+  },
+  "nav": {
+    "label": "Hauptnavigation",
+    "home": "Start",
+    "stats": "Statistik",
+    "achievements": "Erfolge",
+    "players": "Spieler"
+  },
+  "home": {
+    "rematch": "Revanche",
+    "new_game": "Neues Spiel",
+    "new_setup": "Neues Setup",
+    "first_to_legs": "First to {{count}} Legs",
+    "first_to_sets": "First to {{count}} Sets",
+    "section_play": "Weitere Spiele",
+    "section_review": "Auswerten",
+    "section_admin": "Verwaltung",
+    "skip_to_content": "Zum Inhalt springen",
+    "account_menu": "Konto-Menü"
+  },
+  "onboarding": {
+    "title": "Willkommen!",
+    "body": "In drei Schritten zum ersten Spiel:",
+    "step_player": "Eigenes Spielerprofil anlegen",
+    "step_opponent": "Gegner oder Bot hinzufügen",
+    "step_match": "Erstes 501 spielen",
+    "dismiss": "Einführung ausblenden",
+    "done": "erledigt"
   }
 }
