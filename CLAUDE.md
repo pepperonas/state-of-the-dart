@@ -444,6 +444,7 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - `/assets/*` (Vite hashed chunks/CSS) → `public, max-age=31536000, immutable` — safe forever, the hash IS the cache key.
 - `/index.html` and SPA fallback `/` → `no-cache, no-store, must-revalidate` — browser always revalidates so deployed asset hashes are picked up.
 - `/sw.js` + `workbox-*.js` → `no-cache` — SW updates propagate without delay.
+- `= /manifest.webmanifest` → own location with `default_type application/manifest+json` (nginx's mime.types has no entry; it was served as `application/octet-stream`). Added 2026-09-26, backup in `/root/nginx-backups/`.
 - Previously the config had three contradictory `Cache-Control` headers on assets and **none** on HTML, which caused 404 errors on stale chunk references after deploys.
 
 See `docs/DEPLOYMENT_VPS.md` and `docs/ARCHITECTURE.md` for details.
