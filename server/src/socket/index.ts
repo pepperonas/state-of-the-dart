@@ -2,11 +2,18 @@ import { Server as HttpServer } from 'http';
 import { Server, Socket } from 'socket.io';
 import { config } from '../config';
 
-import { OnlinePlayer, GameRoom, isMember, removeFromRoom, applyThrow, cleanChatMessage } from './rooms';
+import {
+  OnlinePlayer, GameRoom, isMember, removeFromRoom, applyThrow, cleanChatMessage,
+  markDisconnected, reconnectPlayer, restartMatch, sanitizeClientId,
+} from './rooms';
+
+/** How long a seat is held for a player whose connection dropped mid-game. */
+export const RECONNECT_GRACE_MS = 60_000;
 
 // In-memory storage (for simplicity)
-const onlinePlayers: Map<string, OnlinePlayer> = new Map();
+const onlinePlayers: Map<string, OnlinePlayer> = new Map(); // by socket id
 const gameRooms: Map<string, GameRoom> = new Map();
+const graceTimers: Map<string, ReturnType<typeof setTimeout>> = new Map(); // `${roomId}:${playerId}`
 
 const publicRooms = () =>
   Array.from(gameRooms.values()).filter(r => !r.settings.isPrivate && r.status === 'waiting');
@@ -37,18 +44,31 @@ export function setupSocketIO(server: HttpServer): Server {
     console.log(`[Socket.IO] Client connected: ${socket.id}`);
 
     // Player joins with their info
-    socket.on('player:join', safe('player:join', (data: { name: string; playerId?: string }) => {
+    socket.on('player:join', safe('player:join', (data: { name: string; playerId?: string; clientId?: string }) => {
       const player: OnlinePlayer = {
-        id: socket.id,
+        // A stable id from the client's localStorage; the socket id changes on every reconnect.
+        id: sanitizeClientId(data?.clientId) ?? socket.id,
         name: typeof data?.name === 'string' && data.name.trim() ? data.name.trim().slice(0, 40) : 'Guest',
         socketId: socket.id,
         playerId: data.playerId,
+        connected: true,
       };
       onlinePlayers.set(socket.id, player);
-      
+
+      // Back from a dropped connection: take the held seat again.
+      gameRooms.forEach((room, roomId) => {
+        if (!reconnectPlayer(room, player.id, socket.id)) return;
+        const key = `${roomId}:${player.id}`;
+        clearTimeout(graceTimers.get(key));
+        graceTimers.delete(key);
+        socket.join(roomId);
+        socket.emit('room:rejoined', room);
+        io.to(roomId).emit('room:updated', room);
+      });
+
       // Broadcast updated player list
       io.emit('players:online', Array.from(onlinePlayers.values()));
-      
+
       // Send available rooms to new player
       socket.emit('rooms:list', publicRooms());
     }));
@@ -61,8 +81,8 @@ export function setupSocketIO(server: HttpServer): Server {
       const roomId = `room-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
       const room: GameRoom = {
         id: roomId,
-        name: data.name,
-        host: socket.id,
+        name: typeof data?.name === 'string' ? data.name.trim().slice(0, 60) : 'Room',
+        host: player.id,
         players: [player],
         settings: data.settings,
         status: 'waiting',
@@ -95,6 +115,7 @@ export function setupSocketIO(server: HttpServer): Server {
         return;
       }
 
+      if (isMember(room, player.id)) return;
       room.players.push(player);
       socket.join(roomId);
       
@@ -105,8 +126,9 @@ export function setupSocketIO(server: HttpServer): Server {
     // Leave a room
     socket.on('room:leave', safe('room:leave', (roomId: string) => {
       const room = gameRooms.get(roomId);
-      if (!room) return;
-      const outcome = removeFromRoom(room, socket.id);
+      const me = onlinePlayers.get(socket.id);
+      if (!room || !me) return;
+      const outcome = removeFromRoom(room, me.id);
       if (outcome === 'not-member') return;
       socket.leave(roomId);
       if (outcome === 'deleted') gameRooms.delete(roomId);
@@ -117,7 +139,8 @@ export function setupSocketIO(server: HttpServer): Server {
     // Start game
     socket.on('game:start', safe('game:start', (roomId: string) => {
       const room = gameRooms.get(roomId);
-      if (!room || room.host !== socket.id) return;
+      const me = onlinePlayers.get(socket.id);
+      if (!room || !me || room.host !== me.id || room.status !== 'waiting') return;
 
       if (room.players.length < 2) {
         socket.emit('error', { message: 'Need at least 2 players' });
@@ -127,14 +150,10 @@ export function setupSocketIO(server: HttpServer): Server {
       room.status = 'playing';
       room.gameState = {
         currentPlayerIndex: 0,
-        scores: room.players.reduce((acc, p) => {
-          acc[p.socketId] = room.settings.startScore;
-          return acc;
-        }, {} as Record<string, number>),
-        legs: room.players.reduce((acc, p) => {
-          acc[p.socketId] = 0;
-          return acc;
-        }, {} as Record<string, number>),
+        starterIndex: 0,
+        legStarterIndex: 0,
+        scores: Object.fromEntries(room.players.map(p => [p.id, room.settings.startScore])),
+        legs: Object.fromEntries(room.players.map(p => [p.id, 0])),
       };
 
       io.to(roomId).emit('game:started', room);
@@ -144,17 +163,41 @@ export function setupSocketIO(server: HttpServer): Server {
     // Submit throw
     socket.on('game:throw', safe('game:throw', (data: { roomId: string; darts?: Array<{ multiplier?: number }>; score: unknown }) => {
       const room = gameRooms.get(data?.roomId);
-      if (!room) return;
-      const result = applyThrow(room, socket.id, data);
-      if (result.kind === 'rejected') return;
+      const me = onlinePlayers.get(socket.id);
+      if (!room || !me) return;
+      const before = room.gameState?.scores[me.id];
+      const result = applyThrow(room, me.id, data);
+      if (result.kind === 'rejected') {
+        socket.emit('game:rejected', { reason: result.reason });
+        return;
+      }
+      const score = data.score as number;
+      // One event per visit: the client shows it and a screen reader announces it.
+      io.to(room.id).emit('game:visit', {
+        playerId: me.id,
+        name: me.name,
+        score: result.kind === 'bust' ? 0 : score,
+        thrown: score,
+        remaining: result.kind === 'bust' ? before : result.kind === 'scored' ? before! - score : 0,
+        bust: result.kind === 'bust',
+      });
       if (result.kind === 'bust') {
-        io.to(room.id).emit('game:bust', { playerId: socket.id, darts: data.darts });
+        io.to(room.id).emit('game:bust', { playerId: me.id, darts: data.darts });
       } else if (result.kind === 'leg') {
         io.to(room.id).emit('game:legWon', { winner: result.winner, legs: room.gameState?.legs });
       } else if (result.kind === 'match') {
         io.to(room.id).emit('game:finished', { winner: result.winner, legs: room.gameState?.legs });
+        io.to(room.id).emit('room:updated', room);
       }
       io.to(room.id).emit('game:state', room.gameState);
+    }));
+
+    // Rematch in the same room (host, after a finished match)
+    socket.on('game:rematch', safe('game:rematch', (roomId: string) => {
+      const room = gameRooms.get(roomId);
+      const me = onlinePlayers.get(socket.id);
+      if (!room || !me || room.host !== me.id) return;
+      if (restartMatch(room)) io.to(roomId).emit('game:started', room);
     }));
 
     // Refresh the public room list (the lobby's refresh button)
@@ -167,7 +210,7 @@ export function setupSocketIO(server: HttpServer): Server {
       const player = onlinePlayers.get(socket.id);
       const room = gameRooms.get(data?.roomId);
       // Only members may talk in a room — it used to accept any roomId.
-      if (!player || !isMember(room, socket.id)) return;
+      if (!player || !isMember(room, player.id)) return;
       const message = cleanChatMessage(data.message);
       if (!message) return;
       io.to(data.roomId).emit('chat:message', { from: player.name, message, timestamp: Date.now() });
@@ -176,19 +219,40 @@ export function setupSocketIO(server: HttpServer): Server {
     // Disconnect
     socket.on('disconnect', safe('disconnect', () => {
       console.log(`[Socket.IO] Client disconnected: ${socket.id}`);
+      const me = onlinePlayers.get(socket.id);
       onlinePlayers.delete(socket.id);
 
-      gameRooms.forEach((room, roomId) => {
-        const outcome = removeFromRoom(room, socket.id);
-        if (outcome === 'not-member') return;
-        if (outcome === 'deleted') {
-          gameRooms.delete(roomId);
-          return;
-        }
-        io.to(roomId).emit('room:updated', room);
-        io.to(roomId).emit('player:left', { socketId: socket.id });
-        if (room.gameState) io.to(roomId).emit('game:state', room.gameState);
-      });
+      if (me) {
+        gameRooms.forEach((room, roomId) => {
+          const seat = room.players.find(p => p.id === me.id);
+          // Only act if this socket still owns the seat (a reconnect may already have taken it over).
+          if (!seat || seat.socketId !== socket.id) return;
+          const drop = () => {
+            const outcome = removeFromRoom(room, me.id);
+            if (outcome === 'not-member') return;
+            if (outcome === 'deleted') {
+              gameRooms.delete(roomId);
+            } else {
+              io.to(roomId).emit('room:updated', room);
+              io.to(roomId).emit('player:left', { playerId: me.id });
+              if (room.gameState) io.to(roomId).emit('game:state', room.gameState);
+            }
+            io.emit('rooms:list', publicRooms());
+          };
+          if (markDisconnected(room, me.id)) {
+            // Mid-game: hold the seat for a while instead of ending the match.
+            io.to(roomId).emit('room:updated', room);
+            const key = `${roomId}:${me.id}`;
+            clearTimeout(graceTimers.get(key));
+            graceTimers.set(key, setTimeout(() => {
+              graceTimers.delete(key);
+              if (room.players.find(p => p.id === me.id)?.connected === false) drop();
+            }, RECONNECT_GRACE_MS));
+          } else {
+            drop();
+          }
+        });
+      }
 
       io.emit('players:online', Array.from(onlinePlayers.values()));
       io.emit('rooms:list', publicRooms());

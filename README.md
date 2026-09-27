@@ -11,7 +11,7 @@
 <!-- Links -->
 [![Live Demo](https://img.shields.io/badge/Live_Demo-stateofthedart.com-22c55e?style=for-the-badge&logo=googlechrome&logoColor=white)](https://stateofthedart.com)
 [![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-a855f7?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://stateofthedart.celox.io)
-[![Version](https://img.shields.io/badge/Version-0.16.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-0.17.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
 
 <!-- Build & Repo (live) -->
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
@@ -46,8 +46,8 @@
 <!-- Qualität -->
 ![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?logo=playwright&logoColor=white)
-![Unit Tests](https://img.shields.io/badge/Unit_Tests-914-brightgreen)
-![E2E Tests](https://img.shields.io/badge/E2E_Tests-22-brightgreen)
+![Unit Tests](https://img.shields.io/badge/Unit_Tests-934-brightgreen)
+![E2E Tests](https://img.shields.io/badge/E2E_Tests-23-brightgreen)
 ![Coverage](https://img.shields.io/badge/Coverage-24%25_stmts_%7C_75%25_branches-yellow)
 ![ESLint](https://img.shields.io/badge/ESLint-configured-4B32C3?logo=eslint&logoColor=white)
 
@@ -795,6 +795,13 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.17.0 (27. September 2026) - Online-Mehrspieler spielbar
+
+- **Online-Matches bis zum Ende:** Tabelle, Eingabe für den eigenen Wurf (auch per Tastatur), Check-out-Weg, letzte Aufnahmen, Siegerbildschirm, Revanche. Vorher ließ sich online gar kein Wurf eingeben.
+- **Verbindung weg ≠ Match weg:** 60 Sekunden bleibt der Platz reserviert, beim Wiederverbinden sitzt man wieder am Tisch.
+- **Behoben:** Der Anwurf wechselte online nicht korrekt zwischen den Legs.
+- Grenze: Räume leben im Serverspeicher – ein Deploy beendet laufende Online-Spiele; Online-Matches zählen nicht in die Statistik.
 
 ### v0.16.0 (26. September 2026) - Turniere werden gespeichert
 

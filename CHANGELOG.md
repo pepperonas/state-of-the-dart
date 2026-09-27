@@ -7,6 +7,46 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-09-27
+
+Online multiplayer, playable.
+
+### Added
+
+- **An online match can be played to the end.** The mode could create rooms and
+  start a game but had no way to enter a throw. Now: a scoreboard (remaining,
+  legs, whose turn), a score pad with keyboard input on your turn, a checkout
+  button with the suggested route, the last visits, a winner screen and a
+  rematch for the host. Visits are announced to screen readers.
+- **A dropped connection no longer ends the match.** Seats are keyed by a stable
+  client id, not the socket; a player whose connection drops mid-game keeps
+  their seat for 60 seconds and gets it back on reconnect (a phone that locks
+  its screen loses its socket within seconds).
+- Typed totals are checked before sending: impossible totals (179, …) and
+  finishes that do not exist (168, 171 with double-out) get a reason.
+
+### Fixed
+
+- **The throw-off did not alternate between legs** online: the player after the
+  leg winner started, so whenever the non-starter won, the same player threw
+  first again.
+- The "Beta" label on the online tile is gone. The room list is a real list and
+  every join button names its room.
+
+### Tests
+
+- Room logic: identity by client id, held seat and reconnect, rematch with the
+  throw-off moving on, leg throw-off alternation, client id sanitising.
+- `e2e/online.spec.ts`: two browsers play a whole match through the UI, one
+  reloads mid-leg and keeps the seat, the non-starter wins a leg (the only case
+  that tells the throw-off rules apart), rematch. Both server rules were
+  mutation-probed against it.
+
+### Known limits
+
+- Rooms live in server memory: a deploy or restart ends running online games.
+  Online matches are not saved to statistics.
+
 ## [0.16.0] - 2026-09-26
 
 Tournaments are saved.

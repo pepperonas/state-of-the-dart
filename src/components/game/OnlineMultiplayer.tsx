@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -11,12 +11,16 @@ import { useAuth } from '../../context/AuthContext';
 import PlayerAvatar from '../player/PlayerAvatar';
 import { Button, Card, TextField, Dialog, IconButton, Chip, BackButton } from '../common';
 import { useFeedback } from '../common/feedbackContext';
+import OnlineGamePanel, { type OnlineVisit } from './OnlineGamePanel';
+import { getOnlineClientId } from '../../utils/onlineVisit';
 
 interface OnlinePlayer {
+  /** Stable client id (see getOnlineClientId), not the socket id. */
   id: string;
   name: string;
   socketId: string;
   playerId?: string;
+  connected?: boolean;
 }
 
 interface GameRoom {
@@ -29,9 +33,10 @@ interface GameRoom {
     startScore: number;
     legsToWin: number;
     isPrivate: boolean;
+    doubleOut?: boolean;
   };
   status: 'waiting' | 'playing' | 'finished';
-  gameState?: any;
+  gameState?: { currentPlayerIndex: number; scores: Record<string, number>; legs: Record<string, number> };
 }
 
 interface ChatMessage {
@@ -57,6 +62,13 @@ const OnlineMultiplayer: React.FC = () => {
   const [currentRoom, setCurrentRoom] = useState<GameRoom | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
+  const [visits, setVisits] = useState<OnlineVisit[]>([]);
+  const [winnerId, setWinnerId] = useState<string | null>(null);
+  const [announcement, setAnnouncement] = useState('');
+  // Stable across reconnects: the server gives this id its seat back.
+  const myId = useMemo(() => getOnlineClientId(), []);
+  const tRef = useRef(t);
+  useEffect(() => { tRef.current = t; }, [t]);
   
   // Create room form
   const [showCreateRoom, setShowCreateRoom] = useState(false);
@@ -74,10 +86,10 @@ const OnlineMultiplayer: React.FC = () => {
   // update, and each change used to close and reopen the socket — a new
   // socket.id, so the server dropped us from our room.
   const mainPlayer = players.find(p => !p.isBot);
-  const joinInfoRef = useRef({ name: t('online_game.guest'), playerId: undefined as string | undefined });
+  const joinInfoRef = useRef({ name: t('online_game.guest'), playerId: undefined as string | undefined, clientId: myId });
   useEffect(() => {
-    joinInfoRef.current = { name: mainPlayer?.name || user?.email || t('online_game.guest'), playerId: mainPlayer?.id };
-  }, [mainPlayer?.name, mainPlayer?.id, user?.email, t]);
+    joinInfoRef.current = { name: mainPlayer?.name || user?.email || t('online_game.guest'), playerId: mainPlayer?.id, clientId: myId };
+  }, [mainPlayer?.name, mainPlayer?.id, user?.email, t, myId]);
 
   // Connect to socket
   useEffect(() => {
@@ -118,6 +130,36 @@ const OnlineMultiplayer: React.FC = () => {
 
     newSocket.on('game:started', (room: GameRoom) => {
       setCurrentRoom(room);
+      setVisits([]);
+      setWinnerId(null);
+    });
+
+    // Back after a dropped connection: the server kept our seat.
+    newSocket.on('room:rejoined', (room: GameRoom) => {
+      setCurrentRoom(room);
+      notifyRef.current(tRef.current('online_game.rejoined'));
+    });
+
+    newSocket.on('game:visit', (v: OnlineVisit) => {
+      setVisits(prev => [...prev, v].slice(-20));
+      setAnnouncement(v.bust
+        ? tRef.current('online_game.announce_bust', { name: v.name, remaining: v.remaining })
+        : tRef.current('online_game.announce_visit', { name: v.name, score: v.score, remaining: v.remaining }));
+    });
+
+    newSocket.on('game:rejected', (data: { reason: string }) => {
+      notifyRef.current(tRef.current(data.reason === 'not your turn' ? 'online_game.not_your_turn' : 'online_game.throw_rejected'));
+    });
+
+    newSocket.on('game:legWon', (data: { winner: OnlinePlayer }) => {
+      const text = tRef.current('online_game.leg_won', { name: data.winner.name });
+      notifyRef.current(text);
+      setAnnouncement(text);
+    });
+
+    newSocket.on('game:finished', (data: { winner: OnlinePlayer }) => {
+      setWinnerId(data.winner.id);
+      setAnnouncement(tRef.current('online_game.winner', { name: data.winner.name }));
     });
 
     newSocket.on('game:state', (state: any) => {
@@ -164,11 +206,24 @@ const OnlineMultiplayer: React.FC = () => {
     socket.emit('room:leave', currentRoom.id);
     setCurrentRoom(null);
     setChatMessages([]);
+    setVisits([]);
+    setWinnerId(null);
   };
 
   const handleStartGame = () => {
     if (!socket || !currentRoom) return;
     socket.emit('game:start', currentRoom.id);
+  };
+
+  const handleThrow = (score: number, checkout: boolean) => {
+    if (!socket || !currentRoom) return;
+    // The server enforces double-out from the last dart; a typed checkout is a double finish.
+    socket.emit('game:throw', { roomId: currentRoom.id, score, darts: checkout ? [{ multiplier: 2 }] : [] });
+  };
+
+  const handleRematch = () => {
+    if (!socket || !currentRoom) return;
+    socket.emit('game:rematch', currentRoom.id);
   };
 
   const handleSendChat = () => {
@@ -194,7 +249,7 @@ const OnlineMultiplayer: React.FC = () => {
     setJoinRoomId('');
   };
 
-  const isHost = currentRoom?.host === socket?.id;
+  const isHost = currentRoom?.host === myId;
 
   // Room View
   if (currentRoom) {
@@ -254,14 +309,16 @@ const OnlineMultiplayer: React.FC = () => {
               </div>
             </div>
 
+            {currentRoom.status === 'waiting' && (
+              <>
             {/* Players */}
             <h3 className="text-on-surface m3-title-small mb-3">{t('online_game.players_count', { count: currentRoom.players.length, max: 4 })}</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-              {currentRoom.players.map((player, idx) => (
+              {currentRoom.players.map((player) => (
                 <div
-                  key={player.socketId}
+                  key={player.id}
                   className={`p-4 rounded-m3-lg text-center ${
-                    player.socketId === currentRoom.host
+                    player.id === currentRoom.host
                       ? 'bg-tertiary-container ring-2 ring-tertiary'
                       : 'bg-surface-container-high'
                   }`}
@@ -270,16 +327,11 @@ const OnlineMultiplayer: React.FC = () => {
                     <div className="w-12 h-12 rounded-m3-full bg-primary flex items-center justify-center text-on-primary text-xl font-bold">
                       {player.name.charAt(0).toUpperCase()}
                     </div>
-                    {player.socketId === currentRoom.host && (
+                    {player.id === currentRoom.host && (
                       <Crown size={16} className="absolute -top-1 -right-1 text-tertiary" />
                     )}
                   </div>
                   <p className="text-on-surface font-medium mt-2 text-sm truncate">{player.name}</p>
-                  {currentRoom.gameState && (
-                    <p className="text-primary text-xl font-bold">
-                      {currentRoom.gameState.scores[player.socketId]}
-                    </p>
-                  )}
                 </div>
               ))}
 
@@ -316,7 +368,24 @@ const OnlineMultiplayer: React.FC = () => {
                 {t('online_game.waiting_for_host')}
               </p>
             )}
+              </>
+            )}
           </Card>
+
+          {currentRoom.status !== 'waiting' && (
+            <div className="mb-6">
+              <OnlineGamePanel
+                room={currentRoom}
+                myId={myId}
+                visits={visits}
+                winnerId={winnerId}
+                onThrow={handleThrow}
+                onRematch={handleRematch}
+                onLeave={handleLeaveRoom}
+              />
+            </div>
+          )}
+          <div data-testid="online-announcer" role="status" aria-live="polite" aria-atomic="true" className="sr-only">{announcement}</div>
 
           {/* Chat */}
           <Card variant="elevated" className="p-4">
@@ -507,9 +576,9 @@ const OnlineMultiplayer: React.FC = () => {
               <p className="text-on-surface-variant text-sm">{t('online_game.create_new_room_hint')}</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <ul className="space-y-3">
               {rooms.map(room => (
-                <div
+                <li
                   key={room.id}
                   className="flex items-center justify-between p-4 rounded-m3-lg bg-surface-container-high"
                 >
@@ -519,12 +588,12 @@ const OnlineMultiplayer: React.FC = () => {
                       {t('online_game.room_summary', { score: room.settings.startScore, count: room.players.length, max: 4 })}
                     </p>
                   </div>
-                  <Button variant="filled" size="sm" onClick={() => handleJoinRoom(room.id)}>
+                  <Button variant="filled" size="sm" onClick={() => handleJoinRoom(room.id)} aria-label={t('online_game.join_room', { name: room.name })}>
                     {t('online.join')}
                   </Button>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
         </Card>
       </div>
