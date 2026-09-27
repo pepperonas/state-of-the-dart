@@ -425,7 +425,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
                   <button
                     key={section.id}
                     onClick={() => setActiveSection(section.id)}
-                    className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-m3-md transition-all text-left whitespace-nowrap md:whitespace-normal md:w-full ${
+                    className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-m3-md transition text-left whitespace-nowrap md:whitespace-normal md:w-full ${
                       activeSection === section.id
                         ? 'bg-primary-container text-on-primary-container'
                         : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'

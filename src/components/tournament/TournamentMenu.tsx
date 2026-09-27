@@ -453,7 +453,7 @@ const TournamentMenu: React.FC = () => {
                       interactive
                       selected={tournamentType === type.id}
                       onClick={() => setTournamentType(type.id)}
-                      className={`p-4 text-left ${tournamentType === type.id ? 'ring-2 ring-primary' : ''}`}
+                      className="p-4 text-left"
                     >
                       <Icon size={24} className="text-primary mb-2" />
                       <p className="text-on-surface font-medium">{type.title}</p>
@@ -502,7 +502,7 @@ const TournamentMenu: React.FC = () => {
                           setSelectedPlayers(prev => [...prev, player]);
                         }
                       }}
-                      className={`p-3 text-center ${isSelected ? 'ring-2 ring-primary' : ''}`}
+                      className="p-3 text-center"
                     >
                       <PlayerAvatar avatar={player.avatar} name={player.name} size="sm" />
                       <p className="text-on-surface m3-body-small mt-1 truncate">{player.name}</p>

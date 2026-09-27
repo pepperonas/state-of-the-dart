@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Activity, TrendingUp, TrendingDown, Minus, Download, Users } from 'lucide-react';
@@ -24,7 +24,7 @@ import { api } from '../../services/api';
 import { formatDate, getTimestampForSort } from '../../utils/dateUtils';
 import BackButton from '../common/BackButton';
 import { staggerChild } from '../../utils/motion';
-import { Card, Button, Chip, Select } from '../common';
+import { Card, Button, Chip, Select, Menu, useFeedback } from '../common';
 import { Icon, iconForEmoji } from '../icons';
 import ErrorState from '../common/ErrorState';
 import { useChartTheme } from '../../utils/chartTheme';
@@ -36,20 +36,19 @@ type TimeInterval = 'daily' | 'weekly' | 'monthly' | 'yearly';
 const StatsOverview: React.FC = () => {
   const chart = useChartTheme();
   const { t } = useTranslation();
+  const { notify } = useFeedback();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { players, getPlayerHeatmap } = usePlayer();
   const { storage } = useTenant();
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>('');
   const [comparePlayerIds, setComparePlayerIds] = useState<string[]>([]);
-  const [showExportMenu, setShowExportMenu] = useState(false);
   const [timeInterval, setTimeInterval] = useState<TimeInterval>(() => {
     const saved = localStorage.getItem('stats_time_interval');
     return (saved && ['daily', 'weekly', 'monthly', 'yearly'].includes(saved)) 
       ? saved as TimeInterval 
       : 'monthly';
   });
-  const exportMenuRef = useRef<HTMLDivElement>(null);
   const [matches, setMatches] = useState<Match[]>([]);
   const [loadingMatches, setLoadingMatches] = useState(true);
 
@@ -105,19 +104,6 @@ const StatsOverview: React.FC = () => {
     localStorage.setItem('stats_time_interval', timeInterval);
   }, [timeInterval]);
   
-  // Close export menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
-        setShowExportMenu(false);
-      }
-    };
-    
-    if (showExportMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [showExportMenu]);
   
   const selectedPlayer = players.find(p => p.id === selectedPlayerId);
   
@@ -292,26 +278,25 @@ const StatsOverview: React.FC = () => {
   const handleExportCSV = () => {
     if (!selectedPlayer) return;
     exportMatchHistoryCSV(playerMatches, selectedPlayer.name);
-    setShowExportMenu(false);
   };
   
   const handleExportExcel = async () => {
     if (!selectedPlayer) return;
-    setShowExportMenu(false);
     try {
       await exportMatchHistoryExcel(playerMatches, selectedPlayer.name);
     } catch (error) {
       console.error(error);
+      notify(t('stats_overview.export_failed'));
     }
   };
 
   const handleExportPDF = async () => {
     if (!selectedPlayer) return;
-    setShowExportMenu(false);
     try {
       await exportMatchHistoryPDF(playerMatches, selectedPlayer.name);
     } catch (error) {
       console.error(error);
+      notify(t('stats_overview.export_failed'));
     }
   };
   
@@ -352,41 +337,19 @@ const StatsOverview: React.FC = () => {
             <h1 className="m3-headline-medium text-on-surface truncate">{t('stats.statistics')}</h1>
           </div>
 
-          <div ref={exportMenuRef} className="relative">
-            <Button
-              variant="filled"
-              icon={<Download size={18} />}
-              onClick={() => setShowExportMenu(!showExportMenu)}
-            >
-              {t('stats_overview.export')}
-            </Button>
-
-            {showExportMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-surface-container-high rounded-m3-md shadow-m3-3 z-50 overflow-hidden border border-outline-variant">
-                <button
-                  onClick={handleExportCSV}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-on-surface hover:bg-surface-container-highest transition-colors text-left"
-                >
-                  <FileText size={18} />
-                  <span>{t('stats_overview.export_csv')}</span>
-                </button>
-                <button
-                  onClick={handleExportExcel}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-on-surface hover:bg-surface-container-highest transition-colors text-left"
-                >
-                  <FileSpreadsheet size={18} />
-                  <span>{t('stats_overview.export_excel')}</span>
-                </button>
-                <button
-                  onClick={handleExportPDF}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-on-surface hover:bg-surface-container-highest transition-colors text-left"
-                >
-                  <FileText size={18} />
-                  <span>{t('stats_overview.export_pdf')}</span>
-                </button>
-              </div>
-            )}
-          </div>
+          <Menu
+            label={t('stats_overview.export')}
+            triggerClassName="m3-button m3-filled m3-state-layer inline-flex items-center gap-2"
+            widthClassName="w-52"
+            items={[
+              { id: 'csv', label: t('stats_overview.export_csv'), icon: <FileText size={18} />, onSelect: handleExportCSV },
+              { id: 'xlsx', label: t('stats_overview.export_excel'), icon: <FileSpreadsheet size={18} />, onSelect: handleExportExcel },
+              { id: 'pdf', label: t('stats_overview.export_pdf'), icon: <FileText size={18} />, onSelect: handleExportPDF },
+            ]}
+          >
+            <Download size={18} aria-hidden="true" />
+            {t('stats_overview.export')}
+          </Menu>
         </div>
 
         {/* Player Selector */}
@@ -1354,7 +1317,7 @@ const PlayerComparisonView: React.FC<{
               key={player.id}
               onClick={() => togglePlayer(player.id)}
               disabled={!comparePlayerIds.includes(player.id) && comparePlayerIds.length >= 4}
-              className={`p-5 rounded-m3-lg border-2 transition-all ${
+              className={`p-5 rounded-m3-lg border-2 transition ${
                 comparePlayerIds.includes(player.id)
                   ? 'border-[var(--m3-primary)] bg-primary-container shadow-m3-2'
                   : 'border-outline-variant bg-surface-container hover:bg-surface-container-high'

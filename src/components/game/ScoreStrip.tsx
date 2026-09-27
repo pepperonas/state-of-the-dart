@@ -37,15 +37,16 @@ const ScoreStrip: React.FC<ScoreStripProps> = ({ players, showSets, className = 
           key={p.playerId}
           role="listitem"
           aria-current={p.isActive ? 'true' : undefined}
-          className={`snap-start flex-1 min-w-[7.5rem] rounded-m3-lg px-3 py-2 transition-colors ${
+          className={`snap-start flex-1 min-w-[7.5rem] rounded-m3-lg px-3 py-2 phoneland:py-1 phoneland:flex phoneland:items-baseline phoneland:gap-3 transition-colors ${
             p.isActive
               ? 'bg-primary-container text-on-primary-container ring-2 ring-[var(--m3-primary)]'
               : 'bg-surface-container text-on-surface'
           }`}
         >
-          <div className="m3-label-large truncate">{p.name}</div>
-          <div className="flex items-baseline justify-between gap-2">
-            <AnimatedNumber value={p.remaining} className="text-3xl font-bold tabular-nums" />
+          <div className="m3-label-large truncate phoneland:min-w-0">{p.name}</div>
+          {/* Phone landscape: name and score on one line — height is what runs out. */}
+          <div className="flex items-baseline justify-between gap-2 phoneland:flex-1">
+            <AnimatedNumber value={p.remaining} className="text-3xl phoneland:text-2xl font-bold tabular-nums" />
             <span className="m3-label-medium opacity-80 whitespace-nowrap">
               {showSets ? `${p.setsWon}S · ` : ''}{p.legsWon}L
             </span>

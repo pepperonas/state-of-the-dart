@@ -133,7 +133,8 @@ The entire app is themed with a **Material 3 Expressive** token layer. **Use it 
 M3 primitive library (barrel `src/components/common/index.ts`). **Prefer these over ad-hoc styled elements.** Each carries an M3 state layer (`.m3-state-layer`) and token colors.
 - `Button` — `variant`: `filled|tonal|accent|elevated|outlined|text|danger|success`; `size`: `sm|md|lg`; `fullWidth`, `icon`, `loading`. Pill-shaped, morphs corner on press.
 - `IconButton` — `variant`: `standard|filled|tonal|outlined`; requires `label` (a11y). Children = the lucide icon.
-- `Fab` — extended/regular FAB (`icon`, `label?`, `color`, `size`).
+- `Fab` — extended/regular/small FAB (`icon`, `label?` or `ariaLabel`, `color`: tertiary|primary|secondary, `size`: sm|md|lg). The floating bug/debug buttons are small FABs.
+- `Menu` — WAI-ARIA menu button (`label`, `items: {id,label,icon,onSelect,disabled,tone}`, `header`, `triggerClassName`/`triggerLabel`). Arrows/Home/End, Enter/Space, Escape returns focus, Tab leaves. Used by the account menu and the stats export.
 - `Card` — `variant`: `filled|elevated|outlined`; `interactive` for hover/press. **A Card with `onClick` becomes a control** (`role="button"`, tab stop, Enter/Space; `selected` → `aria-pressed`). ⚠️ The clickables guard scans lowercase tags only — components must carry their own semantics like this.
 - `TextField` — outlined field with `label`, leading `icon`, `error`.
 - `Switch` — M3 switch (`checked`, `onChange`), thumb grows when on.
@@ -145,6 +146,12 @@ M3 primitive library (barrel `src/components/common/index.ts`). **Prefer these o
 - `AnimatedNumber` — spring number transition (overdamped → no overshoot/jitter), reduced-motion aware; "tallies" to its new value. Used for in-game scores (`PlayerScore`, `ScoreInput`) and Dashboard KPIs (counts up as async data loads).
 - `ErrorBoundary` — top-level React error boundary. Wraps `<App>` in `main.tsx` so a render-time throw (bad `JSON.parse` in match reconstruction, failed lazy chunk, etc.) shows an M3 recovery screen (reload / back-to-menu) instead of white-screening the PWA. The `window.error`/`unhandledrejection` handlers in `App.tsx` only log — they do NOT catch render errors, so don't remove the boundary.
 - `BackButton.tsx` — canonical back button. **Always use this** for screen-level back navigation. An M3 **tonal** button with a leading `<ArrowLeft>`. In **block mode (default)** it wraps itself in a `mb-6` block so the gap to the page heading is uniform across all screens; pass **`inline`** when it sits in a flex header row / form (opts out of the wrapper — the row/form controls spacing). Override text via `label`.
+
+### Shapes, landscape, motion (0.18.0)
+- `utils/shapes.ts`: M3 Expressive shapes as `clip-path: polygon(...)` — computed polar curves (like the icons), every radius ≤ 50 %. Achievement badges: `TIER_SHAPE` (bronze circle → silver cookie → gold sunny → platinum clover → diamond gem). ⚠️ The badge fill must differ from the card surface, or the shape is invisible (locked cards are `filled`; the badge uses an on-surface tint).
+- `phoneland` Tailwind screen = `(orientation: landscape) and (max-height: 500px)`. ScoreInput becomes a two-column grid (numpad `col-start-2 row-span-6`, the rest `col-start-1`). Pinned by the phone-landscape case in `e2e/layout.spec.ts`.
+- `transition-all` is banned (consistency test); plain `transition` uses `--m3-duration-short` / `--m3-easing-standard` (tailwind `transitionDuration/TimingFunction.DEFAULT`).
+- No elevated card inside an elevated card (`scanNestedElevation`, also raw `m3-card m3-elevated` divs) — nest `filled`/`outlined`.
 
 ### Custom Icon Set (`src/components/icons/`)
 **The app renders no emoji.** `<Icon name="trophy" size={24} />` draws one of ~69 hand-built Material 3 Expressive glyphs.

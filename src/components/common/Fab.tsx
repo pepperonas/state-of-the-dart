@@ -4,9 +4,12 @@ interface FabProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   icon: React.ReactNode;
   /** Optional label → renders an extended FAB. */
   label?: string;
-  /** Tertiary container (default, expressive) or primary container. */
-  color?: 'tertiary' | 'primary';
-  size?: 'md' | 'lg';
+  /** Required name for an icon-only FAB (no `label`). */
+  ariaLabel?: string;
+  /** Tertiary container (default, expressive), primary or secondary container. */
+  color?: 'tertiary' | 'primary' | 'secondary';
+  /** sm = M3 small FAB (40px, 48px touch target). */
+  size?: 'sm' | 'md' | 'lg';
 }
 
 /**
@@ -16,6 +19,7 @@ interface FabProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 const Fab: React.FC<FabProps> = ({
   icon,
   label,
+  ariaLabel,
   color = 'tertiary',
   size = 'md',
   className = '',
@@ -25,15 +29,15 @@ const Fab: React.FC<FabProps> = ({
     'm3-fab',
     'm3-state-layer',
     'm3-ripple',
-    color === 'primary' ? 'm3-primary' : '',
-    size === 'lg' ? 'm3-fab-lg' : '',
+    color === 'primary' ? 'm3-primary' : color === 'secondary' ? 'm3-secondary' : '',
+    size === 'lg' ? 'm3-fab-lg' : size === 'sm' ? 'm3-fab-sm' : '',
     className,
   ]
     .filter(Boolean)
     .join(' ');
 
   return (
-    <button className={classes} aria-label={label} {...rest}>
+    <button type="button" className={classes} aria-label={label ? undefined : ariaLabel} title={label ? undefined : ariaLabel} {...rest}>
       {icon}
       {label && <span>{label}</span>}
     </button>

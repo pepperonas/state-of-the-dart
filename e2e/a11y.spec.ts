@@ -34,7 +34,7 @@ async function smallTargets(page: Page) {
     const px = (v: string) => (v.endsWith('px') ? parseFloat(v) : 0);
     const label = (el: Element) => (el.getAttribute('aria-label') || el.textContent || el.getAttribute('name') || '').trim().slice(0, 30);
     // M3 controls: 48×48 hit area (read from the ::after that extends it).
-    for (const el of Array.from(document.querySelectorAll<HTMLElement>('.m3-icon-button, .m3-chip, .m3-button'))) {
+    for (const el of Array.from(document.querySelectorAll<HTMLElement>('.m3-icon-button, .m3-chip, .m3-button, .m3-fab'))) {
       const r = el.getBoundingClientRect();
       if (r.width === 0 || r.height === 0) continue;
       const a = getComputedStyle(el, '::after');
@@ -46,7 +46,7 @@ async function smallTargets(page: Page) {
     // text are exempt by the criterion itself.
     const sel = 'button, [role="button"], [role="tab"], [role="switch"], [role="option"], input[type="checkbox"], input[type="radio"], input[type="range"], a[href]';
     for (const el of Array.from(document.querySelectorAll<HTMLElement>(sel))) {
-      if (el.closest('.m3-icon-button, .m3-chip, .m3-button') === el) continue;
+      if (el.closest('.m3-icon-button, .m3-chip, .m3-button, .m3-fab') === el) continue;
       if (el.closest('[aria-hidden="true"], [inert], .sr-only')) continue; // skip link: off-screen until focused
       // A checkbox/radio inside its <label>: the label is part of the target.
       const host = el instanceof HTMLInputElement && el.closest('label') ? el.closest('label')! : el;
@@ -119,6 +119,13 @@ test('axe finds no serious problems and every control is a 48px target', async (
   await page.waitForTimeout(500);
   for (const v of await axe(page)) problems.push(`/game (in play): ${v}`);
   for (const s of await smallTargets(page)) problems.push(`/game (in play): small target ${s}`);
+
+  // The account menu, open (APG menu button: role=menu, menuitems).
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Konto-Menü' }).first().click();
+  await expect(page.getByRole('menu')).toBeVisible();
+  for (const v of await axe(page)) problems.push(`/ (account menu open): ${v}`);
+  await page.keyboard.press('Escape');
 
   // Cricket, Around the Clock and Shanghai in play — they had no ARIA at all.
   for (const [path, start] of [['/cricket', /Cricket starten/], ['/around-the-clock', /Spiel starten/], ['/shanghai', /Shanghai starten/]] as const) {

@@ -248,7 +248,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
                         setSelectedPlayers(prev => [...prev, player]);
                       }
                     }}
-                    className={`p-3 rounded-m3-md transition-all ${
+                    className={`p-3 rounded-m3-md transition ${
                       selectedPlayers.find(p => p.id === player.id)
                         ? 'bg-surface-container-high ring-2 ring-[var(--m3-primary)] shadow-m3-1'
                         : 'bg-surface-container border border-outline-variant hover:bg-surface-container-high'

@@ -10,6 +10,9 @@ import { BACKEND_PORT } from './fixtures';
  */
 const SIZES = [
   { name: 'phone', width: 390, height: 844 },
+  // Phone on its side (e.g. propped up next to the board): until 0.18.0 only
+  // the top row of the numpad was on screen, confirm sat at 700px of 390.
+  { name: 'phone-landscape', width: 844, height: 390 },
   { name: 'desktop', width: 1280, height: 800 },
 ];
 
@@ -43,6 +46,11 @@ for (const size of SIZES) {
       const b = await score.boundingBox();
       expect(b && b.y + b.height <= size.height, `${n}'s score off screen`).toBeTruthy();
     }
+
+    // The whole numpad, not just its top row.
+    const zero = page.getByRole('button', { name: '0', exact: true });
+    const z = await zero.boundingBox();
+    expect(z && z.y + z.height <= size.height, 'numpad below the fold').toBeTruthy();
 
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
     expect(overflow, 'horizontal scroll').toBeLessThanOrEqual(0);

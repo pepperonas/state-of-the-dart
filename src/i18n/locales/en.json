@@ -1371,7 +1371,8 @@
     "win_stats": "Win statistics",
     "wins": "Wins",
     "won": "Won",
-    "yearly": "Yearly"
+    "yearly": "Yearly",
+    "export_failed": "Export failed."
   },
   "throw_chart": {
     "scored_per_visit": "Points scored per visit",

@@ -920,14 +920,14 @@ const GameScreen: React.FC = () => {
                   <>
                     <button
                       onClick={() => setShowPlayerNameInput(true)}
-                      className="p-3 rounded-m3-lg border-2 border-dashed border-outline-variant hover:border-outline transition-all"
+                      className="p-3 rounded-m3-lg border-2 border-dashed border-outline-variant hover:border-outline transition"
                     >
                       <div className="mb-1 flex justify-center"><Icon name="plus" size={24} /></div>
                       <div className="m3-label-large text-on-surface">{t('game.add_player')}</div>
                     </button>
                     <button
                       onClick={() => setShowBotSelector(true)}
-                      className="p-3 rounded-m3-lg border-2 border-dashed border-outline hover:border-[var(--m3-primary)] transition-all bg-primary-container/40"
+                      className="p-3 rounded-m3-lg border-2 border-dashed border-outline hover:border-[var(--m3-primary)] transition bg-primary-container/40"
                     >
                       <div className="mb-1 flex justify-center"><Icon name="robot" size={24} /></div>
                       <div className="m3-label-large text-primary">{t('game.add_bot')}</div>
@@ -973,7 +973,7 @@ const GameScreen: React.FC = () => {
 
                               setShowBotSelector(false);
                             }}
-                            className="p-3 rounded-m3-lg bg-surface-container-high hover:bg-surface-container-highest border-2 border-transparent hover:border-[var(--m3-primary)] transition-all text-center"
+                            className="p-3 rounded-m3-lg bg-surface-container-high hover:bg-surface-container-highest border-2 border-transparent hover:border-[var(--m3-primary)] transition text-center"
                           >
                             <div className="mb-2 flex justify-center"><Icon name={iconForEmoji(config.icon)} size={30} /></div>
                             <div className="m3-label-large text-on-surface">{isGerman ? config.nameDE : config.name}</div>
@@ -993,7 +993,7 @@ const GameScreen: React.FC = () => {
                               <span className="text-2xl">{newPlayerAvatar}</span>
                               <button
                                 onClick={() => setNewPlayerAvatar(undefined)}
-                                className="m3-label-medium px-2 py-1 bg-error-container hover:bg-error-container/80 text-on-error-container rounded-m3-sm transition-all"
+                                className="m3-label-medium px-2 py-1 bg-error-container hover:bg-error-container/80 text-on-error-container rounded-m3-sm transition"
                               >
                                 {t('game_screen.remove')}
                               </button>
@@ -1306,7 +1306,7 @@ const GameScreen: React.FC = () => {
   const showSets = (state.currentMatch.settings.setsToWin || 1) > 1;
   
   return (
-    <div className="min-h-dvh p-4 md:p-6 gradient-mesh overflow-x-hidden">
+    <div className="min-h-dvh p-4 md:p-6 phoneland:p-2 gradient-mesh overflow-x-hidden">
       <GameAnnouncer match={state.currentMatch} />
       {showConfetti && (
         <Suspense fallback={null}>
@@ -1315,7 +1315,7 @@ const GameScreen: React.FC = () => {
       )}
 
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-3 lg:mb-4">
+        <div className="flex items-center justify-between mb-3 lg:mb-4 phoneland:mb-1">
           <BackButton onClick={handleBackToMenu} inline />
           
           <div className="flex gap-2">
@@ -1348,7 +1348,7 @@ const GameScreen: React.FC = () => {
         
         {/* Phone/tablet: all scores in one row, so the input stays on screen. */}
         <ScoreStrip
-          className="lg:hidden sticky top-0 z-20 -mx-4 px-4 py-2 mb-4 bg-[color-mix(in_srgb,var(--m3-surface)_92%,transparent)] backdrop-blur"
+          className="lg:hidden sticky top-0 z-20 -mx-4 px-4 py-2 mb-4 phoneland:-mx-2 phoneland:px-2 phoneland:py-1 phoneland:mb-2 bg-[color-mix(in_srgb,var(--m3-surface)_92%,transparent)] backdrop-blur"
           showSets={showSets}
           players={state.currentMatch.players.map((p, i) => ({
             playerId: p.playerId,
@@ -1380,7 +1380,7 @@ const GameScreen: React.FC = () => {
           </div>
           
           {/* Center Section - Input first, then optional Dartboard helper */}
-          <div className="lg:col-span-1 flex flex-col items-center space-y-6">
+          <div className="lg:col-span-1 flex flex-col items-center space-y-6 phoneland:space-y-3">
             <ScoreInput
               currentThrow={state.currentThrow}
               onAddDart={handleDartHit}
@@ -1433,7 +1433,7 @@ const GameScreen: React.FC = () => {
               <div>
                 <button
                   onClick={() => setShowMatchStats(!showMatchStats)}
-                  className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition-all"
+                  className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition"
                 >
                   <h3 className="m3-title-medium text-on-surface">{t('game_screen.match_statistics')}</h3>
                   <ChevronDown size={24} className={`m3-chevron ${showMatchStats ? 'm3-open' : ''}`} />
@@ -1482,7 +1482,7 @@ const GameScreen: React.FC = () => {
         <div className="mt-6">
           <button
             onClick={() => setShowThrowHistory(!showThrowHistory)}
-            className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition-all"
+            className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition"
           >
             <h3 className="m3-title-medium text-on-surface">{t('game_screen.throw_history')}</h3>
             <ChevronDown size={24} className={`m3-chevron ${showThrowHistory ? 'm3-open' : ''}`} />
@@ -1594,7 +1594,7 @@ const GameScreen: React.FC = () => {
         <div className="mt-6">
           <button
             onClick={() => setShowThrowChart(!showThrowChart)}
-            className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition-all"
+            className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition"
           >
             <h3 className="m3-title-medium text-on-surface">{t('game_screen.throw_chart')}</h3>
             <ChevronDown size={24} className={`m3-chevron ${showThrowChart ? 'm3-open' : ''}`} />
@@ -1629,7 +1629,7 @@ const GameScreen: React.FC = () => {
         <div className="mt-6">
           <button
             onClick={() => setShowLiveHeatmap(!showLiveHeatmap)}
-            className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition-all"
+            className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition"
           >
             <div className="flex items-center gap-3">
               <Flame size={24} className="text-tertiary" aria-hidden="true" />
@@ -1644,7 +1644,7 @@ const GameScreen: React.FC = () => {
               <div className="flex gap-2 mb-4">
                 <button
                   onClick={() => setHeatmapView('leg')}
-                  className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm transition-all ${
+                  className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm transition ${
                     heatmapView === 'leg' ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
                   }`}
                 >
@@ -1652,7 +1652,7 @@ const GameScreen: React.FC = () => {
                 </button>
                 <button
                   onClick={() => setHeatmapView('match')}
-                  className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm transition-all ${
+                  className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm transition ${
                     heatmapView === 'match' ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
                   }`}
                 >
@@ -1670,7 +1670,7 @@ const GameScreen: React.FC = () => {
                         onClick={() => setSelectedHeatmapPlayer(
                           selectedHeatmapPlayer === player.playerId ? null : player.playerId
                         )}
-                        className={`px-4 py-2 rounded-m3-lg font-medium transition-all flex items-center gap-2 ${
+                        className={`px-4 py-2 rounded-m3-lg font-medium transition flex items-center gap-2 ${
                           selectedHeatmapPlayer === player.playerId || (!selectedHeatmapPlayer && state.currentMatch!.players[0].playerId === player.playerId)
                             ? 'bg-primary text-on-primary'
                             : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
@@ -1779,7 +1779,7 @@ const GameScreen: React.FC = () => {
                 {[...Array(legWonAnimation.legsTotal)].map((_, i) => (
                   <div
                     key={i}
-                    className={`w-4 h-4 rounded-full transition-all ${
+                    className={`w-4 h-4 rounded-full transition ${
                       i < legWonAnimation.legsWon
                         ? 'bg-gradient-to-r from-yellow-400 to-amber-500 shadow-lg shadow-amber-500/50'
                         : 'bg-surface-container-highest'

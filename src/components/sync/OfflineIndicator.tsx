@@ -109,7 +109,7 @@ const OfflineIndicator: React.FC = () => {
           <button
             onClick={handleSync}
             disabled={!isOnline || isSyncing}
-            className={`flex items-center gap-2 px-4 py-2 rounded-m3-full shadow-m3-2 border border-outline-variant transition-all disabled:opacity-60 ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-m3-full shadow-m3-2 border border-outline-variant transition disabled:opacity-60 ${
               isOnline
                 ? 'bg-surface-container-high text-on-surface hover:shadow-m3-3'
                 : 'bg-tertiary-container text-tertiary'

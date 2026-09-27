@@ -472,7 +472,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
           <button
             key={opt.value}
             onClick={() => onChange(opt.value)}
-            className={`flex-1 py-2.5 px-3 m3-label-large transition-all ${
+            className={`flex-1 py-2.5 px-3 m3-label-large transition ${
               value === opt.value
                 ? 'bg-secondary-container text-on-secondary-container'
                 : 'bg-surface-container text-on-surface-variant hover:text-on-surface'
@@ -573,7 +573,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
                         setSelectedPlayers(prev => [...prev, player]);
                       }
                     }}
-                    className={`p-3 rounded-m3-lg border transition-all ${
+                    className={`p-3 rounded-m3-lg border transition ${
                       selectedPlayers.find(p => p.id === player.id)
                         ? 'border-[var(--m3-primary)] bg-surface-container-high ring-2 ring-[var(--m3-primary)] shadow-m3-1'
                         : 'border-outline-variant bg-surface-container hover:bg-surface-container-high'
@@ -730,7 +730,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
               return (
                 <div
                   key={`${target.label}-${idx}`}
-                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-m3-full flex items-center justify-center font-bold text-xs sm:text-sm transition-all ${
+                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-m3-full flex items-center justify-center font-bold text-xs sm:text-sm transition ${
                     isPast
                       ? 'bg-success text-on-surface'
                       : isPending
@@ -763,7 +763,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
                   <button
                     key={player.id}
                     onClick={() => handleSwitchToPlayer(idx)}
-                    className={`p-2.5 sm:p-3 rounded-m3-lg text-center transition-all ${
+                    className={`p-2.5 sm:p-3 rounded-m3-lg text-center transition ${
                       isActive
                         ? 'bg-surface-container-high ring-2 ring-[var(--m3-primary)]'
                         : 'bg-surface-container border border-outline-variant hover:bg-surface-container-high'

@@ -39,7 +39,7 @@ const AppNavigation: React.FC = () => {
           <>
             {/* M3 active indicator: a pill behind the icon that widens in. */}
             <span
-              className={`grid place-items-center h-8 rounded-m3-full transition-all duration-300 ${
+              className={`grid place-items-center h-8 rounded-m3-full transition duration-300 ${
                 isActive ? 'w-16 bg-secondary-container text-on-secondary-container' : 'w-12 group-hover:bg-surface-container-highest'
               }`}
             >

@@ -69,13 +69,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           <div className="space-y-3">
             <a
               href="/resend-verification"
-              className="block w-full px-6 py-3 bg-primary hover:opacity-90 text-on-primary rounded-m3-full font-semibold transition-all"
+              className="block w-full px-6 py-3 bg-primary hover:opacity-90 text-on-primary rounded-m3-full font-semibold transition"
             >
               {t('protected_route.resend')}
             </a>
             <button
               onClick={() => window.location.reload()}
-              className="block w-full px-6 py-3 bg-surface-container-high hover:bg-surface-container-highest text-on-surface rounded-m3-full font-semibold transition-all"
+              className="block w-full px-6 py-3 bg-surface-container-high hover:bg-surface-container-highest text-on-surface rounded-m3-full font-semibold transition"
             >
               {t('protected_route.reload')}
             </button>
@@ -84,7 +84,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
               onClick={() => {
                 localStorage.removeItem('auth_token');
               }}
-              className="block w-full px-6 py-3 text-on-surface-variant hover:text-on-surface transition-all"
+              className="block w-full px-6 py-3 text-on-surface-variant hover:text-on-surface transition"
             >
               {t('protected_route.other_account')}
             </a>

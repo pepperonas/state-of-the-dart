@@ -77,13 +77,13 @@ const ErrorScreen: React.FC<{ message?: string; onReload: () => void; onHome: ()
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
             onClick={onReload}
-            className="px-6 py-3 rounded-m3-full bg-primary text-on-primary font-semibold hover:opacity-90 transition-all"
+            className="px-6 py-3 rounded-m3-full bg-primary text-on-primary font-semibold hover:opacity-90 transition"
           >
             {t('error_boundary.reload', { defaultValue: 'Neu laden' })}
           </button>
           <button
             onClick={onHome}
-            className="px-6 py-3 rounded-m3-full bg-surface-container-high text-on-surface font-semibold hover:bg-surface-container-highest transition-all"
+            className="px-6 py-3 rounded-m3-full bg-surface-container-high text-on-surface font-semibold hover:bg-surface-container-highest transition"
           >
             {t('error_boundary.home', { defaultValue: 'Zum Hauptmenü' })}
           </button>

@@ -383,7 +383,7 @@ const TrainingStats: React.FC = () => {
               {sortedSessions.map((session) => (
                 <div
                   key={session.id}
-                  className={`p-4 rounded-m3-md border-2 transition-all ${
+                  className={`p-4 rounded-m3-md border-2 transition ${
                     session.personalBest
                       ? 'bg-tertiary-container/40 border-tertiary'
                       : 'bg-surface-container-low border-outline-variant'
