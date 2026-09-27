@@ -9,6 +9,7 @@ import { usePlayer } from '../../context/PlayerContext';
 import { AchievementTier, AchievementNotification as AchievementNotificationType, getTierColor, getRarityColor, getAchievementScope, getScopeColor, ACHIEVEMENTS } from '../../types/achievements';
 import { audioSystem } from '../../utils/audio';
 import { Icon, iconForEmoji } from '../icons';
+import { achievementName, achievementDescription } from '../../utils/achievementText';
 
 const TIER_CONFETTI_COUNT: Record<AchievementTier, number> = {
   bronze: 30,
@@ -205,7 +206,7 @@ const NotificationCard: React.FC<{
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
-                <h4 className="text-on-surface m3-title-small truncate">{achievement.name}</h4>
+                <h4 className="text-on-surface m3-title-small truncate">{achievementName(achievement, t)}</h4>
                 <span
                   className="flex items-center gap-0.5 text-sm font-bold flex-shrink-0"
                   style={{ color: tierColor }}
@@ -213,7 +214,7 @@ const NotificationCard: React.FC<{
                   +{achievement.points} <Star size={12} fill={tierColor} />
                 </span>
               </div>
-              <p className="text-on-surface-variant m3-body-small line-clamp-2">{achievement.description}</p>
+              <p className="text-on-surface-variant m3-body-small line-clamp-2">{achievementDescription(achievement, t)}</p>
             </div>
           </div>
 

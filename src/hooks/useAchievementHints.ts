@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAchievements } from '../context/AchievementContext';
 import { Achievement } from '../types/achievements';
+import { achievementName } from '../utils/achievementText';
 
 export interface AchievementHint {
   achievementId: string;
@@ -46,7 +47,7 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
           if (currentAvg >= 55 && currentAvg < 60) {
             newHints.push({
               achievementId: achievement.id,
-              achievementName: achievement.name,
+              achievementName: achievementName(achievement, t),
               achievementIcon: achievement.icon,
               progress: currentAvg,
               target: 60,
@@ -61,7 +62,7 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
           if (currentAvg >= 75 && currentAvg < 80) {
             newHints.push({
               achievementId: achievement.id,
-              achievementName: achievement.name,
+              achievementName: achievementName(achievement, t),
               achievementIcon: achievement.icon,
               progress: currentAvg,
               target: 80,
@@ -76,7 +77,7 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
           if (currentAvg >= 95 && currentAvg < 100) {
             newHints.push({
               achievementId: achievement.id,
-              achievementName: achievement.name,
+              achievementName: achievementName(achievement, t),
               achievementIcon: achievement.icon,
               progress: currentAvg,
               target: 100,
@@ -91,7 +92,7 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
           if (current180s >= 7 && current180s < 10) {
             newHints.push({
               achievementId: achievement.id,
-              achievementName: achievement.name,
+              achievementName: achievementName(achievement, t),
               achievementIcon: achievement.icon,
               progress: current180s,
               target: 10,
@@ -106,7 +107,7 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
           if (currentRate >= 45 && currentRate < 50) {
             newHints.push({
               achievementId: achievement.id,
-              achievementName: achievement.name,
+              achievementName: achievementName(achievement, t),
               achievementIcon: achievement.icon,
               progress: currentRate,
               target: 50,
@@ -121,7 +122,7 @@ export const useAchievementHints = (playerId: string | null, currentMatchData?: 
           if (currentStreak >= 3 && currentStreak < 5) {
             newHints.push({
               achievementId: achievement.id,
-              achievementName: achievement.name,
+              achievementName: achievementName(achievement, t),
               achievementIcon: achievement.icon,
               progress: currentStreak,
               target: 5,

@@ -1,4 +1,5 @@
 import React, { useId } from 'react';
+import { useTranslation } from 'react-i18next';
 import { activityBars, activityTotal, activeDays } from '../../utils/activity';
 
 interface ActivitySparklineProps {
@@ -24,6 +25,7 @@ const ActivitySparkline: React.FC<ActivitySparklineProps> = ({
   height = 26,
   className = '',
 }) => {
+  const { t } = useTranslation();
   const titleId = useId();
 
   if (!values || values.length === 0) {
@@ -37,8 +39,8 @@ const ActivitySparkline: React.FC<ActivitySparklineProps> = ({
 
   const label =
     total === 0
-      ? `Keine Aktivität in den letzten ${values.length} Tagen`
-      : `${total} Spiele an ${days} von ${values.length} Tagen, Spitze ${peak} an einem Tag`;
+      ? t('activity.none', { days: values.length })
+      : t('activity.summary', { count: total, active: days, days: values.length, peak });
 
   return (
     <svg

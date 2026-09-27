@@ -3,6 +3,10 @@
 import { TenantStorage } from './storage';
 import { ExportData, Match, MatchPlayer } from '../types';
 import { formatDate } from './dateUtils';
+import i18n from '../i18n/config';
+
+/** Export texts follow the app language (they were English only). */
+const tx = (key: string) => i18n.t(`export.${key}`);
 
 /**
  * Export all data for the current tenant to a JSON file
@@ -121,18 +125,18 @@ export const exportMatchHistoryCSV = (matches: Match[], playerName: string): voi
   try {
     // CSV Header
     const headers = [
-      'Date',
-      'Player',
-      'Opponent',
-      'Result',
-      'Score',
-      'Average',
-      'Highest Score',
+      tx('date'),
+      tx('player'),
+      tx('opponent'),
+      tx('result'),
+      tx('score'),
+      tx('average'),
+      tx('highest_score'),
       '180s',
       '140+',
       '100+',
-      'Checkout %',
-      'Darts Thrown',
+      tx('checkout_pct'),
+      tx('darts_thrown'),
       'First 9 Avg'
     ];
     
@@ -146,7 +150,7 @@ export const exportMatchHistoryCSV = (matches: Match[], playerName: string): voi
         formatDate(match.startedAt),
         player?.name || '-',
         opponent?.name || '-',
-        match.winner === player?.playerId ? 'Win' : 'Loss',
+        match.winner === player?.playerId ? tx('win') : tx('loss'),
         `${player?.legsWon || 0} - ${opponent?.legsWon || 0}`,
         (player?.matchAverage ?? 0).toFixed(2),
         player?.matchHighestScore || '0',
@@ -194,18 +198,18 @@ export const exportMatchHistoryExcel = async (matches: Match[], playerName: stri
     const XLSX = await import('xlsx');
     // Prepare data
     const headers = [
-      'Date',
-      'Player',
-      'Opponent',
-      'Result',
-      'Score',
-      'Average',
-      'Highest Score',
+      tx('date'),
+      tx('player'),
+      tx('opponent'),
+      tx('result'),
+      tx('score'),
+      tx('average'),
+      tx('highest_score'),
       '180s',
       '140+',
       '100+',
-      'Checkout %',
-      'Legs Won',
+      tx('checkout_pct'),
+      tx('legs_won'),
       'Legs Lost'
     ];
     
@@ -218,7 +222,7 @@ export const exportMatchHistoryExcel = async (matches: Match[], playerName: stri
         formatDate(match.startedAt),
         player?.name || '-',
         opponent?.name || '-',
-        match.winner === player?.playerId ? 'Win' : 'Loss',
+        match.winner === player?.playerId ? tx('win') : tx('loss'),
         `${player?.legsWon || 0} - ${opponent?.legsWon || 0}`,
         parseFloat((player?.matchAverage || 0).toFixed(2)),
         player?.matchHighestScore || 0,
@@ -255,7 +259,7 @@ export const exportMatchHistoryExcel = async (matches: Match[], playerName: stri
     
     // Create workbook
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Match History');
+    XLSX.utils.book_append_sheet(wb, ws, tx('sheet_history'));
     
     // Add summary sheet
     const totalMatches = matches.length;
@@ -282,20 +286,20 @@ export const exportMatchHistoryExcel = async (matches: Match[], playerName: stri
     }, 0);
     
     const summaryData = [
-      ['Player Summary', ''],
-      ['Player Name', playerName],
-      ['Total Matches', totalMatches],
-      ['Wins', wins],
-      ['Losses', losses],
-      ['Win Rate', `${winRate}%`],
-      ['Average (Avg)', avgAverage],
-      ['Total 180s', total180s],
-      ['Export Date', formatDate(new Date())],
+      [tx('player_summary'), ''],
+      [tx('player_name'), playerName],
+      [tx('total_matches'), totalMatches],
+      [tx('wins'), wins],
+      [tx('losses'), losses],
+      [tx('win_rate'), `${winRate}%`],
+      [tx('average'), avgAverage],
+      [tx('total_180s'), total180s],
+      [tx('export_date'), formatDate(new Date())],
     ];
     
     const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
     wsSummary['!cols'] = [{ wch: 20 }, { wch: 15 }];
-    XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
+    XLSX.utils.book_append_sheet(wb, wsSummary, tx('sheet_summary'));
     
     // Download
     XLSX.writeFile(wb, `match-history-${playerName}-${new Date().toISOString().split('T')[0]}.xlsx`);
@@ -320,13 +324,13 @@ export const exportMatchHistoryPDF = async (matches: Match[], playerName: string
     
     // Add title
     doc.setFontSize(20);
-    doc.text('Match History Report', 14, 20);
+    doc.text(tx('report_title'), 14, 20);
     
     // Add player info
     doc.setFontSize(12);
-    doc.text(`Player: ${playerName}`, 14, 30);
-    doc.text(`Export Date: ${formatDate(new Date())}`, 14, 37);
-    doc.text(`Total Matches: ${matches.length}`, 14, 44);
+    doc.text(`${tx('player')}: ${playerName}`, 14, 30);
+    doc.text(`${tx('export_date')}: ${formatDate(new Date())}`, 14, 37);
+    doc.text(`${tx('total_matches')}: ${matches.length}`, 14, 44);
     
     // Calculate summary stats
     const wins = matches.filter(m => {
@@ -336,7 +340,7 @@ export const exportMatchHistoryPDF = async (matches: Match[], playerName: string
     }).length;
     const winRate = matches.length > 0 ? ((wins / matches.length) * 100).toFixed(1) : '0';
     
-    doc.text(`Win Rate: ${winRate}%`, 14, 51);
+    doc.text(`${tx('win_rate')}: ${winRate}%`, 14, 51);
     
     // Prepare table data
     const tableData = matches.map(match => {
@@ -347,7 +351,7 @@ export const exportMatchHistoryPDF = async (matches: Match[], playerName: string
       return [
         formatDate(match.startedAt),
         opponent?.name || '-',
-        match.winner === player?.playerId ? 'W' : 'L',
+        match.winner === player?.playerId ? tx('win_short') : tx('loss_short'),
         `${player?.legsWon || 0}-${opponent?.legsWon || 0}`,
         (player?.matchAverage || 0).toFixed(1),
         player?.match180s || '0',
@@ -360,7 +364,7 @@ export const exportMatchHistoryPDF = async (matches: Match[], playerName: string
     // Add table
     autoTable(doc, {
       startY: 60,
-      head: [['Date', 'Opponent', 'W/L', 'Score', 'Avg', '180s', 'CO%']],
+      head: [[tx('date'), tx('opponent'), tx('wl'), tx('score'), tx('avg'), '180s', tx('co_pct')]],
       body: tableData,
       theme: 'striped',
       headStyles: { fillColor: [59, 130, 246] }, // Primary blue
