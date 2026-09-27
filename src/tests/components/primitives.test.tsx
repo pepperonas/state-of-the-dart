@@ -248,3 +248,30 @@ describe('PageShell', () => {
     expect(screen.getByRole('button', { name: 'Aktion' })).toBeInTheDocument();
   });
 });
+
+describe('Card as a control', () => {
+  it('a card with onClick is a focusable button that Enter and Space activate', async () => {
+    const onClick = vi.fn();
+    render(<Card onClick={onClick} selected={false}>Knockout</Card>);
+    const card = screen.getByRole('button', { name: 'Knockout' });
+    expect(card).toHaveAttribute('tabindex', '0');
+    expect(card).toHaveAttribute('aria-pressed', 'false');
+    card.focus();
+    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard(' ');
+    expect(onClick).toHaveBeenCalledTimes(2);
+  });
+
+  it('a card without onClick stays a plain container', () => {
+    render(<Card>Info</Card>);
+    expect(screen.queryByRole('button')).toBeNull();
+  });
+
+  it('keys pressed inside a nested control do not trigger the card', async () => {
+    const onClick = vi.fn();
+    render(<Card onClick={onClick}><input aria-label="inner" /></Card>);
+    screen.getByLabelText('inner').focus();
+    await userEvent.keyboard('{Enter} ');
+    expect(onClick).not.toHaveBeenCalled();
+  });
+});

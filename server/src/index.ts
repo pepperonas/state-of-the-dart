@@ -119,6 +119,7 @@ import tenantsRouter from './routes/tenants';
 import playersRouter from './routes/players';
 import matchesRouter from './routes/matches';
 import trainingRouter from './routes/training';
+import tournamentsRouter from './routes/tournaments';
 import achievementsRouter from './routes/achievements';
 import leaderboardRouter from './routes/leaderboard';
 import adminRouter from './routes/admin';
@@ -138,6 +139,7 @@ app.get('/api', (req: Request, res: Response) => {
       players: '/api/players',
       matches: '/api/matches',
       training: '/api/training',
+      tournaments: '/api/tournaments',
       achievements: '/api/achievements',
       leaderboard: '/api/leaderboard',
       settings: '/api/settings',
@@ -153,6 +155,7 @@ app.use('/api/tenants', tenantsRouter);
 app.use('/api/players', playersRouter);
 app.use('/api/matches', matchesRouter);
 app.use('/api/training', trainingRouter);
+app.use('/api/tournaments', tournamentsRouter);
 app.use('/api/achievements', achievementsRouter);
 app.use('/api/leaderboard', leaderboardRouter);
 app.use('/api/admin', adminRouter);

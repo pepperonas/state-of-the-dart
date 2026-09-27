@@ -192,6 +192,23 @@ CREATE INDEX IF NOT EXISTS idx_training_tenant ON training_sessions(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_training_player ON training_sessions(player_id);
 CREATE INDEX IF NOT EXISTS idx_training_started_at ON training_sessions(started_at);
 
+-- Tournaments (since 0.16.0). The bracket, standings and half-entered scores
+-- live in the data column as JSON: read and written as one unit, never queried.
+CREATE TABLE IF NOT EXISTS tournaments (
+  id TEXT PRIMARY KEY,
+  tenant_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL,
+  status TEXT NOT NULL,
+  data TEXT NOT NULL, -- JSON
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  completed_at INTEGER,
+  FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_tournaments_tenant ON tournaments(tenant_id, updated_at);
+
 -- Training Results
 CREATE TABLE IF NOT EXISTS training_results (
   id TEXT PRIMARY KEY,
