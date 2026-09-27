@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { checkOnlineVisit, getOnlineClientId } from '../../utils/onlineVisit';
+import { checkOnlineVisit, getOnlineClientSecret } from '../../utils/onlineVisit';
 
 describe('checkOnlineVisit', () => {
   it('accepts ordinary visits', () => {
@@ -30,11 +30,11 @@ describe('checkOnlineVisit', () => {
   });
 });
 
-describe('getOnlineClientId', () => {
+describe('getOnlineClientSecret', () => {
   beforeEach(() => localStorage.clear());
   it('is stable across calls and passes the server check', () => {
-    const a = getOnlineClientId();
-    expect(getOnlineClientId()).toBe(a);
+    const a = getOnlineClientSecret();
+    expect(getOnlineClientSecret()).toBe(a);
     expect(a).toMatch(/^[A-Za-z0-9-]{8,64}$/);
   });
 });

@@ -206,3 +206,53 @@ describe('throw-off alternates per leg', () => {
     expect(room.players[room.gameState!.currentPlayerIndex].id).toBe('b');
   });
 });
+
+import { seatIdFromSecret, seatIdForJoin } from '../../../server/src/socket/rooms';
+
+describe('seat ids cannot be hijacked (security review, 0.17.1)', () => {
+  // The seat id is broadcast to everyone in the lobby and the room. If joining
+  // with that id rebound the seat, anyone could take over another player's
+  // place. The client proves the seat with a secret that is never broadcast.
+  it('the public seat id is derived from a secret and does not reveal it', () => {
+    const secret = 'c-3f2a9e10-6b7c-4d8e-9f00-112233445566';
+    const id = seatIdFromSecret(secret)!;
+    expect(id).toMatch(/^s-[0-9a-f]{24}$/);
+    expect(id).not.toContain(secret);
+    expect(seatIdFromSecret(secret)).toBe(id); // stable across reconnects
+    expect(seatIdFromSecret('c-other-secret-000000')).not.toBe(id);
+  });
+
+  it('joining with somebody\'s public id yields a different seat', () => {
+    const victim = seatIdFromSecret('c-victim-secret-123456')!;
+    // An attacker who copies the broadcast id and sends it as their secret…
+    const attacker = seatIdFromSecret(victim);
+    // …lands on a seat of their own, never the victim's.
+    expect(attacker).not.toBe(victim);
+  });
+
+  it('player:join never uses the sent value as the seat id', () => {
+    const secret = 'c-victim-secret-123456';
+    expect(seatIdForJoin({ clientId: secret }, 'sock-1')).toBe(seatIdFromSecret(secret));
+    expect(seatIdForJoin({ clientId: secret }, 'sock-1')).not.toBe(secret);
+    expect(seatIdForJoin({}, 'sock-1')).toBe('sock-1');
+    expect(seatIdForJoin(undefined, 'sock-1')).toBe('sock-1');
+  });
+
+  it('rejects malformed secrets', () => {
+    expect(seatIdFromSecret('short')).toBeNull();
+    expect(seatIdFromSecret(undefined)).toBeNull();
+  });
+});
+
+import fs from 'fs';
+import path from 'path';
+
+describe('the socket handler uses the derived seat id', () => {
+  it('player:join takes its id from seatIdForJoin, nowhere else', () => {
+    const src = fs.readFileSync(path.resolve(__dirname, '../../../server/src/socket/index.ts'), 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+    const join = src.slice(src.indexOf("socket.on('player:join'"), src.indexOf("socket.on('room:create'"));
+    expect(join).toMatch(/id:\s*seatIdForJoin\(data,\s*socket\.id\)/);
+    expect(join).not.toMatch(/sanitizeClientId|data\??\.clientId/);
+  });
+});
