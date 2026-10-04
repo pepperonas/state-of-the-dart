@@ -18,7 +18,8 @@ import {
   exportMatchHistoryPDF 
 } from '../../utils/exportImport';
 import { Match } from '../../types';
-import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
+import { DartboardHeatmap } from '../dartboard/DartboardHeatmap';
+import { aggregateBeds } from '../../utils/heatmap';
 import { Flame, FileSpreadsheet, FileText } from 'lucide-react';
 import { api } from '../../services/api';
 import { formatDate, getTimestampForSort } from '../../utils/dateUtils';
@@ -1118,7 +1119,7 @@ const StatsOverview: React.FC = () => {
                         <Card variant="filled" className="p-6">
                           <div className="m3-body-small text-on-surface-variant mb-1 font-semibold">{t('stats_overview.segments_hit')}</div>
                           <div className="m3-headline-medium m3-emphasized text-on-surface">
-                            {Object.keys(heatmapData.segments || {}).length}
+                            {Object.keys(aggregateBeds(heatmapData).beds).length}
                           </div>
                           <div className="m3-body-small text-on-surface-variant mt-2">{t('stats_overview.distinct_beds')}</div>
                         </Card>
@@ -1144,8 +1145,8 @@ const StatsOverview: React.FC = () => {
                     </div>
 
                     {/* Heatmap Visualization */}
-                    <Card variant="elevated" className="p-8">
-                      <DartboardHeatmapBlur heatmapData={heatmapData} size={600} />
+                    <Card variant="elevated" className="p-4 sm:p-8">
+                      <DartboardHeatmap heatmapData={heatmapData} maxWidth={560} />
                     </Card>
                   </div>
                 ) : (
@@ -1160,12 +1161,12 @@ const StatsOverview: React.FC = () => {
                     </p>
                     <div className="flex items-center justify-center gap-6 m3-body-large">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-red-500 shadow-lg" style={{ boxShadow: '0 0 20px #ef444480' }}></div>
+                        <div className="w-8 h-8 rounded-full" style={{ background: 'var(--m3-heat-6)' }}></div>
                         <span className="text-on-surface font-semibold">{t('stats_overview.hot_zones')}</span>
                         <span className="text-on-surface-variant">{t('stats_overview.hit_often')}</span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-500 shadow-lg" style={{ boxShadow: '0 0 20px #3b82f680' }}></div>
+                        <div className="w-8 h-8 rounded-full border border-outline-variant" style={{ background: 'var(--m3-heat-1)' }}></div>
                         <span className="text-on-surface font-semibold">{t('stats_overview.cold_zones')}</span>
                         <span className="text-on-surface-variant">{t('stats_overview.hit_rarely')}</span>
                       </div>

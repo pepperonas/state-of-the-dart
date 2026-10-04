@@ -233,6 +233,7 @@ export const claimDefaultCache = (userId: string): void => {
 /** Device-level game saves that belong to whoever is signed in. */
 export const DEVICE_GAME_KEYS = [
   'state-of-the-dart-active-match',
+  'state-of-the-dart-active-throw',
   'state-of-the-dart-atc-game',
   'state-of-the-dart-shanghai-game',
   'state-of-the-dart-cricket-game',

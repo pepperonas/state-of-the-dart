@@ -2,7 +2,10 @@ import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { IconButton } from '../common';
+import { useLocation } from 'react-router-dom';
+import { Button, IconButton } from '../common';
+import { isGameRoute } from '../../utils/gameRoutes';
+import { useCelebrationMoment } from '../../utils/celebrationMoment';
 import { celebrate as confetti } from '../../utils/celebration';
 import { useAchievements } from '../../context/AchievementContext';
 import { usePlayer } from '../../context/PlayerContext';
@@ -53,7 +56,9 @@ const NotificationCard: React.FC<{
   notification: AchievementNotificationType;
   onDismiss: () => void;
   index: number;
-}> = ({ notification, onDismiss, index }) => {
+  /** Centre stage at the end of a leg: bigger icon and title. */
+  prominent?: boolean;
+}> = ({ notification, onDismiss, index, prominent = false }) => {
   const { t } = useTranslation();
   const { getPlayer } = usePlayer();
   const confettiFiredRef = useRef(false);
@@ -138,7 +143,8 @@ const NotificationCard: React.FC<{
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: -30, scale: 0.9 }}
+      data-testid="achievement-card"
+      initial={prominent ? { opacity: 0, scale: 0.6 } : { opacity: 0, y: -30, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, x: 100, scale: 0.9 }}
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
@@ -170,7 +176,7 @@ const NotificationCard: React.FC<{
           }}
         />
 
-        <div className="relative z-10 p-4">
+        <div className={`relative z-10 ${prominent ? 'p-5 sm:p-6' : 'p-4'}`}>
           {/* Header */}
           <div className="flex items-center justify-between mb-3">
             <motion.span
@@ -193,7 +199,7 @@ const NotificationCard: React.FC<{
           {/* Icon + Achievement Info */}
           <div className="flex items-center gap-3 mb-3">
             <motion.div
-              className="w-14 h-14 rounded-xl flex items-center justify-center text-3xl flex-shrink-0"
+              className={`${prominent ? 'w-20 h-20' : 'w-14 h-14'} rounded-xl flex items-center justify-center text-3xl flex-shrink-0`}
               style={{
                 background: `linear-gradient(135deg, ${tierColor}30, ${tierColor}10)`,
                 border: `1px solid ${tierColor}40`,
@@ -201,12 +207,12 @@ const NotificationCard: React.FC<{
               animate={{ scale: [1, 1.08, 1] }}
               transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
             >
-              <Icon name={iconForEmoji(achievement.icon)} size={28} />
+              <Icon name={iconForEmoji(achievement.icon)} size={prominent ? 44 : 28} />
             </motion.div>
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
-                <h4 className="text-on-surface m3-title-small truncate">{achievementName(achievement, t)}</h4>
+                <h4 className={`text-on-surface ${prominent ? 'm3-headline-small m3-emphasized' : 'm3-title-small truncate'}`}>{achievementName(achievement, t)}</h4>
                 <span
                   className="flex items-center gap-0.5 text-sm font-bold flex-shrink-0"
                   style={{ color: tierColor }}
@@ -214,7 +220,7 @@ const NotificationCard: React.FC<{
                   +{achievement.points} <Star size={12} fill={tierColor} />
                 </span>
               </div>
-              <p className="text-on-surface-variant m3-body-small line-clamp-2">{achievementDescription(achievement, t)}</p>
+              <p className={`text-on-surface-variant ${prominent ? 'm3-body-medium' : 'm3-body-small line-clamp-2'}`}>{achievementDescription(achievement, t)}</p>
             </div>
           </div>
 
@@ -294,11 +300,37 @@ const AchievementNotification: React.FC = () => {
   const { currentNotification, notificationQueue, dismissNotification, dismissAllNotifications } = useAchievements();
   const [showFlash, setShowFlash] = useState(false);
   const lastNotificationRef = useRef<string | null>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const { pathname } = useLocation();
+  const inGame = isGameRoute(pathname);
+  const moment = useCelebrationMoment();
 
   // Collect all active notifications
   const allNotifications: AchievementNotificationType[] = [];
   if (currentNotification) allNotifications.push(currentNotification);
   allNotifications.push(...notificationQueue);
+  const hasNotifications = allNotifications.length > 0;
+
+  // End of a leg/match: the batch goes centre stage and stays there until it
+  // is closed — even when the leg overlay underneath times out. During play it
+  // is a toast at the top that a tap anywhere else closes.
+  // (State adjusted during render — React's pattern for deriving from the previous render.)
+  const [centered, setCentered] = useState(false);
+  const center = hasNotifications && (centered || moment);
+  // Three or more at once: two columns on wide screens instead of a long scroll.
+  const wide = center && allNotifications.length >= 3;
+  if (center !== centered) setCentered(center);
+
+  // During a game: a tap outside the cards closes them. The tap is not
+  // swallowed — the dart button underneath still registers.
+  useEffect(() => {
+    if (!inGame || center || !hasNotifications) return;
+    const onDown = (e: PointerEvent) => {
+      if (stageRef.current && !stageRef.current.contains(e.target as Node)) dismissAllNotifications();
+    };
+    document.addEventListener('pointerdown', onDown, true);
+    return () => document.removeEventListener('pointerdown', onDown, true);
+  }, [inGame, center, hasNotifications, dismissAllNotifications]);
 
   // Flash effect when new notification arrives
   useEffect(() => {
@@ -332,9 +364,36 @@ const AchievementNotification: React.FC = () => {
         )}
       </AnimatePresence>
 
+      {/* Centre stage: a scrim that does NOT close on a tap — the end of a leg
+          is the moment to look at what was earned. */}
+      {center && (
+        <motion.div
+          data-testid="achievement-scrim"
+          className="fixed inset-0 z-[9998] bg-[color-mix(in_srgb,var(--m3-scrim)_70%,transparent)]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          aria-hidden="true"
+        />
+      )}
+
       {/* Stacked notification cards */}
-      <div className="fixed top-4 left-1/2 z-[9999] w-full max-w-md px-4 flex flex-col gap-3 max-h-[80vh] overflow-y-auto" style={{ transform: 'translateX(-50%)' }}>
-        {allNotifications.length > 1 && (
+      <div
+        ref={stageRef}
+        data-testid="achievement-stage"
+        data-placement={center ? 'center' : 'top'}
+        role={center ? 'dialog' : undefined}
+        aria-modal={center ? true : undefined}
+        aria-label={center ? t('achievement_toast.stage_label') : undefined}
+        className={center
+          ? `fixed top-1/2 left-1/2 z-[9999] w-full ${wide ? 'max-w-4xl' : 'max-w-lg'} px-4 flex flex-col max-h-[90dvh]`
+          : 'fixed top-4 left-1/2 z-[9999] w-full max-w-md px-4 flex flex-col gap-3 max-h-[80vh] overflow-y-auto [&>*]:shrink-0'}
+        style={{ transform: center ? 'translate(-50%, -50%)' : 'translateX(-50%)' }}
+      >
+        {/* Centre stage: the cards scroll, "Weiter" stays put below them. */}
+        <div className={center
+          ? `overflow-y-auto overscroll-contain pb-1 ${wide ? 'grid gap-4 md:grid-cols-2 items-start' : 'flex flex-col gap-4 [&>*]:shrink-0'}`
+          : 'contents'}>
+        {!center && allNotifications.length > 1 && (
           <motion.button
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -351,10 +410,17 @@ const AchievementNotification: React.FC = () => {
               key={`${notification.achievement.id}-${notification.playerId}-${index}`}
               notification={notification}
               index={index}
+              prominent={center}
               onDismiss={() => dismissNotification(index)}
             />
           ))}
         </AnimatePresence>
+        </div>
+        {center && (
+          <Button variant="filled" size="lg" fullWidth className="mt-4 shrink-0" onClick={dismissAllNotifications} autoFocus>
+            {t('achievement_toast.continue')}
+          </Button>
+        )}
       </div>
     </>
   );

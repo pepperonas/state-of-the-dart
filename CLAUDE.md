@@ -105,7 +105,7 @@ Express routes in `server/src/routes/`, registered in `server/src/index.ts`:
 - Checkout suggestions: `src/data/checkoutTable.ts`
 - Bot AI: `src/utils/botLogic.ts` (10 difficulty levels)
 - Audio: `src/utils/audio.ts` (dart caller, 400+ sound files). **Gotcha**: `announceCheckout(legOrSetNumber, finishType)` expects the **match-scoped leg/set sequence** (1, 2, 3 …), **not** the checkout score — `gameshot/legs/{N}.mp3` says "and the Nth leg". For `'match'` the number is ignored; only `texts/gameshotandthematch.mp3` plays. `announceBust(thrownScore?)` plays the thrown score first (`caller/{N}.mp3`) and then `caller/0.mp3` ("No score").
-- Heatmaps: `src/utils/heatmap.ts`
+- Heatmaps: `src/utils/heatmap.ts` (data) + `src/utils/boardGeometry.ts` (WDF ring radii, bed paths) + `components/dartboard/DartboardHeatmap.tsx`. ⚠️ **No throw coordinates exist** — a `Dart` is a bed, not a point. The heatmap colours whole beds (`--m3-heat-1…6` ramp, square-root `heatLevel`); never reintroduce a scatter cloud. Keys arrive as `20-3` (stored, match history) and `3x20` (old live), bulls as 25/50 — always go through `normalizeHeatmapKey`/`aggregateBeds` (bulls once landed on the 6). Totals include misses in every source. The SVG is `role="img"`; the bed list is the keyboard path.
 - Export: `src/utils/exportImport.ts` (CSV, XLSX, PDF, JSON). `exportMatchHistoryExcel` and `exportMatchHistoryPDF` are **async** — they `await import('xlsx')` / `import('jspdf')` internally so the libs only download on user action
 - Screenshots: `src/utils/screenshot.ts` (html2canvas dynamically imported on first call; excludes z-50+ modals)
 - Celebration: `src/utils/celebration.ts` (lazy-import wrapper around `canvas-confetti`; call `celebrate({ … })` — module fetches on first call, cached thereafter)
@@ -311,6 +311,21 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - Game screen below `lg`: `ScoreStrip` replaces the stacked `PlayerScore` cards and ScoreInput hides its own "remaining" header. `e2e/layout.spec.ts` asserts the confirm button and all scores are on screen at 390×844 and 1280×800. ⚠️ Locators like `getByText('501')` must add `.locator('visible=true')` — the strip exists (hidden) on desktop too.
 - ScoreInput has three modes (`numpad` / `darts` / `quick`, remembered in `sotd-input-mode`); the dart grid adds exact beds.
 
+### Game screen (0.20.0)
+- **Refresh safety:** the running X01 match lives in `state-of-the-dart-active-match`, the unconfirmed darts of the current visit in `state-of-the-dart-active-throw` (`{matchId, darts}`; both in `DEVICE_GAME_KEYS`). `LOAD_MATCH` takes `currentThrow`, validated by `utils/restoredThrow.ts`, ignored when a bot is up. ⚠️ The throw-save effect skips the first render (no match yet) — writing `[]` there would erase the darts before the restore lands. Pinned by `e2e/refresh.spec.ts`.
+- **Desktop columns:** from three players on, `leftPlayerCount = ceil(n/2)` cards sit left of the input, the rest right above the stats.
+- **Burning frame:** the active `PlayerScore` gets `.sotd-on-fire` (m3.css) plus `<FireCanvas />` (WebGL shader ported from nice-to-be-nice, 2D fallback). Only the active card mounts it; the context is released on unmount. Light theme blends `normal` (screen would wash it out); reduced motion → still frame, no canvas.
+- **Leg leader:** the glowing board (`data-testid="leg-leader"`) marks `legLeaderId()` (lowest remaining in the current leg from confirmed visits, null when shared) — not the active player. The legs tile tints tertiary once `legsWon > 0` and springs + glows (`.sotd-leg-won`) only when the count rises during play; the previous count is kept as state adjusted during render, so mount/resume/undo do not replay it.
+- ⚠️ **GameScreen has three identical `{/* Leg/Match Toggle */}` markers** (history, charts, heatmap). A replace anchored on one of them deleted the history and chart sections in 0.19.0 — anchor on something unique. `e2e/refresh.spec.ts` opens all three sections.
+
+### Achievements in a game (0.21.0)
+- `AchievementNotification` (mounted once in App) has two placements: **top** toast, and **center** stage. On game routes (`isGameRoute`) a `pointerdown` outside the stack (capture phase, not swallowed) dismisses all — but only in top placement.
+- **Center** = the game screen's `celebrating` (leg-won overlay or completed match) published through `utils/celebrationMoment.ts`. Once centred, a batch stays centred until it is empty (latched by state adjusted during render, not an effect — `react-hooks/set-state-in-effect`). No outside close; "Continue" dismisses all.
+- ⚠️ Achievements of one visit arrive one after another; a test that taps outside immediately sees the late ones reappear (correctly). Wait for them to land first.
+
+### Numpad checkout (0.21.0)
+- `numpadDarts(score, remaining, dartsLeft, doubleOut)`: a total equal to the remaining score under double-out becomes the checkout-table route (`routeToDarts` reads `T20/D12/S5/7/Bull/25`). Everything else still goes through `convertScoreToDarts`. Before, numpad checkouts busted (greedy darts rarely end on a double).
+
 ### PWA (0.11.0)
 - The service worker is registered in `src/pwa/UpdatePrompt.tsx` (`registerType: 'prompt'`). A new version is offered as a snackbar and **never on a game route** (`utils/gameRoutes.ts`). Before 0.11.0 the built `sw.js` was never registered at all.
 - One manifest: the generated `manifest.webmanifest`. No orientation lock.
@@ -427,7 +442,10 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **23 tests** currently:
+- Specs in `e2e/`. **28 tests** currently:
+  - `achievements-flow.spec.ts` — mid-leg toast closes on an outside tap; a numpad 141 checkout ends the leg; achievements go centre stage and stay until "Weiter"
+  - `refresh.spec.ts` — four players: desktop column split, refresh mid-visit keeps scores, turn and entered darts; history, charts and live heatmap sections render
+  - `heatmap.spec.ts` — the statistics heatmap at phone and desktop size: no overflow, bulls in the centre, a tapped bed is named
   - `online.spec.ts` — two browsers play an online match to the end; a reload mid-leg keeps the seat; a leg won by the non-starter pins the throw-off rule; rematch
   - `tournament.spec.ts` — create a tournament in the UI, enter a leg, reload, resume, confirm, reload: nothing is lost
   - `a11y.spec.ts` — axe-core on 20 screens and four game modes in play, touch-target sizes, the live announcement, plus a cross-check

@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { login } from './helpers/login';
+import { seedHeatmap, openHeatmap } from './helpers/heatmap';
 import { BACKEND_PORT } from './fixtures';
 
 /**
@@ -157,6 +158,13 @@ for (const theme of ['modern', 'modern-light'] as const) {
       await page.waitForTimeout(700); // let entrance animations settle
       for (const f of await measure(page)) all.push(`${path}: ${f}`);
     }
+    // The board heatmap, with data (the empty state measures nothing useful).
+    await seedHeatmap(page, `Cara-${tag}`);
+    await page.reload();
+    await openHeatmap(page, `Cara-${tag}`);
+    await page.waitForTimeout(700);
+    for (const f of await measure(page)) all.push(`/stats?tab=heatmap: ${f}`);
+
     // The achievements page must actually have rendered its cards.
     await page.goto('/achievements');
     await expect(page.locator('p.line-clamp-2').first()).toBeVisible();

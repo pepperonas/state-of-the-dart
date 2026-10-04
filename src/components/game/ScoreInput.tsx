@@ -3,7 +3,7 @@ import { Check, X, Delete, Keyboard, RotateCcw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Dart } from '../../types/index';
 import { motion } from 'framer-motion';
-import { calculateThrowScore, convertScoreToDarts } from '../../utils/scoring';
+import { calculateThrowScore, convertScoreToDarts, numpadDarts } from '../../utils/scoring';
 import AnimatedNumber from '../common/AnimatedNumber';
 import Select from '../common/Select';
 import SegmentedButton from '../common/SegmentedButton';
@@ -21,6 +21,8 @@ interface ScoreInputProps {
   onSetEditingDartIndex: (index: number | null) => void;
   isEditingThrow?: boolean;
   remaining: number;
+  /** Double-out: a numpad total equal to the remaining score is entered along a checkout route. */
+  doubleOut?: boolean;
   isCheckout?: boolean;
   /** Take back the last CONFIRMED throw (loads its darts back for correction). */
   onUndoThrow?: () => void;
@@ -45,6 +47,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   isCheckout = false,
   isEditingThrow,
   remaining,
+  doubleOut = true,
   onUndoThrow,
   lastThrow = null,
 }) => {
@@ -201,8 +204,8 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
 
     if (currentThrow.length >= 3) return;
 
-    // Convert score to plausible darts
-    const darts = convertScoreToDarts(score);
+    // Convert score to plausible darts — along a checkout route when it finishes.
+    const darts = numpadDarts(score, remaining, 3 - currentThrow.length, doubleOut);
     // Add darts one by one, respecting the 3-dart limit
     const dartsToAdd = darts.slice(0, 3 - currentThrow.length);
     dartsToAdd.forEach(dart => onAddDart(dart));
@@ -251,6 +254,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
           <button
             type="button"
             key={index}
+            data-testid={`dart-slot-${index}`}
             disabled={!currentThrow[index] || !onReplaceDart}
             aria-pressed={editingDartIndex === index}
             aria-label={currentThrow[index] ? t('game.edit_dart', { n: index + 1, score: currentThrow[index].score }) : t('game.empty_dart', { n: index + 1 })}

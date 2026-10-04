@@ -862,7 +862,7 @@
         "intro": "<b>Tap a player entry</b> in the list to see their full profile:",
         "items": [
           "<b>Statistics:</b> average, 180s, checkout rate",
-          "<b>Heatmap:</b> L.A.-style heatmap with smooth blur effects",
+          "<b>Heatmap:</b> every bed of the board coloured by how often you hit it",
           "<b>Match history:</b> every match played",
           "<b>Personal bests:</b> top performances",
           "<b>Avatar:</b> professional design with script lettering or an emoji"
@@ -1141,26 +1141,35 @@
     "login": "Sign in"
   },
   "heatmap": {
-    "cluster_center": "Cluster centre",
-    "very_precise": "Very precise",
-    "precise": "Precise",
-    "scattered": "Scattered",
-    "scatter_radius": "Scatter radius",
-    "of_board_diameter": "of the board diameter",
     "triple_rate": "Triple rate",
     "double_rate": "Double rate",
-    "bull_and_outer": "Bull & outer bull",
-    "inner_bull": "Inner bull",
     "legend": "Heatmap legend",
-    "cold": "Cold",
-    "rare": "Rare",
-    "hot": "Hot",
-    "frequent": "Frequent",
-    "legend_hint": "⊕ Crosshair = centre of your throws · ○ Dashed circle = scatter radius",
+    "legend_hint": "Each bed is coloured by how often you hit it. Singles cover both single areas of a number, because the app records the bed, not the exact spot.",
     "top_hotspots_one": "Top {{count}} hotspot",
     "top_hotspots_other": "Top {{count}} hotspots",
     "hits_one": "{{count}} hit",
-    "hits_other": "{{count}} hits"
+    "hits_other": "{{count}} hits",
+    "miss": "Miss",
+    "bull": "Bull",
+    "outer_bull": "Outer bull",
+    "board_label": "Heatmap of the dartboard: {{hits}} of {{total}} darts on the board. The list below names every bed.",
+    "tap_hint": "Tap a bed for details",
+    "misses_one": "{{count}} miss ({{pct}}%)",
+    "misses_other": "{{count}} misses ({{pct}}%)",
+    "bull_rate": "Bull rate",
+    "miss_rate": "Miss rate",
+    "zone_title": "Favourite zone",
+    "zone_left": "Left",
+    "zone_target": "Most hit",
+    "zone_right": "Right",
+    "zone_hint": "Your strongest number with its neighbours — shows which way your darts drift.",
+    "legend_none": "Not hit",
+    "legend_one": "1 hit",
+    "legend_max": "{{count}} hits ({{pct}}%)",
+    "all_beds_one": "All {{count}} bed hit",
+    "all_beds_other": "All {{count}} beds hit",
+    "show_all": "Show all {{count}} beds",
+    "show_less": "Show fewer"
   },
   "leaderboard": {
     "cat_average": "Best average",
@@ -1721,7 +1730,8 @@
   },
   "player_score": {
     "remove": "Remove player",
-    "highest": "High"
+    "highest": "High",
+    "leg_leader": "Leads this leg"
   },
   "dartboard": {
     "label": "Interactive dartboard"
@@ -1759,7 +1769,9 @@
     "unlocked_count_one": "{{count}}/{{total}} achievements",
     "unlocked_count_other": "{{count}}/{{total}} achievements",
     "close_all_one": "Dismiss all ({{count}})",
-    "close_all_other": "Dismiss all ({{count}})"
+    "close_all_other": "Dismiss all ({{count}})",
+    "continue": "Continue",
+    "stage_label": "New achievements"
   },
   "score_input": {
     "total": "Total",

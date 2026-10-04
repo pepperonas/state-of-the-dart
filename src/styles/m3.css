@@ -47,6 +47,10 @@
   --m3-success: #7edb97;
   /* Rank colours, tuned for contrast on dark surfaces. */
   --m3-medal-gold: #f5c542;
+  /* Heatmap: one warm ramp, OKLCH lightness monotone. Dark mode runs dark→bright
+     (low counts recede into the surface), light mode the other way round. */
+  --m3-heat-1: #703324; --m3-heat-2: #924e2e; --m3-heat-3: #b46c37;
+  --m3-heat-4: #d48d40; --m3-heat-5: #f1b04b; --m3-heat-6: #ffd988;
   --m3-medal-silver: #c9ced6;
   --m3-medal-bronze: #e0955a;
   --m3-on-success: #00391d;
@@ -113,6 +117,8 @@
   --m3-success: #006d3c;
   /* …and on light surfaces. */
   --m3-medal-gold: #8a6100;
+  --m3-heat-1: #f3d2a4; --m3-heat-2: #e3b17d; --m3-heat-3: #d48f57;
+  --m3-heat-4: #c36d35; --m3-heat-5: #b14812; --m3-heat-6: #992400;
   --m3-medal-silver: #5c6470;
   --m3-medal-bronze: #8f4a14;
   --m3-on-success: #ffffff;
@@ -772,4 +778,61 @@ button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surfa
 /* Honour reduced-motion: drop the expressive shape morph + transforms */
 @media (prefers-reduced-motion: reduce) {
   .m3-button:active:not(:disabled) { border-radius: var(--m3-shape-full); }
+}
+
+/* ═══ Player at the oche: burning card frame ═══════════════════════════
+   Ported from nice-to-be-nice ("on fire" opener card): a flickering glow
+   halo plus a border cycling orange → rose → amber, with asymmetric timings
+   so it reads as flicker, not as a loop. The flames themselves are a WebGL
+   canvas along the bottom edge (components/game/FireCanvas.tsx), screen-
+   blended in the dark theme. */
+@keyframes sotd-fire-glow {
+  0%   { box-shadow: 0 0 22px rgba(249, 115, 22, 0.34), 0 0 46px rgba(244, 63, 94, 0.20), 0 0 84px rgba(251, 191, 36, 0.12), inset 0 -30px 46px -22px rgba(249, 115, 22, 0.16); }
+  30%  { box-shadow: 0 0 36px rgba(249, 115, 22, 0.58), 0 0 68px rgba(244, 63, 94, 0.34), 0 0 118px rgba(251, 191, 36, 0.20), inset 0 -40px 56px -22px rgba(249, 115, 22, 0.26); }
+  55%  { box-shadow: 0 0 28px rgba(249, 115, 22, 0.42), 0 0 54px rgba(244, 63, 94, 0.24), 0 0 96px rgba(251, 191, 36, 0.14), inset 0 -34px 50px -22px rgba(249, 115, 22, 0.20); }
+  78%  { box-shadow: 0 0 42px rgba(249, 115, 22, 0.66), 0 0 78px rgba(244, 63, 94, 0.40), 0 0 136px rgba(251, 191, 36, 0.26), inset 0 -44px 62px -22px rgba(249, 115, 22, 0.30); }
+  100% { box-shadow: 0 0 22px rgba(249, 115, 22, 0.34), 0 0 46px rgba(244, 63, 94, 0.20), 0 0 84px rgba(251, 191, 36, 0.12), inset 0 -30px 46px -22px rgba(249, 115, 22, 0.16); }
+}
+@keyframes sotd-fire-border {
+  0%, 100% { border-color: rgba(249, 115, 22, 0.85); }
+  40%      { border-color: rgba(244, 63, 94, 0.95); }
+  70%      { border-color: rgba(251, 191, 36, 0.90); }
+}
+.sotd-on-fire {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border: 2px solid rgba(249, 115, 22, 0.85);
+  animation: sotd-fire-glow 4.3s ease-in-out infinite, sotd-fire-border 2.7s ease-in-out infinite;
+}
+/* Content sits above the flames. */
+.sotd-on-fire > :not(.sotd-fire-canvas) { position: relative; z-index: 2; }
+.sotd-fire-canvas {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  width: 100%;
+  height: 46%;
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: screen;
+  opacity: 0.85;
+}
+/* On a light surface "screen" washes the fire out to nothing. */
+.modern-light .sotd-fire-canvas { mix-blend-mode: normal; opacity: 0.7; }
+@media (prefers-reduced-motion: reduce) {
+  /* A still, warm frame keeps the turn visible without motion. */
+  .sotd-on-fire { animation: none; box-shadow: 0 0 28px rgba(249, 115, 22, 0.45); }
+  .sotd-fire-canvas { display: none; }
+}
+
+/* A leg just won: one soft tertiary glow on the legs tile (the spring scale
+   comes from framer-motion). Off under reduced motion — the tint stays. */
+@keyframes sotd-leg-won {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--m3-tertiary) 55%, transparent); }
+  40%  { box-shadow: 0 0 0 6px color-mix(in srgb, var(--m3-tertiary) 25%, transparent), 0 0 18px color-mix(in srgb, var(--m3-tertiary) 35%, transparent); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+.sotd-leg-won { animation: sotd-leg-won 1.4s var(--m3-easing-standard) 1; }
+@media (prefers-reduced-motion: reduce) {
+  .sotd-leg-won { animation: none; }
 }

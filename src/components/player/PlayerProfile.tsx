@@ -8,7 +8,7 @@ import { useTenant } from '../../context/TenantContext';
 import { api } from '../../services/api';
 import { PersonalBests, createEmptyPersonalBests } from '../../types/personalBests';
 import { LineChart, Line, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
+import { DartboardHeatmap } from '../dartboard/DartboardHeatmap';
 import { calculateAccuracyStats } from '../../utils/heatmap';
 import { formatDate } from '../../utils/dateUtils';
 import { ACHIEVEMENTS } from '../../types/achievements';
@@ -428,7 +428,7 @@ const PlayerProfile: React.FC = () => {
                 </div>
               )}
 
-              <DartboardHeatmapBlur heatmapData={heatmapData} size={500} />
+              <DartboardHeatmap heatmapData={heatmapData} maxWidth={500} />
             </>
           ) : (
             <div className="bg-surface-container rounded-m3-md p-8 text-center border-2 border-dashed border-outline-variant">
@@ -442,11 +442,11 @@ const PlayerProfile: React.FC = () => {
               </p>
               <div className="flex items-center justify-center gap-4 mt-4 m3-body-small">
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded bg-red-500"></div>
+                  <div className="w-4 h-4 rounded" style={{ background: 'var(--m3-heat-6)' }}></div>
                   <span className="text-on-surface-variant">{t('player_profile.hot_zones')}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded bg-blue-500"></div>
+                  <div className="w-4 h-4 rounded border border-outline-variant" style={{ background: 'var(--m3-heat-1)' }}></div>
                   <span className="text-on-surface-variant">{t('player_profile.cold_zones')}</span>
                 </div>
               </div>

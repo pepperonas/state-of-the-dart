@@ -13,7 +13,7 @@ import type { Dart, HeatmapData } from '../../types';
 /**
  * Exercises the real `src/utils/heatmap.ts` module.
  *
- * `heatmap.test.ts` next door covers a different thing: the `${multiplier}x${segment}`
+ * `heatmap.test.ts` next door covers the visit builder (`heatmapFromThrows`); the older `${multiplier}x${segment}`
  * key format that GameScreen builds inline. Both formats exist in this codebase
  * (`3x20` there, `20-3` here) and both are worth pinning — but that file tests a
  * copy of the logic declared inside itself, so it cannot catch a change in this

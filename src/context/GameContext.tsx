@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Match, Player, Dart, Throw, GameType, MatchSettings } from '../types/index';
+import { sanitizeRestoredThrow } from '../utils/restoredThrow';
 import { calculateThrowScore, calculateAverage } from '../utils/scoring';
 import { evaluateVisit, rulesOf } from '../utils/visit';
 import { getCheckoutSuggestion } from '../data/checkoutTable';
@@ -22,7 +23,7 @@ export interface GameState {
 
 type GameAction =
   | { type: 'START_MATCH'; payload: { players: Player[]; settings: MatchSettings; gameType: GameType } }
-  | { type: 'LOAD_MATCH'; payload: Match }
+  | { type: 'LOAD_MATCH'; payload: Match; currentThrow?: Dart[] }
   | { type: 'ADD_DART'; payload: Dart }
   | { type: 'REMOVE_DART' }
   | { type: 'CLEAR_THROW' }
@@ -223,12 +224,18 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
 
       logger.apiEvent('LOAD_MATCH: throws in leg:', throwsInLeg, 'current player index:', currentPlayerIndex);
 
+      // Darts entered before a refresh come back — unless a bot is up, which
+      // throws its own visit.
+      const atOche = match.players[currentPlayerIndex];
+      const isBot = !!(atOche as { isBot?: boolean } | undefined)?.isBot;
+      const restoredThrow = isBot ? [] : sanitizeRestoredThrow(action.currentThrow);
+
       return {
         ...state,
         currentMatch: match,
         currentPlayerIndex,
-        currentThrow: [],
-        checkoutSuggestion: checkoutFor(match, currentPlayerIndex, []),
+        currentThrow: restoredThrow,
+        checkoutSuggestion: checkoutFor(match, currentPlayerIndex, restoredThrow),
       };
     }
     
@@ -736,6 +743,8 @@ export const reviveMatchDates = (match: any): Match => {
 };
 
 const ACTIVE_MATCH_KEY = 'state-of-the-dart-active-match';
+/** Darts of the unconfirmed visit, so a refresh mid-visit loses nothing. */
+const ACTIVE_THROW_KEY = 'state-of-the-dart-active-throw';
 
 export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { storage } = useTenant();
@@ -765,7 +774,12 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (parsed.status === 'in-progress' || parsed.status === 'paused') {
           const restoredMatch = reviveMatchDates(parsed);
           logger.apiEvent('Restoring active match from localStorage:', restoredMatch.id);
-          dispatch({ type: 'LOAD_MATCH', payload: restoredMatch });
+          let currentThrow: Dart[] | undefined;
+          try {
+            const savedThrow = JSON.parse(localStorage.getItem(ACTIVE_THROW_KEY) || 'null');
+            if (savedThrow?.matchId === restoredMatch.id) currentThrow = savedThrow.darts;
+          } catch { /* a broken entry only costs the unconfirmed darts */ }
+          dispatch({ type: 'LOAD_MATCH', payload: restoredMatch, currentThrow });
         } else {
           // Match was completed, clear it
           localStorage.removeItem(ACTIVE_MATCH_KEY);
@@ -790,6 +804,21 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       localStorage.removeItem(ACTIVE_MATCH_KEY);
     }
   }, [state.currentMatch]);
+
+  // Save the unconfirmed darts of the current visit (see ACTIVE_THROW_KEY).
+  // Skipped until the match exists: on the very first render the restore above
+  // has not landed yet, and writing [] would erase the saved darts.
+  useEffect(() => {
+    const match = state.currentMatch;
+    if (!match) return;
+    try {
+      if (match.status === 'in-progress' && state.currentThrow.length > 0) {
+        localStorage.setItem(ACTIVE_THROW_KEY, JSON.stringify({ matchId: match.id, darts: state.currentThrow }));
+      } else {
+        localStorage.removeItem(ACTIVE_THROW_KEY);
+      }
+    } catch { /* storage unavailable */ }
+  }, [state.currentMatch, state.currentThrow]);
   
   // Track if match has been created in DB
   const matchCreatedRef = React.useRef<string | null>(null);

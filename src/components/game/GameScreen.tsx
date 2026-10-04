@@ -11,7 +11,10 @@ import { useTenant } from '../../context/TenantContext';
 import { useGameAchievements } from '../../hooks/useGameAchievements';
 import { useAchievementHints } from '../../hooks/useAchievementHints';
 import Dartboard from '../dartboard/Dartboard';
-import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
+import { DartboardHeatmap } from '../dartboard/DartboardHeatmap';
+import { heatmapFromThrows } from '../../utils/heatmap';
+import { setCelebrationMoment } from '../../utils/celebrationMoment';
+import { legLeaderId } from '../../utils/legLeader';
 import ScoreInput from './ScoreInput';
 import GameAnnouncer from './GameAnnouncer';
 import PlayerScore from './PlayerScore';
@@ -168,6 +171,13 @@ const GameScreen: React.FC = () => {
     const timer = setTimeout(() => setLegWonAnimation(null), 5000);
     return () => clearTimeout(timer);
   }, [state.currentMatch?.currentLegIndex, state.currentMatch?.id]);
+
+  // End of a leg or match: achievements unlocked now go centre stage.
+  const celebrating = !!legWonAnimation?.show || (state.currentMatch?.status === 'completed' && !!state.currentMatch?.winner);
+  useEffect(() => {
+    setCelebrationMoment(celebrating);
+  }, [celebrating]);
+  useEffect(() => () => setCelebrationMoment(false), []);
 
   // Check achievements when match is completed (only once per match)
   useEffect(() => {
@@ -362,33 +372,10 @@ const GameScreen: React.FC = () => {
       ? (state.currentMatch.legs[state.currentMatch.currentLegIndex]?.throws || [])
       : state.currentMatch.legs.flatMap(leg => leg.throws || []);
     
-    // Group throws by player
     state.currentMatch.players.forEach(player => {
-      const playerThrows = allThrows.filter(t => t.playerId === player.playerId);
-      const segments: Record<string, number> = {};
-      let totalDarts = 0;
-      
-      playerThrows.forEach(throwData => {
-        if (throwData.darts) {
-          throwData.darts.forEach(dart => {
-            if (dart.segment > 0 && dart.multiplier > 0) {
-              // Format: "multiplier x segment" (e.g., "3x20" for triple 20)
-              const key = `${dart.multiplier}x${dart.segment}`;
-              segments[key] = (segments[key] || 0) + 1;
-              totalDarts++;
-            }
-          });
-        }
-      });
-      
-      heatmaps[player.playerId] = {
-        playerId: player.playerId,
-        segments,
-        totalDarts,
-        lastUpdated: new Date(),
-      };
+      heatmaps[player.playerId] = heatmapFromThrows(allThrows, player.playerId);
     });
-    
+
     return heatmaps;
   }, [state.currentMatch?.legs, state.currentMatch?.players, totalThrowsCount, heatmapView]);
 
@@ -1304,7 +1291,34 @@ const GameScreen: React.FC = () => {
     return (state.currentMatch!.settings.startScore || 501) - scored;
   };
   const showSets = (state.currentMatch.settings.setsToWin || 1) > 1;
-  
+  // Desktop: from three players on, the cards split — the first half left of
+  // the input, the rest right of it above the stats. Four stacked cards ran
+  // far below the fold while the right column stood empty.
+  const playerCount = state.currentMatch.players.length;
+  const leftPlayerCount = playerCount <= 2 ? playerCount : Math.ceil(playerCount / 2);
+  // The glowing board marks who leads this leg (confirmed visits only, so it
+  // does not flicker while darts are being entered).
+  const legLeader = legLeaderId(
+    state.currentMatch.players.map(p => p.playerId),
+    currentLeg.throws,
+    state.currentMatch.settings.startScore || 501,
+  );
+  const renderPlayerCard = (player: typeof state.currentMatch.players[number], index: number) => (
+    <PlayerScore
+      key={player.playerId}
+      player={player}
+      remaining={remainingOf(index)}
+      isActive={index === state.currentPlayerIndex}
+      isLegLeader={player.playerId === legLeader}
+      average={player.matchAverage}
+      legsWon={player.legsWon}
+      setsWon={player.setsWon}
+      showSets={showSets}
+      onRemove={canRemovePlayers ? handleRequestRemovePlayer : undefined}
+      removeLabel={t('game.remove_player')}
+    />
+  );
+
   return (
     <div className="min-h-dvh p-4 md:p-6 phoneland:p-2 gradient-mesh overflow-x-hidden">
       <GameAnnouncer match={state.currentMatch} />
@@ -1363,20 +1377,7 @@ const GameScreen: React.FC = () => {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Players Section (desktop) */}
           <div className="hidden lg:block lg:col-span-1 space-y-4">
-            {state.currentMatch.players.map((player, index) => (
-              <PlayerScore
-                key={player.playerId}
-                player={player}
-                remaining={remainingOf(index)}
-                isActive={index === state.currentPlayerIndex}
-                average={player.matchAverage}
-                legsWon={player.legsWon}
-                setsWon={player.setsWon}
-                showSets={showSets}
-                onRemove={canRemovePlayers ? handleRequestRemovePlayer : undefined}
-                removeLabel={t('game.remove_player')}
-              />
-            ))}
+            {state.currentMatch.players.slice(0, leftPlayerCount).map((player, i) => renderPlayerCard(player, i))}
           </div>
           
           {/* Center Section - Input first, then optional Dartboard helper */}
@@ -1392,6 +1393,7 @@ const GameScreen: React.FC = () => {
               onSetEditingDartIndex={setEditingDartIndex}
               isEditingThrow={isEditingThrow}
               remaining={remaining}
+              doubleOut={state.currentMatch.settings.doubleOut ?? true}
               isCheckout={isEarlyCheckout}
               onUndoThrow={handleUndoThrow}
               lastThrow={lastThrowInfo}
@@ -1427,8 +1429,13 @@ const GameScreen: React.FC = () => {
             )}
           </div>
           
-          {/* Stats Section - Collapsible */}
-          <div className="lg:col-span-1">
+          {/* Right column: players 3+ (desktop), then the collapsible stats */}
+          <div className="lg:col-span-1 space-y-4">
+            {state.currentMatch.players.length > leftPlayerCount && (
+              <div className="hidden lg:block space-y-4">
+                {state.currentMatch.players.slice(leftPlayerCount).map((player, i) => renderPlayerCard(player, leftPlayerCount + i))}
+              </div>
+            )}
             {settings.showStatsDuringGame && (
               <div>
                 <button
@@ -1641,24 +1648,16 @@ const GameScreen: React.FC = () => {
           {showLiveHeatmap && (
             <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
               {/* Leg/Match Toggle */}
-              <div className="flex gap-2 mb-4">
-                <button
-                  onClick={() => setHeatmapView('leg')}
-                  className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm transition ${
-                    heatmapView === 'leg' ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
-                  }`}
-                >
-                  {t('game.current_leg')}
-                </button>
-                <button
-                  onClick={() => setHeatmapView('match')}
-                  className={`flex-1 py-2 rounded-m3-lg font-semibold text-sm transition ${
-                    heatmapView === 'match' ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
-                  }`}
-                >
-                  {t('game.whole_match')}
-                </button>
-              </div>
+              <SegmentedButton
+                className="mb-4"
+                label={t('game_screen.live_heatmap')}
+                value={heatmapView}
+                onChange={setHeatmapView}
+                options={[
+                  { value: 'leg', label: t('game.current_leg') },
+                  { value: 'match', label: t('game.whole_match') },
+                ]}
+              />
               {/* Player Selector */}
               {state.currentMatch.players.length > 1 && (
                 <div className="mb-6">
@@ -1706,11 +1705,7 @@ const GameScreen: React.FC = () => {
                       <span className="text-lg font-bold text-on-surface">{playerName}</span>
                       <span className="text-on-surface-variant ml-2">{t('game_screen.darts_count', { count: playerHeatmap.totalDarts })}</span>
                     </div>
-                    <DartboardHeatmapBlur 
-                      heatmapData={playerHeatmap} 
-                      size={Math.min(500, window.innerWidth - 80)}
-                      compact={true}
-                    />
+                    <DartboardHeatmap heatmapData={playerHeatmap} maxWidth={460} compact />
                   </div>
                 );
               })()}

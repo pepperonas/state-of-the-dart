@@ -7,6 +7,98 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-10-05
+
+### Changed
+
+- The glowing board on a player card now marks the **leader of the current
+  leg** (lowest remaining score after confirmed visits; nobody while it is
+  shared, e.g. at the start of a leg) instead of the player at the oche — the
+  burning frame already shows whose turn it is. `utils/legLeader.ts`, with an
+  accessible label.
+- Won legs: the legs tile turns tertiary with one filled trophy per leg, and
+  springs once with a soft glow when a leg is won during play (not on mount,
+  resume or undo). Reduced motion keeps the tint, drops the glow.
+
+## [0.21.0] - 2026-10-05
+
+Achievements during a game, and checkouts typed on the numpad.
+
+### Fixed
+
+- **A checkout typed on the numpad was a bust under double-out.** The total
+  was turned into "plausible" darts (T20 first), which rarely end on a double —
+  141 at 141 busted. A total equal to the remaining score now follows the
+  checkout table (`numpadDarts`, `routeToDarts` in `utils/scoring.ts`); every
+  finish 2–170 except the bogey numbers is pinned. Found while testing the
+  achievement flow, which then showed "180 and then bust".
+
+### Changed
+
+- Achievement notifications in a game: mid-leg they stay a toast at the top
+  and a tap anywhere else closes them (the tap still reaches the button under
+  it). At the end of a leg or match they go centre stage over a scrim, larger,
+  in two columns from three on, do not close on an outside tap and stay until
+  "Continue" — even after the leg overlay underneath has gone. Signalled by
+  the game screen through `utils/celebrationMoment.ts`.
+
+## [0.20.0] - 2026-10-04
+
+The game screen: a refresh loses nothing, four players fit beside the input,
+and the player at the oche burns.
+
+### Fixed
+
+- **Throw history and throw charts were gone (regression in 0.19.0).** A text
+  replacement meant for the live heatmap's leg/match toggle hit the first of
+  three identical markers and deleted the visit history and the chart section
+  with it. Restored verbatim; `e2e/refresh.spec.ts` now opens all three
+  sections and checks the chart draws data points.
+- **A refresh mid-visit dropped the darts already entered.** Scores and turn
+  survived; the unconfirmed darts did not. They are now kept in
+  `state-of-the-dart-active-throw` (tied to the match id, validated on load,
+  dropped when a bot is up) and come back with the match.
+
+### Changed
+
+- Desktop game screen: from three players on, the cards split — the first half
+  left of the input, the rest right of it above the match statistics.
+- The active player's card burns: flickering glow, a border cycling orange →
+  rose → amber and WebGL flames along the bottom edge, ported from
+  nice-to-be-nice (`components/game/FireCanvas.tsx`, 2D fallback, one context
+  at a time and released on unmount, off under reduced motion — a still warm
+  frame remains).
+
+## [0.19.0] - 2026-10-04
+
+The heatmap shows the real beds of the board, coloured by share of hits.
+
+### Fixed
+
+- **Bull hits and misses were drawn on the 6.** The bed angle lookup did not know
+  25/50/0 and returned 0°, i.e. 3 o'clock.
+- The cloud was an invented scatter around a fixed point per bed: no throw
+  coordinates are ever recorded. Singles only ever showed in the outer single
+  area; the rings were out of proportion.
+- 500/600 px heatmaps were cut off on a phone; the canvas ignored the device
+  pixel ratio and looked blurry.
+- The live heatmap left out misses while the stored one counted them, so the
+  rates had different bases. The match history turned the bull into "D50".
+
+### Changed
+
+- New `DartboardHeatmap` (SVG, WDF proportions, `utils/boardGeometry.ts`)
+  replaces `DartboardHeatmapBlur`. One warm ramp as theme tokens
+  `--m3-heat-1…6`, square-root scale, misses as a chip beside the board.
+- Tap a bed for its details; the bed list underneath is the keyboard and
+  screen-reader path. "Cluster centre / scatter radius" (fiction without
+  coordinates) became the **favourite zone**: strongest number and its neighbours.
+- `utils/heatmap.ts`: `normalizeHeatmapKey` reads every key format,
+  `aggregateBeds`, `boardStats`, `heatLevel`, `heatmapFromThrows` (shared by the
+  live heatmap and the match history), translated `formatSegmentName`.
+- Tests: bed data, board geometry, component, and an E2E spec at phone and
+  desktop size; the heatmap view joined the contrast and axe sweeps.
+
 ## [0.18.0] - 2026-09-27
 
 The rest of the Material 3 Expressive list — and the game on a phone turned sideways.
