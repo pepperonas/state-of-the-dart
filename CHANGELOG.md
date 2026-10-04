@@ -7,6 +7,17 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.23.1] - 2026-10-05
+
+### Fixed
+
+- **Stored averages recalculated** with the 0.23.0 rule (3 darts per visit,
+  actual darts for the checkout): 78 match rows, the career average and best
+  average of 17 players and 10 personal bests. Before, a visit of 60 entered
+  on the numpad counted as a 180 average (e.g. a best average of 180 became
+  37.12). Seed/demo matches and rows without stored throws are untouched.
+  Backup and procedure: `server/scripts/recalc-averages/`.
+
 ## [0.23.0] - 2026-10-05
 
 ### Fixed
