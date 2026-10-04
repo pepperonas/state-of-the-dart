@@ -11,7 +11,7 @@
 <!-- Links -->
 [![Live Demo](https://img.shields.io/badge/Live_Demo-stateofthedart.com-22c55e?style=for-the-badge&logo=googlechrome&logoColor=white)](https://stateofthedart.com)
 [![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-a855f7?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://stateofthedart.celox.io)
-[![Version](https://img.shields.io/badge/Version-0.18.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-0.19.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
 
 <!-- Build & Repo (live) -->
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
@@ -46,8 +46,8 @@
 <!-- Qualität -->
 ![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?logo=playwright&logoColor=white)
-![Unit Tests](https://img.shields.io/badge/Unit_Tests-952-brightgreen)
-![E2E Tests](https://img.shields.io/badge/E2E_Tests-23-brightgreen)
+![Unit Tests](https://img.shields.io/badge/Unit_Tests-977-brightgreen)
+![E2E Tests](https://img.shields.io/badge/E2E_Tests-25-brightgreen)
 ![Coverage](https://img.shields.io/badge/Coverage-24%25_stmts_%7C_75%25_branches-yellow)
 ![ESLint](https://img.shields.io/badge/ESLint-configured-4B32C3?logo=eslint&logoColor=white)
 
@@ -216,15 +216,13 @@
   - **Karriere-Zeitachse** - Vom ersten bis zum letzten Spiel mit allen Stats
   - **Achievement-Showcase** - Zeige freigeschaltete Achievements
   - **Player Avatar System** - Tonale Avatar-Discs mit Icons aus dem hauseigenen Set (siehe [Design-System](docs/DESIGN_SYSTEM.md)); ältere Profile mit Emoji werden automatisch übersetzt
-  - **🔥 Professionelle Heatmap (NEU in v0.1.11)** - Wissenschaftliche Wurf-Visualisierung:
-    - **Polarkoordinaten-Histogramm** - 1440 Zellen (20 Ringe × 72 Winkel) statt 82 Standard-Felder
-    - **Gaussian Blur (15px)** - Smooth Übergänge für professionellen Look
-    - **6-stufiger Farbverlauf** (Blau → Cyan → Grün → Gelb → Orange → Rot)
-    - **Cluster-Analyse** - Zeigt Schwerpunkt der Würfe mit Fadenkreuz
-    - **Streuungsradius** - Gestrichelter Kreis zeigt Präzision des Spielers
-    - **Statistik-Karten**: Cluster-Zentrum, Streuungsradius, Triple/Double/Bull-Rate
-    - Professionelles Dartboard-Design im Hintergrund
-    - Top 5 Hotspots mit Progress-Bars
+  - **🔥 Feldgenaue Heatmap (neu gebaut in v0.19.0)** - Wurfverteilung auf der Scheibe:
+    - Jedes echte Feld (Single, Triple, Double, Single-Bull, Bull) wird nach seiner Trefferquote eingefärbt — scharfes SVG in jeder Größe, folgt hellem und dunklem Theme
+    - Eine warme, wahrnehmungstreue Farbrampe (`--m3-heat-1…6`), Wurzel-Skala, damit ein Hauptfeld nicht alles andere ausgraut
+    - Fehlwürfe stehen neben der Scheibe, nicht auf ihr
+    - Feld antippen zeigt Treffer und Anteil; die Feldliste darunter ist der Tastatur- und Screenreader-Weg
+    - Triple-, Double-, Bull- und Fehlwurfquote sowie die **bevorzugte Zone** (stärkste Zahl und wohin die Darts zu den Nachbarn abweichen)
+    - Ehrlich: Die App speichert das getroffene Feld, nicht die genaue Stelle — deshalb keine erfundene Streuwolke
 - **Bestenlisten-Rankings** - Wettbewerbs-Rankings in 7 Kategorien:
   - Bester Average, Meiste Siege, Win-Rate, Meiste 180s, Checkout-Rate, Achievements, Gesamtpunkte
   - Top 3 bekommen spezielle Medaillen (🏆 Gold, 🥈 Silber, 🥉 Bronze)
@@ -795,6 +793,14 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.19.0 (4. Oktober 2026) - Feldgenaue Heatmap
+
+Die Heatmap zeigt jetzt die echten Felder der Scheibe, eingefärbt nach Trefferquote, statt einer weichgezeichneten Wolke.
+
+**⚠️ Behoben:** Bull-Treffer und Fehlwürfe wurden auf die **6** gemalt (Winkel 0° = 3 Uhr). Die Wolke war erfundene Streuung um einen festen Punkt je Feld — Koordinaten werden nie gespeichert. Singles erschienen nur im äußeren Single-Feld, die Ringe waren falsch proportioniert. Auf dem Handy wurden die 500/600-px-Heatmaps in Profil und Statistik abgeschnitten, und die Canvas war unscharf. Die Live-Heatmap zählte Fehlwürfe nicht mit, die gespeicherte schon — die Quoten hatten verschiedene Bezugsgrößen. Aus dem Bull der Match-Historie wurde „D50".
+
+**Neu:** SVG-Scheibe nach WDF-Maßen, Farbrampe als Theme-Tokens, Detailzeile beim Antippen, Feldliste als Tastaturweg, bevorzugte Zone mit Nachbarn, Fehlwurf-Chip. Live-Heatmap und Match-Historie bauen ihre Daten über dieselbe Funktion (`heatmapFromThrows`).
 
 ### v0.18.0 (27. September 2026) - Querformat & der Rest von M3 Expressive
 

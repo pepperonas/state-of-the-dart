@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { login } from './helpers/login';
+import { seedHeatmap, openHeatmap } from './helpers/heatmap';
 import { BACKEND_PORT } from './fixtures';
 
 /**
@@ -110,6 +111,14 @@ test('axe finds no serious problems and every control is a 48px target', async (
     for (const v of await axe(page)) problems.push(`${path}: ${v}`);
     for (const s of await smallTargets(page)) problems.push(`${path}: small target ${s}`);
   }
+
+  // The board heatmap with data: a picture plus a list of bed buttons.
+  await seedHeatmap(page, `Ada-${tag}`);
+  await page.reload();
+  await openHeatmap(page, `Ada-${tag}`);
+  await page.waitForTimeout(500);
+  for (const v of await axe(page)) problems.push(`/stats?tab=heatmap: ${v}`);
+  for (const s of await smallTargets(page)) problems.push(`/stats?tab=heatmap: small target ${s}`);
 
   await page.goto('/game?new=1');
   await page.getByRole('button', { name: new RegExp(`Ada${tag}`) }).first().click();

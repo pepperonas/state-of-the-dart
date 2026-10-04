@@ -105,7 +105,7 @@ Express routes in `server/src/routes/`, registered in `server/src/index.ts`:
 - Checkout suggestions: `src/data/checkoutTable.ts`
 - Bot AI: `src/utils/botLogic.ts` (10 difficulty levels)
 - Audio: `src/utils/audio.ts` (dart caller, 400+ sound files). **Gotcha**: `announceCheckout(legOrSetNumber, finishType)` expects the **match-scoped leg/set sequence** (1, 2, 3 …), **not** the checkout score — `gameshot/legs/{N}.mp3` says "and the Nth leg". For `'match'` the number is ignored; only `texts/gameshotandthematch.mp3` plays. `announceBust(thrownScore?)` plays the thrown score first (`caller/{N}.mp3`) and then `caller/0.mp3` ("No score").
-- Heatmaps: `src/utils/heatmap.ts`
+- Heatmaps: `src/utils/heatmap.ts` (data) + `src/utils/boardGeometry.ts` (WDF ring radii, bed paths) + `components/dartboard/DartboardHeatmap.tsx`. ⚠️ **No throw coordinates exist** — a `Dart` is a bed, not a point. The heatmap colours whole beds (`--m3-heat-1…6` ramp, square-root `heatLevel`); never reintroduce a scatter cloud. Keys arrive as `20-3` (stored, match history) and `3x20` (old live), bulls as 25/50 — always go through `normalizeHeatmapKey`/`aggregateBeds` (bulls once landed on the 6). Totals include misses in every source. The SVG is `role="img"`; the bed list is the keyboard path.
 - Export: `src/utils/exportImport.ts` (CSV, XLSX, PDF, JSON). `exportMatchHistoryExcel` and `exportMatchHistoryPDF` are **async** — they `await import('xlsx')` / `import('jspdf')` internally so the libs only download on user action
 - Screenshots: `src/utils/screenshot.ts` (html2canvas dynamically imported on first call; excludes z-50+ modals)
 - Celebration: `src/utils/celebration.ts` (lazy-import wrapper around `canvas-confetti`; call `celebrate({ … })` — module fetches on first call, cached thereafter)
@@ -427,7 +427,8 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **23 tests** currently:
+- Specs in `e2e/`. **25 tests** currently:
+  - `heatmap.spec.ts` — the statistics heatmap at phone and desktop size: no overflow, bulls in the centre, a tapped bed is named
   - `online.spec.ts` — two browsers play an online match to the end; a reload mid-leg keeps the seat; a leg won by the non-starter pins the throw-off rule; rematch
   - `tournament.spec.ts` — create a tournament in the UI, enter a leg, reload, resume, confirm, reload: nothing is lost
   - `a11y.spec.ts` — axe-core on 20 screens and four game modes in play, touch-target sizes, the live announcement, plus a cross-check

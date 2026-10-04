@@ -11,7 +11,7 @@
 <!-- Links -->
 [![Live Demo](https://img.shields.io/badge/Live_Demo-stateofthedart.com-22c55e?style=for-the-badge&logo=googlechrome&logoColor=white)](https://stateofthedart.com)
 [![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-a855f7?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://stateofthedart.celox.io)
-[![Version](https://img.shields.io/badge/Version-0.18.0-3b82f6?style=for-the-badge)](../CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-0.19.0-3b82f6?style=for-the-badge)](../CHANGELOG.md)
 
 <!-- Build & repo (live) -->
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
@@ -46,8 +46,8 @@
 <!-- Quality -->
 ![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?logo=playwright&logoColor=white)
-![Unit Tests](https://img.shields.io/badge/Unit_Tests-952-brightgreen)
-![E2E Tests](https://img.shields.io/badge/E2E_Tests-23-brightgreen)
+![Unit Tests](https://img.shields.io/badge/Unit_Tests-977-brightgreen)
+![E2E Tests](https://img.shields.io/badge/E2E_Tests-25-brightgreen)
 ![Coverage](https://img.shields.io/badge/Coverage-24%25_stmts_%7C_75%25_branches-yellow)
 ![ESLint](https://img.shields.io/badge/ESLint-configured-4B32C3?logo=eslint&logoColor=white)
 
@@ -136,14 +136,13 @@
   - **Skill Radar** - 5-dimensional skill visualization
   - **Career Timeline** - From first to last game with all stats
   - **Achievement Showcase** - Display unlocked achievements
-  - **🔥 L.A. Style Heatmap (NEW in v0.0.5)** - Professional throw visualization:
-    - Smooth blur effects (20px Gaussian Blur)
-    - 6-level color gradient (Blue → Cyan → Green → Yellow → Orange → Red)
-    - Professional dartboard design (Red/Green/Black/White)
-    - Silver wire rings like real dartboards
-    - Screen blend mode for smooth overlay
-    - Top 5 hotspots with progress bars
-    - Accuracy stats (Miss Rate, Triple Rate, Double Rate, Favorite Field)
+  - **🔥 Bed-accurate heatmap (rebuilt in v0.19.0)** - where your darts land:
+    - Every real bed (single, treble, double, outer bull, bull) coloured by its share of hits — a sharp SVG at any size, following the light and dark theme
+    - One warm, perceptually ordered ramp (`--m3-heat-1…6`) on a square-root scale, so one dominant bed does not grey out the rest
+    - Misses shown beside the board, not on it
+    - Tap a bed for hits and share; the bed list below is the keyboard and screen-reader path
+    - Treble, double, bull and miss rates plus your **favourite zone** (strongest number and which neighbour your darts drift to)
+    - Honest: the app records the bed, not the exact spot — so no invented scatter cloud
 - **Leaderboard Rankings** - Competitive rankings in 7 categories:
   - Best Average, Most Wins, Win Rate, Most 180s, Checkout Rate, Achievements, Total Points
   - Top 3 get special medals (🏆 Gold, 🥈 Silver, 🥉 Bronze)
@@ -607,7 +606,7 @@ See [DEPLOYMENT_VPS.md](DEPLOYMENT_VPS.md) for complete deployment guide includi
 - [x] Leaderboards
 - [x] Player Comparison (up to 4 players)
 - [x] Round Chart in Match History
-- [x] L.A. Style Heatmap
+- [x] Bed-accurate heatmap
 
 ### 🎯 Planned
 - [ ] Cricket game mode

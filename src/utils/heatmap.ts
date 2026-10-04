@@ -101,9 +101,9 @@ export const calculateSegmentHeat = (heatmapData: HeatmapData): SegmentHeat[] =>
     const segmentData = typeof data === 'number' ? null : (data as SegmentData);
     const count = typeof data === 'number' ? data : (segmentData?.count || segmentData?.x?.length || 0);
 
-    const [segmentStr, multiplierStr] = key.split('-');
-    const segment = parseInt(segmentStr);
-    const multiplier = parseInt(multiplierStr);
+    const parsed = normalizeHeatmapKey(key);
+    if (!parsed) return;
+    const { segment, multiplier } = parsed;
     const percentage = (count / totalDarts) * 100;
 
     heats.push({
@@ -158,13 +158,18 @@ export const getSegmentHitRate = (
 };
 
 /**
- * Formats segment name for display
+ * Formats segment name for display. Pass `t` for the translated special beds;
+ * numbers keep darts notation (T20, D16) in every language.
  */
-export const formatSegmentName = (segment: number, multiplier: number): string => {
-  if (segment === 0) return 'Miss';
-  if (segment === 25 && multiplier === 1) return 'Outer Bull';
-  if (segment === 25 && multiplier === 2) return 'Bull';
-  
+export const formatSegmentName = (
+  segment: number,
+  multiplier: number,
+  t?: (key: string) => string,
+): string => {
+  if (segment === 0) return t ? t('heatmap.miss') : 'Miss';
+  if (segment === 50 || (segment === 25 && multiplier === 2)) return t ? t('heatmap.bull') : 'Bull';
+  if (segment === 25) return t ? t('heatmap.outer_bull') : 'Outer Bull';
+
   const prefix = multiplier === 2 ? 'D' : multiplier === 3 ? 'T' : '';
   return `${prefix}${segment}`;
 };
@@ -206,10 +211,9 @@ export const calculateAccuracyStats = (heatmapData: HeatmapData) => {
     const segmentData = typeof data === 'number' ? null : (data as SegmentData);
     const count = typeof data === 'number' ? data : (segmentData?.count || segmentData?.x?.length || 0);
 
-    // Parse key format: "20-3" (segment-multiplier)
-    const [segmentStr, multiplierStr] = key.split('-');
-    const segment = parseInt(segmentStr);
-    const multiplier = parseInt(multiplierStr);
+    const parsed = normalizeHeatmapKey(key);
+    if (!parsed) return;
+    const { segment, multiplier } = parsed;
 
     if (segment === 0) {
       misses += count;
@@ -255,4 +259,179 @@ export const calculateAccuracyStats = (heatmapData: HeatmapData) => {
     favoriteDouble: formatKey(maxDoubleKey),
     favoriteTriple: formatKey(maxTripleKey)
   };
+};
+
+// ---------------------------------------------------------------------------
+// Bed aggregation for the board heatmap.
+//
+// The app records WHICH bed a dart hit, never where on it: there are no
+// coordinates. The heatmap therefore colours whole beds by their share instead
+// of inventing a scatter cloud around a fixed point.
+// ---------------------------------------------------------------------------
+
+/** Board order, clockwise from the top. */
+export const BOARD_ORDER = [20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5];
+
+/** Number of colour steps in the heat ramp (`--m3-heat-1` … `--m3-heat-6`). */
+export const HEAT_LEVELS = 6;
+
+/**
+ * Reads every key format that exists in this codebase:
+ *   "3x20"  multiplier x segment (live heatmap in the game screen)
+ *   "20-3"  segment - multiplier (persisted heatmap, match history)
+ * Bulls arrive as 25-1, 25-2, 50-2, 2x50, 1x25 and become segment 25 with
+ * multiplier 1 (outer) or 2 (bull). Segment 0 is a miss.
+ */
+export const normalizeHeatmapKey = (key: string): { segment: number; multiplier: number } | null => {
+  let segment: number;
+  let multiplier: number;
+  const x = /^(\d+)x(\d+)$/.exec(key);
+  const dash = /^(\d+)-(\d+)$/.exec(key);
+  if (x) { multiplier = Number(x[1]); segment = Number(x[2]); }
+  else if (dash) { segment = Number(dash[1]); multiplier = Number(dash[2]); }
+  else return null;
+
+  if (segment === 0) return { segment: 0, multiplier: 0 };
+  if (segment === 50) return { segment: 25, multiplier: 2 };
+  if (segment === 25) return multiplier === 1 || multiplier === 2 ? { segment: 25, multiplier } : null;
+  if (segment < 1 || segment > 20 || multiplier < 1 || multiplier > 3) return null;
+  return { segment, multiplier };
+};
+
+/** Canonical bed id: "20-3", "25-1" (outer bull), "25-2" (bull). */
+export const bedKey = (segment: number, multiplier: number): string => `${segment}-${multiplier}`;
+
+/** Count stored under a key: a plain number or the legacy {x, y, count} object. */
+const countOf = (value: unknown): number => {
+  if (typeof value === 'number') return Number.isFinite(value) && value > 0 ? value : 0;
+  if (value && typeof value === 'object') {
+    const v = value as { count?: unknown; x?: unknown };
+    if (typeof v.count === 'number' && v.count > 0) return v.count;
+    if (Array.isArray(v.x)) return v.x.length;
+  }
+  return 0;
+};
+
+export interface BedAggregate {
+  /** Hits per canonical bed id; misses are not a bed. */
+  beds: Record<string, number>;
+  misses: number;
+  /** Darts that landed on the board. */
+  hits: number;
+  /** Every dart, misses included — the same basis for every data source. */
+  total: number;
+  /** Hits on the hottest bed. */
+  max: number;
+}
+
+export const aggregateBeds = (heatmapData: Pick<HeatmapData, 'segments' | 'totalDarts'>): BedAggregate => {
+  let raw: Record<string, unknown> = {};
+  const src = heatmapData.segments as unknown;
+  if (typeof src === 'string') {
+    try { raw = JSON.parse(src) ?? {}; } catch { raw = {}; }
+  } else if (src && typeof src === 'object') {
+    raw = src as Record<string, unknown>;
+  }
+
+  const beds: Record<string, number> = {};
+  let misses = 0;
+  let hits = 0;
+  for (const [key, value] of Object.entries(raw)) {
+    const parsed = normalizeHeatmapKey(key);
+    const count = countOf(value);
+    if (!parsed || count === 0) continue;
+    if (parsed.segment === 0) { misses += count; continue; }
+    const id = bedKey(parsed.segment, parsed.multiplier);
+    beds[id] = (beds[id] ?? 0) + count;
+    hits += count;
+  }
+  const max = Object.values(beds).reduce((m, c) => Math.max(m, c), 0);
+  // Older data may count darts that were never keyed; never report fewer darts than stored.
+  const total = Math.max(hits + misses, heatmapData.totalDarts || 0);
+  return { beds, misses, hits, total, max };
+};
+
+/**
+ * Colour step 0…HEAT_LEVELS for a bed. Square-root scale: a quarter of the
+ * hottest bed sits half-way up the ramp, so one dominant bed does not grey out
+ * everything else. Any hit gets at least step 1.
+ */
+export const heatLevel = (count: number, max: number): number => {
+  if (count <= 0 || max <= 0) return 0;
+  return Math.min(HEAT_LEVELS, Math.max(1, Math.ceil(Math.sqrt(count / max) * HEAT_LEVELS - 1e-9)));
+};
+
+/** Left and right neighbour of a number on the board (as seen by the thrower). */
+export const boardNeighbours = (segment: number): [number, number] => {
+  const i = BOARD_ORDER.indexOf(segment);
+  const n = BOARD_ORDER.length;
+  return [BOARD_ORDER[(i - 1 + n) % n], BOARD_ORDER[(i + 1) % n]];
+};
+
+export interface BoardStats {
+  tripleRate: number;
+  doubleRate: number;
+  singleRate: number;
+  bullRate: number;
+  innerBullRate: number;
+  missRate: number;
+  /** The strongest number (all its beds) and how many darts spilled to either side. */
+  zone: { segment: number; count: number; left: number; leftCount: number; right: number; rightCount: number } | null;
+}
+
+export const boardStats = (agg: BedAggregate): BoardStats => {
+  const pct = (n: number) => (agg.total > 0 ? (n / agg.total) * 100 : 0);
+  let triples = 0, doubles = 0, singles = 0;
+  const perNumber = new Map<number, number>();
+  for (const [id, count] of Object.entries(agg.beds)) {
+    const [segment, multiplier] = id.split('-').map(Number);
+    if (segment === 25) continue;
+    if (multiplier === 3) triples += count;
+    else if (multiplier === 2) doubles += count;
+    else singles += count;
+    perNumber.set(segment, (perNumber.get(segment) ?? 0) + count);
+  }
+  const outer = agg.beds['25-1'] ?? 0;
+  const bull = agg.beds['25-2'] ?? 0;
+
+  let zone: BoardStats['zone'] = null;
+  for (const segment of BOARD_ORDER) {
+    const count = perNumber.get(segment) ?? 0;
+    if (count > 0 && (!zone || count > zone.count)) {
+      const [left, right] = boardNeighbours(segment);
+      zone = { segment, count, left, leftCount: perNumber.get(left) ?? 0, right, rightCount: perNumber.get(right) ?? 0 };
+    }
+  }
+
+  return {
+    tripleRate: pct(triples),
+    doubleRate: pct(doubles),
+    singleRate: pct(singles),
+    bullRate: pct(outer + bull),
+    innerBullRate: pct(bull),
+    missRate: pct(agg.misses),
+    zone,
+  };
+};
+
+/**
+ * Heatmap of one player's darts in a list of visits (live game, match detail).
+ * Keys are canonical "<segment>-<multiplier>" and misses count, so the rates
+ * share the basis of the stored heatmap.
+ */
+export const heatmapFromThrows = (
+  throws: { playerId: string; darts?: Pick<Dart, 'segment' | 'multiplier'>[] }[],
+  playerId: string,
+): HeatmapData => {
+  const segments: Record<string, number> = {};
+  let totalDarts = 0;
+  for (const visit of throws) {
+    if (visit.playerId !== playerId) continue;
+    for (const dart of visit.darts ?? []) {
+      const key = bedKey(dart.segment, dart.multiplier);
+      segments[key] = (segments[key] ?? 0) + 1;
+      totalDarts++;
+    }
+  }
+  return { playerId, segments, totalDarts, lastUpdated: new Date() };
 };

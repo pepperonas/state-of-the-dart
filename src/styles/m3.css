@@ -47,6 +47,10 @@
   --m3-success: #7edb97;
   /* Rank colours, tuned for contrast on dark surfaces. */
   --m3-medal-gold: #f5c542;
+  /* Heatmap: one warm ramp, OKLCH lightness monotone. Dark mode runs dark→bright
+     (low counts recede into the surface), light mode the other way round. */
+  --m3-heat-1: #703324; --m3-heat-2: #924e2e; --m3-heat-3: #b46c37;
+  --m3-heat-4: #d48d40; --m3-heat-5: #f1b04b; --m3-heat-6: #ffd988;
   --m3-medal-silver: #c9ced6;
   --m3-medal-bronze: #e0955a;
   --m3-on-success: #00391d;
@@ -113,6 +117,8 @@
   --m3-success: #006d3c;
   /* …and on light surfaces. */
   --m3-medal-gold: #8a6100;
+  --m3-heat-1: #f3d2a4; --m3-heat-2: #e3b17d; --m3-heat-3: #d48f57;
+  --m3-heat-4: #c36d35; --m3-heat-5: #b14812; --m3-heat-6: #992400;
   --m3-medal-silver: #5c6470;
   --m3-medal-bronze: #8f4a14;
   --m3-on-success: #ffffff;

@@ -9,7 +9,8 @@ import { api } from '../../services/api';
 import LoadingIndicator from '../common/LoadingIndicator';
 
 const MatchChart = lazy(() => import('./MatchChart'));
-import { DartboardHeatmapBlur } from '../dartboard/DartboardHeatmapBlur';
+import { DartboardHeatmap } from '../dartboard/DartboardHeatmap';
+import { heatmapFromThrows } from '../../utils/heatmap';
 import PlayerAvatar from '../player/PlayerAvatar';
 import { BackButton, Card, Chip, TextField, IconButton, Button, Select } from '../common';
 import { staggerChild } from '../../utils/motion';
@@ -140,25 +141,6 @@ const MatchHistoryPage: React.FC = () => {
       data.push(point);
     }
     return data;
-  };
-
-  // Build heatmap from match throws
-  const buildMatchHeatmap = (detail: any, playerId: string): Record<string, number> => {
-    const segments: Record<string, number> = {};
-    const legs = detail.legs || [];
-    legs.forEach((leg: any) => {
-      (leg.throws || []).forEach((t: any) => {
-        if (t.playerId !== playerId) return;
-        (t.darts || []).forEach((d: any) => {
-          // Canonical order: "<segment>-<multiplier>" (matches heatmap.ts and
-          // DartboardHeatmapBlur.parseSegmentKey; multiplier-first collided with
-          // the persisted format and mislabelled segments 1–3).
-          const key = `${d.segment}-${d.multiplier}`;
-          segments[key] = (segments[key] || 0) + 1;
-        });
-      });
-    });
-    return segments;
   };
 
   const formatDuration = (match: Match) => {
@@ -413,21 +395,19 @@ const MatchHistoryPage: React.FC = () => {
                           {/* Per-player heatmaps */}
                           <div className={`grid gap-4 ${players.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-1'}`}>
                             {(detail.players || players).map((p: any) => {
-                              const segments = buildMatchHeatmap(detail, p.playerId);
-                              const totalDarts = Object.values(segments).reduce((s: number, v: any) => s + (v as number), 0);
-                              if (totalDarts === 0) return null;
+                              const heatmap = heatmapFromThrows((detail.legs || []).flatMap((leg: any) => leg.throws || []), p.playerId);
+                              if (heatmap.totalDarts === 0) return null;
                               return (
                                 <Card key={p.playerId} variant="filled" className="p-4">
                                   <h4 className="font-bold text-on-surface mb-3 m3-title-medium flex items-center gap-2">
                                     <Target size={16} className="text-primary" />
                                     {t('match_history.heatmap')} — {p.name}
                                   </h4>
-                                  <div className="flex justify-center">
-                                    <DartboardHeatmapBlur
-                                      heatmapData={{ playerId: p.playerId, segments, totalDarts, lastUpdated: new Date() }}
-                                      size={220}
-                                    />
-                                  </div>
+                                  <DartboardHeatmap
+                                    heatmapData={heatmap}
+                                    maxWidth={320}
+                                    compact
+                                  />
                                 </Card>
                               );
                             })}

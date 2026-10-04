@@ -7,6 +7,36 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.19.0] - 2026-10-04
+
+The heatmap shows the real beds of the board, coloured by share of hits.
+
+### Fixed
+
+- **Bull hits and misses were drawn on the 6.** The bed angle lookup did not know
+  25/50/0 and returned 0°, i.e. 3 o'clock.
+- The cloud was an invented scatter around a fixed point per bed: no throw
+  coordinates are ever recorded. Singles only ever showed in the outer single
+  area; the rings were out of proportion.
+- 500/600 px heatmaps were cut off on a phone; the canvas ignored the device
+  pixel ratio and looked blurry.
+- The live heatmap left out misses while the stored one counted them, so the
+  rates had different bases. The match history turned the bull into "D50".
+
+### Changed
+
+- New `DartboardHeatmap` (SVG, WDF proportions, `utils/boardGeometry.ts`)
+  replaces `DartboardHeatmapBlur`. One warm ramp as theme tokens
+  `--m3-heat-1…6`, square-root scale, misses as a chip beside the board.
+- Tap a bed for its details; the bed list underneath is the keyboard and
+  screen-reader path. "Cluster centre / scatter radius" (fiction without
+  coordinates) became the **favourite zone**: strongest number and its neighbours.
+- `utils/heatmap.ts`: `normalizeHeatmapKey` reads every key format,
+  `aggregateBeds`, `boardStats`, `heatLevel`, `heatmapFromThrows` (shared by the
+  live heatmap and the match history), translated `formatSegmentName`.
+- Tests: bed data, board geometry, component, and an E2E spec at phone and
+  desktop size; the heatmap view joined the contrast and axe sweeps.
+
 ## [0.18.0] - 2026-09-27
 
 The rest of the Material 3 Expressive list — and the game on a phone turned sideways.
