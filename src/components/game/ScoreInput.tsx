@@ -251,6 +251,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
           <button
             type="button"
             key={index}
+            data-testid={`dart-slot-${index}`}
             disabled={!currentThrow[index] || !onReplaceDart}
             aria-pressed={editingDartIndex === index}
             aria-label={currentThrow[index] ? t('game.edit_dart', { n: index + 1, score: currentThrow[index].score }) : t('game.empty_dart', { n: index + 1 })}

@@ -311,6 +311,12 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - Game screen below `lg`: `ScoreStrip` replaces the stacked `PlayerScore` cards and ScoreInput hides its own "remaining" header. `e2e/layout.spec.ts` asserts the confirm button and all scores are on screen at 390×844 and 1280×800. ⚠️ Locators like `getByText('501')` must add `.locator('visible=true')` — the strip exists (hidden) on desktop too.
 - ScoreInput has three modes (`numpad` / `darts` / `quick`, remembered in `sotd-input-mode`); the dart grid adds exact beds.
 
+### Game screen (0.20.0)
+- **Refresh safety:** the running X01 match lives in `state-of-the-dart-active-match`, the unconfirmed darts of the current visit in `state-of-the-dart-active-throw` (`{matchId, darts}`; both in `DEVICE_GAME_KEYS`). `LOAD_MATCH` takes `currentThrow`, validated by `utils/restoredThrow.ts`, ignored when a bot is up. ⚠️ The throw-save effect skips the first render (no match yet) — writing `[]` there would erase the darts before the restore lands. Pinned by `e2e/refresh.spec.ts`.
+- **Desktop columns:** from three players on, `leftPlayerCount = ceil(n/2)` cards sit left of the input, the rest right above the stats.
+- **Burning frame:** the active `PlayerScore` gets `.sotd-on-fire` (m3.css) plus `<FireCanvas />` (WebGL shader ported from nice-to-be-nice, 2D fallback). Only the active card mounts it; the context is released on unmount. Light theme blends `normal` (screen would wash it out); reduced motion → still frame, no canvas.
+- ⚠️ **GameScreen has three identical `{/* Leg/Match Toggle */}` markers** (history, charts, heatmap). A replace anchored on one of them deleted the history and chart sections in 0.19.0 — anchor on something unique. `e2e/refresh.spec.ts` opens all three sections.
+
 ### PWA (0.11.0)
 - The service worker is registered in `src/pwa/UpdatePrompt.tsx` (`registerType: 'prompt'`). A new version is offered as a snackbar and **never on a game route** (`utils/gameRoutes.ts`). Before 0.11.0 the built `sw.js` was never registered at all.
 - One manifest: the generated `manifest.webmanifest`. No orientation lock.
@@ -427,7 +433,8 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **25 tests** currently:
+- Specs in `e2e/`. **27 tests** currently:
+  - `refresh.spec.ts` — four players: desktop column split, refresh mid-visit keeps scores, turn and entered darts; history, charts and live heatmap sections render
   - `heatmap.spec.ts` — the statistics heatmap at phone and desktop size: no overflow, bulls in the centre, a tapped bed is named
   - `online.spec.ts` — two browsers play an online match to the end; a reload mid-leg keeps the seat; a leg won by the non-starter pins the throw-off rule; rematch
   - `tournament.spec.ts` — create a tournament in the UI, enter a leg, reload, resume, confirm, reload: nothing is lost

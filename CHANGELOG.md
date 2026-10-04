@@ -7,6 +7,33 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.20.0] - 2026-10-04
+
+The game screen: a refresh loses nothing, four players fit beside the input,
+and the player at the oche burns.
+
+### Fixed
+
+- **Throw history and throw charts were gone (regression in 0.19.0).** A text
+  replacement meant for the live heatmap's leg/match toggle hit the first of
+  three identical markers and deleted the visit history and the chart section
+  with it. Restored verbatim; `e2e/refresh.spec.ts` now opens all three
+  sections and checks the chart draws data points.
+- **A refresh mid-visit dropped the darts already entered.** Scores and turn
+  survived; the unconfirmed darts did not. They are now kept in
+  `state-of-the-dart-active-throw` (tied to the match id, validated on load,
+  dropped when a bot is up) and come back with the match.
+
+### Changed
+
+- Desktop game screen: from three players on, the cards split — the first half
+  left of the input, the rest right of it above the match statistics.
+- The active player's card burns: flickering glow, a border cycling orange →
+  rose → amber and WebGL flames along the bottom edge, ported from
+  nice-to-be-nice (`components/game/FireCanvas.tsx`, 2D fallback, one context
+  at a time and released on unmount, off under reduced motion — a still warm
+  frame remains).
+
 ## [0.19.0] - 2026-10-04
 
 The heatmap shows the real beds of the board, coloured by share of hits.

@@ -8,6 +8,7 @@ import { usePlayer } from '../../context/PlayerContext';
 import AnimatedNumber from '../common/AnimatedNumber';
 import IconButton from '../common/IconButton';
 import { springSpatialDefault } from '../../utils/motion';
+import FireCanvas from './FireCanvas';
 
 interface PlayerScoreProps {
   player: MatchPlayer;
@@ -50,12 +51,16 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
       // primary ring carry the distinction.
       animate={{ scale: isActive ? 1.03 : 1 }}
       transition={springSpatialDefault}
+      data-testid={`player-card-${player.name}`}
+      aria-current={isActive ? 'true' : undefined}
       className={`m3-card m3-elevated p-4 ${
         isActive
-          ? 'ring-4 ring-[var(--m3-primary)] bg-surface-container-high'
+          ? 'sotd-on-fire bg-surface-container-high'
           : 'bg-surface-container'
       }`}
     >
+      {/* The player at the oche burns (WebGL flames along the bottom edge). */}
+      {isActive && <FireCanvas />}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3 min-w-0">
           <PlayerAvatar avatar={fullPlayer?.avatar} name={player.name} size="md" />

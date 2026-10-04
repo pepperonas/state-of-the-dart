@@ -1282,7 +1282,26 @@ const GameScreen: React.FC = () => {
     return (state.currentMatch!.settings.startScore || 501) - scored;
   };
   const showSets = (state.currentMatch.settings.setsToWin || 1) > 1;
-  
+  // Desktop: from three players on, the cards split — the first half left of
+  // the input, the rest right of it above the stats. Four stacked cards ran
+  // far below the fold while the right column stood empty.
+  const playerCount = state.currentMatch.players.length;
+  const leftPlayerCount = playerCount <= 2 ? playerCount : Math.ceil(playerCount / 2);
+  const renderPlayerCard = (player: typeof state.currentMatch.players[number], index: number) => (
+    <PlayerScore
+      key={player.playerId}
+      player={player}
+      remaining={remainingOf(index)}
+      isActive={index === state.currentPlayerIndex}
+      average={player.matchAverage}
+      legsWon={player.legsWon}
+      setsWon={player.setsWon}
+      showSets={showSets}
+      onRemove={canRemovePlayers ? handleRequestRemovePlayer : undefined}
+      removeLabel={t('game.remove_player')}
+    />
+  );
+
   return (
     <div className="min-h-dvh p-4 md:p-6 phoneland:p-2 gradient-mesh overflow-x-hidden">
       <GameAnnouncer match={state.currentMatch} />
@@ -1341,20 +1360,7 @@ const GameScreen: React.FC = () => {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Players Section (desktop) */}
           <div className="hidden lg:block lg:col-span-1 space-y-4">
-            {state.currentMatch.players.map((player, index) => (
-              <PlayerScore
-                key={player.playerId}
-                player={player}
-                remaining={remainingOf(index)}
-                isActive={index === state.currentPlayerIndex}
-                average={player.matchAverage}
-                legsWon={player.legsWon}
-                setsWon={player.setsWon}
-                showSets={showSets}
-                onRemove={canRemovePlayers ? handleRequestRemovePlayer : undefined}
-                removeLabel={t('game.remove_player')}
-              />
-            ))}
+            {state.currentMatch.players.slice(0, leftPlayerCount).map((player, i) => renderPlayerCard(player, i))}
           </div>
           
           {/* Center Section - Input first, then optional Dartboard helper */}
@@ -1405,8 +1411,13 @@ const GameScreen: React.FC = () => {
             )}
           </div>
           
-          {/* Stats Section - Collapsible */}
-          <div className="lg:col-span-1">
+          {/* Right column: players 3+ (desktop), then the collapsible stats */}
+          <div className="lg:col-span-1 space-y-4">
+            {state.currentMatch.players.length > leftPlayerCount && (
+              <div className="hidden lg:block space-y-4">
+                {state.currentMatch.players.slice(leftPlayerCount).map((player, i) => renderPlayerCard(player, leftPlayerCount + i))}
+              </div>
+            )}
             {settings.showStatsDuringGame && (
               <div>
                 <button
@@ -1467,6 +1478,156 @@ const GameScreen: React.FC = () => {
           </button>
 
           {showThrowHistory && (
+            <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
+              {/* Leg/Match Toggle */}
+              <SegmentedButton<'leg' | 'match'>
+                className="mb-4"
+                label={t('game.stats_scope')}
+                value={statsView}
+                onChange={setStatsView}
+                options={[
+                  { value: 'leg', label: t('game.current_leg') },
+                  { value: 'match', label: t('game.whole_match') },
+                ]}
+              />
+              {state.currentMatch.players.map((player) => {
+                const allPlayerThrowsView = statsView === 'leg'
+                  ? currentLeg.throws.filter(t => t.playerId === player.playerId)
+                  : state.currentMatch!.legs.flatMap(l => l.throws.filter(t => t.playerId === player.playerId));
+                const playerThrows = allPlayerThrowsView;
+
+                return (
+                  <div key={player.playerId} className="mb-6 last:mb-0">
+                    <h4 className="text-on-surface font-bold mb-3 flex items-center gap-2">
+                      <span>{player.name}</span>
+                      <span className="text-sm text-on-surface-variant">
+                        {t('game_screen.visit_count', { count: playerThrows.length })}
+                      </span>
+                    </h4>
+
+                    {playerThrows.length === 0 ? (
+                      <p className="text-on-surface-variant text-sm italic">{t('game_screen.no_visits')}</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {playerThrows.map((throwData, index) => (
+                          <div
+                            key={throwData.id}
+                            className="bg-surface-container rounded-m3-lg p-3 border border-outline-variant"
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-on-surface-variant text-sm">
+                                {t('game_screen.visit_number', { n: index + 1 })}
+                              </span>
+                              <div className="flex items-center gap-3">
+                                {throwData.isBust && (
+                                  <span className="text-on-error-container text-xs font-bold bg-error-container px-2 py-1 rounded-m3-sm">
+                                    {t('game_screen.bust')}
+                                  </span>
+                                )}
+                                <span className={`font-bold text-lg ${
+                                  throwData.isBust
+                                    ? 'text-error line-through'
+                                    : throwData.score >= 140
+                                      ? 'text-tertiary'
+                                      : throwData.score >= 100
+                                        ? 'text-primary'
+                                        : 'text-on-surface'
+                                }`}>
+                                  {throwData.score}
+                                </span>
+                                <span className="text-on-surface-variant text-sm">
+                                  → {throwData.remaining}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex gap-2">
+                              {throwData.darts.map((dart, dartIndex) => (
+                                <div
+                                  key={dartIndex}
+                                  className={`flex-1 text-center py-2 rounded-m3-sm ${
+                                    dart.multiplier === 3
+                                      ? 'bg-success-container text-on-success-container'
+                                      : dart.multiplier === 2
+                                        ? 'bg-error-container text-on-error-container'
+                                        : dart.score === 0
+                                          ? 'bg-surface-container-highest text-on-surface-variant'
+                                          : 'bg-primary-container text-on-primary-container'
+                                  }`}
+                                >
+                                  <span className="text-xs font-semibold">
+                                    {dart.score === 0
+                                      ? t('game.miss')
+                                      : dart.multiplier === 3
+                                        ? `T${dart.segment}`
+                                        : dart.multiplier === 2
+                                          ? `D${dart.segment}`
+                                          : dart.segment
+                                    }
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Throw Chart - Collapsable */}
+        <div className="mt-6">
+          <button
+            onClick={() => setShowThrowChart(!showThrowChart)}
+            className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition"
+          >
+            <h3 className="m3-title-medium text-on-surface">{t('game_screen.throw_chart')}</h3>
+            <ChevronDown size={24} className={`m3-chevron ${showThrowChart ? 'm3-open' : ''}`} />
+          </button>
+
+          {showThrowChart && (() => {
+            const chartThrows = statsView === 'leg'
+              ? currentLeg.throws
+              : state.currentMatch.legs.flatMap(l => l.throws);
+            return (
+              <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
+                {/* Leg/Match Toggle */}
+                <SegmentedButton<'leg' | 'match'>
+                  className="mb-4"
+                  label={t('game.stats_scope')}
+                  value={statsView}
+                  onChange={setStatsView}
+                  options={[
+                    { value: 'leg', label: t('game.current_leg') },
+                    { value: 'match', label: t('game.whole_match') },
+                  ]}
+                />
+                <Suspense fallback={<div className="h-[600px] flex items-center justify-center"><LoadingIndicator /></div>}>
+                  <ThrowChart players={state.currentMatch.players} chartThrows={chartThrows} />
+                </Suspense>
+              </div>
+            );
+          })()}
+        </div>
+
+        {/* Live Heatmap - Collapsable */}
+        <div className="mt-6">
+          <button
+            onClick={() => setShowLiveHeatmap(!showLiveHeatmap)}
+            className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition"
+          >
+            <div className="flex items-center gap-3">
+              <Flame size={24} className="text-tertiary" aria-hidden="true" />
+              <h3 className="m3-title-medium text-on-surface">{t('game_screen.live_heatmap')}</h3>
+            </div>
+            <ChevronDown size={24} className={`m3-chevron ${showLiveHeatmap ? 'm3-open' : ''}`} />
+          </button>
+
+          {showLiveHeatmap && (
             <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
               {/* Leg/Match Toggle */}
               <SegmentedButton
