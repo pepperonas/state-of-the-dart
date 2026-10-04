@@ -92,11 +92,20 @@ export const calculateThrowScore = (darts: Dart[]): number => {
   return darts.reduce((sum, dart) => sum + dart.score, 0);
 };
 
+/**
+ * Darts a visit counts for statistics: three, except the checkout, which
+ * counts the darts actually used. The stored darts cannot be trusted for this
+ * — a total typed on the numpad is kept as "plausible" darts (60 = one T20),
+ * and counting those made a visit of 60 a 180 average.
+ */
+export const dartsInVisit = (t: Pick<Throw, 'darts' | 'remaining' | 'isBust'>): number =>
+  !t.isBust && t.remaining === 0 ? Math.min(3, Math.max(1, t.darts?.length ?? 0)) : 3;
+
 export const calculateAverage = (throws: Throw[]): number => {
   if (throws.length === 0) return 0;
   
   const totalScore = throws.reduce((sum, t) => sum + t.score, 0);
-  const totalDarts = throws.reduce((sum, t) => sum + t.darts.length, 0);
+  const totalDarts = throws.reduce((sum, t) => sum + dartsInVisit(t), 0);
   
   if (totalDarts === 0) return 0;
   
@@ -104,18 +113,15 @@ export const calculateAverage = (throws: Throw[]): number => {
 };
 
 export const calculateFirst9Average = (throws: Throw[]): number => {
+  // The first three visits (fewer if the leg was already checked out).
   let dartsCount = 0;
   let totalScore = 0;
-  
-  for (const throwData of throws) {
-    for (const dart of throwData.darts) {
-      if (dartsCount >= 9) break;
-      totalScore += dart.score;
-      dartsCount++;
-    }
-    if (dartsCount >= 9) break;
+
+  for (const throwData of throws.slice(0, 3)) {
+    totalScore += throwData.score;
+    dartsCount += dartsInVisit(throwData);
   }
-  
+
   if (dartsCount === 0) return 0;
   
   return Math.round((totalScore / dartsCount) * 3 * 100) / 100;
@@ -224,12 +230,12 @@ export const getScoreCategory = (score: number): string | null => {
 export const isNineDarter = (leg: Leg, startScore: number): boolean => {
   if (startScore !== 501) return false;
   
-  const totalDarts = leg.throws.reduce((sum, t) => sum + t.darts.length, 0);
+  const totalDarts = leg.throws.reduce((sum, t) => sum + dartsInVisit(t), 0);
   return totalDarts === 9 && leg.winner !== undefined;
 };
 
 export const calculateDartsForLeg = (leg: Leg): number => {
-  return leg.throws.reduce((sum, t) => sum + t.darts.length, 0);
+  return leg.throws.reduce((sum, t) => sum + dartsInVisit(t), 0);
 };
 
 export const getQuickScoreButtons = (): number[] => {

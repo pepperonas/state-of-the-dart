@@ -1,7 +1,7 @@
 import express, { Response } from 'express';
 import { getDatabase } from '../database';
 import { AuthRequest, authenticateTenant } from '../middleware/auth';
-import { upsertMatch, updateMatch } from '../services/matchStore';
+import { upsertMatch, updateMatch, currentLegState } from '../services/matchStore';
 
 const router = express.Router();
 
@@ -78,6 +78,12 @@ router.get('/', authenticateTenant, (req: AuthRequest, res: Response) => {
         setsWon: mp.sets_won || 0,
       }));
 
+      const settings = JSON.parse(match.settings);
+      // Paused / running matches carry where they stand (resume list).
+      const current = match.status === 'completed' ? undefined : currentLegState(
+        db, match.id, Number(settings?.startScore) || 501, players.map(p => p.playerId),
+      );
+
       return {
         id: match.id,
         type: match.game_type,
@@ -85,8 +91,9 @@ router.get('/', authenticateTenant, (req: AuthRequest, res: Response) => {
         winner: match.winner,
         startedAt: match.started_at,
         completedAt: match.completed_at,
-        settings: JSON.parse(match.settings),
-        players,
+        settings,
+        players: current ? players.map(p => ({ ...p, remaining: current.remaining[p.playerId] })) : players,
+        ...(current ? { currentLeg: current.legNumber, legVisits: current.visits, totalVisits: current.totalVisits } : {}),
       };
     });
 

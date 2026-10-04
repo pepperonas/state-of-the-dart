@@ -55,8 +55,20 @@ test('start, score, pause & leave without a reload, then resume', async ({ page 
   await expect(page).toHaveURL(/\/$/);
   expect(await page.evaluate(() => (window as unknown as { __noReload?: boolean }).__noReload)).toBe(true);
 
-  // Resume from the database.
+  // Resume from the database. The card shows the standings as a table.
   await page.goto('/resume');
+  const aliceRow = page.getByTestId(`resume-row-${alice}`).first();
+  await expect(aliceRow).toContainText('441');
+  // A numpad 60 is a 60 average (it was shown as 180: one stored dart × 3).
+  await expect(aliceRow).toContainText('60.0');
+  await expect(aliceRow).not.toContainText('180.0');
+  await expect(page.getByTestId(`resume-row-${bob}`).first()).toContainText('501');
+  if (process.env.SHOT_DIR) {
+    await page.screenshot({ path: `${process.env.SHOT_DIR}/resume-desktop.png` });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.screenshot({ path: `${process.env.SHOT_DIR}/resume-phone.png` });
+    await page.setViewportSize({ width: 1280, height: 720 });
+  }
   await page.getByText(new RegExp(alice)).first().click();
   const resume = page.getByRole('button', { name: /Fortsetzen/i }).first();
   if (await resume.isVisible()) await resume.click();

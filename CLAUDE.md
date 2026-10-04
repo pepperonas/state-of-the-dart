@@ -361,6 +361,12 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 ### One source for visit evaluation (`src/utils/visit.ts`)
 `evaluateVisit(rules, legThrows, playerId, darts)` returns previous/new remaining, counted score, bust and checkout — including **double-in** (nothing counts before the first double). The reducer, every GameScreen auto-confirm path and the bot use it. Do not reintroduce a hand-written `remaining - score` check anywhere; six copies drifted apart before, and double-in could not be implemented at all.
 
+### Darts per visit (0.23.0)
+`dartsInVisit(t)` (`utils/scoring.ts`) is the only way to count darts for statistics: 3 per visit, the darts actually used for a checkout (`remaining === 0`, not a bust). ⚠️ Never sum `t.darts.length` for averages or darts-per-leg — numpad totals are stored as "plausible" darts (60 = one T20), which made a 60 a 180 average. Pattern checks on individual darts (e.g. "three misses") may still read `darts`.
+
+### Resume list (0.23.0)
+`GET /api/matches` adds `players[].remaining`, `currentLeg`, `totalVisits` for unfinished matches (`currentLegState`: last visit's `remaining` per player in the highest `leg_number`; busts keep it). `ResumeScoreTable` renders them; `legLeaderFromRemaining` marks the leader.
+
 ### Undo
 `UNDO_THROW` takes back the last visit **across leg and set boundaries** and out of a match won by a checkout. `legsWon` resets every set, so it is recomputed by **replaying the legs** (`replaySets`), never by counting leg winners over the whole match. `{ payload: { skipBots: true } }` (used by the human undo button) steps over bot visits — otherwise the bot would re-commit its own restored darts. `UNDO_END_MATCH` on a checkout-won match delegates to the same undo.
 
