@@ -824,3 +824,15 @@ button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surfa
   .sotd-on-fire { animation: none; box-shadow: 0 0 28px rgba(249, 115, 22, 0.45); }
   .sotd-fire-canvas { display: none; }
 }
+
+/* A leg just won: one soft tertiary glow on the legs tile (the spring scale
+   comes from framer-motion). Off under reduced motion — the tint stays. */
+@keyframes sotd-leg-won {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--m3-tertiary) 55%, transparent); }
+  40%  { box-shadow: 0 0 0 6px color-mix(in srgb, var(--m3-tertiary) 25%, transparent), 0 0 18px color-mix(in srgb, var(--m3-tertiary) 35%, transparent); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+.sotd-leg-won { animation: sotd-leg-won 1.4s var(--m3-easing-standard) 1; }
+@media (prefers-reduced-motion: reduce) {
+  .sotd-leg-won { animation: none; }
+}

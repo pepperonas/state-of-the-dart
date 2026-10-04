@@ -7,6 +7,19 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-10-05
+
+### Changed
+
+- The glowing board on a player card now marks the **leader of the current
+  leg** (lowest remaining score after confirmed visits; nobody while it is
+  shared, e.g. at the start of a leg) instead of the player at the oche — the
+  burning frame already shows whose turn it is. `utils/legLeader.ts`, with an
+  accessible label.
+- Won legs: the legs tile turns tertiary with one filled trophy per leg, and
+  springs once with a soft glow when a leg is won during play (not on mount,
+  resume or undo). Reduced motion keeps the tint, drops the glow.
+
 ## [0.21.0] - 2026-10-05
 
 Achievements during a game, and checkouts typed on the numpad.

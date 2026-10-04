@@ -14,6 +14,7 @@ import Dartboard from '../dartboard/Dartboard';
 import { DartboardHeatmap } from '../dartboard/DartboardHeatmap';
 import { heatmapFromThrows } from '../../utils/heatmap';
 import { setCelebrationMoment } from '../../utils/celebrationMoment';
+import { legLeaderId } from '../../utils/legLeader';
 import ScoreInput from './ScoreInput';
 import GameAnnouncer from './GameAnnouncer';
 import PlayerScore from './PlayerScore';
@@ -1295,12 +1296,20 @@ const GameScreen: React.FC = () => {
   // far below the fold while the right column stood empty.
   const playerCount = state.currentMatch.players.length;
   const leftPlayerCount = playerCount <= 2 ? playerCount : Math.ceil(playerCount / 2);
+  // The glowing board marks who leads this leg (confirmed visits only, so it
+  // does not flicker while darts are being entered).
+  const legLeader = legLeaderId(
+    state.currentMatch.players.map(p => p.playerId),
+    currentLeg.throws,
+    state.currentMatch.settings.startScore || 501,
+  );
   const renderPlayerCard = (player: typeof state.currentMatch.players[number], index: number) => (
     <PlayerScore
       key={player.playerId}
       player={player}
       remaining={remainingOf(index)}
       isActive={index === state.currentPlayerIndex}
+      isLegLeader={player.playerId === legLeader}
       average={player.matchAverage}
       legsWon={player.legsWon}
       setsWon={player.setsWon}

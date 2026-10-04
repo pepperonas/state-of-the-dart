@@ -1730,7 +1730,8 @@
   },
   "player_score": {
     "remove": "Spieler entfernen",
-    "highest": "High"
+    "highest": "High",
+    "leg_leader": "Führt im Leg"
   },
   "dartboard": {
     "label": "Interaktive Dartscheibe"

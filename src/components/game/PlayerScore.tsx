@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Trophy, Target, UserMinus } from 'lucide-react';
 import { MatchPlayer } from '../../types/index';
@@ -14,6 +14,8 @@ interface PlayerScoreProps {
   player: MatchPlayer;
   remaining: number;
   isActive: boolean;
+  /** Lowest remaining score in the current leg (the glowing board marks it). */
+  isLegLeader?: boolean;
   average: number;
   legsWon: number;
   setsWon: number;
@@ -29,6 +31,7 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
   player,
   remaining,
   isActive,
+  isLegLeader = false,
   average,
   legsWon,
   setsWon,
@@ -38,6 +41,16 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
 }) => {
   const { t } = useTranslation();
   const { players } = usePlayer();
+
+  // A leg just won: the legs tile springs once and glows. Counted from the
+  // previous render (state adjusted during render), so mounting or resuming
+  // a match does not replay it.
+  const [seenLegs, setSeenLegs] = useState(legsWon);
+  const [legPulse, setLegPulse] = useState(0);
+  if (legsWon !== seenLegs) {
+    if (legsWon > seenLegs) setLegPulse(n => n + 1);
+    setSeenLegs(legsWon);
+  }
   
   // Get full player data to access avatar
   const fullPlayer = useMemo(() => {
@@ -69,8 +82,16 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
           </h3>
         </div>
         <div className="flex items-center gap-1 shrink-0">
-          {isActive && (
-            <Target className="text-primary animate-pulse" size={24} />
+          {isLegLeader && (
+            <span
+              role="img"
+              aria-label={t('player_score.leg_leader')}
+              title={t('player_score.leg_leader')}
+              data-testid="leg-leader"
+              className="inline-flex text-primary motion-safe:animate-pulse"
+            >
+              <Target size={24} aria-hidden="true" />
+            </span>
           )}
           {onRemove && (
             <IconButton
@@ -97,13 +118,26 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
           <div className="font-semibold text-on-surface">{average.toFixed(2)}</div>
         </div>
 
-        <div className="bg-surface-container-highest rounded-m3-sm p-2">
-          <div className="text-on-surface-variant m3-label-medium">{t('game.legs')}</div>
-          <div className="font-semibold text-on-surface flex items-center gap-1">
+        <motion.div
+          key={legPulse}
+          data-testid="legs-tile"
+          data-won={legsWon > 0 ? 'true' : undefined}
+          data-pulse={legPulse}
+          initial={legPulse > 0 ? { scale: 1.1 } : false}
+          animate={{ scale: 1 }}
+          transition={springSpatialDefault}
+          className={`rounded-m3-sm p-2 ${legsWon > 0 ? 'bg-tertiary-container' : 'bg-surface-container-highest'} ${legPulse > 0 ? 'sotd-leg-won' : ''}`}
+        >
+          <div className={`m3-label-medium ${legsWon > 0 ? 'text-on-tertiary-container' : 'text-on-surface-variant'}`}>{t('game.legs')}</div>
+          <div className={`font-semibold flex items-center gap-1 ${legsWon > 0 ? 'text-on-tertiary-container' : 'text-on-surface'}`}>
             {legsWon}
-            <Trophy size={14} className="text-tertiary" />
+            {legsWon > 0
+              ? Array.from({ length: Math.min(legsWon, 5) }, (_, i) => (
+                  <Trophy key={i} size={14} fill="currentColor" aria-hidden="true" />
+                ))
+              : <Trophy size={14} className="text-tertiary" aria-hidden="true" />}
           </div>
-        </div>
+        </motion.div>
 
         {showSets && (
           <div className="bg-surface-container-highest rounded-m3-sm p-2">

@@ -1730,7 +1730,8 @@
   },
   "player_score": {
     "remove": "Remove player",
-    "highest": "High"
+    "highest": "High",
+    "leg_leader": "Leads this leg"
   },
   "dartboard": {
     "label": "Interactive dartboard"
