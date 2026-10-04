@@ -13,6 +13,7 @@ import { useAchievementHints } from '../../hooks/useAchievementHints';
 import Dartboard from '../dartboard/Dartboard';
 import { DartboardHeatmap } from '../dartboard/DartboardHeatmap';
 import { heatmapFromThrows } from '../../utils/heatmap';
+import { setCelebrationMoment } from '../../utils/celebrationMoment';
 import ScoreInput from './ScoreInput';
 import GameAnnouncer from './GameAnnouncer';
 import PlayerScore from './PlayerScore';
@@ -169,6 +170,13 @@ const GameScreen: React.FC = () => {
     const timer = setTimeout(() => setLegWonAnimation(null), 5000);
     return () => clearTimeout(timer);
   }, [state.currentMatch?.currentLegIndex, state.currentMatch?.id]);
+
+  // End of a leg or match: achievements unlocked now go centre stage.
+  const celebrating = !!legWonAnimation?.show || (state.currentMatch?.status === 'completed' && !!state.currentMatch?.winner);
+  useEffect(() => {
+    setCelebrationMoment(celebrating);
+  }, [celebrating]);
+  useEffect(() => () => setCelebrationMoment(false), []);
 
   // Check achievements when match is completed (only once per match)
   useEffect(() => {
@@ -1376,6 +1384,7 @@ const GameScreen: React.FC = () => {
               onSetEditingDartIndex={setEditingDartIndex}
               isEditingThrow={isEditingThrow}
               remaining={remaining}
+              doubleOut={state.currentMatch.settings.doubleOut ?? true}
               isCheckout={isEarlyCheckout}
               onUndoThrow={handleUndoThrow}
               lastThrow={lastThrowInfo}

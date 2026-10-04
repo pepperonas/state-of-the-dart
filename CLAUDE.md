@@ -317,6 +317,14 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - **Burning frame:** the active `PlayerScore` gets `.sotd-on-fire` (m3.css) plus `<FireCanvas />` (WebGL shader ported from nice-to-be-nice, 2D fallback). Only the active card mounts it; the context is released on unmount. Light theme blends `normal` (screen would wash it out); reduced motion → still frame, no canvas.
 - ⚠️ **GameScreen has three identical `{/* Leg/Match Toggle */}` markers** (history, charts, heatmap). A replace anchored on one of them deleted the history and chart sections in 0.19.0 — anchor on something unique. `e2e/refresh.spec.ts` opens all three sections.
 
+### Achievements in a game (0.21.0)
+- `AchievementNotification` (mounted once in App) has two placements: **top** toast, and **center** stage. On game routes (`isGameRoute`) a `pointerdown` outside the stack (capture phase, not swallowed) dismisses all — but only in top placement.
+- **Center** = the game screen's `celebrating` (leg-won overlay or completed match) published through `utils/celebrationMoment.ts`. Once centred, a batch stays centred until it is empty (latched by state adjusted during render, not an effect — `react-hooks/set-state-in-effect`). No outside close; "Continue" dismisses all.
+- ⚠️ Achievements of one visit arrive one after another; a test that taps outside immediately sees the late ones reappear (correctly). Wait for them to land first.
+
+### Numpad checkout (0.21.0)
+- `numpadDarts(score, remaining, dartsLeft, doubleOut)`: a total equal to the remaining score under double-out becomes the checkout-table route (`routeToDarts` reads `T20/D12/S5/7/Bull/25`). Everything else still goes through `convertScoreToDarts`. Before, numpad checkouts busted (greedy darts rarely end on a double).
+
 ### PWA (0.11.0)
 - The service worker is registered in `src/pwa/UpdatePrompt.tsx` (`registerType: 'prompt'`). A new version is offered as a snackbar and **never on a game route** (`utils/gameRoutes.ts`). Before 0.11.0 the built `sw.js` was never registered at all.
 - One manifest: the generated `manifest.webmanifest`. No orientation lock.
@@ -433,7 +441,8 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **27 tests** currently:
+- Specs in `e2e/`. **28 tests** currently:
+  - `achievements-flow.spec.ts` — mid-leg toast closes on an outside tap; a numpad 141 checkout ends the leg; achievements go centre stage and stay until "Weiter"
   - `refresh.spec.ts` — four players: desktop column split, refresh mid-visit keeps scores, turn and entered darts; history, charts and live heatmap sections render
   - `heatmap.spec.ts` — the statistics heatmap at phone and desktop size: no overflow, bulls in the centre, a tapped bed is named
   - `online.spec.ts` — two browsers play an online match to the end; a reload mid-leg keeps the seat; a leg won by the non-starter pins the throw-off rule; rematch

@@ -108,3 +108,14 @@ describe('ScoreInput dart grid', () => {
       .toEqual([[50, 2], [25, 1], [0, 0]]);
   });
 });
+
+describe('ScoreInput numpad checkout', () => {
+  it('typing the remaining score enters a checkout route that ends on a double', () => {
+    const onAddDart = vi.fn();
+    setup({ currentThrow: [], remaining: 141, doubleOut: true, onAddDart });
+    for (const k of ['1', '4', '1', 'Enter']) fireEvent.keyDown(window, { key: k });
+    const darts = onAddDart.mock.calls.map((c: unknown[]) => c[0] as Dart);
+    expect(darts.reduce((s, d) => s + d.score, 0)).toBe(141);
+    expect(darts[darts.length - 1].multiplier).toBe(2);
+  });
+});

@@ -1,4 +1,5 @@
 import { Dart, Throw, Leg, Match, MatchPlayer } from '../types/index';
+import { getCheckoutSuggestion } from '../data/checkoutTable';
 
 export const calculateDartScore = (segment: number, multiplier: 0 | 1 | 2 | 3): number => {
   if (multiplier === 0) return 0; // miss
@@ -476,4 +477,37 @@ export const getBogeyNumbers = (): number[] => {
 export const isBogeyNumber = (score: number): boolean => {
   const bogeyNumbers = [169, 168, 166, 165, 163, 162, 159];
   return bogeyNumbers.includes(score);
+};
+/** One token of a checkout route ('T20', 'D12', 'S5', '7', 'Bull', '25') as a dart. */
+const tokenToDart = (token: string): Dart | null => {
+  if (token === 'Bull' || token === 'DB') return { segment: 50, multiplier: 2, score: 50, bed: 'bull' };
+  if (token === '25' || token === 'SB') return { segment: 25, multiplier: 1, score: 25, bed: 'outer-bull' };
+  const m = /^([SDT]?)(\d{1,2})$/.exec(token);
+  if (!m) return null;
+  const segment = Number(m[2]);
+  if (segment < 1 || segment > 20) return null;
+  const multiplier = (m[1] === 'T' ? 3 : m[1] === 'D' ? 2 : 1) as 1 | 2 | 3;
+  return { segment, multiplier, score: segment * multiplier, bed: multiplier === 3 ? 'triple' : multiplier === 2 ? 'double' : 'single' };
+};
+
+/** A checkout route from the table as darts, or null if a token is unknown. */
+export const routeToDarts = (route: string[]): Dart[] | null => {
+  const darts = route.map(tokenToDart);
+  if (darts.some(d => d === null)) return null;
+  return (darts as Dart[]).map(d => ({ ...d, ...generateDartCoordinates(d.segment === 50 ? 25 : d.segment, d.multiplier) }));
+};
+
+/**
+ * Darts for a total typed on the numpad. When the total is exactly what is
+ * left, it is a checkout: under double-out the darts follow the checkout
+ * table, so the last one is a double. The plain reconstruction (T20 first)
+ * would not end on a double and turned every such checkout into a bust.
+ */
+export const numpadDarts = (score: number, remaining: number, dartsLeft: number, doubleOut: boolean): Dart[] => {
+  if (doubleOut && score === remaining && score > 1 && score <= 170) {
+    const route = getCheckoutSuggestion(score, dartsLeft, true);
+    const darts = route ? routeToDarts(route) : null;
+    if (darts && calculateThrowScore(darts) === score) return darts;
+  }
+  return convertScoreToDarts(score);
 };

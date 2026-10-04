@@ -7,6 +7,28 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-10-05
+
+Achievements during a game, and checkouts typed on the numpad.
+
+### Fixed
+
+- **A checkout typed on the numpad was a bust under double-out.** The total
+  was turned into "plausible" darts (T20 first), which rarely end on a double —
+  141 at 141 busted. A total equal to the remaining score now follows the
+  checkout table (`numpadDarts`, `routeToDarts` in `utils/scoring.ts`); every
+  finish 2–170 except the bogey numbers is pinned. Found while testing the
+  achievement flow, which then showed "180 and then bust".
+
+### Changed
+
+- Achievement notifications in a game: mid-leg they stay a toast at the top
+  and a tap anywhere else closes them (the tap still reaches the button under
+  it). At the end of a leg or match they go centre stage over a scrim, larger,
+  in two columns from three on, do not close on an outside tap and stay until
+  "Continue" — even after the leg overlay underneath has gone. Signalled by
+  the game screen through `utils/celebrationMoment.ts`.
+
 ## [0.20.0] - 2026-10-04
 
 The game screen: a refresh loses nothing, four players fit beside the input,

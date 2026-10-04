@@ -1768,7 +1768,9 @@
     "unlocked_count_one": "{{count}}/{{total}} Achievements",
     "unlocked_count_other": "{{count}}/{{total}} Achievements",
     "close_all_one": "Alle schließen ({{count}})",
-    "close_all_other": "Alle schließen ({{count}})"
+    "close_all_other": "Alle schließen ({{count}})",
+    "continue": "Weiter",
+    "stage_label": "Neue Achievements"
   },
   "score_input": {
     "total": "Total",

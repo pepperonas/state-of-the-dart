@@ -1768,7 +1768,9 @@
     "unlocked_count_one": "{{count}}/{{total}} achievements",
     "unlocked_count_other": "{{count}}/{{total}} achievements",
     "close_all_one": "Dismiss all ({{count}})",
-    "close_all_other": "Dismiss all ({{count}})"
+    "close_all_other": "Dismiss all ({{count}})",
+    "continue": "Continue",
+    "stage_label": "New achievements"
   },
   "score_input": {
     "total": "Total",

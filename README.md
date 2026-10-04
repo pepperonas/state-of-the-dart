@@ -11,7 +11,7 @@
 <!-- Links -->
 [![Live Demo](https://img.shields.io/badge/Live_Demo-stateofthedart.com-22c55e?style=for-the-badge&logo=googlechrome&logoColor=white)](https://stateofthedart.com)
 [![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-a855f7?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://stateofthedart.celox.io)
-[![Version](https://img.shields.io/badge/Version-0.20.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-0.21.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
 
 <!-- Build & Repo (live) -->
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
@@ -46,8 +46,8 @@
 <!-- Qualität -->
 ![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?logo=playwright&logoColor=white)
-![Unit Tests](https://img.shields.io/badge/Unit_Tests-982-brightgreen)
-![E2E Tests](https://img.shields.io/badge/E2E_Tests-27-brightgreen)
+![Unit Tests](https://img.shields.io/badge/Unit_Tests-995-brightgreen)
+![E2E Tests](https://img.shields.io/badge/E2E_Tests-28-brightgreen)
 ![Coverage](https://img.shields.io/badge/Coverage-24%25_stmts_%7C_75%25_branches-yellow)
 ![ESLint](https://img.shields.io/badge/ESLint-configured-4B32C3?logo=eslint&logoColor=white)
 
@@ -793,6 +793,12 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.21.0 (5. Oktober 2026) - Achievements im Spiel, Checkout per Numpad
+
+**⚠️ Behoben:** Ein Checkout per Numpad (Rest eintippen, Enter) war mit Double-Out ein Bust — die Summe wurde in „plausible“ Darts zerlegt (T20 zuerst), die selten auf einem Double enden; 141 bei Rest 141 bustete. Jetzt folgt eine Eingabe, die genau den Rest trifft, dem Weg aus der Checkout-Tabelle (jedes Finish 2–170 außer den Bogey-Zahlen ist per Test gepinnt).
+
+**Neu:** Achievements während eines Legs bleiben oben eingeblendet und schließen sich mit einem Tipp daneben (der Tipp wirkt trotzdem, z. B. auf das Numpad). Am Ende eines Legs oder Matches erscheinen sie groß in der Bildschirmmitte über abgedunkeltem Hintergrund — ab drei zweispaltig —, schließen sich nicht beim Tippen daneben und bleiben, bis „Weiter“ gedrückt wird.
 
 ### v0.20.0 (4. Oktober 2026) - Neuladen ohne Verlust, brennender Rahmen
 
