@@ -44,8 +44,10 @@ describe('toApiMatch', () => {
   it('sends the per-player totals the server stores', () => {
     const p = toApiMatch(match()).players[0];
     expect(p.highestScore).toBe(180);
-    expect(p.dartsThrown).toBe(4);
-    expect(p.first9Average).toBe(180);
+    // 180 + a numpad 60 (stored as one T20): two visits = 6 darts, first-9 (180+60)/6*3.
+    // Counting stored darts said 4 and 180 — the numpad made a 60 look like a 180.
+    expect(p.dartsThrown).toBe(6);
+    expect(p.first9Average).toBe(120);
   });
 
   it('turns every timestamp into epoch ms', () => {

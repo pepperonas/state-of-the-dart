@@ -1,5 +1,5 @@
 import { Match, Throw } from '../types/index';
-import { calculateFirst9Average } from './scoring';
+import { calculateFirst9Average, dartsInVisit } from './scoring';
 
 const toMs = (value: Date | string | number | undefined | null): number | null => {
   if (value === undefined || value === null) return null;
@@ -17,7 +17,7 @@ const first9Of = (match: Match, playerId: string): number => {
   return Math.round((perLeg.reduce((a, b) => a + b, 0) / perLeg.length) * 100) / 100;
 };
 
-const dartsOf = (throws: Throw[]): number => throws.reduce((sum, t) => sum + (t.darts?.length ?? 0), 0);
+const dartsOf = (throws: Throw[]): number => throws.reduce((sum, t) => sum + dartsInVisit(t), 0);
 
 /**
  * The match as the API stores it.

@@ -174,13 +174,15 @@ describe('averages', () => {
    */
   it('divides by darts thrown, not by turns', () => {
     const full = t(60);                                    // 3 darts, 60
-    const checkout = { darts: [d(20, 2)], score: 40, isBust: false } as Throw; // 1 dart, 40
+    const checkout = { darts: [d(20, 2)], score: 40, remaining: 0, isBust: false } as Throw; // 1-dart checkout, 40
     // 100 points off 4 darts = 25 per dart = 75 per three darts.
     expect(calculateAverage([full, checkout])).toBeCloseTo(75, 2);
   });
 
-  it('is zero when the turns contain no darts at all', () => {
-    expect(calculateAverage([{ darts: [], score: 60, isBust: false } as unknown as Throw])).toBe(0);
+  it('counts an ordinary visit as three darts, however many were stored', () => {
+    // A numpad total is stored as "plausible" darts — 60 is one T20.
+    expect(calculateAverage([{ darts: [d(20, 3)], score: 60, remaining: 441, isBust: false } as unknown as Throw])).toBe(60);
+    expect(calculateAverage([{ darts: [], score: 60, remaining: 441, isBust: false } as unknown as Throw])).toBe(60);
   });
 });
 
@@ -286,8 +288,10 @@ describe('calculateDartsForLeg', () => {
     expect(calculateDartsForLeg({ throws: [] } as never)).toBe(0);
   });
 
-  it('counts every dart actually thrown', () => {
-    const leg = { throws: [{ darts: [d(20, 3), d(20, 3), d(20, 3)] }, { darts: [d(20, 2)] }] };
+  it('counts three per visit and the darts used for the checkout', () => {
+    const leg = { throws: [{ darts: [d(20, 3), d(20, 3), d(20, 3)], remaining: 40 }, { darts: [d(20, 2)], remaining: 0 }] };
     expect(calculateDartsForLeg(leg as never)).toBe(4);
+    const unfinished = { throws: [{ darts: [d(20, 3)], remaining: 441 }, { darts: [d(20, 2)], remaining: 401 }] };
+    expect(calculateDartsForLeg(unfinished as never)).toBe(6);
   });
 });

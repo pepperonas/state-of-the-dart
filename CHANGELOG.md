@@ -7,6 +7,31 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.23.0] - 2026-10-05
+
+### Fixed
+
+- **Averages counted stored darts, not visits.** A total typed on the numpad
+  is stored as "plausible" darts — 60 is one T20 — so a visit of 60 showed a
+  180 average; darts thrown, first-9, darts per leg, the nine-darter check and
+  three darts-per-leg achievements were skewed the same way (fewer darts could
+  even unlock them). `dartsInVisit()` now counts three per visit and the darts
+  actually used for a checkout. Averages already stored for past matches keep
+  their old value.
+
+### Changed
+
+- Resume screen: each paused match shows its standings as a table — player,
+  legs won, remaining score in the current leg, average — with the leg leader
+  marked, plus current leg and "best of" in the meta line. Matches started and
+  left without a single dart say so. `GET /api/matches` returns `remaining`
+  per player and `currentLeg`/`totalVisits` for unfinished matches
+  (`currentLegState` in `services/matchStore.ts`).
+
+Checked against production: every paused match's stored legs won equals the
+leg winners in the legs table — the many 0 : 0 are real (no leg finished yet,
+several matches have no dart at all).
+
 ## [0.22.0] - 2026-10-05
 
 ### Changed

@@ -231,3 +231,26 @@ export const updateMatch = (db: Db, tenantId: string, id: string, body: Json): b
 
   return true;
 };
+
+/**
+ * Where a paused match stands, for the resume list: the latest leg's number,
+ * each player's remaining score in it (the `remaining` of their last visit —
+ * busts keep it unchanged), the visits in that leg and in the whole match.
+ */
+export const currentLegState = (db: Db, matchId: string, startScore: number, playerIds: string[]) => {
+  const leg = db.prepare('SELECT id, leg_number FROM legs WHERE match_id = ? ORDER BY leg_number DESC LIMIT 1')
+    .get(matchId) as { id: string; leg_number: number } | undefined;
+  const remaining: Record<string, number> = Object.fromEntries(playerIds.map(id => [id, startScore]));
+  let visits = 0;
+  if (leg) {
+    const rows = db.prepare('SELECT player_id, remaining FROM throws WHERE leg_id = ? ORDER BY visit_number, timestamp')
+      .all(leg.id) as { player_id: string; remaining: number }[];
+    for (const r of rows) {
+      if (r.player_id in remaining) remaining[r.player_id] = r.remaining;
+    }
+    visits = rows.length;
+  }
+  const total = db.prepare('SELECT count(*) AS n FROM throws t JOIN legs l ON t.leg_id = l.id WHERE l.match_id = ?')
+    .get(matchId) as { n: number };
+  return { legNumber: leg?.leg_number ?? 1, remaining, visits, totalVisits: total.n };
+};

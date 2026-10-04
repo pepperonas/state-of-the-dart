@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createRequire } from 'module';
 import { schema } from '../../../server/src/database/schema';
-import { toEpochMs, upsertMatch, updateMatch } from '../../../server/src/services/matchStore';
+import { toEpochMs, upsertMatch, updateMatch, currentLegState } from '../../../server/src/services/matchStore';
 
 /** The real schema on a real in-memory SQLite — the value is all in the SQL. */
 const require_ = createRequire(import.meta.url);
@@ -150,5 +150,30 @@ describe('updateMatch', () => {
     upsertMatch(db, 'tenant', finishedMatch({ id: 'm2', legs: [] }));
     updateMatch(db, 'tenant', 'm2', { legs: [{ id: 'l1', winner: 'bob', startedAt: T0, throws: [] }] });
     expect(db.prepare('SELECT match_id, winner FROM legs WHERE id = ?').get('l1')).toEqual({ match_id: 'm1', winner: 'alice' });
+  });
+});
+
+describe('currentLegState — the resume list shows where a paused match stands', () => {
+  const paused = (legs: unknown[]) => ({ ...finishedMatch({ status: 'paused', winner: null, completedAt: null, legs }), settings: { startScore: 301, legsToWin: 2 } });
+  const t = (id: string, playerId: string, score: number, remaining: number, visitNumber: number, isBust = false) =>
+    ({ id, playerId, darts: [], score, remaining, isBust, timestamp: iso(T0 + visitNumber * 1000), visitNumber });
+
+  it('reads the remaining score of each player in the latest leg', () => {
+    upsertMatch(db, 'tenant', paused([
+      { id: 'l1', winner: 'alice', startedAt: iso(T0), throws: [t('a1', 'alice', 301, 0, 1)] },
+      { id: 'l2', startedAt: iso(T0 + 5000), throws: [t('b1', 'bob', 60, 241, 1), t('a2', 'alice', 100, 201, 2), t('b2', 'bob', 0, 241, 3, true)] },
+    ]));
+    const s = currentLegState(db, 'm1', 301, ['alice', 'bob']);
+    expect(s).toEqual({ legNumber: 2, remaining: { alice: 201, bob: 241 }, visits: 3, totalVisits: 4 });
+  });
+
+  it('starts everyone at the start score when nothing was thrown', () => {
+    upsertMatch(db, 'tenant', paused([{ id: 'l1', startedAt: iso(T0), throws: [] }]));
+    expect(currentLegState(db, 'm1', 301, ['alice', 'bob'])).toEqual({ legNumber: 1, remaining: { alice: 301, bob: 301 }, visits: 0, totalVisits: 0 });
+  });
+
+  it('copes with a match without legs', () => {
+    upsertMatch(db, 'tenant', paused([]));
+    expect(currentLegState(db, 'm1', 501, ['alice'])).toEqual({ legNumber: 1, remaining: { alice: 501 }, visits: 0, totalVisits: 0 });
   });
 });

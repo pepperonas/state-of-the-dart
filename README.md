@@ -11,7 +11,7 @@
 <!-- Links -->
 [![Live Demo](https://img.shields.io/badge/Live_Demo-stateofthedart.com-22c55e?style=for-the-badge&logo=googlechrome&logoColor=white)](https://stateofthedart.com)
 [![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-a855f7?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://stateofthedart.celox.io)
-[![Version](https://img.shields.io/badge/Version-0.22.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-0.23.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
 
 <!-- Build & Repo (live) -->
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
@@ -46,7 +46,7 @@
 <!-- Qualität -->
 ![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?logo=playwright&logoColor=white)
-![Unit Tests](https://img.shields.io/badge/Unit_Tests-1003-brightgreen)
+![Unit Tests](https://img.shields.io/badge/Unit_Tests-1017-brightgreen)
 ![E2E Tests](https://img.shields.io/badge/E2E_Tests-28-brightgreen)
 ![Coverage](https://img.shields.io/badge/Coverage-24%25_stmts_%7C_75%25_branches-yellow)
 ![ESLint](https://img.shields.io/badge/ESLint-configured-4B32C3?logo=eslint&logoColor=white)
@@ -793,6 +793,12 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.23.0 (5. Oktober 2026) - Spielstände als Tabelle, korrekter Schnitt
+
+**⚠️ Behoben:** Der Schnitt zählte gespeicherte Darts statt Aufnahmen. Eine per Numpad eingegebene Summe wird als „plausible“ Darts gespeichert — 60 als ein T20 —, eine 60er-Aufnahme stand so mit Schnitt 180 da; ebenso verzerrt waren geworfene Darts, First-9, Darts je Leg, der Neun-Darter und drei Achievements zu Darts je Leg. Jetzt zählt jede Aufnahme drei Darts, nur der Checkout die tatsächlich geworfenen. Bereits gespeicherte Schnitte alter Spiele bleiben unverändert.
+
+**Neu:** „Spiele fortsetzen“ zeigt den Stand jedes pausierten Spiels als Tabelle (Spieler, Legs, Rest im laufenden Leg, Schnitt; der Leg-Führende markiert), dazu Leg und Best-of. Spiele ohne einen einzigen Wurf sind als solche gekennzeichnet. Gegen die Produktion geprüft: Die vielen 0 : 0 stimmen — in diesen Spielen wurde noch kein Leg beendet.
 
 ### v0.22.0 (5. Oktober 2026) - Leg-Führung und gewonnene Legs
 

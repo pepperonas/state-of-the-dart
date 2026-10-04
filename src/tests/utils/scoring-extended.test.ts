@@ -208,8 +208,9 @@ describe('calculateAverage', () => {
         { segment: 20, multiplier: 2, score: 40 },
       ]),
     ];
-    // 40 / 1 * 3 = 120
-    expect(calculateAverage(throws)).toBe(120);
+    // An ordinary visit is three darts, however many were entered: 40 average.
+    // (Counting entered darts said 120 — the numpad stores 40 as one D20.)
+    expect(calculateAverage(throws)).toBe(40);
   });
 });
 
@@ -522,7 +523,7 @@ describe('calculateDartsForLeg', () => {
         ]),
       ],
     };
-    expect(calculateDartsForLeg(leg)).toBe(5);
+    expect(calculateDartsForLeg(leg)).toBe(6); // two visits, neither a checkout
   });
 
   it('should return 0 for empty leg', () => {

@@ -1741,9 +1741,16 @@
     "throws_first": "wirft zuerst!"
   },
   "resume_screen": {
-    "legs_progress_one": "{{scores}} (Best of {{count}})",
-    "legs_progress_other": "{{scores}} (Best of {{count}})",
-    "double_out_short": "DO"
+    "double_out_short": "DO",
+    "leg_n": "Leg {{n}}",
+    "best_of_one": "Best of {{count}}",
+    "best_of_other": "Best of {{count}}",
+    "table_caption": "Spielstand",
+    "col_player": "Spieler",
+    "col_legs": "Legs",
+    "col_rest": "Rest",
+    "col_avg": "Ø",
+    "no_throws": "Noch kein Wurf — das Spiel wurde gestartet und gleich verlassen."
   },
   "atc_game": {
     "player_progress_one": "{{progress}}/{{total}} • {{count}} Dart",

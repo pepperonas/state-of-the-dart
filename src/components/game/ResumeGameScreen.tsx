@@ -5,6 +5,7 @@ import { ArrowLeft, Play, Trash2, Clock, Users, Target } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../services/api';
 import { useGame } from '../../context/GameContext';
+import ResumeScoreTable from './ResumeScoreTable';
 import { generateMatchName } from '../../utils/matchNames';
 import { reconstructMatch } from '../../utils/matchReconstruction';
 import { getLocalGameSummaries, clearGameState, LocalGameSummary } from '../../utils/gameStorage';
@@ -27,7 +28,12 @@ interface ResumableMatch {
     isBot?: boolean;
     botLevel?: number;
     legsWon: number;
+    matchAverage?: number;
+    /** Remaining score in the current leg (sent for unfinished matches). */
+    remaining?: number;
   }>;
+  currentLeg?: number;
+  totalVisits?: number;
 }
 
 type ResumableItem =
@@ -125,10 +131,11 @@ const ResumeGameScreen: React.FC = () => {
     });
   };
 
-  const getLegsProgress = (match: ResumableMatch) => {
+  const getMatchFormat = (match: ResumableMatch) => {
     const legsToWin = match.settings.legsToWin || 3;
-    const scores = match.players.map((p) => `${p.legsWon}`).join(' : ');
-    return t('resume_screen.legs_progress', { scores, count: legsToWin * 2 - 1 });
+    const parts = [t('resume_screen.best_of', { count: legsToWin * 2 - 1 })];
+    if (match.currentLeg) parts.unshift(t('resume_screen.leg_n', { n: match.currentLeg }));
+    return parts.join(' · ');
   };
 
   const getGameTypeLabel = (gameType: LocalGameSummary['gameType']) => {
@@ -212,19 +219,12 @@ const ResumeGameScreen: React.FC = () => {
                         </div>
 
                         <div className="flex items-center gap-1.5 text-on-surface-variant m3-body-medium mb-1">
-                          <Users size={14} />
-                          <span>
-                            {match.players.map((p) => p.name).join(' vs ')}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-1.5 text-on-surface-variant m3-body-medium mb-1">
                           <Target size={14} />
                           <span>
                             {match.settings.startScore || 501}
                             {match.settings.doubleOut !== false ? ` ${t('resume_screen.double_out_short')}` : ''}
                             {' · '}
-                            {getLegsProgress(match)}
+                            {getMatchFormat(match)}
                           </span>
                         </div>
 
@@ -278,6 +278,7 @@ const ResumeGameScreen: React.FC = () => {
                         )}
                       </div>
                     </div>
+                    <ResumeScoreTable rows={match.players} totalVisits={match.totalVisits} />
                     </Card>
                   </motion.div>
                 );

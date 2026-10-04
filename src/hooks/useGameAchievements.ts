@@ -3,6 +3,7 @@ import { useAchievements } from '../context/AchievementContext';
 import { Match, Leg, Dart } from '../types/index';
 import { api } from '../services/api';
 import logger from '../utils/logger';
+import { dartsInVisit } from '../utils/scoring';
 
 interface MatchContext {
   previousThrowScore?: number;
@@ -408,7 +409,7 @@ export const useGameAchievements = () => {
     winnerId: string
   ) => {
     const winnerThrows = leg.throws.filter(t => t.playerId === winnerId);
-    const totalDarts = winnerThrows.reduce((sum, t) => sum + t.darts.length, 0);
+    const totalDarts = winnerThrows.reduce((sum, t) => sum + dartsInVisit(t), 0);
 
     // 9-darter (501 only)
     if (match.settings.startScore === 501 && totalDarts === 9) {
@@ -557,7 +558,7 @@ export const useGameAchievements = () => {
       if (completedLegs.length > 0) {
         const totalDartsAllLegs = completedLegs.reduce((sum, l) => {
           const throws = l.throws.filter(t => t.playerId === winnerId);
-          return sum + throws.reduce((s, t) => s + t.darts.length, 0);
+          return sum + throws.reduce((s, t) => s + dartsInVisit(t), 0);
         }, 0);
         const avgDartsPerLeg = totalDartsAllLegs / completedLegs.length;
         checkAchievement(winnerId, 'avg_darts_per_leg_max', avgDartsPerLeg, match.id, { mode: 'absolute' });
@@ -834,7 +835,7 @@ export const useGameAchievements = () => {
           if (wonLegs.length > 0) {
             const totalDartsInWonLegs = wonLegs.reduce((sum, l) => {
               const throws = l.throws.filter(t => t.playerId === playerId);
-              return sum + throws.reduce((s, t) => s + t.darts.length, 0);
+              return sum + throws.reduce((s, t) => s + dartsInVisit(t), 0);
             }, 0);
             const avgDartsPerLeg = totalDartsInWonLegs / wonLegs.length;
             if (avgDartsPerLeg <= 15) {

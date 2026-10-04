@@ -1741,9 +1741,16 @@
     "throws_first": "throws first!"
   },
   "resume_screen": {
-    "legs_progress_one": "{{scores}} (best of {{count}})",
-    "legs_progress_other": "{{scores}} (best of {{count}})",
-    "double_out_short": "DO"
+    "double_out_short": "DO",
+    "leg_n": "Leg {{n}}",
+    "best_of_one": "Best of {{count}}",
+    "best_of_other": "Best of {{count}}",
+    "table_caption": "Score",
+    "col_player": "Player",
+    "col_legs": "Legs",
+    "col_rest": "Left",
+    "col_avg": "Avg",
+    "no_throws": "No darts thrown yet — the match was started and left straight away."
   },
   "atc_game": {
     "player_progress_one": "{{progress}}/{{total}} • {{count}} dart",
