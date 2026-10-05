@@ -195,7 +195,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
     if (editingDartIndex !== null && onReplaceDart) {
       const darts = convertScoreToDarts(score);
       if (darts.length > 0) {
-        onReplaceDart(editingDartIndex, darts[0]);
+        onReplaceDart(editingDartIndex, { ...darts[0], estimated: true });
       }
       setEditingDartIndex(null);
       setCurrentInput('');

@@ -513,7 +513,7 @@ export const numpadDarts = (score: number, remaining: number, dartsLeft: number,
   if (doubleOut && score === remaining && score > 1 && score <= 170) {
     const route = getCheckoutSuggestion(score, dartsLeft, true);
     const darts = route ? routeToDarts(route) : null;
-    if (darts && calculateThrowScore(darts) === score) return darts;
+    if (darts && calculateThrowScore(darts) === score) return darts.map(d => ({ ...d, estimated: true }));
   }
-  return convertScoreToDarts(score);
+  return convertScoreToDarts(score).map(d => ({ ...d, estimated: true }));
 };

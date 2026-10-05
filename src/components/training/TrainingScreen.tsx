@@ -280,6 +280,7 @@ const TrainingScreen: React.FC = () => {
 
     const throwScore = currentThrow.reduce((sum, dart) => sum + dart.score, 0);
     let isHit = false;
+    let clockCompleted = false; // around the clock: went all the way to 20
     let newState = { ...trainingState };
 
     // Increment attempts for all modes
@@ -297,6 +298,7 @@ const TrainingScreen: React.FC = () => {
         }
         if (step.completed) {
           newState.completed = true;
+          clockCompleted = true;
           audioSystem.playSound('/sounds/effects/get_ready.mp3', true);
         } else if (newState.attempts >= newState.totalRounds) {
           newState.completed = true;
@@ -448,6 +450,7 @@ const TrainingScreen: React.FC = () => {
             totalDarts: sessionRef.current?.totalDarts,
             totalHits: newState.hits,
             totalAttempts: newState.attempts,
+            allNumbersHit: clockCompleted,
             duration: sessionStartTimeRef.current
               ? Math.floor((new Date().getTime() - sessionStartTimeRef.current.getTime()) / 1000)
               : undefined,

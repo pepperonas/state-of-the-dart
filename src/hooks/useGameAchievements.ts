@@ -4,6 +4,10 @@ import { Match, Leg, Dart } from '../types/index';
 import { api } from '../services/api';
 import logger from '../utils/logger';
 import { dartsInVisit } from '../utils/scoring';
+import {
+  hasExactDarts, isZeroVisit, nextMissStreak, legsWonInMatch, matchScore, bestOpponentScore,
+  tonsInMatch, wonOnFirstCheckoutAttempt,
+} from '../utils/achievementRules';
 
 interface MatchContext {
   previousThrowScore?: number;
@@ -62,6 +66,22 @@ export const useGameAchievements = () => {
   // Track unique triples hit (T1-T20) per player
   const uniqueTriplesRef = useRef<Record<string, Set<number>>>({});
 
+  // Checkout values seen this session (progress keeps the larger count, see mode 'max')
+  const uniqueCheckoutValuesRef = useRef<Record<string, Set<number>>>({});
+
+  // Consecutive checkouts with all three darts
+  const threeDartCheckoutStreakRef = useRef<Record<string, number>>({});
+
+  // First / last leg of consecutive matches
+  const firstLegStreakRef = useRef<Record<string, number>>({});
+  const lastLegStreakRef = useRef<Record<string, number>>({});
+
+  // Legs already evaluated — an undo across a leg boundary re-announces the same leg
+  const processedLegsRef = useRef<Set<string>>(new Set());
+
+  // Training sessions in a row with 80 %+, per mode
+  const training80StreakRef = useRef<Record<string, number>>({});
+
   // ==================== THROW-LEVEL CHECKS ====================
   const checkThrowAchievements = useCallback((
     playerId: string,
@@ -72,6 +92,11 @@ export const useGameAchievements = () => {
     gameId?: string,
     matchContext?: MatchContext
   ) => {
+    // Typed totals (numpad) carry reconstructed darts: patterns of single darts
+    // are only judged on darts that were actually entered bed by bed.
+    const exact = hasExactDarts(darts);
+    const isBust = !!matchContext?.isBust;
+
     // --- Score-based checks ---
     if (score === 180) {
       checkAchievement(playerId, 'score_180', 1, gameId);
@@ -130,12 +155,10 @@ export const useGameAchievements = () => {
       checkAchievement(playerId, 'triple_consecutive_180', 1, gameId);
     }
 
-    // Consecutive misses tracking (score 0 visits)
-    if (score === 0 && darts.length === 3) {
-      consecutiveMissesRef.current[playerId] = (consecutiveMissesRef.current[playerId] || 0) + 1;
-      checkAchievement(playerId, 'consecutive_misses', consecutiveMissesRef.current[playerId], gameId, { mode: 'absolute' });
-    } else {
-      consecutiveMissesRef.current[playerId] = 0;
+    // Consecutive missed darts (a bust's darts hit something)
+    consecutiveMissesRef.current[playerId] = nextMissStreak(consecutiveMissesRef.current[playerId] || 0, darts, score, isBust);
+    if (consecutiveMissesRef.current[playerId] > 0) {
+      checkAchievement(playerId, 'consecutive_misses', consecutiveMissesRef.current[playerId], gameId, { mode: 'max' });
     }
 
     // Bust after 180 (previous throw was 180 and this visit is a bust)
@@ -143,8 +166,8 @@ export const useGameAchievements = () => {
       checkAchievement(playerId, 'bust_after_180', 1, gameId);
     }
 
-    // Low score
-    if (score < 10 && darts.length > 0) {
+    // Low score (a bust is stored as 0 but was not a low visit)
+    if (score < 10 && darts.length > 0 && !isBust) {
       checkAchievement(playerId, 'visit_under_10', 1, gameId);
       checkAchievement(playerId, 'visit_under_10_fail', 1, gameId);
     }
@@ -157,16 +180,16 @@ export const useGameAchievements = () => {
       checkAchievement(playerId, 'visit_score_3', 1, gameId);
     }
     // Score of 0 (all misses)
-    if (score === 0 && darts.length === 3) {
+    if (isZeroVisit(score, isBust) && darts.length > 0) {
       checkAchievement(playerId, 'three_miss_visit', 1, gameId);
     }
     // Low score after high score
-    if (score < 10 && darts.length > 0 && matchContext?.previousThrowScore && matchContext.previousThrowScore >= 100) {
+    if (score < 10 && darts.length > 0 && !isBust && matchContext?.previousThrowScore && matchContext.previousThrowScore >= 100) {
       checkAchievement(playerId, 'crash_after_high', 1, gameId);
     }
 
     // --- Dart-Segment Analysis ---
-    for (const dart of darts) {
+    for (const dart of exact ? darts : []) {
       if (dart.multiplier === 0 || dart.segment === 0) {
         checkAchievement(playerId, 'missed_board', 1, gameId);
       } else if (dart.multiplier === 1) {
@@ -203,12 +226,12 @@ export const useGameAchievements = () => {
     }
 
     // --- Fail: First dart miss ---
-    if (darts.length > 0 && (darts[0].multiplier === 0 || darts[0].segment === 0)) {
+    if (exact && (darts[0].multiplier === 0 || darts[0].segment === 0)) {
       checkAchievement(playerId, 'visit_starts_with_miss', 1, gameId);
     }
 
     // --- Visit Pattern Detection (3 darts) ---
-    if (darts.length === 3) {
+    if (exact && darts.length === 3) {
       const segments = darts.map(d => d.segment);
       const multipliers = darts.map(d => d.multiplier);
 
@@ -308,7 +331,7 @@ export const useGameAchievements = () => {
       }
 
       // Last dart double identification
-      const lastDart = darts[darts.length - 1];
+      const lastDart = exact ? darts[darts.length - 1] : undefined;
       if (lastDart && lastDart.multiplier === 2) {
         if (lastDart.segment === 20) checkAchievement(playerId, 'checkout_d20', 1, gameId);
         if (lastDart.segment === 16) checkAchievement(playerId, 'checkout_d16', 1, gameId);
@@ -321,18 +344,17 @@ export const useGameAchievements = () => {
         }
       }
 
-      // One-dart and two-dart checkouts
-      const effectiveDarts = darts.filter(d => d.score > 0 || d.multiplier > 0);
-      // For checkout, count darts thrown (not just scoring ones)
-      const dartsUsedForCheckout = darts.length;
-      if (dartsUsedForCheckout === 1 || (darts.length <= 1)) {
+      // One-dart and two-dart checkouts (only known for darts entered one by one)
+      if (exact && darts.length === 1) {
         checkAchievement(playerId, 'checkout_one_dart', 1, gameId);
-      } else if (dartsUsedForCheckout === 2 || (darts.length <= 2 && effectiveDarts.length <= 2)) {
+      } else if (exact && darts.length === 2) {
         checkAchievement(playerId, 'checkout_two_dart', 1, gameId);
       }
 
-      // Unique checkout values tracking
-      checkAchievement(playerId, 'unique_checkout_values', 1, gameId);
+      // Distinct checkout values — a repeat of the same value adds nothing
+      if (!uniqueCheckoutValuesRef.current[playerId]) uniqueCheckoutValuesRef.current[playerId] = new Set();
+      uniqueCheckoutValuesRef.current[playerId].add(checkoutValue);
+      checkAchievement(playerId, 'unique_checkout_values', uniqueCheckoutValuesRef.current[playerId].size, gameId, { mode: 'max' });
 
       // Checkout after 180 (previous throw was 180)
       if (matchContext?.previousThrowScore === 180) {
@@ -355,7 +377,7 @@ export const useGameAchievements = () => {
       }
 
       // Unique doubles tracking: track which double segments have been used for checkout
-      const lastDartForDouble = darts[darts.length - 1];
+      const lastDartForDouble = exact ? darts[darts.length - 1] : undefined;
       if (lastDartForDouble && lastDartForDouble.multiplier === 2) {
         const doubleSegment = lastDartForDouble.segment;
         if (!uniqueDoublesRef.current[playerId]) {
@@ -373,14 +395,11 @@ export const useGameAchievements = () => {
         checkAchievement(playerId, 'same_double', maxSameDouble, gameId, { mode: 'absolute' });
       }
 
-      // First dart checkout (checkout with only 1 dart thrown)
-      if (darts.length === 1) {
-        checkAchievement(playerId, 'first_dart_checkout', 1, gameId, { mode: 'absolute' });
-      }
-
-      // Three dart checkout (checkout using all 3 darts, all scoring)
-      if (darts.length === 3 && darts.every(d => d.score > 0 || (d.multiplier > 0 && d.segment > 0))) {
-        checkAchievement(playerId, 'three_dart_checkout', 1, gameId);
+      // Three dart checkouts in a row (a streak achievement)
+      if (exact) {
+        const allThree = darts.length === 3 && darts.every(d => d.multiplier > 0 && d.segment > 0);
+        threeDartCheckoutStreakRef.current[playerId] = allThree ? (threeDartCheckoutStreakRef.current[playerId] || 0) + 1 : 0;
+        if (allThree) checkStreakProgress(playerId, 'three_dart_checkout', threeDartCheckoutStreakRef.current[playerId], gameId);
       }
 
       // Reset missed checkout streak on successful checkout
@@ -408,6 +427,11 @@ export const useGameAchievements = () => {
     match: Match,
     winnerId: string
   ) => {
+    // An undo across a leg boundary re-announces the same leg: count it once.
+    const legKey = `${match.id}:${leg.id}`;
+    if (processedLegsRef.current.has(legKey)) return;
+    processedLegsRef.current.add(legKey);
+
     const winnerThrows = leg.throws.filter(t => t.playerId === winnerId);
     const totalDarts = winnerThrows.reduce((sum, t) => sum + dartsInVisit(t), 0);
 
@@ -416,8 +440,10 @@ export const useGameAchievements = () => {
       unlockAchievement(winnerId, 'nine_darter', match.id);
     }
 
-    // Leg dart count checks (lower is better handled by context)
-    checkAchievement(winnerId, 'leg_darts', totalDarts, match.id);
+    // Leg dart count checks (lower is better handled by context) — the darters are 501 achievements
+    if (match.settings.startScore === 501) {
+      checkAchievement(winnerId, 'leg_darts', totalDarts, match.id);
+    }
 
     // 301-specific dart counts
     if (match.settings.startScore === 301) {
@@ -430,7 +456,7 @@ export const useGameAchievements = () => {
     }
 
     // Legs under 15 darts
-    if (totalDarts <= 15) {
+    if (totalDarts < 15) {
       checkAchievement(winnerId, 'legs_under_15_darts', 1, match.id);
     }
 
@@ -448,11 +474,17 @@ export const useGameAchievements = () => {
     // Leg checkout streak: consecutive legs won (= checked out)
     legCheckoutStreakRef.current[winnerId] = (legCheckoutStreakRef.current[winnerId] || 0) + 1;
     checkStreakProgress(winnerId, 'leg_checkout', legCheckoutStreakRef.current[winnerId], match.id);
-    // Reset checkout streak for losers
+    // A lost leg ends both "legs in a row" streaks
     for (const p of match.players) {
       if (p.playerId !== winnerId) {
         legCheckoutStreakRef.current[p.playerId] = 0;
+        legsNoBustStreakRef.current[p.playerId] = 0;
       }
+    }
+
+    // Won on the first visit in checkout range
+    if (wonOnFirstCheckoutAttempt(winnerThrows)) {
+      checkAchievement(winnerId, 'first_dart_checkout', 1, match.id, { mode: 'absolute' });
     }
 
     // Leg average
@@ -490,13 +522,12 @@ export const useGameAchievements = () => {
       checkAchievement(winnerId, 'first_visit_checkout', 1, match.id);
     }
 
-    // Leg visits minimum (number of visits/throws to win, lower is better)
+    // Long leg: at least N visits ("mindestens 20 Würfe")
     checkAchievement(winnerId, 'leg_visits_min', winnerThrows.length, match.id, { mode: 'absolute' });
 
-    // Checkout darts max (darts in the winning throw, lower is better)
-    if (winnerThrows.length > 0) {
-      const checkoutThrow = winnerThrows[winnerThrows.length - 1];
-      checkAchievement(winnerId, 'checkout_darts_max', checkoutThrow.darts.length, match.id, { mode: 'absolute' });
+    // Quick 301 finish: darts for the whole leg (lower is better)
+    if (match.settings.startScore === 301 && totalDarts > 0) {
+      checkAchievement(winnerId, 'checkout_darts_max', totalDarts, match.id, { mode: 'absolute' });
     }
 
     // Checkout after misses: missed checkout attempts in THIS leg before eventual checkout
@@ -552,18 +583,6 @@ export const useGameAchievements = () => {
       }
     }
 
-    // Average darts per leg (computed at match level after each leg completes)
-    {
-      const completedLegs = match.legs.filter(l => l.winner === winnerId);
-      if (completedLegs.length > 0) {
-        const totalDartsAllLegs = completedLegs.reduce((sum, l) => {
-          const throws = l.throws.filter(t => t.playerId === winnerId);
-          return sum + throws.reduce((s, t) => s + dartsInVisit(t), 0);
-        }, 0);
-        const avgDartsPerLeg = totalDartsAllLegs / completedLegs.length;
-        checkAchievement(winnerId, 'avg_darts_per_leg_max', avgDartsPerLeg, match.id, { mode: 'absolute' });
-      }
-    }
 
     // --- Fail: Leg-level checks for losers ---
     const losers = match.players.filter(p => p.playerId !== winnerId);
@@ -589,7 +608,7 @@ export const useGameAchievements = () => {
       }
 
       // First visit was zero (all misses)
-      if (loserThrows.length > 0 && loserThrows[0].score === 0 && loserThrows[0].darts.length === 3) {
+      if (loserThrows.length > 0 && isZeroVisit(loserThrows[0].score, loserThrows[0].isBust)) {
         checkAchievement(loserId, 'zero_first_visit', 1, match.id);
       }
 
@@ -600,7 +619,7 @@ export const useGameAchievements = () => {
       }
 
       // Zero visit count in this leg
-      const zeroVisits = loserThrows.filter(t => t.score === 0 && t.darts.length === 3).length;
+      const zeroVisits = loserThrows.filter(t => isZeroVisit(t.score, t.isBust)).length;
       if (zeroVisits >= 2) {
         checkAchievement(loserId, 'zero_visits_in_match', zeroVisits, match.id, { mode: 'absolute' });
       }
@@ -640,7 +659,7 @@ export const useGameAchievements = () => {
         }
       }
     }
-  }, [checkAchievement, unlockAchievement]);
+  }, [checkAchievement, checkStreakProgress, unlockAchievement]);
 
   // ==================== MATCH-LEVEL CHECKS ====================
   const checkMatchAchievements = useCallback((
@@ -699,13 +718,22 @@ export const useGameAchievements = () => {
       // Checkout percentage (absolute)
       if (player.checkoutAttempts && player.checkoutAttempts >= 10) {
         const checkoutPercentage = (player.checkoutsHit / player.checkoutAttempts) * 100;
-        checkAchievement(playerId, 'checkout_percentage', checkoutPercentage, match.id, { mode: 'absolute' });
+        checkAchievement(playerId, 'checkout_percentage', checkoutPercentage, match.id, { mode: 'absolute', attempts: player.checkoutAttempts });
       }
 
-      // Tons in match (100+ scores)
-      if (player.match100Plus && player.match100Plus > 0) {
-        checkAchievement(playerId, 'tons_in_match', player.match100Plus, match.id, { mode: 'absolute' });
+      // Tons in match: every visit of 100+, not just the 100–139 bucket
+      const tons = tonsInMatch(player);
+      if (tons > 0) {
+        checkAchievement(playerId, 'tons_in_match', tons, match.id, { mode: 'absolute' });
       }
+
+      // First / last leg of the match — "in N matches in a row" streaks
+      const firstLegWon = match.legs[0]?.winner === playerId;
+      firstLegStreakRef.current[playerId] = firstLegWon ? (firstLegStreakRef.current[playerId] || 0) + 1 : 0;
+      if (firstLegWon) checkStreakProgress(playerId, 'first_leg_wins', firstLegStreakRef.current[playerId], match.id);
+      const lastLegWon = match.legs[match.legs.length - 1]?.winner === playerId;
+      lastLegStreakRef.current[playerId] = lastLegWon ? (lastLegStreakRef.current[playerId] || 0) + 1 : 0;
+      if (lastLegWon) checkStreakProgress(playerId, 'last_leg_wins', lastLegStreakRef.current[playerId], match.id);
 
       // --- Match pattern checks (winner only) ---
       if (isWinner) {
@@ -713,7 +741,8 @@ export const useGameAchievements = () => {
         const totalLegs = match.settings.legsToWin || 3;
         if (totalLegs >= 3) {
           const allOpponents = match.players.filter(p => p.playerId !== playerId);
-          const isWhitewash = allOpponents.every(op => op.legsWon === 0);
+          // Over the whole match: legsWon resets every set
+          const isWhitewash = allOpponents.every(op => legsWonInMatch(match, op.playerId) === 0);
           if (isWhitewash) {
             checkAchievement(playerId, 'whitewash', 1, match.id, { mode: 'absolute' });
             checkAchievement(playerId, 'whitewash_wins', 1, match.id);
@@ -727,10 +756,12 @@ export const useGameAchievements = () => {
           // Not a multi-leg match, don't count for whitewash streak
         }
 
-        // Close win: leg difference = 1
-        const winnerLegs = player.legsWon;
-        const maxOpponentLegs = Math.max(...match.players.filter(p => p.playerId !== playerId).map(p => p.legsWon));
-        if (winnerLegs - maxOpponentLegs === 1) {
+        // Close win: one leg (or set) ahead — never in a single-leg match, where every win is 1:0
+        const winnerLegs = matchScore(match, player);
+        const maxOpponentLegs = bestOpponentScore(match, playerId);
+        const unitsToWin = (match.settings.setsToWin || 1) > 1 ? (match.settings.setsToWin || 1) : (match.settings.legsToWin || 1);
+        const isCloseWin = unitsToWin > 1 && winnerLegs - maxOpponentLegs === 1;
+        if (isCloseWin) {
           checkAchievement(playerId, 'close_win', 1, match.id, { mode: 'absolute' });
         }
 
@@ -747,9 +778,8 @@ export const useGameAchievements = () => {
         if (hasHuman) checkAchievement(playerId, 'human_wins', 1, match.id);
 
         // Close wins (cumulative count, different from close_win which is absolute flag)
-        const winnerLegsForClose = player.legsWon;
-        const maxOpponentLegsForClose = Math.max(...match.players.filter(p => p.playerId !== playerId).map(p => p.legsWon));
-        if (winnerLegsForClose - maxOpponentLegsForClose === 1) {
+        const maxOpponentLegsForClose = maxOpponentLegs;
+        if (isCloseWin) {
           checkAchievement(playerId, 'close_wins', 1, match.id);
         }
 
@@ -760,16 +790,14 @@ export const useGameAchievements = () => {
         }
 
         // First leg wins (won the first leg of the match)
-        if (match.legs.length > 0 && match.legs[0].winner === playerId) {
+        if (firstLegWon) {
           checkAchievement(playerId, 'first_leg_wins', 1, match.id);
-          checkStreakProgress(playerId, 'first_leg_wins', (winStreakRef.current[playerId] || 0), match.id);
         }
 
         // Last leg wins (won the deciding/last leg)
         const lastLeg = match.legs[match.legs.length - 1];
         if (lastLeg && lastLeg.winner === playerId && maxOpponentLegsForClose > 0) {
           checkAchievement(playerId, 'last_leg_wins', 1, match.id);
-          checkStreakProgress(playerId, 'last_leg_wins', (winStreakRef.current[playerId] || 0), match.id);
         }
 
         // Weekend wins
@@ -843,6 +871,19 @@ export const useGameAchievements = () => {
             }
           }
         }
+
+        // Darts per won leg over the finished match (winner only)
+        {
+          const wonLegs = match.legs.filter(l => l.winner === playerId);
+          if (wonLegs.length > 0) {
+            const dartsInWonLegs = wonLegs.reduce((sum, l) =>
+              sum + l.throws.filter(t => t.playerId === playerId).reduce((s, t) => s + dartsInVisit(t), 0), 0);
+            checkAchievement(playerId, 'avg_darts_per_leg_max', dartsInWonLegs / wonLegs.length, match.id, { mode: 'absolute' });
+          }
+        }
+      } else {
+        // A lost match ends the run of whitewash wins
+        whitewashStreakRef.current[playerId] = 0;
       }
 
       // Average threshold streak achievements (for all players)
@@ -945,7 +986,7 @@ export const useGameAchievements = () => {
       }
 
       // Zero visits in match (total across all legs)
-      const totalZeroVisits = playerThrows.filter(t => t.score === 0 && t.darts.length === 3).length;
+      const totalZeroVisits = playerThrows.filter(t => isZeroVisit(t.score, t.isBust)).length;
       if (totalZeroVisits >= 2) {
         checkAchievement(playerId, 'zero_visits_in_match', totalZeroVisits, match.id, { mode: 'absolute' });
       }
@@ -954,8 +995,8 @@ export const useGameAchievements = () => {
       if (!isWinner) {
         checkAchievement(playerId, 'matches_lost', 1, match.id);
 
-        // Whitewash loss (0 legs won)
-        if (player.legsWon === 0) {
+        // Whitewash loss (0 legs won over the whole match)
+        if (legsWonInMatch(match, playerId) === 0) {
           checkAchievement(playerId, 'matches_lost_whitewash', 1, match.id);
         }
 
@@ -983,16 +1024,17 @@ export const useGameAchievements = () => {
         // Lost more legs: lost despite having more legs won than the winner (3+ player game)
         if (match.players.length >= 3) {
           const winnerPlayer = opponents.find(p => isPlayerWinner(p.playerId));
-          if (winnerPlayer && player.legsWon > winnerPlayer.legsWon) {
+          if (winnerPlayer && legsWonInMatch(match, playerId) > legsWonInMatch(match, winnerPlayer.playerId)) {
             checkAchievement(playerId, 'lost_more_legs', 1, match.id);
           }
         }
 
         // Last place in multiplayer (3+ players)
         if (match.players.length >= 3) {
-          const minLegs = Math.min(...match.players.map(p => p.legsWon));
-          if (player.legsWon === minLegs) {
-            const playersWithMinLegs = match.players.filter(p => p.legsWon === minLegs);
+          const legsOf = (id: string) => legsWonInMatch(match, id);
+          const minLegs = Math.min(...match.players.map(p => legsOf(p.playerId)));
+          if (legsOf(playerId) === minLegs) {
+            const playersWithMinLegs = match.players.filter(p => legsOf(p.playerId) === minLegs);
             if (playersWithMinLegs.length === 1) {
               checkAchievement(playerId, 'last_place_multi', 1, match.id);
             }
@@ -1100,11 +1142,8 @@ export const useGameAchievements = () => {
         }
       }
 
-      // --- Unique opponents ---
-      const opponents = match.players.filter(p => p.playerId !== playerId);
-      for (const _opponent of opponents) {
-        checkAchievement(playerId, 'unique_opponents', 1, match.id);
-      }
+      // Unique opponents are counted by the server (calendar stats): a +1 per
+      // match counted the same opponent again every time.
     });
   }, [checkAchievement, checkStreakProgress]);
 
@@ -1120,7 +1159,7 @@ export const useGameAchievements = () => {
     totalHits?: number;
     totalAttempts?: number;
     duration?: number;      // seconds
-    numbersHit?: number[];  // which numbers were hit (for around-the-clock)
+    allNumbersHit?: boolean; // around the clock went all the way through 1–20
   }
 
   const checkTrainingAchievements = useCallback((
@@ -1140,19 +1179,19 @@ export const useGameAchievements = () => {
     if (result.mode === 'around-the-clock') {
       checkAchievement(playerId, 'training_around_clock', 1);
       // All numbers hit (1-20)
-      if (result.numbersHit && result.numbersHit.length >= 20) {
+      if (result.allNumbersHit) {
         checkAchievement(playerId, 'training_all_numbers', 1, undefined, { mode: 'absolute' });
       }
     }
 
     // Hit rate / accuracy checks
     if (result.hitRate !== undefined) {
-      if (result.hitRate >= 80) {
-        checkAchievement(playerId, 'training_80_percent', 1, undefined, { mode: 'absolute' });
-      }
-      if (result.hitRate === 100) {
-        checkAchievement(playerId, 'training_perfect', 1, undefined, { mode: 'absolute' });
-      }
+      // 80 %+ several times in a row in the same training (a streak achievement)
+      const streak80 = result.hitRate >= 80 ? (training80StreakRef.current[result.mode] || 0) + 1 : 0;
+      training80StreakRef.current[result.mode] = streak80;
+      if (streak80 > 0) checkStreakProgress(playerId, 'training_80_percent', streak80);
+      // Perfect training: the hit rate itself, target 100
+      checkAchievement(playerId, 'training_perfect', result.hitRate, undefined, { mode: 'absolute' });
 
       // Doubles accuracy
       if (result.mode === 'doubles' && result.hitRate > 0) {
@@ -1203,20 +1242,7 @@ export const useGameAchievements = () => {
     if (dayOfWeek === 0 || dayOfWeek === 6) {
       checkAchievement(playerId, 'weekend_training', 1);
     }
-  }, [checkAchievement]);
-
-  const checkAllTrainingModesAchievement = useCallback((
-    playerId: string,
-    completedModes: string[]
-  ) => {
-    const allModes = ['doubles', 'triples', 'around-the-clock', 'checkout', 'bobs-27', 'score'];
-    const completedAllModes = allModes.every(mode => completedModes.includes(mode));
-
-    if (completedAllModes) {
-      checkAchievement(playerId, 'training_all_modes', 6, undefined, { mode: 'absolute' });
-      checkAchievement(playerId, 'all_training_types', 6, undefined, { mode: 'absolute' });
-    }
-  }, [checkAchievement]);
+  }, [checkAchievement, checkStreakProgress]);
 
   // ==================== CALENDAR/DAILY CHECKS ====================
   const checkCalendarAchievements = useCallback(async (playerId: string) => {
@@ -1287,9 +1313,19 @@ export const useGameAchievements = () => {
         checkAchievement(playerId, 'wins_all_modes', stats.minWinsAllModes, undefined, { mode: 'absolute' });
       }
 
-      // All training types completed
-      if (stats.distinctTrainingTypes >= 6) {
-        checkAchievement(playerId, 'all_training_types', stats.distinctTrainingTypes, undefined, { mode: 'absolute' });
+      // All six training modes completed at least once
+      if (stats.distinctTrainingTypes > 0) {
+        checkAchievement(playerId, 'training_all_modes', stats.distinctTrainingTypes, undefined, { mode: 'absolute' });
+      }
+
+      // Every training mode N times: the least-played mode decides (0 until all six were played)
+      if ((stats.minSessionsAllTraining ?? 0) > 0) {
+        checkAchievement(playerId, 'all_training_types', stats.minSessionsAllTraining, undefined, { mode: 'absolute' });
+      }
+
+      // Distinct opponents over all matches
+      if ((stats.distinctOpponents ?? 0) > 0) {
+        checkAchievement(playerId, 'unique_opponents', stats.distinctOpponents, undefined, { mode: 'absolute' });
       }
 
       // All training 90%+ (minimum hit rate across all training types)
@@ -1306,7 +1342,6 @@ export const useGameAchievements = () => {
     checkLegAchievements,
     checkThrowAchievements,
     checkTrainingAchievements,
-    checkAllTrainingModesAchievement,
     checkCalendarAchievements,
   };
 };

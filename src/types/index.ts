@@ -157,6 +157,8 @@ export interface Dart {
   multiplier: 0 | 1 | 2 | 3; // 0 = miss, 1 = single, 2 = double, 3 = triple
   score: number;
   bed?: 'single' | 'double' | 'triple' | 'outer-bull' | 'bull' | 'miss';
+  /** Reconstructed from a typed total, not thrown at this bed (numpad input). */
+  estimated?: boolean;
 }
 
 // Heatmap Types

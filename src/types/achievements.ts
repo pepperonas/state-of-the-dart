@@ -30,7 +30,7 @@ export interface Achievement {
     type: 'count' | 'value' | 'streak' | 'special';
     target: number;
     metric: string;
-    matchMode?: 'exact';
+    matchMode?: 'exact' | 'below'; // below = strictly under target (lower-better metrics)
   };
   hidden?: boolean; // Hidden until unlocked
   rarity?: 'common' | 'rare' | 'epic' | 'legendary';
@@ -446,7 +446,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'silver',
     icon: 'bolt',
     points: 50,
-    requirement: { type: 'special', target: 12, metric: 'checkout_darts_max' },
+    requirement: { type: 'special', target: 12, metric: 'checkout_darts_max', matchMode: 'below' },
     rarity: 'rare',
   },
   {
@@ -642,7 +642,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'gold',
     icon: 'bolt',
     points: 75,
-    requirement: { type: 'special', target: 300, metric: 'game_time_max' },
+    requirement: { type: 'special', target: 300, metric: 'game_time_max', matchMode: 'below' },
     rarity: 'epic',
     hidden: true,
   },
@@ -1215,7 +1215,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'gold',
     icon: 'bolt',
     points: 100,
-    requirement: { type: 'special', target: 15, metric: 'avg_darts_per_leg_max' },
+    requirement: { type: 'special', target: 15, metric: 'avg_darts_per_leg_max', matchMode: 'below' },
     rarity: 'epic',
   },
   {
@@ -1517,7 +1517,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'gold',
     icon: 'bolt',
     points: 100,
-    requirement: { type: 'special', target: 9, metric: 'leg_301_darts' },
+    requirement: { type: 'special', target: 9, metric: 'leg_301_darts', matchMode: 'below' },
     rarity: 'epic',
     hidden: true,
   },
@@ -1643,7 +1643,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'platinum',
     icon: 'wave',
     points: 150,
-    requirement: { type: 'special', target: 180, metric: 'game_time_max' },
+    requirement: { type: 'special', target: 180, metric: 'game_time_max', matchMode: 'below' },
     rarity: 'legendary',
   },
 
@@ -2439,7 +2439,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'gold',
     icon: 'bolt',
     points: 75,
-    requirement: { type: 'special', target: 5, metric: 'training_fast_good' },
+    requirement: { type: 'special', target: 1, metric: 'training_fast_good' },
     rarity: 'epic',
   },
   {
@@ -2554,7 +2554,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'platinum',
     icon: 'bolt',
     points: 200,
-    requirement: { type: 'special', target: 21, metric: 'leg_701_darts' },
+    requirement: { type: 'special', target: 21, metric: 'leg_701_darts', matchMode: 'below' },
     rarity: 'legendary',
   },
   {
@@ -2656,7 +2656,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'platinum',
     icon: 'hash',
     points: 150,
-    requirement: { type: 'special', target: 9, metric: 'consecutive_60_plus' },
+    requirement: { type: 'streak', target: 9, metric: 'score_60_plus' },
     rarity: 'legendary',
   },
   {
@@ -2667,7 +2667,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'diamond',
     icon: 'chartUp',
     points: 300,
-    requirement: { type: 'special', target: 120, metric: 'game_time_max' },
+    requirement: { type: 'special', target: 120, metric: 'game_time_max', matchMode: 'below' },
     rarity: 'legendary',
   },
   {
@@ -3652,7 +3652,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'gold',
     icon: 'bolt',
     points: 75,
-    requirement: { type: 'special', target: 120, metric: 'game_time_max' },
+    requirement: { type: 'special', target: 120, metric: 'game_time_max', matchMode: 'below' },
     rarity: 'epic',
   },
   {
@@ -3663,7 +3663,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     tier: 'platinum',
     icon: 'wave',
     points: 150,
-    requirement: { type: 'special', target: 60, metric: 'game_time_max' },
+    requirement: { type: 'special', target: 60, metric: 'game_time_max', matchMode: 'below' },
     rarity: 'legendary',
   },
   {

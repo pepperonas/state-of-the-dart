@@ -265,3 +265,6 @@ export const usePlayer = () => {
   }
   return context;
 };
+/** The player list, or an empty list outside a PlayerProvider (tests, isolated trees). */
+export const useOptionalPlayers = () => useContext(PlayerContext)?.players ?? EMPTY_PLAYERS;
+const EMPTY_PLAYERS: Player[] = [];
