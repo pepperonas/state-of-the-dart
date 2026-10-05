@@ -11,7 +11,7 @@
 <!-- Links -->
 [![Live Demo](https://img.shields.io/badge/Live_Demo-stateofthedart.com-22c55e?style=for-the-badge&logo=googlechrome&logoColor=white)](https://stateofthedart.com)
 [![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-a855f7?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://stateofthedart.celox.io)
-[![Version](https://img.shields.io/badge/Version-0.23.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-0.23.1-3b82f6?style=for-the-badge)](CHANGELOG.md)
 
 <!-- Build & Repo (live) -->
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
@@ -793,6 +793,10 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.23.1 (5. Oktober 2026) - Gespeicherte Schnitte neu berechnet
+
+Die vor 0.23.0 gespeicherten Schnitte sind mit der korrigierten Regel nachgerechnet: 78 Match-Einträge, Karriere- und Bestschnitt von 17 Spielern, 10 persönliche Bestwerte (z. B. bester Schnitt 180 → 37,12). Demo-Daten und Einträge ohne gespeicherte Würfe bleiben unverändert. Vorgehen und Sicherung: `server/scripts/recalc-averages/`.
 
 ### v0.23.0 (5. Oktober 2026) - Spielstände als Tabelle, korrekter Schnitt
 
