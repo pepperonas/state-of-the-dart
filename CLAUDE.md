@@ -285,7 +285,7 @@ All game modes except Online Multiplayer persist state to localStorage and appea
 ### Achievement System Persistence
 - 463 achievements defined in `src/types/achievements.ts` (frontend is source of truth for definitions)
 - DB table `player_achievements` stores unlock records and progress (no FK to legacy achievements table)
-- Achievement IDs use underscores (`first_180`, `ten_180s`) — legacy DB had dashes (`first-180`), don't mix
+- Achievement IDs use underscores (`first_game`, `ton_80` = first 180, `max_out` = ten 180s) — legacy DB had dashes (`first-180`), don't mix. ⚠️ `first_180`/`ten_180s` are NOT ids. Check an id exists before using it in a test: an unknown id is a silent no-op in `unlockAchievement`, so the test asserts nothing.
 - `AchievementContext` unlock flow: save to localStorage immediately, then API call with retry (2 attempts + pending queue)
 - Failed API syncs stored in `achievements_pending_sync` localStorage key, retried on next session load
 - On page load: localStorage cache shown instantly, then API data merged (API wins on conflicts)
