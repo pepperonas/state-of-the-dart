@@ -7,6 +7,56 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.24.0] - 2026-10-05
+
+### Fixed — achievement unlocks
+
+False unlocks:
+- **"Rally Master" (at least 20 visits)** unlocked on every leg: the metric was
+  treated as lower-is-better.
+- **"Quick Finish" (under 12 darts, 301)** got the darts of the last visit
+  (1–3) and unlocked on any leg in any mode. It now gets the darts of the whole
+  301 leg.
+- **Darters (9/12/15/18/21/24 darts, 501)** also unlocked in 301 and 701 legs.
+- **"Unter …" was "at most"**: quick 301/701, efficient winner, the speed
+  achievements and "legs under 15 darts" now require strictly less
+  (`matchMode: 'below'`).
+- **Efficient Winner** was checked after every leg, mid-match and for losers;
+  now once, for the winner, over the finished match.
+- **Numpad totals** are stored as reconstructed darts. Dart patterns (triples,
+  Robin Hood, Shanghai …), checkout doubles and one/two-dart checkouts were
+  judged on those guesses. Typed darts are now marked `estimated` and skipped
+  for every dart-level check.
+- **Busts** (stored with score 0) counted as zero visits and low scores.
+- **"Robbery" (first checkout attempt)** fired on any one-dart checkout.
+- **Close win** fired on every win of a single-leg match; whitewash, close
+  win, decider and the "lost" checks read `legsWon`, which resets every set.
+- **Checkout percentage** tiers ignored their minimum of 20/30 attempts.
+- **"Perfect Nine" (9 visits of 60+ in a row)** counted 60+ visits in total.
+- **Distinct checkout values / opponents** were +1 per checkout / per match.
+- **Bots** earned achievements and showed toasts.
+
+Could never unlock:
+- **"All achievements"** (both of them) waited for themselves.
+- **Training**: 80 % three times in a row, perfectionist (100 %), fast and
+  good, around the clock (all numbers), all six modes, "every mode N times".
+- **Three-dart checkouts in a row**.
+
+Wrong streaks:
+- First/last leg streaks were fed the win streak; a lost match did not end
+  the whitewash streak; a lost leg did not end the no-bust streak.
+- **Daily streaks were computed in UTC** while SQLite grouped by local date —
+  in Berlin "today" was yesterday, so every daily play/training/three-wins
+  streak was broken.
+
+Persistence:
+- Unlocks made while the achievement list was loading from the API were
+  overwritten by the merge.
+- Unknown/legacy ids no longer count toward "unlock N achievements".
+- A leg announced twice (undo across the leg boundary) is evaluated once.
+
+Achievements already unlocked by these bugs stay unlocked.
+
 ## [0.23.1] - 2026-10-05
 
 ### Fixed

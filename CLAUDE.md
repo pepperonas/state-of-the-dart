@@ -272,6 +272,16 @@ All game modes except Online Multiplayer persist state to localStorage and appea
 
 ## Critical Patterns & Pitfalls
 
+### Achievement unlock rules (0.24.0)
+- Pure rules in `src/utils/achievementRules.ts`: `meetsRequirement` (exact / `below` = strictly under / lower-better ≤ / else ≥), `LOWER_IS_BETTER` (`leg_visits_min` is NOT in it — "mindestens 20 Würfe"), `allAchievementsReached` (the two "all achievements" do not wait for themselves), `legsWonInMatch`/`matchScore` (`MatchPlayer.legsWon` resets every set — never use it for whole-match checks), `tonsInMatch` (all 100+ buckets), `isZeroVisit` (a bust is stored with score 0 but is not a zero visit), `nextMissStreak`, `minCheckoutAttempts` (read from "min. N Versuche" in the description).
+- **Numpad darts carry `estimated: true`** (`numpadDarts`, typed single-dart replacement). The hook judges dart patterns, checkout doubles and one/two/three-dart checkouts only when `hasExactDarts(darts)`.
+- `checkAchievement` modes: `absolute`, `increment`, `max` (keep the larger — for session-scoped sets like distinct checkout values). Option `attempts` gates checkout-percentage tiers.
+- Bots never earn achievements: the context reads the player list (`useOptionalPlayers`) and returns early in `checkAchievement`/`checkStreakProgress`/`unlockAchievement`.
+- Streak-type achievements must go through `checkStreakProgress` — `checkAchievement` skips them.
+- Distinct opponents and "every training mode N times" come from `calendar-stats` (`distinctOpponents`, `minSessionsAllTraining`). Day keys there use `server/src/utils/dates.ts` `localDateKey` — `toISOString()` is UTC and broke every daily streak on the Berlin VPS.
+- `checkLegAchievements` evaluates each `match.id:leg.id` once (undo re-announces legs).
+- Known limits: streak refs live in the hook and reset when the game screen remounts; distinct checkout values are counted per session (progress keeps the maximum); a throw-level undo cannot take an unlock back; Cricket/ATC/Shanghai are not stored as matches, so "all modes tried" cannot see them.
+
 ### Achievement System Persistence
 - 463 achievements defined in `src/types/achievements.ts` (frontend is source of truth for definitions)
 - DB table `player_achievements` stores unlock records and progress (no FK to legacy achievements table)

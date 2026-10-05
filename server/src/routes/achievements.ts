@@ -1,6 +1,7 @@
 import express, { Response } from 'express';
 import { getDatabase } from '../database';
 import { AuthRequest, authenticateTenant } from '../middleware/auth';
+import { localDateKey } from '../utils/dates';
 
 const router = express.Router();
 
@@ -223,7 +224,7 @@ router.get('/player/:playerId/calendar-stats', authenticateTenant, (req: AuthReq
     // Calculate consecutive play day streak (from today backwards)
     let dailyPlayStreak = 0;
     if (playDays.length > 0) {
-      const todayStr = todayStart.toISOString().split('T')[0];
+      const todayStr = localDateKey(todayStart);
       const playDateSet = new Set(playDays.map(d => d.play_date));
 
       const checkDate = new Date(todayStart);
@@ -233,7 +234,7 @@ router.get('/player/:playerId/calendar-stats', authenticateTenant, (req: AuthReq
       }
 
       while (true) {
-        const dateStr = checkDate.toISOString().split('T')[0];
+        const dateStr = localDateKey(checkDate);
         if (playDateSet.has(dateStr)) {
           dailyPlayStreak++;
           checkDate.setDate(checkDate.getDate() - 1);
@@ -259,7 +260,7 @@ router.get('/player/:playerId/calendar-stats', authenticateTenant, (req: AuthReq
     // Calculate training day streak
     let dailyTrainingStreak = 0;
     if (trainingDays.length > 0) {
-      const todayStr = todayStart.toISOString().split('T')[0];
+      const todayStr = localDateKey(todayStart);
       const trainDateSet = new Set(trainingDays.map(d => d.train_date));
 
       const checkDate = new Date(todayStart);
@@ -268,7 +269,7 @@ router.get('/player/:playerId/calendar-stats', authenticateTenant, (req: AuthReq
       }
 
       while (true) {
-        const dateStr = checkDate.toISOString().split('T')[0];
+        const dateStr = localDateKey(checkDate);
         if (trainDateSet.has(dateStr)) {
           dailyTrainingStreak++;
           checkDate.setDate(checkDate.getDate() - 1);
@@ -281,15 +282,14 @@ router.get('/player/:playerId/calendar-stats', authenticateTenant, (req: AuthReq
     // Win days this month
     const monthStart = new Date(todayStart);
     monthStart.setDate(1);
-    const winDaysThisMonth = winDays.filter(d => d.win_date >= monthStart.toISOString().split('T')[0]).length;
+    const winDaysThisMonth = winDays.filter(d => d.win_date >= localDateKey(monthStart)).length;
 
     // Consecutive days with 3+ wins (check last 30 days)
     let dailyThreeWinsStreak = 0;
     {
       const checkDate = new Date(todayStart);
       for (let i = 0; i < 30; i++) {
-        const dateStr = checkDate.toISOString().split('T')[0];
-        const dayStart = new Date(dateStr + 'T00:00:00').getTime();
+        const dayStart = new Date(checkDate.getFullYear(), checkDate.getMonth(), checkDate.getDate()).getTime();
         const dayEnd = dayStart + 86400000;
         const dayWins = db.prepare(`
           SELECT COUNT(*) as count FROM matches m
@@ -370,6 +370,19 @@ router.get('/player/:playerId/calendar-stats', authenticateTenant, (req: AuthReq
     `).all(playerId, req.tenantId) as { type: string; best_hit_rate: number | null; sessions: number }[];
 
     const distinctTrainingTypes = trainingTypeStats.length;
+    // "Every training mode N times": the least-played of the six modes
+    const minSessionsAllTraining = trainingTypeStats.length >= 6
+      ? Math.min(...trainingTypeStats.map(t => t.sessions))
+      : 0;
+
+    // Distinct opponents over all completed matches
+    const opponents = db.prepare(`
+      SELECT COUNT(DISTINCT other.player_id) as count
+      FROM match_players mine
+      JOIN matches m ON m.id = mine.match_id
+      JOIN match_players other ON other.match_id = mine.match_id AND other.player_id != mine.player_id
+      WHERE mine.player_id = ? AND m.status = 'completed' AND m.tenant_id = ?
+    `).get(playerId, req.tenantId) as { count: number };
     const minHitRateAllTraining = trainingTypeStats.length >= 6
       ? Math.min(...trainingTypeStats.map(t => t.best_hit_rate || 0))
       : 0;
@@ -392,6 +405,8 @@ router.get('/player/:playerId/calendar-stats', authenticateTenant, (req: AuthReq
       // Training variety
       distinctTrainingTypes,
       minHitRateAllTraining,
+      minSessionsAllTraining,
+      distinctOpponents: opponents.count,
     });
   } catch (error) {
     console.error('Error fetching calendar stats:', error);

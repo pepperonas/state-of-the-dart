@@ -14,6 +14,8 @@ import {
 import logger from '../utils/logger';
 import { mayLoadAchievements } from '../utils/achievementLoading';
 import { logBuffer } from '../utils/logBuffer';
+import { useOptionalPlayers } from './PlayerContext';
+import { meetsRequirement, LOWER_IS_BETTER, allAchievementsReached, minCheckoutAttempts } from '../utils/achievementRules';
 
 // Cumulative metrics that should use increment mode
 const CUMULATIVE_METRICS = new Set([
@@ -54,11 +56,18 @@ const CUMULATIVE_METRICS = new Set([
   'training_100_triples',
 ]);
 
-export type CheckMode = 'absolute' | 'increment';
+/** absolute = this value; increment = add to the stored progress; max = keep the larger. */
+export type CheckMode = 'absolute' | 'increment' | 'max';
+
+export interface CheckOptions {
+  mode?: CheckMode;
+  /** Checkout attempts behind a checkout-percentage value (tiers ask for a minimum). */
+  attempts?: number;
+}
 
 interface AchievementContextType {
   getPlayerProgress: (playerId: string) => PlayerAchievementProgress;
-  checkAchievement: (playerId: string, metric: string, value: number, gameId?: string, options?: { mode?: CheckMode }) => void;
+  checkAchievement: (playerId: string, metric: string, value: number, gameId?: string, options?: CheckOptions) => void;
   checkStreakProgress: (playerId: string, metric: string, currentStreak: number, gameId?: string) => void;
   unlockAchievement: (playerId: string, achievementId: string, gameId?: string) => void;
   isAchievementUnlocked: (playerId: string, achievementId: string) => boolean;
@@ -72,6 +81,16 @@ interface AchievementContextType {
   resetPlayerAchievements: (playerId: string) => void;
 }
 
+const ALL_ACHIEVEMENT_IDS = ACHIEVEMENTS.map(a => a.id);
+const KNOWN_IDS = new Set(ALL_ACHIEVEMENT_IDS);
+const isAllAchievementsKind = (id: string) => {
+  const a = ACHIEVEMENTS.find(x => x.id === id);
+  return !!a && a.requirement.metric === 'achievements_unlocked' && a.requirement.target >= ACHIEVEMENTS.length;
+};
+/** Legacy or removed ids (e.g. `first-180`) do not count toward "unlock N". */
+const countKnownUnlocks = (unlocked: UnlockedAchievement[]) =>
+  new Set(unlocked.map(u => u.achievementId).filter(id => KNOWN_IDS.has(id))).size;
+
 const AchievementContext = createContext<AchievementContextType | undefined>(undefined);
 
 interface AchievementProviderProps {
@@ -80,6 +99,10 @@ interface AchievementProviderProps {
 
 export const AchievementProvider: React.FC<AchievementProviderProps> = ({ children }) => {
   const { currentTenant } = useTenant();
+  // Bots do not earn achievements: no toast, no progress, nothing synced.
+  const players = useOptionalPlayers();
+  const botIdsRef = useRef<Set<string>>(new Set());
+  botIdsRef.current = new Set(players.filter(p => p.isBot).map(p => p.id));
   const [progressCache, setProgressCache] = useState<Record<string, PlayerAchievementProgress>>({});
   const [notificationQueue, setNotificationQueue] = useState<AchievementNotification[]>([]);
   const [currentNotification, setCurrentNotification] = useState<AchievementNotification | null>(null);
@@ -180,9 +203,10 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
 
     try {
       logger.apiEvent(`Loading achievements for player ${playerId} from API...`);
-      const currentProgress = progressCacheRef.current[playerId];
-
       const apiAchievements = await api.achievements.getByPlayer(playerId);
+      // Read local state AFTER the request: an unlock made while it was in
+      // flight (first visits of a game) would otherwise be overwritten.
+      const currentProgress = progressCacheRef.current[playerId];
       logger.debug(`API returned ${apiAchievements?.length || 0} achievements for player ${playerId}`);
 
       if (apiAchievements && Array.isArray(apiAchievements)) {
@@ -411,7 +435,11 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
       for (const achievement of unlockCountAchievements) {
         const currentProg = progressCacheRef.current[playerId];
         if (currentProg?.unlockedAchievements.some(u => u.achievementId === achievement.id)) continue;
-        if (currentProg.unlockedAchievements.length >= achievement.requirement.target) {
+        const reached = achievement.requirement.target >= ACHIEVEMENTS.length
+          // "All achievements" cannot wait for itself (or for its twin).
+          ? allAchievementsReached(currentProg.unlockedAchievements.map(u => u.achievementId), ALL_ACHIEVEMENT_IDS, isAllAchievementsKind)
+          : countKnownUnlocks(currentProg.unlockedAchievements) >= achievement.requirement.target;
+        if (reached) {
           const unlockedAchievement: UnlockedAchievement = {
             achievementId: achievement.id,
             unlockedAt: new Date(),
@@ -545,6 +573,8 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
       return;
     }
 
+    if (botIdsRef.current.has(playerId)) return;
+
     // Check if already unlocked using ref (always current)
     if (isAchievementUnlocked(playerId, achievementId)) {
       return;
@@ -617,8 +647,9 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
     metric: string,
     value: number,
     gameId?: string,
-    options?: { mode?: CheckMode }
+    options?: CheckOptions
   ) => {
+    if (botIdsRef.current.has(playerId)) return;
     const mode = options?.mode ?? (CUMULATIVE_METRICS.has(metric) ? 'increment' : 'absolute');
 
     const relevantAchievements = ACHIEVEMENTS.filter(a => a.requirement.metric === metric && a.requirement.type !== 'streak');
@@ -632,24 +663,20 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
       const { target } = achievement.requirement;
 
       // Calculate effective value
-      let effectiveValue = value;
-      if (mode === 'increment') {
-        const playerProgress = progressCacheRef.current[playerId];
-        const existing = playerProgress?.progress[achievement.id]?.current || 0;
-        effectiveValue = existing + value;
+      // Checkout-percentage tiers name a minimum number of attempts.
+      if (metric === 'checkout_percentage' && (options?.attempts ?? 0) < minCheckoutAttempts(achievement.description)) {
+        continue;
       }
 
-      // Special handling for metrics where lower is better (e.g. game_time_max, leg_darts)
-      const isLowerBetter = metric === 'game_time_max' || metric === 'leg_darts' ||
-                            metric === 'leg_301_darts' || metric === 'leg_701_darts' ||
-                            metric === 'checkout_darts_max' || metric === 'leg_visits_min' ||
-                            metric === 'avg_darts_per_leg_max';
-      const isExact = achievement.requirement.matchMode === 'exact';
-      const shouldUnlock = isExact
-        ? (effectiveValue === target)
-        : isLowerBetter
-          ? (effectiveValue <= target && effectiveValue > 0)
-          : (effectiveValue >= target);
+      let effectiveValue = value;
+      if (mode === 'increment' || mode === 'max') {
+        const playerProgress = progressCacheRef.current[playerId];
+        const existing = playerProgress?.progress[achievement.id]?.current || 0;
+        effectiveValue = mode === 'increment' ? existing + value : Math.max(existing, value);
+      }
+
+      const isLowerBetter = LOWER_IS_BETTER.has(metric);
+      const shouldUnlock = meetsRequirement(metric, effectiveValue, achievement.requirement);
 
       if (shouldUnlock) {
         unlockAchievement(playerId, achievement.id, gameId);
@@ -707,6 +734,7 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
     currentStreak: number,
     gameId?: string
   ) => {
+    if (botIdsRef.current.has(playerId)) return;
     const relevantAchievements = ACHIEVEMENTS.filter(
       a => a.requirement.metric === metric && a.requirement.type === 'streak'
     );
