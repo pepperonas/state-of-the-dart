@@ -7,6 +7,22 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.25.1] - 2026-10-11
+
+### Added
+- **Place in the leg** on every player card and in the phone score strip:
+  a poster in the style of gostumblr's match score (Google Sans Flex, wght 925
+  / wdth 45 / slnt -10, turned −8°, glow in its own colour). 1 green, 2 yellow,
+  3 orange, 4 red, 5+ neutral (`--m3-rank-1…5`, darker hues in the light
+  theme). The card takes the colour as a corner glow and an outline.
+- `utils/legRanks.ts`: competition ranking on confirmed visits (shared score =
+  shared rank, 1, 1, 3); nobody ranks while everyone is level.
+
+### Changed
+- The glowing-board leg-leader icon is replaced by the rank (`legLeaderId`
+  removed; the resume table keeps `legLeaderFromRemaining`).
+- The font is loaded cut to the digits (`text=0123456789`).
+
 ## [0.25.0] - 2026-10-11
 
 ### Fixed — quick play

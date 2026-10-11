@@ -47,6 +47,9 @@
   --m3-success: #7edb97;
   /* Rank colours, tuned for contrast on dark surfaces. */
   --m3-medal-gold: #f5c542;
+  /* Leg standing (1 green → 4 red, 5+ neutral), the gostumblr stamp colours. */
+  --m3-rank-1: #4ade80; --m3-rank-2: #facc15; --m3-rank-3: #fb923c;
+  --m3-rank-4: #f87171; --m3-rank-5: #a3a3a3;
   /* Heatmap: one warm ramp, OKLCH lightness monotone. Dark mode runs dark→bright
      (low counts recede into the surface), light mode the other way round. */
   --m3-heat-1: #703324; --m3-heat-2: #924e2e; --m3-heat-3: #b46c37;
@@ -117,6 +120,9 @@
   --m3-success: #006d3c;
   /* …and on light surfaces. */
   --m3-medal-gold: #8a6100;
+  /* The bright stamp colours vanish on a light card: same hues, darker. */
+  --m3-rank-1: #15803d; --m3-rank-2: #a16207; --m3-rank-3: #c2410c;
+  --m3-rank-4: #b91c1c; --m3-rank-5: #5c6470;
   --m3-heat-1: #f3d2a4; --m3-heat-2: #e3b17d; --m3-heat-3: #d48f57;
   --m3-heat-4: #c36d35; --m3-heat-5: #b14812; --m3-heat-6: #992400;
   --m3-medal-silver: #5c6470;
@@ -806,7 +812,9 @@ button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surfa
   animation: sotd-fire-glow 4.3s ease-in-out infinite, sotd-fire-border 2.7s ease-in-out infinite;
 }
 /* Content sits above the flames. */
-.sotd-on-fire > :not(.sotd-fire-canvas) { position: relative; z-index: 2; }
+.sotd-on-fire > :not(.sotd-fire-canvas):not(.sotd-rank-stamp) { position: relative; z-index: 2; }
+/* The rank stamp floats over the burning card too (above the flames). */
+.sotd-on-fire > .sotd-rank-stamp { z-index: 2; }
 .sotd-fire-canvas {
   position: absolute;
   left: 0; right: 0; bottom: 0;
@@ -835,4 +843,42 @@ button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surfa
 .sotd-leg-won { animation: sotd-leg-won 1.4s var(--m3-easing-standard) 1; }
 @media (prefers-reduced-motion: reduce) {
   .sotd-leg-won { animation: none; }
+}
+
+/* ── Leg rank stamp ───────────────────────────────────────────────────────
+   The gostumblr "Übereinstimmung" poster: Google Sans Flex with fixed axes
+   (wght 925 / wdth 45 / slnt -10 / opsz 96), large, turned a little, with a
+   glow in its own colour. ⚠️ The font is cut to the digits 0–9 (index.html);
+   no other character may go in, it would fall back visibly. */
+.sotd-rank-stamp {
+  font-family: 'Google Sans Flex', 'Inter', system-ui, sans-serif;
+  font-weight: 925;
+  font-stretch: 45%;
+  font-style: oblique 10deg;
+  font-variation-settings: 'wght' 925, 'wdth' 45, 'slnt' -10, 'opsz' 96;
+  font-variant-numeric: tabular-nums;
+  line-height: 0.78;
+  letter-spacing: -0.02em;
+  color: var(--rank-color);
+  text-shadow: 0 0 32px color-mix(in srgb, var(--rank-color) 30%, transparent);
+  transform: rotate(-8deg);
+  transform-origin: 100% 100%;
+  user-select: none;
+  pointer-events: none;
+}
+/* The card behind it takes the rank's colour: a soft glow from the stamp's
+   corner, and an outline in the same hue. */
+.sotd-rank-tint {
+  background-image: radial-gradient(
+    120% 100% at 100% 0%,
+    color-mix(in srgb, var(--rank-color) 18%, transparent),
+    transparent 62%
+  );
+}
+/* ⚠️ An outline, not a box-shadow: elevation and the burning frame of the
+   player at the oche both live on box-shadow. The burning card keeps its own
+   frame. */
+.sotd-rank-tint:not(.sotd-on-fire) {
+  outline: 1px solid color-mix(in srgb, var(--rank-color) 45%, transparent);
+  outline-offset: -1px;
 }

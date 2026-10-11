@@ -321,6 +321,11 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - Game screen below `lg`: `ScoreStrip` replaces the stacked `PlayerScore` cards and ScoreInput hides its own "remaining" header. `e2e/layout.spec.ts` asserts the confirm button and all scores are on screen at 390×844 and 1280×800. ⚠️ Locators like `getByText('501')` must add `.locator('visible=true')` — the strip exists (hidden) on desktop too.
 - ScoreInput has three modes (`numpad` / `darts` / `quick`, remembered in `sotd-input-mode`); the dart grid adds exact beds.
 
+### Leg ranks (0.25.1)
+- `legRanks()` (`utils/legRanks.ts`) — place in the current leg from confirmed visits, shared score = shared rank, all level = nobody. `RankStamp` draws it (`data-testid="leg-rank"`, `data-rank`), colour via `--rank-color: var(--m3-rank-N)` (`rankTone`: 1–4, 5 = neutral).
+- `.sotd-rank-stamp` = gostumblr's score poster. ⚠️ Google Sans Flex is loaded with `text=0123456789` — only digits may go in, anything else falls back visibly.
+- `.sotd-rank-tint` uses an **outline**, not a box-shadow: elevation and the burning frame live on box-shadow. ⚠️ `.sotd-on-fire > :not(...)` forces `position: relative` on card children; the stamp is exempted there, otherwise it drops into the flow on the active card.
+
 ### Quick play (0.25.0)
 - **The turn passes at once:** `confirmVisit` dispatches `CONFIRM_THROW` and then `NEXT_PLAYER` in the same tick (never on a checkout). The old one-second timer booked a visit typed inside that second to the previous player. The two actions stay separate (`gameReducer.turns.test.ts`).
 - **Numpad total + Enter = `onCommitDarts(darts)`**: GameScreen adds the darts and confirms `[...currentThrow, ...darts]` in one handler. Don't go back to "add, then confirm in an effect" (`pendingConfirm` remains only as a fallback for a ScoreInput without `onCommitDarts`): keys typed before the effect saw three darts and were dropped.
@@ -335,7 +340,7 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - **Refresh safety:** the running X01 match lives in `state-of-the-dart-active-match`, the unconfirmed darts of the current visit in `state-of-the-dart-active-throw` (`{matchId, darts}`; both in `DEVICE_GAME_KEYS`). `LOAD_MATCH` takes `currentThrow`, validated by `utils/restoredThrow.ts`, ignored when a bot is up. ⚠️ The throw-save effect skips the first render (no match yet) — writing `[]` there would erase the darts before the restore lands. Pinned by `e2e/refresh.spec.ts`.
 - **Desktop columns:** from three players on, `leftPlayerCount = ceil(n/2)` cards sit left of the input, the rest right above the stats.
 - **Burning frame:** the active `PlayerScore` gets `.sotd-on-fire` (m3.css) plus `<FireCanvas />` (WebGL shader ported from nice-to-be-nice, 2D fallback). Only the active card mounts it; the context is released on unmount. Light theme blends `normal` (screen would wash it out); reduced motion → still frame, no canvas.
-- **Leg leader:** the glowing board (`data-testid="leg-leader"`) marks `legLeaderId()` (lowest remaining in the current leg from confirmed visits, null when shared) — not the active player. The legs tile tints tertiary once `legsWon > 0` and springs + glows (`.sotd-leg-won`) only when the count rises during play; the previous count is kept as state adjusted during render, so mount/resume/undo do not replay it.
+- **Leg standing:** since 0.25.1 the rank stamp (see "Leg ranks") replaces the glowing-board leader icon. The legs tile tints tertiary once `legsWon > 0` and springs + glows (`.sotd-leg-won`) only when the count rises during play; the previous count is kept as state adjusted during render, so mount/resume/undo do not replay it.
 - ⚠️ **GameScreen has three identical `{/* Leg/Match Toggle */}` markers** (history, charts, heatmap). A replace anchored on one of them deleted the history and chart sections in 0.19.0 — anchor on something unique. `e2e/refresh.spec.ts` opens all three sections.
 
 ### Achievements in a game (0.21.0)
@@ -471,7 +476,7 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Specs in `e2e/`. **33 tests** currently:
   - `fast-play.spec.ts` — visits typed back to back without waiting land with the right player; a bust never shows a negative score; the leg overlay closes on a tap; checkout route on screen at 390×844; no player cards (fire canvas) mounted on phones
   - `achievements-flow.spec.ts` — mid-leg toast closes on an outside tap; a numpad 141 checkout ends the leg; achievements go centre stage and stay until "Weiter"
-  - `refresh.spec.ts` — four players: desktop column split, refresh mid-visit keeps scores, turn and entered darts; history, charts and live heatmap sections render
+  - `refresh.spec.ts` — four players: leg ranks 1/2/3/3, desktop column split, refresh mid-visit keeps scores, turn and entered darts; history, charts and live heatmap sections render
   - `heatmap.spec.ts` — the statistics heatmap at phone and desktop size: no overflow, bulls in the centre, a tapped bed is named
   - `online.spec.ts` — two browsers play an online match to the end; a reload mid-leg keeps the seat; a leg won by the non-starter pins the throw-off rule; rematch
   - `tournament.spec.ts` — create a tournament in the UI, enter a leg, reload, resume, confirm, reload: nothing is lost

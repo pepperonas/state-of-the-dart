@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import AnimatedNumber from '../common/AnimatedNumber';
+import RankStamp from './RankStamp';
+import { rankTone } from '../../utils/legRanks';
 
 export interface StripPlayer {
   playerId: string;
@@ -9,6 +11,8 @@ export interface StripPlayer {
   legsWon: number;
   setsWon: number;
   isActive: boolean;
+  /** Place in the current leg; null while everyone is level. */
+  rank?: number | null;
 }
 
 interface ScoreStripProps {
@@ -46,13 +50,15 @@ const ScoreStrip: React.FC<ScoreStripProps> = ({ players, showSets, className = 
           role="listitem"
           data-testid={`strip-${p.name}`}
           aria-current={p.isActive ? 'true' : undefined}
-          className={`snap-start flex-1 min-w-[7.5rem] rounded-m3-lg px-3 py-2 phoneland:py-1 phoneland:flex phoneland:items-baseline phoneland:gap-3 transition-colors ${
+          style={p.rank ? ({ '--rank-color': `var(--m3-rank-${rankTone(p.rank)})` } as React.CSSProperties) : undefined}
+          className={`relative overflow-hidden snap-start flex-1 min-w-[7.5rem] rounded-m3-lg px-3 py-2 phoneland:py-1 phoneland:flex phoneland:items-baseline phoneland:gap-3 transition-colors ${
             p.isActive
               ? 'bg-primary-container text-on-primary-container ring-2 ring-[var(--m3-primary)]'
               : 'bg-surface-container text-on-surface'
-          }`}
+          } ${p.rank ? 'sotd-rank-tint' : ''}`}
         >
-          <div className="m3-label-large truncate phoneland:min-w-0">{p.name}</div>
+          {p.rank && <RankStamp rank={p.rank} size="strip" className="absolute right-2 top-1.5 phoneland:static phoneland:order-last" />}
+          <div className={`m3-label-large truncate phoneland:min-w-0 ${p.rank ? 'pr-8 phoneland:pr-0' : ''}`}>{p.name}</div>
           {/* Phone landscape: name and score on one line — height is what runs out. */}
           <div className="flex items-baseline justify-between gap-2 phoneland:flex-1">
             <AnimatedNumber value={p.remaining} className="text-3xl phoneland:text-2xl font-bold tabular-nums" />
@@ -74,7 +80,7 @@ const samePlayers = (a: ScoreStripProps, b: ScoreStripProps) =>
   a.players.every((p, i) => {
     const q = b.players[i];
     return p.playerId === q.playerId && p.name === q.name && p.remaining === q.remaining &&
-      p.legsWon === q.legsWon && p.setsWon === q.setsWon && p.isActive === q.isActive;
+      p.legsWon === q.legsWon && p.setsWon === q.setsWon && p.isActive === q.isActive && p.rank === q.rank;
   });
 
 export default React.memo(ScoreStrip, samePlayers);
