@@ -25,8 +25,8 @@ export const loadLastGameSettings = (): MatchSettings => {
 
 export const saveLastGameSettings = (settings: MatchSettings): void => {
   try {
-    const { startScore, legsToWin, setsToWin, doubleOut, doubleIn } = settings;
-    localStorage.setItem(LAST_SETTINGS_KEY, JSON.stringify({ startScore, legsToWin, setsToWin, doubleOut, doubleIn }));
+    const { startScore, legsToWin, setsToWin, doubleOut, doubleIn, tripleOut, tripleIn } = settings;
+    localStorage.setItem(LAST_SETTINGS_KEY, JSON.stringify({ startScore, legsToWin, setsToWin, doubleOut, doubleIn, tripleOut, tripleIn }));
   } catch {
     // storage unavailable
   }

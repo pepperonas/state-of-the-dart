@@ -216,7 +216,18 @@
     "stats_scope": "Scope",
     "current_leg": "Current leg",
     "whole_match": "Whole match",
-    "new_dart_value": "New dart value…"
+    "new_dart_value": "New dart value…",
+    "triple_out": "Triple Out",
+    "triple_in": "Triple In",
+    "single_out": "Single Out",
+    "single_in": "Single In",
+    "check_in": "Check-in",
+    "check_out": "Check-out",
+    "check_in_hint": "What starts the scoring",
+    "check_out_hint": "What finishes a leg",
+    "rule_single": "Single",
+    "rule_double": "Double",
+    "rule_triple": "Triple"
   },
   "stats": {
     "statistics": "Statistics",
@@ -1732,7 +1743,10 @@
     "remove": "Remove player",
     "highest": "High",
     "leg_leader": "Leads this leg",
-    "leg_rank": "Place {{rank}} in this leg"
+    "leg_rank": "Place {{rank}} in this leg",
+    "legs_to_win": "{{won}}/{{total}} to win",
+    "legs_to_win_set": "{{won}}/{{total}} for the set",
+    "legs_to_win_long": "{{won}} of {{total}} legs to win"
   },
   "dartboard": {
     "label": "Interactive dartboard"
@@ -1786,7 +1800,10 @@
     "replace_dart": "Replace dart",
     "submit_total": "Enter visit total and confirm",
     "checkout": "Checkout!",
-    "typed": "Input"
+    "typed": "Input",
+    "keyboard_entry": "Type the total on your keyboard, Enter books it",
+    "show_numpad": "Show numpad",
+    "hide_numpad": "Hide numpad"
   },
   "cricket_game": {
     "rules_title": "Cricket rules:",

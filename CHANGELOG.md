@@ -7,6 +7,29 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.27.0] - 2026-10-11
+
+### Added
+- **Triple in / triple out.** `utils/checkRules.ts`: check-in and check-out
+  as `single | double | triple`, stored as flags (`tripleIn`/`tripleOut` next to
+  the double flags; old matches keep their meaning). `evaluateVisit`,
+  `isBust`, `numpadDarts` and the checkout route follow the rule; triple-out
+  routes are solved (up to 180, last dart a triple); 1 and 2 left are a bust
+  under triple out. Setup: two segmented buttons "Check-in" / "Check-out".
+  Menu and resume list show the rules (`ruleTags`: DI/TI/DO/TO).
+- **Legs to win** on every card ("1/3 zum Sieg", "zum Satz" in sets) and in
+  the phone strip ("1/3 L", full sentence for screen readers).
+- **Numpad folds on keyboard-first desktops** (fine pointer + hover + ≥ 1024 px):
+  folded by default with a keyboard hint and an unfold control, remembered per
+  device (`sotd-numpad-open`). Touch keeps it open.
+
+### Known limits
+- Bots aim for doubles and online games stay double-out.
+
+### Tests
+- `checkRules.test.ts` (9), `numpadFold.test.tsx` (6), a triple-out E2E;
+  `layout.spec.ts` unfolds the numpad on desktop before measuring it.
+
 ## [0.26.0] - 2026-10-11
 
 ### Changed — motion

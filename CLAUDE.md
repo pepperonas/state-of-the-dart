@@ -321,6 +321,12 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - Game screen below `lg`: `ScoreStrip` replaces the stacked `PlayerScore` cards and ScoreInput hides its own "remaining" header. `e2e/layout.spec.ts` asserts the confirm button and all scores are on screen at 390×844 and 1280×800. ⚠️ Locators like `getByText('501')` must add `.locator('visible=true')` — the strip exists (hidden) on desktop too.
 - ScoreInput has three modes (`numpad` / `darts` / `quick`, remembered in `sotd-input-mode`); the dart grid adds exact beds.
 
+### Check rules, legs to win, numpad fold (0.27.0)
+- In/out rules live in `utils/checkRules.ts` (`inRuleOf`/`outRuleOf` from the settings flags, `ruleSettings` writes consistent flags, `checkoutRoute` dispatches: triple → solver, else the table). Always go through `rulesOf()` → `evaluateVisit` — `VisitRules.inRule/outRule` are optional and fall back to the double flags, so hand-built rules in tests still work. `isBust` and `numpadDarts` take `boolean | CheckRule` (true = double).
+- Triple out: 1 and 2 left are a bust; checkouts go up to 180. Bots and online play are still double-out only.
+- Legs to win: `PlayerScore`/`ScoreStrip` take `legsToWin` (match or set value).
+- Numpad: folded by default only when `(hover: hover) and (pointer: fine) and (min-width: 1024px)` — ⚠️ the width matters: Playwright's desktop Chromium reports a fine pointer at 390 px too, so without it every phone-sized E2E saw a folded numpad.
+
 ### Motion system (0.26.0)
 - **`src/utils/springs.ts` is the one source of motion.** M3 specs (stiffness + damping ratio). `motion.ts` builds framer transitions with `toFramer()`; CSS gets them as `--m3-spring-<group>-<speed>` (`linear()`) + `-duration`, written by `node --experimental-strip-types tools/gen-springs.ts` between the `@generated springs` markers in `motion.css`. Change a spec → re-run the generator, or `springs.test.ts` fails.
 - Effects springs are ζ = 1 (no overshoot); `AnimatedNumber` uses `TALLY` (ζ = 1) — a score must never overshoot and show a wrong digit.
@@ -480,8 +486,8 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **34 tests** currently:
-  - `fast-play.spec.ts` — visits typed back to back without waiting land with the right player; a bust never shows a negative score; the leg overlay closes on a tap; checkout route on screen at 390×844; no player cards (fire canvas) mounted on phones; no endless animation under reduced motion
+- Specs in `e2e/`. **35 tests** currently:
+  - `fast-play.spec.ts` — visits typed back to back without waiting land with the right player; a bust never shows a negative score; the leg overlay closes on a tap; checkout route on screen at 390×844; no player cards (fire canvas) mounted on phones; no endless animation under reduced motion; triple out chosen at setup checks out on a triple
   - `achievements-flow.spec.ts` — mid-leg toast closes on an outside tap; a numpad 141 checkout ends the leg; achievements go centre stage and stay until "Weiter"
   - `refresh.spec.ts` — four players: leg ranks 1/2/3/3, desktop column split, refresh mid-visit keeps scores, turn and entered darts; history, charts and live heatmap sections render
   - `heatmap.spec.ts` — the statistics heatmap at phone and desktop size: no overflow, bulls in the centre, a tapped bed is named

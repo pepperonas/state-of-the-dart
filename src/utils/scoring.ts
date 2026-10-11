@@ -1,5 +1,6 @@
 import { Dart, Throw, Leg, Match, MatchPlayer } from '../types/index';
 import { getCheckoutSuggestion } from '../data/checkoutTable';
+import { checkoutRoute, type CheckRule } from './checkRules';
 
 export const calculateDartScore = (segment: number, multiplier: 0 | 1 | 2 | 3): number => {
   if (multiplier === 0) return 0; // miss
@@ -136,16 +137,24 @@ export const isCheckout = (remaining: number, darts: Dart[]): boolean => {
 };
 
 export const isBust = (
-  remaining: number, 
-  throwScore: number, 
-  requiresDouble: boolean,
+  remaining: number,
+  throwScore: number,
+  outRule: boolean | CheckRule,
   lastDart?: Dart
 ): boolean => {
   const newRemaining = remaining - throwScore;
-  
+
   // Score went negative
   if (newRemaining < 0) return true;
-  
+
+  // Triple out: the finishing dart must be a triple, and 1 or 2 left can never
+  // be finished on one (T1 = 3).
+  if (outRule === 'triple') {
+    if (newRemaining === 0) return !lastDart || lastDart.multiplier !== 3;
+    return newRemaining < 3;
+  }
+  const requiresDouble = outRule === true || outRule === 'double';
+
   // Finished on 0 but didn't hit a double when required
   if (newRemaining === 0 && requiresDouble && lastDart) {
     // Valid finish requires a double (multiplier 2), which includes bull
@@ -505,13 +514,14 @@ export const routeToDarts = (route: string[]): Dart[] | null => {
 
 /**
  * Darts for a total typed on the numpad. When the total is exactly what is
- * left, it is a checkout: under double-out the darts follow the checkout
- * table, so the last one is a double. The plain reconstruction (T20 first)
+ * left, it is a checkout: under double- or triple-out the darts follow the
+ * checkout route, so the last one is a double (or a triple). The plain reconstruction (T20 first)
  * would not end on a double and turned every such checkout into a bust.
  */
-export const numpadDarts = (score: number, remaining: number, dartsLeft: number, doubleOut: boolean): Dart[] => {
-  if (doubleOut && score === remaining && score > 1 && score <= 170) {
-    const route = getCheckoutSuggestion(score, dartsLeft, true);
+export const numpadDarts = (score: number, remaining: number, dartsLeft: number, outRule: boolean | CheckRule): Dart[] => {
+  const rule: CheckRule = outRule === true ? 'double' : outRule === false ? 'single' : outRule;
+  if (rule !== 'single' && score === remaining) {
+    const route = checkoutRoute(score, dartsLeft, rule);
     const darts = route ? routeToDarts(route) : null;
     if (darts && calculateThrowScore(darts) === score) return darts.map(d => ({ ...d, estimated: true }));
   }

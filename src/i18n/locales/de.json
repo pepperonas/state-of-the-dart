@@ -216,7 +216,18 @@
     "stats_scope": "Zeitraum",
     "current_leg": "Aktuelles Leg",
     "whole_match": "Gesamtes Spiel",
-    "new_dart_value": "Neuer Dart-Wert …"
+    "new_dart_value": "Neuer Dart-Wert …",
+    "triple_out": "Triple Out",
+    "triple_in": "Triple In",
+    "single_out": "Single Out",
+    "single_in": "Single In",
+    "check_in": "Check-in",
+    "check_out": "Check-out",
+    "check_in_hint": "Womit das Punkten beginnt",
+    "check_out_hint": "Womit ein Leg beendet wird",
+    "rule_single": "Single",
+    "rule_double": "Double",
+    "rule_triple": "Triple"
   },
   "stats": {
     "statistics": "Statistiken",
@@ -1732,7 +1743,10 @@
     "remove": "Spieler entfernen",
     "highest": "High",
     "leg_leader": "Führt im Leg",
-    "leg_rank": "Platz {{rank}} im Leg"
+    "leg_rank": "Platz {{rank}} im Leg",
+    "legs_to_win": "{{won}}/{{total}} zum Sieg",
+    "legs_to_win_set": "{{won}}/{{total}} zum Satz",
+    "legs_to_win_long": "{{won}} von {{total}} Legs zum Sieg"
   },
   "dartboard": {
     "label": "Interaktive Dartscheibe"
@@ -1786,7 +1800,10 @@
     "replace_dart": "Dart ersetzen",
     "submit_total": "Wurf-Summe übernehmen und bestätigen",
     "checkout": "Checkout!",
-    "typed": "Eingabe"
+    "typed": "Eingabe",
+    "keyboard_entry": "Summe auf der Tastatur tippen, Enter bucht",
+    "show_numpad": "Ziffernfeld einblenden",
+    "hide_numpad": "Ziffernfeld ausblenden"
   },
   "cricket_game": {
     "rules_title": "Cricket-Regeln:",

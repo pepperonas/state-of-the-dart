@@ -76,6 +76,9 @@ export interface MatchSettings {
   setsToWin?: number;
   doubleOut?: boolean;
   doubleIn?: boolean;
+  /** Triple out / in — take precedence over the double flags (utils/checkRules). */
+  tripleOut?: boolean;
+  tripleIn?: boolean;
   masterOut?: boolean;
   
   // Cricket Settings

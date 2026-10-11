@@ -47,6 +47,13 @@ for (const size of SIZES) {
       expect(b && b.y + b.height <= size.height, `${n}'s score off screen`).toBeTruthy();
     }
 
+    // Desktop with mouse + keyboard: the numpad starts folded (the keyboard is
+    // the numpad there); unfolded, it must still fit.
+    if (size.name === 'desktop') {
+      await expect(page.getByTestId('numpad-collapsed')).toBeVisible();
+      await page.getByRole('button', { name: 'Ziffernfeld einblenden' }).click();
+    }
+
     // The whole numpad, not just its top row.
     const zero = page.getByRole('button', { name: '0', exact: true });
     const z = await zero.boundingBox();

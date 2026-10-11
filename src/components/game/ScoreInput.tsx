@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
-import { Check, X, Delete, Keyboard, RotateCcw } from 'lucide-react';
+import { Check, X, Delete, Keyboard, RotateCcw, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Dart } from '../../types/index';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,6 +10,8 @@ import SegmentedButton from '../common/SegmentedButton';
 import { springSpatialFast, springSpatialDefault, effectsFast, enterRise } from '../../utils/motion';
 import { shouldHandleGameKey } from '../../utils/gameKeys';
 import type { Handoff } from '../../utils/handoff';
+import type { CheckRule } from '../../utils/checkRules';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 
 interface ScoreInputProps {
   currentThrow: Dart[];
@@ -22,8 +24,8 @@ interface ScoreInputProps {
   onSetEditingDartIndex: (index: number | null) => void;
   isEditingThrow?: boolean;
   remaining: number;
-  /** Double-out: a numpad total equal to the remaining score is entered along a checkout route. */
-  doubleOut?: boolean;
+  /** Out rule: a numpad total equal to the remaining score is entered along a checkout route. */
+  outRule?: CheckRule;
   isCheckout?: boolean;
   /** Take back the last CONFIRMED throw (loads its darts back for correction). */
   onUndoThrow?: () => void;
@@ -54,6 +56,10 @@ const STAGGER_S = 0.045;
 const keepFocus = { onPointerDown: (e: React.PointerEvent) => e.preventDefault() };
 
 const INPUT_MODE_KEY = 'sotd-input-mode';
+/** Whether the on-screen numpad is unfolded where it starts folded (per device). */
+const NUMPAD_OPEN_KEY = 'sotd-numpad-open';
+/** Mouse and keyboard on a desktop-sized screen. Phones report a coarse pointer. */
+const KEYBOARD_FIRST_QUERY = '(hover: hover) and (pointer: fine) and (min-width: 1024px)';
 type InputMode = 'numpad' | 'darts' | 'quick';
 
 
@@ -69,7 +75,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   isCheckout = false,
   isEditingThrow,
   remaining,
-  doubleOut = true,
+  outRule = 'double',
   onUndoThrow,
   lastThrow = null,
   onAddDarts,
@@ -99,6 +105,19 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
     try { localStorage.setItem(INPUT_MODE_KEY, mode); } catch { /* storage unavailable */ }
   };
   const setEditingDartIndex = onSetEditingDartIndex;
+  const keyboardFirst = useMediaQuery(KEYBOARD_FIRST_QUERY);
+  const [numpadPref, setNumpadPref] = useState<boolean | null>(() => {
+    try {
+      const v = localStorage.getItem(NUMPAD_OPEN_KEY);
+      return v === '1' ? true : v === '0' ? false : null;
+    } catch { return null; }
+  });
+  const numpadOpen = !keyboardFirst || (numpadPref ?? false);
+  const toggleNumpad = () => {
+    const next = !numpadOpen;
+    setNumpadPref(next);
+    try { localStorage.setItem(NUMPAD_OPEN_KEY, next ? '1' : '0'); } catch { /* storage unavailable */ }
+  };
   // Shared-axis X between the input modes: the new pad slides in from the side
   // of the tab that was picked (left tab → from the left).
   const [modeDir, setModeDir] = useState(0);
@@ -242,7 +261,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
       if (score < 0 || score > 180) return;
 
       if (onCommitDarts) {
-        const darts = numpadDarts(score, remaining, 3 - currentThrow.length, doubleOut)
+        const darts = numpadDarts(score, remaining, 3 - currentThrow.length, outRule)
           .slice(0, 3 - currentThrow.length);
         setCurrentInput('');
         onCommitDarts(darts);
@@ -278,7 +297,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
     if (currentThrow.length >= 3) return;
 
     // Convert score to plausible darts — along a checkout route when it finishes.
-    const darts = numpadDarts(score, remaining, 3 - currentThrow.length, doubleOut);
+    const darts = numpadDarts(score, remaining, 3 - currentThrow.length, outRule);
     // Add darts one by one, respecting the 3-dart limit
     const dartsToAdd = darts.slice(0, 3 - currentThrow.length);
     if (onAddDarts) onAddDarts(dartsToAdd);
@@ -562,7 +581,30 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
         </>
       ) : (
         <>
+          {/* Mouse + keyboard on a desktop: the keyboard IS the numpad, so the
+              on-screen one starts folded (per device). Touch keeps it open —
+              there it is the fastest way in. */}
+          {keyboardFirst && (
+            <div className="flex items-center justify-between gap-2 mb-3 phoneland:col-start-1">
+              {!numpadOpen && (
+                <span data-testid="numpad-collapsed" className="m3-body-medium text-on-surface-variant flex items-center gap-2">
+                  <Keyboard size={18} aria-hidden="true" />
+                  {t('score_input.keyboard_entry')}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={toggleNumpad}
+                aria-expanded={numpadOpen}
+                className="m3-state-layer ml-auto inline-flex items-center gap-1 px-3 min-h-[40px] rounded-m3-full m3-label-large text-primary"
+              >
+                <ChevronDown size={18} aria-hidden="true" className={`m3-chevron ${numpadOpen ? 'm3-open' : ''}`} />
+                {numpadOpen ? t('score_input.hide_numpad') : t('score_input.show_numpad')}
+              </button>
+            </div>
+          )}
           {/* Numpad */}
+          {numpadOpen && (
           <motion.div key={inputMode} {...modeEnter} className="grid grid-cols-3 gap-2 mb-3 lg:mb-4 phoneland:gap-1.5 phoneland:col-start-2 phoneland:row-start-1 phoneland:row-span-6 phoneland:mb-0">
             {[7, 8, 9, 4, 5, 6, 1, 2, 3].map((num) => (
               <button
@@ -599,6 +641,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
               {editingDartIndex !== null ? t('game.set_dart') : '↵'}
             </button>
           </motion.div>
+          )}
 
         </>
       )}

@@ -1,5 +1,6 @@
 import { Dart, Throw } from '../types/index';
 import { calculateThrowScore, isBust } from './scoring';
+import { inRuleOf, outRuleOf, ruleMultiplier, type CheckRule } from './checkRules';
 
 /**
  * One source of truth for "what does this visit do to the score".
@@ -12,6 +13,11 @@ import { calculateThrowScore, isBust } from './scoring';
 
 export interface VisitRules {
   startScore: number;
+  /** Check-in / check-out (single, double, triple) — see utils/checkRules.
+   *  Optional: without them the double flags below decide. */
+  inRule?: CheckRule;
+  outRule?: CheckRule;
+  /** Kept for callers that only know double rules. */
   doubleOut: boolean;
   doubleIn: boolean;
 }
@@ -33,24 +39,35 @@ export const rulesOf = (settings: {
   startScore?: number;
   doubleOut?: boolean;
   doubleIn?: boolean;
-}): VisitRules => ({
-  startScore: settings.startScore || 501,
-  doubleOut: settings.doubleOut ?? true,
-  doubleIn: settings.doubleIn ?? false,
-});
+  tripleOut?: boolean;
+  tripleIn?: boolean;
+}): VisitRules => {
+  const inRule = inRuleOf(settings);
+  const outRule = outRuleOf(settings);
+  return {
+    startScore: settings.startScore || 501,
+    inRule,
+    outRule,
+    doubleOut: outRule === 'double',
+    doubleIn: inRule === 'double',
+  };
+};
 
 /** Points already scored in this leg by one player. */
 export const scoredInLeg = (legThrows: Throw[], playerId: string): number =>
   legThrows.reduce((sum, t) => (t.playerId === playerId ? sum + t.score : sum), 0);
 
 /**
- * Double-in: nothing counts until a double lands, and the double itself counts.
- * Once a player has scored in this leg they are "in" — any counted score
- * implies a double was hit, because only a double can open the scoring.
+ * Double-/triple-in: nothing counts until a dart of that kind lands, and that
+ * dart itself counts. Once a player has scored in this leg they are "in" — any
+ * counted score implies the opener was hit, only it can open the scoring.
+ * `true` / `false` still mean double-in / straight-in.
  */
-export const countedScore = (darts: Dart[], alreadyIn: boolean, doubleIn: boolean): number => {
-  if (!doubleIn || alreadyIn) return calculateThrowScore(darts);
-  const opener = darts.findIndex(d => d.multiplier === 2);
+export const countedScore = (darts: Dart[], alreadyIn: boolean, inRule: CheckRule | boolean): number => {
+  const rule: CheckRule = inRule === true ? 'double' : inRule === false ? 'single' : inRule;
+  if (rule === 'single' || alreadyIn) return calculateThrowScore(darts);
+  const need = ruleMultiplier(rule);
+  const opener = darts.findIndex(d => d.multiplier === need);
   if (opener === -1) return 0;
   return calculateThrowScore(darts.slice(opener));
 };
@@ -64,9 +81,11 @@ export const evaluateVisit = (
   const scored = scoredInLeg(legThrows, playerId);
   const previousRemaining = rules.startScore - scored;
   const rawScore = calculateThrowScore(darts);
-  const counted = countedScore(darts, scored > 0, rules.doubleIn);
+  const inRule = rules.inRule ?? (rules.doubleIn ? 'double' : 'single');
+  const outRule = rules.outRule ?? (rules.doubleOut ? 'double' : 'single');
+  const counted = countedScore(darts, scored > 0, inRule);
   const lastDart = darts[darts.length - 1];
-  const bust = darts.length > 0 && isBust(previousRemaining, counted, rules.doubleOut, lastDart);
+  const bust = darts.length > 0 && isBust(previousRemaining, counted, outRule, lastDart);
   const checkout = !bust && darts.length > 0 && previousRemaining - counted === 0;
 
   return {
