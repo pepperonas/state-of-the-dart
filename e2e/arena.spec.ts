@@ -82,3 +82,22 @@ test('very large screen: no narrow width cap, the UI scales up', async ({ page }
   expect(rootPx).toBeGreaterThan(16);
   await noOverflow(page);
 });
+
+test('a 180 gets the hero moment, a won leg its recap', async ({ page }) => {
+  const names = await start(page, 1280, 900);
+  await page.keyboard.type('180');
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('hero-moment')).toContainText('180');
+  // It does not block input: the next player types straight away.
+  await page.keyboard.type('0');
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('hero-moment')).toHaveCount(0, { timeout: 4000 });
+  const close = page.getByRole('button', { name: /Alle schließen|Weiter/ });
+  if (await close.count()) await close.first().click();
+  for (const s of ['0', '180', '0', '0', '141']) {
+    await page.keyboard.type(s);
+    await page.keyboard.press('Enter');
+  }
+  await expect(page.getByTestId('leg-recap')).toContainText('Checkout 141');
+  await expect(page.getByTestId(`player-card-${names[1]}`)).toContainText('501');
+});

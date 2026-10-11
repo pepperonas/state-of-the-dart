@@ -245,7 +245,6 @@ These modules used to ship eagerly and were extracted into their own chunks duri
 - `xlsx`, `jspdf`, `jspdf-autotable` — dynamic-imported inside `exportImport.ts`
 - `html2canvas` — dynamic-imported inside `screenshot.ts`
 - `canvas-confetti` — dynamic-imported via `celebration.ts`
-- `react-confetti` — `React.lazy` + `<Suspense>` in `GameScreen.tsx`
 - `recharts` — extracted into `src/components/game/ThrowChart.tsx` (lazy in `GameScreen`) and `src/components/stats/MatchChart.tsx` (lazy in `MatchHistoryPage`)
 
 ### Type System
@@ -320,6 +319,12 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - Home (`MainMenu.tsx`): the rematch button navigates to `/game?new=1&quick=1`; GameScreen then pre-selects the last players (`lastPlayerIds`) and starts with the last settings (`utils/matchSetup.ts`). Pinned by `e2e/game-flow.spec.ts`.
 - Game screen below `lg`: `ScoreStrip` replaces the stacked `PlayerScore` cards and ScoreInput hides its own "remaining" header. `e2e/layout.spec.ts` asserts the confirm button and all scores are on screen at 390×844 and 1280×800. ⚠️ Locators like `getByText('501')` must add `.locator('visible=true')` — the strip exists (hidden) on desktop too.
 - ScoreInput has three modes (`numpad` / `darts` / `quick`, remembered in `sotd-input-mode`); the dart grid adds exact beds.
+
+### Feedback ladder (0.29.0)
+- One effect in GameScreen (`seenThrowsRef`) reacts to the newest booked visit: level from `feedbackLevel`, PB chips from `personalBestHits` against baselines read once per match from `storage.personalBests` (`pbRef`, raised as records fall). Checkouts are skipped there — the leg overlay celebrates them (recap, radial burst, morph, best-leg chip).
+- `HeroMoment` sits at `z-[10000]` (above the achievement stack at 9999) and is `pointer-events: none`; canvas-confetti uses `zIndex: 10001`. Keep both — below the toasts the moment was invisible.
+- Only real records: `highestCheckout` in personal bests is never written, so it is not used. `shortestLeg` is stored as visits × 3 and compared only for 501.
+- `react-confetti` is gone; use `burst()` (`utils/celebration.ts`).
 
 ### Game screen "Arena" (0.28.0)
 - Scoreboard = `Spotlight` → `HeroCard` (player at the oche, `data-hero`, `aria-current`) + `PlayerRow`s (`role=listitem`). Shared `layoutId`s `spot-<id>`, `spot-name-<id>`, `spot-rest-<id>` make the turn change one morph. All keep `data-testid="player-card-<name>"`.
@@ -494,8 +499,8 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **40 tests** currently:
-  - `arena.spec.ts` — phone: input dock in reach, hero above it, stats sheet; hero swaps on the turn; 2 panes at 1024, 3 panes + board above the fold at 1440; no width cap at 2560
+- Specs in `e2e/`. **41 tests** currently:
+  - `arena.spec.ts` — phone: input dock in reach, hero above it, stats sheet; hero swaps on the turn; 2 panes at 1024, 3 panes + board above the fold at 1440; no width cap at 2560; a 180 shows the hero moment without blocking input, a won leg its recap
   - `fast-play.spec.ts` — visits typed back to back without waiting land with the right player; a bust never shows a negative score; the leg overlay closes on a tap; checkout route on screen at 390×844; no player cards (fire canvas) mounted on phones; no endless animation under reduced motion; triple out chosen at setup checks out on a triple
   - `achievements-flow.spec.ts` — mid-leg toast closes on an outside tap; a numpad 141 checkout ends the leg; achievements go centre stage and stay until "Weiter"
   - `refresh.spec.ts` — four players: leg ranks 1/2/3/3, desktop column split, refresh mid-visit keeps scores, turn and entered darts; history, charts and live heatmap sections render

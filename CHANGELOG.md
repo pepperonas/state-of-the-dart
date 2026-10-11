@@ -7,6 +7,36 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.29.0] - 2026-10-11
+
+### Added — feedback ladder
+- `utils/feedback.ts`: `feedbackLevel` (1 visit, 2 ton, 3 = 180 or 100+
+  checkout, 'bust') and `personalBestHits` (best visit, best 501 leg — only
+  against a recorded baseline).
+- One effect in GameScreen drives it from the newest booked visit (humans and
+  bots alike; an undo fires nothing). Ton: `burst('spark')` from the
+  thrower's card + `ton` haptic. 180 / new best visit: `HeroMoment` (number
+  swelling out of a circle → soft-burst morph, PB chip, `pointer-events:
+  none`, 1.6 s) + `burst('hero')` + `hero` haptic.
+- Leg overlay: recap (darts, average, checkout), radial burst, avatar on a
+  circle → sunny (burst for 100+ checkouts) morph, best-leg chip, `leg`
+  haptic; the broken CSS confetti dots are gone.
+- Match won: a finite `burst('match')` sequence + `match` haptic.
+- Roboto Flex numerals (`AnimatedNumber numeral`, `.sotd-numeral`): weight
+  and width swell on every change; the hero's number breathes in checkout
+  range. Font loaded cut to digits.
+- Haptics: `ton`, `hero`, `undo`, `leg`, `match` patterns.
+- `utils/shapes.ts`: `burst` shape.
+
+### Removed
+- `react-confetti` (its winner confetti looped forever); all particles go
+  through the lazy canvas-confetti with token colours and
+  `disableForReducedMotion`.
+
+### Tests
+- `feedback.test.ts` (7), `heroMoment.test.tsx` (4), E2E: a 180 shows the
+  hero moment without blocking input, a won leg shows its recap.
+
 ## [0.28.0] - 2026-10-11
 
 ### Changed — game screen "Arena"

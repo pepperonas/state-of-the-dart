@@ -11,7 +11,7 @@
 <!-- Links -->
 [![Live Demo](https://img.shields.io/badge/Live_Demo-stateofthedart.com-22c55e?style=for-the-badge&logo=googlechrome&logoColor=white)](https://stateofthedart.com)
 [![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-a855f7?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://stateofthedart.celox.io)
-[![Version](https://img.shields.io/badge/Version-0.28.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-0.29.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
 
 <!-- Build & Repo (live) -->
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
@@ -46,8 +46,8 @@
 <!-- Qualität -->
 ![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?logo=playwright&logoColor=white)
-![Unit Tests](https://img.shields.io/badge/Unit_Tests-1122-brightgreen)
-![E2E Tests](https://img.shields.io/badge/E2E_Tests-40-brightgreen)
+![Unit Tests](https://img.shields.io/badge/Unit_Tests-1133-brightgreen)
+![E2E Tests](https://img.shields.io/badge/E2E_Tests-41-brightgreen)
 ![Coverage](https://img.shields.io/badge/Coverage-24%25_stmts_%7C_75%25_branches-yellow)
 ![ESLint](https://img.shields.io/badge/ESLint-configured-4B32C3?logo=eslint&logoColor=white)
 
@@ -795,6 +795,10 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.29.0 (11. Oktober 2026) - Feedback und Feiern
+
+Jede Aufnahme bekommt eine Rückmeldung, die mit dem Moment wächst. Die großen Zahlen stehen in **Roboto Flex** und schwellen bei jeder Änderung kurz an (Gewicht und Breite der variablen Schrift); im Checkout-Bereich „atmet“ der Rest. Ab 100 sprüht ein kleiner Funke aus der Karte, eine **180** bekommt den Bildschirm: die Zahl wächst aus einer Form, die sich vom Kreis zum Strahlenkranz verwandelt, dazu zwei Konfetti-Fontänen — ohne je die Eingabe zu blockieren, auch bei Bots. Ein gewonnenes Leg zeigt seine Zahlen (Darts, Schnitt, Checkout), einen echten radialen Konfetti-Ausbruch und den Avatar auf einer sich verwandelnden Form; ein 100+-Checkout bekommt den Strahlenkranz. **Neue Rekorde** erscheinen live — höchste Aufnahme, bestes 501-Leg —, aber nur gegen einen tatsächlich gespeicherten Bestwert. Für jede Stufe gibt es ein eigenes Vibrationsmuster; ein Bust klingt nie wie ein Erfolg. Das Siegerkonfetti läuft nicht mehr endlos. Bei reduzierter Bewegung bleibt alles ruhig.
 
 ### v0.28.0 (11. Oktober 2026) - Spielansicht „Arena“
 

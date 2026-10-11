@@ -5,7 +5,7 @@
  * curve r(θ) sampled into a polygon in percent, so it scales with its box and
  * stays round. Every radius is ≤ 50 %, so a shape never leaves its box.
  */
-export type ShapeName = 'circle' | 'cookie' | 'sunny' | 'clover' | 'gem';
+export type ShapeName = 'circle' | 'cookie' | 'sunny' | 'clover' | 'gem' | 'burst';
 
 const RADIUS: Record<ShapeName, (t: number) => number> = {
   circle: () => 1,
@@ -17,6 +17,8 @@ const RADIUS: Record<ShapeName, (t: number) => number> = {
   clover: t => 0.68 + 0.32 * Math.abs(Math.cos(2 * t)) ** 0.6,
   // Five facets, softened.
   gem: t => 0.86 + 0.14 * Math.cos(5 * t),
+  // Twelve soft rays — the M3 "soft burst", for hero moments.
+  burst: t => 0.86 + 0.14 * Math.cos(12 * t),
 };
 
 const cache = new Map<string, string>();
