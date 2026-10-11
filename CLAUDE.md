@@ -321,6 +321,16 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - Game screen below `lg`: `ScoreStrip` replaces the stacked `PlayerScore` cards and ScoreInput hides its own "remaining" header. `e2e/layout.spec.ts` asserts the confirm button and all scores are on screen at 390×844 and 1280×800. ⚠️ Locators like `getByText('501')` must add `.locator('visible=true')` — the strip exists (hidden) on desktop too.
 - ScoreInput has three modes (`numpad` / `darts` / `quick`, remembered in `sotd-input-mode`); the dart grid adds exact beds.
 
+### Quick play (0.25.0)
+- **The turn passes at once:** `confirmVisit` dispatches `CONFIRM_THROW` and then `NEXT_PLAYER` in the same tick (never on a checkout). The old one-second timer booked a visit typed inside that second to the previous player. The two actions stay separate (`gameReducer.turns.test.ts`).
+- **Numpad total + Enter = `onCommitDarts(darts)`**: GameScreen adds the darts and confirms `[...currentThrow, ...darts]` in one handler. Don't go back to "add, then confirm in an effect" (`pendingConfirm` remains only as a fallback for a ScoreInput without `onCommitDarts`): keys typed before the effect saw three darts and were dropped.
+- ScoreInput binds ONE keydown listener and calls `keyHandlerRef.current`, set in a dep-less layout effect — re-binding per render left a window with a stale closure.
+- `autoNextPlayer: false` → `awaitingNextPlayer`: the confirm button becomes "Next: name", Enter passes the turn, all input is locked.
+- Scoreboard remaining = `evaluateCurrent(currentThrow).newRemaining` (`shownRemaining`), so a bust keeps the old score and double-in counts. `remaining` (raw) still feeds ScoreInput/checkout.
+- Leg overlay: tap/key closes it (layout-effect listener, before paint; Enter/Space are swallowed so they don't commit a 0 visit; the closing tap's click is swallowed so it doesn't press a key beneath), otherwise `LEG_WON_MS` (2.5 s). Bots wait while it is open. A set-winning leg shows the set (`legsWon` is already reset).
+- Layout by `useMediaQuery(DESKTOP_QUERY)`: desktop player columns and the phone strip are MOUNTED per breakpoint, not hidden — a `hidden lg:block` column kept FireCanvas running on phones. ⚠️ jsdom has no `matchMedia` → unit tests render the phone layout.
+- Phones: the checkout route sits inside the input card (`data-testid="checkout-route"`), the dartboard helper behind a toggle (`sotd-board-open`, per device).
+
 ### Game screen (0.20.0)
 - **Refresh safety:** the running X01 match lives in `state-of-the-dart-active-match`, the unconfirmed darts of the current visit in `state-of-the-dart-active-throw` (`{matchId, darts}`; both in `DEVICE_GAME_KEYS`). `LOAD_MATCH` takes `currentThrow`, validated by `utils/restoredThrow.ts`, ignored when a bot is up. ⚠️ The throw-save effect skips the first render (no match yet) — writing `[]` there would erase the darts before the restore lands. Pinned by `e2e/refresh.spec.ts`.
 - **Desktop columns:** from three players on, `leftPlayerCount = ceil(n/2)` cards sit left of the input, the rest right above the stats.
@@ -458,7 +468,8 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **28 tests** currently:
+- Specs in `e2e/`. **33 tests** currently:
+  - `fast-play.spec.ts` — visits typed back to back without waiting land with the right player; a bust never shows a negative score; the leg overlay closes on a tap; checkout route on screen at 390×844; no player cards (fire canvas) mounted on phones
   - `achievements-flow.spec.ts` — mid-leg toast closes on an outside tap; a numpad 141 checkout ends the leg; achievements go centre stage and stay until "Weiter"
   - `refresh.spec.ts` — four players: desktop column split, refresh mid-visit keeps scores, turn and entered darts; history, charts and live heatmap sections render
   - `heatmap.spec.ts` — the statistics heatmap at phone and desktop size: no overflow, bulls in the centre, a tapped bed is named

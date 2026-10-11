@@ -8,12 +8,15 @@ interface CheckoutSuggestionProps {
   suggestion: string[];
   alternatives?: string[][];
   remaining: number;
+  /** The game screen shows the main route inside the input card; only the alternatives here. */
+  hidePrimary?: boolean;
 }
 
-const CheckoutSuggestion: React.FC<CheckoutSuggestionProps> = ({ suggestion, alternatives, remaining }) => {
+const CheckoutSuggestion: React.FC<CheckoutSuggestionProps> = ({ suggestion, alternatives, remaining, hidePrimary = false }) => {
   const { t } = useTranslation();
 
   if (!suggestion || suggestion.length === 0) return null;
+  if (hidePrimary && !alternatives?.length) return null;
 
   return (
     <motion.div
@@ -23,7 +26,7 @@ const CheckoutSuggestion: React.FC<CheckoutSuggestionProps> = ({ suggestion, alt
       transition={springSpatialDefault}
     >
       {/* Primary suggestion */}
-      <div className="bg-tertiary-container text-on-tertiary-container rounded-m3-lg p-3">
+      {!hidePrimary && <div className="bg-tertiary-container text-on-tertiary-container rounded-m3-lg p-3">
         <div className="flex items-center gap-2 mb-2">
           <Target className="text-tertiary" size={18} />
           <span className="m3-title-small">
@@ -45,7 +48,7 @@ const CheckoutSuggestion: React.FC<CheckoutSuggestionProps> = ({ suggestion, alt
             </React.Fragment>
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* Alternative suggestions */}
       {alternatives && alternatives.length > 0 && alternatives.map((alt, altIndex) => (

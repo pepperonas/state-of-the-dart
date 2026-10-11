@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import AnimatedNumber from '../common/AnimatedNumber';
 
@@ -26,8 +26,16 @@ interface ScoreStripProps {
  */
 const ScoreStrip: React.FC<ScoreStripProps> = ({ players, showSets, className = '' }) => {
   const { t } = useTranslation();
+  const listRef = useRef<HTMLDivElement>(null);
+  const activeId = players.find(p => p.isActive)?.playerId;
+  // From three players on the row scrolls sideways; keep the thrower in view.
+  useEffect(() => {
+    const el = listRef.current?.querySelector<HTMLElement>('[aria-current="true"]');
+    el?.scrollIntoView?.({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+  }, [activeId]);
   return (
     <div
+      ref={listRef}
       role="list"
       aria-label={t('game.scoreboard')}
       className={`flex gap-2 overflow-x-auto snap-x ${className}`}
@@ -36,6 +44,7 @@ const ScoreStrip: React.FC<ScoreStripProps> = ({ players, showSets, className = 
         <div
           key={p.playerId}
           role="listitem"
+          data-testid={`strip-${p.name}`}
           aria-current={p.isActive ? 'true' : undefined}
           className={`snap-start flex-1 min-w-[7.5rem] rounded-m3-lg px-3 py-2 phoneland:py-1 phoneland:flex phoneland:items-baseline phoneland:gap-3 transition-colors ${
             p.isActive
@@ -57,4 +66,15 @@ const ScoreStrip: React.FC<ScoreStripProps> = ({ players, showSets, className = 
   );
 };
 
-export default React.memo(ScoreStrip);
+/** The parent rebuilds the array every render; compare what is drawn. */
+const samePlayers = (a: ScoreStripProps, b: ScoreStripProps) =>
+  a.showSets === b.showSets &&
+  a.className === b.className &&
+  a.players.length === b.players.length &&
+  a.players.every((p, i) => {
+    const q = b.players[i];
+    return p.playerId === q.playerId && p.name === q.name && p.remaining === q.remaining &&
+      p.legsWon === q.legsWon && p.setsWon === q.setsWon && p.isActive === q.isActive;
+  });
+
+export default React.memo(ScoreStrip, samePlayers);

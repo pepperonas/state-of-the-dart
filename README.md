@@ -11,7 +11,7 @@
 <!-- Links -->
 [![Live Demo](https://img.shields.io/badge/Live_Demo-stateofthedart.com-22c55e?style=for-the-badge&logo=googlechrome&logoColor=white)](https://stateofthedart.com)
 [![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-a855f7?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://stateofthedart.celox.io)
-[![Version](https://img.shields.io/badge/Version-0.24.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-0.25.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
 
 <!-- Build & Repo (live) -->
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
@@ -46,8 +46,8 @@
 <!-- Qualität -->
 ![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?logo=playwright&logoColor=white)
-![Unit Tests](https://img.shields.io/badge/Unit_Tests-1071-brightgreen)
-![E2E Tests](https://img.shields.io/badge/E2E_Tests-28-brightgreen)
+![Unit Tests](https://img.shields.io/badge/Unit_Tests-1082-brightgreen)
+![E2E Tests](https://img.shields.io/badge/E2E_Tests-33-brightgreen)
 ![Coverage](https://img.shields.io/badge/Coverage-24%25_stmts_%7C_75%25_branches-yellow)
 ![ESLint](https://img.shields.io/badge/ESLint-configured-4B32C3?logo=eslint&logoColor=white)
 
@@ -793,6 +793,12 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.25.0 (11. Oktober 2026) - Schnelles Spiel
+
+**⚠️ Behoben:** Nach dem Bestätigen wechselte der Zug erst eine Sekunde später — eine in dieser Sekunde getippte Aufnahme wurde dem vorigen Spieler gebucht. Eine Summe, die direkt nach Enter getippt wurde, ging sogar ganz verloren. Jetzt wechselt der Zug sofort, und Summe, Bestätigung und Wechsel passieren im selben Tastendruck. Mit „Automatisch nächster Spieler“ aus hing das Spiel: Es gab keinen Weg zum nächsten Spieler; jetzt gibt es dafür einen Knopf (und Enter). Bei einem Bust zeigte die Anzeige kurz einen negativen Rest; Double-in zählte dort nicht.
+
+**Neu:** Ein kleiner Chip zeigt kurz die eben gebuchte Aufnahme („Ben · 60 → 441“). „Bestätigen“ übernimmt auch eine eingetippte Summe, die Summe steht neben den Dart-Feldern, der Checkout-Weg in der Eingabekarte. Auf dem Handy passt eine ganze Aufnahme auf einen Bildschirm, der Dartboard-Helfer ist dort einklappbar. Das Leg-Overlay schließt sich mit einem Tipp oder einer Taste (sonst nach 2,5 s) und zeigt beim Satzgewinn den Satz. Eine Numpad-Summe ergibt nur noch einen Klick-Sound, der Caller hinkt nicht mehr hinterher.
 
 ### v0.24.0 (5. Oktober 2026) - Achievement-Logik geprüft und korrigiert
 

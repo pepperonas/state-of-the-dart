@@ -1784,7 +1784,8 @@
     "total": "Total",
     "replace_dart": "Replace dart",
     "submit_total": "Enter visit total and confirm",
-    "checkout": "Checkout!"
+    "checkout": "Checkout!",
+    "typed": "Input"
   },
   "cricket_game": {
     "rules_title": "Cricket rules:",
@@ -2013,7 +2014,16 @@
     "darts_count_other": "({{count}} darts)",
     "leg_number": "LEG {{n}}",
     "legs_progress": "{{won}} / {{total}} legs",
-    "next_leg_starting": "Next leg starting..."
+    "next_leg_starting": "Next leg starting...",
+    "set_number": "SET {{n}}",
+    "sets_progress": "{{won}} / {{total}} sets",
+    "next_set_starting": "Next set starting…",
+    "tap_to_continue": "Tap to continue",
+    "handoff": "{{name}} · {{score}} → {{remaining}}",
+    "handoff_bust": "{{name}} · Bust → {{remaining}}",
+    "next_player": "Next: {{name}}",
+    "show_dartboard": "Show dartboard",
+    "hide_dartboard": "Hide dartboard"
   },
   "training_screen": {
     "title_doubles": "Doubles training",
