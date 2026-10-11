@@ -812,7 +812,11 @@ button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surfa
   animation: sotd-fire-glow var(--sotd-fire-glow-period) ease-in-out infinite, sotd-fire-border var(--sotd-fire-border-period) ease-in-out infinite;
 }
 /* Content sits above the flames. */
-.sotd-on-fire > :not(.sotd-fire-canvas):not(.sotd-rank-stamp) { position: relative; z-index: 2; }
+.sotd-on-fire > :not(.sotd-fire-canvas):not(.sotd-fire-slot):not(.sotd-rank-stamp) { position: relative; z-index: 2; }
+/* The slot the shared fire canvas moves into: it must stay absolute and fill
+   the card — caught by the rule above it collapsed to 0 px and the flames
+   were invisible (0.30.0). */
+.sotd-on-fire > .sotd-fire-slot { position: absolute; inset: 0; z-index: 1; }
 /* The rank stamp floats over the burning card too (above the flames). */
 .sotd-on-fire > .sotd-rank-stamp { z-index: 2; }
 .sotd-fire-canvas {

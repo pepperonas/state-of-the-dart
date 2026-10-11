@@ -109,3 +109,22 @@ test('a 180 gets the hero moment, a won leg its recap', async ({ page }) => {
   await expect(page.getByTestId('leg-recap')).toContainText('Checkout 141');
   await expect(page.getByTestId(`player-card-${names[1]}`)).toContainText('501');
 });
+
+/**
+ * The flames are the mark of the player at the oche. 0.30.0 moved one shared
+ * fire canvas into the hero card — and a CSS rule collapsed its slot to 0 px,
+ * so the flames were gone while every test stayed green. Measure them.
+ */
+test('the player at the oche burns, and the fire moves with the turn', async ({ page }) => {
+  const names = await start(page, 1440, 900);
+  const fire = (name: string) => page.getByTestId(`player-card-${name}`).locator('canvas.sotd-fire-canvas');
+  await expect(fire(names[0])).toHaveCount(1, { timeout: 5_000 });
+  await expect.poll(async () => (await fire(names[0]).boundingBox())?.height ?? 0).toBeGreaterThan(60);
+  await page.keyboard.type('60');
+  await page.keyboard.press('Enter');
+  await expect(fire(names[1])).toHaveCount(1, { timeout: 5_000 });
+  await expect.poll(async () => (await fire(names[1]).boundingBox())?.height ?? 0).toBeGreaterThan(60);
+  await expect(page.locator('canvas.sotd-fire-canvas')).toHaveCount(1);
+  await page.waitForTimeout(1200);
+  await page.getByTestId(`player-card-${names[1]}`).screenshot({ path: 'test-results/hero-fire.png' });
+});

@@ -49,7 +49,10 @@ const PlayerRow: React.FC<PlayerRowProps> = ({
       // grows into the card (and back). The content is counter-scaled.
       layoutId={`spot-${id}`}
       layoutDependency={turnKey}
-      transition={{ layout: CONTAINER_MORPH }}
+      // The card shrinking back into a row would squash its text (a row is far
+      // wider than tall), so the row stands at once — only avatar, name and
+      // score fly in from the card. The opposite way the card still grows.
+      transition={{ layout: { duration: 0 } }}
       role="listitem"
       data-testid={`player-card-${player.name}`}
       style={{ borderRadius: 'var(--m3-shape-lg)', ...(rank ? { '--rank-color': `var(--m3-rank-${rankTone(rank)})` } : {}) } as React.CSSProperties}
@@ -60,25 +63,29 @@ const PlayerRow: React.FC<PlayerRowProps> = ({
         layout="position"
         layoutDependency={turnKey}
         className="relative flex items-center gap-3 pl-4 pr-2 py-2"
-        initial={reduce ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={CONTENT_IN}
       >
-      <PlayerAvatar avatar={avatar} name={player.name} size="sm" />
+      <motion.div layoutId={`spot-avatar-${id}`} layout="position" layoutDependency={turnKey} transition={{ layout: CONTAINER_MORPH }} className="shrink-0">
+        <PlayerAvatar avatar={avatar} name={player.name} size="sm" />
+      </motion.div>
       <div className="min-w-0 flex-1">
-        <div className="m3-title-small text-on-surface truncate">
+        <motion.div layoutId={`spot-name-${id}`} layout="position" layoutDependency={turnKey} transition={{ layout: CONTAINER_MORPH }} className="m3-title-small text-on-surface truncate">
           {player.name}
-        </div>
-        <div className="m3-label-small text-on-surface-variant tabular-nums truncate">
+        </motion.div>
+        <motion.div
+          initial={reduce ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={CONTENT_IN}
+          className="m3-label-small text-on-surface-variant tabular-nums truncate"
+        >
           Ø {average.toFixed(1)} · {showSets ? `${setsWon}S · ` : ''}{legs} L
           {legsToWin ? <span className="sr-only"> {t('player_score.legs_to_win_long', { won: legsWon, total: legsToWin })}</span> : null}
-        </div>
+        </motion.div>
       </div>
       {rank && <RankStamp rank={rank} size="strip" />}
-      <div className="relative">
+      <motion.div layoutId={`spot-rest-${id}`} layout="position" layoutDependency={turnKey} transition={{ layout: CONTAINER_MORPH }} className="relative">
         <AnimatedNumber numeral value={remaining} className="block text-3xl text-on-surface" />
         <ScoreDelta value={remaining} from={previousRemaining} className="right-full mr-1 bottom-0 m3-label-large" />
-      </div>
+      </motion.div>
       {onRemove && (
         <IconButton
           label={removeLabel ?? t('player_score.remove')}
