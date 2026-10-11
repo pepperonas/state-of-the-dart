@@ -5,7 +5,7 @@ import { rankTone } from '../../utils/legRanks';
 interface RankStampProps {
   rank: number;
   /** `card` = the poster on a desktop player card, `strip` = the phone score strip. */
-  size?: 'card' | 'strip';
+  size?: 'card' | 'strip' | 'large';
   className?: string;
 }
 
@@ -20,7 +20,7 @@ const RankStamp: React.FC<RankStampProps> = ({ rank, size = 'card', className = 
     <span
       data-testid="leg-rank"
       data-rank={rank}
-      className={`sotd-rank-stamp ${size === 'card' ? 'text-[4.5rem]' : 'text-[2.25rem]'} ${className}`}
+      className={`sotd-rank-stamp ${size === 'large' ? 'text-[6rem]' : size === 'card' ? 'text-[4.5rem]' : 'text-[2.25rem]'} ${className}`}
       style={{ '--rank-color': `var(--m3-rank-${rankTone(rank)})` } as React.CSSProperties}
     >
       <span className="sr-only">{t('player_score.leg_rank', { rank })}</span>

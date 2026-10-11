@@ -1,8 +1,8 @@
 import React, { useEffect, useId, useRef } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useDragControls } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { dialogMotion, effectsDefault } from '../../utils/motion';
+import { dialogMotion, effectsDefault, springStandardDefault } from '../../utils/motion';
 import IconButton from './IconButton';
 
 interface DialogProps {
@@ -19,6 +19,8 @@ interface DialogProps {
   persistent?: boolean;
   /** Accessible name when the dialog draws its own header instead of `title`. */
   ariaLabel?: string;
+  /** `sheet`: a bottom sheet (phones) — docked at the bottom, slides up, drag down to close. */
+  variant?: 'dialog' | 'sheet';
   children: React.ReactNode;
 }
 
@@ -42,8 +44,12 @@ const Dialog: React.FC<DialogProps> = ({
   widthClassName,
   persistent = false,
   ariaLabel,
+  variant = 'dialog',
   children,
 }) => {
+  const sheet = variant === 'sheet';
+  // Only the handle starts a drag — the sheet's content must still scroll.
+  const dragControls = useDragControls();
   const { t } = useTranslation();
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -91,7 +97,7 @@ const Dialog: React.FC<DialogProps> = ({
     <AnimatePresence>
       {open && (
         <motion.div
-          className="m3-scrim"
+          className={sheet ? 'm3-scrim m3-scrim-sheet' : 'm3-scrim'}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -102,17 +108,34 @@ const Dialog: React.FC<DialogProps> = ({
           <motion.div
             ref={panelRef}
             tabIndex={-1}
-            className={['m3-dialog outline-none', widthClassName].filter(Boolean).join(' ')}
-            initial={dialogMotion.initial}
-            animate={dialogMotion.animate}
-            exit={dialogMotion.exit}
-            transition={dialogMotion.transition}
+            className={[sheet ? 'm3-sheet' : 'm3-dialog', 'outline-none', widthClassName].filter(Boolean).join(' ')}
+            initial={sheet ? { y: '100%' } : dialogMotion.initial}
+            animate={sheet ? { y: 0 } : dialogMotion.animate}
+            exit={sheet ? { y: '100%' } : dialogMotion.exit}
+            transition={sheet ? springStandardDefault : dialogMotion.transition}
+            // A sheet follows the finger down and closes past a threshold.
+            drag={sheet ? 'y' : false}
+            dragListener={false}
+            dragControls={dragControls}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.6 }}
+            onDragEnd={sheet ? (_e, info) => { if (info.offset.y > 120 || info.velocity.y > 600) onClose(); } : undefined}
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
             aria-labelledby={title ? titleId : undefined}
             aria-label={title ? undefined : ariaLabel}
           >
+            {sheet && (
+              <div
+                aria-hidden="true"
+                data-testid="sheet-handle"
+                onPointerDown={(e) => dragControls.start(e)}
+                className="-mt-1 mb-2 flex justify-center py-2 cursor-grab touch-none"
+              >
+                <span className="h-1 w-9 rounded-m3-full bg-[var(--m3-on-surface-variant)]" />
+              </div>
+            )}
             {(title || !hideClose) && (
               <div className="flex items-center justify-between mb-4 gap-3">
                 {title ? <h2 id={titleId} className="m3-headline-small">{title}</h2> : <span />}

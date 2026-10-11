@@ -7,6 +7,31 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.28.0] - 2026-10-11
+
+### Changed — game screen "Arena"
+- **Spotlight:** `HeroCard` for the player at the oche (remaining sized by
+  viewport height, checkout route, rank stamp, darts in leg, average, legs to
+  win, last 5 visits), `PlayerRow` for everyone else (rank as a stripe).
+  Both share framer `layoutId`s, so the turn passing morphs the next row into
+  the hero card. Replaces `PlayerScore` and the equal desktop card columns.
+- **Layout by M3 window size class** (`useWindowClass`): compact/medium —
+  rows, hero and the input docked at the bottom, stats/history/heatmap/board
+  in a bottom sheet (`Dialog variant="sheet"`, drag the handle down to close);
+  phone landscape — strip + input as before; expanded — two panes; large/xl —
+  three panes with a context pane (board above the fold, stats), no 1280-px
+  cap, and the UI scales up with the viewport above ~1900 px.
+- The input card no longer repeats the remaining score; under the total it
+  previews what the visit leaves ("→ 401", also on a bust). The checkout route
+  moved to the hero card. Phones get a dense input (undo and clear as icons).
+- Flames only from 600 px up; phones keep the warm frame without WebGL.
+
+### Tests
+- `arena.test.ts` (5), `HeroCard.test.tsx` (9, replaces PlayerScore tests),
+  `e2e/arena.spec.ts` (5: phone dock + sheet, hero swap, 2/3 panes, board
+  above the fold, no width cap at 2560). `refresh`, `fast-play` and
+  `achievements-flow` adapted to the new layout.
+
 ## [0.27.0] - 2026-10-11
 
 ### Added

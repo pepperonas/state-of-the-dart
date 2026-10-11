@@ -73,9 +73,9 @@ describe('ScoreInput quick play', () => {
     expect(screen.getByRole('button', { name: /Bestätigen/ })).toBeDisabled();
   });
 
-  it('shows the checkout route inside the card', () => {
-    setup({ checkoutRoute: ['T20', 'T19', 'D12'] });
-    expect(screen.getByTestId('checkout-route')).toHaveTextContent('T20T19D12');
+  it('shows what the visit leaves under the total', () => {
+    setup({ currentThrow: [{ segment: 20, multiplier: 3, score: 60 } as Dart], previewRemaining: 441 });
+    expect(screen.getByTestId('visit-preview')).toHaveTextContent('→ 441');
   });
 
   it('waiting for the next player: Enter passes the turn and digits do nothing', () => {

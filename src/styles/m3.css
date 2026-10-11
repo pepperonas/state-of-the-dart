@@ -911,3 +911,31 @@ button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surfa
 @media (prefers-reduced-motion: reduce) {
   .sotd-ring-pulse { animation: none; box-shadow: 0 0 0 3px var(--m3-success); }
 }
+
+/* Bottom sheet (Dialog variant="sheet"): docked at the bottom, full width on
+   phones, rounded top corners, scrolls inside. */
+.m3-scrim-sheet { align-items: flex-end; padding: 0; }
+.m3-sheet {
+  width: 100%;
+  max-width: 40rem;
+  max-height: 88dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: var(--m3-shape-xl) var(--m3-shape-xl) 0 0;
+  background-color: var(--m3-surface-container-low);
+  color: var(--m3-on-surface);
+  box-shadow: var(--m3-elevation-3);
+  padding: 0.75rem 1rem calc(1rem + env(safe-area-inset-bottom));
+}
+
+/* Dense score input (phones in portrait, docked under the scoreboard): the
+   same controls a little tighter, so the whole dock fits on one screen. */
+.sotd-dense .sotd-key { min-height: 44px; padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.sotd-dense [data-testid^="dart-slot-"] { height: 3rem; }
+.sotd-dense [data-testid="visit-total"] { min-height: 3rem; }
+
+/* Very wide screens: the game screen scales up with the viewport (everything
+   is in rem), instead of a small UI floating in a 2560-px window. */
+@media (min-width: 1600px) {
+  html:has([data-game-screen]) { font-size: clamp(16px, 0.85vw, 28px); }
+}

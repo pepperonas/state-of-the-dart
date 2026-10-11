@@ -117,10 +117,12 @@ test('phone: the checkout route is on screen without scrolling', async ({ page }
   expect(await page.evaluate(() => window.scrollY)).toBe(0);
 });
 
-test('phone: no fire canvas runs in the hidden desktop layout', async ({ page }) => {
+test('phone: one hero card for the thrower, rows for the rest, no WebGL flames', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await startMatch(page);
-  await expect(page.locator('[data-testid^="player-card-"]')).toHaveCount(0);
+  await expect(page.locator('[data-hero="true"]')).toHaveCount(1);
+  await expect(page.locator('[role="listitem"][data-testid^="player-card-"]')).toHaveCount(1);
+  await expect(page.locator('.sotd-fire-canvas')).toHaveCount(0);
 });
 
 test('reduced motion: no endless animation runs during play', async ({ page }) => {

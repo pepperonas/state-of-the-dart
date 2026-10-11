@@ -11,7 +11,7 @@
 <!-- Links -->
 [![Live Demo](https://img.shields.io/badge/Live_Demo-stateofthedart.com-22c55e?style=for-the-badge&logo=googlechrome&logoColor=white)](https://stateofthedart.com)
 [![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-a855f7?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://stateofthedart.celox.io)
-[![Version](https://img.shields.io/badge/Version-0.27.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-0.28.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
 
 <!-- Build & Repo (live) -->
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
@@ -46,8 +46,8 @@
 <!-- Qualität -->
 ![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?logo=playwright&logoColor=white)
-![Unit Tests](https://img.shields.io/badge/Unit_Tests-1111-brightgreen)
-![E2E Tests](https://img.shields.io/badge/E2E_Tests-35-brightgreen)
+![Unit Tests](https://img.shields.io/badge/Unit_Tests-1122-brightgreen)
+![E2E Tests](https://img.shields.io/badge/E2E_Tests-40-brightgreen)
 ![Coverage](https://img.shields.io/badge/Coverage-24%25_stmts_%7C_75%25_branches-yellow)
 ![ESLint](https://img.shields.io/badge/ESLint-configured-4B32C3?logo=eslint&logoColor=white)
 
@@ -795,6 +795,10 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.28.0 (11. Oktober 2026) - Spielansicht „Arena“
+
+Die Spielansicht ist neu aufgebaut. **Spotlight:** Wer am Zug ist, bekommt eine große Hero-Karte — riesiger Rest (nach Bildschirmhöhe skaliert), Checkout-Weg, Platz im Leg, Darts im Leg, Schnitt, Legs bis zum Sieg und die letzten Aufnahmen. Alle anderen stehen als kompakte Zeilen darunter, wie auf einem TV-Scoreboard, der Platz als Farbstreifen. Beim Wechsel wächst die Zeile des Nächsten zur Hero-Karte und die alte schrumpft zurück. Der Rest steht nur noch einmal da; die Eingabe zeigt stattdessen, was die Aufnahme übrig lässt („→ 401“). **Für jede Bildschirmgröße** (M3 Window Size Classes): Auf dem Handy sitzt die Eingabe unten im Daumenbereich, Statistik, Verlauf, Heatmap und Dartboard öffnen als Bottom Sheet; auf dem Tablet quer zwei Spalten; ab Laptop drei Spalten mit Dartboard und Statistik daneben; auf sehr großen Monitoren ohne schmale Begrenzung und mitwachsend.
 
 ### v0.27.0 (11. Oktober 2026) - Triple-In/Out, Legs bis zum Sieg, Ziffernfeld einklappbar
 

@@ -3,7 +3,7 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 
 import '../../i18n/config';
 import ScoreInput from '../../components/game/ScoreInput';
-import PlayerScore from '../../components/game/PlayerScore';
+import HeroCard from '../../components/game/HeroCard';
 import ScoreStrip from '../../components/game/ScoreStrip';
 import type { Dart, MatchPlayer } from '../../types/index';
 
@@ -63,14 +63,14 @@ describe('legs to win', () => {
   } as unknown as MatchPlayer;
 
   it('the card says how far from the win, small', () => {
-    render(<PlayerScore player={player} remaining={301} isActive={false} average={0} legsWon={1} setsWon={0} legsToWin={2} />);
+    render(<HeroCard player={player} remaining={301} rank={null} average={0} legsWon={1} setsWon={0} legsToWin={2} dartsInLeg={0} visits={[]} flames={false} />);
     const line = screen.getByTestId('legs-to-win');
     expect(line).toHaveTextContent('1/2 zum Sieg');
     expect(line.className).toContain('m3-label-small');
   });
 
   it('in a sets match it counts towards the set', () => {
-    render(<PlayerScore player={player} remaining={301} isActive={false} average={0} legsWon={1} setsWon={0} legsToWin={3} showSets />);
+    render(<HeroCard player={player} remaining={301} rank={null} average={0} legsWon={1} setsWon={0} legsToWin={3} showSets dartsInLeg={0} visits={[]} flames={false} />);
     expect(screen.getByTestId('legs-to-win')).toHaveTextContent('1/3 zum Satz');
   });
 

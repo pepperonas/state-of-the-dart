@@ -2041,7 +2041,10 @@
     "handoff_bust": "{{name}} · Bust → {{remaining}}",
     "next_player": "Next: {{name}}",
     "show_dartboard": "Show dartboard",
-    "hide_dartboard": "Hide dartboard"
+    "hide_dartboard": "Hide dartboard",
+    "darts_in_leg": "Darts",
+    "last_visits": "Last",
+    "insights": "Stats & board"
   },
   "training_screen": {
     "title_doubles": "Doubles training",
