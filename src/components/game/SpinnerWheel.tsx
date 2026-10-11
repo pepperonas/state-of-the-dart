@@ -226,14 +226,19 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
       >
         {/* Portrait: title, wheel, buttons stacked. Landscape: the wheel takes
             the height, title and buttons stand beside it. */}
-        <div className="relative w-[min(92vw,calc(100dvh-21rem),80rem)] landscape:w-[min(58vw,86dvh,80rem)] aspect-square shrink-0 portrait:order-2" data-testid="spinner-wheel" data-phase={phase}>
+        <div className="relative w-[min(88vw,calc(100dvh-23rem),72rem)] landscape:w-[min(52vw,78dvh,72rem)] aspect-square shrink-0 portrait:order-2" data-testid="spinner-wheel" data-phase={phase}>
           {/* Idle sway while the intro plays, so the wheel looks ready to go. */}
+          {/* The shadow sits on a still circle behind the wheel: a drop-shadow
+              filter on the turning SVG was re-rendered every frame (45 fps on
+              a 2560 screen), and the turning square's corners changed the
+              dialog's scroll height — text beside it flickered. */}
+          <div className="absolute inset-[3%] rounded-full shadow-m3-4" aria-hidden="true" />
           <motion.div
-            className="absolute inset-0"
+            className="absolute inset-0 rounded-full overflow-hidden"
             animate={phase === 'intro' && !reduce ? { rotate: [0, -4, 0] } : { rotate: 0 }}
             transition={phase === 'intro' && !reduce ? { duration: 1.4, repeat: Infinity, ease: 'easeInOut' } : springSpatialFast}
           >
-            <motion.svg viewBox={`0 0 ${VIEW} ${VIEW}`} className="w-full h-full drop-shadow-xl" style={{ rotate: rot }} aria-hidden="true">
+            <motion.svg viewBox={`0 0 ${VIEW} ${VIEW}`} className="w-full h-full will-change-transform" style={{ rotate: rot }} aria-hidden="true">
               {players.map((p, i) => {
                 const [fill, ink] = TONES[i % TONES.length];
                 const from = i * seg;

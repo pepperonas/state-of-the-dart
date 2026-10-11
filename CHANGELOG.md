@@ -7,6 +7,22 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.32.1] - 2026-10-11
+
+### Fixed
+- Wheel: the text beside the spinning wheel flickered and the wheel
+  stuttered. The turning SVG's corners changed the dialog's scroll height
+  every frame (a scrollbar came and went, the text reflowed), and a
+  `drop-shadow` filter on the turning SVG was re-rendered every frame. The
+  wheel now turns inside a clipped round layer (`will-change: transform`),
+  the shadow is a still circle behind it, and the wheel is slightly smaller
+  (`min(88vw, 100dvh − 23rem, 72rem)` / landscape `min(52vw, 78dvh, 72rem)`)
+  so the dialog never scrolls.
+
+### Tests
+- `e2e/wheel.spec.ts` samples the dialog's overflow on every frame of the
+  spin: it must stay 0 (the old wheel measured 107 px).
+
 ## [0.32.0] - 2026-10-11
 
 ### Added
