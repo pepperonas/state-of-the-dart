@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Trophy, UserMinus } from 'lucide-react';
@@ -7,7 +7,7 @@ import PlayerAvatar from '../player/PlayerAvatar';
 import AnimatedNumber from '../common/AnimatedNumber';
 import IconButton from '../common/IconButton';
 import { springSpatialDefault, springSpatialFast } from '../../utils/motion';
-import FireCanvas from './FireCanvas';
+import { CONTAINER_MORPH, CONTENT_IN, FLAMES_AFTER_MS } from './spotlightMotion';
 import RankStamp from './RankStamp';
 import ScoreDelta from './ScoreDelta';
 
@@ -32,10 +32,14 @@ export interface HeroCardProps {
   /** Remaining score at which a finish is possible (170 double out, 180 otherwise). */
   checkoutMax?: number;
   size?: HeroSize;
-  /** WebGL flames along the bottom edge (not on small phones). */
-  flames?: boolean;
+  /** The match's single fire canvas host (null = no flames, e.g. small phones). */
+  fireHost?: HTMLElement | null;
   onRemove?: (playerId: string) => void;
   removeLabel?: string;
+  /** Remaining score before this render (the hand-over): shows the "−60". */
+  previousRemaining?: number;
+  /** Changes when the turn passes — the only time the layout is measured. */
+  turnKey?: string;
 }
 
 /** The remaining score, sized by viewport height so a big screen gets a big number. */
@@ -61,8 +65,8 @@ const visitTone = (v: { score: number; bust: boolean }) =>
  */
 const HeroCard: React.FC<HeroCardProps> = ({
   player, avatar, remaining, rank, average, legsWon, setsWon, showSets = false, legsToWin,
-  dartsInLeg, visits, checkoutRoute, checkoutMax = 170, size = 'regular', flames = true,
-  onRemove, removeLabel,
+  dartsInLeg, visits, checkoutRoute, checkoutMax = 170, size = 'regular', fireHost = null,
+  onRemove, removeLabel, previousRemaining, turnKey,
 }) => {
   const { t } = useTranslation();
   const id = player.playerId;
@@ -79,23 +83,50 @@ const HeroCard: React.FC<HeroCardProps> = ({
     setSeenLegs(legsWon);
   }
 
+  // The fire moves in once the card has arrived: the shared canvas host is
+  // re-parented into this card (no new WebGL context) and fades in.
+  const fireSlot = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const slot = fireSlot.current;
+    if (!fireHost || !slot) return;
+    fireHost.classList.remove('sotd-fire-host--on');
+    const timer = setTimeout(() => {
+      slot.appendChild(fireHost);
+      requestAnimationFrame(() => fireHost.classList.add('sotd-fire-host--on'));
+    }, FLAMES_AFTER_MS);
+    return () => clearTimeout(timer);
+  }, [fireHost]);
+
   return (
+    // M3 container transform: the card morphs out of the player's row. The
+    // content stays inside it, clipped, and `layout` on the content wrapper
+    // makes framer counter-scale it — text is never stretched.
     <motion.article
       layoutId={`spot-${id}`}
-      transition={{ layout: springSpatialDefault }}
+      layoutDependency={turnKey}
+      transition={{ layout: CONTAINER_MORPH }}
       data-testid={`player-card-${player.name}`}
       data-hero="true"
       aria-current="true"
-      className={`relative m3-card m3-elevated sotd-on-fire bg-surface-container-high ${size === 'compact' ? 'p-3' : 'p-4 md:p-5'}`}
+      className={`relative overflow-hidden m3-card m3-elevated sotd-on-fire bg-surface-container-high ${size === 'compact' ? 'p-3' : 'p-4 md:p-5'}`}
+      style={{ borderRadius: 'var(--m3-shape-lg)' }}
     >
-      {flames && <FireCanvas />}
+      <div ref={fireSlot} aria-hidden="true" className="absolute inset-0 rounded-m3-lg overflow-hidden pointer-events-none" />
+      <motion.div
+        layout="position"
+        layoutDependency={turnKey}
+        className="relative"
+        initial={reduce ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={CONTENT_IN}
+      >
 
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-3 min-w-0">
           <PlayerAvatar avatar={avatar} name={player.name} size={size === 'compact' ? 'sm' : 'md'} />
-          <motion.h3 layoutId={`spot-name-${id}`} className="m3-title-large text-on-surface truncate">
+          <h3 className="m3-title-large text-on-surface truncate">
             {player.name}
-          </motion.h3>
+          </h3>
         </div>
         {onRemove && (
           <IconButton
@@ -110,7 +141,7 @@ const HeroCard: React.FC<HeroCardProps> = ({
 
       {/* The number and the place in the leg share a row. */}
       <div className="flex items-end justify-between gap-3 mt-1">
-        <motion.div layoutId={`spot-rest-${id}`} className="relative">
+        <div className="relative">
           {/* In checkout range the number breathes — a finish is on. */}
           <motion.div
             data-breathing={breathing ? 'true' : undefined}
@@ -126,8 +157,8 @@ const HeroCard: React.FC<HeroCardProps> = ({
             }`}
           />
           </motion.div>
-          <ScoreDelta value={remaining} className="left-full ml-2 top-0 m3-title-large" />
-        </motion.div>
+          <ScoreDelta value={remaining} from={previousRemaining} className="left-full ml-2 top-0 m3-title-large" />
+        </div>
         {rank && <RankStamp rank={rank} size={size === 'large' ? 'large' : 'card'} />}
       </div>
 
@@ -251,6 +282,7 @@ const HeroCard: React.FC<HeroCardProps> = ({
         )}
           </>
       )}
+      </motion.div>
     </motion.article>
   );
 };

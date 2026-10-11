@@ -11,7 +11,7 @@
 <!-- Links -->
 [![Live Demo](https://img.shields.io/badge/Live_Demo-stateofthedart.com-22c55e?style=for-the-badge&logo=googlechrome&logoColor=white)](https://stateofthedart.com)
 [![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-a855f7?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://stateofthedart.celox.io)
-[![Version](https://img.shields.io/badge/Version-0.29.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-0.30.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
 
 <!-- Build & Repo (live) -->
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
@@ -46,7 +46,7 @@
 <!-- Qualität -->
 ![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?logo=playwright&logoColor=white)
-![Unit Tests](https://img.shields.io/badge/Unit_Tests-1133-brightgreen)
+![Unit Tests](https://img.shields.io/badge/Unit_Tests-1139-brightgreen)
 ![E2E Tests](https://img.shields.io/badge/E2E_Tests-41-brightgreen)
 ![Coverage](https://img.shields.io/badge/Coverage-24%25_stmts_%7C_75%25_branches-yellow)
 ![ESLint](https://img.shields.io/badge/ESLint-configured-4B32C3?logo=eslint&logoColor=white)
@@ -795,6 +795,10 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.30.0 (11. Oktober 2026) - Einblicke, Glücksrad, flüssiger Spielerwechsel
+
+**Einblicke:** Unter der Spielfläche stehen Match-Statistik, Wurf-Verlauf, Wurf-Chart und Live-Heatmap jetzt als Karten in **zwei Spalten**, immer offen — links Statistik und Verlauf, rechts Heatmap und Chart. Die Statistik zeigt alle Spieler nebeneinander, der Spieler am Zug ist hervorgehoben. Auf dem Handy wählt man im Bottom Sheet per Reiter (Statistik · Verlauf · Chart · Heatmap). **Glücksrad:** Das Rad „Wer wirft zuerst?“ dreht jetzt mit echter Physik (Reibung und Luftwiderstand — langes, spannendes Auslaufen), ein Zeiger klackt an jedem Stift mit Ton und Vibration, das Siegerfeld tritt hervor, die Nabe öffnet sich zum Strahlenkranz mit Funken. Namen nutzen den Platz im Feld und werden nur noch gekürzt, wenn sie wirklich nicht passen. **Spielerwechsel:** Die Karte wächst jetzt als Ganzes (M3 Container Transform) statt Name und Zahl getrennt fliegen zu lassen, langsamer und ohne Ruckeln — das Feuer wird nicht mehr bei jedem Wechsel neu aufgebaut, sondern wandert mit (Rechenzeit je Wechsel ~560 → ~125 ms). Die Bestätigen-Taste im Ziffernfeld zeigt einen **Haken** statt eines Pfeils.
 
 ### v0.29.0 (11. Oktober 2026) - Feedback und Feiern
 

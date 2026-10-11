@@ -63,14 +63,14 @@ describe('legs to win', () => {
   } as unknown as MatchPlayer;
 
   it('the card says how far from the win, small', () => {
-    render(<HeroCard player={player} remaining={301} rank={null} average={0} legsWon={1} setsWon={0} legsToWin={2} dartsInLeg={0} visits={[]} flames={false} />);
+    render(<HeroCard player={player} remaining={301} rank={null} average={0} legsWon={1} setsWon={0} legsToWin={2} dartsInLeg={0} visits={[]} />);
     const line = screen.getByTestId('legs-to-win');
     expect(line).toHaveTextContent('1/2 zum Sieg');
     expect(line.className).toContain('m3-label-small');
   });
 
   it('in a sets match it counts towards the set', () => {
-    render(<HeroCard player={player} remaining={301} rank={null} average={0} legsWon={1} setsWon={0} legsToWin={3} showSets dartsInLeg={0} visits={[]} flames={false} />);
+    render(<HeroCard player={player} remaining={301} rank={null} average={0} legsWon={1} setsWon={0} legsToWin={3} showSets dartsInLeg={0} visits={[]} />);
     expect(screen.getByTestId('legs-to-win')).toHaveTextContent('1/3 zum Satz');
   });
 

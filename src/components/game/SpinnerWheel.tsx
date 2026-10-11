@@ -1,33 +1,25 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, AnimatePresence, animate, useMotionValue, useReducedMotion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { Player } from '../../types';
 import { audioSystem } from '../../utils/audio';
 import { Icon, iconForEmoji, ICON_PATHS } from '../icons';
-import { useTranslation } from 'react-i18next';
 import { randomIndex, randomBetween } from '../../utils/random';
-import { logger } from '../../utils/logger';
-
-/** Intro sound before the wheel starts, the spin itself, and its deceleration
- *  (a wheel losing speed, not a spring — it must not bounce back). */
-const INTRO_MS = 1500;
-const SPIN_MS = 4000;
-const SPIN_EASING = 'cubic-bezier(0.17, 0.67, 0.12, 0.99)';
-import { Button, Chip } from '../common';
+import { planSpin, angleAt, landingAngle, crossings } from '../../utils/wheelPhysics';
+import { shapePolygon } from '../../utils/shapes';
+import { springSpatialDefault, springSpatialFast, springSpatialSlow } from '../../utils/motion';
+import { burst, originOf } from '../../utils/celebration';
+import { Button } from '../common';
 
 interface SpinnerWheelProps {
   players: Player[];
   onComplete: (startingPlayerIndex: number) => void;
 }
 
-const WHEEL_COLORS = [
-  '#ef4444', // red
-  '#3b82f6', // blue
-  '#22c55e', // green
-  '#f59e0b', // amber
-  '#8b5cf6', // violet
-  '#ec4899', // pink
-  '#06b6d4', // cyan
-  '#f97316', // orange
-];
+/** The intro line plays before the wheel starts; the choice buttons stay up throughout. */
+const INTRO_MS = 1500;
+/** How long the result stays before the game starts (tap to go on sooner). */
+const RESULT_MS = 2500;
 
 const INTRO_SOUNDS = [
   '/sounds/who-throws-first/spin-the-wheel/time_to_spin_the_wheel.mp3',
@@ -37,285 +29,337 @@ const INTRO_SOUNDS = [
   '/sounds/who-throws-first/spin-the-wheel/luck_as_your_coffee.mp3',
 ];
 
-export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete }) => {
-  const [isSpinning, setIsSpinning] = useState(false);
-  const [rotation, setRotation] = useState(0);
-  const [winner, setWinner] = useState<Player | null>(null);
-  const [showResult, setShowResult] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const hasStarted = useRef(false);
-  const { t } = useTranslation();
-  // Every pending timeout, so skipping can cancel the spin cleanly.
-  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const doneRef = useRef(false);
-  const later = (fn: () => void, ms: number) => { timersRef.current.push(setTimeout(fn, ms)); };
-  useEffect(() => () => timersRef.current.forEach(clearTimeout), []);
+/** Wedge colours from the theme's tonal palettes (fill, label) — readable in both themes. */
+const TONES: [string, string][] = [
+  ['var(--m3-primary-container)', 'var(--m3-on-primary-container)'],
+  ['var(--m3-tertiary-container)', 'var(--m3-on-tertiary-container)'],
+  ['var(--m3-secondary-container)', 'var(--m3-on-secondary-container)'],
+  ['var(--m3-success-container)', 'var(--m3-on-success-container)'],
+  ['var(--m3-error-container)', 'var(--m3-on-error-container)'],
+];
 
-  const skipRandom = () => finish(randomIndex(players.length));
+const VIEW = 320;
+const C = VIEW / 2;
+const R = 150;
+/** Label band (fraction of the radius): outside the hub, inside the avatar. */
+const LABEL_INNER = 0.31;
+const LABEL_OUTER = 0.76;
+/** Avatar centre, as a fraction of the radius — close to the rim, out of the label's way. */
+const AVATAR_AT = 0.86;
+const CIRCLE = shapePolygon('circle', 144);
+const BURST = shapePolygon('burst', 144);
+
+/** A point at `deg` (0 = top, clockwise) and radius `r`. */
+const at = (deg: number, r: number) => {
+  const a = (deg * Math.PI) / 180;
+  return [C + r * Math.sin(a), C - r * Math.cos(a)] as const;
+};
+
+const wedgePath = (from: number, to: number) => {
+  const [x0, y0] = at(from, R);
+  const [x1, y1] = at(to, R);
+  const large = to - from > 180 ? 1 : 0;
+  return `M ${C} ${C} L ${x0} ${y0} A ${R} ${R} 0 ${large} 1 ${x1} ${y1} Z`;
+};
+
+const vibrate = (pattern: number | number[]) => {
+  if (typeof navigator === 'undefined' || typeof navigator.vibrate !== 'function') return;
+  try { navigator.vibrate(pattern); } catch { /* blocked by policy */ }
+};
+
+/**
+ * "Who throws first?" — a prize wheel with real physics. The winner is drawn
+ * first; the wheel winds up, launches and coasts out under friction and drag
+ * (`utils/wheelPhysics`) exactly onto that wedge, crawling past the last pegs.
+ * A flapper at the top clicks and springs on every peg (sound and haptics),
+ * the winning wedge lifts while the rest dim, and the hub morphs into a burst
+ * with the winner on it. Every player keeps an "X begins" button the whole
+ * time, and the spin can be skipped.
+ */
+export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete }) => {
+  const { t } = useTranslation();
+  const reduce = useReducedMotion();
+  const count = Math.max(1, players.length);
+  const seg = 360 / count;
+  const rot = useMotionValue(0);
+  const flap = useMotionValue(0);
+  const hubRef = useRef<HTMLDivElement>(null);
+  const [phase, setPhase] = useState<'intro' | 'spinning' | 'result'>('intro');
+  const [winner, setWinner] = useState<number | null>(null);
+
+  // Everything pending, so a skip or a choice cancels the spin cleanly.
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const frame = useRef<number | null>(null);
+  const done = useRef(false);
+  const later = (fn: () => void, ms: number) => { timers.current.push(setTimeout(fn, ms)); };
+  const stopAll = () => {
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
+    if (frame.current != null) cancelAnimationFrame(frame.current);
+    frame.current = null;
+  };
+  useEffect(() => stopAll, []);
 
   /** Finishes exactly once — by the wheel, a skip, or a chosen starter. */
-  const finish = (index: number) => {
-    if (doneRef.current) return;
-    doneRef.current = true;
-    timersRef.current.forEach(clearTimeout);
-    timersRef.current = [];
+  const finish = useCallback((index: number) => {
+    if (done.current) return;
+    done.current = true;
+    stopAll();
     onComplete(index);
+  }, [onComplete]);
+
+  // The flapper: knocked aside by a peg, it springs back and rattles.
+  const lastTick = useRef(0);
+  const kick = (speed: number) => {
+    flap.set(-Math.min(28, 8 + speed * 0.018));
+    void animate(flap, 0, { type: 'spring', stiffness: 900, damping: 14 });
+    const now = performance.now();
+    if (now - lastTick.current > 35) {
+      lastTick.current = now;
+      audioSystem.tick(Math.min(1, speed / 900));
+      vibrate(6);
+    }
   };
 
-  // Store players at spin start to prevent race conditions
-  const playersAtSpinRef = useRef<Player[]>(players);
+  const reveal = (index: number) => {
+    setWinner(index);
+    setPhase('result');
+    audioSystem.playSound('/sounds/effects/accepted_invite.mp3', true);
+    vibrate([30, 40, 60]);
+    later(() => burst('spark', originOf(hubRef.current)), 120);
+    later(() => finish(index), RESULT_MS);
+  };
 
-  const segmentAngle = 360 / (players?.length || 1);
-
-  // Draw the wheel
-  useEffect(() => {
-    if (!players || players.length === 0) return;
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const radius = Math.min(centerX, centerY) - 10;
-
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw segments
-    players.forEach((player, index) => {
-      const startAngle = (index * segmentAngle - 90) * (Math.PI / 180);
-      const endAngle = ((index + 1) * segmentAngle - 90) * (Math.PI / 180);
-
-      // Draw segment
-      ctx.beginPath();
-      ctx.moveTo(centerX, centerY);
-      ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-      ctx.closePath();
-      ctx.fillStyle = WHEEL_COLORS[index % WHEEL_COLORS.length];
-      ctx.fill();
-      ctx.strokeStyle = '#1f2937';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // Draw player name/avatar
-      const midAngle = (startAngle + endAngle) / 2;
-      const textRadius = radius * 0.65;
-      const textX = centerX + Math.cos(midAngle) * textRadius;
-      const textY = centerY + Math.sin(midAngle) * textRadius;
-
-      ctx.save();
-      ctx.translate(textX, textY);
-      ctx.rotate(midAngle + Math.PI / 2);
-
-      // Avatar glyph. `Path2D` accepts the same 24x24 path data the <Icon>
-      // component renders, so the wheel shows the app's own icon rather than a
-      // platform emoji drawn in a canvas font.
-      ctx.fillStyle = 'white';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      const glyph = new Path2D(ICON_PATHS[iconForEmoji(player.avatar)]);
-      ctx.save();
-      const GLYPH = 30;
-      ctx.translate(-GLYPH / 2, -15 - GLYPH / 2);
-      ctx.scale(GLYPH / 24, GLYPH / 24);
-      ctx.fill(glyph, 'evenodd');
-      ctx.restore();
-
-      // Player name (truncated)
-      ctx.font = 'bold 14px sans-serif';
-      const displayName = player.name.length > 10 ? player.name.slice(0, 10) + '...' : player.name;
-      ctx.fillText(displayName, 0, 15);
-
-      ctx.restore();
-    });
-
-    // Draw center circle
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, 25, 0, Math.PI * 2);
-    ctx.fillStyle = '#1f2937';
-    ctx.fill();
-    ctx.strokeStyle = '#f0e130';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-
-    // Draw center text
-    ctx.font = 'bold 12px sans-serif';
-    ctx.fillStyle = '#f0e130';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(t('spinner.spin'), centerX, centerY);
-
-  }, [players, segmentAngle, t]);
-
-  // Auto-start spin after component mounts
-  useEffect(() => {
-    if (!players || players.length === 0) return;
-    if (!hasStarted.current) {
-      hasStarted.current = true;
-      // Play intro sound
-      const introSound = INTRO_SOUNDS[Math.floor(Math.random() * INTRO_SOUNDS.length)];
-      audioSystem.playSound(introSound, true);
-
-      // Start spinning after intro
-      later(() => {
-        startSpin();
-      }, INTRO_MS);
+  const spin = async () => {
+    if (done.current) return;
+    const index = randomIndex(count);
+    const start = rot.get();
+    const target = landingAngle(start, index, count, randomBetween(0.2, 0.8), 5);
+    setPhase('spinning');
+    if (reduce) {
+      rot.set(target);
+      later(() => reveal(index), 400);
+      return;
     }
+    audioSystem.playSound('/sounds/games/bullseye-summit/spinner.mp3', false);
+    // Wind up: pull back a little before the launch (anticipation).
+    await animate(rot, start - 14, { duration: 0.28, ease: [0.3, 0, 0.8, 0.15] });
+    if (done.current) return;
+    const from = rot.get();
+    const plan = planSpin(target - from, 0.5, 1.4);
+    const t0 = performance.now();
+    const step = () => {
+      if (done.current) return;
+      const t = (performance.now() - t0) / 1000;
+      const prev = rot.get();
+      const next = from + angleAt(t, plan.w0, plan.mu, plan.k);
+      rot.set(next);
+      const speed = Math.max(0, (plan.w0 + plan.mu / plan.k) * Math.exp(-plan.k * t) - plan.mu / plan.k);
+      if (crossings(prev, next, seg) > 0) kick(speed);
+      if (t < plan.duration) {
+        frame.current = requestAnimationFrame(step);
+      } else {
+        frame.current = null;
+        rot.set(target);
+        // The last peg catches the flapper: one slow teeter, then rest.
+        flap.set(-12);
+        void animate(flap, 0, springSpatialSlow);
+        later(() => reveal(index), 260);
+      }
+    };
+    frame.current = requestAnimationFrame(step);
+  };
+
+  // The intro line, then the spin.
+  const started = useRef(false);
+  useEffect(() => {
+    if (players.length === 0 || started.current) return;
+    started.current = true;
+    audioSystem.playSound(INTRO_SOUNDS[Math.floor(Math.random() * INTRO_SOUNDS.length)], true);
+    later(() => { void spin(); }, INTRO_MS);
+    // spin reads refs and motion values only; running it once is the point.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Validate players array - check AFTER all hooks
-  if (!players || players.length === 0) {
-    console.error('SpinnerWheel: No players provided');
+  if (players.length === 0) {
     onComplete(0);
     return null;
   }
 
-  const startSpin = () => {
-    if (isSpinning) return;
-
-    // Store current players to prevent race conditions
-    playersAtSpinRef.current = [...players];
-
-    setIsSpinning(true);
-    setWinner(null);
-    setShowResult(false);
-
-    // Play spinner sound
-    audioSystem.playSound('/sounds/games/bullseye-summit/spinner.mp3', false);
-
-    // Calculate random winner and rotation using stored players
-    const currentPlayers = playersAtSpinRef.current;
-    const winnerIndex = randomIndex(currentPlayers.length);
-
-    // How the wheel is drawn:
-    // - Segment 0 starts at -90° (canvas coordinates) which is at the TOP of the wheel
-    // - Segments go clockwise: segment 0 at top, segment 1 to the right, etc.
-    //
-    // The pointer is at the TOP of the wheel, pointing DOWN into the wheel.
-    // CSS rotation is clockwise (positive degrees rotate clockwise).
-    //
-    // Initially (rotation=0°), segment 0's center is at the top under the pointer.
-    // To land on segment N, we need to rotate the wheel so that segment N is at the top.
-    //
-    // Segment N's center is at angle: N * segmentAngle (from segment 0's center)
-    // To bring segment N to the top, we rotate BACKWARDS (counter to where it currently is)
-    // But since we want dramatic clockwise spinning, we do full rotations PLUS the offset to land correctly.
-    //
-    // After rotating by X degrees clockwise, the segment at position (360 - X) mod 360 is at top.
-    // So to land on segment N (at position N * segmentAngle), we need:
-    // (360 - X) mod 360 = N * segmentAngle + segmentAngle/2
-    // X = 360 - (N * segmentAngle + segmentAngle/2)
-
-    const segmentCenter = winnerIndex * segmentAngle + segmentAngle / 2;
-    const baseRotation = 360 - segmentCenter; // This brings segment N to top
-    const spins = randomBetween(5, 8); // 5-8 full rotations for drama
-    const finalRotation = Math.floor(spins) * 360 + baseRotation;
-
-    logger.debug(`🎰 Spinner: players=${players.map(p=>p.name).join(', ')}`);
-    logger.debug(`🎰 Spinner: winnerIndex=${winnerIndex}, player=${players[winnerIndex]?.name}`);
-    logger.debug(`🎰 Spinner: segmentAngle=${segmentAngle}°, segmentCenter=${segmentCenter}°, baseRotation=${baseRotation}°, finalRotation=${finalRotation.toFixed(1)}°`);
-
-    setRotation(finalRotation);
-
-    // Show result after spin completes
-    later(() => {
-      const storedPlayers = playersAtSpinRef.current;
-      setIsSpinning(false);
-      setWinner(storedPlayers[winnerIndex]);
-      setShowResult(true);
-
-      // Play winner announcement after a short delay
-      later(() => {
-        audioSystem.playSound('/sounds/effects/accepted_invite.mp3', true);
-      }, 300);
-
-      // Proceed to game after showing result
-      later(() => finish(winnerIndex), 2500);
-    // ⚠️ Also under reduced motion: while the wheel turns, every player has a
-    // "X begins" button — shortening the spin took that choice away.
-    }, SPIN_MS);
+  // Each name gets the largest size that fits the room between hub and avatar
+  // (capped by the wedge's width); only a name too long even at the smallest
+  // size is cut.
+  const room = R * (LABEL_OUTER - LABEL_INNER);
+  const widest = Math.min(16, ((R * 0.5 * Math.PI * seg) / 180) * 0.34);
+  const label = (name: string) => {
+    const size = Math.max(12, Math.min(widest, room / (name.length * 0.58)));
+    const max = Math.floor(room / (size * 0.58));
+    return { size, text: name.length > max ? `${name.slice(0, max - 1)}…` : name };
   };
 
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="spinner-title" className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_85%,transparent)] flex items-center justify-center z-50 m3-scrim-enter">
-      <div className="flex flex-col items-center gap-6 p-8 bg-surface-container rounded-m3-lg shadow-m3-3">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="spinner-title"
+      className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_85%,transparent)] flex items-center justify-center z-50 m3-scrim-enter p-4"
+      onClick={() => { if (phase === 'result' && winner != null) finish(winner); }}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 16 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={springSpatialDefault}
+        className="flex flex-col items-center gap-5 p-6 sm:p-8 bg-surface-container-high rounded-m3-xl shadow-m3-3 w-full max-w-md"
+        onClick={e => e.stopPropagation()}
+      >
         <h2 id="spinner-title" className="m3-headline-small text-on-surface text-center">
           {t('game.who_starts')}
         </h2>
 
-        {/* Wheel Container */}
-        <div className="relative">
-          {/* Pointer */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-10">
-            <div
-              className="w-0 h-0 border-l-[15px] border-r-[15px] border-t-[30px] border-l-transparent border-r-transparent border-t-yellow-400"
-              style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}
-            />
-          </div>
-
-          {/* Spinning Wheel */}
-          <div
-            className="transition-transform ease-out"
-            style={{
-              transform: `rotate(${rotation}deg)`,
-              transitionDuration: isSpinning ? `${SPIN_MS}ms` : '0s',
-              transitionTimingFunction: SPIN_EASING,
-            }}
+        <div className="relative w-[min(78vw,20rem)] aspect-square" data-testid="spinner-wheel" data-phase={phase}>
+          {/* Idle sway while the intro plays, so the wheel looks ready to go. */}
+          <motion.div
+            className="absolute inset-0"
+            animate={phase === 'intro' && !reduce ? { rotate: [0, -4, 0] } : { rotate: 0 }}
+            transition={phase === 'intro' && !reduce ? { duration: 1.4, repeat: Infinity, ease: 'easeInOut' } : springSpatialFast}
           >
-            <canvas
-              ref={canvasRef}
-              width={300}
-              height={300}
-              className="rounded-full shadow-2xl"
-              style={{
-                boxShadow: '0 0 40px rgba(240, 225, 48, 0.3), inset 0 0 20px rgba(0,0,0,0.3)'
-              }}
-            />
-          </div>
+            <motion.svg viewBox={`0 0 ${VIEW} ${VIEW}`} className="w-full h-full drop-shadow-xl" style={{ rotate: rot }} aria-hidden="true">
+              {players.map((p, i) => {
+                const [fill, ink] = TONES[i % TONES.length];
+                const from = i * seg;
+                const mid = from + seg / 2;
+                const isWinner = winner === i;
+                const dim = winner != null && !isWinner;
+                const [ix, iy] = at(mid, R * AVATAR_AT);
+                const name = label(p.name);
+                const leftHalf = mid > 180;
+                return (
+                  <motion.g
+                    key={p.id}
+                    animate={{ scale: isWinner ? 1.06 : 1, opacity: dim ? 0.38 : 1 }}
+                    transition={springSpatialDefault}
+                    style={{ transformOrigin: `${C}px ${C}px` }}
+                  >
+                    <path
+                      d={count === 1 ? `M ${C} ${C - R} A ${R} ${R} 0 1 1 ${C - 0.01} ${C - R} Z` : wedgePath(from, from + seg)}
+                      fill={fill}
+                      stroke="var(--m3-surface-container-high)"
+                      strokeWidth={3}
+                    />
+                    {/* Avatar near the rim, where the wedge is widest. */}
+                    <g transform={`translate(${ix - 12} ${iy - 12}) rotate(${mid} 12 12)`}>
+                      <path d={ICON_PATHS[iconForEmoji(p.avatar)]} fill={ink} fillRule="evenodd" />
+                    </g>
+                    {/* Name along the radius, between hub and avatar, never upside
+                        down: on the left half it is turned the other way. */}
+                    <text
+                      transform={`rotate(${leftHalf ? mid + 90 : mid - 90} ${C} ${C})`}
+                      x={leftHalf ? C - R * LABEL_OUTER : C + R * LABEL_OUTER}
+                      y={C}
+                      textAnchor={leftHalf ? 'start' : 'end'}
+                      dominantBaseline="middle"
+                      fill={ink}
+                      style={{ fontSize: name.size, fontWeight: 700 }}
+                    >
+                      {name.text}
+                    </text>
+                  </motion.g>
+                );
+              })}
+              {/* Rim with a peg at every divider. */}
+              <circle cx={C} cy={C} r={R} fill="none" stroke="var(--m3-outline-variant)" strokeWidth={6} />
+              {players.map((p, i) => {
+                const [px, py] = at(i * seg, R - 3);
+                return <circle key={`peg-${p.id}`} cx={px} cy={py} r={4} fill="var(--m3-on-surface)" />;
+              })}
+            </motion.svg>
+          </motion.div>
 
-          {/* Glow effect when spinning */}
-          {isSpinning && (
-            <div
-              className="absolute inset-0 rounded-full animate-pulse"
-              style={{
-                boxShadow: '0 0 60px rgba(240, 225, 48, 0.5)',
-              }}
-            />
-          )}
+          {/* Hub: a circle that bursts open on the winner. */}
+          <motion.div
+            ref={hubRef}
+            className="absolute left-1/2 top-1/2 w-20 h-20 -ml-10 -mt-10 flex items-center justify-center bg-tertiary text-on-tertiary shadow-m3-3"
+            animate={{
+              clipPath: phase === 'result' ? BURST : CIRCLE,
+              scale: phase === 'result' ? 1.25 : 1,
+              rotate: phase === 'result' ? 20 : 0,
+            }}
+            transition={springSpatialDefault}
+          >
+            <AnimatePresence mode="popLayout" initial={false}>
+              {phase === 'result' && winner != null ? (
+                <motion.span key="winner" initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={springSpatialFast}>
+                  <Icon name={iconForEmoji(players[winner].avatar)} size={34} />
+                </motion.span>
+              ) : (
+                <motion.span key="spin" className="m3-label-large font-bold tracking-wider" exit={{ scale: 0.4, opacity: 0 }}>
+                  {t('spinner.spin')}
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </motion.div>
+
+          {/* Flapper: knocked by every peg, springs back. */}
+          <motion.div
+            className="absolute left-1/2 -top-3 -ml-4 w-8 h-11 origin-top z-10"
+            style={{ rotate: flap }}
+            aria-hidden="true"
+          >
+            <svg viewBox="0 0 32 44" className="w-full h-full drop-shadow-md">
+              <path d="M16 44 C 6 30, 2 22, 2 14 A 14 14 0 0 1 30 14 C 30 22, 26 30, 16 44 Z" fill="var(--m3-tertiary)" />
+              <circle cx="16" cy="14" r="5" fill="var(--m3-on-tertiary)" />
+            </svg>
+          </motion.div>
         </div>
 
-        {/* Result */}
-        {showResult && winner && (
-          <div className="animate-bounce-in text-center">
-            <div className="mb-2 flex justify-center"><Icon name={iconForEmoji(winner.avatar)} size={48} /></div>
-            <div className="m3-title-large text-tertiary">
-              {winner.name}
-            </div>
-            <div className="m3-body-large text-on-surface-variant mt-1">
-              {t('spinner.throws_first')}
-            </div>
-          </div>
-        )}
+        {/* Result: the winner's name springs in. */}
+        <div className="min-h-[4.5rem] flex items-center justify-center" aria-live="polite">
+          <AnimatePresence>
+            {phase === 'result' && winner != null && (
+              <motion.div
+                key="result"
+                data-testid="spinner-result"
+                initial={{ opacity: 0, y: 14, scale: 0.85 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={springSpatialDefault}
+                className="text-center"
+              >
+                <div className="m3-headline-small m3-emphasized text-tertiary">{players[winner].name}</div>
+                <div className="m3-body-large text-on-surface-variant">{t('spinner.throws_first')}</div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
-        {/* The wheel runs for several seconds on every game — never force it. */}
-        {!showResult && (
-          <div className="flex flex-col items-center gap-3">
+        {/* The wheel runs on every game — never force it: anyone can be picked directly. */}
+        {phase !== 'result' && (
+          <div className="flex flex-col items-center gap-3 w-full">
             <div className="flex flex-wrap justify-center gap-2" role="group" aria-label={t('game.who_starts')}>
               {players.map((p, i) => (
-                <Chip key={p.id} onClick={() => finish(i)}>
+                <motion.button
+                  key={p.id}
+                  type="button"
+                  onClick={() => finish(i)}
+                  whileTap={{ scale: 0.94 }}
+                  transition={springSpatialFast}
+                  className="m3-state-layer m3-ripple inline-flex items-center gap-2 min-h-[40px] pl-2 pr-4 rounded-m3-full border border-outline-variant bg-surface-container text-on-surface m3-label-large"
+                >
+                  <span
+                    className="w-7 h-7 rounded-m3-full flex items-center justify-center"
+                    style={{ background: TONES[i % TONES.length][0], color: TONES[i % TONES.length][1] }}
+                  >
+                    <Icon name={iconForEmoji(p.avatar)} size={16} />
+                  </span>
                   {t('game.starts', { name: p.name })}
-                </Chip>
+                </motion.button>
               ))}
             </div>
-            <Button variant="text" onClick={skipRandom}>
+            <Button variant="text" onClick={() => finish(randomIndex(players.length))}>
               {t('game.skip_spinner')}
             </Button>
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 };

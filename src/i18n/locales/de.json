@@ -211,7 +211,7 @@
     "edit_dart": "Dart {{n}}: {{score}} – antippen zum Ändern",
     "empty_dart": "Dart {{n}}: leer",
     "scoreboard": "Spielstand",
-    "numpad_hint": "Summe tippen, ↵ übernimmt",
+    "numpad_hint": "Summe tippen, Haken übernimmt",
     "new_game_short": "Neues Spiel",
     "stats_scope": "Zeitraum",
     "current_leg": "Aktuelles Leg",
@@ -2048,7 +2048,11 @@
     "hero_checkout": "Checkout · {{name}}",
     "pb_visit": "Neuer Rekord: {{value}} in einer Aufnahme",
     "pb_leg": "Neues bestes Leg: {{value}} Darts",
-    "leg_recap": "{{darts}} Darts · Ø {{avg}} · Checkout {{checkout}}"
+    "leg_recap": "{{darts}} Darts · Ø {{avg}} · Checkout {{checkout}}",
+    "tab_stats": "Statistik",
+    "tab_history": "Verlauf",
+    "tab_chart": "Chart",
+    "tab_heatmap": "Heatmap"
   },
   "training_screen": {
     "title_doubles": "Doppel-Training",

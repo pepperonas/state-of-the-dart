@@ -81,4 +81,17 @@ describe('ScoreDelta', () => {
     act(() => rerender(<ScoreDelta value={200} />));
     expect(screen.queryByTestId('score-delta')).toBeNull();
   });
+
+  it('a freshly mounted card still shows the visit it was handed (row ↔ hero morph)', () => {
+    render(<ScoreDelta value={441} from={501} />);
+    expect(screen.getByTestId('score-delta')).toHaveTextContent('−60');
+  });
+
+  it('a mount with no drop, a rise or an implausible drop shows nothing', () => {
+    for (const from of [undefined, 441, 400, 700]) {
+      const { unmount } = render(<ScoreDelta value={441} from={from} />);
+      expect(screen.queryByTestId('score-delta')).toBeNull();
+      unmount();
+    }
+  });
 });
