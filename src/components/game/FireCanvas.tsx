@@ -433,6 +433,9 @@ function start2DFire(canvas: HTMLCanvasElement): (() => void) | null {
   };
 }
 
+/** Delay before a dropped WebGL context is released (after the turn-change morph). */
+const RELEASE_AFTER_MS = 1500;
+
 function FireCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -463,7 +466,11 @@ function FireCanvas() {
       cleanup?.();
       sibling?.remove();
       // getContext('webgl') returns the existing context only if WebGL was used.
-      (canvas.getContext('webgl') as WebGLRenderingContext | null)?.getExtension('WEBGL_lose_context')?.loseContext();
+      const gl = canvas.getContext('webgl') as WebGLRenderingContext | null;
+      // ⚠️ Released later, not here: this runs when the turn passes, and a
+      // synchronous loseContext() blocked the main thread for ~300 ms right
+      // in the middle of the card morph (CPU profile, 0.30.0).
+      if (gl) setTimeout(() => gl.getExtension('WEBGL_lose_context')?.loseContext(), RELEASE_AFTER_MS);
     };
   }, []);
 

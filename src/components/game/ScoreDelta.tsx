@@ -4,6 +4,9 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 interface ScoreDeltaProps {
   /** The remaining score shown next to it. */
   value: number;
+  /** The score before this mount — a card that just turned into a row (or
+   *  back) is a new element, but the visit still has to show. */
+  from?: number;
   className?: string;
 }
 
@@ -13,10 +16,13 @@ interface ScoreDeltaProps {
  * and shows nothing. Decorative (`aria-hidden`; the live region announces
  * visits) and absent under reduced motion.
  */
-const ScoreDelta: React.FC<ScoreDeltaProps> = ({ value, className = '' }) => {
+const ScoreDelta: React.FC<ScoreDeltaProps> = ({ value, from, className = '' }) => {
   const reduce = useReducedMotion();
   const [prev, setPrev] = useState(value);
-  const [delta, setDelta] = useState<{ n: number; id: number } | null>(null);
+  const [delta, setDelta] = useState<{ n: number; id: number } | null>(() => {
+    const drop = from != null ? from - value : 0;
+    return drop > 0 && drop <= 180 ? { n: drop, id: 1 } : null;
+  });
   // State adjusted during render: compares with the value of the last render.
   if (value !== prev) {
     const drop = prev - value;

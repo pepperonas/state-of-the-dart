@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useDeferredValue, Suspense, lazy } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, RotateCcw, X, Bot, ChevronDown, AlertTriangle, Smile, Flame, UserMinus, Volume2, VolumeX, BarChart3 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -23,7 +23,7 @@ import SpinnerWheel from './SpinnerWheel';
 import BugReportModal from '../bugReport/BugReportModal';
 import PlayerAvatar from '../player/PlayerAvatar';
 import AvatarPicker from '../player/AvatarPicker';
-import { Dart, Player, GameType, MatchSettings, Throw, HeatmapData } from '../../types/index';
+import { Dart, Player, GameType, MatchSettings, Throw, HeatmapData, MatchPlayer } from '../../types/index';
 import { calculateThrowScore } from '../../utils/scoring';
 import { evaluateVisit, rulesOf } from '../../utils/visit';
 import { inRuleOf, outRuleOf, ruleSettings, maxFinish, type CheckRule } from '../../utils/checkRules';
@@ -50,11 +50,28 @@ const MatchDetailModal = lazy(() => import('../dashboard/MatchDetailModal'));
 import { springSpatialDefault, springSpatialFast, effectsDefault } from '../../utils/motion';
 import { Icon, iconForEmoji } from '../icons';
 
+/**
+ * Renders `render()` only when `depsKey` changes. With deferred values in the
+ * key, the subtree re-renders in React's low-priority pass after an urgent
+ * update (the turn change) instead of inside it.
+ */
+const DeferredSection = React.memo(
+  ({ render }: { render: () => React.ReactNode; depsKey: string }) => <>{render()}</>,
+  (a, b) => a.depsKey === b.depsKey,
+);
+
+/** The insight cards (stats, visit history, chart, heatmap). */
+type InsightTab = 'stats' | 'history' | 'chart' | 'heatmap';
+
 const GameScreen: React.FC = () => {
   const { notify } = useFeedback();
   const windowClass = useWindowClass();
   // Phones and tablets in portrait: stats, history and the board open in a sheet.
   const [insightsOpen, setInsightsOpen] = useState(false);
+  const [insightsTab, setInsightsTab] = useState<InsightTab>('stats');
+  // The heatmap is only computed while it is on screen: always in the
+  // multi-pane layouts, on phones while its tab is open in the sheet.
+  const heatmapVisible = windowClass.panes > 1 || (insightsOpen && insightsTab === 'heatmap');
   const { t, i18n } = useTranslation();
   const isGerman = (i18n.language || 'de').startsWith('de');
   const navigate = useNavigate();
@@ -354,10 +371,6 @@ const GameScreen: React.FC = () => {
   const [newPlayerAvatar, setNewPlayerAvatar] = useState<string | undefined>(undefined);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showBotSelector, setShowBotSelector] = useState(false);
-  const [showThrowHistory, setShowThrowHistory] = useState(false);
-  const [showThrowChart, setShowThrowChart] = useState(false);
-  const [showMatchStats, setShowMatchStats] = useState(false);
-  const [showLiveHeatmap, setShowLiveHeatmap] = useState(false);
   const [selectedHeatmapPlayer, setSelectedHeatmapPlayer] = useState<string | null>(null);
   const [heatmapView, setHeatmapView] = useState<'leg' | 'match'>('match');
   const [statsView, setStatsView] = useState<'leg' | 'match'>('match');
@@ -448,6 +461,11 @@ const GameScreen: React.FC = () => {
   const totalThrowsCount = state.currentMatch?.legs.reduce(
     (total, leg) => total + (leg.throws?.length || 0), 0
   ) || 0;
+  // The insight cards (table, chart, heatmap, history) follow a visit at low
+  // priority: rendering them in the same commit as the turn change cost
+  // 100+ ms long tasks right in the middle of the card morph.
+  const deferredThrows = useDeferredValue(totalThrowsCount);
+  const deferredPlayerIndex = useDeferredValue(state.currentPlayerIndex);
 
   // Personal-best baselines per player for live "new best" chips, read once
   // per match and raised as records fall (so one record is not shown twice).
@@ -521,7 +539,7 @@ const GameScreen: React.FC = () => {
   // Calculate live heatmap data from current match throws
   const liveHeatmapData = useMemo((): Record<string, HeatmapData> => {
     // Only while the section is open — it used to rebuild after every visit.
-    if (!state.currentMatch || !showLiveHeatmap) return {};
+    if (!state.currentMatch || !heatmapVisible) return {};
 
     const heatmaps: Record<string, HeatmapData> = {};
 
@@ -535,7 +553,8 @@ const GameScreen: React.FC = () => {
     });
 
     return heatmaps;
-  }, [state.currentMatch?.legs, state.currentMatch?.players, totalThrowsCount, heatmapView, showLiveHeatmap]);
+    // deferredThrows, not the legs: recomputed in the low-priority pass.
+  }, [deferredThrows, state.currentMatch?.id, state.currentMatch?.players.length, heatmapView, heatmapVisible]);
 
   // Announce "You require X" when player's turn STARTS and they can checkout
   useEffect(() => {
@@ -1598,281 +1617,291 @@ const GameScreen: React.FC = () => {
     </div>
 
   ) : null;
-  const insights = (
-    <div className="space-y-4">
-      {settings.showStatsDuringGame && (
-        <div>
-          <button
-            onClick={() => setShowMatchStats(!showMatchStats)}
-            className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition"
-          >
-            <h3 className="m3-title-medium text-on-surface">{t('game_screen.match_statistics')}</h3>
-            <ChevronDown size={24} className={`m3-chevron ${showMatchStats ? 'm3-open' : ''}`} />
-          </button>
+  const chartThrows = statsView === 'leg'
+    ? currentLeg.throws
+    : state.currentMatch.legs.flatMap(l => l.throws);
+  // Every player side by side — the old panel showed only the player up.
+  const statRows: { label: string; value: (p: MatchPlayer) => string }[] = [
+    { label: t('game_screen.stat_average'), value: p => p.matchAverage.toFixed(2) },
+    { label: t('game_screen.stat_highest'), value: p => String(p.matchHighestScore) },
+    { label: '180', value: p => String(p.match180s) },
+    { label: '140+', value: p => String(p.match140Plus) },
+    { label: '100+', value: p => String(p.match100Plus) },
+    { label: t('game_screen.stat_checkout'), value: p => `${p.checkoutAttempts > 0 ? ((p.checkoutsHit / p.checkoutAttempts) * 100).toFixed(1) : '0.0'}%` },
+    { label: t('game.legs'), value: p => String(p.legsWon) },
+  ];
+  const statsTable = (
+    <div className="overflow-x-auto -mx-1">
+      <table className="w-full m3-body-medium tabular-nums border-separate border-spacing-x-1 border-spacing-y-0.5">
+        <thead>
+          <tr>
+            <th scope="col" className="sr-only">{t('game_screen.match_statistics')}</th>
+            {state.currentMatch.players.map((p, i) => (
+              <th
+                key={p.playerId}
+                scope="col"
+                className={`px-2 py-1.5 rounded-t-m3-sm m3-label-large text-right truncate max-w-[8rem] ${
+                  i === state.currentPlayerIndex ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant'
+                }`}
+              >
+                {p.name}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {statRows.map(row => (
+            <tr key={row.label}>
+              <th scope="row" className="text-left font-normal text-on-surface-variant pr-2 py-1 whitespace-nowrap">{row.label}</th>
+              {state.currentMatch!.players.map((p, i) => (
+                <td
+                  key={p.playerId}
+                  className={`px-2 py-1 text-right font-semibold text-on-surface ${
+                    i === state.currentPlayerIndex ? 'bg-[color-mix(in_srgb,var(--m3-primary-container)_45%,transparent)]' : ''
+                  }`}
+                >
+                  {row.value(p)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+  const historyBody = (
+    <div className="max-h-[32rem] overflow-y-auto pr-1">
+      {/* Leg/Match Toggle */}
+      <SegmentedButton<'leg' | 'match'>
+        className="mb-4"
+        label={t('game.stats_scope')}
+        value={statsView}
+        onChange={setStatsView}
+        options={[
+          { value: 'leg', label: t('game.current_leg') },
+          { value: 'match', label: t('game.whole_match') },
+        ]}
+      />
+      {state.currentMatch.players.map((player) => {
+        const allPlayerThrowsView = statsView === 'leg'
+          ? currentLeg.throws.filter(t => t.playerId === player.playerId)
+          : state.currentMatch!.legs.flatMap(l => l.throws.filter(t => t.playerId === player.playerId));
+        const playerThrows = allPlayerThrowsView;
 
-          {showMatchStats && (
-            <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-on-surface-variant">{t('game_screen.stat_average')}</span>
-                  <span className="font-semibold text-on-surface">{currentPlayer!.matchAverage.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-on-surface-variant">{t('game_screen.stat_highest')}</span>
-                  <span className="font-semibold text-on-surface">{currentPlayer!.matchHighestScore}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-on-surface-variant">180s:</span>
-                  <span className="font-semibold text-on-surface">{currentPlayer!.match180s}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-on-surface-variant">140+:</span>
-                  <span className="font-semibold text-on-surface">{currentPlayer!.match140Plus}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-on-surface-variant">100+:</span>
-                  <span className="font-semibold text-on-surface">{currentPlayer!.match100Plus}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-on-surface-variant">{t('game_screen.stat_checkout')}</span>
-                  <span className="font-semibold text-on-surface">
-                    {currentPlayer!.checkoutAttempts > 0
-                      ? ((currentPlayer!.checkoutsHit / currentPlayer!.checkoutAttempts) * 100).toFixed(1)
-                      : '0.0'}%
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-      {/* Throw History - Collapsable */}
-      <div>
-        <button
-          onClick={() => setShowThrowHistory(!showThrowHistory)}
-          className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition"
-        >
-          <h3 className="m3-title-medium text-on-surface">{t('game_screen.throw_history')}</h3>
-          <ChevronDown size={24} className={`m3-chevron ${showThrowHistory ? 'm3-open' : ''}`} />
-        </button>
+        return (
+          <div key={player.playerId} className="mb-6 last:mb-0">
+            <h4 className="text-on-surface font-bold mb-3 flex items-center gap-2">
+              <span>{player.name}</span>
+              <span className="text-sm text-on-surface-variant">
+                {t('game_screen.visit_count', { count: playerThrows.length })}
+              </span>
+            </h4>
 
-        {showThrowHistory && (
-          <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
-            {/* Leg/Match Toggle */}
-            <SegmentedButton<'leg' | 'match'>
-              className="mb-4"
-              label={t('game.stats_scope')}
-              value={statsView}
-              onChange={setStatsView}
-              options={[
-                { value: 'leg', label: t('game.current_leg') },
-                { value: 'match', label: t('game.whole_match') },
-              ]}
-            />
-            {state.currentMatch.players.map((player) => {
-              const allPlayerThrowsView = statsView === 'leg'
-                ? currentLeg.throws.filter(t => t.playerId === player.playerId)
-                : state.currentMatch!.legs.flatMap(l => l.throws.filter(t => t.playerId === player.playerId));
-              const playerThrows = allPlayerThrowsView;
+            {playerThrows.length === 0 ? (
+              <p className="text-on-surface-variant text-sm italic">{t('game_screen.no_visits')}</p>
+            ) : (
+              <div className="space-y-2">
+                {playerThrows.map((throwData, index) => (
+                  <div
+                    key={throwData.id}
+                    className="bg-surface-container rounded-m3-lg p-3 border border-outline-variant"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-on-surface-variant text-sm">
+                        {t('game_screen.visit_number', { n: index + 1 })}
+                      </span>
+                      <div className="flex items-center gap-3">
+                        {throwData.isBust && (
+                          <span className="text-on-error-container text-xs font-bold bg-error-container px-2 py-1 rounded-m3-sm">
+                            {t('game_screen.bust')}
+                          </span>
+                        )}
+                        <span className={`font-bold text-lg ${
+                          throwData.isBust
+                            ? 'text-error line-through'
+                            : throwData.score >= 140
+                              ? 'text-tertiary'
+                              : throwData.score >= 100
+                                ? 'text-primary'
+                                : 'text-on-surface'
+                        }`}>
+                          {throwData.score}
+                        </span>
+                        <span className="text-on-surface-variant text-sm">
+                          → {throwData.remaining}
+                        </span>
+                      </div>
+                    </div>
 
-              return (
-                <div key={player.playerId} className="mb-6 last:mb-0">
-                  <h4 className="text-on-surface font-bold mb-3 flex items-center gap-2">
-                    <span>{player.name}</span>
-                    <span className="text-sm text-on-surface-variant">
-                      {t('game_screen.visit_count', { count: playerThrows.length })}
-                    </span>
-                  </h4>
-
-                  {playerThrows.length === 0 ? (
-                    <p className="text-on-surface-variant text-sm italic">{t('game_screen.no_visits')}</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {playerThrows.map((throwData, index) => (
+                    <div className="flex gap-2">
+                      {throwData.darts.map((dart, dartIndex) => (
                         <div
-                          key={throwData.id}
-                          className="bg-surface-container rounded-m3-lg p-3 border border-outline-variant"
+                          key={dartIndex}
+                          className={`flex-1 text-center py-2 rounded-m3-sm ${
+                            dart.multiplier === 3
+                              ? 'bg-success-container text-on-success-container'
+                              : dart.multiplier === 2
+                                ? 'bg-error-container text-on-error-container'
+                                : dart.score === 0
+                                  ? 'bg-surface-container-highest text-on-surface-variant'
+                                  : 'bg-primary-container text-on-primary-container'
+                          }`}
                         >
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-on-surface-variant text-sm">
-                              {t('game_screen.visit_number', { n: index + 1 })}
-                            </span>
-                            <div className="flex items-center gap-3">
-                              {throwData.isBust && (
-                                <span className="text-on-error-container text-xs font-bold bg-error-container px-2 py-1 rounded-m3-sm">
-                                  {t('game_screen.bust')}
-                                </span>
-                              )}
-                              <span className={`font-bold text-lg ${
-                                throwData.isBust
-                                  ? 'text-error line-through'
-                                  : throwData.score >= 140
-                                    ? 'text-tertiary'
-                                    : throwData.score >= 100
-                                      ? 'text-primary'
-                                      : 'text-on-surface'
-                              }`}>
-                                {throwData.score}
-                              </span>
-                              <span className="text-on-surface-variant text-sm">
-                                → {throwData.remaining}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="flex gap-2">
-                            {throwData.darts.map((dart, dartIndex) => (
-                              <div
-                                key={dartIndex}
-                                className={`flex-1 text-center py-2 rounded-m3-sm ${
-                                  dart.multiplier === 3
-                                    ? 'bg-success-container text-on-success-container'
-                                    : dart.multiplier === 2
-                                      ? 'bg-error-container text-on-error-container'
-                                      : dart.score === 0
-                                        ? 'bg-surface-container-highest text-on-surface-variant'
-                                        : 'bg-primary-container text-on-primary-container'
-                                }`}
-                              >
-                                <span className="text-xs font-semibold">
-                                  {dart.score === 0
-                                    ? t('game.miss')
-                                    : dart.multiplier === 3
-                                      ? `T${dart.segment}`
-                                      : dart.multiplier === 2
-                                        ? `D${dart.segment}`
-                                        : dart.segment
-                                  }
-                                </span>
-                              </div>
-                            ))}
-                          </div>
+                          <span className="text-xs font-semibold">
+                            {dart.score === 0
+                              ? t('game.miss')
+                              : dart.multiplier === 3
+                                ? `T${dart.segment}`
+                                : dart.multiplier === 2
+                                  ? `D${dart.segment}`
+                                  : dart.segment
+                            }
+                          </span>
                         </div>
                       ))}
                     </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* Throw Chart - Collapsable */}
-      <div>
-        <button
-          onClick={() => setShowThrowChart(!showThrowChart)}
-          className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition"
-        >
-          <h3 className="m3-title-medium text-on-surface">{t('game_screen.throw_chart')}</h3>
-          <ChevronDown size={24} className={`m3-chevron ${showThrowChart ? 'm3-open' : ''}`} />
-        </button>
-
-        {showThrowChart && (() => {
-          const chartThrows = statsView === 'leg'
-            ? currentLeg.throws
-            : state.currentMatch.legs.flatMap(l => l.throws);
-          return (
-            <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
-              {/* Leg/Match Toggle */}
-              <SegmentedButton<'leg' | 'match'>
-                className="mb-4"
-                label={t('game.stats_scope')}
-                value={statsView}
-                onChange={setStatsView}
-                options={[
-                  { value: 'leg', label: t('game.current_leg') },
-                  { value: 'match', label: t('game.whole_match') },
-                ]}
-              />
-              <Suspense fallback={<div className="h-[600px] flex items-center justify-center"><LoadingIndicator /></div>}>
-                <ThrowChart players={state.currentMatch.players} chartThrows={chartThrows} />
-              </Suspense>
-            </div>
-          );
-        })()}
-      </div>
-
-      {/* Live Heatmap - Collapsable */}
-      <div>
-        <button
-          onClick={() => setShowLiveHeatmap(!showLiveHeatmap)}
-          className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition"
-        >
-          <div className="flex items-center gap-3">
-            <Flame size={24} className="text-tertiary" aria-hidden="true" />
-            <h3 className="m3-title-medium text-on-surface">{t('game_screen.live_heatmap')}</h3>
-          </div>
-          <ChevronDown size={24} className={`m3-chevron ${showLiveHeatmap ? 'm3-open' : ''}`} />
-        </button>
-
-        {showLiveHeatmap && (
-          <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
-            {/* Leg/Match Toggle */}
-            <SegmentedButton
-              className="mb-4"
-              label={t('game_screen.live_heatmap')}
-              value={heatmapView}
-              onChange={setHeatmapView}
-              options={[
-                { value: 'leg', label: t('game.current_leg') },
-                { value: 'match', label: t('game.whole_match') },
-              ]}
-            />
-            {/* Player Selector */}
-            {state.currentMatch.players.length > 1 && (
-              <div className="mb-6">
-                <label className="block m3-label-large text-on-surface-variant mb-2">{t('game.select_players')}</label>
-                <div className="flex flex-wrap gap-2">
-                  {state.currentMatch.players.map(player => (
-                    <button
-                      key={player.playerId}
-                      onClick={() => setSelectedHeatmapPlayer(
-                        selectedHeatmapPlayer === player.playerId ? null : player.playerId
-                      )}
-                      className={`px-4 py-2 rounded-m3-lg font-medium transition flex items-center gap-2 ${
-                        selectedHeatmapPlayer === player.playerId || (!selectedHeatmapPlayer && state.currentMatch!.players[0].playerId === player.playerId)
-                          ? 'bg-primary text-on-primary'
-                          : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
-                      }`}
-                    >
-                      <PlayerAvatar avatar={players.find(p => p.id === player.playerId)?.avatar} name={player.name} size="sm" />
-                      {player.name}
-                    </button>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
             )}
-
-            {/* Heatmap Display */}
-            {(() => {
-              const displayPlayerId = selectedHeatmapPlayer || state.currentMatch.players[0]?.playerId;
-              const playerHeatmap = displayPlayerId ? liveHeatmapData[displayPlayerId] : null;
-              const playerName = state.currentMatch.players.find(p => p.playerId === displayPlayerId)?.name || '';
-
-              if (!playerHeatmap || playerHeatmap.totalDarts === 0) {
-                return (
-                  <div className="text-center py-12">
-                    <Flame size={48} className="mx-auto mb-4 text-on-surface-variant" />
-                    <p className="text-on-surface-variant text-lg">{t('game_screen.no_heatmap_data', { name: playerName })}</p>
-                    <p className="text-on-surface-variant text-sm mt-2">{t('game_screen.heatmap_hint')}</p>
-                  </div>
-                );
-              }
-
-              return (
-                <div>
-                  <div className="text-center mb-4">
-                    <span className="text-lg font-bold text-on-surface">{playerName}</span>
-                    <span className="text-on-surface-variant ml-2">{t('game_screen.darts_count', { count: playerHeatmap.totalDarts })}</span>
-                  </div>
-                  <DartboardHeatmap heatmapData={playerHeatmap} maxWidth={460} compact />
-                </div>
-              );
-            })()}
           </div>
-        )}
+        );
+      })}
+    </div>
+  );
+  const chartBody = (
+    <>
+      {/* Leg/Match Toggle */}
+      <SegmentedButton<'leg' | 'match'>
+        className="mb-4"
+        label={t('game.stats_scope')}
+        value={statsView}
+        onChange={setStatsView}
+        options={[
+          { value: 'leg', label: t('game.current_leg') },
+          { value: 'match', label: t('game.whole_match') },
+        ]}
+      />
+      <Suspense fallback={<div className="h-[600px] flex items-center justify-center"><LoadingIndicator /></div>}>
+        <ThrowChart players={state.currentMatch.players} chartThrows={chartThrows} />
+      </Suspense>
+    </>
+  );
+  const heatmapBody = (
+    <>
+      {/* Leg/Match Toggle */}
+      <SegmentedButton
+        className="mb-4"
+        label={t('game_screen.live_heatmap')}
+        value={heatmapView}
+        onChange={setHeatmapView}
+        options={[
+          { value: 'leg', label: t('game.current_leg') },
+          { value: 'match', label: t('game.whole_match') },
+        ]}
+      />
+      {/* Player Selector */}
+      {state.currentMatch.players.length > 1 && (
+        <div className="mb-6">
+          <label className="block m3-label-large text-on-surface-variant mb-2">{t('game.select_players')}</label>
+          <div className="flex flex-wrap gap-2">
+            {state.currentMatch.players.map(player => (
+              <button
+                key={player.playerId}
+                onClick={() => setSelectedHeatmapPlayer(
+                  selectedHeatmapPlayer === player.playerId ? null : player.playerId
+                )}
+                className={`px-4 py-2 rounded-m3-lg font-medium transition flex items-center gap-2 ${
+                  selectedHeatmapPlayer === player.playerId || (!selectedHeatmapPlayer && state.currentMatch!.players[0].playerId === player.playerId)
+                    ? 'bg-primary text-on-primary'
+                    : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
+                }`}
+              >
+                <PlayerAvatar avatar={players.find(p => p.id === player.playerId)?.avatar} name={player.name} size="sm" />
+                {player.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Heatmap Display */}
+      {(() => {
+        const displayPlayerId = selectedHeatmapPlayer || state.currentMatch.players[0]?.playerId;
+        const playerHeatmap = displayPlayerId ? liveHeatmapData[displayPlayerId] : null;
+        const playerName = state.currentMatch.players.find(p => p.playerId === displayPlayerId)?.name || '';
+
+        if (!playerHeatmap || playerHeatmap.totalDarts === 0) {
+          return (
+            <div className="text-center py-12">
+              <Flame size={48} className="mx-auto mb-4 text-on-surface-variant" />
+              <p className="text-on-surface-variant text-lg">{t('game_screen.no_heatmap_data', { name: playerName })}</p>
+              <p className="text-on-surface-variant text-sm mt-2">{t('game_screen.heatmap_hint')}</p>
+            </div>
+          );
+        }
+
+        return (
+          <div>
+            <div className="text-center mb-4">
+              <span className="text-lg font-bold text-on-surface">{playerName}</span>
+              <span className="text-on-surface-variant ml-2">{t('game_screen.darts_count', { count: playerHeatmap.totalDarts })}</span>
+            </div>
+            <DartboardHeatmap heatmapData={playerHeatmap} maxWidth={460} compact />
+          </div>
+        );
+      })()}
+    </>
+  );
+  const card = (id: InsightTab, title: string, icon: React.ReactNode, content: React.ReactNode) => (
+    <motion.section
+      key={id}
+      data-testid={`insight-${id}`}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={springSpatialDefault}
+      className="m3-card m3-elevated rounded-m3-lg p-4 md:p-5 min-w-0"
+    >
+      <h3 className="m3-title-medium text-on-surface mb-3 flex items-center gap-2">{icon}{title}</h3>
+      {content}
+    </motion.section>
+  );
+  const insightCards: Record<InsightTab, React.ReactNode> = {
+    stats: settings.showStatsDuringGame ? card('stats', t('game_screen.match_statistics'), <BarChart3 size={20} className="text-primary" aria-hidden="true" />, statsTable) : null,
+    history: card('history', t('game_screen.throw_history'), <RotateCcw size={20} className="text-primary" aria-hidden="true" />, historyBody),
+    chart: card('chart', t('game_screen.throw_chart'), <BarChart3 size={20} className="text-tertiary" aria-hidden="true" />, chartBody),
+    heatmap: card('heatmap', t('game_screen.live_heatmap'), <Flame size={20} className="text-tertiary" aria-hidden="true" />, heatmapBody),
+  };
+  // Desktop: two columns of open cards under the play area — numbers on the
+  // left, pictures on the right.
+  const insights = (
+    <section data-testid="insights-grid" aria-label={t('game_screen.insights')} className="grid gap-6 md:grid-cols-2 items-start">
+      <div className="space-y-6 min-w-0">
+        {insightCards.stats}
+        {insightCards.history}
       </div>
+      <div className="space-y-6 min-w-0">
+        {insightCards.heatmap}
+        {insightCards.chart}
+      </div>
+    </section>
+  );
+  // Phones: one card at a time behind tabs, inside the sheet.
+  const insightTabs = (
+    <div className="space-y-4">
+      <SegmentedButton<InsightTab>
+        label={t('game_screen.insights')}
+        size="sm"
+        value={insightsTab}
+        onChange={setInsightsTab}
+        options={[
+          { value: 'stats', label: t('game_screen.tab_stats') },
+          { value: 'history', label: t('game_screen.tab_history') },
+          { value: 'chart', label: t('game_screen.tab_chart') },
+          { value: 'heatmap', label: t('game_screen.tab_heatmap') },
+        ]}
+      />
+      {insightCards[insightsTab] ?? insightCards.history}
     </div>
   );
   const containerWidth = widthClass === 'xl' ? 'max-w-[2400px]' : widthClass === 'large' ? 'max-w-[1600px]' : 'max-w-7xl';
@@ -1951,7 +1980,6 @@ const GameScreen: React.FC = () => {
           <div className="grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-6 items-start">
             <div className="space-y-4 min-w-0">
               {spotlight}
-              {insights}
             </div>
             <div className="space-y-4 min-w-0 sticky top-4 flex flex-col items-center">
               {scoreInput}
@@ -1966,12 +1994,22 @@ const GameScreen: React.FC = () => {
               {scoreInput}
               {alternatives}
             </div>
-            {/* Context pane: the board above the fold, stats below — side by
-                side on very wide screens. */}
-            <div data-testid="context-pane" className="min-w-0 space-y-4 min-[2200px]:space-y-0 min-[2200px]:grid min-[2200px]:grid-cols-2 min-[2200px]:gap-6 min-[2200px]:items-start">
+            {/* Context pane: the board, above the fold. */}
+            <div data-testid="context-pane" className="min-w-0">
               {boardHelper}
-              {insights}
             </div>
+          </div>
+        )}
+        {/* Under the play area: the insight cards in two columns. */}
+        {panes > 1 && (
+          <div className="mt-6">
+            <DeferredSection
+              depsKey={[
+                state.currentMatch.id, deferredThrows, deferredPlayerIndex, statsView, heatmapView,
+                selectedHeatmapPlayer ?? '', settings.showStatsDuringGame, i18n.language, state.currentMatch.currentLegIndex,
+              ].join('|')}
+              render={() => insights}
+            />
           </div>
         )}
       </div>
@@ -1986,7 +2024,7 @@ const GameScreen: React.FC = () => {
         >
           <div className="space-y-4">
             {boardHelper}
-            {insights}
+            {insightTabs}
           </div>
         </Dialog>
       )}

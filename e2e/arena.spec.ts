@@ -42,9 +42,17 @@ test('phone: input docked in reach, hero above it, stats in a sheet', async ({ p
   const dock = (await page.getByTestId('input-dock').boundingBox())!;
   expect(hero.y + hero.height).toBeLessThanOrEqual(dock.y + 1);
   expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  await page.keyboard.type('60'); // one visit, so the heatmap has beds to show
+  await page.keyboard.press('Enter');
   await page.getByRole('button', { name: 'Statistik & Board' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
-  await expect(page.getByRole('dialog').getByText('Match-Statistik')).toBeVisible();
+  const sheet = page.getByRole('dialog');
+  await expect(sheet.getByTestId('insight-stats')).toBeVisible();
+  // One insight at a time on a phone, picked from the tabs.
+  await sheet.getByRole('radio', { name: 'Heatmap' }).click();
+  await expect(sheet.getByTestId('insight-heatmap')).toBeVisible();
+  await expect(sheet.getByTestId('insight-stats')).toHaveCount(0);
+  await expect(sheet.getByTestId('heatmap-board')).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await noOverflow(page);

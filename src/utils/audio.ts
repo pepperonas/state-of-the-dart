@@ -305,6 +305,32 @@ class AudioSystem {
     this.enabled = enabled;
   }
 
+  /**
+   * A short synthesized click — the wheel's flapper hitting a peg. Web Audio,
+   * so dozens per second never queue up the way audio elements do; louder the
+   * faster the wheel turns (`intensity` 0..1).
+   */
+  tick(intensity = 1) {
+    const ctx = this.audioContext;
+    if (!this.enabled || !ctx || ctx.state !== 'running') return;
+    try {
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(1400 + Math.random() * 250, t);
+      const peak = Math.max(0.0002, 0.12 * this.effectsVolume * Math.min(1, Math.max(0.2, intensity)));
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(peak, t + 0.002);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.035);
+    } catch {
+      // A blocked or closed context — the click is decoration.
+    }
+  }
+
   setVolume(volume: number) {
     this.volume = Math.max(0, Math.min(1, volume / 100));
     // Set both caller and effects to the same volume (for backward compatibility)

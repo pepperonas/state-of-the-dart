@@ -950,3 +950,13 @@ button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surfa
   font-variant-numeric: tabular-nums;
   font-optical-sizing: auto;
 }
+
+/* The match's single fire canvas host, moved into the hero card after each
+   turn change; fades in there instead of switching on. */
+.sotd-fire-host {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity var(--m3-dur-long-2) var(--m3-ease-standard);
+}
+.sotd-fire-host--on { opacity: 1; }

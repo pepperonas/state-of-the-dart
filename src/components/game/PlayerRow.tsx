@@ -6,7 +6,8 @@ import type { MatchPlayer } from '../../types/index';
 import PlayerAvatar from '../player/PlayerAvatar';
 import AnimatedNumber from '../common/AnimatedNumber';
 import IconButton from '../common/IconButton';
-import { springSpatialDefault } from '../../utils/motion';
+import { CONTAINER_MORPH, CONTENT_IN } from './spotlightMotion';
+import { useReducedMotion } from 'framer-motion';
 import { rankTone } from '../../utils/legRanks';
 import RankStamp from './RankStamp';
 import ScoreDelta from './ScoreDelta';
@@ -23,6 +24,10 @@ export interface PlayerRowProps {
   legsToWin?: number;
   onRemove?: (playerId: string) => void;
   removeLabel?: string;
+  /** Remaining score before this render (the hand-over): shows the "−60". */
+  previousRemaining?: number;
+  /** Changes when the turn passes — the only time the layout is measured. */
+  turnKey?: string;
 }
 
 /**
@@ -32,36 +37,48 @@ export interface PlayerRowProps {
  */
 const PlayerRow: React.FC<PlayerRowProps> = ({
   player, avatar, remaining, rank, average, legsWon, setsWon, showSets = false, legsToWin,
-  onRemove, removeLabel,
+  onRemove, removeLabel, previousRemaining, turnKey,
 }) => {
   const { t } = useTranslation();
+  const reduce = useReducedMotion();
   const id = player.playerId;
   const legs = legsToWin ? `${legsWon}/${legsToWin}` : String(legsWon);
   return (
     <motion.div
+      // Container transform: shares the hero card's layout id, so the row
+      // grows into the card (and back). The content is counter-scaled.
       layoutId={`spot-${id}`}
-      transition={{ layout: springSpatialDefault }}
+      layoutDependency={turnKey}
+      transition={{ layout: CONTAINER_MORPH }}
       role="listitem"
       data-testid={`player-card-${player.name}`}
-      style={rank ? ({ '--rank-color': `var(--m3-rank-${rankTone(rank)})` } as React.CSSProperties) : undefined}
-      className="relative m3-card bg-surface-container rounded-m3-lg flex items-center gap-3 pl-4 pr-2 py-2 overflow-hidden"
+      style={{ borderRadius: 'var(--m3-shape-lg)', ...(rank ? { '--rank-color': `var(--m3-rank-${rankTone(rank)})` } : {}) } as React.CSSProperties}
+      className="relative m3-card bg-surface-container overflow-hidden"
     >
       {rank && <span aria-hidden="true" className="absolute left-0 inset-y-0 w-1.5 bg-[var(--rank-color)]" />}
+      <motion.div
+        layout="position"
+        layoutDependency={turnKey}
+        className="relative flex items-center gap-3 pl-4 pr-2 py-2"
+        initial={reduce ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={CONTENT_IN}
+      >
       <PlayerAvatar avatar={avatar} name={player.name} size="sm" />
       <div className="min-w-0 flex-1">
-        <motion.div layoutId={`spot-name-${id}`} className="m3-title-small text-on-surface truncate">
+        <div className="m3-title-small text-on-surface truncate">
           {player.name}
-        </motion.div>
+        </div>
         <div className="m3-label-small text-on-surface-variant tabular-nums truncate">
           Ø {average.toFixed(1)} · {showSets ? `${setsWon}S · ` : ''}{legs} L
           {legsToWin ? <span className="sr-only"> {t('player_score.legs_to_win_long', { won: legsWon, total: legsToWin })}</span> : null}
         </div>
       </div>
       {rank && <RankStamp rank={rank} size="strip" />}
-      <motion.div layoutId={`spot-rest-${id}`} className="relative">
+      <div className="relative">
         <AnimatedNumber numeral value={remaining} className="block text-3xl text-on-surface" />
-        <ScoreDelta value={remaining} className="right-full mr-1 bottom-0 m3-label-large" />
-      </motion.div>
+        <ScoreDelta value={remaining} from={previousRemaining} className="right-full mr-1 bottom-0 m3-label-large" />
+      </div>
       {onRemove && (
         <IconButton
           label={removeLabel ?? t('player_score.remove')}
@@ -71,6 +88,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({
           <UserMinus size={16} />
         </IconButton>
       )}
+      </motion.div>
     </motion.div>
   );
 };

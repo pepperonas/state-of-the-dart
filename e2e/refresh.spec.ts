@@ -84,12 +84,17 @@ test('a refresh mid-match keeps scores, turn and the darts of the current visit'
   await active(names[3]);
   expect(await page.getByTestId(`player-card-${names[2]}`).textContent()).toContain('441'); // Cid: 501 - 60
 
-  // The sections below the game: visit history, throw charts, live heatmap.
-  // 0.19.0 deleted the first two by accident and no test noticed.
-  await page.getByRole('button', { name: /Wurf-Verlauf/ }).first().click();
-  await expect(page.getByText("Wurf #1").first()).toBeVisible();
-  await page.getByRole('button', { name: /Wurf-Statistik/ }).first().click();
+  // The insights below the game: all four cards at once on a desktop, in two
+  // columns, so the space left of the board is used. 0.19.0 deleted two of
+  // them by accident and no test noticed.
+  const grid = page.getByTestId('insights-grid');
+  await grid.scrollIntoViewIfNeeded();
+  for (const id of ['stats', 'history', 'chart', 'heatmap']) await expect(grid.getByTestId(`insight-${id}`)).toBeVisible();
+  const stats = (await grid.getByTestId('insight-stats').boundingBox())!;
+  const heat = (await grid.getByTestId('insight-heatmap').boundingBox())!;
+  expect(heat.x).toBeGreaterThan(stats.x + stats.width - 1); // side by side
+  expect(Math.abs(heat.y - stats.y)).toBeLessThan(2);
+  await expect(page.getByText('Wurf #1').first()).toBeVisible();
   await expect(page.locator('.recharts-line-dots circle').first()).toBeVisible({ timeout: 10_000 });
-  await page.getByRole('button', { name: /Live-Heatmap/ }).first().click();
-  await expect(page.getByTestId('heatmap-board')).toBeVisible();
+  await expect(grid.getByTestId('heatmap-board')).toBeVisible();
 });

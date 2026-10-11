@@ -211,7 +211,7 @@
     "edit_dart": "Dart {{n}}: {{score}} – tap to change",
     "empty_dart": "Dart {{n}}: empty",
     "scoreboard": "Scoreboard",
-    "numpad_hint": "Type the total, ↵ commits",
+    "numpad_hint": "Type the total, the tick commits",
     "new_game_short": "New game",
     "stats_scope": "Scope",
     "current_leg": "Current leg",
@@ -2048,7 +2048,11 @@
     "hero_checkout": "Checkout · {{name}}",
     "pb_visit": "New best: {{value}} in one visit",
     "pb_leg": "New best leg: {{value}} darts",
-    "leg_recap": "{{darts}} darts · avg {{avg}} · checkout {{checkout}}"
+    "leg_recap": "{{darts}} darts · avg {{avg}} · checkout {{checkout}}",
+    "tab_stats": "Stats",
+    "tab_history": "History",
+    "tab_chart": "Chart",
+    "tab_heatmap": "Heatmap"
   },
   "training_screen": {
     "title_doubles": "Doubles training",

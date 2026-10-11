@@ -7,6 +7,34 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.30.0] - 2026-10-11
+
+### Changed — insights
+- Below the panes (2/3-pane layouts) the insights are always-open cards in a
+  two-column grid (`insights-grid`, `insight-<id>`): stats + history left,
+  heatmap + chart right. Stats table shows all players side by side, active
+  column tinted. Rendered through `DeferredSection` (memo + `useDeferredValue`)
+  so it never competes with the turn-change animation.
+- Phone sheet: `SegmentedButton` tabs (stats / history / chart / heatmap); the
+  live heatmap is only computed while visible.
+
+### Changed — wheel
+- `utils/wheelPhysics.ts`: Coulomb friction + drag (`dω/dt = −μ − kω`), winner
+  decided first, μ solved by bisection, `planSpin` picks ω₀ from the target.
+- `SpinnerWheel` rewritten: SVG wedges in M3 container tones, wind-up, peg
+  flapper with spring kick + `audioSystem.tick` + haptic, winner wedge steps
+  forward, hub morphs circle → burst with sparks. Per-name label size (12–16
+  px, cut only when needed).
+
+### Changed — turn change
+- `HeroCard`/`PlayerRow` share one `layoutId` container (M3 container
+  transform, `springSpatialSlow`); content uses `layout="position"` and fades
+  in early; `ScoreDelta` takes `from` so the remounted card still shows "−60".
+- One `FireCanvas` per match, portalled into a host element that is
+  re-parented into each new hero card — no WebGL context per turn (was a
+  400–450 ms long task on every change).
+- Numpad confirm key: check icon instead of "↵".
+
 ## [0.29.0] - 2026-10-11
 
 ### Added — feedback ladder

@@ -16,7 +16,7 @@ const mp = (id: string, name: string, over: Partial<MatchPlayer> = {}) => ({
 
 const hero = (over: Record<string, unknown> = {}) => ({
   player: mp('p', 'Anna'), remaining: 301, rank: null, average: 50, legsWon: 0, setsWon: 0,
-  dartsInLeg: 6, visits: [], flames: false, ...over,
+  dartsInLeg: 6, visits: [], ...over,
 });
 
 describe('HeroCard', () => {

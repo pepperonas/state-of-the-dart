@@ -600,8 +600,11 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
               onClick={() => handleNumpadClick('enter')}
               className="sotd-key m3-state-layer m3-ripple p-3 lg:p-4 phoneland:p-2 min-h-[48px] text-2xl font-bold bg-primary text-on-primary shadow-m3-1"
               title={editingDartIndex !== null ? t('score_input.replace_dart') : t('score_input.submit_total')}
+              aria-label={editingDartIndex !== null ? t('score_input.replace_dart') : t('score_input.submit_total')}
             >
-              {editingDartIndex !== null ? t('game.set_dart') : '↵'}
+              {editingDartIndex !== null
+                ? t('game.set_dart')
+                : <Check size={28} strokeWidth={3} className="mx-auto" aria-hidden="true" />}
             </button>
           </motion.div>
           )}
