@@ -1240,7 +1240,7 @@ const GameScreen: React.FC = () => {
                         <div className="flex-1">
                           {newPlayerAvatar ? (
                             <div className="flex items-center gap-2">
-                              <span className="text-2xl">{newPlayerAvatar}</span>
+                              <PlayerAvatar avatar={newPlayerAvatar} name={newPlayerName || '?'} size="md" />
                               <button
                                 onClick={() => setNewPlayerAvatar(undefined)}
                                 className="m3-label-medium px-2 py-1 bg-error-container hover:bg-error-container/80 text-on-error-container rounded-m3-sm transition"

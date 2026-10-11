@@ -8,7 +8,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import { BackButton, Button, Card, TextField, PageShell } from '../common';
-import { Icon, iconForEmoji, type IconName } from '../icons';
+import { type IconName, AvatarGlyph } from '../icons';
 
 /** The avatar choices, as names from the app's own icon set. */
 const AVATAR_ICONS: IconName[] = [
@@ -38,7 +38,7 @@ const renderAvatar = (avatarValue: string, alt: string, size: 'sm' | 'md' | 'lg'
       />
     );
   }
-  return <Icon name={iconForEmoji(avatarValue)} size={size === 'sm' ? 20 : size === 'lg' ? 40 : 28} />;
+  return <AvatarGlyph avatar={avatarValue} size={size === 'sm' ? 20 : size === 'lg' ? 40 : 28} />;
 };
 
 const UserSettings: React.FC = () => {

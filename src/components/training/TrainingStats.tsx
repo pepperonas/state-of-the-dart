@@ -11,7 +11,7 @@ import { api } from '../../services/api';
 import { toDateOrNow, formatDateTime, formatDateShort } from '../../utils/dateUtils';
 import { staggerChild } from '../../utils/motion';
 import { BackButton, Button, Card, Select } from '../common';
-import { Icon, iconForEmoji } from '../icons';
+import { AvatarGlyph } from '../icons';
 import { useChartTheme } from '../../utils/chartTheme';
 
 const TrainingStats: React.FC = () => {
@@ -181,7 +181,7 @@ const TrainingStats: React.FC = () => {
                     value: player.id,
                     label: player.name,
                     text: player.name,
-                    icon: <Icon name={iconForEmoji(player.avatar)} size={18} />,
+                    icon: <AvatarGlyph avatar={player.avatar} size={18} />,
                   }))}
                 />
               </div>
@@ -220,7 +220,7 @@ const TrainingStats: React.FC = () => {
                   value: player.id,
                   label: player.name,
                   text: player.name,
-                  icon: <Icon name={iconForEmoji(player.avatar)} size={18} />,
+                  icon: <AvatarGlyph avatar={player.avatar} size={18} />,
                 }))}
               />
             </div>

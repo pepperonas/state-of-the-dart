@@ -12,7 +12,7 @@ import { useInstallPrompt } from '../pwa/installPrompt';
 import { api } from '../services/api';
 import type { BugReport } from '../types';
 import BugReportModal from './bugReport/BugReportModal';
-import { Icon, iconForEmoji } from './icons';
+import { AvatarGlyph } from './icons';
 import { useFeedback } from './common/feedbackContext';
 
 interface SettingsProps {
@@ -548,7 +548,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               <div className="bg-surface-container rounded-m3-md p-4 mb-4">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-12 h-12 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center m3-headline-small">
-                    <Icon name={iconForEmoji(currentTenant?.avatar)} size={26} />
+                    <AvatarGlyph avatar={currentTenant?.avatar} size={26} />
                   </div>
                   <div>
                     <p className="font-semibold text-on-surface">{currentTenant?.name}</p>

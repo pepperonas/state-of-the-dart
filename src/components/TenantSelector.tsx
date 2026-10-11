@@ -4,7 +4,7 @@ import { Users, Plus, X, LogIn, Trash2 } from 'lucide-react';
 import { useTenant } from '../context/TenantContext';
 import { formatDate } from '../utils/dateUtils';
 import { useTranslation } from 'react-i18next';
-import { Icon, iconForEmoji } from './icons';
+import { AvatarGlyph } from './icons';
 
 const TenantSelector: React.FC = () => {
   const { t } = useTranslation();
@@ -93,7 +93,7 @@ const TenantSelector: React.FC = () => {
                   className="w-full flex items-center gap-5 p-5 bg-surface-container hover:bg-surface-container-high rounded-m3-lg transition border border-outline-variant hover:border-[var(--m3-primary)] shadow-m3-1"
                 >
                   <div className="w-20 h-20 bg-primary-container rounded-m3-full flex items-center justify-center text-4xl shadow-m3-1">
-                    <Icon name={iconForEmoji(tenant.avatar)} size={26} />
+                    <AvatarGlyph avatar={tenant.avatar} size={26} />
                   </div>
                   <div className="flex-1 text-left">
                     <h3 className="m3-title-large m3-emphasized text-on-surface mb-1">{tenant.name}</h3>
@@ -209,7 +209,7 @@ const TenantSelector: React.FC = () => {
                         : 'bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant'
                     }`}
                   >
-                    <Icon name={iconForEmoji(avatar)} size={24} />
+                    <AvatarGlyph avatar={avatar} size={24} />
                   </motion.button>
                 ))}
               </div>

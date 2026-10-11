@@ -88,6 +88,8 @@ const PlayerManagement: React.FC = () => {
     } else if (showEmojiPicker) {
       handleUpdateAvatar(showEmojiPicker, emoji || undefined);
     }
+    // A pick is the answer — close, as the game setup's picker does.
+    setShowEmojiPicker(null);
   };
 
   const handleSetMainPlayer = async (playerId: string) => {
@@ -153,7 +155,7 @@ const PlayerManagement: React.FC = () => {
                   <div className="flex-1">
                     {newPlayerAvatar ? (
                       <div className="flex items-center gap-3">
-                        <div className="text-4xl">{newPlayerAvatar}</div>
+                        <PlayerAvatar avatar={newPlayerAvatar} name={newPlayerName || '?'} size="lg" />
                         <Button
                           variant="danger"
                           size="sm"

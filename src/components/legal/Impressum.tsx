@@ -1,3 +1,4 @@
+import { GAME_ICON_AUTHOR_NAMES } from '../icons/avatarCatalog';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -201,8 +202,23 @@ const Impressum: React.FC = () => {
           </div>
         </Card>
 
+        {/* Bildnachweise: CC BY 3.0 verlangt die Nennung der Urheber. */}
+        <Card variant="elevated" className="p-6 md:p-8 mb-6">
+          <h2 className="m3-title-large text-on-surface mb-4">Bildnachweise</h2>
+          <div className="m3-body-medium text-on-surface-variant space-y-3" data-testid="impressum-credits">
+            <p>
+              Ein Teil der Spieler-Symbole stammt von{' '}
+              <a href="https://game-icons.net" target="_blank" rel="noopener noreferrer" className="underline text-primary">game-icons.net</a>{' '}
+              und ist unter der Lizenz{' '}
+              <a href="https://creativecommons.org/licenses/by/3.0/deed.de" target="_blank" rel="noopener noreferrer" className="underline text-primary">CC BY 3.0</a>{' '}
+              ver&ouml;ffentlicht. Urheber: {GAME_ICON_AUTHOR_NAMES.join(', ')}. Die Symbole wurden
+              unver&auml;ndert &uuml;bernommen und in der Farbe der App dargestellt.
+            </p>
+          </div>
+        </Card>
+
         <div className="text-center m3-label-large text-on-surface-variant mt-8 mb-4">
-          Stand: Februar 2026
+          Stand: Oktober 2026
         </div>
         </PageShell>
   );
