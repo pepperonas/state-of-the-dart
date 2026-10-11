@@ -26,7 +26,9 @@ export interface HeroCardProps {
   legsToWin?: number;
   dartsInLeg: number;
   /** Last visits in the leg, oldest first. */
-  visits: { score: number; bust: boolean }[];
+  visits: { id?: string; score: number; bust: boolean }[];
+  /** Tap a last-visit pill to correct that visit. */
+  onEditVisit?: (throwId: string) => void;
   /** Checkout route for the darts left (only when one exists). */
   checkoutRoute?: string[] | null;
   /** Remaining score at which a finish is possible (170 double out, 180 otherwise). */
@@ -66,9 +68,36 @@ const visitTone = (v: { score: number; bust: boolean }) =>
 const HeroCard: React.FC<HeroCardProps> = ({
   player, avatar, remaining, rank, average, legsWon, setsWon, showSets = false, legsToWin,
   dartsInLeg, visits, checkoutRoute, checkoutMax = 170, size = 'regular', fireHost = null,
-  onRemove, removeLabel, previousRemaining, turnKey,
+  onRemove, removeLabel, previousRemaining, turnKey, onEditVisit,
 }) => {
   const { t } = useTranslation();
+  // A pill is a button when the visit can be corrected; the invisible ::before
+  // grows the hit area past the 24 px minimum without growing the pill.
+  const pill = (v: HeroCardProps['visits'][number], key: string, isNew: boolean, cls: string) => {
+    const label = v.bust ? t('game.bust') : v.score;
+    const motionProps = {
+      initial: isNew ? { scale: 0.5, opacity: 0 } : false,
+      animate: { scale: 1, opacity: 1 },
+      transition: springSpatialFast,
+    } as const;
+    if (onEditVisit && v.id) {
+      const visitId = v.id;
+      return (
+        <motion.button
+          key={key}
+          type="button"
+          {...motionProps}
+          onClick={() => onEditVisit(visitId)}
+          aria-label={t('correction.edit_visit', { score: label })}
+          data-testid="visit-pill"
+          className={`relative before:absolute before:-inset-x-1 before:-inset-y-2 before:content-[''] m3-state-layer ${cls} ${visitTone(v)}`}
+        >
+          {label}
+        </motion.button>
+      );
+    }
+    return <motion.span key={key} {...motionProps} className={`${cls} ${visitTone(v)}`}>{label}</motion.span>;
+  };
   const id = player.playerId;
   const reduce = useReducedMotion();
   const breathing = !reduce && remaining > 1 && remaining <= checkoutMax;
@@ -205,17 +234,8 @@ const HeroCard: React.FC<HeroCardProps> = ({
           ) : null}
           {visits.length > 0 && (
             <span data-testid="last-visits" className="flex items-center gap-1 ml-auto" aria-label={t('game_screen.last_visits')}>
-              {visits.slice(-3).map((v, i, arr) => (
-                <motion.span
-                  key={`${visits.length}-${i}`}
-                  initial={i === arr.length - 1 ? { scale: 0.5, opacity: 0 } : false}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={springSpatialFast}
-                  className={`px-1.5 py-0.5 rounded-m3-full m3-label-small ${visitTone(v)}`}
-                >
-                  {v.bust ? t('game.bust') : v.score}
-                </motion.span>
-              ))}
+              {visits.slice(-3).map((v, i, arr) =>
+                pill(v, `${visits.length}-${i}`, i === arr.length - 1, 'px-1.5 py-0.5 rounded-m3-full m3-label-small'))}
             </span>
           )}
         </div>
@@ -270,17 +290,8 @@ const HeroCard: React.FC<HeroCardProps> = ({
         {visits.length > 0 && (
           <div data-testid="last-visits" className="flex items-center gap-1.5 mt-3 flex-wrap" aria-label={t('game_screen.last_visits')}>
             <span className="m3-label-small text-on-surface-variant mr-1">{t('game_screen.last_visits')}</span>
-            {visits.map((v, i) => (
-              <motion.span
-                key={`${visits.length}-${i}`}
-                initial={i === visits.length - 1 ? { scale: 0.5, opacity: 0 } : false}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={springSpatialFast}
-                className={`px-2 py-0.5 rounded-m3-full m3-label-medium tabular-nums ${visitTone(v)}`}
-              >
-                {v.bust ? t('game.bust') : v.score}
-              </motion.span>
-            ))}
+            {visits.map((v, i) =>
+              pill(v, `${visits.length}-${i}`, i === visits.length - 1, 'px-2 py-0.5 rounded-m3-full m3-label-medium tabular-nums'))}
           </div>
         )}
           </>

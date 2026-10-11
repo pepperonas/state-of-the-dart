@@ -22,7 +22,14 @@ export function announcementFor(prev: Match | null, next: Match | null, t: TFunc
       ? t('announce.undo_to', { name: nameOf(last.playerId), remaining: last.remaining })
       : t('announce.undo');
   }
-  if (after.length === before.length) return null;
+  if (after.length === before.length) {
+    // A corrected visit (same visits, one with a new score).
+    const old = new Map(before.map(t => [t.id, t]));
+    const changed = after.find(t => old.has(t.id) && old.get(t.id)!.score !== t.score);
+    if (!changed) return null;
+    const last = [...after].reverse().find(t => t.playerId === changed.playerId)!;
+    return t('announce.corrected', { name: nameOf(changed.playerId), from: old.get(changed.id)!.score, to: changed.score, remaining: last.remaining });
+  }
 
   const visit = after[after.length - 1];
   const name = nameOf(visit.playerId);

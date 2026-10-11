@@ -3,10 +3,13 @@ import { Check, X, Delete, Keyboard, RotateCcw, ChevronDown } from 'lucide-react
 import { useTranslation } from 'react-i18next';
 import { Dart } from '../../types/index';
 import { motion, AnimatePresence } from 'framer-motion';
-import { calculateThrowScore, convertScoreToDarts, numpadDarts } from '../../utils/scoring';
+import { calculateThrowScore, convertScoreToDarts, numpadDarts, validateScore } from '../../utils/scoring';
 import AnimatedNumber from '../common/AnimatedNumber';
 import Select from '../common/Select';
 import SegmentedButton from '../common/SegmentedButton';
+import { DartGrid } from './DartGrid';
+import { gridDart } from '../../utils/gridDart';
+import { VisitChips, type VisitChipsProps } from './VisitChips';
 import { springSpatialFast, springSpatialDefault, effectsFast, enterRise } from '../../utils/motion';
 import { shouldHandleGameKey } from '../../utils/gameKeys';
 import type { Handoff } from '../../utils/handoff';
@@ -52,6 +55,10 @@ interface ScoreInputProps {
   /** Phones in portrait: tighter keys, undo as an icon in the action row, so
    *  the whole dock fits under the scoreboard. */
   dense?: boolean;
+  /** Replaces the whole visit in the input and confirms it (a corrected total). */
+  onReplaceVisit?: (darts: Dart[]) => void;
+  /** "How was it thrown?" for the last typed visit. */
+  chips?: VisitChipsProps | null;
 }
 
 /** Delay between darts that land together, from the stagger token (45 ms). */
@@ -91,6 +98,8 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   bust = false,
   previewRemaining = null,
   dense = false,
+  onReplaceVisit,
+  chips = null,
 }) => {
   const { t } = useTranslation();
   const [currentInput, setCurrentInput] = useState('');
@@ -142,15 +151,19 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   const prevLengthRef = useRef(currentThrow.length);
 
   const currentScore = calculateThrowScore(currentThrow);
+  // A typed visit taken back comes back as a sum to correct, not as three
+  // invented darts: type the right total, Enter replaces it, Esc keeps it.
+  const correcting = Boolean(onReplaceVisit && isEditingThrow && editingDartIndex === null
+    && currentThrow.length > 0 && currentThrow.every(d => d.estimated));
   // How many darts the slots showed on the previous render — the new ones stagger.
   const [seenDarts, setSeenDarts] = useState(currentThrow.length);
   if (seenDarts !== currentThrow.length && currentThrow.length < seenDarts) setSeenDarts(currentThrow.length);
   useEffect(() => { setSeenDarts(currentThrow.length); }, [currentThrow.length]);
   // A typed total (or the dart being edited) owns the total box for now.
-  const typing = inputMode === 'numpad' && (currentInput !== '' || editingDartIndex !== null);
+  const typing = !correcting && inputMode === 'numpad' && (currentInput !== '' || editingDartIndex !== null);
   // "Bestätigen" with a typed total takes it, like Enter — it used to stay
   // disabled until darts existed, so the labelled button was a dead end.
-  const commitsTyped = inputMode === 'numpad' && currentInput !== '' && editingDartIndex === null && currentThrow.length < 3;
+  const commitsTyped = currentInput !== '' && editingDartIndex === null && (correcting || (inputMode === 'numpad' && currentThrow.length < 3));
 
   // Taking back a confirmed throw reloads its darts into the input, so it would
   // silently overwrite darts that are already sitting there — only offer it on an
@@ -201,7 +214,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
         handleNumpadClick(e.key);
       } else if (e.key === 'Enter') {
         e.preventDefault();
-        if (inputMode === 'numpad' && currentThrow.length < 3) {
+        if (correcting || (inputMode === 'numpad' && currentThrow.length < 3)) {
           // In numpad mode, Enter adds the score (or 0 if empty)
           handleNumpadClick('enter');
         } else if (currentThrow.length > 0) {
@@ -226,6 +239,9 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
       } else if (e.key === 'Escape') {
         if (currentInput) {
           setCurrentInput('');
+        } else if (correcting) {
+          // Keep the visit as it was booked.
+          onConfirm();
         } else {
           onClearThrow();
         }
@@ -249,6 +265,15 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
     }
 
     if (value === 'enter') {
+      if (correcting) {
+        if (currentInput === '') { onConfirm(); return; }
+        const score = parseInt(currentInput);
+        if (!validateScore(score)) return;
+        setCurrentInput('');
+        // `remaining` is after the darts in the input; the corrected total starts before them.
+        onReplaceVisit?.(numpadDarts(score, remaining + currentScore, 3, outRule));
+        return;
+      }
       // Edit mode: replace the selected dart, do NOT commit the whole throw
       if (editingDartIndex !== null) {
         const score = currentInput ? parseInt(currentInput) : 0;
@@ -278,7 +303,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
       return;
     }
 
-    if (currentThrow.length >= 3) return;
+    if (currentThrow.length >= 3 && !correcting) return;
 
     const newInput = currentInput + value;
     const num = parseInt(newInput);
@@ -314,12 +339,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   /** One dart from the S/D/T grid: exact bed, no reconstruction needed. */
   const addGridDart = (segment: number) => {
     if (awaitingNextPlayer) return;
-    const m = Number(multiplier) as 1 | 2 | 3;
-    const dart: Dart =
-      segment === 0 ? { segment: 0, multiplier: 0, score: 0, bed: 'miss' }
-      : segment === 25 ? { segment: 25, multiplier: 1, score: 25, bed: 'outer-bull' }
-      : segment === 50 ? { segment: 50, multiplier: 2, score: 50, bed: 'bull' }
-      : { segment, multiplier: m, score: segment * m, bed: m === 3 ? 'triple' : m === 2 ? 'double' : 'single' };
+    const dart = gridDart(segment, multiplier);
     if (editingDartIndex !== null && onReplaceDart) {
       onReplaceDart(editingDartIndex, dart);
       setEditingDartIndex(null);
@@ -394,7 +414,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
                   animate={{ scale: 1, opacity: 1, y: 0 }}
                   exit={{ scale: 0.5, opacity: 0, y: 8 }}
                   transition={{ ...springSpatialFast, delay }}
-                  className={`font-bold text-2xl ${bust ? 'text-on-error-container' : 'text-on-secondary-container'}`}
+                  className={`font-bold text-2xl ${correcting ? 'text-on-surface-variant line-through' : bust ? 'text-on-error-container' : 'text-on-secondary-container'}`}
                 >
                   {dart.score}
                 </motion.span>
@@ -420,15 +440,19 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
         <div
           data-testid="visit-total"
           className={`flex flex-col justify-center items-center rounded-m3-md px-3 min-w-[4.5rem] transition-colors ${
-            typing ? 'bg-primary-container ring-2 ring-[var(--m3-primary)]'
+            typing || correcting ? 'bg-primary-container ring-2 ring-[var(--m3-primary)]'
               : bust ? 'bg-error-container ring-2 ring-[var(--m3-error)]'
               : 'bg-tertiary-container'
           }`}
         >
-          <span className={`m3-label-small ${typing ? 'text-on-primary-container' : bust ? 'text-on-error-container' : 'text-on-tertiary-container'}`}>
-            {typing ? (editingDartIndex !== null ? t('game.new_dart_value') : t('score_input.typed')) : t('score_input.total')}
+          <span className={`m3-label-small ${typing || correcting ? 'text-on-primary-container' : bust ? 'text-on-error-container' : 'text-on-tertiary-container'}`}>
+            {correcting ? t('correction.label') : typing ? (editingDartIndex !== null ? t('game.new_dart_value') : t('score_input.typed')) : t('score_input.total')}
           </span>
-          {typing ? (
+          {correcting ? (
+            <span data-testid="visit-correction" className="text-2xl font-bold tabular-nums text-on-primary-container whitespace-nowrap">
+              {currentScore} → {currentInput || '…'}
+            </span>
+          ) : typing ? (
             <span className="text-2xl font-bold tabular-nums text-on-primary-container">{currentInput || '…'}</span>
           ) : bust ? (
             <motion.span
@@ -446,13 +470,20 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
           )}
           {/* What the visit leaves — the remaining score itself lives on the
               hero card, once. */}
-          {!typing && previewRemaining != null && currentThrow.length > 0 && (
+          {!typing && !correcting && previewRemaining != null && currentThrow.length > 0 && (
             <span data-testid="visit-preview" className={`m3-label-small tabular-nums ${bust ? 'text-on-error-container' : 'text-on-tertiary-container'}`}>
               → {previewRemaining}
             </span>
           )}
         </div>
       </motion.div>
+
+      {correcting && (
+        <p data-testid="correction-hint" className="m3-body-small text-on-surface-variant mb-3 phoneland:mb-2 phoneland:col-start-1">
+          {t('correction.hint', { score: currentScore })}
+        </p>
+      )}
+      {chips && !correcting && <VisitChips {...chips} />}
 
       {/* Mode switcher */}
       <SegmentedButton<InputMode>
@@ -469,42 +500,16 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
 
       {inputMode === 'darts' ? (
         <>
-          {/* S/D/T grid: one tap per dart, exact beds — more accurate than
-              tapping a phone-sized dartboard, and reachable by keyboard. */}
-          <SegmentedButton<'1' | '2' | '3'>
-            className="mb-3 phoneland:mb-2 phoneland:col-start-1"
-            size="sm"
-            label={t('game.multiplier')}
-            value={multiplier}
-            onChange={setMultiplier}
-            options={[
-              { value: '1', label: 'S', ariaLabel: t('game.single') },
-              { value: '2', label: 'D', ariaLabel: t('game.double') },
-              { value: '3', label: 'T', ariaLabel: t('game.triple') },
-            ]}
+          <DartGrid
+            multiplier={multiplier}
+            onMultiplierChange={setMultiplier}
+            onPick={addGridDart}
+            disabled={currentThrow.length >= 3 && editingDartIndex === null}
+            multiplierClassName="mb-3 phoneland:mb-2 phoneland:col-start-1"
+            numbersClassName="mb-1.5 phoneland:col-start-2 phoneland:row-start-1 phoneland:row-span-6 phoneland:mb-0"
+            bullsClassName="mb-4 phoneland:mb-2 phoneland:col-start-1"
+            numbersMotion={modeEnter}
           />
-          <motion.div key={inputMode} {...modeEnter} className="grid grid-cols-5 gap-1.5 mb-1.5 phoneland:col-start-2 phoneland:row-start-1 phoneland:row-span-6 phoneland:mb-0">
-            {Array.from({ length: 20 }, (_, i) => i + 1).map(n => (
-              <button
-                key={n}
-                type="button"
-                onClick={() => addGridDart(n)}
-                disabled={currentThrow.length >= 3 && editingDartIndex === null}
-                aria-label={`${multiplier === '3' ? t('game.triple') : multiplier === '2' ? t('game.double') : t('game.single')} ${n}`}
-                className="sotd-key m3-state-layer m3-ripple min-h-[44px] bg-surface-container-high text-on-surface text-lg font-bold disabled:opacity-30"
-              >
-                {n}
-              </button>
-            ))}
-          </motion.div>
-          <div className="grid grid-cols-3 gap-1.5 mb-4 phoneland:mb-2 phoneland:col-start-1">
-            <button type="button" onClick={() => addGridDart(25)} disabled={currentThrow.length >= 3 && editingDartIndex === null}
-              className="sotd-key m3-state-layer m3-ripple min-h-[44px] bg-surface-container-high text-on-surface font-bold disabled:opacity-30">25</button>
-            <button type="button" onClick={() => addGridDart(50)} disabled={currentThrow.length >= 3 && editingDartIndex === null}
-              className="sotd-key m3-state-layer m3-ripple min-h-[44px] bg-primary-container text-on-primary-container font-bold disabled:opacity-30">Bull</button>
-            <button type="button" onClick={() => addGridDart(0)} disabled={currentThrow.length >= 3 && editingDartIndex === null}
-              className="sotd-key m3-state-layer m3-ripple min-h-[44px] bg-surface-container text-on-surface-variant font-bold disabled:opacity-30">{t('game.miss')}</button>
-          </div>
         </>
       ) : inputMode === 'quick' ? (
         <>
@@ -677,7 +682,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
           ref={confirmBtnRef}
           onClick={awaitingNextPlayer ? onNextPlayer : commitsTyped ? () => handleNumpadClick('enter') : onConfirm}
           disabled={!awaitingNextPlayer && !commitsTyped && currentThrow.length === 0}
-          className={`flex items-center justify-center gap-1 p-3 rounded-m3-full disabled:opacity-30 disabled:cursor-not-allowed transition font-bold shadow-m3-1 ${
+          className={`min-w-0 flex items-center justify-center gap-1 p-3 rounded-m3-full disabled:opacity-30 disabled:cursor-not-allowed transition font-bold shadow-m3-1 ${
             isCheckout
               ? 'bg-success text-on-success sotd-ring-pulse'
               : isEditingThrow
@@ -688,7 +693,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
           <Check size={20} />
           <span className="truncate">{awaitingNextPlayer
             ? t('game_screen.next_player', { name: awaitingNextPlayer })
-            : isCheckout ? t('score_input.checkout') : isEditingThrow ? t('game.confirm_correction') : t('game.confirm_visit')}</span>
+            : isCheckout ? t('score_input.checkout') : isEditingThrow ? (dense ? t('correction.save') : t('game.confirm_correction')) : t('game.confirm_visit')}</span>
         </button>
       </div>
 

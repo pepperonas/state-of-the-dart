@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Player, PlayerStats, PlayerPreferences, HeatmapData, Dart } from '../types/index';
 import { useTenant } from './TenantContext';
 import { useAuth } from './AuthContext';
-import { createEmptyHeatmapData, updateHeatmapData } from '../utils/heatmap';
+import { createEmptyHeatmapData, updateHeatmapData, removeFromHeatmapData, exactDarts } from '../utils/heatmap';
 import { sortPlayers } from '../utils/playerOrder';
 import { api } from '../services/api';
 import logger from '../utils/logger';
@@ -18,7 +18,8 @@ interface PlayerContextType {
   setCurrentPlayer: (player: Player | null) => void;
   getPlayer: (id: string) => Player | undefined;
   getPlayerHeatmap: (playerId: string) => HeatmapData;
-  updatePlayerHeatmap: (playerId: string, newDarts: Dart[]) => void;
+  /** Adds (and optionally takes back) darts in the stored heatmap; only exact darts count. */
+  updatePlayerHeatmap: (playerId: string, newDarts: Dart[], removeDarts?: Dart[]) => void;
   refreshPlayers: () => Promise<void>;
 }
 
@@ -196,7 +197,7 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     return createEmptyHeatmapData(playerId);
   };
   
-  const updatePlayerHeatmap = async (playerId: string, newDarts: Dart[]) => {
+  const updatePlayerHeatmap = async (playerId: string, newDarts: Dart[], removeDarts: Dart[] = []) => {
     if (!user) return;
 
     // Skip heatmap updates for bots (their throws are simulated, not real)
@@ -206,7 +207,9 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     }
 
     const currentHeatmap = getPlayerHeatmap(playerId);
-    const updatedHeatmap = updateHeatmapData(currentHeatmap, newDarts);
+    const apply = (h: HeatmapData) => updateHeatmapData(removeFromHeatmapData(h, removeDarts), newDarts);
+    if (exactDarts(newDarts).length === 0 && exactDarts(removeDarts).length === 0) return;
+    const updatedHeatmap = apply(currentHeatmap);
 
     // Update in memory. Derive the new value from `prev` INSIDE the updater so two
     // heatmap updates to the same player before the state commits don't clobber
@@ -215,7 +218,7 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     setPlayers(prev => prev.map(p => {
       if (p.id !== playerId) return p;
       const base = (p as any).heatmapData || createEmptyHeatmapData(playerId);
-      return { ...p, heatmapData: updateHeatmapData(base, newDarts) };
+      return { ...p, heatmapData: apply(base) };
     }));
 
     // Sync to API (best-effort; the next write reconciles any transient skew).

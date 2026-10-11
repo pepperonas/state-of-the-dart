@@ -51,27 +51,27 @@
 
   ### 🧰 Tech stack
 
-  React 19 · TypeScript 5 · Vite · Tailwind · Material 3 Expressive (own springs, shapes, icons) · Framer Motion · WebGL · Express · SQLite · Socket.IO · Workbox. **1154 unit tests + 45 E2E tests.** MIT-licensed.
+  React 19 · TypeScript 5 · Vite · Tailwind · Material 3 Expressive (own springs, shapes, icons) · Framer Motion · WebGL · Express · SQLite · Socket.IO · Workbox. **1188 unit tests + 46 E2E tests.** MIT-licensed.
 
   <!-- ── Headline metrics ─────────────────────────────────────── -->
   <p>
     <a href="https://github.com/pepperonas/state-of-the-dart" title="Lines of code — measured by scripts/count-loc.mjs, checked by the docs test">
-      <img src="https://img.shields.io/badge/lines_of_code-~57k-2b3137?style=for-the-badge&logo=typescript&logoColor=white" height="64" alt="Lines of code" />
+      <img src="https://img.shields.io/badge/lines_of_code-~58k-2b3137?style=for-the-badge&logo=typescript&logoColor=white" height="64" alt="Lines of code" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml" title="Vitest unit and component tests, all passing">
-      <img src="https://img.shields.io/badge/Unit_Tests-1154-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
+      <img src="https://img.shields.io/badge/Unit_Tests-1188-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml" title="Playwright end-to-end tests against a real backend">
-      <img src="https://img.shields.io/badge/E2E_Tests-45-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
+      <img src="https://img.shields.io/badge/E2E_Tests-46-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
     </a>
   </p>
 
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="../LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="../CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.31.4-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="../CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.32.0-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
@@ -374,8 +374,8 @@ admin-only.
 
 | Layer | Count | Tool |
 |---|---|---|
-| Unit / component | **1154** | Vitest + React Testing Library |
-| End-to-end | **45** | Playwright (preview build + isolated backend) |
+| Unit / component | **1188** | Vitest + React Testing Library |
+| End-to-end | **46** | Playwright (preview build + isolated backend) |
 
 ```bash
 npm test              # watch mode
@@ -544,7 +544,8 @@ See [DEPLOYMENT_VPS.md](DEPLOYMENT_VPS.md) for full deployment guide.
 - **Numpad:** type the visit total and press Enter (or "Confirm") — the turn passes at once, so the next player can type straight away. A short chip shows the visit just booked.
 - **Darts:** enter each dart via S/D/T and the number (exact beds, for stats and the heatmap)
 - **Quick:** common scores with one tap
-- **Undo:** "Take back", Backspace or Ctrl+Z returns the last visit for correction
+- **Undo:** "Take back", Backspace or Ctrl+Z returns the last visit for correction. A typed total comes back as a total ("60 → _"): type the right number, Enter — Esc keeps it. Any earlier visit of the leg in play can be corrected from its pill on the player card or the pencil in the visit history (total or single darts).
+- **How was it thrown?** After a typed total the app suggests 2–3 likely decompositions (for 60, e.g. "20 · 20 · 20" or "T20 · 0 · 0"). One tap makes the darts exact; ignoring it costs nothing. Typed totals stay out of the heatmap — every heatmap says how many darts were recorded exactly.
 - The checkout route sits inside the input card; every player card shows the **place in the leg** (1 green, 2 yellow, 3 orange …)
 - Audio announcements guide you through the game
 

@@ -13,6 +13,8 @@ import { api } from '../services/api';
 import logger from '../utils/logger';
 import { logBuffer } from '../utils/logBuffer';
 import { toApiMatch, matchSaveKey } from '../utils/matchApi';
+import { diffVisitDarts, type BookedVisits } from '../utils/heatmap';
+import { editVisit } from '../utils/editVisit';
 
 export interface GameState {
   currentMatch: Match | null;
@@ -30,6 +32,8 @@ type GameAction =
   | { type: 'REPLACE_DART'; payload: { index: number; dart: Dart } }
   | { type: 'CONFIRM_THROW' }
   | { type: 'UNDO_THROW'; payload?: { skipBots?: boolean } }
+  /** Replace the darts of a booked visit in the leg in play; later visits are re-scored. */
+  | { type: 'EDIT_THROW'; payload: { throwId: string; darts: Dart[] } }
   | { type: 'REMOVE_PLAYER'; payload: { playerId: string } }
   | { type: 'NEXT_PLAYER' }
   | { type: 'END_MATCH' }
@@ -102,35 +106,10 @@ const replaySets = (
 };
 
 /**
- * Takes back the last confirmed visit — also across a leg or set boundary,
- * and out of a completed match. The darts come back into the input so the
- * player can correct them.
+ * Match statistics of every player rebuilt from the legs — after an undo or a
+ * corrected visit, nothing incremental can be trusted.
  */
-const undoLastThrow = (state: GameState): GameState => {
-  const m = state.currentMatch;
-  if (!m) return state;
-  const n = m.players.length;
-
-  let legs = m.legs;
-  let legIndex = m.currentLegIndex;
-  let legStart = m.legStartPlayerIndex ?? 0;
-
-  if (!legs[legIndex] || legs[legIndex].throws.length === 0) {
-    // The current leg is fresh: the visit to take back is the checkout that
-    // closed the previous leg. Only the newest leg can be stepped out of.
-    if (legIndex === 0 || legIndex !== legs.length - 1) return state;
-    legs = legs.slice(0, -1);
-    legIndex -= 1;
-    // Every leg and set transition advances the starter by one.
-    legStart = (legStart - 1 + n) % n;
-  }
-
-  const leg = legs[legIndex];
-  if (!leg || leg.throws.length === 0) return state;
-  const lastThrow = leg.throws[leg.throws.length - 1];
-  const updatedLeg = { ...leg, throws: leg.throws.slice(0, -1), winner: undefined, completedAt: undefined };
-  const updatedLegs = legs.map((l, i) => (i === legIndex ? updatedLeg : l));
-
+const recomputePlayers = (m: Match, updatedLegs: Match['legs']) => {
   const startScore = m.settings.startScore || 501;
   const progress = replaySets(updatedLegs, m.players.map(p => p.playerId), m.settings);
 
@@ -171,6 +150,41 @@ const undoLastThrow = (state: GameState): GameState => {
     player.setsWon = progress.setsWon[player.playerId] ?? 0;
     return player;
   });
+
+  return { players: updatedPlayers, progress };
+};
+
+/**
+ * Takes back the last confirmed visit — also across a leg or set boundary,
+ * and out of a completed match. The darts come back into the input so the
+ * player can correct them.
+ */
+const undoLastThrow = (state: GameState): GameState => {
+  const m = state.currentMatch;
+  if (!m) return state;
+  const n = m.players.length;
+
+  let legs = m.legs;
+  let legIndex = m.currentLegIndex;
+  let legStart = m.legStartPlayerIndex ?? 0;
+
+  if (!legs[legIndex] || legs[legIndex].throws.length === 0) {
+    // The current leg is fresh: the visit to take back is the checkout that
+    // closed the previous leg. Only the newest leg can be stepped out of.
+    if (legIndex === 0 || legIndex !== legs.length - 1) return state;
+    legs = legs.slice(0, -1);
+    legIndex -= 1;
+    // Every leg and set transition advances the starter by one.
+    legStart = (legStart - 1 + n) % n;
+  }
+
+  const leg = legs[legIndex];
+  if (!leg || leg.throws.length === 0) return state;
+  const lastThrow = leg.throws[leg.throws.length - 1];
+  const updatedLeg = { ...leg, throws: leg.throws.slice(0, -1), winner: undefined, completedAt: undefined };
+  const updatedLegs = legs.map((l, i) => (i === legIndex ? updatedLeg : l));
+
+  const { players: updatedPlayers, progress } = recomputePlayers(m, updatedLegs);
 
   const updatedMatch: Match = {
     ...m,
@@ -531,6 +545,21 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
       };
     }
     
+    case 'EDIT_THROW': {
+      const m = state.currentMatch;
+      if (!m) return state;
+      const result = editVisit(m, action.payload.throwId, action.payload.darts);
+      if (!result.ok) return state;
+      const legs = m.legs.map((l, i) => (i === result.legIndex ? { ...l, throws: result.throws } : l));
+      const { players: updatedPlayers } = recomputePlayers(m, legs);
+      const updatedMatch: Match = { ...m, legs, players: updatedPlayers };
+      return {
+        ...state,
+        currentMatch: updatedMatch,
+        checkoutSuggestion: checkoutFor(updatedMatch, state.currentPlayerIndex, state.currentThrow),
+      };
+    }
+
     case 'UNDO_THROW': {
       let next = undoLastThrow(state);
       // A human pressing undo wants THEIR last visit back, not to "edit" the
@@ -1010,28 +1039,31 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [currentLegThrowsCount, state.currentMatch?.currentLegIndex]);
 
-  // Track last processed throw to avoid duplicate heatmap updates
-  const lastProcessedThrowIdRef = React.useRef<string | null>(null);
+  // The stored per-player heatmap is booked by visit id (`diffVisitDarts`): a
+  // new visit adds its exact darts, an undone one subtracts them, a corrected
+  // one swaps them. Booking "the last visit" instead counted the visit before
+  // an undo a second time and never took the undone one back out. The first
+  // look at a match (load, resume) only records what is there.
+  const bookedVisitsRef = React.useRef<{ matchId: string | null; booked: BookedVisits }>({ matchId: null, booked: new Map() });
 
-  // Update heatmap data when throws are confirmed
   useEffect(() => {
-    if (!state.currentMatch || state.currentMatch.status !== 'in-progress') return;
-
-    const currentLeg = state.currentMatch.legs[state.currentMatch.currentLegIndex];
-    if (!currentLeg || currentLeg.throws.length === 0) return;
-
-    // Get the last throw and update heatmap for that player
-    const lastThrow = currentLeg.throws[currentLeg.throws.length - 1];
-
-    // Skip if we already processed this throw
-    if (!lastThrow || lastThrow.id === lastProcessedThrowIdRef.current) return;
-
-    if (lastThrow.darts && lastThrow.darts.length > 0) {
-      logger.gameEvent('Updating heatmap for player:', lastThrow.playerId, 'with darts:', lastThrow.darts);
-      updatePlayerHeatmap(lastThrow.playerId, lastThrow.darts);
-      lastProcessedThrowIdRef.current = lastThrow.id;
+    const match = state.currentMatch;
+    if (!match) return;
+    const visits = match.legs.flatMap(leg => leg.throws);
+    const ref = bookedVisitsRef.current;
+    if (ref.matchId !== match.id) {
+      bookedVisitsRef.current = { matchId: match.id, booked: diffVisitDarts(new Map(), visits).next };
+      return;
     }
-  }, [state.currentMatch?.legs, updatePlayerHeatmap]);
+    // No status gate: the checkout that completes a match lands in the same
+    // dispatch as `completed`, and must still be booked.
+    const { next, changes } = diffVisitDarts(ref.booked, visits);
+    ref.booked = next;
+    for (const c of changes) {
+      logger.gameEvent('Heatmap change for player:', c.playerId, '+', c.add.length, '−', c.remove.length);
+      updatePlayerHeatmap(c.playerId, c.add, c.remove);
+    }
+  }, [state.currentMatch?.legs, state.currentMatch?.id, updatePlayerHeatmap]);
 
   // Pause the current match: dispatch PAUSE_MATCH and wait for DB save
   const pauseCurrentMatch = async (): Promise<void> => {

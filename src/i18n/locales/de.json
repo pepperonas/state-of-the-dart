@@ -1152,6 +1152,9 @@
     "login": "Anmelden"
   },
   "heatmap": {
+    "exact_share": "{{exact}} von {{total}} Darts genau erfasst.",
+    "exact_hint": "Getippte Summen zählen nicht – wähle nach der Aufnahme, wie geworfen wurde, oder gib Darts einzeln ein.",
+    "only_typed": "Nur getippte Summen – daraus lässt sich nicht ablesen, welche Felder getroffen wurden.",
     "triple_rate": "Triple-Rate",
     "double_rate": "Double-Rate",
     "legend": "Heatmap-Legende",
@@ -2127,7 +2130,8 @@
     "leg_won": "{{name}} checkt {{score}} und gewinnt das Leg",
     "match_won": "{{name}} checkt {{score}} und gewinnt das Match",
     "undo": "Aufnahme zurückgenommen",
-    "undo_to": "Aufnahme zurückgenommen, {{name}} steht wieder auf {{remaining}}"
+    "undo_to": "Aufnahme zurückgenommen, {{name}} steht wieder auf {{remaining}}",
+    "corrected": "Aufnahme von {{name}} korrigiert: {{from}} → {{to}}, Rest {{remaining}}"
   },
   "export": {
     "date": "Datum",
@@ -4047,5 +4051,28 @@
     "standings": "Spielstand",
     "remaining": "Rest",
     "open": "Auf zweitem Bildschirm öffnen"
+  },
+  "correction": {
+    "label": "Korrektur",
+    "hint": "Neue Summe tippen · Enter übernimmt · Esc behält {{score}}",
+    "how_thrown": "{{name}} {{score}} – wie geworfen?",
+    "how_thrown_label": "Wie hat {{name}} die {{score}} geworfen?",
+    "pick": "Geworfen: {{darts}}",
+    "other": "Andere…",
+    "title": "Aufnahme korrigieren – {{name}}, Aufnahme {{n}}",
+    "booked": "Gebucht: {{score}}",
+    "mode": "Korrigieren über",
+    "tab_sum": "Summe",
+    "tab_darts": "Darts",
+    "new_sum": "Richtige Summe",
+    "remove_dart": "{{dart}} entfernen",
+    "save": "Übernehmen",
+    "edit_visit": "Aufnahme {{score}} korrigieren",
+    "typed": "Summe getippt – Felder unbekannt",
+    "error_invalid": "Diese Summe ist mit drei Darts nicht möglich.",
+    "error_no_darts": "Wähle mindestens einen Dart.",
+    "error_not_found": "Diese Aufnahme gibt es nicht mehr.",
+    "error_finished_leg": "In einem beendeten Leg lässt sich nur eintragen, wie dieselbe Summe geworfen wurde. Für eine andere Summe nimm die Aufnahmen bis dorthin zurück.",
+    "error_checkout": "Damit wäre das Leg beendet. Für ein Finish: „Wurf zurück“ und neu eingeben."
   }
 }

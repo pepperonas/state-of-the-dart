@@ -42,8 +42,10 @@ test('phone: input docked in reach, hero above it, stats in a sheet', async ({ p
   const dock = (await page.getByTestId('input-dock').boundingBox())!;
   expect(hero.y + hero.height).toBeLessThanOrEqual(dock.y + 1);
   expect(await page.evaluate(() => window.scrollY)).toBe(0);
-  await page.keyboard.type('60'); // one visit, so the heatmap has beds to show
+  await page.keyboard.type('60'); // one visit, so the heatmap has beds to show —
   await page.keyboard.press('Enter');
+  // a typed total counts only once it is said how it was thrown (0.32.0).
+  await page.getByTestId('visit-chips').getByRole('button', { name: /20 · 20 · 20/ }).click();
   await page.getByRole('button', { name: 'Statistik & Board' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   const sheet = page.getByRole('dialog');

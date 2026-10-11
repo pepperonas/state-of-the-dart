@@ -518,12 +518,18 @@ export const routeToDarts = (route: string[]): Dart[] | null => {
  * checkout route, so the last one is a double (or a triple). The plain reconstruction (T20 first)
  * would not end on a double and turned every such checkout into a bust.
  */
+/** A reconstructed dart: marked as a guess, without invented board coordinates. */
+const asGuess = (dart: Dart): Dart => {
+  const { x: _x, y: _y, ...rest } = dart as Dart & { x?: number; y?: number };
+  return { ...rest, estimated: true };
+};
+
 export const numpadDarts = (score: number, remaining: number, dartsLeft: number, outRule: boolean | CheckRule): Dart[] => {
   const rule: CheckRule = outRule === true ? 'double' : outRule === false ? 'single' : outRule;
   if (rule !== 'single' && score === remaining) {
     const route = checkoutRoute(score, dartsLeft, rule);
     const darts = route ? routeToDarts(route) : null;
-    if (darts && calculateThrowScore(darts) === score) return darts.map(d => ({ ...d, estimated: true }));
+    if (darts && calculateThrowScore(darts) === score) return darts.map(asGuess);
   }
-  return convertScoreToDarts(score).map(d => ({ ...d, estimated: true }));
+  return convertScoreToDarts(score).map(asGuess);
 };
