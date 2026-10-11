@@ -809,13 +809,15 @@ button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surfa
   overflow: hidden;
   isolation: isolate;
   border: 2px solid rgba(249, 115, 22, 0.85);
-  animation: sotd-fire-glow 4.3s ease-in-out infinite, sotd-fire-border 2.7s ease-in-out infinite;
+  animation: sotd-fire-glow var(--sotd-fire-glow-period) ease-in-out infinite, sotd-fire-border var(--sotd-fire-border-period) ease-in-out infinite;
 }
 /* Content sits above the flames. */
 .sotd-on-fire > :not(.sotd-fire-canvas):not(.sotd-rank-stamp) { position: relative; z-index: 2; }
 /* The rank stamp floats over the burning card too (above the flames). */
 .sotd-on-fire > .sotd-rank-stamp { z-index: 2; }
 .sotd-fire-canvas {
+  /* Flames rise in instead of switching on with the turn. */
+  animation: m3-fade var(--m3-dur-long-2) var(--m3-ease-standard) backwards;
   position: absolute;
   left: 0; right: 0; bottom: 0;
   width: 100%;
@@ -840,7 +842,7 @@ button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surfa
   40%  { box-shadow: 0 0 0 6px color-mix(in srgb, var(--m3-tertiary) 25%, transparent), 0 0 18px color-mix(in srgb, var(--m3-tertiary) 35%, transparent); }
   100% { box-shadow: 0 0 0 0 transparent; }
 }
-.sotd-leg-won { animation: sotd-leg-won 1.4s var(--m3-easing-standard) 1; }
+.sotd-leg-won { animation: sotd-leg-won var(--sotd-leg-won-duration) var(--m3-easing-standard) 1; }
 @media (prefers-reduced-motion: reduce) {
   .sotd-leg-won { animation: none; }
 }
@@ -881,4 +883,31 @@ button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surfa
 .sotd-rank-tint:not(.sotd-on-fire) {
   outline: 1px solid color-mix(in srgb, var(--rank-color) 45%, transparent);
   outline-offset: -1px;
+}
+
+/* ── Input keys (numpad, dart grid, quick scores) ─────────────────────────
+   M3 Expressive shape morph: a pressed key rounds off, on the fast spatial
+   spring (the generated `linear()` token — the same physics framer uses). */
+.sotd-key {
+  border-radius: var(--m3-shape-md);
+  transition:
+    border-radius var(--m3-spring-spatial-fast-duration) var(--m3-spring-spatial-fast),
+    background-color var(--m3-duration-short) var(--m3-easing-standard),
+    color var(--m3-duration-short) var(--m3-easing-standard);
+}
+.sotd-key:active:not(:disabled) { border-radius: var(--m3-shape-xl); }
+@media (prefers-reduced-motion: reduce) {
+  .sotd-key:active:not(:disabled) { border-radius: var(--m3-shape-md); }
+}
+
+/* Checkout ready: a ring pulses out of the confirm button. The button and its
+   label stay fully opaque (an opacity pulse dimmed the text to 45 %). */
+@keyframes sotd-ring-pulse {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--m3-success) 60%, transparent); }
+  70%  { box-shadow: 0 0 0 10px color-mix(in srgb, var(--m3-success) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--m3-success) 0%, transparent); }
+}
+.sotd-ring-pulse { animation: sotd-ring-pulse var(--m3-loop-shape-morph) var(--m3-easing-standard) infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .sotd-ring-pulse { animation: none; box-shadow: 0 0 0 3px var(--m3-success); }
 }

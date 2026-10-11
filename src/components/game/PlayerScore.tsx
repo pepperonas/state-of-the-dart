@@ -7,9 +7,10 @@ import PlayerAvatar from '../player/PlayerAvatar';
 import { usePlayer } from '../../context/PlayerContext';
 import AnimatedNumber from '../common/AnimatedNumber';
 import IconButton from '../common/IconButton';
-import { springSpatialDefault } from '../../utils/motion';
+import { springSpatialDefault, enterPop } from '../../utils/motion';
 import FireCanvas from './FireCanvas';
 import RankStamp from './RankStamp';
+import ScoreDelta from './ScoreDelta';
 import { rankTone } from '../../utils/legRanks';
 
 interface PlayerScoreProps {
@@ -99,12 +100,15 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
         </div>
       </div>
 
+      <div className="relative">
       <AnimatedNumber
-        value={remaining}
-        className={`block m3-display-small m3-emphasized text-center mb-3 tabular-nums ${
-          remaining <= 170 ? 'text-primary' : 'text-on-surface'
-        }`}
-      />
+          value={remaining}
+          className={`block m3-display-small m3-emphasized text-center mb-3 tabular-nums ${
+            remaining <= 170 ? 'text-primary' : 'text-on-surface'
+          }`}
+        />
+        <ScoreDelta value={remaining} className="left-1/2 ml-16 top-1 m3-title-large" />
+      </div>
 
       <div className={`grid ${showSets ? 'grid-cols-3' : 'grid-cols-2'} gap-2 text-sm`}>
         <div className="bg-surface-container-highest rounded-m3-sm p-2">
@@ -144,30 +148,32 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
         )}
       </div>
 
-      <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+      {/* One row is always reserved, so the card does not jump when the first
+          badge arrives; badges pop in. */}
+      <div className="mt-2 grid grid-cols-2 gap-2 text-xs min-h-[1.5rem]">
         {player.match180s > 0 && (
-          <div className="bg-error-container text-on-error-container rounded-m3-sm p-1 text-center">
+          <motion.div {...enterPop} className="bg-error-container text-on-error-container rounded-m3-sm p-1 text-center">
             <span className="font-bold">180</span>
-            <span className="opacity-70"> ×{player.match180s}</span>
-          </div>
+            <span className="font-normal"> ×{player.match180s}</span>
+          </motion.div>
         )}
         {player.match140Plus > 0 && (
-          <div className="bg-tertiary-container text-on-tertiary-container rounded-m3-sm p-1 text-center">
+          <motion.div {...enterPop} className="bg-tertiary-container text-on-tertiary-container rounded-m3-sm p-1 text-center">
             <span className="font-bold">140+</span>
-            <span className="opacity-70"> ×{player.match140Plus}</span>
-          </div>
+            <span className="font-normal"> ×{player.match140Plus}</span>
+          </motion.div>
         )}
         {player.match100Plus > 0 && (
-          <div className="bg-secondary-container text-on-secondary-container rounded-m3-sm p-1 text-center">
+          <motion.div {...enterPop} className="bg-secondary-container text-on-secondary-container rounded-m3-sm p-1 text-center">
             <span className="font-bold">100+</span>
-            <span className="opacity-70"> ×{player.match100Plus}</span>
-          </div>
+            <span className="font-normal"> ×{player.match100Plus}</span>
+          </motion.div>
         )}
         {player.matchHighestScore > 0 && (
-          <div className="bg-primary-container text-on-primary-container rounded-m3-sm p-1 text-center">
+          <motion.div {...enterPop} className="bg-primary-container text-on-primary-container rounded-m3-sm p-1 text-center">
             <span className="font-bold">{t('player_score.highest')}</span>
-            <span className="opacity-70"> {player.matchHighestScore}</span>
-          </div>
+            <span className="font-normal"> {player.matchHighestScore}</span>
+          </motion.div>
         )}
       </div>
     </motion.div>

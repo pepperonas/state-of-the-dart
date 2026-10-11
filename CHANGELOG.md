@@ -7,6 +7,39 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.26.0] - 2026-10-11
+
+### Changed — motion
+- **One spring source:** `utils/springs.ts` holds the M3 Expressive specs
+  (spatial / standard / effects × fast / default / slow, plus the number
+  tally). `utils/motion.ts` derives the framer transitions from it, and
+  `tools/gen-springs.ts` samples the same curves into CSS `linear()` easings
+  (`--m3-spring-*` in `motion.css`). A test fails if the two drift apart.
+  The effects springs are critically damped springs now (were tweens).
+- Dart slots: spring in, animate out (`AnimatePresence`), darts that land
+  together stagger; the visit total tallies.
+- **Bust:** the slot row shakes and turns error-red, the total box shows
+  "Bust", and the bust haptic fires on the busting dart (not 800 ms later).
+- Hand-over: a "−60" rises off the player's score; the phone strip's turn
+  ring glides to the next player (`layoutId`); the fire frame fades in.
+- Checkout row: height always reserved (the numpad no longer jumps on turn
+  changes), route chips morph per dart.
+- Input modes enter on a shared X axis; keys round off on press (spring
+  `linear()` token), state layer and ripple; Enter is filled primary.
+- Player-card badges pop in, one row reserved.
+
+### Fixed
+- `.animate-slide-in-right` pointed at a keyframe that did not exist.
+- Reduced motion: the achievement card's box-shadow/opacity loops, the hint
+  shimmer and the icon pulse kept running (framer only stops transforms).
+- Text dimmed by opacity: the checkout button pulse (now a ring), the
+  achievement header loop, `opacity-70/80` labels on cards and strip.
+- Hard-coded loop durations now come from tokens.
+
+### Tests
+- `springs.test.ts` (5), `gameMotion.test.tsx` (6), and an E2E check that no
+  endless animation runs during play under reduced motion.
+
 ## [0.25.1] - 2026-10-11
 
 ### Added

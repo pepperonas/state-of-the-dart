@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { TrendingUp, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { IconButton } from '../common';
@@ -16,6 +16,7 @@ interface AchievementHintProps {
 
 const AchievementHint: React.FC<AchievementHintProps> = ({ hints, onDismiss }) => {
   const { t } = useTranslation();
+  const reduce = useReducedMotion();
   const hint = hints[0]; // Show first hint only
   const hintId = hint?.achievementId;
   useEffect(() => {
@@ -90,13 +91,14 @@ const AchievementHint: React.FC<AchievementHintProps> = ({ hints, onDismiss }) =
             </div>
           </div>
 
-          {/* Shimmer Effect */}
-          <motion.div
+          {/* Shimmer Effect (none under reduced motion — framer only stops transforms
+              there when MotionConfig is set, and this loop must not run at all) */}
+          {!reduce && <motion.div
             className="absolute inset-0 bg-gradient-to-r from-transparent via-[color-mix(in_srgb,var(--m3-on-surface)_6%,transparent)] to-transparent"
             initial={{ x: '-100%' }}
             animate={{ x: '200%' }}
             transition={{ repeat: Infinity, duration: 3, ease: 'linear' }}
-          />
+          />}
         </div>
       </motion.div>
     </AnimatePresence>

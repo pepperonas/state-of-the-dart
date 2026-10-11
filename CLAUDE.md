@@ -321,6 +321,13 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - Game screen below `lg`: `ScoreStrip` replaces the stacked `PlayerScore` cards and ScoreInput hides its own "remaining" header. `e2e/layout.spec.ts` asserts the confirm button and all scores are on screen at 390×844 and 1280×800. ⚠️ Locators like `getByText('501')` must add `.locator('visible=true')` — the strip exists (hidden) on desktop too.
 - ScoreInput has three modes (`numpad` / `darts` / `quick`, remembered in `sotd-input-mode`); the dart grid adds exact beds.
 
+### Motion system (0.26.0)
+- **`src/utils/springs.ts` is the one source of motion.** M3 specs (stiffness + damping ratio). `motion.ts` builds framer transitions with `toFramer()`; CSS gets them as `--m3-spring-<group>-<speed>` (`linear()`) + `-duration`, written by `node --experimental-strip-types tools/gen-springs.ts` between the `@generated springs` markers in `motion.css`. Change a spec → re-run the generator, or `springs.test.ts` fails.
+- Effects springs are ζ = 1 (no overshoot); `AnimatedNumber` uses `TALLY` (ζ = 1) — a score must never overshoot and show a wrong digit.
+- framer's `reducedMotion="user"` only stops transform/layout animations. Infinite loops on opacity/box-shadow need an explicit `useReducedMotion()` guard (pinned by the E2E check in `fast-play.spec.ts`).
+- Never dim text with opacity, not even in an animation — pulse a ring or a surface instead (`.sotd-ring-pulse`).
+- ⚠️ The SpinnerWheel offers a "X begins" button per player while it turns — do not shorten the spin under reduced motion, that removes the choice (and broke three E2E specs).
+
 ### Leg ranks (0.25.1)
 - `legRanks()` (`utils/legRanks.ts`) — place in the current leg from confirmed visits, shared score = shared rank, all level = nobody. `RankStamp` draws it (`data-testid="leg-rank"`, `data-rank`), colour via `--rank-color: var(--m3-rank-N)` (`rankTone`: 1–4, 5 = neutral).
 - `.sotd-rank-stamp` = gostumblr's score poster. ⚠️ Google Sans Flex is loaded with `text=0123456789` — only digits may go in, anything else falls back visibly.
@@ -473,8 +480,8 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **33 tests** currently:
-  - `fast-play.spec.ts` — visits typed back to back without waiting land with the right player; a bust never shows a negative score; the leg overlay closes on a tap; checkout route on screen at 390×844; no player cards (fire canvas) mounted on phones
+- Specs in `e2e/`. **34 tests** currently:
+  - `fast-play.spec.ts` — visits typed back to back without waiting land with the right player; a bust never shows a negative score; the leg overlay closes on a tap; checkout route on screen at 390×844; no player cards (fire canvas) mounted on phones; no endless animation under reduced motion
   - `achievements-flow.spec.ts` — mid-leg toast closes on an outside tap; a numpad 141 checkout ends the leg; achievements go centre stage and stay until "Weiter"
   - `refresh.spec.ts` — four players: leg ranks 1/2/3/3, desktop column split, refresh mid-visit keeps scores, turn and entered darts; history, charts and live heatmap sections render
   - `heatmap.spec.ts` — the statistics heatmap at phone and desktop size: no overflow, bulls in the centre, a tapped bed is named

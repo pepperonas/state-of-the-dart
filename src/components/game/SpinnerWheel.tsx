@@ -4,6 +4,13 @@ import { audioSystem } from '../../utils/audio';
 import { Icon, iconForEmoji, ICON_PATHS } from '../icons';
 import { useTranslation } from 'react-i18next';
 import { randomIndex, randomBetween } from '../../utils/random';
+import { logger } from '../../utils/logger';
+
+/** Intro sound before the wheel starts, the spin itself, and its deceleration
+ *  (a wheel losing speed, not a spring — it must not bounce back). */
+const INTRO_MS = 1500;
+const SPIN_MS = 4000;
+const SPIN_EASING = 'cubic-bezier(0.17, 0.67, 0.12, 0.99)';
 import { Button, Chip } from '../common';
 
 interface SpinnerWheelProps {
@@ -155,7 +162,7 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
       // Start spinning after intro
       later(() => {
         startSpin();
-      }, 1500);
+      }, INTRO_MS);
     }
   }, []);
 
@@ -207,9 +214,9 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
     const spins = randomBetween(5, 8); // 5-8 full rotations for drama
     const finalRotation = Math.floor(spins) * 360 + baseRotation;
 
-    console.log(`🎰 Spinner: players=${players.map(p=>p.name).join(', ')}`);
-    console.log(`🎰 Spinner: winnerIndex=${winnerIndex}, player=${players[winnerIndex]?.name}`);
-    console.log(`🎰 Spinner: segmentAngle=${segmentAngle}°, segmentCenter=${segmentCenter}°, baseRotation=${baseRotation}°, finalRotation=${finalRotation.toFixed(1)}°`);
+    logger.debug(`🎰 Spinner: players=${players.map(p=>p.name).join(', ')}`);
+    logger.debug(`🎰 Spinner: winnerIndex=${winnerIndex}, player=${players[winnerIndex]?.name}`);
+    logger.debug(`🎰 Spinner: segmentAngle=${segmentAngle}°, segmentCenter=${segmentCenter}°, baseRotation=${baseRotation}°, finalRotation=${finalRotation.toFixed(1)}°`);
 
     setRotation(finalRotation);
 
@@ -227,7 +234,9 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
 
       // Proceed to game after showing result
       later(() => finish(winnerIndex), 2500);
-    }, 4000); // Spin duration
+    // ⚠️ Also under reduced motion: while the wheel turns, every player has a
+    // "X begins" button — shortening the spin took that choice away.
+    }, SPIN_MS);
   };
 
   return (
@@ -252,8 +261,8 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
             className="transition-transform ease-out"
             style={{
               transform: `rotate(${rotation}deg)`,
-              transitionDuration: isSpinning ? '4s' : '0s',
-              transitionTimingFunction: 'cubic-bezier(0.17, 0.67, 0.12, 0.99)',
+              transitionDuration: isSpinning ? `${SPIN_MS}ms` : '0s',
+              transitionTimingFunction: SPIN_EASING,
             }}
           >
             <canvas
