@@ -1,75 +1,193 @@
-<div align="center">
-  <img src="../public/images/state-of-the-dart-thumb-xs.jpg" alt="State of the Dart" width="800" />
+<div align="right">
+
+[🇩🇪 Deutsch](../README.md) · **🇬🇧 English**
+
 </div>
 
-> [🇩🇪 Deutsch](../README.md) | 🇬🇧 **English**
+<div align="center">
+  <img src="media/social-preview.png" alt="State of the Dart — dart scoring for every screen" width="820" />
 
-# 🎯 State of the Dart
+  # 🎯 State of the Dart
 
-**Professional Dart Scoring System** — a feature-rich, web-based dart scoring application with multi-user support, deep statistics tracking, 463 achievements and live deployment.
+  > **The dart scorer for the pub, the basement and the club: X01, Cricket, Shanghai and training with live stats, heatmaps, 463 achievements, online multiplayer and a TV scoreboard — one installable web app for phone, tablet, laptop and TV.**
 
-<!-- Links -->
-[![Live Demo](https://img.shields.io/badge/Live_Demo-stateofthedart.com-22c55e?style=for-the-badge&logo=googlechrome&logoColor=white)](https://stateofthedart.com)
-[![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-a855f7?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://stateofthedart.celox.io)
-[![Version](https://img.shields.io/badge/Version-0.31.1-3b82f6?style=for-the-badge)](../CHANGELOG.md)
+  Type the total, press Enter — the next player is up at once. The big card shows who is at the oche, the remaining score, the checkout route and the place in the leg; a 180 takes the screen, and the TV follows every visit live. Works offline, syncs through your account, no ads.
 
-<!-- Build & repo (live) -->
-[![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
-[![E2E](https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml)
-[![License](https://img.shields.io/github/license/pepperonas/state-of-the-dart)](../LICENSE)
-[![Last Commit](https://img.shields.io/github/last-commit/pepperonas/state-of-the-dart)](https://github.com/pepperonas/state-of-the-dart/commits)
-[![Commit Activity](https://img.shields.io/github/commit-activity/m/pepperonas/state-of-the-dart)](https://github.com/pepperonas/state-of-the-dart/pulse)
-[![Open Issues](https://img.shields.io/github/issues/pepperonas/state-of-the-dart)](https://github.com/pepperonas/state-of-the-dart/issues)
-[![Code Size](https://img.shields.io/github/languages/code-size/pepperonas/state-of-the-dart)](https://github.com/pepperonas/state-of-the-dart)
-[![Top Language](https://img.shields.io/github/languages/top/pepperonas/state-of-the-dart)](https://github.com/pepperonas/state-of-the-dart)
+  <h3>🌐 <a href="https://stateofthedart.com">stateofthedart.com</a> — play right in the browser</h3>
 
-<!-- Frontend -->
-![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?logo=vite&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?logo=tailwindcss&logoColor=white)
-![Material Design 3](https://img.shields.io/badge/Material_Design_3-Expressive-757575?logo=materialdesign&logoColor=white)
-![Framer Motion](https://img.shields.io/badge/Framer_Motion-12.x-0055FF?logo=framer&logoColor=white)
-![Recharts](https://img.shields.io/badge/Recharts-2.12-FF6384)
-![i18next](https://img.shields.io/badge/i18next-25.x-26A69A?logo=i18next&logoColor=white)
-![PWA](https://img.shields.io/badge/PWA-Installable-5A0FC8?logo=pwa&logoColor=white)
-![Workbox](https://img.shields.io/badge/Workbox-7.x-FF6F00?logo=googlechrome&logoColor=white)
+  <p>
+    <a href="https://stateofthedart.com">
+      <img src="https://img.shields.io/badge/%F0%9F%8E%AF_Live_App-stateofthedart.com-22C55E?style=for-the-badge" height="80" alt="Live app: stateofthedart.com" />
+    </a>
+    <a href="https://stateofthedart.celox.io">
+      <img src="https://img.shields.io/badge/%F0%9F%8F%A0_Website-stateofthedart.celox.io-A855F7?style=for-the-badge" height="80" alt="Website: stateofthedart.celox.io" />
+    </a>
+  </p>
 
-<!-- Backend -->
-![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)
-![Express](https://img.shields.io/badge/Express-4.19-000000?logo=express&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white)
-![Socket.IO](https://img.shields.io/badge/Socket.IO-4.8-010101?logo=socket.io&logoColor=white)
-![JWT](https://img.shields.io/badge/Auth-JWT_+_OAuth-000000?logo=jsonwebtokens&logoColor=white)
-![Stripe](https://img.shields.io/badge/Stripe-Payments-635BFF?logo=stripe&logoColor=white)
+  <em>Free in the browser, installable as an app, no ads. The website shows every feature at a glance.</em>
 
-<!-- Quality -->
-![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
-![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?logo=playwright&logoColor=white)
-![Unit Tests](https://img.shields.io/badge/Unit_Tests-1153-brightgreen)
-![E2E Tests](https://img.shields.io/badge/E2E_Tests-43-brightgreen)
-![Coverage](https://img.shields.io/badge/Coverage-24%25_stmts_%7C_75%25_branches-yellow)
-![ESLint](https://img.shields.io/badge/ESLint-configured-4B32C3?logo=eslint&logoColor=white)
+  <p>
+    <a href="https://www.paypal.com/donate/?business=martin.pfeffer@celox.io&item_name=State+of+the+Dart&currency_code=EUR">
+      <img src="https://img.shields.io/badge/%E2%98%95_Buy_the_dev_a_coffee-Donate_via_PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white" height="80" alt="Donate via PayPal" />
+    </a>
+  </p>
 
-<!-- Content -->
-![Achievements](https://img.shields.io/badge/Achievements-463-FFD700)
-![Game Modes](https://img.shields.io/badge/Game_Modes-5-orange)
-![Training Modes](https://img.shields.io/badge/Training_Modes-6-orange)
-![Custom Icons](https://img.shields.io/badge/Custom_Icons-69-8b5cf6)
-![Audio Files](https://img.shields.io/badge/Audio_Files-609-e11d48)
-![i18n](https://img.shields.io/badge/i18n-DE_%7C_EN-informational)
-![Mobile](https://img.shields.io/badge/Mobile-Optimized-success)
-![Offline](https://img.shields.io/badge/Offline-First-0ea5e9)
+  <em>A one-person project from Berlin, built on evenings and weekends. If State of the Dart makes your game night easier, <a href="https://www.paypal.com/donate/?business=martin.pfeffer@celox.io&item_name=State+of+the+Dart&currency_code=EUR">buy the dev a coffee</a> ☕ — every cup turns into the next feature.</em>
 
-<!-- Conventions -->
-[![Conventional Commits](https://img.shields.io/badge/Conventional_Commits-1.0.0-FE5196?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org/)
-[![Keep a Changelog](https://img.shields.io/badge/Keep_a_Changelog-1.0.0-E05735?logo=keepachangelog&logoColor=white)](../CHANGELOG.md)
-[![Semantic Versioning](https://img.shields.io/badge/SemVer-2.0.0-3F4551)](https://semver.org/)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](../CONTRIBUTING.md)
-[![Code of Conduct](https://img.shields.io/badge/Code_of_Conduct-Contributor_Covenant-5e0d73.svg)](../CODE_OF_CONDUCT.md)
-[![Security Policy](https://img.shields.io/badge/Security-Policy-important)](../SECURITY.md)
+  ### ✨ What it does (in short)
 
-🌐 **[Live App](https://stateofthedart.com)** · 🏠 **[Website](https://stateofthedart.celox.io)** · 🏗️ **[Architecture](ARCHITECTURE.md)** · 🎨 **[Design System](DESIGN_SYSTEM.md)** · 🚀 **[Deployment](DEPLOYMENT_VPS.md)** · 📝 **[Changelog](../CHANGELOG.md)** · 🐛 **[Report Issues](https://github.com/pepperonas/state-of-the-dart/issues)**
+  - 🎯 **X01 up to 1001** with single, double or triple in/out, sets and legs, bots in 10 levels
+  - ⌨️ **Fast scoring:** type the total + Enter, single darts, quick scores or the board — undo across leg and set boundaries
+  - 🔦 **Spotlight game screen:** a big card for the player at the oche with checkout route, place in the leg and a burning frame
+  - 📐 **Every screen size:** input in thumb reach on phones, two panes on tablets, three with the board on laptops, no width cap on XXL monitors
+  - 📺 **TV scoreboard** on a second screen, live with every visit
+  - 🎉 **Feedback ladder:** sparks from 100, the 180 moment, a leg recap, personal bests live, haptics per level
+  - 🎡 **Wheel of fortune** for the throw-off, with real physics
+  - 📊 **Stats & heatmaps** bed-accurate, history, comparison, leaderboards
+  - 🏆 **463 achievements** in five tiers with their own shapes
+  - 🎮 **Cricket, Around the Clock, Shanghai, 6 training modes, tournaments, online multiplayer**
+  - 🔊 **Caller with 609 voice files** · 🌍 German and English · ♿ WCAG 2.1 AA checked
+  - 📴 **Offline-first PWA** with account sync, resume after a refresh, no ads
+
+  ### 🧰 Tech stack
+
+  React 19 · TypeScript 5 · Vite · Tailwind · Material 3 Expressive (own springs, shapes, icons) · Framer Motion · WebGL · Express · SQLite · Socket.IO · Workbox. **1154 unit tests + 43 E2E tests.** MIT-licensed.
+
+  <!-- ── Headline metrics ─────────────────────────────────────── -->
+  <p>
+    <a href="https://github.com/pepperonas/state-of-the-dart" title="Lines of code — measured by scripts/count-loc.mjs, checked by the docs test">
+      <img src="https://img.shields.io/badge/lines_of_code-~57k-2b3137?style=for-the-badge&logo=typescript&logoColor=white" height="64" alt="Lines of code" />
+    </a>
+    &nbsp;
+    <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml" title="Vitest unit and component tests, all passing">
+      <img src="https://img.shields.io/badge/Unit_Tests-1154-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
+    </a>
+    &nbsp;
+    <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml" title="Playwright end-to-end tests against a real backend">
+      <img src="https://img.shields.io/badge/E2E_Tests-43-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
+    </a>
+  </p>
+
+  <!-- ── Highlights ───────────────────────────────────────────── -->
+  <p>
+    <a href="../LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
+    <a href="../CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.31.2-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
+    <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
+    <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
+    <a href="https://m3.material.io"><img src="https://img.shields.io/badge/Material_3-Expressive-7C4DFF?style=for-the-badge&logo=materialdesign&logoColor=white" alt="Material 3 Expressive" /></a>
+    <a href="#"><img src="https://img.shields.io/badge/Screens-phone_%C2%B7_tablet_%C2%B7_laptop_%C2%B7_TV-8957e5?style=for-the-badge" alt="Phone, tablet, laptop, TV" /></a>
+    <a href="#"><img src="https://img.shields.io/badge/Made_in-Berlin-e11d48?style=for-the-badge" alt="Made in Berlin" /></a>
+  </p>
+
+  <!-- ── Build & repository (live) ────────────────────────────── -->
+  [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
+  [![E2E](https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml)
+  [![Last commit](https://img.shields.io/github/last-commit/pepperonas/state-of-the-dart?style=flat-square)](https://github.com/pepperonas/state-of-the-dart/commits)
+  [![Commit activity](https://img.shields.io/github/commit-activity/m/pepperonas/state-of-the-dart?style=flat-square)](https://github.com/pepperonas/state-of-the-dart/pulse)
+  [![Issues](https://img.shields.io/github/issues/pepperonas/state-of-the-dart?style=flat-square)](https://github.com/pepperonas/state-of-the-dart/issues)
+  [![Pull requests](https://img.shields.io/github/issues-pr/pepperonas/state-of-the-dart?style=flat-square)](https://github.com/pepperonas/state-of-the-dart/pulls)
+  [![Stars](https://img.shields.io/github/stars/pepperonas/state-of-the-dart?style=flat-square)](https://github.com/pepperonas/state-of-the-dart/stargazers)
+  [![Forks](https://img.shields.io/github/forks/pepperonas/state-of-the-dart?style=flat-square)](https://github.com/pepperonas/state-of-the-dart/network/members)
+  [![Latest tag](https://img.shields.io/github/v/tag/pepperonas/state-of-the-dart?style=flat-square&label=tag)](https://github.com/pepperonas/state-of-the-dart/tags)
+  [![Code size](https://img.shields.io/github/languages/code-size/pepperonas/state-of-the-dart?style=flat-square)](https://github.com/pepperonas/state-of-the-dart)
+  [![Repo size](https://img.shields.io/github/repo-size/pepperonas/state-of-the-dart?style=flat-square)](https://github.com/pepperonas/state-of-the-dart)
+  [![Top language](https://img.shields.io/github/languages/top/pepperonas/state-of-the-dart?style=flat-square)](https://github.com/pepperonas/state-of-the-dart)
+  [![Languages](https://img.shields.io/github/languages/count/pepperonas/state-of-the-dart?style=flat-square&label=languages)](https://github.com/pepperonas/state-of-the-dart)
+  [![Maintained](https://img.shields.io/badge/Maintained-yes-brightgreen?style=flat-square)](https://github.com/pepperonas/state-of-the-dart/commits)
+
+  <!-- ── Frontend ─────────────────────────────────────────────── -->
+  ![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?style=flat-square&logo=vite&logoColor=white)
+  ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+  ![Framer Motion](https://img.shields.io/badge/Framer_Motion-12.x-0055FF?style=flat-square&logo=framer&logoColor=white)
+  ![Recharts](https://img.shields.io/badge/Recharts-2.12-FF6384?style=flat-square)
+  ![i18next](https://img.shields.io/badge/i18next-25.x-26A69A?style=flat-square&logo=i18next&logoColor=white)
+  ![Workbox](https://img.shields.io/badge/Workbox-7.x-FF6F00?style=flat-square&logo=googlechrome&logoColor=white)
+  ![canvas-confetti](https://img.shields.io/badge/canvas--confetti-feedback-ff69b4?style=flat-square)
+  ![WebGL](https://img.shields.io/badge/WebGL-fire_shader-990000?style=flat-square&logo=webgl&logoColor=white)
+  ![Roboto Flex](https://img.shields.io/badge/Roboto_Flex-variable_numerals-4285F4?style=flat-square&logo=googlefonts&logoColor=white)
+  ![BroadcastChannel](https://img.shields.io/badge/BroadcastChannel-TV_sync-0ea5e9?style=flat-square)
+
+  <!-- ── Backend ──────────────────────────────────────────────── -->
+  ![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=flat-square&logo=node.js&logoColor=white)
+  ![Express](https://img.shields.io/badge/Express-4.19-000000?style=flat-square&logo=express&logoColor=white)
+  ![SQLite](https://img.shields.io/badge/SQLite-3-003B57?style=flat-square&logo=sqlite&logoColor=white)
+  ![Socket.IO](https://img.shields.io/badge/Socket.IO-4.8-010101?style=flat-square&logo=socket.io&logoColor=white)
+  ![JWT](https://img.shields.io/badge/Auth-JWT_+_OAuth-000000?style=flat-square&logo=jsonwebtokens&logoColor=white)
+  ![Stripe](https://img.shields.io/badge/Stripe-Payments-635BFF?style=flat-square&logo=stripe&logoColor=white)
+  ![PM2](https://img.shields.io/badge/PM2-process_manager-2B037A?style=flat-square&logo=pm2&logoColor=white)
+  ![nginx](https://img.shields.io/badge/nginx-reverse_proxy-009639?style=flat-square&logo=nginx&logoColor=white)
+
+  <!-- ── Quality ──────────────────────────────────────────────── -->
+  ![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?style=flat-square&logo=vitest&logoColor=white)
+  ![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?style=flat-square&logo=playwright&logoColor=white)
+  ![Coverage](https://img.shields.io/badge/Coverage-24%25_stmts_%7C_75%25_branches-yellow?style=flat-square)
+  ![axe-core](https://img.shields.io/badge/axe--core-WCAG_2.1_AA-663399?style=flat-square)
+  ![Contrast](https://img.shields.io/badge/Contrast-measured_in_both_themes-663399?style=flat-square)
+  ![Mutation probes](https://img.shields.io/badge/Mutation_probes-on_new_tests-orange?style=flat-square)
+  ![Docs sync](https://img.shields.io/badge/Docs-checked_against_code-0ea5e9?style=flat-square)
+  ![ESLint](https://img.shields.io/badge/ESLint-configured-4B32C3?style=flat-square&logo=eslint&logoColor=white)
+  ![Test files](https://img.shields.io/badge/Test_files-98-2ea043?style=flat-square)
+  ![E2E specs](https://img.shields.io/badge/E2E_specs-16-2ead33?style=flat-square)
+
+  <!-- ── Code base ────────────────────────────────────────────── -->
+  ![Components](https://img.shields.io/badge/React_components-100-61DAFB?style=flat-square&logo=react&logoColor=black)
+  ![Utility modules](https://img.shields.io/badge/Utility_modules-53-3178C6?style=flat-square&logo=typescript&logoColor=white)
+  ![API routes](https://img.shields.io/badge/API_route_modules-14-339933?style=flat-square&logo=express&logoColor=white)
+  ![App routes](https://img.shields.io/badge/App_routes-37-8957e5?style=flat-square)
+  ![Contexts](https://img.shields.io/badge/React_contexts-6-61DAFB?style=flat-square)
+  ![i18n keys](https://img.shields.io/badge/i18n_keys-2709-26A69A?style=flat-square)
+
+  <!-- ── Content ──────────────────────────────────────────────── -->
+  ![Achievements](https://img.shields.io/badge/Achievements-463-FFD700?style=flat-square)
+  ![Game Modes](https://img.shields.io/badge/Game_Modes-5-orange?style=flat-square)
+  ![Training Modes](https://img.shields.io/badge/Training_Modes-6-orange?style=flat-square)
+  ![Custom Icons](https://img.shields.io/badge/Custom_Icons-69-8b5cf6?style=flat-square)
+  ![Audio Files](https://img.shields.io/badge/Audio_Files-609-e11d48?style=flat-square)
+  ![Check rules](https://img.shields.io/badge/In%2FOut-single_%C2%B7_double_%C2%B7_triple-orange?style=flat-square)
+  ![TV scoreboard](https://img.shields.io/badge/TV_scoreboard-live-0ea5e9?style=flat-square)
+  ![i18n](https://img.shields.io/badge/i18n-DE_%7C_EN-informational?style=flat-square)
+  ![Mobile](https://img.shields.io/badge/Mobile-optimized-success?style=flat-square)
+  ![Offline](https://img.shields.io/badge/Offline-first-0ea5e9?style=flat-square)
+  ![No ads](https://img.shields.io/badge/Ads-none-334155?style=flat-square)
+
+  <!-- ── Conventions & community ─────────────────────────────── -->
+  [![Conventional Commits](https://img.shields.io/badge/Conventional_Commits-1.0.0-FE5196?style=flat-square&logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org/)
+  [![Keep a Changelog](https://img.shields.io/badge/Keep_a_Changelog-1.0.0-E05735?style=flat-square&logo=keepachangelog&logoColor=white)](../CHANGELOG.md)
+  [![Semantic Versioning](https://img.shields.io/badge/SemVer-2.0.0-3F4551?style=flat-square&logo=semver&logoColor=white)](https://semver.org/)
+  [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](../CONTRIBUTING.md)
+  [![Code of Conduct](https://img.shields.io/badge/Code_of_Conduct-Contributor_Covenant-5e0d73?style=flat-square)](../CODE_OF_CONDUCT.md)
+  [![Security Policy](https://img.shields.io/badge/Security-Policy-important?style=flat-square)](../SECURITY.md)
+  [![Donate](https://img.shields.io/badge/Support-PayPal-00457C?style=flat-square&logo=paypal&logoColor=white)](https://www.paypal.com/donate/?business=martin.pfeffer@celox.io&item_name=State+of+the+Dart&currency_code=EUR)
+  [![celox.io](https://img.shields.io/badge/by-celox.io-0B57D0?style=flat-square)](https://celox.io)
+
+  🌐 **[Live app](https://stateofthedart.com)** · 🏠 **[Website](https://stateofthedart.celox.io)** · 🏗️ **[Architecture](ARCHITECTURE.md)** · 🎨 **[Design system](DESIGN_SYSTEM.md)** · 🚀 **[Deployment](DEPLOYMENT_VPS.md)** · 📝 **[Changelog](../CHANGELOG.md)** · 🐛 **[Issues](https://github.com/pepperonas/state-of-the-dart/issues)**
+
+</div>
+
+---
+
+## 📸 Screenshots
+
+<div align="center">
+  <img src="media/mockup-hero.png" alt="One match on phone, laptop and TV" width="100%" />
+</div>
+
+<table>
+  <tr>
+    <td width="50%"><img src="media/mockup-game.png" alt="Arena game screen on a laptop" /><br><sub><b>Arena</b> — spotlight on the player at the oche, input and board alongside</sub></td>
+    <td width="50%"><img src="media/mockup-tv.png" alt="TV scoreboard" /><br><sub><b>TV scoreboard</b> — the score live on the TV, with moments</sub></td>
+  </tr>
+  <tr>
+    <td><img src="media/mockup-phone.png" alt="Game screen on a phone" /><br><sub><b>Phone</b> — input in thumb reach, stats in a bottom sheet</sub></td>
+    <td><img src="media/mockup-wheel.png" alt="Wheel for the throw-off" /><br><sub><b>Wheel</b> — who throws first, with real physics</sub></td>
+  </tr>
+  <tr>
+    <td><img src="media/mockup-stats.png" alt="Statistics and insights" /><br><sub><b>Statistics</b> — overview, heatmap and insights during the match</sub></td>
+    <td><img src="media/mockup-achievements.png" alt="Achievements and leaderboard" /><br><sub><b>Achievements</b> — 463 achievements and leaderboards</sub></td>
+  </tr>
+</table>
+
 ---
 
 ## ✨ Features
@@ -256,7 +374,7 @@ admin-only.
 
 | Layer | Count | Tool |
 |---|---|---|
-| Unit / component | **1153** | Vitest + React Testing Library |
+| Unit / component | **1154** | Vitest + React Testing Library |
 | End-to-end | **43** | Playwright (preview build + isolated backend) |
 
 ```bash
@@ -657,12 +775,6 @@ Contributions are welcome! Please follow these steps:
 
 ---
 
-## 📄 License
-
-This project is open source. License file to be added.
-
----
-
 ## 🙏 Acknowledgments
 
 - Professional dart calling audio system
@@ -672,27 +784,33 @@ This project is open source. License file to be added.
 
 ---
 
-## 📞 Contact
+## 👨‍💻 Developer
 
-**Martin Pfeffer**  
-- Website: [celox.io](https://celox.io)
-- Email: martin.pfeffer@celox.io
-- GitHub: [@pepperonas](https://github.com/pepperonas)
+<table>
+  <tr>
+    <td>
+      <b>Martin Pfeffer</b> — author &amp; maintainer<br>
+      🌐 <a href="https://celox.io">celox.io</a> · 🐙 <a href="https://github.com/pepperonas">@pepperonas</a> · ✉️ <a href="mailto:martin.pfeffer@celox.io">martin.pfeffer@celox.io</a>
+    </td>
+  </tr>
+</table>
 
-**Project Links**  
-- Live Demo: [stateofthedart.com](https://stateofthedart.com)
-- Repository: [github.com/pepperonas/state-of-the-dart](https://github.com/pepperonas/state-of-the-dart)
-- Issues: [Report a Bug](https://github.com/pepperonas/state-of-the-dart/issues)
+Found a bug or have an idea? → [Open an issue](https://github.com/pepperonas/state-of-the-dart/issues) · Contributions: [CONTRIBUTING.md](../CONTRIBUTING.md) · Report vulnerabilities as described in [SECURITY.md](../SECURITY.md).
 
----
+## ☕ Support
 
-<p align="center">
-  <strong>Made with ❤️ for dart players worldwide</strong><br>
-  <sub>© 2026 Martin Pfeffer | celox.io</sub>
-</p>
+State of the Dart is free and ad-free. If you like it:
 
-<p align="center">
-  <a href="https://stateofthedart.com">
-    <img src="https://img.shields.io/badge/Try_it_now-stateofthedart.com-green?style=for-the-badge" alt="Try it now">
+<p>
+  <a href="https://www.paypal.com/donate/?business=martin.pfeffer@celox.io&item_name=State+of+the+Dart&currency_code=EUR">
+    <img src="https://img.shields.io/badge/%E2%98%95_Buy_the_dev_a_coffee-Donate_via_PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white" height="56" alt="Donate via PayPal" />
   </a>
 </p>
+
+A ⭐ on GitHub helps too — and tell your dart club.
+
+## 📄 License
+
+[MIT](../LICENSE) — © 2026 Martin Pfeffer | [celox.io](https://celox.io)
+
+A private open-source side project — built on evenings and weekends, made with ❤️ and shipped from Berlin 🍻

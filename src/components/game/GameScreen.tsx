@@ -1080,6 +1080,7 @@ const GameScreen: React.FC = () => {
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.95 }}
                     transition={springSpatialFast}
+                    aria-pressed={!!selectedPlayers.find(p => p.id === player.id)}
                     onClick={() => {
                       if (selectedPlayers.find(p => p.id === player.id)) {
                         setSelectedPlayers(selectedPlayers.filter(p => p.id !== player.id));

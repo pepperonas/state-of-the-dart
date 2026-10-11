@@ -7,6 +7,24 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.31.2] - 2026-10-11
+
+### Changed — documentation
+- README (de/en) rebuilt: social preview, product buttons, PayPal donation,
+  headline badges (lines of code, unit and E2E tests), highlight and
+  grouped badges, device mockups from real screenshots, developer, support
+  and MIT license sections. Old February screenshots (`docs/mockups`,
+  `docs/screenshots`) removed; `SCREENSHOTS.md` rewritten.
+- `tools/screenshots/`: reproducible captures (`npx playwright test -c
+  tools/screenshots`, own config, not part of the E2E suite) and
+  `compose.mjs` for mockups + the 1280×640 social preview in `docs/media/`.
+- `scripts/count-loc.mjs` measures lines of code; `docsSync` fails when the
+  badge overstates the count or lags it by more than 2k.
+
+### Fixed — accessibility
+- Player tiles in the game setup carry `aria-pressed`: a screen reader could
+  not tell which players were selected.
+
 ## [0.31.1] - 2026-10-11
 
 ### Fixed

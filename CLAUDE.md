@@ -503,6 +503,12 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - **Deploy**: `scp -r website/dist/* root@69.62.121.168:/var/www/stateofthedart-landing/`
 - Nginx config at `/etc/nginx/sites-available/stateofthedart.celox.io` with SSL via Let's Encrypt
 
+## README media (0.31.2)
+- `npx playwright test -c tools/screenshots` captures the app (seeded backend, own config — not part of the E2E suite; vitest excludes `tools/screenshots/**`), `node tools/screenshots/compose.mjs` builds the mockups and the 1280×640 social preview into `docs/media/` (HTML device frames rendered by Chromium, pngquant). Raw captures stay in the git-ignored `tools/screenshots/out/`; the README uses `docs/media/` only.
+- The GitHub social preview (`docs/media/social-preview.png`) has to be uploaded by hand: Settings → General → Social preview. There is no API for it.
+- `lines_of_code` badge = `node scripts/count-loc.mjs` (non-blank, non-comment lines); `docsSync` fails if the badge overstates it or lags by more than 2k.
+- Both READMEs must keep the same shields badge set (`docsSync`).
+
 ## Testing
 
 ### Unit / Integration (Vitest + React Testing Library)

@@ -76,3 +76,7 @@ server/logs/
 
 # Ad-hoc verification screenshots
 /*.png
+
+# Screenshot tooling output (tools/screenshots)
+tools/screenshots/out/
+tools/screenshots/build/
