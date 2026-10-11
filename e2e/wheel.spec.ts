@@ -35,8 +35,8 @@ async function openWheel(page: Page, tag: string) {
 }
 
 for (const vp of [
-  { name: 'phone', width: 390, height: 844, minWheel: 330 },
-  { name: 'desktop', width: 1440, height: 900, minWheel: 520 },
+  { name: 'phone', width: 390, height: 844, minWheel: 350 },
+  { name: 'desktop', width: 1440, height: 900, minWheel: 700 },
 ]) {
   test(`wheel on ${vp.name}: big, and the flapper never spins out`, async ({ page }) => {
     await page.setViewportSize({ width: vp.width, height: vp.height });

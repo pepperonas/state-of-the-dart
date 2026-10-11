@@ -7,6 +7,22 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.31.4] - 2026-10-11
+
+### Changed
+- Wheel fills the screen: portrait `min(92vw, 100dvh − 21rem, 80rem)`,
+  landscape `min(58vw, 86dvh, 80rem)` with title, buttons and result beside
+  it. Wedge names (14–24 units, weight 800), avatars (30 units), title,
+  winner name, start buttons and hub label scale with the viewport
+  (`clamp`/`vmin`-style sizes; buttons never below 48 px).
+- Longer spin: at least 6 turns with drag 0.32 (~6.5 s, was ~4.3 s).
+- The dialog centres with `safe center`: content taller than the screen
+  scrolls instead of being cut off at the top.
+
+### Fixed
+- CI: `docsSync` expected the git-ignored `tools/screenshots/out/` to exist;
+  it is now exempt like other generated paths.
+
 ## [0.31.3] - 2026-10-11
 
 ### Fixed

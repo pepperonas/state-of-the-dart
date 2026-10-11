@@ -71,7 +71,7 @@
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.31.3-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.31.4-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
@@ -825,7 +825,7 @@ Was die Suite abdeckt:
 - Spielansicht je Bildschirmklasse (390 px bis 2560 px), 180-Moment, Leg-Rückblick, Einblicke in zwei Spalten
 - Refresh mitten in der Aufnahme verliert nichts; Online-Spiel mit zwei Browsern; Turnier über Reloads hinweg
 - TV-Scoreboard mit zwei Fenstern: wartet, folgt live, zeigt Momente, übersteht Reload
-- Glücksrad auf Handy und Desktop: groß genug, Zeiger schlägt nie mehr als 30° aus
+- Glücksrad auf Handy und Desktop: bildschirmfüllend, Zeiger schlägt nie mehr als 30° aus
 - Barrierefreiheit (axe-core auf 21 Seiten + Spielmodi, Trefferflächen) und Kontrast (12 Seiten, beide Themes)
 
 ### CI/CD
@@ -920,6 +920,10 @@ Contributions sind willkommen! Bitte:
 ---
 
 ## 📝 Changelog
+
+### v0.31.4 (11. Oktober 2026) - Glücksrad bildschirmfüllend, längerer Spin
+
+Das Glücksrad füllt jetzt den Bildschirm: am Handy fast die ganze Breite, am Desktop und im Querformat fast die ganze Höhe – Titel, Startknöpfe und Ergebnis stehen dann rechts daneben. Namen und Symbole auf dem Rad, die Überschrift, der Siegername und die Startknöpfe wachsen mit der Bildschirmgröße (bis 2560 px und darüber). Der Spin dauert etwa 6,5 statt 4,3 Sekunden. Passt etwas auf einem sehr kleinen Bildschirm nicht ganz, lässt sich scrollen, statt dass der Titel oben abgeschnitten wird. **Behoben:** Ein Doku-Test schlug in der CI fehl, weil er einen nur lokal vorhandenen Screenshot-Ordner erwartete.
 
 ### v0.31.3 (11. Oktober 2026) - Glücksrad repariert und größer
 
