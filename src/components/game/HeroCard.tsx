@@ -111,22 +111,23 @@ const HeroCard: React.FC<HeroCardProps> = ({
       className={`relative overflow-hidden m3-card m3-elevated sotd-on-fire bg-surface-container-high ${size === 'compact' ? 'p-3' : 'p-4 md:p-5'}`}
       style={{ borderRadius: 'var(--m3-shape-lg)' }}
     >
-      <div ref={fireSlot} aria-hidden="true" className="absolute inset-0 rounded-m3-lg overflow-hidden pointer-events-none" />
+      <div ref={fireSlot} aria-hidden="true" className="sotd-fire-slot absolute inset-0 rounded-m3-lg overflow-hidden pointer-events-none" />
       <motion.div
         layout="position"
         layoutDependency={turnKey}
         className="relative"
-        initial={reduce ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={CONTENT_IN}
       >
 
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-3 min-w-0">
-          <PlayerAvatar avatar={avatar} name={player.name} size={size === 'compact' ? 'sm' : 'md'} />
-          <h3 className="m3-title-large text-on-surface truncate">
+          {/* Avatar, name and remaining score fly from the player's row into
+              this card as shared elements (and back when the turn passes). */}
+          <motion.div layoutId={`spot-avatar-${id}`} layout="position" layoutDependency={turnKey} transition={{ layout: CONTAINER_MORPH }} className="shrink-0">
+            <PlayerAvatar avatar={avatar} name={player.name} size={size === 'compact' ? 'sm' : 'md'} />
+          </motion.div>
+          <motion.h3 layoutId={`spot-name-${id}`} layout="position" layoutDependency={turnKey} transition={{ layout: CONTAINER_MORPH }} className="m3-title-large text-on-surface truncate">
             {player.name}
-          </h3>
+          </motion.h3>
         </div>
         {onRemove && (
           <IconButton
@@ -141,7 +142,7 @@ const HeroCard: React.FC<HeroCardProps> = ({
 
       {/* The number and the place in the leg share a row. */}
       <div className="flex items-end justify-between gap-3 mt-1">
-        <div className="relative">
+        <motion.div layoutId={`spot-rest-${id}`} layout="position" layoutDependency={turnKey} transition={{ layout: CONTAINER_MORPH }} className="relative">
           {/* In checkout range the number breathes — a finish is on. */}
           <motion.div
             data-breathing={breathing ? 'true' : undefined}
@@ -158,7 +159,7 @@ const HeroCard: React.FC<HeroCardProps> = ({
           />
           </motion.div>
           <ScoreDelta value={remaining} from={previousRemaining} className="left-full ml-2 top-0 m3-title-large" />
-        </div>
+        </motion.div>
         {rank && <RankStamp rank={rank} size={size === 'large' ? 'large' : 'card'} />}
       </div>
 
@@ -190,6 +191,8 @@ const HeroCard: React.FC<HeroCardProps> = ({
         </motion.div>
       )}
 
+      {/* The details fade in once the card has arrived. */}
+      <motion.div initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={CONTENT_IN}>
       {size === 'compact' ? (
         // Phones: one meta line instead of tiles — the dock below needs the height.
         <div className="flex items-center gap-x-3 gap-y-1 flex-wrap mt-2 m3-label-medium text-on-surface-variant tabular-nums">
@@ -282,6 +285,7 @@ const HeroCard: React.FC<HeroCardProps> = ({
         )}
           </>
       )}
+      </motion.div>
       </motion.div>
     </motion.article>
   );

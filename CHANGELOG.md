@@ -7,6 +7,20 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.31.1] - 2026-10-11
+
+### Fixed
+- Flames on the player at the oche were invisible since 0.30.0: the shared
+  fire slot is a direct child of `.sotd-on-fire`, whose
+  `> :not(.sotd-fire-canvas)` rule forced it to `position: relative` — the slot
+  collapsed to 0 px. Excluded `.sotd-fire-slot` and pinned it absolute.
+  New E2E (`arena.spec.ts`) measures the canvas in the hero card before and
+  after a turn change; mutation-checked.
+- Turn change: avatar, name and remaining score fly again as shared elements
+  (`spot-avatar|name|rest-<id>`, position only — text is never stretched).
+  The card growing from the row keeps the container morph; the card turning
+  back into a row stands at once (shrinking it squashed the text).
+
 ## [0.31.0] - 2026-10-11
 
 ### Added — TV / second-screen scoreboard
