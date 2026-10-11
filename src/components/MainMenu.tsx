@@ -17,6 +17,7 @@ import { getLocalGameSummaries } from '../utils/gameStorage';
 import { enterDrop, staggerChild, springSpatialFast } from '../utils/motion';
 import { loadLastGameSettings } from '../utils/matchSetup';
 import InstallCard from '../pwa/InstallCard';
+import { ruleTags } from '../utils/checkRules';
 import OnboardingCard from './onboarding/OnboardingCard';
 
 /** M3 tonal presets — full class strings (Tailwind JIT can't see interpolated names). */
@@ -73,7 +74,7 @@ const MainMenu: React.FC = () => {
   const last = loadLastGameSettings();
   const settingsLine = [
     last.startScore,
-    last.doubleOut ? t('game.double_out') : null,
+    ...ruleTags(last).map(tag => t(tag.key)),
     (last.setsToWin ?? 1) > 1
       ? t('home.first_to_sets', { count: last.setsToWin })
       : t('home.first_to_legs', { count: last.legsToWin }),

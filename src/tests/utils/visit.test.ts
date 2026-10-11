@@ -17,7 +17,7 @@ const rules = (over: Partial<ReturnType<typeof rulesOf>> = {}) =>
 
 describe('rulesOf', () => {
   it('defaults to 501, double-out on, double-in off', () => {
-    expect(rulesOf({})).toEqual({ startScore: 501, doubleOut: true, doubleIn: false });
+    expect(rulesOf({})).toEqual({ startScore: 501, inRule: 'single', outRule: 'double', doubleOut: true, doubleIn: false });
   });
 });
 

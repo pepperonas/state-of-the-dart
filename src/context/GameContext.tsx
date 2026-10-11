@@ -4,7 +4,7 @@ import { Match, Player, Dart, Throw, GameType, MatchSettings } from '../types/in
 import { sanitizeRestoredThrow } from '../utils/restoredThrow';
 import { calculateThrowScore, calculateAverage } from '../utils/scoring';
 import { evaluateVisit, rulesOf } from '../utils/visit';
-import { getCheckoutSuggestion } from '../data/checkoutTable';
+import { checkoutRoute } from '../utils/checkRules';
 import audioSystem from '../utils/audio';
 import { useTenant } from './TenantContext';
 import { usePlayer } from './PlayerContext';
@@ -54,7 +54,7 @@ export const initialState: GameState = {
 
 /**
  * Checkout suggestion for the player at `playerIndex` after `darts` of the
- * current visit. Goes through evaluateVisit so double-in is respected.
+ * current visit. Goes through evaluateVisit so the in/out rules are respected.
  */
 const checkoutFor = (match: Match, playerIndex: number, darts: Dart[]): string[] | null => {
   const player = match.players[playerIndex];
@@ -64,8 +64,7 @@ const checkoutFor = (match: Match, playerIndex: number, darts: Dart[]): string[]
   const v = evaluateVisit(rules, leg.throws, player.playerId, darts);
   if (v.bust || darts.length >= 3) return null;
   const remaining = v.newRemaining;
-  if (remaining > 170 || remaining < 1) return null;
-  return getCheckoutSuggestion(remaining, 3 - darts.length, rules.doubleOut);
+  return checkoutRoute(remaining, 3 - darts.length, rules.outRule ?? 'double');
 };
 
 /**

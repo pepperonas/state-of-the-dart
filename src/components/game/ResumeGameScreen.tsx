@@ -10,6 +10,7 @@ import { generateMatchName } from '../../utils/matchNames';
 import { reconstructMatch } from '../../utils/matchReconstruction';
 import { getLocalGameSummaries, clearGameState, LocalGameSummary } from '../../utils/gameStorage';
 import { BackButton, Button, Card, PageShell } from '../common';
+import { ruleTags } from '../../utils/checkRules';
 import LoadingIndicator from '../common/LoadingIndicator';
 
 interface ResumableMatch {
@@ -21,6 +22,9 @@ interface ResumableMatch {
     startScore?: number;
     legsToWin?: number;
     doubleOut?: boolean;
+    doubleIn?: boolean;
+    tripleOut?: boolean;
+    tripleIn?: boolean;
   };
   players: Array<{
     playerId: string;
@@ -222,7 +226,7 @@ const ResumeGameScreen: React.FC = () => {
                           <Target size={14} />
                           <span>
                             {match.settings.startScore || 501}
-                            {match.settings.doubleOut !== false ? ` ${t('resume_screen.double_out_short')}` : ''}
+                            {ruleTags(match.settings).map(tag => ` ${tag.short}`).join('')}
                             {' · '}
                             {getMatchFormat(match)}
                           </span>

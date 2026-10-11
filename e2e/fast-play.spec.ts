@@ -88,7 +88,9 @@ test('a bust never shows a negative remaining score', async ({ page }) => {
     }
     return out;
   }, `player-card-${ann}`);
-  expect(seen.some(t => /-\d|−\d/.test(t))).toBe(false);
+  // A negative score would come from the number itself (toFixed → "-39"). The
+  // "−120" chip of the previous visit uses a typographic minus and is fine.
+  expect(seen.some(t => /-\d/.test(t))).toBe(false);
   await expect(page.getByTestId(`player-card-${ann}`)).toContainText('21');
 });
 
@@ -135,4 +137,26 @@ test('reduced motion: no endless animation runs during play', async ({ page }) =
       .map(a => (a as CSSAnimation).animationName || (a.effect as KeyframeEffect)?.target?.className || 'anon'),
   );
   expect(endless).toEqual([]);
+});
+
+test('triple out: chosen at setup, the route ends on a triple, a typed finish checks out', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await login(page);
+  const s = String(Date.now()).slice(-5);
+  const [ann, ben] = [`Ann${s}`, `Ben${s}`];
+  await createPlayer(page, ann);
+  await createPlayer(page, ben);
+  await page.goto('/game?new=1');
+  await page.getByRole('button', { name: new RegExp(ann) }).first().click();
+  await page.getByRole('button', { name: new RegExp(ben) }).first().click();
+  await page.getByRole('radiogroup', { name: 'Check-out' }).getByRole('radio', { name: 'Triple' }).click();
+  await page.getByRole('button', { name: /Spiel starten/i }).click();
+  await page.getByRole('button', { name: new RegExp(`${ann} beginnt`) }).click();
+
+  for (const sc of ['180', '0', '180', '0']) await type(page, sc);
+  await clearAchievements(page);
+  // 141 on a triple needs three darts: T20 T20 T7.
+  await expect(page.getByTestId('checkout-route')).toContainText('T7');
+  await type(page, '141');
+  await expect(page.getByTestId('leg-won')).toBeVisible();
 });

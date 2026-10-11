@@ -21,6 +21,8 @@ export interface StripPlayer {
 interface ScoreStripProps {
   players: StripPlayer[];
   showSets: boolean;
+  /** Legs needed to win (match or set). */
+  legsToWin?: number;
   className?: string;
 }
 
@@ -31,7 +33,7 @@ interface ScoreStripProps {
  * below the fold as soon as two players were in the match; the strip keeps the
  * whole score and the input on one screen.
  */
-const ScoreStrip: React.FC<ScoreStripProps> = ({ players, showSets, className = '' }) => {
+const ScoreStrip: React.FC<ScoreStripProps> = ({ players, showSets, legsToWin, className = '' }) => {
   const { t } = useTranslation();
   const listRef = useRef<HTMLDivElement>(null);
   const activeId = players.find(p => p.isActive)?.playerId;
@@ -77,8 +79,12 @@ const ScoreStrip: React.FC<ScoreStripProps> = ({ players, showSets, className = 
               <AnimatedNumber value={p.remaining} className="text-3xl phoneland:text-2xl font-bold tabular-nums" />
               <ScoreDelta value={p.remaining} className="left-full ml-1 bottom-0 m3-label-large" />
             </span>
-            <span className="m3-label-medium whitespace-nowrap">
-              {showSets ? `${p.setsWon}S · ` : ''}{p.legsWon}L
+            <span
+              className="m3-label-medium whitespace-nowrap tabular-nums"
+              title={legsToWin ? t('player_score.legs_to_win_long', { won: p.legsWon, total: legsToWin }) : undefined}
+            >
+              {showSets ? `${p.setsWon}S · ` : ''}{legsToWin ? `${p.legsWon}/${legsToWin}` : p.legsWon}L
+              {legsToWin ? <span className="sr-only"> {t('player_score.legs_to_win_long', { won: p.legsWon, total: legsToWin })}</span> : null}
             </span>
           </div>
         </div>
@@ -90,6 +96,7 @@ const ScoreStrip: React.FC<ScoreStripProps> = ({ players, showSets, className = 
 /** The parent rebuilds the array every render; compare what is drawn. */
 const samePlayers = (a: ScoreStripProps, b: ScoreStripProps) =>
   a.showSets === b.showSets &&
+  a.legsToWin === b.legsToWin &&
   a.className === b.className &&
   a.players.length === b.players.length &&
   a.players.every((p, i) => {

@@ -23,6 +23,8 @@ interface PlayerScoreProps {
   legsWon: number;
   setsWon: number;
   showSets?: boolean;
+  /** Legs needed to win (the match, or the set when playing sets). */
+  legsToWin?: number;
   /** Remove this player from the running match. Omit to hide the control.
    *  Takes the id so callers can pass one stable callback for every card. */
   onRemove?: (playerId: string) => void;
@@ -39,6 +41,7 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
   legsWon,
   setsWon,
   showSets = false,
+  legsToWin,
   onRemove,
   removeLabel,
 }) => {
@@ -135,6 +138,12 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
                 ))
               : <Trophy size={14} className="text-tertiary" aria-hidden="true" />}
           </div>
+          {/* Small and self-explanatory: how far from the win. */}
+          {legsToWin ? (
+            <div data-testid="legs-to-win" className={`m3-label-small tabular-nums ${legsWon > 0 ? 'text-on-tertiary-container' : 'text-on-surface-variant'}`}>
+              {t(showSets ? 'player_score.legs_to_win_set' : 'player_score.legs_to_win', { won: legsWon, total: legsToWin })}
+            </div>
+          ) : null}
         </motion.div>
 
         {showSets && (

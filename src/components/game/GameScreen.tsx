@@ -28,6 +28,7 @@ import AvatarPicker from '../player/AvatarPicker';
 import { Dart, Player, GameType, MatchSettings, Throw, HeatmapData } from '../../types/index';
 import { calculateThrowScore } from '../../utils/scoring';
 import { evaluateVisit, rulesOf } from '../../utils/visit';
+import { inRuleOf, outRuleOf, ruleSettings, type CheckRule } from '../../utils/checkRules';
 import { Handoff, HANDOFF_MS, LEG_WON_MS } from '../../utils/handoff';
 import { useMediaQuery, DESKTOP_QUERY } from '../../hooks/useMediaQuery';
 import { haptic } from '../../utils/haptics';
@@ -1216,22 +1217,33 @@ const GameScreen: React.FC = () => {
             </div>
             
             <div className="space-y-3 mb-6">
-              <div className="flex items-center justify-between gap-3 min-h-[48px]">
-                <span className="text-on-surface">{t('game.double_out')}</span>
-                <Switch
-                  checked={gameSettings.doubleOut ?? true}
-                  onChange={(doubleOut) => setGameSettings({ ...gameSettings, doubleOut })}
-                  label={t('game.double_out')}
-                />
-              </div>
-              <div className="flex items-center justify-between gap-3 min-h-[48px]">
-                <span className="text-on-surface">{t('game.double_in')}</span>
-                <Switch
-                  checked={gameSettings.doubleIn ?? false}
-                  onChange={(doubleIn) => setGameSettings({ ...gameSettings, doubleIn })}
-                  label={t('game.double_in')}
-                />
-              </div>
+              {/* Check-in / check-out: single, double or triple (utils/checkRules). */}
+              {([
+                ['in', 'game.check_in', 'game.check_in_hint', inRuleOf(gameSettings)],
+                ['out', 'game.check_out', 'game.check_out_hint', outRuleOf(gameSettings)],
+              ] as const).map(([side, label, hint, value]) => (
+                <div key={side}>
+                  <div className="flex items-baseline justify-between gap-3 mb-1.5">
+                    <span className="text-on-surface">{t(label)}</span>
+                    <span className="m3-body-small text-on-surface-variant">{t(hint)}</span>
+                  </div>
+                  <SegmentedButton<CheckRule>
+                    label={t(label)}
+                    value={value}
+                    onChange={(rule) => setGameSettings({
+                      ...gameSettings,
+                      ...(side === 'in'
+                        ? ruleSettings(rule, outRuleOf(gameSettings))
+                        : ruleSettings(inRuleOf(gameSettings), rule)),
+                    })}
+                    options={[
+                      { value: 'single', label: t('game.rule_single') },
+                      { value: 'double', label: t('game.rule_double') },
+                      { value: 'triple', label: t('game.rule_triple') },
+                    ]}
+                  />
+                </div>
+              ))}
             </div>
 
             <Button
@@ -1436,6 +1448,7 @@ const GameScreen: React.FC = () => {
       legsWon={player.legsWon}
       setsWon={player.setsWon}
       showSets={showSets}
+      legsToWin={state.currentMatch!.settings.legsToWin || 3}
       onRemove={canRemovePlayers ? handleRequestRemovePlayer : undefined}
       removeLabel={t('game.remove_player')}
     />
@@ -1487,6 +1500,7 @@ const GameScreen: React.FC = () => {
           <ScoreStrip
             className="lg:hidden sticky top-0 z-20 -mx-4 px-4 py-2 mb-4 phoneland:-mx-2 phoneland:px-2 phoneland:py-1 phoneland:mb-2 bg-[color-mix(in_srgb,var(--m3-surface)_92%,transparent)] backdrop-blur"
             showSets={showSets}
+            legsToWin={state.currentMatch.settings.legsToWin || 3}
             players={stripPlayers}
           />
         )}
@@ -1510,7 +1524,7 @@ const GameScreen: React.FC = () => {
               onSetEditingDartIndex={setEditingDartIndex}
               isEditingThrow={isEditingThrow}
               remaining={remaining}
-              doubleOut={state.currentMatch.settings.doubleOut ?? true}
+              outRule={outRuleOf(state.currentMatch.settings)}
               isCheckout={isEarlyCheckout}
               onUndoThrow={handleUndoThrow}
               lastThrow={lastThrowInfo}
@@ -1529,7 +1543,7 @@ const GameScreen: React.FC = () => {
               <CheckoutSuggestion
                 hidePrimary
                 suggestion={state.checkoutSuggestion}
-                alternatives={getCheckoutAlternatives(remaining, 3 - state.currentThrow.length, state.currentMatch?.settings.doubleOut ?? true)}
+                alternatives={outRuleOf(state.currentMatch.settings) === 'double' ? getCheckoutAlternatives(remaining, 3 - state.currentThrow.length, true) : []}
                 remaining={remaining}
               />
             )}
