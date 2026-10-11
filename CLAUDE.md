@@ -472,7 +472,7 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - **Clickable = control:** `src/tests/a11y/clickables.test.ts` fails on any `<div|span|motion.div … onClick>` without a role/key handler. Overlay backdrops carry `data-backdrop` (Escape is their keyboard path). The SVG `Dartboard` is exempt — the dart grid in ScoreInput is its keyboard/screen-reader equivalent.
 - **Shortcuts:** `?` opens `ShortcutsDialog` (mounted in App); uses `shouldHandleGameKey`, so typing `?` in a field does nothing.
 - `Dialog` takes `ariaLabel` when it draws its own header (UserGuideModal).
-- `e2e/a11y.spec.ts` runs axe-core (WCAG 2.1 A/AA, serious+critical; contrast is left to `contrast.spec.ts`) on 20 routes and in play for X01, Cricket, ATC and Shanghai, and measures hit areas. Its cross-check injects an unlabelled slider and two small buttons — keep it; the first version of the target check measured only M3 classes and would have missed the 2-px player name.
+- `e2e/a11y.spec.ts` runs axe-core (WCAG 2.1 A/AA, serious+critical; contrast is left to `contrast.spec.ts`) on 21 routes and in play for X01, Cricket, ATC and Shanghai, and measures hit areas. Its cross-check injects an unlabelled slider and two small buttons — keep it; the first version of the target check measured only M3 classes and would have missed the 2-px player name.
 
 ### UI Conventions
 - **Back buttons**: use the `<BackButton>` component (`src/components/common/BackButton.tsx`) — now an M3 tonal button with a leading `<ArrowLeft>` + `t('common.back')`. Pass `label` for custom text. **Do not** inline a new back button. For compact in-game back nav, a `<Button variant="tonal" size="sm" icon={<ArrowLeft size={18}/>}>` is the accepted inline form.
@@ -517,8 +517,8 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
   - `heatmap.spec.ts` — the statistics heatmap at phone and desktop size: no overflow, bulls in the centre, a tapped bed is named
   - `online.spec.ts` — two browsers play an online match to the end; a reload mid-leg keeps the seat; a leg won by the non-starter pins the throw-off rule; rematch
   - `tournament.spec.ts` — create a tournament in the UI, enter a leg, reload, resume, confirm, reload: nothing is lost
-  - `a11y.spec.ts` — axe-core on 20 screens and four game modes in play, touch-target sizes, the live announcement, plus a cross-check
-  - `contrast.spec.ts` — WCAG AA text contrast on eleven screens in both themes, plus a cross-check that the tool catches a bad element
+  - `a11y.spec.ts` — axe-core on 21 screens (incl. `/scoreboard`) and four game modes in play, touch-target sizes, the live announcement, plus a cross-check
+  - `contrast.spec.ts` — WCAG AA text contrast on twelve screens (incl. `/scoreboard`) in both themes, plus a cross-check that the tool catches a bad element
   - `layout.spec.ts` — a whole turn fits on one screen at phone and desktop size, no horizontal scroll
   - `game-flow.spec.ts` — full X01 round trip (start, score, pause & leave without reload, resume from the DB) and the one-tap rematch from the home screen
   - `smoke.spec.ts` — load redirect, asset-count regression guard, no-heavy-chunks-eager guard

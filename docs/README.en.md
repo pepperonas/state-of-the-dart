@@ -88,12 +88,21 @@
 
 ### 🎮 Game Modes
 - **X01 Games** - Full support for 301/501/701/1001 with customizable settings
-- **Double Out/In** - Configurable checkout rules
+- **Check-in / check-out** - single, double or triple each (e.g. double out, triple out with finishes up to 180)
+- **Cricket, Around the Clock, Shanghai, Online Multiplayer** - additional modes, all resumable
 - **Best of Sets/Legs** - Tournament-style match formats
 - **Multi-player** - Support for 2+ players with custom avatars and names
 - **Continue Match** - Resume interrupted games automatically
-- **Training Modes** - 6 training modes including Doubles/Triples practice, Around the Clock, and Bob's 27 (UI ready)
-- **Tournament System** - Knockout, Round Robin, League, and Swiss System formats (UI ready)
+- **Training Modes** - 6 training modes including Doubles/Triples practice, Around the Clock, and Bob's 27
+- **Tournament System** - knockout and round robin, stored in the database
+
+### 🖥️ Game screen "Arena" & TV scoreboard (v0.28–v0.31)
+- **Spotlight** — the player at the oche gets a large hero card (huge remaining score, checkout route, place in the leg, darts in the leg, average, legs to win, last visits); everyone else is a compact row. When the turn passes, the next row grows into the hero card as a whole (M3 container transform) — text is never stretched.
+- **Every screen size** (M3 window size classes) — phone: input docked at the bottom, stats/history/heatmap/board in a bottom sheet with tabs; tablet landscape: two panes; laptop and up: three panes with the board alongside; very large monitors without a narrow width cap.
+- **Insights below the board** — match stats (all players side by side), visit history, throw chart and live heatmap as always-open cards in two columns.
+- **Feedback ladder** — big Roboto Flex numerals that swell on every change; sparks from 100, a 180 takes the screen (circle → burst morph, confetti), a leg recap with darts/average/checkout, new personal bests live — never blocking, one haptic pattern per level.
+- **"Who throws first?" wheel** — spins with real physics (friction + drag), a flapper clicks on every peg with sound and haptics, the winning wedge steps forward.
+- **TV scoreboard** (`/scoreboard`) — the screen button in the game opens the score in its own window for a TV, projector or second monitor: the active player's remaining score at about a third of the screen height, the live visit, checkout route, every player with place and remaining score, moments for 180/100+/bust/leg and the winner. Updates with every visit at once (same device and browser, no server), full screen button, the pointer hides when idle. The window only reads and can never write a score back.
 
 ### 📊 Advanced Statistics & Charts
 - **10+ Interactive Charts** - Beautiful visualizations with Recharts
@@ -196,10 +205,10 @@ admin-only.
 
 ### 🎨 Modern UI/UX
 - **Dark Mode Optimized** - High-contrast design with perfect readability
-- **Glassmorphism Design** - Modern, sleek interface with blur effects
-- **Responsive Layout** - Works on desktop, tablet, and mobile devices
-- **Smooth Animations** - Framer Motion powered transitions and effects
-- **Confetti Celebrations** - Visual feedback for 180s and wins
+- **Material 3 Expressive** - one token system (colour roles, shapes, elevation, type) in dark and light
+- **Responsive Layout** - from phone to XXL monitor, a layout per window size class
+- **Spring-based motion** - one source for every spring (`utils/springs.ts`), honours "reduce motion"
+- **Feedback ladder** - sparks, the 180 moment, leg recap and the winner celebration (see "Game screen")
 
 ### ⚡ Performance & PWA
 - **Progressive Web App** - Install on any device, works offline
@@ -247,8 +256,8 @@ admin-only.
 
 | Layer | Count | Tool |
 |---|---|---|
-| Unit / component | **692** | Vitest + React Testing Library |
-| End-to-end | **11** | Playwright (preview build + isolated backend) |
+| Unit / component | **1153** | Vitest + React Testing Library |
+| End-to-end | **42** | Playwright (preview build + isolated backend) |
 
 ```bash
 npm test              # watch mode
@@ -421,17 +430,22 @@ See [DEPLOYMENT_VPS.md](DEPLOYMENT_VPS.md) for full deployment guide.
 - The checkout route sits inside the input card; every player card shows the **place in the leg** (1 green, 2 yellow, 3 orange …)
 - Audio announcements guide you through the game
 
-### 4. Training & Tournaments
-- Click "Training" to access practice modes (UI ready)
-- Click "Tournament" to set up competitions (UI ready)
-- Features coming soon: full functionality for all modes
+### 4. Score on the TV
+- In a running X01 game, tap the **screen button** at the top right (tablet landscape / laptop and up)
+- Drag the new window onto the TV or projector and switch to **full screen**
+- The score follows every visit at once; a window opened later shows the running match straight away
+- Works on the same device in the same browser (e.g. a laptop on HDMI)
 
-### 5. View Statistics
+### 5. Training & Tournaments
+- "Training" opens six practice modes with their own statistics
+- "Tournament" runs knockout and round-robin events, stored in the database
+
+### 6. View Statistics
 - Click "Statistics" from the main menu
 - View your personal stats, averages, and achievements
 - All data is saved and synced automatically
 
-### 6. Switch Profiles
+### 7. Switch Profiles
 - Click "Profil wechseln" in the main menu or settings
 - Select a different profile to view their data
 - Each profile has completely separate statistics
@@ -603,18 +617,24 @@ See [DEPLOYMENT_VPS.md](DEPLOYMENT_VPS.md) for complete deployment guide includi
 - [x] Advanced Statistics with 10+ Charts
 - [x] Export/Import (JSON/CSV/Excel/PDF)
 - [x] PWA with Offline Support
-- [x] Achievement System (20 Achievements)
+- [x] Achievement System (463 achievements)
 - [x] Player Profiles & Personal Bests
 - [x] Leaderboards
 - [x] Player Comparison (up to 4 players)
 - [x] Round Chart in Match History
 - [x] Bed-accurate heatmap
+- [x] Cricket, Around the Clock, Shanghai, Online Multiplayer
+- [x] Tournament system (knockout & round robin)
+- [x] Keyboard shortcuts (`?` lists them)
+- [x] Triple in/out (v0.27.0)
+- [x] Game screen "Arena" with window size classes (v0.28.0)
+- [x] Feedback ladder with Roboto Flex numerals and personal bests (v0.29.0)
+- [x] Insights in two columns + physics wheel (v0.30.0)
+- [x] TV / second-screen scoreboard (v0.31.0)
 
 ### 🎯 Planned
-- [ ] Cricket game mode
-- [ ] Tournament system implementation
 - [ ] Head-to-Head stats
-- [ ] Keyboard shortcuts
+- [ ] Cross-device scoreboard (phone scores, TV shows) through the server
 - [ ] Smart checkout trainer
 
 ---

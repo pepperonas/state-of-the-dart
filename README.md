@@ -124,7 +124,7 @@
   - Per Raum-Code einem privaten Raum beitreten
   - Live-Chat während des Spiels
   - Bis zu 4 Spieler pro Raum
-- **Double Out/In** - Konfigurierbare Checkout-Regeln
+- **Check-in / Check-out** - je Single, Double oder Triple (z. B. Double-Out, Triple-Out mit Finish bis 180)
 - **Best of Sets/Legs** - Turnier-Matchformate
 - **Multi-Player** - Unterstützung für 2+ Spieler mit eigenen Avataren und Namen
 - **Match fortsetzen (v0.5.0 / erweitert v0.8.4)** - Alle Spielmodi pausieren und später fortsetzen
@@ -134,6 +134,14 @@
   - Vollständige Match-Rekonstruktion aus der Datenbank
   - 48h-Ablaufzeit für localStorage-Spielstände
 - **Trainingsmodi** - 6 Trainingsmodi inkl. Doubles/Triples-Training, Around the Clock und Bob's 27
+
+### 🖥️ Spielansicht „Arena“ & TV-Scoreboard (v0.28–v0.31)
+- **Spotlight** — wer am Zug ist, bekommt eine große Hero-Karte (riesiger Rest, Checkout-Weg, Platz im Leg, Darts im Leg, Schnitt, Legs bis zum Sieg, letzte Aufnahmen); alle anderen stehen als kompakte Zeilen darunter. Beim Spielerwechsel wächst die Zeile des Nächsten als Ganzes zur Hero-Karte (M3 Container Transform), ohne dass Schrift gestreckt wird.
+- **Für jede Bildschirmgröße** (M3 Window Size Classes) — Handy: Eingabe unten im Daumenbereich, Statistik/Verlauf/Heatmap/Board als Bottom Sheet mit Reitern; Tablet quer: zwei Spalten; ab Laptop: drei Spalten mit Dartboard daneben; sehr große Monitore ohne schmale Begrenzung.
+- **Einblicke unter dem Spielfeld** — Match-Statistik (alle Spieler nebeneinander), Wurf-Verlauf, Wurf-Chart und Live-Heatmap als Karten in zwei Spalten, immer offen.
+- **Feedback-Leiter** — große Zahlen in Roboto Flex, die bei jeder Änderung kurz anschwellen; Funken ab 100, eine 180 bekommt den Bildschirm (Formwechsel Kreis → Strahlenkranz, Konfetti), Leg-Rückblick mit Darts/Schnitt/Checkout, neue Bestwerte live — nie blockierend, ein eigenes Vibrationsmuster je Stufe.
+- **Glücksrad „Wer wirft zuerst?“** — dreht mit echter Physik (Reibung + Luftwiderstand), Zeiger klackt an jedem Stift mit Ton und Vibration, Siegerfeld tritt hervor.
+- **TV-Scoreboard** (`/scoreboard`) — das Bildschirm-Symbol in der Spielansicht öffnet den Spielstand in einem eigenen Fenster für Fernseher, Beamer oder zweiten Monitor: Rest des Spielers am Zug auf etwa einem Drittel der Bildhöhe, laufende Aufnahme, Checkout-Weg, alle Spieler mit Platz und Rest, Momente für 180/100+/Bust/Leg und der Sieger. Aktualisiert sich bei jeder Aufnahme sofort (gleiches Gerät und gleicher Browser, kein Server), Vollbild per Knopf, Mauszeiger blendet sich aus. Das Fenster liest nur und kann nie einen Spielstand zurückschreiben.
 
 ### 🏆 Turniersystem (NEU in v0.2.0)
 - **Knockout-Modus** - Single Elimination Turniere
@@ -327,10 +335,10 @@ Ein **Bug Report** ist Nutzer-Feedback und steht jedem angemeldeten Konto offen 
 
 ### 🎨 Modernes UI/UX
 - **Dark Mode optimiert** - Hochkontrast-Design mit perfekter Lesbarkeit
-- **Glassmorphism-Design** - Modernes, schlankes Interface mit Blur-Effekten
-- **Responsive Layout** - Funktioniert auf Desktop, Tablet und mobilen Geräten
-- **Sanfte Animationen** - Framer Motion powered Transitions und Effekte
-- **Konfetti-Feiern** - Visuelles Feedback für 180s und Siege
+- **Material 3 Expressive** - durchgängiges Token-System (Farbrollen, Formen, Elevation, Typo) in Dunkel und Hell
+- **Responsive Layout** - von Smartphone bis XXL-Monitor, je Bildschirmklasse ein eigenes Layout
+- **Federbasierte Animationen** - eine Quelle für alle Federn (`utils/springs.ts`), respektiert „Bewegung reduzieren“
+- **Feedback-Leiter** - Funken, 180-Moment, Leg-Rückblick und Siegerfeier, siehe „Spielansicht“
 
 ### ⚡ Performance & PWA
 - **Progressive Web App** - Auf jedem Gerät installierbar, funktioniert offline
@@ -481,7 +489,13 @@ state-of-the-dart/
 - **Verlauf**: Detaillierte Match-Historie mit Runden-Charts
 - **Vergleich**: Multi-Player-Vergleich
 
-### 5. Achievements freischalten
+### 5. Spielstand auf dem Fernseher
+- Im laufenden X01-Spiel auf das **Bildschirm-Symbol** oben rechts tippen (ab Tablet quer / Laptop)
+- Das neue Fenster auf den Fernseher oder Beamer ziehen und dort **Vollbild** wählen
+- Der Spielstand folgt jeder Aufnahme sofort; ein später geöffnetes Fenster zeigt das laufende Spiel direkt
+- Funktioniert auf demselben Gerät im selben Browser (z. B. Laptop per HDMI am Fernseher)
+
+### 6. Achievements freischalten
 - Spiele Matches um Achievements zu verdienen
 - 463 Achievements in 8 Kategorien
 - Erhalte Hinweise, wenn du kurz vor einem Achievement stehst
@@ -680,7 +694,7 @@ scheitern. Das Badge darf laut Doku-Abgleich **nie mehr** behaupten, als gemesse
 > **Doku-Abgleich:** `src/tests/docs/docsSync.test.ts` lässt die Dokumentation nicht driften. Es prüft, dass jede Zahl in einem Badge zum Code passt, dass jeder dokumentierte `npm run …`-Befehl existiert, dass jeder erwähnte Pfad und jeder Markdown-Link auflösbar ist und dass beide READMEs denselben Badge-Satz tragen. Wer eine Zahl ändert, ohne die Doku nachzuziehen, bekommt einen roten Test statt einer stillen Lüge.
 
 ### E2E-Tests (Playwright)
-**11 Tests** in `e2e/` gegen `vite preview` + isoliertes Backend mit eigener SQLite-DB.
+**42 Tests** in `e2e/` gegen `vite preview` + isoliertes Backend mit eigener SQLite-DB.
 
 ```bash
 npm run test:e2e       # Headless
@@ -694,6 +708,12 @@ Was die Suite abdeckt:
 - Login-Form (Render, leere Submission, Version-Footer)
 - Echter Login-Flow gegen seeded Backend (200 + JWT, 401 bei wrong password)
 - Main-Menu nach Login + Game-Route Lazy-Load
+- Kompletter X01-Ablauf: spielen, pausieren, aus der DB fortsetzen, Rematch mit einem Tipp
+- Schnelles Tippen ohne Warten, Bust, Leg-Overlay, Triple-Out
+- Spielansicht je Bildschirmklasse (390 px bis 2560 px), 180-Moment, Leg-Rückblick, Einblicke in zwei Spalten
+- Refresh mitten in der Aufnahme verliert nichts; Online-Spiel mit zwei Browsern; Turnier über Reloads hinweg
+- TV-Scoreboard mit zwei Fenstern: wartet, folgt live, zeigt Momente, übersteht Reload
+- Barrierefreiheit (axe-core auf 21 Seiten + Spielmodi, Trefferflächen) und Kontrast (12 Seiten, beide Themes)
 
 ### CI/CD
 - `.github/workflows/test.yml` — Lint + Vitest + Build
@@ -751,10 +771,16 @@ Siehe [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) für Details.
 - [x] Online Multiplayer (WebSocket)
 - [x] Turniersystem (Knockout & Round Robin)
 - [x] Multi-Game Resume (v0.5.0, alle Modi v0.8.4)
+- [x] Tastaturkürzel (`?` zeigt sie)
+- [x] Check-in/Check-out mit Triple (v0.27.0)
+- [x] Spielansicht „Arena“ mit Window Size Classes (v0.28.0)
+- [x] Feedback-Leiter mit Roboto-Flex-Zahlen und Bestwerten (v0.29.0)
+- [x] Einblicke in zwei Spalten + Physik-Glücksrad (v0.30.0)
+- [x] TV-/Zweitbildschirm-Scoreboard (v0.31.0)
 
 ### 🎯 Geplant
 - [ ] Head-to-Head-Stats
-- [ ] Keyboard-Shortcuts
+- [ ] Scoreboard geräteübergreifend (Handy zählt, Fernseher zeigt) über den Server
 - [ ] Smart-Checkout-Trainer
 
 ---

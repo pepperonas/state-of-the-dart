@@ -10,6 +10,7 @@
 - [Context-Provider](#context-provider)
 - [Offline-Support](#offline-support)
 - [Präsentationsschicht](#-präsentationsschicht)
+- [Zweiter Bildschirm (TV-Scoreboard)](#-zweiter-bildschirm-tv-scoreboard)
 
 ---
 
@@ -501,6 +502,30 @@ nichts geht verloren.
 Bot-Namen enthielten früher ein Emoji **im Namen** (`🎯 Bot 1 (…)`). Das landete damit in
 der Datenbank, in der Match-Historie und in jedem Export. Namen sind jetzt reiner Text; das
 Icon kommt aus dem Avatar-Feld, wo es hingehört.
+
+---
+
+## 📺 Zweiter Bildschirm (TV-Scoreboard)
+
+Seit v0.31.0 zeigt `/scoreboard` den laufenden Spielstand in einem eigenen Fenster (Fernseher, Beamer). Das ist bewusst **keine** Ausnahme von der Database-First-Policy: das Scoreboard speichert nichts, es ist eine reine Anzeige auf demselben Gerät.
+
+```
+GameScreen ──► ScoreboardPublisher ──► publishScoreboard(snapshot)
+                (nur bei geändertem       ├─► BroadcastChannel 'sotd-scoreboard'  (live, sofort)
+                 Inhalt)                  └─► localStorage 'state-of-the-dart-scoreboard'
+                                                (Startbild für neu geöffnete Fenster,
+                                                 Fallback über das storage-Event)
+                                                        │
+ScoreboardScreen ◄── subscribeScoreboard ◄──────────────┘
+   isNewer()      verwirft ältere Snapshots (streng steigende Zeitstempel, nextStamp)
+   momentBetween() leitet 180 / 100+ / Bust / Leg / Match aus der Differenz ab
+```
+
+- **Kein GameContext im Scoreboard.** Jedes zweite Fenster würde den Match sonst aus localStorage wiederherstellen und könnte einen veralteten Stand zurück in die DB schreiben. Das Scoreboard liest ausschließlich Snapshots.
+- **Momente nur vorwärts:** ein Moment entsteht nur, wenn bei einem Spieler `dartsInLeg` gewachsen ist (oder ein Leg/Match gewonnen wurde) — ein Undo löst nichts aus.
+- **Matchende:** der Sieger-Bildschirm der Spielansicht veröffentlicht den letzten Snapshot erneut, mit `status: 'completed'`, Siegername und den finalen Legs.
+- **Abmelden** löscht die Scoreboard-Kopie mit den übrigen Spielständen des Geräts (`DEVICE_GAME_KEYS`).
+- **Grenze:** nur gleiches Gerät und gleicher Browser. Geräteübergreifend (Handy zählt, Fernseher zeigt) bräuchte einen Weg über den Server und ist nicht gebaut.
 
 ---
 
