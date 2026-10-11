@@ -939,3 +939,14 @@ button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surfa
 @media (min-width: 1600px) {
   html:has([data-game-screen]) { font-size: clamp(16px, 0.85vw, 28px); }
 }
+
+/* Big scores: Roboto Flex, the M3 Expressive numerals. Weight and width are
+   variable axes, so a change can swell the digits for a beat (AnimatedNumber
+   `numeral`). ⚠️ Loaded cut to digits — only numbers may use this class. */
+.sotd-numeral {
+  font-family: 'Roboto Flex', 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-variant-numeric: tabular-nums;
+  font-optical-sizing: auto;
+}

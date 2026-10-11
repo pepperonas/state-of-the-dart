@@ -2044,7 +2044,11 @@
     "hide_dartboard": "Hide dartboard",
     "darts_in_leg": "Darts",
     "last_visits": "Last",
-    "insights": "Stats & board"
+    "insights": "Stats & board",
+    "hero_checkout": "Checkout · {{name}}",
+    "pb_visit": "New best: {{value}} in one visit",
+    "pb_leg": "New best leg: {{value}} darts",
+    "leg_recap": "{{darts}} darts · avg {{avg}} · checkout {{checkout}}"
   },
   "training_screen": {
     "title_doubles": "Doubles training",

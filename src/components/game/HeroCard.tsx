@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Trophy, UserMinus } from 'lucide-react';
 import type { MatchPlayer } from '../../types/index';
 import PlayerAvatar from '../player/PlayerAvatar';
@@ -66,6 +66,8 @@ const HeroCard: React.FC<HeroCardProps> = ({
 }) => {
   const { t } = useTranslation();
   const id = player.playerId;
+  const reduce = useReducedMotion();
+  const breathing = !reduce && remaining > 1 && remaining <= checkoutMax;
 
   // A leg just won: the legs tile springs once and glows. Counted from the
   // previous render (state adjusted during render), so mounting or resuming
@@ -109,12 +111,21 @@ const HeroCard: React.FC<HeroCardProps> = ({
       {/* The number and the place in the leg share a row. */}
       <div className="flex items-end justify-between gap-3 mt-1">
         <motion.div layoutId={`spot-rest-${id}`} className="relative">
+          {/* In checkout range the number breathes — a finish is on. */}
+          <motion.div
+            data-breathing={breathing ? 'true' : undefined}
+            animate={breathing ? { scale: [1, 1.035, 1] } : { scale: 1 }}
+            transition={breathing ? { duration: 2.4, repeat: Infinity, ease: 'easeInOut' } : springSpatialDefault}
+            style={{ transformOrigin: 'left bottom' }}
+          >
           <AnimatedNumber
+            numeral
             value={remaining}
-            className={`block font-bold leading-none tabular-nums tracking-tight ${NUMBER_SIZE[size]} ${
+            className={`block leading-none tracking-tight ${NUMBER_SIZE[size]} ${
               remaining <= checkoutMax ? 'text-primary' : 'text-on-surface'
             }`}
           />
+          </motion.div>
           <ScoreDelta value={remaining} className="left-full ml-2 top-0 m3-title-large" />
         </motion.div>
         {rank && <RankStamp rank={rank} size={size === 'large' ? 'large' : 'card'} />}

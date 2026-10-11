@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useMemo, Suspense, lazy } from 'rea
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, RotateCcw, X, Bot, ChevronDown, AlertTriangle, Smile, Flame, UserMinus, Volume2, VolumeX, BarChart3 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-const Confetti = lazy(() => import('react-confetti'));
 const ThrowChart = lazy(() => import('./ThrowChart'));
 import { useGame, MIN_MATCH_PLAYERS } from '../../context/GameContext';
 import { usePlayer } from '../../context/PlayerContext';
@@ -30,6 +29,10 @@ import { evaluateVisit, rulesOf } from '../../utils/visit';
 import { inRuleOf, outRuleOf, ruleSettings, maxFinish, type CheckRule } from '../../utils/checkRules';
 import { Handoff, HANDOFF_MS, LEG_WON_MS } from '../../utils/handoff';
 import { useWindowClass } from '../../hooks/useWindowClass';
+import HeroMoment, { type HeroMomentState } from './HeroMoment';
+import { feedbackLevel, personalBestHits, type Baseline, type PersonalBestHit } from '../../utils/feedback';
+import { burst, originOf } from '../../utils/celebration';
+import { shapePolygon } from '../../utils/shapes';
 import Spotlight, { type SpotPlayer } from './Spotlight';
 import { lastVisits, dartsInLeg } from '../../utils/arena';
 import { haptic } from '../../utils/haptics';
@@ -131,6 +134,12 @@ const GameScreen: React.FC = () => {
     legsTotal: number;
     /** A set-winning leg: the reducer has already reset legsWon to 0. */
     setWon?: { setNumber: number; setsWon: number; setsTotal: number };
+    /** The leg in numbers: darts used, average, the checkout. */
+    recap?: { darts: number; avg: number; checkout: number };
+    /** A new personal best leg. */
+    best?: PersonalBestHit | null;
+    /** A 100+ checkout: the hero moment of the leg. */
+    big?: boolean;
   } | null>(null);
   const legWonOpen = !!legWonAnimation?.show;
   // Any tap or key closes it — it used to swallow every tap for five seconds.
@@ -196,6 +205,15 @@ const GameScreen: React.FC = () => {
 
     const legsTotal = match.settings.legsToWin || 3;
     const setsTotal = match.settings.setsToWin || 1;
+    // The leg in numbers, from the winner's visits in it.
+    const winnerVisits = completedLeg.throws.filter(t => t.playerId === winnerPlayer.playerId);
+    const legDarts = dartsInLeg(completedLeg.throws, winnerPlayer.playerId);
+    const legScored = winnerVisits.reduce((n, t) => n + t.score, 0);
+    const checkoutScore = winnerVisits[winnerVisits.length - 1]?.score ?? 0;
+    const best = winnerPlayer.isBot ? null : personalBestHits(baselineFor(winnerPlayer.playerId), {
+      score: 0, legWonInDarts: legDarts, startScore: match.settings.startScore || 501,
+    })[0] ?? null;
+    if (best) raiseBaseline(winnerPlayer.playerId, [best]);
     // legsWon resets when a set is won, so a set-winning leg reads 0 here.
     const setWasWon = setsTotal > 1 && winnerPlayer.legsWon === 0;
     setLegWonAnimation({
@@ -213,7 +231,12 @@ const GameScreen: React.FC = () => {
             setsTotal,
           }
         : undefined,
+      recap: legDarts > 0 ? { darts: legDarts, avg: (legScored / legDarts) * 3, checkout: checkoutScore } : undefined,
+      best,
+      big: checkoutScore >= 100,
     });
+    burst('radial', { x: 0.5, y: 0.4 });
+    haptic('leg', settings.vibrationEnabled);
 
     const timer = setTimeout(() => setLegWonAnimation(null), LEG_WON_MS);
     return () => clearTimeout(timer);
@@ -360,7 +383,9 @@ const GameScreen: React.FC = () => {
       setSelectedPlayers(lastPlayers);
     }
   };
-  const [showConfetti, setShowConfetti] = useState(false);
+  // Stage 3 of the feedback ladder (a 180, a new best visit).
+  const [heroMoment, setHeroMoment] = useState<HeroMomentState | null>(null);
+  const clearHeroMoment = React.useCallback(() => setHeroMoment(null), []);
   // The last settings are remembered; a fresh device starts with the standard
   // game (501, double out) — it used to be 301 without double out.
   const [gameSettings, setGameSettings] = useState<MatchSettings>(loadLastGameSettings);
@@ -423,6 +448,75 @@ const GameScreen: React.FC = () => {
   const totalThrowsCount = state.currentMatch?.legs.reduce(
     (total, leg) => total + (leg.throws?.length || 0), 0
   ) || 0;
+
+  // Personal-best baselines per player for live "new best" chips, read once
+  // per match and raised as records fall (so one record is not shown twice).
+  const pbRef = useRef<{ matchId?: string; byPlayer: Record<string, Baseline> }>({ byPlayer: {} });
+  const baselineFor = (playerId: string): Baseline => {
+    const matchId = state.currentMatch?.id;
+    if (pbRef.current.matchId !== matchId) {
+      const saved = storage?.get<Record<string, PersonalBests>>('personalBests', {}) ?? {};
+      pbRef.current = {
+        matchId,
+        byPlayer: Object.fromEntries(Object.entries(saved).map(([id, b]) => [id, {
+          highestScore: b?.highestScore?.value ?? 0,
+          shortestLeg: b?.shortestLeg?.darts ?? 0,
+        }])),
+      };
+    }
+    return pbRef.current.byPlayer[playerId] ?? { highestScore: 0, shortestLeg: 0 };
+  };
+  const raiseBaseline = (playerId: string, hits: PersonalBestHit[]) => {
+    const b = { ...baselineFor(playerId) };
+    for (const h of hits) {
+      if (h.kind === 'visit') b.highestScore = h.value;
+      else b.shortestLeg = h.value;
+    }
+    pbRef.current.byPlayer[playerId] = b;
+  };
+
+  // The feedback ladder, driven by the newest booked visit — the same for
+  // humans and bots, and an undo (fewer visits) fires nothing. Checkouts end a
+  // leg: the leg overlay celebrates those.
+  const seenThrowsRef = useRef<{ matchId?: string; count: number }>({ matchId: state.currentMatch?.id, count: totalThrowsCount });
+  useEffect(() => {
+    const m = state.currentMatch;
+    if (!m) return;
+    const prev = seenThrowsRef.current;
+    seenThrowsRef.current = { matchId: m.id, count: totalThrowsCount };
+    if (prev.matchId !== m.id || totalThrowsCount <= prev.count) return;
+    const all = m.legs.flatMap(l => l.throws);
+    const visit = all[all.length - 1];
+    if (!visit) return;
+    const checkout = !visit.isBust && visit.remaining === 0;
+    if (checkout) return;
+    const level = feedbackLevel({ score: visit.score, bust: !!visit.isBust, checkout });
+    const thrower = m.players.find(p => p.playerId === visit.playerId);
+    if (!thrower) return;
+    const hits = thrower.isBot ? [] : personalBestHits(baselineFor(thrower.playerId), {
+      score: visit.isBust ? 0 : visit.score, legWonInDarts: null, startScore: m.settings.startScore || 501,
+    });
+    if (hits.length) raiseBaseline(thrower.playerId, hits);
+    const card = document.querySelector(`[data-testid="player-card-${CSS.escape(thrower.name)}"]`);
+    if (level === 3 || hits.length) {
+      setHeroMoment({ key: Date.now(), value: visit.score, kind: '180', name: thrower.name, bests: hits });
+      burst('hero');
+      haptic('hero', settings.vibrationEnabled);
+    } else if (level === 2) {
+      burst('spark', originOf(card));
+      haptic('ton', settings.vibrationEnabled);
+    }
+  }, [totalThrowsCount, state.currentMatch?.id]);
+
+  // The match is won: a short burst sequence (finite — the old confetti looped forever).
+  const celebratedMatchRef = useRef<string | null>(null);
+  useEffect(() => {
+    const m = state.currentMatch;
+    if (!m || m.status !== 'completed' || !m.winner || celebratedMatchRef.current === m.id) return;
+    celebratedMatchRef.current = m.id;
+    burst('match');
+    haptic('match', settings.vibrationEnabled);
+  }, [state.currentMatch?.status, state.currentMatch?.id]);
 
   // Calculate live heatmap data from current match throws
   const liveHeatmapData = useMemo((): Record<string, HeatmapData> => {
@@ -705,10 +799,6 @@ const GameScreen: React.FC = () => {
     if (visit && !visit.checkout && !visit.bust) {
       audioSystem.announceScore(visit.score);
     }
-    if (currentScore === 180) {
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 3000);
-    }
 
     // A bust entered dart by dart already buzzed when the busting dart landed;
     // a typed total that busts is only known now.
@@ -845,6 +935,7 @@ const GameScreen: React.FC = () => {
     if (!state.currentMatch || !lastThrowInfo) return;
     setAwaitingNextPlayer(false);
     setHandoff(null);
+    haptic('undo', settings.vibrationEnabled);
     // Enter editing mode - darts will be loaded into currentThrow by the reducer
     setIsEditingThrow(true);
     setEditingDartIndex(null);
@@ -1289,11 +1380,6 @@ const GameScreen: React.FC = () => {
 
     return (
       <div className="min-h-dvh p-4 gradient-mesh flex items-center justify-center">
-        <div className="fixed inset-0 pointer-events-none z-0">
-          <Suspense fallback={null}>
-            <Confetti recycle={true} numberOfPieces={200} gravity={0.15} />
-          </Suspense>
-        </div>
         <div className="max-w-4xl w-full relative z-10">
           <motion.div
             className="m3-card m3-elevated p-6 sm:p-12 text-center"
@@ -1794,11 +1880,7 @@ const GameScreen: React.FC = () => {
   return (
     <div data-game-screen className={`min-h-dvh p-4 md:p-6 phoneland:p-2 gradient-mesh overflow-x-hidden ${usesSheet && !compactHeight ? 'flex flex-col' : ''}`}>
       <GameAnnouncer match={state.currentMatch} />
-      {showConfetti && (
-        <Suspense fallback={null}>
-          <Confetti recycle={false} numberOfPieces={300} gravity={0.3} />
-        </Suspense>
-      )}
+      <HeroMoment moment={heroMoment} onDone={clearHeroMoment} />
 
       <div className={`${containerWidth} w-full mx-auto ${usesSheet && !compactHeight ? 'flex-1 flex flex-col' : ''}`} data-panes={panes}>
         <div className="flex items-center justify-between mb-3 lg:mb-4 phoneland:mb-1">
@@ -1934,33 +2016,29 @@ const GameScreen: React.FC = () => {
           className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_80%,transparent)] flex items-center justify-center z-50"
         >
           <div className="text-center animate-scale-in">
-            {/* Confetti burst effect */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              <div>
-                {[...Array(20)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="absolute w-3 h-3 rounded-full"
-                    style={{
-                      left: '50%',
-                      top: '50%',
-                      backgroundColor: ['#f59e0b', '#22c55e', '#3b82f6', '#ef4444', '#8b5cf6'][i % 5],
-                      transform: `rotate(${i * 18}deg) translateY(-${100 + (i * 37) % 100}px)`,
-                      animation: `confetti-fall 1s ease-out ${i * 0.05}s forwards`,
-                      opacity: 0,
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Winner Avatar */}
-            <div className="mb-4 animate-bounce-in flex justify-center">
-              <PlayerAvatar
-                avatar={legWonAnimation.winnerAvatar}
-                name={legWonAnimation.winnerName}
-                size="xl"
+            {/* Winner avatar on a shape that morphs circle → sunny (a 100+
+                checkout gets the soft burst). */}
+            <div className="relative mb-4 flex justify-center">
+              <motion.div
+                aria-hidden="true"
+                className="absolute w-36 h-36 bg-tertiary-container"
+                initial={{ clipPath: shapePolygon('circle', 144), scale: 0.4, rotate: -40 }}
+                animate={{ clipPath: shapePolygon(legWonAnimation.big ? 'burst' : 'sunny', 144), scale: 1, rotate: 0 }}
+                transition={springSpatialDefault}
+                style={{ top: '50%', left: '50%', x: '-50%', y: '-50%' }}
               />
+              <motion.div
+                className="relative"
+                initial={{ scale: 0.5 }}
+                animate={{ scale: 1 }}
+                transition={springSpatialDefault}
+              >
+                <PlayerAvatar
+                  avatar={legWonAnimation.winnerAvatar}
+                  name={legWonAnimation.winnerName}
+                  size="xl"
+                />
+              </motion.div>
             </div>
 
             {/* LEG / SET text with glow */}
@@ -2004,6 +2082,27 @@ const GameScreen: React.FC = () => {
                 </>
               );
             })()}
+
+            {legWonAnimation.recap && (
+              <div data-testid="leg-recap" className="mt-4 m3-title-medium text-on-surface tabular-nums">
+                {t('game_screen.leg_recap', {
+                  darts: legWonAnimation.recap.darts,
+                  avg: legWonAnimation.recap.avg.toFixed(1),
+                  checkout: legWonAnimation.recap.checkout,
+                })}
+              </div>
+            )}
+            {legWonAnimation.best && (
+              <motion.div
+                data-testid="pb-chip"
+                initial={{ y: 12, opacity: 0, scale: 0.8 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                transition={{ ...springSpatialDefault, delay: 0.3 }}
+                className="inline-block mt-3 px-4 py-1.5 rounded-m3-full bg-primary text-on-primary m3-label-large"
+              >
+                {t('game_screen.pb_leg', { value: legWonAnimation.best.value })}
+              </motion.div>
+            )}
 
             {/* Next leg indicator */}
             <div className="mt-6 m3-title-medium text-primary">

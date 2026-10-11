@@ -59,7 +59,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({
       </div>
       {rank && <RankStamp rank={rank} size="strip" />}
       <motion.div layoutId={`spot-rest-${id}`} className="relative">
-        <AnimatedNumber value={remaining} className="block text-3xl font-bold tabular-nums text-on-surface" />
+        <AnimatedNumber numeral value={remaining} className="block text-3xl text-on-surface" />
         <ScoreDelta value={remaining} className="right-full mr-1 bottom-0 m3-label-large" />
       </motion.div>
       {onRemove && (

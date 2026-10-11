@@ -442,7 +442,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
               {t('game.bust')}
             </motion.span>
           ) : (
-            <AnimatedNumber value={currentScore} className="text-2xl font-bold tabular-nums text-on-tertiary-container" />
+            <AnimatedNumber numeral value={currentScore} className="text-2xl text-on-tertiary-container" />
           )}
           {/* What the visit leaves — the remaining score itself lives on the
               hero card, once. */}

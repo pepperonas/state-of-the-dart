@@ -2044,7 +2044,11 @@
     "hide_dartboard": "Dartboard ausblenden",
     "darts_in_leg": "Darts",
     "last_visits": "Zuletzt",
-    "insights": "Statistik & Board"
+    "insights": "Statistik & Board",
+    "hero_checkout": "Checkout · {{name}}",
+    "pb_visit": "Neuer Rekord: {{value}} in einer Aufnahme",
+    "pb_leg": "Neues bestes Leg: {{value}} Darts",
+    "leg_recap": "{{darts}} Darts · Ø {{avg}} · Checkout {{checkout}}"
   },
   "training_screen": {
     "title_doubles": "Doppel-Training",
