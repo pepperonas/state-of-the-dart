@@ -8,6 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { motion } from 'framer-motion';
 import { staggerChild } from '../../utils/motion';
 import { Icon } from '../icons';
+import PlayerAvatar from '../player/PlayerAvatar';
 import LoadingIndicator from '../common/LoadingIndicator';
 
 interface LeaderboardEntry {
@@ -186,7 +187,7 @@ const GlobalLeaderboard: React.FC = () => {
 
                     {/* Player Info */}
                     <div className="flex items-center gap-3 flex-1">
-                      <div className="text-3xl">{entry.playerAvatar}</div>
+                      <PlayerAvatar avatar={entry.playerAvatar} name={entry.playerName} size="md" />
                       <div className="flex-1 min-w-0">
                         <p className="m3-title-medium text-on-surface truncate">
                           {entry.playerName}

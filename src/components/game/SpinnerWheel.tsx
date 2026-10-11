@@ -3,7 +3,7 @@ import { motion, AnimatePresence, animate, useMotionValue, useReducedMotion, typ
 import { useTranslation } from 'react-i18next';
 import { Player } from '../../types';
 import { audioSystem } from '../../utils/audio';
-import { Icon, iconForEmoji, ICON_PATHS } from '../icons';
+import { iconForEmoji, ICON_PATHS, AvatarGlyph, isGameIcon, gameIconName, useAvatarPaths } from '../icons';
 import { randomIndex, randomBetween } from '../../utils/random';
 import { planSpin, angleAt, landingAngle, crossings } from '../../utils/wheelPhysics';
 import { shapePolygon } from '../../utils/shapes';
@@ -84,6 +84,7 @@ const vibrate = (pattern: number | number[]) => {
 export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete }) => {
   const { t } = useTranslation();
   const reduce = useReducedMotion();
+  const gamePaths = useAvatarPaths(players.some(p => isGameIcon(p.avatar)));
   const count = Math.max(1, players.length);
   const seg = 360 / count;
   const rot = useMotionValue(0);
@@ -263,9 +264,16 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
                       strokeWidth={3}
                     />
                     {/* Avatar near the rim, where the wedge is widest. */}
-                    <g transform={`translate(${ix - 15} ${iy - 15}) rotate(${mid} 15 15) scale(${30 / 24})`}>
-                      <path d={ICON_PATHS[iconForEmoji(p.avatar)]} fill={ink} fillRule="evenodd" />
-                    </g>
+                    {isGameIcon(p.avatar) ? (
+                      // game-icons.net avatar: 512 grid, default nonzero fill.
+                      <g transform={`translate(${ix - 15} ${iy - 15}) rotate(${mid} 15 15) scale(${30 / 512})`}>
+                        {gamePaths?.[gameIconName(p.avatar)] && <path d={gamePaths[gameIconName(p.avatar)]} fill={ink} />}
+                      </g>
+                    ) : (
+                      <g transform={`translate(${ix - 15} ${iy - 15}) rotate(${mid} 15 15) scale(${30 / 24})`}>
+                        <path d={ICON_PATHS[iconForEmoji(p.avatar)]} fill={ink} fillRule="evenodd" />
+                      </g>
+                    )}
                     {/* Name along the radius, between hub and avatar, never upside
                         down: on the left half it is turned the other way. */}
                     <text
@@ -305,7 +313,7 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
             <AnimatePresence mode="popLayout" initial={false}>
               {phase === 'result' && winner != null ? (
                 <motion.span key="winner" className="w-1/2 h-1/2 flex" initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={springSpatialFast}>
-                  <Icon name={iconForEmoji(players[winner].avatar)} size="100%" />
+                  <AvatarGlyph avatar={players[winner].avatar} size="100%" />
                 </motion.span>
               ) : (
                 <motion.span key="spin" className="m3-title-large font-bold tracking-wider" style={{ fontSize: 'clamp(1.1rem, 2.6vmin, 2.75rem)' }} exit={{ scale: 0.4, opacity: 0 }}>
@@ -377,7 +385,7 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
                     className="w-[2.2em] h-[2.2em] rounded-m3-full flex items-center justify-center"
                     style={{ background: TONES[i % TONES.length][0], color: TONES[i % TONES.length][1] }}
                   >
-                    <Icon name={iconForEmoji(p.avatar)} size="1.2em" />
+                    <AvatarGlyph avatar={p.avatar} size="1.2em" />
                   </span>
                   {t('game.starts', { name: p.name })}
                 </motion.button>

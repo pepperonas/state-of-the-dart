@@ -51,27 +51,27 @@
 
   ### 🧰 Tech-Stack
 
-  React 19 · TypeScript 5 · Vite · Tailwind · Material 3 Expressive (eigene Federn, Formen, Icons) · Framer Motion · WebGL · Express · SQLite · Socket.IO · Workbox. **1188 Unit-Tests + 46 E2E-Tests.** MIT-lizenziert.
+  React 19 · TypeScript 5 · Vite · Tailwind · Material 3 Expressive (eigene Federn, Formen, Icons) · Framer Motion · WebGL · Express · SQLite · Socket.IO · Workbox. **1201 Unit-Tests + 47 E2E-Tests.** MIT-lizenziert.
 
   <!-- ── Headline metrics ─────────────────────────────────────── -->
   <p>
     <a href="https://github.com/pepperonas/state-of-the-dart" title="Lines of code — measured by scripts/count-loc.mjs, checked by the docs test">
-      <img src="https://img.shields.io/badge/lines_of_code-~58k-2b3137?style=for-the-badge&logo=typescript&logoColor=white" height="64" alt="Lines of code" />
+      <img src="https://img.shields.io/badge/lines_of_code-~59k-2b3137?style=for-the-badge&logo=typescript&logoColor=white" height="64" alt="Lines of code" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml" title="Vitest unit and component tests, all passing">
-      <img src="https://img.shields.io/badge/Unit_Tests-1188-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
+      <img src="https://img.shields.io/badge/Unit_Tests-1201-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml" title="Playwright end-to-end tests against a real backend">
-      <img src="https://img.shields.io/badge/E2E_Tests-46-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
+      <img src="https://img.shields.io/badge/E2E_Tests-47-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
     </a>
   </p>
 
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.32.1-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.33.0-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
@@ -143,6 +143,7 @@
   ![Game Modes](https://img.shields.io/badge/Game_Modes-5-orange?style=flat-square)
   ![Training Modes](https://img.shields.io/badge/Training_Modes-6-orange?style=flat-square)
   ![Custom Icons](https://img.shields.io/badge/Custom_Icons-69-8b5cf6?style=flat-square)
+  ![Avatar Icons](https://img.shields.io/badge/Avatar_Icons-165-8b5cf6?style=flat-square)
   ![Audio Files](https://img.shields.io/badge/Audio_Files-609-e11d48?style=flat-square)
   ![Check rules](https://img.shields.io/badge/In%2FOut-single_%C2%B7_double_%C2%B7_triple-orange?style=flat-square)
   ![TV scoreboard](https://img.shields.io/badge/TV_scoreboard-live-0ea5e9?style=flat-square)
@@ -333,7 +334,7 @@
   - **Skill-Radar** - 5-dimensionale Skill-Visualisierung
   - **Karriere-Zeitachse** - Vom ersten bis zum letzten Spiel mit allen Stats
   - **Achievement-Showcase** - Zeige freigeschaltete Achievements
-  - **Player Avatar System** - Tonale Avatar-Discs mit Icons aus dem hauseigenen Set (siehe [Design-System](docs/DESIGN_SYSTEM.md)); ältere Profile mit Emoji werden automatisch übersetzt
+  - **Player Avatar System** - Tonale Avatar-Discs mit Icons aus dem hauseigenen Set (siehe [Design-System](docs/DESIGN_SYSTEM.md)); ältere Profile mit Emoji werden automatisch übersetzt. Seit v0.33.0 zusätzlich **165 Spieler-Symbole von [game-icons.net](https://game-icons.net)** (Tiere, Fantasy, Sport & Spiel, Kneipe, Musik & Party, Natur & Weltall, Zeichen, Fahrzeuge), auf Deutsch durchsuchbar, einfarbig im Theme; die Pfaddaten werden erst bei Bedarf geladen
   - **🔥 Feldgenaue Heatmap (neu gebaut in v0.19.0)** - Wurfverteilung auf der Scheibe:
     - Jedes echte Feld (Single, Triple, Double, Single-Bull, Bull) wird nach seiner Trefferquote eingefärbt — scharfes SVG in jeder Größe, folgt hellem und dunklem Theme
     - Eine warme, wahrnehmungstreue Farbrampe (`--m3-heat-1…6`), Wurzel-Skala, damit ein Hauptfeld nicht alles andere ausgraut
@@ -807,7 +808,7 @@ scheitern. Das Badge darf laut Doku-Abgleich **nie mehr** behaupten, als gemesse
 > **Doku-Abgleich:** `src/tests/docs/docsSync.test.ts` lässt die Dokumentation nicht driften. Es prüft, dass jede Zahl in einem Badge zum Code passt, dass jeder dokumentierte `npm run …`-Befehl existiert, dass jeder erwähnte Pfad und jeder Markdown-Link auflösbar ist und dass beide READMEs denselben Badge-Satz tragen. Wer eine Zahl ändert, ohne die Doku nachzuziehen, bekommt einen roten Test statt einer stillen Lüge.
 
 ### E2E-Tests (Playwright)
-**46 Tests** in `e2e/` gegen `vite preview` + isoliertes Backend mit eigener SQLite-DB.
+**47 Tests** in `e2e/` gegen `vite preview` + isoliertes Backend mit eigener SQLite-DB.
 
 ```bash
 npm run test:e2e       # Headless
@@ -827,6 +828,7 @@ Was die Suite abdeckt:
 - Refresh mitten in der Aufnahme verliert nichts; Online-Spiel mit zwei Browsern; Turnier über Reloads hinweg
 - TV-Scoreboard mit zwei Fenstern: wartet, folgt live, zeigt Momente, übersteht Reload
 - Glücksrad auf Handy und Desktop: bildschirmfüllend, Zeiger schlägt nie mehr als 30° aus
+- Spieler-Symbol über den deutschen Namen wählen, gespeichert als `gi:<name>`, Pfaddaten nie im Startpaket
 - Getippte Summe bleibt aus der Heatmap, Chip macht sie genau, „Wurf zurück“ als Summe, ältere Aufnahme korrigieren, gespeicherte Heatmap zählt nichts doppelt
 - Barrierefreiheit (axe-core auf 21 Seiten + Spielmodi, Trefferflächen) und Kontrast (12 Seiten, beide Themes)
 
@@ -922,6 +924,10 @@ Contributions sind willkommen! Bitte:
 ---
 
 ## 📝 Changelog
+
+### v0.33.0 (12. Oktober 2026) - Neue Spieler-Symbole
+
+**Neu:** 165 Spieler-Symbole aus dem Open-Source-Paket game-icons.net – Tiere (Wolf, Fuchs, Eule …), Fantasy (Drache, Wikinger, Ninja …), Sport & Spiel, Kneipe (Bierkrug, Pizza …), Musik & Party, Natur & Weltall, Zeichen und Fahrzeuge. Sie sind einfarbig wie die eigenen Symbole und passen sich dem hellen und dunklen Thema an. Die Suche in der Avatar-Auswahl findet sie über ihre deutschen Namen. Die Daten der Symbole werden erst geladen, wenn sie gebraucht werden – die App startet nicht langsamer. Die Urheber sind in der Auswahl und im Impressum genannt (CC BY 3.0). **Behoben:** Die Avatar-Auswahl in der Spielerverwaltung schließt jetzt nach der Wahl; die Vorschau beim Anlegen eines Spielers zeigte den gespeicherten Wert als Text statt als Symbol.
 
 ### v0.32.1 (11. Oktober 2026) - Glücksrad ruhig und flüssig
 
@@ -1456,5 +1462,7 @@ Ein ⭐ auf GitHub hilft ebenfalls — und erzähl es deinem Dart-Verein.
 ## 📄 Lizenz
 
 [MIT](LICENSE) — © 2026 Martin Pfeffer | [celox.io](https://celox.io)
+
+Spieler-Symbole aus [game-icons.net](https://game-icons.net) stehen unter [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/deed.de) — Urheber: Delapouite, Lorc, Skoll, Caro Asercion, Kier Heyl, Cathelineau, Sbed, Various artists, DarkZaitzev, Carl Olsen (Liste je Symbol: `tools/avatar-icons/manifest.tsv`).
 
 Ein privates Open-Source-Projekt, gebaut an Abenden und Wochenenden, mit ❤️ gemacht und aus Berlin ausgeliefert 🍻

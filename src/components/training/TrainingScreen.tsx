@@ -13,7 +13,7 @@ import { api } from '../../services/api';
 import { useGameAchievements } from '../../hooks/useGameAchievements';
 import BackButton from '../common/BackButton';
 import { Button, Card, AnimatedNumber } from '../common';
-import { Icon, iconForEmoji } from '../icons';
+import { AvatarGlyph } from '../icons';
 import { advanceThroughSequence, bobs27Round, BOBS_27_ROUNDS, BOBS_27_BULL } from '../../utils/training';
 import { useWakeLock } from '../../hooks/useWakeLock';
 import { haptic } from '../../utils/haptics';
@@ -541,7 +541,7 @@ const TrainingScreen: React.FC = () => {
                       ) : (
                         <div className="w-16 h-16 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold ring-2 ring-outline-variant group-hover:ring-[var(--m3-primary)]">
                           {player.avatar
-                            ? <Icon name={iconForEmoji(player.avatar)} size={34} />
+                            ? <AvatarGlyph avatar={player.avatar} size={34} />
                             : <span className="m3-headline-small">{player.name.charAt(0).toUpperCase()}</span>}
                         </div>
                       )}

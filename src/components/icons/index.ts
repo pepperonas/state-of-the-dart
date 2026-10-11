@@ -2,3 +2,6 @@ export { default as Icon } from './Icon';
 export type { IconProps } from './Icon';
 export { ICON_PATHS, ICON_NAMES, type IconName } from './paths';
 export { EMOJI_TO_ICON, iconForEmoji } from './emojiMap';
+export { default as AvatarGlyph } from './AvatarGlyph';
+export { GAME_ICON_PREFIX, isGameIcon, gameIconName, loadAvatarPaths, useAvatarPaths } from './avatarSource';
+export { GAME_ICON_GROUPS, GAME_ICON_AUTHORS, GAME_ICON_AUTHOR_NAMES } from './avatarCatalog';

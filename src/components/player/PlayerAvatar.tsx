@@ -1,6 +1,6 @@
 import React from 'react';
 import { getInitial } from '../../utils/avatar';
-import { Icon, iconForEmoji } from '../icons';
+import { AvatarGlyph } from '../icons';
 
 interface PlayerAvatarProps {
   avatar?: string;
@@ -34,8 +34,9 @@ const badgeSizeClasses = {
  * operating system: Apple's glossy 3-D on a phone, Google's flat shapes on a
  * tablet, a flat outline on Windows — three different looks for one player, none
  * of them in the app's palette. The stored value is still whatever emoji the user
- * picked; `iconForEmoji` translates it to a glyph from the app's own set, so old
- * profiles keep their meaning and gain the theme.
+ * picked; `AvatarGlyph` translates it to a glyph from the app's own set, so old
+ * profiles keep their meaning and gain the theme. Since 0.33.0 an avatar can
+ * also be a game-icons.net glyph (`gi:<name>`).
  */
 const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
   avatar,
@@ -67,7 +68,7 @@ const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
         </div>
       ) : avatar ? (
         <div className={disc}>
-          <Icon name={iconForEmoji(avatar)} size={glyphSize[size]} />
+          <AvatarGlyph avatar={avatar} size={glyphSize[size]} />
         </div>
       ) : (
         <div className={disc}>
@@ -78,7 +79,7 @@ const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
         <div
           className={`absolute -bottom-1 -right-1 ${badgeSizeClasses[size]} bg-tertiary-container text-on-tertiary-container rounded-full border-2 border-surface flex items-center justify-center`}
         >
-          <Icon name={iconForEmoji(avatar)} size={size === 'sm' ? 10 : 12} />
+          <AvatarGlyph avatar={avatar} size={size === 'sm' ? 10 : 12} />
         </div>
       )}
     </div>

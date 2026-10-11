@@ -51,27 +51,27 @@
 
   ### 🧰 Tech stack
 
-  React 19 · TypeScript 5 · Vite · Tailwind · Material 3 Expressive (own springs, shapes, icons) · Framer Motion · WebGL · Express · SQLite · Socket.IO · Workbox. **1188 unit tests + 46 E2E tests.** MIT-licensed.
+  React 19 · TypeScript 5 · Vite · Tailwind · Material 3 Expressive (own springs, shapes, icons) · Framer Motion · WebGL · Express · SQLite · Socket.IO · Workbox. **1201 unit tests + 47 E2E tests.** MIT-licensed.
 
   <!-- ── Headline metrics ─────────────────────────────────────── -->
   <p>
     <a href="https://github.com/pepperonas/state-of-the-dart" title="Lines of code — measured by scripts/count-loc.mjs, checked by the docs test">
-      <img src="https://img.shields.io/badge/lines_of_code-~58k-2b3137?style=for-the-badge&logo=typescript&logoColor=white" height="64" alt="Lines of code" />
+      <img src="https://img.shields.io/badge/lines_of_code-~59k-2b3137?style=for-the-badge&logo=typescript&logoColor=white" height="64" alt="Lines of code" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml" title="Vitest unit and component tests, all passing">
-      <img src="https://img.shields.io/badge/Unit_Tests-1188-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
+      <img src="https://img.shields.io/badge/Unit_Tests-1201-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml" title="Playwright end-to-end tests against a real backend">
-      <img src="https://img.shields.io/badge/E2E_Tests-46-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
+      <img src="https://img.shields.io/badge/E2E_Tests-47-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
     </a>
   </p>
 
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="../LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="../CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.32.1-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="../CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.33.0-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
@@ -143,6 +143,7 @@
   ![Game Modes](https://img.shields.io/badge/Game_Modes-5-orange?style=flat-square)
   ![Training Modes](https://img.shields.io/badge/Training_Modes-6-orange?style=flat-square)
   ![Custom Icons](https://img.shields.io/badge/Custom_Icons-69-8b5cf6?style=flat-square)
+  ![Avatar Icons](https://img.shields.io/badge/Avatar_Icons-165-8b5cf6?style=flat-square)
   ![Audio Files](https://img.shields.io/badge/Audio_Files-609-e11d48?style=flat-square)
   ![Check rules](https://img.shields.io/badge/In%2FOut-single_%C2%B7_double_%C2%B7_triple-orange?style=flat-square)
   ![TV scoreboard](https://img.shields.io/badge/TV_scoreboard-live-0ea5e9?style=flat-square)
@@ -374,8 +375,8 @@ admin-only.
 
 | Layer | Count | Tool |
 |---|---|---|
-| Unit / component | **1188** | Vitest + React Testing Library |
-| End-to-end | **46** | Playwright (preview build + isolated backend) |
+| Unit / component | **1201** | Vitest + React Testing Library |
+| End-to-end | **47** | Playwright (preview build + isolated backend) |
 
 ```bash
 npm test              # watch mode
@@ -813,5 +814,7 @@ A ⭐ on GitHub helps too — and tell your dart club.
 ## 📄 License
 
 [MIT](../LICENSE) — © 2026 Martin Pfeffer | [celox.io](https://celox.io)
+
+Player avatar icons from [game-icons.net](https://game-icons.net) are licensed [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) — authors: Delapouite, Lorc, Skoll, Caro Asercion, Kier Heyl, Cathelineau, Sbed, Various artists, DarkZaitzev, Carl Olsen (per icon: `tools/avatar-icons/manifest.tsv`).
 
 A private open-source side project — built on evenings and weekends, made with ❤️ and shipped from Berlin 🍻

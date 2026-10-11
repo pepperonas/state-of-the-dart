@@ -66,7 +66,7 @@ test.describe('Production build smoke', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    const forbidden = ['html2canvas', 'xlsx', 'jspdf', 'recharts', 'charts-', 'confetti', 'GameScreen', 'MatchHistoryPage', 'AchievementsScreen', 'StatsOverview', 'AdminPanel'];
+    const forbidden = ['html2canvas', 'xlsx', 'jspdf', 'recharts', 'charts-', 'confetti', 'GameScreen', 'MatchHistoryPage', 'AchievementsScreen', 'StatsOverview', 'AdminPanel', 'avatarPaths'];
     const violations = requests.filter((url) =>
       forbidden.some((needle) => url.toLowerCase().includes(needle.toLowerCase()))
     );

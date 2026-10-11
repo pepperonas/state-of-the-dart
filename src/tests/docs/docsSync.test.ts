@@ -60,6 +60,14 @@ describe('README badges state the truth', () => {
     }
   });
 
+  it('the avatar icon count matches the game-icons catalogue', () => {
+    const count = (read('src/components/icons/avatarPaths.ts').match(/^ "[\w-]+": "/gm) || []).length;
+    expect(count).toBeGreaterThan(100);
+    for (const [name, md] of [['DE', README_DE], ['EN', README_EN]] as const) {
+      expect(badgeValue(md, 'Avatar_Icons'), `${name} README`).toBe(String(count));
+    }
+  });
+
   it('the icon count matches the generated set', () => {
     const icons = (read('src/components/icons/paths.ts').match(/^ {2}\w+: 'M/gm) || []).length;
     expect(icons).toBeGreaterThan(50);

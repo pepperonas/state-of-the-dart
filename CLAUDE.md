@@ -329,6 +329,11 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - **Correcting older visits:** hero last-visit pills (`visit-pill`) and the pencil in the visit history (`history-edit`) open `EditVisitDialog` (Summe / Darts, the grid is the shared `DartGrid`). Typed visits show "Summe getippt" in the history instead of invented darts.
 - Insight cards follow `visitRevision` (ids + scores + darts), not the visit count — a correction changes no count.
 
+### Avatar icons from game-icons.net (0.33.0)
+- 165 single-colour glyphs, CC BY 3.0, stored as avatar value `gi:<name>`. Originals + `manifest.tsv` (group, name, author, source path) in `tools/avatar-icons/`; `python3 tools/gen-avatar-icons.py` writes `src/components/icons/avatarCatalog.ts` (groups/authors, eager) and `avatarPaths.ts` (path data, **lazy** — `avatarSource.ts` `loadAvatarPaths`/`useAvatarPaths`). ⚠️ Never import `avatarPaths` statically: it would merge ~127 kB gzip into the main chunk (`e2e/avatars.spec.ts` searches the eager JS for path data).
+- Render every player/profile avatar with `AvatarGlyph` (not `<Icon name={iconForEmoji(avatar)}>`): game icons use a 512 view box and the default **nonzero** fill — evenodd would punch wrong holes. `SpinnerWheel` draws them in its own SVG (scale 30/512).
+- Labels in `avatar_picker.gi.<name>` (de/en, the picker searches them); credits in the picker footer and the imprint ("Bildnachweise"). Adding an icon: SVG + manifest row + both labels, re-run the generator; `avatarIcons.test.tsx` checks all of it.
+
 ### TV scoreboard (0.31.0)
 - `/scoreboard` renders a snapshot published by GameScreen (`ScoreboardPublisher` → `utils/scoreboard.ts`): BroadcastChannel `sotd-scoreboard` for live updates plus a localStorage copy (`state-of-the-dart-scoreboard`, in `DEVICE_GAME_KEYS`) for a window that opens mid-match and for the `storage`-event fallback. Same device and browser only — no backend.
 - ⚠️ The scoreboard must never use GameContext: a second window restoring the match there could write a stale state back. It only reads snapshots; `isNewer` drops older ones (publish stamps are strictly increasing, `nextStamp`).
@@ -527,7 +532,8 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **46 tests** currently:
+- Specs in `e2e/`. **47 tests** currently:
+  - `avatars.spec.ts` — a game-icons avatar is found by its German name, the picker closes, the list draws it, the path chunk loads once and never rides in an eager bundle, the value is stored
   - `correction.spec.ts` — a typed 60 stays out of the heatmap, a chip makes it exact, undo brings a typed visit back as "26 → …", an older visit is corrected from its pill, the stored heatmap never counts twice, reload keeps it all
   - `wheel.spec.ts` — the start wheel on phone and desktop: size, and the flapper rotation sampled every frame never exceeds 30°
   - `scoreboard.spec.ts` — a waiting scoreboard window picks up a new match, follows visits live (rows, active player, visit and 180 moments) and shows the match at once after a reload
