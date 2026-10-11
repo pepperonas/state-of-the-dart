@@ -74,6 +74,12 @@
   --m3-travel-sm: 8px;
   --m3-travel-md: 16px;
   --m3-travel-lg: 24px;
+  /* Loops and one-shot glows on the game screen. The two fire periods are
+     deliberately incommensurate, so glow and border never sync up. */
+  --m3-loop-shape-morph: 1.6s;
+  --sotd-fire-glow-period: 4.3s;
+  --sotd-fire-border-period: 2.7s;
+  --sotd-leg-won-duration: 1.4s;
 
   /* Aliases — the names `m3.css` and the components already use. Values are
      byte-identical to what they were; this only folds them into one scale. */
@@ -86,11 +92,40 @@
   --m3-easing-emphasized-accelerate: var(--m3-ease-emphasized-accelerate);
 }
 
+/* @generated springs — tools/gen-springs.ts, do not edit by hand */
+:root {
+  --m3-spring-spatial-fast: linear(0, 0.028, 0.099, 0.199, 0.316, 0.439, 0.559, 0.672, 0.773, 0.86, 0.932, 0.99, 1.033, 1.063, 1.082, 1.092, 1.095, 1.092, 1.085, 1.075, 1.064, 1.052, 1.041, 1.03, 1.021, 1.013, 1.006, 1.001, 0.997, 0.994, 0.992, 0.991, 0.991, 0.991, 0.992, 0.993, 0.994, 0.995, 0.996, 0.997, 1);
+  --m3-spring-spatial-fast-duration: 349ms;
+  --m3-spring-spatial-default: linear(0, 0.018, 0.065, 0.132, 0.21, 0.294, 0.379, 0.462, 0.541, 0.614, 0.68, 0.739, 0.791, 0.836, 0.874, 0.906, 0.932, 0.954, 0.971, 0.984, 0.994, 1.002, 1.008, 1.011, 1.014, 1.015, 1.015, 1.015, 1.014, 1.013, 1.012, 1.011, 1.009, 1.008, 1.007, 1.006, 1.005, 1.004, 1.003, 1.003, 1);
+  --m3-spring-spatial-default-duration: 413ms;
+  --m3-spring-spatial-slow: linear(0, 0.018, 0.065, 0.132, 0.21, 0.293, 0.378, 0.462, 0.54, 0.613, 0.68, 0.739, 0.79, 0.835, 0.873, 0.905, 0.932, 0.953, 0.971, 0.984, 0.994, 1.002, 1.008, 1.011, 1.014, 1.015, 1.015, 1.015, 1.014, 1.013, 1.012, 1.011, 1.009, 1.008, 1.007, 1.006, 1.005, 1.004, 1.003, 1.003, 1);
+  --m3-spring-spatial-slow-duration: 569ms;
+  --m3-spring-standard-fast: linear(0, 0.01, 0.036, 0.075, 0.122, 0.174, 0.23, 0.288, 0.346, 0.402, 0.457, 0.51, 0.559, 0.605, 0.648, 0.688, 0.724, 0.758, 0.788, 0.815, 0.839, 0.861, 0.88, 0.897, 0.912, 0.925, 0.937, 0.947, 0.956, 0.963, 0.97, 0.975, 0.98, 0.984, 0.987, 0.99, 0.993, 0.995, 0.996, 0.997, 1);
+  --m3-spring-standard-fast-duration: 157ms;
+  --m3-spring-standard-default: linear(0, 0.01, 0.036, 0.074, 0.121, 0.173, 0.229, 0.286, 0.344, 0.4, 0.455, 0.507, 0.556, 0.603, 0.646, 0.685, 0.722, 0.755, 0.785, 0.812, 0.837, 0.859, 0.878, 0.895, 0.91, 0.924, 0.936, 0.946, 0.955, 0.962, 0.969, 0.975, 0.979, 0.983, 0.987, 0.99, 0.992, 0.994, 0.996, 0.997, 1);
+  --m3-spring-standard-default-duration: 221ms;
+  --m3-spring-standard-slow: linear(0, 0.01, 0.036, 0.073, 0.12, 0.172, 0.227, 0.284, 0.341, 0.398, 0.452, 0.504, 0.554, 0.6, 0.643, 0.683, 0.719, 0.753, 0.783, 0.81, 0.835, 0.857, 0.876, 0.894, 0.909, 0.922, 0.934, 0.945, 0.954, 0.961, 0.968, 0.974, 0.979, 0.983, 0.986, 0.989, 0.992, 0.994, 0.996, 0.997, 1);
+  --m3-spring-standard-slow-duration: 336ms;
+  --m3-spring-effects-fast: linear(0, 0.02, 0.069, 0.136, 0.212, 0.29, 0.368, 0.442, 0.511, 0.574, 0.631, 0.682, 0.727, 0.766, 0.801, 0.831, 0.856, 0.878, 0.897, 0.913, 0.927, 0.939, 0.949, 0.957, 0.964, 0.97, 0.975, 0.979, 0.983, 0.986, 0.988, 0.99, 0.992, 0.993, 0.994, 0.995, 0.996, 0.997, 0.997, 0.998, 1);
+  --m3-spring-effects-fast-duration: 139ms;
+  --m3-spring-effects-default: linear(0, 0.02, 0.069, 0.135, 0.21, 0.288, 0.365, 0.439, 0.508, 0.571, 0.628, 0.679, 0.724, 0.764, 0.798, 0.828, 0.854, 0.876, 0.895, 0.912, 0.926, 0.938, 0.948, 0.956, 0.963, 0.969, 0.974, 0.979, 0.982, 0.985, 0.988, 0.99, 0.991, 0.993, 0.994, 0.995, 0.996, 0.997, 0.997, 0.998, 1);
+  --m3-spring-effects-default-duration: 213ms;
+  --m3-spring-effects-slow: linear(0, 0.02, 0.069, 0.135, 0.21, 0.288, 0.365, 0.439, 0.508, 0.571, 0.628, 0.679, 0.724, 0.763, 0.798, 0.828, 0.854, 0.876, 0.895, 0.912, 0.926, 0.937, 0.947, 0.956, 0.963, 0.969, 0.974, 0.978, 0.982, 0.985, 0.988, 0.99, 0.991, 0.993, 0.994, 0.995, 0.996, 0.997, 0.997, 0.998, 1);
+  --m3-spring-effects-slow-duration: 301ms;
+}
+/* @end springs */
+
 /* ----------------------------------------------------------------------------
    2. KEYFRAMES
    -------------------------------------------------------------------------- */
 @keyframes m3-rise {
   from { opacity: 0; transform: translate3d(0, var(--m3-travel-md), 0); }
+  to   { opacity: 1; transform: none; }
+}
+/* Enters from the inline end (`.animate-slide-in-right` pointed at this name
+   before it existed). */
+@keyframes m3-slide-end {
+  from { opacity: 0; transform: translate3d(var(--m3-travel-lg), 0, 0); }
   to   { opacity: 1; transform: none; }
 }
 @keyframes m3-drop {
@@ -627,7 +662,7 @@ html.m3-theme-anim::view-transition-new(root) {
   display: block;
   background-color: var(--m3-primary);
   border-radius: 30%;
-  animation: m3-shape-morph 1.6s var(--m3-ease-emphasized, cubic-bezier(0.2, 0, 0, 1)) infinite;
+  animation: m3-shape-morph var(--m3-loop-shape-morph) var(--m3-ease-emphasized, cubic-bezier(0.2, 0, 0, 1)) infinite;
 }
 @keyframes m3-shape-morph {
   0%   { border-radius: 30%;                     transform: rotate(0deg) scale(0.9); }

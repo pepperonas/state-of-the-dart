@@ -418,6 +418,13 @@ const GameScreen: React.FC = () => {
     return evaluateVisit(rulesOf(match.settings), leg.throws, player.playerId, darts);
   };
 
+  // The busting dart buzzes the moment it lands (it used to wait for the
+  // auto-confirm 800 ms later).
+  const liveBust = !!evaluateCurrent(state.currentThrow)?.bust;
+  useEffect(() => {
+    if (liveBust) haptic('bust', settings.vibrationEnabled);
+  }, [liveBust]);
+
   // Calculate total throws count for dependency tracking
   const totalThrowsCount = state.currentMatch?.legs.reduce(
     (total, leg) => total + (leg.throws?.length || 0), 0
@@ -694,7 +701,7 @@ const GameScreen: React.FC = () => {
   // Define handleConfirmThrow with useCallback BEFORE useEffects that use it
   /** Confirms a visit made of `darts` (the current throw, or a numpad total that
    *  is being added in the same dispatch batch). */
-  const confirmVisit = React.useCallback((darts: Dart[]) => {
+  const confirmVisit = React.useCallback((darts: Dart[], typedTotal = false) => {
     const currentScore = calculateThrowScore(darts);
     const currentPlayer = state.currentMatch?.players[state.currentPlayerIndex];
     const currentLeg = state.currentMatch?.legs[state.currentMatch.currentLegIndex];
@@ -709,7 +716,9 @@ const GameScreen: React.FC = () => {
       setTimeout(() => setShowConfetti(false), 3000);
     }
 
-    haptic(visit?.checkout ? 'checkout' : visit?.bust ? 'bust' : 'confirm', settings.vibrationEnabled);
+    // A bust entered dart by dart already buzzed when the busting dart landed;
+    // a typed total that busts is only known now.
+    haptic(visit?.checkout ? 'checkout' : visit?.bust ? (typedTotal ? 'bust' : 'confirm') : 'confirm', settings.vibrationEnabled);
     dispatch({ type: 'CONFIRM_THROW' });
 
     // Check throw achievements (180s, checkouts, etc.)
@@ -774,7 +783,7 @@ const GameScreen: React.FC = () => {
    *  key already belongs to the next player. */
   const handleCommitDarts = React.useCallback((darts: Dart[]) => {
     darts.forEach(dart => dispatch({ type: 'ADD_DART', payload: dart }));
-    confirmVisit([...state.currentThrow, ...darts]);
+    confirmVisit([...state.currentThrow, ...darts], true);
   }, [confirmVisit, dispatch, state.currentThrow]);
 
   // Auto-confirm after 3rd dart (skip for bots and editing mode)
@@ -1511,6 +1520,7 @@ const GameScreen: React.FC = () => {
               handoff={handoff}
               awaitingNextPlayer={awaitingNextPlayer ? state.currentMatch.players[(state.currentPlayerIndex + 1) % state.currentMatch.players.length]?.name ?? null : null}
               onNextPlayer={handleNextPlayer}
+              bust={!!liveVisit?.bust}
             />
 
             {/* The main route sits inside the input card; the alternatives

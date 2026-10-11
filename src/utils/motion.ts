@@ -14,19 +14,27 @@
  * Reference: https://m3.material.io/styles/motion/overview/how-it-works
  */
 import type { Transition } from 'framer-motion';
+import { SPATIAL, STANDARD, EFFECTS, framerDamping, type SpringSpec } from './springs';
 
-/* Spatial — expressive (low damping ratio → noticeable overshoot) */
-export const springSpatialFast: Transition = { type: 'spring', stiffness: 800, damping: 34, mass: 1 };
-export const springSpatialDefault: Transition = { type: 'spring', stiffness: 380, damping: 30, mass: 1 };
-export const springSpatialSlow: Transition = { type: 'spring', stiffness: 200, damping: 25, mass: 1 };
+/** A framer spring from an M3 spec (`utils/springs.ts` is the one source). */
+export const toFramer = (s: SpringSpec): Transition =>
+  ({ type: 'spring', stiffness: s.stiffness, damping: framerDamping(s), mass: 1 });
 
-/* Spatial — standard (higher damping → subdued, minimal bounce) */
-export const springStandardFast: Transition = { type: 'spring', stiffness: 800, damping: 50, mass: 1 };
-export const springStandardDefault: Transition = { type: 'spring', stiffness: 380, damping: 42, mass: 1 };
+/* Spatial — expressive (damping ratio < 1 → noticeable overshoot) */
+export const springSpatialFast: Transition = toFramer(SPATIAL.fast);
+export const springSpatialDefault: Transition = toFramer(SPATIAL.default);
+export const springSpatialSlow: Transition = toFramer(SPATIAL.slow);
 
-/* Effects — no overshoot, for opacity/colour/fades */
-export const effectsFast: Transition = { duration: 0.15, ease: [0.2, 0, 0, 1] };
-export const effectsDefault: Transition = { duration: 0.2, ease: [0.2, 0, 0, 1] };
+/* Spatial — standard (barely any bounce) */
+export const springStandardFast: Transition = toFramer(STANDARD.fast);
+export const springStandardDefault: Transition = toFramer(STANDARD.default);
+export const springStandardSlow: Transition = toFramer(STANDARD.slow);
+
+/* Effects — critically damped, for opacity/colour/fades (M3 defines these as
+   springs too; they used to be 150/200 ms tweens). */
+export const effectsFast: Transition = toFramer(EFFECTS.fast);
+export const effectsDefault: Transition = toFramer(EFFECTS.default);
+export const effectsSlow: Transition = toFramer(EFFECTS.slow);
 
 /* Convenience presets for common patterns ---------------------------------- */
 
@@ -79,7 +87,7 @@ export const dialogMotion = {
  * Recharts only accepts its own easing keywords — it will not take a
  * cubic-bezier — so `ease-out` is the closest thing to the emphasized-decelerate
  * curve the rest of the app uses. The duration is a real token value
- * (`--m3-dur-long-4` = 600ms); recharts' own default is 1500ms, which reads as
+ * (`--m3-dur-long-4` = 600ms, `styles/motion.css`); recharts' own default is 1500ms, which reads as
  * sluggish next to everything else on screen.
  */
 export const CHART_MOTION = { duration: 600, easing: 'ease-out' } as const;

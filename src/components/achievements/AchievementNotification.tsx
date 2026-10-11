@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { springSpatialDefault } from '../../utils/motion';
 import { X, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -60,6 +61,7 @@ const NotificationCard: React.FC<{
   prominent?: boolean;
 }> = ({ notification, onDismiss, index, prominent = false }) => {
   const { t } = useTranslation();
+  const reduce = useReducedMotion();
   const { getPlayer } = usePlayer();
   const confettiFiredRef = useRef(false);
 
@@ -147,14 +149,16 @@ const NotificationCard: React.FC<{
       initial={prominent ? { opacity: 0, scale: 0.6 } : { opacity: 0, y: -30, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, x: 100, scale: 0.9 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+      transition={springSpatialDefault}
     >
       <motion.div
         className="relative overflow-hidden rounded-m3-lg bg-surface-container-high shadow-m3-3 border border-outline-variant"
-        animate={{
+        // framer's reduced-motion mode only stops transforms — loops on
+        // box-shadow and opacity have to be switched off here.
+        animate={reduce ? { boxShadow: getTierGlow(tier) } : {
           boxShadow: [getTierGlow(tier), getTierGlowIntense(tier), getTierGlow(tier)],
         }}
-        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        transition={reduce ? { duration: 0 } : { duration: 2, repeat: Infinity, ease: 'easeInOut' }}
       >
         {/* Animated gradient border */}
         <motion.div
@@ -163,8 +167,8 @@ const NotificationCard: React.FC<{
             border: `2px solid ${tierColor}`,
             opacity: 0.6,
           }}
-          animate={{ opacity: [0.4, 0.8, 0.4] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          animate={reduce ? { opacity: 0.6 } : { opacity: [0.4, 0.8, 0.4] }}
+          transition={reduce ? { duration: 0 } : { duration: 2, repeat: Infinity, ease: 'easeInOut' }}
         />
 
         {/* Background shimmer */}
@@ -179,14 +183,13 @@ const NotificationCard: React.FC<{
         <div className={`relative z-10 ${prominent ? 'p-5 sm:p-6' : 'p-4'}`}>
           {/* Header */}
           <div className="flex items-center justify-between mb-3">
-            <motion.span
+            {/* No opacity loop on text — it dims the label below AA half the time. */}
+            <span
               className="text-xs font-bold tracking-[0.2em] uppercase"
               style={{ color: tierColor }}
-              animate={{ opacity: [0.7, 1, 0.7] }}
-              transition={{ duration: 2, repeat: Infinity }}
             >
               {t('achievement_toast.unlocked_by', { name: playerName })}
-            </motion.span>
+            </span>
             <IconButton
               onClick={onDismiss}
               label={t('common.close')}
@@ -204,8 +207,8 @@ const NotificationCard: React.FC<{
                 background: `linear-gradient(135deg, ${tierColor}30, ${tierColor}10)`,
                 border: `1px solid ${tierColor}40`,
               }}
-              animate={{ scale: [1, 1.08, 1] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+              animate={reduce ? { scale: 1 } : { scale: [1, 1.08, 1] }}
+              transition={reduce ? { duration: 0 } : { duration: 2, repeat: Infinity, ease: 'easeInOut' }}
             >
               <Icon name={iconForEmoji(achievement.icon)} size={prominent ? 44 : 28} />
             </motion.div>

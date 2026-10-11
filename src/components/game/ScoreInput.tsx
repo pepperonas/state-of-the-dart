@@ -2,12 +2,12 @@ import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Check, X, Delete, Keyboard, RotateCcw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Dart } from '../../types/index';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { calculateThrowScore, convertScoreToDarts, numpadDarts } from '../../utils/scoring';
 import AnimatedNumber from '../common/AnimatedNumber';
 import Select from '../common/Select';
 import SegmentedButton from '../common/SegmentedButton';
-import { springSpatialFast } from '../../utils/motion';
+import { springSpatialFast, springSpatialDefault, effectsFast, enterRise } from '../../utils/motion';
 import { shouldHandleGameKey } from '../../utils/gameKeys';
 import type { Handoff } from '../../utils/handoff';
 
@@ -43,7 +43,12 @@ interface ScoreInputProps {
   /** "Auto next player" is off and a visit is confirmed: the name of who is next. */
   awaitingNextPlayer?: string | null;
   onNextPlayer?: () => void;
+  /** The darts entered so far bust the visit (shake + BUST in the total box). */
+  bust?: boolean;
 }
+
+/** Delay between darts that land together, from the stagger token (45 ms). */
+const STAGGER_S = 0.045;
 
 /** Numpad keys must not take focus on a click — a later Enter would click them again. */
 const keepFocus = { onPointerDown: (e: React.PointerEvent) => e.preventDefault() };
@@ -73,6 +78,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   handoff = null,
   awaitingNextPlayer = null,
   onNextPlayer,
+  bust = false,
 }) => {
   const { t } = useTranslation();
   const [currentInput, setCurrentInput] = useState('');
@@ -87,10 +93,20 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   // way a player calls them ("treble 20, 5, 1").
   const [multiplier, setMultiplier] = useState<'1' | '2' | '3'>('1');
   const setInputMode = (mode: InputMode) => {
+    const order: InputMode[] = ['numpad', 'darts', 'quick'];
+    setModeDir(Math.sign(order.indexOf(mode) - order.indexOf(inputMode)));
     setInputModeState(mode);
     try { localStorage.setItem(INPUT_MODE_KEY, mode); } catch { /* storage unavailable */ }
   };
   const setEditingDartIndex = onSetEditingDartIndex;
+  // Shared-axis X between the input modes: the new pad slides in from the side
+  // of the tab that was picked (left tab → from the left).
+  const [modeDir, setModeDir] = useState(0);
+  const modeEnter = {
+    initial: modeDir === 0 ? false : { opacity: 0, x: 28 * modeDir },
+    animate: { opacity: 1, x: 0 },
+    transition: springSpatialDefault,
+  } as const;
   const confirmBtnRef = useRef<HTMLButtonElement>(null);
 
   // Pending-confirm flag for "type total + Enter = commit throw" in numpad mode.
@@ -101,6 +117,10 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   const prevLengthRef = useRef(currentThrow.length);
 
   const currentScore = calculateThrowScore(currentThrow);
+  // How many darts the slots showed on the previous render — the new ones stagger.
+  const [seenDarts, setSeenDarts] = useState(currentThrow.length);
+  if (seenDarts !== currentThrow.length && currentThrow.length < seenDarts) setSeenDarts(currentThrow.length);
+  useEffect(() => { setSeenDarts(currentThrow.length); }, [currentThrow.length]);
   // A typed total (or the dart being edited) owns the total box for now.
   const typing = inputMode === 'numpad' && (currentInput !== '' || editingDartIndex !== null);
   // "Bestätigen" with a typed total takes it, like Enter — it used to stay
@@ -317,77 +337,140 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
         />
       </div>
 
-      {/* Current Throw Display */}
-      <div className="flex gap-2 mb-3 lg:mb-4 phoneland:mb-2 phoneland:col-start-1">
-        {[0, 1, 2].map((index) => (
+      {/* Current Throw Display — shakes once when the visit busts. */}
+      <motion.div
+        data-testid="dart-slots"
+        data-bust={bust ? 'true' : undefined}
+        animate={bust ? { x: [0, -9, 8, -6, 4, -2, 0] } : { x: 0 }}
+        transition={bust ? { duration: 0.45, ease: 'easeOut' } : springSpatialFast}
+        className="flex gap-2 mb-3 lg:mb-4 phoneland:mb-2 phoneland:col-start-1"
+      >
+        {[0, 1, 2].map((index) => {
+          const dart = currentThrow[index];
+          // Darts that land together (a quick score) arrive one after another.
+          const delay = dart && index >= seenDarts ? (index - seenDarts) * STAGGER_S : 0;
+          return (
           <button
             type="button"
             key={index}
             data-testid={`dart-slot-${index}`}
-            disabled={!currentThrow[index] || !onReplaceDart}
+            disabled={!dart || !onReplaceDart}
             aria-pressed={editingDartIndex === index}
-            aria-label={currentThrow[index] ? t('game.edit_dart', { n: index + 1, score: currentThrow[index].score }) : t('game.empty_dart', { n: index + 1 })}
+            aria-label={dart ? t('game.edit_dart', { n: index + 1, score: dart.score }) : t('game.empty_dart', { n: index + 1 })}
             onClick={() => {
-              if (currentThrow[index] && onReplaceDart) {
+              if (dart && onReplaceDart) {
                 setEditingDartIndex(editingDartIndex === index ? null : index);
               }
             }}
-            className={`flex-1 h-14 lg:h-16 phoneland:h-11 rounded-m3-md border flex items-center justify-center transition ${
+            className={`relative overflow-hidden flex-1 h-14 lg:h-16 phoneland:h-11 rounded-m3-md border flex items-center justify-center transition ${
               editingDartIndex === index
                 ? 'border-tertiary bg-tertiary-container ring-2 ring-[var(--m3-tertiary)]'
-                : currentThrow[index]
+                : bust && dart
+                ? 'bg-error-container ring-1 ring-[var(--m3-error)]'
+                : dart
                 ? 'bg-secondary-container cursor-pointer ring-1 ring-[var(--m3-primary)]'
                 : 'border-outline-variant bg-surface-container'
             }`}
           >
-            {currentThrow[index] ? (
-              <motion.span
-                key={currentThrow[index].score}
-                initial={{ scale: 0.3, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={springSpatialFast}
-                className="font-bold text-2xl text-on-secondary-container"
-              >
-                {currentThrow[index].score}
-              </motion.span>
-            ) : (
-              <span className="text-on-surface-variant text-xl opacity-50">-</span>
-            )}
+            <AnimatePresence mode="popLayout" initial={false}>
+              {dart ? (
+                <motion.span
+                  key={`dart-${dart.segment}-${dart.multiplier}-${dart.score}`}
+                  initial={{ scale: 0.3, opacity: 0, y: -10 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  exit={{ scale: 0.5, opacity: 0, y: 8 }}
+                  transition={{ ...springSpatialFast, delay }}
+                  className={`font-bold text-2xl ${bust ? 'text-on-error-container' : 'text-on-secondary-container'}`}
+                >
+                  {dart.score}
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="empty"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={effectsFast}
+                  className="text-on-surface-variant text-xl"
+                  aria-hidden="true"
+                >
+                  -
+                </motion.span>
+              )}
+            </AnimatePresence>
           </button>
-        ))}
+          );
+        })}
         {/* While a total is typed it shows here, next to the slots, instead of
-            below the numpad where the eye never was. */}
+            below the numpad where the eye never was. A bust takes it over. */}
         <div
           data-testid="visit-total"
-          className={`flex flex-col justify-center items-center rounded-m3-md px-3 min-w-[4.5rem] ${
-            typing ? 'bg-primary-container ring-2 ring-[var(--m3-primary)]' : 'bg-tertiary-container'
+          className={`flex flex-col justify-center items-center rounded-m3-md px-3 min-w-[4.5rem] transition-colors ${
+            typing ? 'bg-primary-container ring-2 ring-[var(--m3-primary)]'
+              : bust ? 'bg-error-container ring-2 ring-[var(--m3-error)]'
+              : 'bg-tertiary-container'
           }`}
         >
-          <span className={`m3-label-small ${typing ? 'text-on-primary-container' : 'text-on-tertiary-container'}`}>
+          <span className={`m3-label-small ${typing ? 'text-on-primary-container' : bust ? 'text-on-error-container' : 'text-on-tertiary-container'}`}>
             {typing ? (editingDartIndex !== null ? t('game.new_dart_value') : t('score_input.typed')) : t('score_input.total')}
           </span>
-          <span className={`text-2xl font-bold tabular-nums ${typing ? 'text-on-primary-container' : 'text-on-tertiary-container'}`}>
-            {typing ? (currentInput || '…') : currentScore}
-          </span>
+          {typing ? (
+            <span className="text-2xl font-bold tabular-nums text-on-primary-container">{currentInput || '…'}</span>
+          ) : bust ? (
+            <motion.span
+              key="bust"
+              data-testid="bust-chip"
+              initial={{ scale: 0.4, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={springSpatialFast}
+              className="text-xl font-bold text-on-error-container"
+            >
+              {t('game.bust')}
+            </motion.span>
+          ) : (
+            <AnimatedNumber value={currentScore} className="text-2xl font-bold tabular-nums text-on-tertiary-container" />
+          )}
         </div>
-      </div>
+      </motion.div>
 
       {/* Checkout route for the darts left — inside the card, so it is on
-          screen while typing (below the card it sat under the fold on phones). */}
-      {checkoutRoute && checkoutRoute.length > 0 && (
-        <div
-          data-testid="checkout-route"
-          aria-label={`${t('score_input.checkout')}: ${checkoutRoute.join(' ')}`}
-          className="flex items-center gap-2 mb-3 phoneland:mb-2 phoneland:col-start-1 px-3 py-2 rounded-m3-md bg-success-container text-on-success-container"
-        >
-          <span className="m3-label-medium uppercase tracking-wide">{t('score_input.checkout')}</span>
-          <span className="flex gap-1.5 ml-auto">
-            {checkoutRoute.map((d, i) => (
-              <span key={`${i}-${d}`} className="px-2 py-0.5 rounded-m3-sm bg-surface text-on-surface m3-label-large tabular-nums">{d}</span>
-            ))}
-          </span>
-        </div>
-      )}
+          screen while typing. Its height is ALWAYS reserved: appearing and
+          vanishing on every turn change made the numpad jump under the thumb. */}
+      <div data-testid="checkout-slot" className="relative h-10 mb-3 phoneland:mb-2 phoneland:col-start-1">
+        <AnimatePresence initial={false}>
+          {checkoutRoute && checkoutRoute.length > 0 && (
+            <motion.div
+              key="route"
+              data-testid="checkout-route"
+              aria-label={`${t('score_input.checkout')}: ${checkoutRoute.join(' ')}`}
+              initial={{ opacity: 0, y: 8, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={springSpatialDefault}
+              className="absolute inset-0 flex items-center gap-2 px-3 rounded-m3-md bg-success-container text-on-success-container"
+            >
+              <span className="m3-label-medium uppercase tracking-wide">{t('score_input.checkout')}</span>
+              <span className="flex gap-1.5 ml-auto">
+                <AnimatePresence mode="popLayout" initial={false}>
+                  {checkoutRoute.map((d, i) => (
+                    <motion.span
+                      layout
+                      key={`${i}-${d}`}
+                      initial={{ opacity: 0, scale: 0.6 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.6 }}
+                      transition={springSpatialFast}
+                      className="px-2 py-0.5 rounded-m3-sm bg-surface text-on-surface m3-label-large tabular-nums"
+                    >
+                      {d}
+                    </motion.span>
+                  ))}
+                </AnimatePresence>
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Mode switcher */}
       <SegmentedButton<InputMode>
@@ -418,7 +501,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
               { value: '3', label: 'T', ariaLabel: t('game.triple') },
             ]}
           />
-          <div className="grid grid-cols-5 gap-1.5 mb-1.5 phoneland:col-start-2 phoneland:row-start-1 phoneland:row-span-6 phoneland:mb-0">
+          <motion.div key={inputMode} {...modeEnter} className="grid grid-cols-5 gap-1.5 mb-1.5 phoneland:col-start-2 phoneland:row-start-1 phoneland:row-span-6 phoneland:mb-0">
             {Array.from({ length: 20 }, (_, i) => i + 1).map(n => (
               <button
                 key={n}
@@ -426,31 +509,31 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
                 onClick={() => addGridDart(n)}
                 disabled={currentThrow.length >= 3 && editingDartIndex === null}
                 aria-label={`${multiplier === '3' ? t('game.triple') : multiplier === '2' ? t('game.double') : t('game.single')} ${n}`}
-                className="m3-state-layer min-h-[44px] rounded-m3-md bg-surface-container-high text-on-surface text-lg font-bold disabled:opacity-30"
+                className="sotd-key m3-state-layer m3-ripple min-h-[44px] bg-surface-container-high text-on-surface text-lg font-bold disabled:opacity-30"
               >
                 {n}
               </button>
             ))}
-          </div>
+          </motion.div>
           <div className="grid grid-cols-3 gap-1.5 mb-4 phoneland:mb-2 phoneland:col-start-1">
             <button type="button" onClick={() => addGridDart(25)} disabled={currentThrow.length >= 3 && editingDartIndex === null}
-              className="m3-state-layer min-h-[44px] rounded-m3-md bg-surface-container-high text-on-surface font-bold disabled:opacity-30">25</button>
+              className="sotd-key m3-state-layer m3-ripple min-h-[44px] bg-surface-container-high text-on-surface font-bold disabled:opacity-30">25</button>
             <button type="button" onClick={() => addGridDart(50)} disabled={currentThrow.length >= 3 && editingDartIndex === null}
-              className="m3-state-layer min-h-[44px] rounded-m3-md bg-primary-container text-on-primary-container font-bold disabled:opacity-30">Bull</button>
+              className="sotd-key m3-state-layer m3-ripple min-h-[44px] bg-primary-container text-on-primary-container font-bold disabled:opacity-30">Bull</button>
             <button type="button" onClick={() => addGridDart(0)} disabled={currentThrow.length >= 3 && editingDartIndex === null}
-              className="m3-state-layer min-h-[44px] rounded-m3-md bg-surface-container text-on-surface-variant font-bold disabled:opacity-30">{t('game.miss')}</button>
+              className="sotd-key m3-state-layer m3-ripple min-h-[44px] bg-surface-container text-on-surface-variant font-bold disabled:opacity-30">{t('game.miss')}</button>
           </div>
         </>
       ) : inputMode === 'quick' ? (
         <>
           {/* Common Scores - Large Buttons */}
-          <div className="grid grid-cols-5 gap-1.5 sm:gap-2 mb-3 phoneland:col-start-2 phoneland:row-start-1 phoneland:row-span-6 phoneland:mb-0">
+          <motion.div key={inputMode} {...modeEnter} className="grid grid-cols-5 gap-1.5 sm:gap-2 mb-3 phoneland:col-start-2 phoneland:row-start-1 phoneland:row-span-6 phoneland:mb-0">
             {commonScores.map((score) => (
               <button
                 key={score}
                 onClick={() => handleQuickScore(score)}
                 disabled={currentThrow.length >= 3}
-                className={`p-2 sm:p-3 text-lg font-bold rounded-m3-md transition min-h-[44px] disabled:opacity-30 disabled:cursor-not-allowed ${
+                className={`sotd-key m3-state-layer m3-ripple p-2 sm:p-3 text-lg font-bold min-h-[44px] disabled:opacity-30 disabled:cursor-not-allowed ${
                   score === 180
                     ? 'bg-tertiary-container text-on-tertiary-container'
                     : score >= 100
@@ -463,7 +546,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
                 {score}
               </button>
             ))}
-          </div>
+          </motion.div>
 
           {/* All Scores Dropdown */}
           <Select<number>
@@ -480,13 +563,13 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
       ) : (
         <>
           {/* Numpad */}
-          <div className="grid grid-cols-3 gap-2 mb-3 lg:mb-4 phoneland:gap-1.5 phoneland:col-start-2 phoneland:row-start-1 phoneland:row-span-6 phoneland:mb-0">
+          <motion.div key={inputMode} {...modeEnter} className="grid grid-cols-3 gap-2 mb-3 lg:mb-4 phoneland:gap-1.5 phoneland:col-start-2 phoneland:row-start-1 phoneland:row-span-6 phoneland:mb-0">
             {[7, 8, 9, 4, 5, 6, 1, 2, 3].map((num) => (
               <button
                 key={num}
                 {...keepFocus}
                 onClick={() => handleNumpadClick(num.toString())}
-                className="p-3 lg:p-4 phoneland:p-2 min-h-[48px] text-xl font-bold rounded-m3-md bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition active:scale-95"
+                className="sotd-key m3-state-layer m3-ripple p-3 lg:p-4 phoneland:p-2 min-h-[48px] text-xl font-bold bg-surface-container-high text-on-surface"
               >
                 {num}
               </button>
@@ -496,26 +579,26 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
               onClick={() => handleNumpadClick('clear')}
               aria-label={t('game.clear_input')}
               title={t('game.clear_input')}
-              className="p-3 lg:p-4 phoneland:p-2 min-h-[48px] text-lg font-bold rounded-m3-md bg-surface-container-highest text-on-surface transition active:scale-95"
+              className="sotd-key m3-state-layer m3-ripple p-3 lg:p-4 phoneland:p-2 min-h-[48px] text-lg font-bold bg-surface-container-highest text-on-surface"
             >
               C
             </button>
             <button
               {...keepFocus}
               onClick={() => handleNumpadClick('0')}
-              className="p-3 lg:p-4 phoneland:p-2 min-h-[48px] text-xl font-bold rounded-m3-md bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition active:scale-95"
+              className="sotd-key m3-state-layer m3-ripple p-3 lg:p-4 phoneland:p-2 min-h-[48px] text-xl font-bold bg-surface-container-high text-on-surface"
             >
               0
             </button>
             <button
               {...keepFocus}
               onClick={() => handleNumpadClick('enter')}
-              className="p-3 lg:p-4 phoneland:p-2 min-h-[48px] text-lg font-bold rounded-m3-md bg-primary-container text-on-primary-container transition active:scale-95"
+              className="sotd-key m3-state-layer m3-ripple p-3 lg:p-4 phoneland:p-2 min-h-[48px] text-2xl font-bold bg-primary text-on-primary shadow-m3-1"
               title={editingDartIndex !== null ? t('score_input.replace_dart') : t('score_input.submit_total')}
             >
               {editingDartIndex !== null ? t('game.set_dart') : '↵'}
             </button>
-          </div>
+          </motion.div>
 
         </>
       )}
@@ -576,7 +659,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
           disabled={!awaitingNextPlayer && !commitsTyped && currentThrow.length === 0}
           className={`flex items-center justify-center gap-1 p-3 rounded-m3-full disabled:opacity-30 disabled:cursor-not-allowed transition font-bold shadow-m3-1 ${
             isCheckout
-              ? 'bg-success text-on-success animate-pulse ring-2 ring-[var(--m3-success)] ring-offset-2 ring-offset-surface'
+              ? 'bg-success text-on-success sotd-ring-pulse'
               : isEditingThrow
                 ? 'bg-tertiary text-on-tertiary col-span-1'
                 : 'bg-primary text-on-primary'

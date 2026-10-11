@@ -120,3 +120,19 @@ test('phone: no fire canvas runs in the hidden desktop layout', async ({ page })
   await startMatch(page);
   await expect(page.locator('[data-testid^="player-card-"]')).toHaveCount(0);
 });
+
+test('reduced motion: no endless animation runs during play', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await startMatch(page);
+  for (const s of ['100', '26']) await type(page, s);
+  await clearAchievements(page);
+  // Ann is up with 401, a checkout is not on — enter a busting state too.
+  await page.waitForTimeout(800);
+  const endless = await page.evaluate(() =>
+    document.getAnimations()
+      .filter(a => a.playState === 'running' && a.effect?.getTiming().iterations === Infinity)
+      .map(a => (a as CSSAnimation).animationName || (a.effect as KeyframeEffect)?.target?.className || 'anon'),
+  );
+  expect(endless).toEqual([]);
+});
