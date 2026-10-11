@@ -14,7 +14,7 @@ import Dartboard from '../dartboard/Dartboard';
 import { DartboardHeatmap } from '../dartboard/DartboardHeatmap';
 import { heatmapFromThrows } from '../../utils/heatmap';
 import { setCelebrationMoment } from '../../utils/celebrationMoment';
-import { legLeaderId } from '../../utils/legLeader';
+import { legRanks } from '../../utils/legRanks';
 import ScoreInput from './ScoreInput';
 import GameAnnouncer from './GameAnnouncer';
 import PlayerScore from './PlayerScore';
@@ -1394,6 +1394,13 @@ const GameScreen: React.FC = () => {
     return (state.currentMatch!.settings.startScore || 501) - scored;
   };
   const showSets = (state.currentMatch.settings.setsToWin || 1) > 1;
+  // Place in the leg per player (confirmed visits only, so it does not
+  // flicker while darts are being entered).
+  const ranks = legRanks(
+    state.currentMatch.players.map(p => p.playerId),
+    currentLeg.throws,
+    state.currentMatch.settings.startScore || 501,
+  );
   const stripPlayers = state.currentMatch.players.map((p, i) => ({
     playerId: p.playerId,
     name: p.name,
@@ -1401,26 +1408,21 @@ const GameScreen: React.FC = () => {
     legsWon: p.legsWon,
     setsWon: p.setsWon,
     isActive: i === state.currentPlayerIndex,
+    rank: ranks.get(p.playerId) ?? null,
   }));
   // Desktop: from three players on, the cards split — the first half left of
   // the input, the rest right of it above the stats. Four stacked cards ran
   // far below the fold while the right column stood empty.
   const playerCount = state.currentMatch.players.length;
   const leftPlayerCount = playerCount <= 2 ? playerCount : Math.ceil(playerCount / 2);
-  // The glowing board marks who leads this leg (confirmed visits only, so it
-  // does not flicker while darts are being entered).
-  const legLeader = legLeaderId(
-    state.currentMatch.players.map(p => p.playerId),
-    currentLeg.throws,
-    state.currentMatch.settings.startScore || 501,
-  );
+
   const renderPlayerCard = (player: typeof state.currentMatch.players[number], index: number) => (
     <PlayerScore
       key={player.playerId}
       player={player}
       remaining={remainingOf(index)}
       isActive={index === state.currentPlayerIndex}
-      isLegLeader={player.playerId === legLeader}
+      legRank={ranks.get(player.playerId) ?? null}
       average={player.matchAverage}
       legsWon={player.legsWon}
       setsWon={player.setsWon}

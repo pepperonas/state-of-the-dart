@@ -13,15 +13,28 @@ const player = {
 } as unknown as MatchPlayer;
 
 const props = (over: Record<string, unknown> = {}) => ({
-  player, remaining: 301, isActive: false, isLegLeader: false, average: 50, legsWon: 0, setsWon: 0, ...over,
+  player, remaining: 301, isActive: false, legRank: null, average: 50, legsWon: 0, setsWon: 0, ...over,
 });
 
 describe('PlayerScore', () => {
-  it('the glowing board marks the leg leader, not the player at the oche', () => {
+  it('shows the place in the leg as a stamp, read as a sentence', () => {
     const { rerender } = render(<PlayerScore {...props({ isActive: true })} />);
-    expect(screen.queryByTestId('leg-leader')).toBeNull();
-    rerender(<PlayerScore {...props({ isLegLeader: true })} />);
-    expect(screen.getByRole('img', { name: 'Führt im Leg' })).toBeInTheDocument();
+    expect(screen.queryByTestId('leg-rank')).toBeNull();
+    rerender(<PlayerScore {...props({ legRank: 2 })} />);
+    const stamp = screen.getByTestId('leg-rank');
+    expect(stamp).toHaveAttribute('data-rank', '2');
+    expect(stamp).toHaveTextContent('Platz 2 im Leg');
+  });
+
+  it('tints the card in the colour of its place (1 green … 5+ neutral)', () => {
+    const { rerender } = render(<PlayerScore {...props({ legRank: 1 })} />);
+    const card = screen.getByTestId('player-card-Anna');
+    expect(card.className).toContain('sotd-rank-tint');
+    expect(card.style.getPropertyValue('--rank-color')).toBe('var(--m3-rank-1)');
+    rerender(<PlayerScore {...props({ legRank: 7 })} />);
+    expect(card.style.getPropertyValue('--rank-color')).toBe('var(--m3-rank-5)');
+    rerender(<PlayerScore {...props({ legRank: null })} />);
+    expect(card.className).not.toContain('sotd-rank-tint');
   });
 
   it('tints the legs tile once a leg is won', () => {

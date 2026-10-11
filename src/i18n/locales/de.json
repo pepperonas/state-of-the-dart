@@ -1731,7 +1731,8 @@
   "player_score": {
     "remove": "Spieler entfernen",
     "highest": "High",
-    "leg_leader": "Führt im Leg"
+    "leg_leader": "Führt im Leg",
+    "leg_rank": "Platz {{rank}} im Leg"
   },
   "dartboard": {
     "label": "Interaktive Dartscheibe"

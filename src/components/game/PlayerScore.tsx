@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Target, UserMinus } from 'lucide-react';
+import { Trophy, UserMinus } from 'lucide-react';
 import { MatchPlayer } from '../../types/index';
 import PlayerAvatar from '../player/PlayerAvatar';
 import { usePlayer } from '../../context/PlayerContext';
@@ -9,13 +9,15 @@ import AnimatedNumber from '../common/AnimatedNumber';
 import IconButton from '../common/IconButton';
 import { springSpatialDefault } from '../../utils/motion';
 import FireCanvas from './FireCanvas';
+import RankStamp from './RankStamp';
+import { rankTone } from '../../utils/legRanks';
 
 interface PlayerScoreProps {
   player: MatchPlayer;
   remaining: number;
   isActive: boolean;
-  /** Lowest remaining score in the current leg (the glowing board marks it). */
-  isLegLeader?: boolean;
+  /** Place in the current leg (1 = lowest remaining); null while everyone is level. */
+  legRank?: number | null;
   average: number;
   legsWon: number;
   setsWon: number;
@@ -31,7 +33,7 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
   player,
   remaining,
   isActive,
-  isLegLeader = false,
+  legRank = null,
   average,
   legsWon,
   setsWon,
@@ -66,12 +68,15 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
       transition={springSpatialDefault}
       data-testid={`player-card-${player.name}`}
       aria-current={isActive ? 'true' : undefined}
-      className={`m3-card m3-elevated p-4 ${
+      className={`relative m3-card m3-elevated p-4 ${
         isActive
           ? 'sotd-on-fire bg-surface-container-high'
           : 'bg-surface-container'
-      }`}
+      } ${legRank ? 'sotd-rank-tint' : ''}`}
+      style={legRank ? ({ '--rank-color': `var(--m3-rank-${rankTone(legRank)})` } as React.CSSProperties) : undefined}
     >
+      {/* Place in the leg: 1 green, 2 yellow, 3 orange … beside the score. */}
+      {legRank && <RankStamp rank={legRank} className="absolute right-5 top-[3.9rem] z-[1]" />}
       {/* The player at the oche burns (WebGL flames along the bottom edge). */}
       {isActive && <FireCanvas />}
       <div className="flex items-center justify-between mb-3">
@@ -82,17 +87,6 @@ const PlayerScore: React.FC<PlayerScoreProps> = ({
           </h3>
         </div>
         <div className="flex items-center gap-1 shrink-0">
-          {isLegLeader && (
-            <span
-              role="img"
-              aria-label={t('player_score.leg_leader')}
-              title={t('player_score.leg_leader')}
-              data-testid="leg-leader"
-              className="inline-flex text-primary motion-safe:animate-pulse"
-            >
-              <Target size={24} aria-hidden="true" />
-            </span>
-          )}
           {onRemove && (
             <IconButton
               label={removeLabel ?? t('player_score.remove')}

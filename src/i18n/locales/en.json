@@ -1731,7 +1731,8 @@
   "player_score": {
     "remove": "Remove player",
     "highest": "High",
-    "leg_leader": "Leads this leg"
+    "leg_leader": "Leads this leg",
+    "leg_rank": "Place {{rank}} in this leg"
   },
   "dartboard": {
     "label": "Interactive dartboard"

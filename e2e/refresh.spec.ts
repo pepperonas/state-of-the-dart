@@ -46,9 +46,12 @@ test('a refresh mid-match keeps scores, turn and the darts of the current visit'
   await expect(visible(page, '456')).toBeVisible();
   await active(names[2]);
 
-  // The glowing board marks the leg leader (Ann, 441), not the player up (Cid).
-  await expect(page.getByTestId(`player-card-${names[0]}`).getByTestId('leg-leader')).toBeVisible();
-  await expect(page.getByTestId(`player-card-${names[2]}`).getByTestId('leg-leader')).toHaveCount(0);
+  // Place in the leg: Ann 441 → 1, Ben 456 → 2, Cid and Dan still on 501 share 3.
+  const rank = (n: string) => page.getByTestId(`player-card-${n}`).getByTestId('leg-rank');
+  await expect(rank(names[0])).toHaveAttribute('data-rank', '1');
+  await expect(rank(names[1])).toHaveAttribute('data-rank', '2');
+  await expect(rank(names[2])).toHaveAttribute('data-rank', '3');
+  await expect(rank(names[3])).toHaveAttribute('data-rank', '3');
 
   // Desktop: players 1+2 left of the input, 3+4 right of it.
   const box = async (name: string) => (await page.getByTestId(`player-card-${name}`).boundingBox())!;
