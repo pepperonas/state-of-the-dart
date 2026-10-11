@@ -468,10 +468,12 @@ state-of-the-dart/
 - Starte das Match
 
 ### 3. Score eingeben
-- **Numpad**: Direkte Eingabe von Scores
-- **Quick Scores**: Häufige Scores mit einem Klick (26, 41, 45, 60, 85, 100, 140, 180)
-- **Dartboard**: Visuell auf Board klicken
-- **Miss-Button**: Fehlwurf registrieren
+- **Numpad**: Summe der Aufnahme tippen, Enter (oder „Bestätigen“) bucht sie — der nächste Spieler ist sofort dran, man kann direkt weitertippen. Ein kurzer Chip zeigt die eben gebuchte Aufnahme.
+- **Darts**: jeder Dart einzeln über S/D/T und die Zahl (exakte Felder, für Statistik und Heatmap)
+- **Schnell**: häufige Scores mit einem Klick (26, 41, 45, 60, 81, 85, 100, 121, 140, 180)
+- **Dartboard**: auf dem Desktop unter der Eingabe, auf dem Handy einklappbar
+- **Korrektur**: „Wurf zurück“, Backspace oder Strg+Z holt die letzte Aufnahme zurück
+- **Checkout-Weg** steht in der Eingabekarte; der **Platz im Leg** (1 grün, 2 gelb, 3 orange …) auf jeder Spielerkarte
 
 ### 4. Statistiken ansehen
 - **Übersicht**: Gesamtstatistiken mit Charts

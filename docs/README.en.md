@@ -414,9 +414,11 @@ See [DEPLOYMENT_VPS.md](DEPLOYMENT_VPS.md) for full deployment guide.
 - Click "Start Game"
 
 ### 3. Play
-- Use the numpad or quick score buttons to enter scores
-- Click dartboard segments for precise dart entry
-- Confirm throws with the OK button
+- **Numpad:** type the visit total and press Enter (or "Confirm") — the turn passes at once, so the next player can type straight away. A short chip shows the visit just booked.
+- **Darts:** enter each dart via S/D/T and the number (exact beds, for stats and the heatmap)
+- **Quick:** common scores with one tap
+- **Undo:** "Take back", Backspace or Ctrl+Z returns the last visit for correction
+- The checkout route sits inside the input card; every player card shows the **place in the leg** (1 green, 2 yellow, 3 orange …)
 - Audio announcements guide you through the game
 
 ### 4. Training & Tournaments
