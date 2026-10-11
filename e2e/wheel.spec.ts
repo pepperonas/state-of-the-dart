@@ -35,7 +35,7 @@ async function openWheel(page: Page, tag: string) {
 }
 
 for (const vp of [
-  { name: 'phone', width: 390, height: 844, minWheel: 350 },
+  { name: 'phone', width: 390, height: 844, minWheel: 330 },
   { name: 'desktop', width: 1440, height: 900, minWheel: 700 },
 ]) {
   test(`wheel on ${vp.name}: big, and the flapper never spins out`, async ({ page }) => {
@@ -50,9 +50,12 @@ for (const vp of [
 
     // Sample the flapper's rotation on every frame of the spin.
     await page.evaluate(() => {
-      const w = window as unknown as { __flap: number[] };
+      const w = window as unknown as { __flap: number[]; __overflow: number[] };
       w.__flap = [];
+      w.__overflow = [];
+      const card = document.querySelector('[role="dialog"] > div') as HTMLElement;
       const read = () => {
+        w.__overflow.push(card.scrollHeight - card.clientHeight);
         const el = document.querySelector('[data-testid="spinner-flapper"]') as HTMLElement | null;
         const m = el?.style.transform.match(/rotate\((-?[\d.e+]+)deg\)/);
         if (m) w.__flap.push(Number(m[1]));
@@ -65,6 +68,10 @@ for (const vp of [
     expect(flap.filter(v => v !== 0).length, 'the pegs moved the flapper').toBeGreaterThan(5);
     // A spring overshoots a little past rest; the peg side is capped at 28°.
     expect(Math.max(...flap.map(Math.abs))).toBeLessThanOrEqual(30);
+    // The turning wheel never changes the dialog's scroll height (0.32.1): its
+    // corners used to, a scrollbar came and went and the text beside it jumped.
+    const overflow = await page.evaluate(() => (window as unknown as { __overflow: number[] }).__overflow);
+    expect(Math.max(...overflow)).toBe(0);
 
     await expect(page.getByTestId('spinner-result')).toBeVisible();
     await page.screenshot({ path: `test-results/wheel-${vp.name}.png` });

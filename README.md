@@ -71,7 +71,7 @@
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.32.0-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.32.1-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
@@ -922,6 +922,10 @@ Contributions sind willkommen! Bitte:
 ---
 
 ## 📝 Changelog
+
+### v0.32.1 (11. Oktober 2026) - Glücksrad ruhig und flüssig
+
+**Behoben:** Während sich das Glücksrad drehte, flackerte die Schrift daneben und das Rad ruckelte. Die Ecken der drehenden Grafik veränderten laufend die Scrollhöhe des Fensters – ein Scrollbalken kam und ging, der Text sprang mit. Außerdem lag ein Schattenfilter auf der drehenden Grafik, den der Browser in jedem Bild neu berechnen musste. Jetzt dreht das Rad in einer festen, runden Fläche, der Schatten liegt still dahinter, und das Rad ist etwas kleiner, sodass nie gescrollt werden muss. Ein Browser-Test prüft, dass sich die Scrollhöhe beim Drehen nicht mehr ändert.
 
 ### v0.32.0 (11. Oktober 2026) - Summe korrigieren, ehrliche Heatmap
 

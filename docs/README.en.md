@@ -71,7 +71,7 @@
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="../LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="../CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.32.0-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="../CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.32.1-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
