@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { IconButton } from '../common';
 import { AchievementHint as AchievementHintType } from '../../hooks/useAchievementHints';
+import { Icon, iconForEmoji } from '../icons';
+
+/** A hint closes by itself; in a game it must not sit over the input for long. */
+export const HINT_MS = 4000;
 
 interface AchievementHintProps {
   hints: AchievementHintType[];
@@ -12,19 +16,26 @@ interface AchievementHintProps {
 
 const AchievementHint: React.FC<AchievementHintProps> = ({ hints, onDismiss }) => {
   const { t } = useTranslation();
-  if (hints.length === 0) return null;
-
   const hint = hints[0]; // Show first hint only
+  const hintId = hint?.achievementId;
+  useEffect(() => {
+    if (!hintId) return;
+    const timer = setTimeout(() => onDismiss(hintId), HINT_MS);
+    return () => clearTimeout(timer);
+  }, [hintId, onDismiss]);
+  if (!hint) return null;
+
   const progressPercent = (hint.progress / hint.target) * 100;
 
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+        initial={{ opacity: 0, y: -50, scale: 0.9 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 50, scale: 0.9 }}
+        exit={{ opacity: 0, y: -50, scale: 0.9 }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-[9999]"
+        // Top, not bottom: at the bottom it covered undo and confirm on phones.
+        className="fixed top-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-[9999]"
       >
         <div className="p-4 rounded-m3-lg shadow-m3-3 border border-outline-variant bg-primary-container relative overflow-hidden">
           {/* Content */}
@@ -50,8 +61,9 @@ const AchievementHint: React.FC<AchievementHintProps> = ({ hints, onDismiss }) =
 
             {/* Achievement Info */}
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 flex-shrink-0 bg-surface-container-highest rounded-m3-full flex items-center justify-center text-2xl border border-outline-variant shadow-inner">
-                {hint.achievementIcon}
+              <div className="w-10 h-10 flex-shrink-0 bg-surface-container-highest rounded-m3-full flex items-center justify-center text-on-surface border border-outline-variant shadow-inner">
+                {/* The icon NAME used to be printed as text ("target"). */}
+                <Icon name={iconForEmoji(hint.achievementIcon)} size={22} />
               </div>
               <div className="flex-1">
                 <p className="text-on-primary-container m3-title-small">{hint.achievementName}</p>

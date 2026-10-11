@@ -28,6 +28,8 @@ import AvatarPicker from '../player/AvatarPicker';
 import { Dart, Player, GameType, MatchSettings, Throw, HeatmapData } from '../../types/index';
 import { calculateThrowScore } from '../../utils/scoring';
 import { evaluateVisit, rulesOf } from '../../utils/visit';
+import { Handoff, HANDOFF_MS, LEG_WON_MS } from '../../utils/handoff';
+import { useMediaQuery, DESKTOP_QUERY } from '../../hooks/useMediaQuery';
 import { haptic } from '../../utils/haptics';
 import { useWakeLock } from '../../hooks/useWakeLock';
 import { getCheckoutAlternatives } from '../../data/checkoutTable';
@@ -36,15 +38,26 @@ import audioSystem from '../../utils/audio';
 import { api } from '../../services/api';
 import { createAdaptiveBotPlayer, getAdaptiveBotConfigs, generateBotTurn, AdaptiveBotCategory } from '../../utils/botLogic';
 import BackButton from '../common/BackButton';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button, IconButton, Card, Dialog, Select, Switch, Snackbar, SegmentedButton, LoadingIndicator, useFeedback } from '../common';
 import { loadLastGameSettings, saveLastGameSettings, rotateForRematch, standings, findReusableGuest, GUEST_NAME } from '../../utils/matchSetup';
 const MatchDetailModal = lazy(() => import('../dashboard/MatchDetailModal'));
-import { staggerChild, springSpatialDefault, springSpatialFast } from '../../utils/motion';
+import { springSpatialDefault, springSpatialFast, effectsDefault } from '../../utils/motion';
 import { Icon, iconForEmoji } from '../icons';
+
+/** Phones: whether the dartboard helper is unfolded (UI state, per device). */
+const BOARD_OPEN_KEY = 'sotd-board-open';
 
 const GameScreen: React.FC = () => {
   const { notify } = useFeedback();
+  const isDesktop = useMediaQuery(DESKTOP_QUERY);
+  const [boardOpen, setBoardOpen] = useState(() => {
+    try { return localStorage.getItem(BOARD_OPEN_KEY) === '1'; } catch { return false; }
+  });
+  const toggleBoard = () => setBoardOpen(open => {
+    try { localStorage.setItem(BOARD_OPEN_KEY, open ? '0' : '1'); } catch { /* storage unavailable */ }
+    return !open;
+  });
   const { t, i18n } = useTranslation();
   const isGerman = (i18n.language || 'de').startsWith('de');
   const navigate = useNavigate();
@@ -122,7 +135,36 @@ const GameScreen: React.FC = () => {
     legNumber: number;
     legsWon: number;
     legsTotal: number;
+    /** A set-winning leg: the reducer has already reset legsWon to 0. */
+    setWon?: { setNumber: number; setsWon: number; setsTotal: number };
   } | null>(null);
+  const legWonOpen = !!legWonAnimation?.show;
+  // Any tap or key closes it — it used to swallow every tap for five seconds.
+  // A layout effect, so the listener is in place before the overlay is painted.
+  React.useLayoutEffect(() => {
+    if (!legWonOpen) return;
+    const close = (e: Event) => {
+      // Enter/Space only close it — they must not go on to commit a 0 visit.
+      if (e instanceof KeyboardEvent && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      }
+      // The tap that closes the overlay must not go on to press whatever lies
+      // beneath it (a numpad key): swallow the click that follows.
+      if (e.type === 'pointerdown') {
+        const swallow = (c: Event) => { c.preventDefault(); c.stopPropagation(); };
+        window.addEventListener('click', swallow, { capture: true, once: true });
+        setTimeout(() => window.removeEventListener('click', swallow, true), 600);
+      }
+      setLegWonAnimation(null);
+    };
+    window.addEventListener('pointerdown', close, true);
+    window.addEventListener('keydown', close, true);
+    return () => {
+      window.removeEventListener('pointerdown', close, true);
+      window.removeEventListener('keydown', close, true);
+    };
+  }, [legWonOpen]);
   // Seeded with the match that is already loaded, so resuming a match at leg N
   // does not replay a "leg won" animation for leg N-1.
   const lastLegIndexRef = React.useRef<number>(state.currentMatch?.currentLegIndex ?? 0);
@@ -158,17 +200,28 @@ const GameScreen: React.FC = () => {
     if (!winnerPlayer) return;
     const fullPlayer = players.find(p => p.id === winnerPlayer.playerId);
 
+    const legsTotal = match.settings.legsToWin || 3;
+    const setsTotal = match.settings.setsToWin || 1;
+    // legsWon resets when a set is won, so a set-winning leg reads 0 here.
+    const setWasWon = setsTotal > 1 && winnerPlayer.legsWon === 0;
     setLegWonAnimation({
       show: true,
       winnerName: winnerPlayer.name,
       winnerAvatar: fullPlayer?.avatar,
       winnerId: winnerPlayer.playerId,
       legNumber: currentLegIndex, // 1-indexed number of the leg just won
-      legsWon: winnerPlayer.legsWon,
-      legsTotal: match.settings.legsToWin || 3,
+      legsWon: setWasWon ? legsTotal : winnerPlayer.legsWon,
+      legsTotal,
+      setWon: setWasWon
+        ? {
+            setNumber: match.players.reduce((n, p) => n + p.setsWon, 0),
+            setsWon: winnerPlayer.setsWon,
+            setsTotal,
+          }
+        : undefined,
     });
 
-    const timer = setTimeout(() => setLegWonAnimation(null), 5000);
+    const timer = setTimeout(() => setLegWonAnimation(null), LEG_WON_MS);
     return () => clearTimeout(timer);
   }, [state.currentMatch?.currentLegIndex, state.currentMatch?.id]);
 
@@ -335,17 +388,26 @@ const GameScreen: React.FC = () => {
   const isBotPlayingRef = useRef(false);
   const botTimersRef = useRef<NodeJS.Timeout[]>([]);
   const isNavigatingAwayRef = useRef(false);
-  // The auto-advance after a confirmed visit. Kept so an undo inside that
-  // one-second window can cancel it — otherwise NEXT_PLAYER fired anyway and
-  // threw away the darts the undo had just brought back.
-  const autoNextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const cancelAutoNext = () => {
-    if (autoNextTimerRef.current) {
-      clearTimeout(autoNextTimerRef.current);
-      autoNextTimerRef.current = null;
-    }
-  };
-  useEffect(() => cancelAutoNext, []);
+  // With "auto next player" off, a confirmed visit waits for an explicit
+  // "next player". There used to be no such control at all, so the game hung.
+  const [awaitingNextPlayer, setAwaitingNextPlayer] = useState(false);
+  // The visit that was just handed over, shown briefly above the input.
+  const [handoff, setHandoff] = useState<Handoff | null>(null);
+  useEffect(() => {
+    if (!handoff) return;
+    const timer = setTimeout(() => setHandoff(null), HANDOFF_MS);
+    return () => clearTimeout(timer);
+  }, [handoff]);
+  // Any turn change (bot, undo, new leg) ends the wait.
+  useEffect(() => { setAwaitingNextPlayer(false); }, [state.currentPlayerIndex, state.currentMatch?.currentLegIndex]);
+  // Stable: the hint's auto-close timer restarts whenever this changes.
+  const dismissHint = React.useCallback((achievementId: string) => {
+    setDismissedHints(prev => new Set(prev).add(achievementId));
+  }, []);
+  const handleNextPlayer = React.useCallback(() => {
+    setAwaitingNextPlayer(false);
+    dispatch({ type: 'NEXT_PLAYER' });
+  }, [dispatch]);
 
   /** What the given darts do for the player at the oche — see utils/visit. */
   const evaluateCurrent = (darts: Dart[]) => {
@@ -363,7 +425,8 @@ const GameScreen: React.FC = () => {
 
   // Calculate live heatmap data from current match throws
   const liveHeatmapData = useMemo((): Record<string, HeatmapData> => {
-    if (!state.currentMatch) return {};
+    // Only while the section is open — it used to rebuild after every visit.
+    if (!state.currentMatch || !showLiveHeatmap) return {};
 
     const heatmaps: Record<string, HeatmapData> = {};
 
@@ -377,7 +440,7 @@ const GameScreen: React.FC = () => {
     });
 
     return heatmaps;
-  }, [state.currentMatch?.legs, state.currentMatch?.players, totalThrowsCount, heatmapView]);
+  }, [state.currentMatch?.legs, state.currentMatch?.players, totalThrowsCount, heatmapView, showLiveHeatmap]);
 
   // Announce "You require X" when player's turn STARTS and they can checkout
   useEffect(() => {
@@ -411,6 +474,7 @@ const GameScreen: React.FC = () => {
     const match = state.currentMatch;
     if (!match || match.status !== 'in-progress') return;
     if (isBotPlayingRef.current) return; // Prevent multiple concurrent bot plays
+    if (legWonOpen) return; // the bot starts the new leg once the overlay is gone
 
     const currentLeg = match.legs[match.currentLegIndex];
     if (!currentLeg || currentLeg.winner) return;
@@ -450,7 +514,7 @@ const GameScreen: React.FC = () => {
             if (isCancelled) return;
             isBotPlayingRef.current = false;
             dispatch({ type: 'NEXT_PLAYER' });
-          }, 800);
+          }, 500);
           botTimersRef.current.push(timer2);
         } else {
           isBotPlayingRef.current = false;
@@ -493,7 +557,7 @@ const GameScreen: React.FC = () => {
     };
     // currentTurnPlayerId: REMOVE_PLAYER can put a bot at the same index — the
     // index alone did not change, so the bot never started.
-  }, [state.currentPlayerIndex, currentTurnPlayerId, state.currentMatch?.currentLegIndex, state.currentMatch?.status, dispatch]);
+  }, [state.currentPlayerIndex, currentTurnPlayerId, state.currentMatch?.currentLegIndex, state.currentMatch?.status, legWonOpen, dispatch]);
 
   useEffect(() => {
     // Don't auto-resume if we're navigating away (user clicked "Pause")
@@ -614,12 +678,27 @@ const GameScreen: React.FC = () => {
     haptic('dart', settings.vibrationEnabled);
   }, [editingDartIndex, dispatch, settings.vibrationEnabled]);
 
+  const handleReplaceDart = React.useCallback(
+    (index: number, dart: Dart) => dispatch({ type: 'REPLACE_DART', payload: { index, dart } }),
+    [dispatch],
+  );
+
+  /** A numpad total: its darts land together, with one sound and one haptic. */
+  const handleDartsHit = React.useCallback((darts: Dart[]) => {
+    darts.forEach(dart => dispatch({ type: 'ADD_DART', payload: dart }));
+    if (darts.length === 0) return;
+    audioSystem.playSound('/sounds/OMNI/pop.mp3', false);
+    haptic('dart', settings.vibrationEnabled);
+  }, [dispatch, settings.vibrationEnabled]);
+
   // Define handleConfirmThrow with useCallback BEFORE useEffects that use it
-  const handleConfirmThrow = React.useCallback(() => {
-    const currentScore = calculateThrowScore(state.currentThrow);
+  /** Confirms a visit made of `darts` (the current throw, or a numpad total that
+   *  is being added in the same dispatch batch). */
+  const confirmVisit = React.useCallback((darts: Dart[]) => {
+    const currentScore = calculateThrowScore(darts);
     const currentPlayer = state.currentMatch?.players[state.currentPlayerIndex];
     const currentLeg = state.currentMatch?.legs[state.currentMatch.currentLegIndex];
-    const visit = evaluateCurrent(state.currentThrow);
+    const visit = evaluateCurrent(darts);
 
     // A checkout is announced by GameContext, a bust too — only plain scores here.
     if (visit && !visit.checkout && !visit.bust) {
@@ -649,7 +728,7 @@ const GameScreen: React.FC = () => {
 
       checkThrowAchievements(
         currentPlayer.playerId,
-        [...state.currentThrow],
+        [...darts],
         visit.score,
         visit.checkout,
         visit.checkout ? visit.score : undefined,
@@ -668,16 +747,35 @@ const GameScreen: React.FC = () => {
     setIsEditingThrow(false);
     setEditingDartIndex(null);
 
-    // Auto-advance to next player, but NOT after a checkout/leg-win
-    // (CONFIRM_THROW already sets currentPlayerIndex for the new leg)
-    cancelAutoNext();
-    if (settings.autoNextPlayer && !visit?.checkout) {
-      autoNextTimerRef.current = setTimeout(() => {
-        autoNextTimerRef.current = null;
-        dispatch({ type: 'NEXT_PLAYER' });
-      }, 1000);
+    // The turn passes at once — never after a checkout (CONFIRM_THROW already
+    // starts the next leg). It used to pass one second later, and a visit typed
+    // inside that second was booked to the previous player.
+    if (!visit?.checkout) {
+      if (currentPlayer && visit) {
+        setHandoff({
+          key: Date.now(),
+          name: currentPlayer.name,
+          score: visit.bust ? 0 : visit.score,
+          remaining: visit.bust ? visit.previousRemaining : visit.newRemaining,
+          bust: visit.bust,
+        });
+      }
+      if (settings.autoNextPlayer) dispatch({ type: 'NEXT_PLAYER' });
+      else setAwaitingNextPlayer(true);
     }
-  }, [state.currentThrow, state.currentPlayerIndex, state.currentMatch, settings.autoNextPlayer, settings.vibrationEnabled, dispatch]);
+  }, [state.currentPlayerIndex, state.currentMatch, settings.autoNextPlayer, settings.vibrationEnabled, dispatch]);
+
+  const handleConfirmThrow = React.useCallback(
+    () => confirmVisit(state.currentThrow),
+    [confirmVisit, state.currentThrow],
+  );
+
+  /** Numpad total + Enter: add the darts and confirm in one go, so the next
+   *  key already belongs to the next player. */
+  const handleCommitDarts = React.useCallback((darts: Dart[]) => {
+    darts.forEach(dart => dispatch({ type: 'ADD_DART', payload: dart }));
+    confirmVisit([...state.currentThrow, ...darts]);
+  }, [confirmVisit, dispatch, state.currentThrow]);
 
   // Auto-confirm after 3rd dart (skip for bots and editing mode)
   useEffect(() => {
@@ -742,8 +840,8 @@ const GameScreen: React.FC = () => {
 
   const handleUndoThrow = () => {
     if (!state.currentMatch || !lastThrowInfo) return;
-    // An undo inside the auto-advance window must win over the pending NEXT_PLAYER.
-    cancelAutoNext();
+    setAwaitingNextPlayer(false);
+    setHandoff(null);
     // Enter editing mode - darts will be loaded into currentThrow by the reducer
     setIsEditingThrow(true);
     setEditingDartIndex(null);
@@ -1284,13 +1382,26 @@ const GameScreen: React.FC = () => {
   const totalScored = playerThrows.reduce((sum, t) => sum + t.score, 0);
   const currentThrowScore = calculateThrowScore(state.currentThrow);
   const remaining = (state.currentMatch.settings.startScore || 501) - totalScored - currentThrowScore;
+  // What the scoreboard shows: the visit as the rules count it. A bust keeps the
+  // old score (it used to read negative until the auto-confirm), and double-in
+  // counts nothing before the first double.
+  const liveVisit = evaluateCurrent(state.currentThrow);
+  const shownRemaining = liveVisit ? liveVisit.newRemaining : remaining;
   const remainingOf = (index: number) => {
-    if (index === state.currentPlayerIndex) return remaining;
+    if (index === state.currentPlayerIndex) return shownRemaining;
     const player = state.currentMatch!.players[index];
     const scored = currentLeg.throws.filter(t => t.playerId === player.playerId).reduce((sum, t) => sum + t.score, 0);
     return (state.currentMatch!.settings.startScore || 501) - scored;
   };
   const showSets = (state.currentMatch.settings.setsToWin || 1) > 1;
+  const stripPlayers = state.currentMatch.players.map((p, i) => ({
+    playerId: p.playerId,
+    name: p.name,
+    remaining: remainingOf(i),
+    legsWon: p.legsWon,
+    setsWon: p.setsWon,
+    isActive: i === state.currentPlayerIndex,
+  }));
   // Desktop: from three players on, the cards split — the first half left of
   // the input, the rest right of it above the stats. Four stacked cards ran
   // far below the fold while the right column stood empty.
@@ -1361,23 +1472,18 @@ const GameScreen: React.FC = () => {
         </div>
         
         {/* Phone/tablet: all scores in one row, so the input stays on screen. */}
-        <ScoreStrip
-          className="lg:hidden sticky top-0 z-20 -mx-4 px-4 py-2 mb-4 phoneland:-mx-2 phoneland:px-2 phoneland:py-1 phoneland:mb-2 bg-[color-mix(in_srgb,var(--m3-surface)_92%,transparent)] backdrop-blur"
-          showSets={showSets}
-          players={state.currentMatch.players.map((p, i) => ({
-            playerId: p.playerId,
-            name: p.name,
-            remaining: remainingOf(i),
-            legsWon: p.legsWon,
-            setsWon: p.setsWon,
-            isActive: i === state.currentPlayerIndex,
-          }))}
-        />
+        {!isDesktop && (
+          <ScoreStrip
+            className="lg:hidden sticky top-0 z-20 -mx-4 px-4 py-2 mb-4 phoneland:-mx-2 phoneland:px-2 phoneland:py-1 phoneland:mb-2 bg-[color-mix(in_srgb,var(--m3-surface)_92%,transparent)] backdrop-blur"
+            showSets={showSets}
+            players={stripPlayers}
+          />
+        )}
 
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Players Section (desktop) */}
           <div className="hidden lg:block lg:col-span-1 space-y-4">
-            {state.currentMatch.players.slice(0, leftPlayerCount).map((player, i) => renderPlayerCard(player, i))}
+            {isDesktop && state.currentMatch.players.slice(0, leftPlayerCount).map((player, i) => renderPlayerCard(player, i))}
           </div>
           
           {/* Center Section - Input first, then optional Dartboard helper */}
@@ -1388,7 +1494,7 @@ const GameScreen: React.FC = () => {
               onRemoveDart={handleRemoveDart}
               onClearThrow={handleClearThrow}
               onConfirm={handleConfirmThrow}
-              onReplaceDart={(index, dart) => dispatch({ type: 'REPLACE_DART', payload: { index, dart } })}
+              onReplaceDart={handleReplaceDart}
               editingDartIndex={editingDartIndex}
               onSetEditingDartIndex={setEditingDartIndex}
               isEditingThrow={isEditingThrow}
@@ -1397,18 +1503,40 @@ const GameScreen: React.FC = () => {
               isCheckout={isEarlyCheckout}
               onUndoThrow={handleUndoThrow}
               lastThrow={lastThrowInfo}
+              onAddDarts={handleDartsHit}
+              onCommitDarts={handleCommitDarts}
+              checkoutRoute={settings.showCheckoutHints ? state.checkoutSuggestion : null}
+              handoff={handoff}
+              awaitingNextPlayer={awaitingNextPlayer ? state.currentMatch.players[(state.currentPlayerIndex + 1) % state.currentMatch.players.length]?.name ?? null : null}
+              onNextPlayer={handleNextPlayer}
             />
 
-            {/* The setting existed but was never read — hints always showed. */}
-            {settings.showCheckoutHints && state.checkoutSuggestion && (
+            {/* The main route sits inside the input card; the alternatives
+                follow here on desktop, where there is room. */}
+            {isDesktop && settings.showCheckoutHints && state.checkoutSuggestion && (
               <CheckoutSuggestion
+                hidePrimary
                 suggestion={state.checkoutSuggestion}
                 alternatives={getCheckoutAlternatives(remaining, 3 - state.currentThrow.length, state.currentMatch?.settings.doubleOut ?? true)}
                 remaining={remaining}
               />
             )}
 
-            {settings.showDartboardHelper && (
+            {/* Phones: the board sits behind a toggle (remembered per device) so
+                a whole visit fits on one screen. The setting still decides
+                whether it is offered at all. */}
+            {settings.showDartboardHelper && !isDesktop && (
+              <Button
+                variant="text"
+                size="sm"
+                aria-expanded={boardOpen}
+                onClick={toggleBoard}
+                icon={<ChevronDown size={18} className={`m3-chevron ${boardOpen ? 'm3-open' : ''}`} />}
+              >
+                {boardOpen ? t('game_screen.hide_dartboard') : t('game_screen.show_dartboard')}
+              </Button>
+            )}
+            {settings.showDartboardHelper && (isDesktop || boardOpen) && (
               <div className="w-full max-w-lg space-y-3">
                 <Dartboard
                   onDartHit={handleDartHit}
@@ -1431,7 +1559,7 @@ const GameScreen: React.FC = () => {
           
           {/* Right column: players 3+ (desktop), then the collapsible stats */}
           <div className="lg:col-span-1 space-y-4">
-            {state.currentMatch.players.length > leftPlayerCount && (
+            {isDesktop && state.currentMatch.players.length > leftPlayerCount && (
               <div className="hidden lg:block space-y-4">
                 {state.currentMatch.players.slice(leftPlayerCount).map((player, i) => renderPlayerCard(player, leftPlayerCount + i))}
               </div>
@@ -1718,15 +1846,26 @@ const GameScreen: React.FC = () => {
       {hints.length > 0 && (
         <AchievementHint
           hints={hints}
-          onDismiss={(achievementId) => {
-            setDismissedHints(prev => new Set(prev).add(achievementId));
-          }}
+          onDismiss={dismissHint}
         />
       )}
 
-      {/* Leg Won Animation Overlay */}
+      {/* Leg Won Animation Overlay — any tap or key closes it (window listener
+          above). It stays mounted through its exit fade, so the closing tap
+          lands on the scrim and not on a numpad key underneath. */}
+      <AnimatePresence>
       {legWonAnimation?.show && (
-        <div className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_80%,transparent)] flex items-center justify-center z-50 animate-fade-in">
+        <motion.div
+          key="leg-won"
+          data-testid="leg-won"
+          role="status"
+          aria-live="polite"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={effectsDefault}
+          className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_80%,transparent)] flex items-center justify-center z-50"
+        >
           <div className="text-center animate-scale-in">
             {/* Confetti burst effect */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -1739,7 +1878,7 @@ const GameScreen: React.FC = () => {
                       left: '50%',
                       top: '50%',
                       backgroundColor: ['#f59e0b', '#22c55e', '#3b82f6', '#ef4444', '#8b5cf6'][i % 5],
-                      transform: `rotate(${i * 18}deg) translateY(-${100 + Math.random() * 100}px)`,
+                      transform: `rotate(${i * 18}deg) translateY(-${100 + (i * 37) % 100}px)`,
                       animation: `confetti-fall 1s ease-out ${i * 0.05}s forwards`,
                       opacity: 0,
                     }}
@@ -1750,17 +1889,19 @@ const GameScreen: React.FC = () => {
 
             {/* Winner Avatar */}
             <div className="mb-4 animate-bounce-in flex justify-center">
-              <PlayerAvatar 
-                avatar={legWonAnimation.winnerAvatar} 
-                name={legWonAnimation.winnerName} 
-                size="xl" 
+              <PlayerAvatar
+                avatar={legWonAnimation.winnerAvatar}
+                name={legWonAnimation.winnerName}
+                size="xl"
               />
             </div>
 
-            {/* LEG text with glow */}
-            <div className="text-6xl md:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 animate-pulse mb-2"
+            {/* LEG / SET text with glow */}
+            <div className="text-6xl md:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 mb-2"
                  style={{ textShadow: '0 0 40px rgba(245, 158, 11, 0.5)' }}>
-              {t('game_screen.leg_number', { n: legWonAnimation.legNumber })}
+              {legWonAnimation.setWon
+                ? t('game_screen.set_number', { n: legWonAnimation.setWon.setNumber })
+                : t('game_screen.leg_number', { n: legWonAnimation.legNumber })}
             </div>
 
             {/* Winner name */}
@@ -1768,34 +1909,46 @@ const GameScreen: React.FC = () => {
               {legWonAnimation.winnerName}
             </div>
 
-            {/* Score indicator */}
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <div className="flex gap-2">
-                {[...Array(legWonAnimation.legsTotal)].map((_, i) => (
-                  <div
-                    key={i}
-                    className={`w-4 h-4 rounded-full transition ${
-                      i < legWonAnimation.legsWon
-                        ? 'bg-gradient-to-r from-yellow-400 to-amber-500 shadow-lg shadow-amber-500/50'
-                        : 'bg-surface-container-highest'
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Progress text */}
-            <div className="text-xl text-on-surface-variant">
-              {t('game_screen.legs_progress', { won: legWonAnimation.legsWon, total: legWonAnimation.legsTotal })}
-            </div>
+            {/* Score indicator: sets after a set, legs otherwise */}
+            {(() => {
+              const won = legWonAnimation.setWon ? legWonAnimation.setWon.setsWon : legWonAnimation.legsWon;
+              const total = legWonAnimation.setWon ? legWonAnimation.setWon.setsTotal : legWonAnimation.legsTotal;
+              return (
+                <>
+                  <div className="flex items-center justify-center gap-3 mb-6">
+                    <div className="flex gap-2">
+                      {[...Array(total)].map((_, i) => (
+                        <div
+                          key={i}
+                          className={`w-4 h-4 rounded-full transition ${
+                            i < won
+                              ? 'bg-gradient-to-r from-yellow-400 to-amber-500 shadow-lg shadow-amber-500/50'
+                              : 'bg-surface-container-highest'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="text-xl text-on-surface-variant">
+                    {legWonAnimation.setWon
+                      ? t('game_screen.sets_progress', { won, total })
+                      : t('game_screen.legs_progress', { won, total })}
+                  </div>
+                </>
+              );
+            })()}
 
             {/* Next leg indicator */}
-            <div className="mt-6 text-lg text-primary animate-pulse">
-              {t('game_screen.next_leg_starting')}
+            <div className="mt-6 m3-title-medium text-primary">
+              {legWonAnimation.setWon ? t('game_screen.next_set_starting') : t('game_screen.next_leg_starting')}
+            </div>
+            <div className="mt-2 m3-body-medium text-on-surface-variant">
+              {t('game_screen.tap_to_continue')}
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       {/* Back to Menu Confirmation Dialog */}
       <Dialog

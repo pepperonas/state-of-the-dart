@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Check, X, Delete, Keyboard, RotateCcw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Dart } from '../../types/index';
@@ -9,6 +9,7 @@ import Select from '../common/Select';
 import SegmentedButton from '../common/SegmentedButton';
 import { springSpatialFast } from '../../utils/motion';
 import { shouldHandleGameKey } from '../../utils/gameKeys';
+import type { Handoff } from '../../utils/handoff';
 
 interface ScoreInputProps {
   currentThrow: Dart[];
@@ -29,7 +30,23 @@ interface ScoreInputProps {
   /** The throw `onUndoThrow` would take back — shown on the button so the player
    *  can see what they are about to undo. `null` = nothing to undo. */
   lastThrow?: { playerName: string; score: number; isBust?: boolean } | null;
+  /** Several darts at once (a numpad total) — one sound and one haptic, not three. */
+  onAddDarts?: (darts: Dart[]) => void;
+  /** Adds the darts AND confirms the visit in one go (numpad total + Enter).
+   *  Without it the confirm waited for an effect, and keys typed in between
+   *  saw "three darts already" and were dropped. */
+  onCommitDarts?: (darts: Dart[]) => void;
+  /** The suggested checkout for the darts left, shown inside the card. */
+  checkoutRoute?: string[] | null;
+  /** The visit that was just handed over, shown briefly above the card. */
+  handoff?: Handoff | null;
+  /** "Auto next player" is off and a visit is confirmed: the name of who is next. */
+  awaitingNextPlayer?: string | null;
+  onNextPlayer?: () => void;
 }
+
+/** Numpad keys must not take focus on a click — a later Enter would click them again. */
+const keepFocus = { onPointerDown: (e: React.PointerEvent) => e.preventDefault() };
 
 const INPUT_MODE_KEY = 'sotd-input-mode';
 type InputMode = 'numpad' | 'darts' | 'quick';
@@ -50,6 +67,12 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   doubleOut = true,
   onUndoThrow,
   lastThrow = null,
+  onAddDarts,
+  onCommitDarts,
+  checkoutRoute = null,
+  handoff = null,
+  awaitingNextPlayer = null,
+  onNextPlayer,
 }) => {
   const { t } = useTranslation();
   const [currentInput, setCurrentInput] = useState('');
@@ -78,16 +101,22 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   const prevLengthRef = useRef(currentThrow.length);
 
   const currentScore = calculateThrowScore(currentThrow);
+  // A typed total (or the dart being edited) owns the total box for now.
+  const typing = inputMode === 'numpad' && (currentInput !== '' || editingDartIndex !== null);
+  // "Bestätigen" with a typed total takes it, like Enter — it used to stay
+  // disabled until darts existed, so the labelled button was a dead end.
+  const commitsTyped = inputMode === 'numpad' && currentInput !== '' && editingDartIndex === null && currentThrow.length < 3;
 
   // Taking back a confirmed throw reloads its darts into the input, so it would
   // silently overwrite darts that are already sitting there — only offer it on an
   // empty visit.
   const canUndoThrow = Boolean(onUndoThrow && lastThrow && currentThrow.length === 0);
 
-  // Auto-scroll confirm button into view on early checkout
+  // Bring the checkout button into view on an early checkout — 'nearest', so a
+  // button that is already on screen does not make the page jump.
   useEffect(() => {
     if (isCheckout && confirmBtnRef.current) {
-      confirmBtnRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      confirmBtnRef.current.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
     }
   }, [isCheckout]);
 
@@ -100,11 +129,29 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
     prevLengthRef.current = currentThrow.length;
   }, [currentThrow.length, pendingConfirm, onConfirm]);
   
-  // Keyboard support
+  // Keyboard support. The listener is bound once and always calls the handler
+  // of the latest render: re-binding it in an effect left a gap in which fast
+  // typing hit a closure with stale input and dropped digits.
+  const keyHandlerRef = useRef<(e: KeyboardEvent) => void>(() => {});
   useEffect(() => {
+    const listener = (e: KeyboardEvent) => keyHandlerRef.current(e);
+    window.addEventListener('keydown', listener);
+    return () => window.removeEventListener('keydown', listener);
+  }, []);
+  useLayoutEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (!shouldHandleGameKey(e)) return;
-      
+
+      // A confirmed visit waits for "next player": Enter passes the turn, and
+      // nothing else may start the next visit for the wrong player.
+      if (awaitingNextPlayer) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          onNextPlayer?.();
+        }
+        return;
+      }
+
       if (e.key >= '0' && e.key <= '9') {
         handleNumpadClick(e.key);
       } else if (e.key === 'Enter') {
@@ -140,12 +187,9 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
       }
     };
     
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-    // editingDartIndex must be a dep: it changes when a dart slot is clicked WITHOUT
-    // currentThrow/currentInput changing, so the listener would otherwise close over a
-    // stale value and route keyboard-Enter to the wrong branch (commit vs. replace-dart).
-  }, [currentInput, currentThrow, inputMode, editingDartIndex, onConfirm, onRemoveDart, onClearThrow, canUndoThrow, onUndoThrow]);
+    keyHandlerRef.current = handleKeyPress;
+    // No deps on purpose: every render installs the handler it just built.
+  });
   // Most common scores - prominently displayed
   const commonScores = [0, 26, 41, 45, 60, 81, 85, 100, 121, 140, 180];
   
@@ -153,6 +197,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   const allScores = Array.from({ length: 181 }, (_, i) => i);
   
   const handleNumpadClick = (value: string) => {
+    if (awaitingNextPlayer) return;
     if (value === 'clear') {
       setCurrentInput('');
       return;
@@ -176,6 +221,13 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
       const score = currentInput ? parseInt(currentInput) : 0;
       if (score < 0 || score > 180) return;
 
+      if (onCommitDarts) {
+        const darts = numpadDarts(score, remaining, 3 - currentThrow.length, doubleOut)
+          .slice(0, 3 - currentThrow.length);
+        setCurrentInput('');
+        onCommitDarts(darts);
+        return;
+      }
       addScore(score);
       setPendingConfirm(true);
       return;
@@ -191,6 +243,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   };
   
   const addScore = (score: number) => {
+    if (awaitingNextPlayer) return;
     // If editing a specific dart, replace it
     if (editingDartIndex !== null && onReplaceDart) {
       const darts = convertScoreToDarts(score);
@@ -208,12 +261,14 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
     const darts = numpadDarts(score, remaining, 3 - currentThrow.length, doubleOut);
     // Add darts one by one, respecting the 3-dart limit
     const dartsToAdd = darts.slice(0, 3 - currentThrow.length);
-    dartsToAdd.forEach(dart => onAddDart(dart));
+    if (onAddDarts) onAddDarts(dartsToAdd);
+    else dartsToAdd.forEach(dart => onAddDart(dart));
     setCurrentInput('');
   };
   
   /** One dart from the S/D/T grid: exact bed, no reconstruction needed. */
   const addGridDart = (segment: number) => {
+    if (awaitingNextPlayer) return;
     const m = Number(multiplier) as 1 | 2 | 3;
     const dart: Dart =
       segment === 0 ? { segment: 0, multiplier: 0, score: 0, bed: 'miss' }
@@ -236,7 +291,21 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   return (
     // Phone landscape: two columns — numpad right, everything else left — so a
     // whole turn fits into ~390px of height.
-    <div className="m3-card m3-elevated rounded-m3-lg p-3 sm:p-4 md:p-5 w-full max-w-md phoneland:max-w-none phoneland:p-2 phoneland:grid phoneland:grid-cols-2 phoneland:gap-x-3 phoneland:items-start">
+    <div className="relative m3-card m3-elevated rounded-m3-lg p-3 sm:p-4 md:p-5 w-full max-w-md phoneland:max-w-none phoneland:p-2 phoneland:grid phoneland:grid-cols-2 phoneland:gap-x-3 phoneland:items-start">
+      {/* The visit just handed over — floats over the card edge, so it costs no
+          height. The live region announces it; this is for the eyes. */}
+      {handoff && (
+        <div
+          key={handoff.key}
+          data-testid="handoff-chip"
+          aria-hidden="true"
+          className="absolute left-1/2 phoneland:left-3/4 -top-3 -translate-x-1/2 z-10 whitespace-nowrap px-3 py-1 rounded-m3-full m3-label-large shadow-m3-2 animate-fade-in bg-secondary-container text-on-secondary-container"
+        >
+          {handoff.bust
+            ? t('game_screen.handoff_bust', { name: handoff.name, remaining: handoff.remaining })
+            : t('game_screen.handoff', { name: handoff.name, score: handoff.score, remaining: handoff.remaining })}
+        </div>
+      )}
       {/* Header with Remaining Score */}
       {/* On phones the score strip above already shows the remaining score. */}
       <div className="mb-3 text-center hidden lg:block">
@@ -286,11 +355,39 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
             )}
           </button>
         ))}
-        <div className="flex flex-col justify-center items-center bg-tertiary-container rounded-m3-md px-3">
-          <span className="m3-label-small text-on-tertiary-container opacity-80">{t('score_input.total')}</span>
-          <span className="text-2xl font-bold text-on-tertiary-container">{currentScore}</span>
+        {/* While a total is typed it shows here, next to the slots, instead of
+            below the numpad where the eye never was. */}
+        <div
+          data-testid="visit-total"
+          className={`flex flex-col justify-center items-center rounded-m3-md px-3 min-w-[4.5rem] ${
+            typing ? 'bg-primary-container ring-2 ring-[var(--m3-primary)]' : 'bg-tertiary-container'
+          }`}
+        >
+          <span className={`m3-label-small ${typing ? 'text-on-primary-container' : 'text-on-tertiary-container'}`}>
+            {typing ? (editingDartIndex !== null ? t('game.new_dart_value') : t('score_input.typed')) : t('score_input.total')}
+          </span>
+          <span className={`text-2xl font-bold tabular-nums ${typing ? 'text-on-primary-container' : 'text-on-tertiary-container'}`}>
+            {typing ? (currentInput || '…') : currentScore}
+          </span>
         </div>
       </div>
+
+      {/* Checkout route for the darts left — inside the card, so it is on
+          screen while typing (below the card it sat under the fold on phones). */}
+      {checkoutRoute && checkoutRoute.length > 0 && (
+        <div
+          data-testid="checkout-route"
+          aria-label={`${t('score_input.checkout')}: ${checkoutRoute.join(' ')}`}
+          className="flex items-center gap-2 mb-3 phoneland:mb-2 phoneland:col-start-1 px-3 py-2 rounded-m3-md bg-success-container text-on-success-container"
+        >
+          <span className="m3-label-medium uppercase tracking-wide">{t('score_input.checkout')}</span>
+          <span className="flex gap-1.5 ml-auto">
+            {checkoutRoute.map((d, i) => (
+              <span key={`${i}-${d}`} className="px-2 py-0.5 rounded-m3-sm bg-surface text-on-surface m3-label-large tabular-nums">{d}</span>
+            ))}
+          </span>
+        </div>
+      )}
 
       {/* Mode switcher */}
       <SegmentedButton<InputMode>
@@ -387,6 +484,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
             {[7, 8, 9, 4, 5, 6, 1, 2, 3].map((num) => (
               <button
                 key={num}
+                {...keepFocus}
                 onClick={() => handleNumpadClick(num.toString())}
                 className="p-3 lg:p-4 phoneland:p-2 min-h-[48px] text-xl font-bold rounded-m3-md bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition active:scale-95"
               >
@@ -394,6 +492,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
               </button>
             ))}
             <button
+              {...keepFocus}
               onClick={() => handleNumpadClick('clear')}
               aria-label={t('game.clear_input')}
               title={t('game.clear_input')}
@@ -402,12 +501,14 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
               C
             </button>
             <button
+              {...keepFocus}
               onClick={() => handleNumpadClick('0')}
               className="p-3 lg:p-4 phoneland:p-2 min-h-[48px] text-xl font-bold rounded-m3-md bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition active:scale-95"
             >
               0
             </button>
             <button
+              {...keepFocus}
               onClick={() => handleNumpadClick('enter')}
               className="p-3 lg:p-4 phoneland:p-2 min-h-[48px] text-lg font-bold rounded-m3-md bg-primary-container text-on-primary-container transition active:scale-95"
               title={editingDartIndex !== null ? t('score_input.replace_dart') : t('score_input.submit_total')}
@@ -416,18 +517,6 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
             </button>
           </div>
 
-          {/* Current Input Display */}
-          <div className="mb-3 lg:mb-4 phoneland:mb-2 phoneland:p-1 phoneland:min-h-[40px] p-2 lg:p-4 min-h-[48px] flex items-center justify-center bg-surface-container rounded-m3-md text-center border border-outline-variant phoneland:col-start-1">
-            {currentInput ? (
-              <span className="text-3xl font-bold text-on-surface">{currentInput}</span>
-            ) : (
-              <span className="text-on-surface-variant">
-                {editingDartIndex !== null
-                  ? t('game.new_dart_value')
-                  : t('game.numpad_hint')}
-              </span>
-            )}
-          </div>
         </>
       )}
 
@@ -457,8 +546,8 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
         </button>
       )}
 
-      {/* Action Buttons */}
-      <div className="grid grid-cols-3 gap-2 phoneland:col-start-1">
+      {/* Action Buttons — confirm gets the most room, it is the one used every visit. */}
+      <div className="grid grid-cols-[1fr_1fr_1.6fr] gap-2 phoneland:col-start-1">
         <button
           onClick={onRemoveDart}
           disabled={currentThrow.length === 0}
@@ -483,8 +572,8 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
 
         <button
           ref={confirmBtnRef}
-          onClick={onConfirm}
-          disabled={currentThrow.length === 0}
+          onClick={awaitingNextPlayer ? onNextPlayer : commitsTyped ? () => handleNumpadClick('enter') : onConfirm}
+          disabled={!awaitingNextPlayer && !commitsTyped && currentThrow.length === 0}
           className={`flex items-center justify-center gap-1 p-3 rounded-m3-full disabled:opacity-30 disabled:cursor-not-allowed transition font-bold shadow-m3-1 ${
             isCheckout
               ? 'bg-success text-on-success animate-pulse ring-2 ring-[var(--m3-success)] ring-offset-2 ring-offset-surface'
@@ -494,7 +583,9 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
           }`}
         >
           <Check size={20} />
-          <span>{isCheckout ? t('score_input.checkout') : isEditingThrow ? t('game.confirm_correction') : t('game.confirm_visit')}</span>
+          <span className="truncate">{awaitingNextPlayer
+            ? t('game_screen.next_player', { name: awaitingNextPlayer })
+            : isCheckout ? t('score_input.checkout') : isEditingThrow ? t('game.confirm_correction') : t('game.confirm_visit')}</span>
         </button>
       </div>
 

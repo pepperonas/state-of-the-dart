@@ -7,6 +7,46 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.25.0] - 2026-10-11
+
+### Fixed — quick play
+- **A visit typed right after a confirm was booked to the previous player.**
+  The turn passed one second after `CONFIRM_THROW`; it now passes at once
+  (`NEXT_PLAYER` dispatched right after, never on a checkout).
+- **Digits typed straight after Enter were dropped.** A numpad total was added
+  as darts and confirmed in a later effect; keys in between saw "three darts"
+  and were ignored. `onCommitDarts` adds and confirms in one go, and the
+  keydown listener always runs the handler of the latest render.
+- **"Auto next player" off hung the game** — nothing advanced a human. A
+  "Next: name" button (and Enter) now does.
+- **Bust showed a negative remaining score** for the 800 ms before its
+  auto-confirm; double-in was ignored there. The scoreboard now shows
+  `evaluateVisit().newRemaining`.
+- **The leg-won overlay swallowed every tap for 5 s.** A tap or key closes it
+  (the closing tap does not press anything beneath), otherwise 2.5 s. Bots
+  wait for it. After a set-winning leg it showed 0 legs; it now shows the set.
+- The confirm button was disabled while a total was typed; it now takes it.
+  Numpad keys no longer keep focus, so a later Enter commits instead of
+  pressing the digit again.
+
+### Changed
+- Hand-over chip above the input ("Ben · 60 → 441").
+- Typed total shown next to the dart slots; checkout route inside the input
+  card (alternatives stay below on desktop).
+- Phones: dartboard helper behind a toggle (per device), so a visit fits on
+  one screen; the strip scrolls the thrower into view.
+- Desktop player columns are only mounted on desktop — the fire shader no
+  longer ran hidden on phones. Live heatmap computed only while open.
+- A numpad total plays one pop; a new score call drops stale queued calls;
+  audio logs go through `logger`.
+- Achievement hint sits at the top, closes after 4 s, shows its icon.
+
+### Tests
+- `e2e/fast-play.spec.ts` (5): back-to-back visits, bust never negative, leg
+  overlay closes on a tap, checkout route on screen at 390×844, no player
+  cards (fire canvas) on phones.
+- `ScoreInput.fastPlay.test.tsx` (9), `audioQueue.test.ts` (2).
+
 ## [0.24.0] - 2026-10-05
 
 ### Fixed — achievement unlocks

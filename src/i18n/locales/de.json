@@ -1784,7 +1784,8 @@
     "total": "Total",
     "replace_dart": "Dart ersetzen",
     "submit_total": "Wurf-Summe übernehmen und bestätigen",
-    "checkout": "Checkout!"
+    "checkout": "Checkout!",
+    "typed": "Eingabe"
   },
   "cricket_game": {
     "rules_title": "Cricket-Regeln:",
@@ -2013,7 +2014,16 @@
     "darts_count_other": "({{count}} Darts)",
     "leg_number": "LEG {{n}}",
     "legs_progress": "{{won}} / {{total}} Legs",
-    "next_leg_starting": "Nächstes Leg startet..."
+    "next_leg_starting": "Nächstes Leg startet...",
+    "set_number": "SATZ {{n}}",
+    "sets_progress": "{{won}} / {{total}} Sätze",
+    "next_set_starting": "Nächster Satz startet …",
+    "tap_to_continue": "Tippen zum Weiterspielen",
+    "handoff": "{{name}} · {{score}} → {{remaining}}",
+    "handoff_bust": "{{name}} · Bust → {{remaining}}",
+    "next_player": "Weiter: {{name}}",
+    "show_dartboard": "Dartboard einblenden",
+    "hide_dartboard": "Dartboard ausblenden"
   },
   "training_screen": {
     "title_doubles": "Doppel-Training",

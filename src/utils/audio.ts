@@ -1,4 +1,16 @@
 // Audio system for dart sounds and announcements
+import { logger } from './logger';
+
+/**
+ * Sounds that only make sense right away. When a new score is called, any of
+ * these still waiting in the queue are stale — in quick play the caller used
+ * to trail one or two visits behind.
+ */
+const STALE_ON_ANNOUNCE = /\/sounds\/(caller|yourequire|requires|OMNI\/pop)/;
+
+/** The queue after a new score announcement: stale calls dropped. */
+export const pruneForAnnouncement = (queue: string[]): string[] =>
+  queue.filter(path => !STALE_ON_ANNOUNCE.test(path));
 
 class AudioSystem {
   private audioCache: Map<string, HTMLAudioElement> = new Map();
@@ -29,7 +41,7 @@ class AudioSystem {
         if (this.audioContext && this.audioContext.state === 'suspended') {
           this.audioContext.resume().then(() => {
             this.isUnlocked = true;
-            console.log('✅ Audio system unlocked');
+            logger.debug('✅ Audio system unlocked');
           });
         }
         
@@ -43,7 +55,7 @@ class AudioSystem {
       document.addEventListener('touchend', unlockAudio, false);
       document.addEventListener('click', unlockAudio, false);
     } catch (error) {
-      console.warn('AudioContext not supported:', error);
+      logger.warn('AudioContext not supported:', error);
     }
   }
 
@@ -61,7 +73,7 @@ class AudioSystem {
       audio.preload = 'auto';
       this.audioCache.set(path, audio);
     } catch (error) {
-      console.warn('Failed to preload sound:', path, error);
+      logger.warn('Failed to preload sound:', path, error);
     }
   }
 
@@ -87,14 +99,14 @@ class AudioSystem {
       this.audioCache.set(path, audio);
       return audio;
     } catch (error) {
-      console.warn('Failed to load sound:', path, error);
+      logger.warn('Failed to load sound:', path, error);
       return null;
     }
   }
 
   private async playSoundImmediate(soundPath: string): Promise<void> {
     if (!this.enabled) {
-      console.log('🔇 Audio disabled, skipping:', soundPath);
+      logger.debug('🔇 Audio disabled, skipping:', soundPath);
       return;
     }
     
@@ -103,14 +115,14 @@ class AudioSystem {
       try {
         await this.audioContext.resume();
       } catch (error) {
-        console.warn('Failed to resume AudioContext:', error);
+        logger.warn('Failed to resume AudioContext:', error);
       }
     }
     
     try {
       const audio = await this.loadSound(soundPath);
       if (!audio) {
-        console.warn('❌ Audio element not loaded:', soundPath);
+        logger.warn('❌ Audio element not loaded:', soundPath);
         return;
       }
       
@@ -120,12 +132,12 @@ class AudioSystem {
       
       return new Promise((resolve, reject) => {
         audio.onended = () => {
-          console.log('✅ Finished playing:', soundPath);
+          logger.debug('✅ Finished playing:', soundPath);
           resolve();
         };
         
         audio.onerror = () => {
-          console.warn('❌ Error playing:', soundPath);
+          logger.warn('❌ Error playing:', soundPath);
           reject();
         };
         
@@ -134,23 +146,23 @@ class AudioSystem {
         if (playPromise !== undefined) {
           playPromise
             .then(() => {
-              console.log('🔊 Playing sound:', soundPath);
+              logger.debug('🔊 Playing sound:', soundPath);
             })
             .catch((error) => {
               // Handle autoplay restrictions
               if (error.name === 'NotAllowedError') {
-                console.warn('⚠️ Audio blocked by browser autoplay policy. User interaction required.');
+                logger.warn('⚠️ Audio blocked by browser autoplay policy. User interaction required.');
               } else if (error.name === 'NotSupportedError') {
-                console.warn('⚠️ Audio format not supported:', soundPath);
+                logger.warn('⚠️ Audio format not supported:', soundPath);
               } else {
-                console.warn('❌ Failed to play sound:', soundPath, error);
+                logger.warn('❌ Failed to play sound:', soundPath, error);
               }
               reject(error);
             });
         }
       });
     } catch (error) {
-      console.warn('❌ Error in playSound:', soundPath, error);
+      logger.warn('❌ Error in playSound:', soundPath, error);
       throw error;
     }
   }
@@ -170,7 +182,7 @@ class AudioSystem {
           // Small delay between sounds
           await new Promise(resolve => setTimeout(resolve, 100));
         } catch (error) {
-          console.warn('Error playing queued sound:', error);
+          logger.warn('Error playing queued sound:', error);
         }
       }
     }
@@ -180,7 +192,7 @@ class AudioSystem {
 
   async playSound(soundPath: string, priority: boolean = false) {
     if (!this.enabled) {
-      console.log('🔇 Audio disabled');
+      logger.debug('🔇 Audio disabled');
       return;
     }
     
@@ -191,7 +203,7 @@ class AudioSystem {
       try {
         await this.playSoundImmediate(soundPath);
       } catch (error) {
-        console.warn('Failed to play priority sound:', error);
+        logger.warn('Failed to play priority sound:', error);
       }
     } else {
       // Normal sounds - add to queue
@@ -216,6 +228,7 @@ class AudioSystem {
     // Play only caller sound for the score - no speech synthesis
     // Check if file exists, fallback to 0 if not
     const soundPath = `/sounds/caller/${score}.mp3`;
+    this.soundQueue = pruneForAnnouncement(this.soundQueue);
     this.playSound(soundPath, false);
   }
 
@@ -269,7 +282,7 @@ class AudioSystem {
         await this.playSoundImmediate('/sounds/texts/gameshot.mp3');
       }
     } catch (error) {
-      console.warn('Failed to play checkout announcement:', error);
+      logger.warn('Failed to play checkout announcement:', error);
     }
   }
 
@@ -284,7 +297,7 @@ class AudioSystem {
       }
       await this.playSoundImmediate('/sounds/caller/0.mp3');
     } catch (error) {
-      console.warn('Failed to play bust announcement:', error);
+      logger.warn('Failed to play bust announcement:', error);
     }
   }
 
@@ -332,11 +345,11 @@ class AudioSystem {
 
   // Test method to verify audio is working
   async testSound() {
-    console.log('🎵 Testing audio system...');
-    console.log('  - Enabled:', this.enabled);
-    console.log('  - Volume:', this.volume);
-    console.log('  - AudioContext state:', this.audioContext?.state);
-    console.log('  - Unlocked:', this.isUnlocked);
+    logger.debug('🎵 Testing audio system...');
+    logger.debug('  - Enabled:', this.enabled);
+    logger.debug('  - Volume:', this.volume);
+    logger.debug('  - AudioContext state:', this.audioContext?.state);
+    logger.debug('  - Unlocked:', this.isUnlocked);
     
     await this.playSound('/sounds/caller/100.mp3');
   }
