@@ -80,6 +80,24 @@ describe('README badges state the truth', () => {
   });
 
   /**
+   * Lines of code are measured by `scripts/count-loc.mjs`, never typed. The
+   * badge may round down and may lag by up to 2k lines (it is not updated on
+   * every commit), but it may never claim more than was measured.
+   */
+  it('the lines-of-code badge matches the measured count', async () => {
+    const { countLoc } = await import('../../../scripts/count-loc.mjs');
+    const measured = Math.floor(countLoc() / 1000);
+    expect(measured).toBeGreaterThan(10);
+    for (const [name, md] of [['DE', README_DE], ['EN', README_EN]] as const) {
+      const raw = badgeValue(md, 'lines_of_code');
+      expect(raw, `${name} README has no lines_of_code badge`).toBeTruthy();
+      const claimed = Number(raw!.replace(/\D/g, ''));
+      expect(claimed, `${name}: badge ~${claimed}k, measured ${measured}k`).toBeLessThanOrEqual(measured);
+      expect(claimed, `${name}: badge ~${claimed}k is stale, measured ${measured}k`).toBeGreaterThanOrEqual(measured - 2);
+    }
+  });
+
+  /**
    * Counting `it(` blocks statically undercounts, because `it.each([...])`
    * expands to one test per row at runtime. So the badge must be at least the
    * static count — it can never claim fewer tests than are visibly written —
