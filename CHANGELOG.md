@@ -7,6 +7,27 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.31.3] - 2026-10-11
+
+### Fixed
+- Wheel: the flapper spun wildly during the spin. Every peg started a new
+  spring with `set`, which inherited the previous spring's velocity; the pegs
+  pumped it up to 10^13 degrees. Each peg now stops the running spring, jumps
+  the flapper (velocity reset) and springs back from rest, capped at 28°.
+- Wheel: the lifted winning wedge (scale 1.06) poked out past the rim; now
+  1.02, inside the rim stroke.
+
+### Changed
+- Wheel is larger: `min(86vw, 60dvh, 38rem)` instead of `min(78vw, 20rem)`;
+  hub and flapper scale with it. Result and choice buttons share one grid
+  cell, so a small phone shows the wheel, all buttons and "skip" without
+  scrolling, and the wheel does not jump when the result appears.
+
+### Tests
+- `e2e/wheel.spec.ts` (phone + desktop): wheel size, flapper rotation
+  sampled every frame stays within 30°. Fails against the old code
+  (measured 5·10^21°).
+
 ## [0.31.2] - 2026-10-11
 
 ### Changed — documentation

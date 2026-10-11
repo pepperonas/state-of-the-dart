@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence, animate, useMotionValue, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence, animate, useMotionValue, useReducedMotion, type Transition } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Player } from '../../types';
 import { audioSystem } from '../../utils/audio';
@@ -46,6 +46,8 @@ const LABEL_INNER = 0.31;
 const LABEL_OUTER = 0.76;
 /** Avatar centre, as a fraction of the radius — close to the rim, out of the label's way. */
 const AVATAR_AT = 0.86;
+/** Furthest a peg can push the flapper aside, in degrees. */
+const FLAP_MAX = 28;
 const CIRCLE = shapePolygon('circle', 144);
 const BURST = shapePolygon('burst', 144);
 
@@ -109,10 +111,18 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
   }, [onComplete]);
 
   // The flapper: knocked aside by a peg, it springs back and rattles.
+  // Every peg restarts the flapper from rest: `jump` drops the velocity the
+  // previous spring left behind. With `set`, each new spring inherited it and
+  // the pegs pumped it up until the flapper spun through 10^13 degrees.
   const lastTick = useRef(0);
+  const flapAnim = useRef<ReturnType<typeof animate> | null>(null);
+  const knock = (deg: number, spring: Transition) => {
+    flapAnim.current?.stop();
+    flap.jump(Math.max(-FLAP_MAX, Math.min(0, deg)));
+    flapAnim.current = animate(flap, 0, { ...spring, velocity: 0 });
+  };
   const kick = (speed: number) => {
-    flap.set(-Math.min(28, 8 + speed * 0.018));
-    void animate(flap, 0, { type: 'spring', stiffness: 900, damping: 14 });
+    knock(-Math.min(FLAP_MAX, 8 + speed * 0.018), { type: 'spring', stiffness: 900, damping: 14 });
     const now = performance.now();
     if (now - lastTick.current > 35) {
       lastTick.current = now;
@@ -162,8 +172,7 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
         frame.current = null;
         rot.set(target);
         // The last peg catches the flapper: one slow teeter, then rest.
-        flap.set(-12);
-        void animate(flap, 0, springSpatialSlow);
+        knock(-12, springSpatialSlow);
         later(() => reveal(index), 260);
       }
     };
@@ -202,21 +211,21 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
       role="dialog"
       aria-modal="true"
       aria-labelledby="spinner-title"
-      className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_85%,transparent)] flex items-center justify-center z-50 m3-scrim-enter p-4"
+      className="fixed inset-0 bg-[color-mix(in_srgb,var(--m3-scrim)_85%,transparent)] flex items-center justify-center z-50 m3-scrim-enter p-2 sm:p-4"
       onClick={() => { if (phase === 'result' && winner != null) finish(winner); }}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={springSpatialDefault}
-        className="flex flex-col items-center gap-5 p-6 sm:p-8 bg-surface-container-high rounded-m3-xl shadow-m3-3 w-full max-w-md"
+        className="flex flex-col items-center gap-4 sm:gap-5 p-4 sm:p-8 bg-surface-container-high rounded-m3-xl shadow-m3-3 w-full max-w-2xl max-h-full overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         <h2 id="spinner-title" className="m3-headline-small text-on-surface text-center">
           {t('game.who_starts')}
         </h2>
 
-        <div className="relative w-[min(78vw,20rem)] aspect-square" data-testid="spinner-wheel" data-phase={phase}>
+        <div className="relative w-[min(86vw,60dvh,38rem)] aspect-square shrink-0" data-testid="spinner-wheel" data-phase={phase}>
           {/* Idle sway while the intro plays, so the wheel looks ready to go. */}
           <motion.div
             className="absolute inset-0"
@@ -236,7 +245,8 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
                 return (
                   <motion.g
                     key={p.id}
-                    animate={{ scale: isWinner ? 1.06 : 1, opacity: dim ? 0.38 : 1 }}
+                    // 1.02: the lifted wedge stays inside the rim stroke (3 of 150 units).
+                    animate={{ scale: isWinner ? 1.02 : 1, opacity: dim ? 0.38 : 1 }}
                     transition={springSpatialDefault}
                     style={{ transformOrigin: `${C}px ${C}px` }}
                   >
@@ -278,7 +288,7 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
           {/* Hub: a circle that bursts open on the winner. */}
           <motion.div
             ref={hubRef}
-            className="absolute left-1/2 top-1/2 w-20 h-20 -ml-10 -mt-10 flex items-center justify-center bg-tertiary text-on-tertiary shadow-m3-3"
+            className="absolute left-1/2 top-1/2 w-1/4 h-1/4 -ml-[12.5%] -mt-[12.5%] flex items-center justify-center bg-tertiary text-on-tertiary shadow-m3-3"
             animate={{
               clipPath: phase === 'result' ? BURST : CIRCLE,
               scale: phase === 'result' ? 1.25 : 1,
@@ -289,10 +299,10 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
             <AnimatePresence mode="popLayout" initial={false}>
               {phase === 'result' && winner != null ? (
                 <motion.span key="winner" initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={springSpatialFast}>
-                  <Icon name={iconForEmoji(players[winner].avatar)} size={34} />
+                  <Icon name={iconForEmoji(players[winner].avatar)} size={44} />
                 </motion.span>
               ) : (
-                <motion.span key="spin" className="m3-label-large font-bold tracking-wider" exit={{ scale: 0.4, opacity: 0 }}>
+                <motion.span key="spin" className="m3-title-medium font-bold tracking-wider" exit={{ scale: 0.4, opacity: 0 }}>
                   {t('spinner.spin')}
                 </motion.span>
               )}
@@ -301,7 +311,8 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
 
           {/* Flapper: knocked by every peg, springs back. */}
           <motion.div
-            className="absolute left-1/2 -top-3 -ml-4 w-8 h-11 origin-top z-10"
+            className="absolute left-1/2 -top-[4%] -ml-[5%] w-[10%] h-[13.75%] origin-top z-10"
+            data-testid="spinner-flapper"
             style={{ rotate: flap }}
             aria-hidden="true"
           >
@@ -312,8 +323,12 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
           </motion.div>
         </div>
 
+        {/* The choice buttons and the result share one grid cell: they never
+            show together, and the cell keeps the taller one's height, so the
+            wheel does not jump when the result replaces the buttons. */}
+        <div className="grid w-full place-items-center [&>*]:[grid-area:1/1]">
         {/* Result: the winner's name springs in. */}
-        <div className="min-h-[4.5rem] flex items-center justify-center" aria-live="polite">
+        <div className="flex items-center justify-center" aria-live="polite">
           <AnimatePresence>
             {phase === 'result' && winner != null && (
               <motion.div
@@ -332,8 +347,8 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
         </div>
 
         {/* The wheel runs on every game — never force it: anyone can be picked directly. */}
-        {phase !== 'result' && (
-          <div className="flex flex-col items-center gap-3 w-full">
+        {/* Kept in the layout (hidden, inert) once the result shows, so the cell keeps its height. */}
+          <div className={`flex flex-col items-center gap-2 sm:gap-3 w-full ${phase === 'result' ? 'invisible' : ''}`} inert={phase === 'result'}>
             <div className="flex flex-wrap justify-center gap-2" role="group" aria-label={t('game.who_starts')}>
               {players.map((p, i) => (
                 <motion.button
@@ -358,7 +373,7 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
               {t('game.skip_spinner')}
             </Button>
           </div>
-        )}
+        </div>
       </motion.div>
     </div>
   );
