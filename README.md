@@ -51,7 +51,7 @@
 
   ### 🧰 Tech-Stack
 
-  React 19 · TypeScript 5 · Vite · Tailwind · Material 3 Expressive (eigene Federn, Formen, Icons) · Framer Motion · WebGL · Express · SQLite · Socket.IO · Workbox. **1154 Unit-Tests + 43 E2E-Tests.** MIT-lizenziert.
+  React 19 · TypeScript 5 · Vite · Tailwind · Material 3 Expressive (eigene Federn, Formen, Icons) · Framer Motion · WebGL · Express · SQLite · Socket.IO · Workbox. **1154 Unit-Tests + 45 E2E-Tests.** MIT-lizenziert.
 
   <!-- ── Headline metrics ─────────────────────────────────────── -->
   <p>
@@ -64,14 +64,14 @@
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml" title="Playwright end-to-end tests against a real backend">
-      <img src="https://img.shields.io/badge/E2E_Tests-43-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
+      <img src="https://img.shields.io/badge/E2E_Tests-45-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
     </a>
   </p>
 
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.31.2-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.31.4-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
@@ -806,7 +806,7 @@ scheitern. Das Badge darf laut Doku-Abgleich **nie mehr** behaupten, als gemesse
 > **Doku-Abgleich:** `src/tests/docs/docsSync.test.ts` lässt die Dokumentation nicht driften. Es prüft, dass jede Zahl in einem Badge zum Code passt, dass jeder dokumentierte `npm run …`-Befehl existiert, dass jeder erwähnte Pfad und jeder Markdown-Link auflösbar ist und dass beide READMEs denselben Badge-Satz tragen. Wer eine Zahl ändert, ohne die Doku nachzuziehen, bekommt einen roten Test statt einer stillen Lüge.
 
 ### E2E-Tests (Playwright)
-**43 Tests** in `e2e/` gegen `vite preview` + isoliertes Backend mit eigener SQLite-DB.
+**45 Tests** in `e2e/` gegen `vite preview` + isoliertes Backend mit eigener SQLite-DB.
 
 ```bash
 npm run test:e2e       # Headless
@@ -825,6 +825,7 @@ Was die Suite abdeckt:
 - Spielansicht je Bildschirmklasse (390 px bis 2560 px), 180-Moment, Leg-Rückblick, Einblicke in zwei Spalten
 - Refresh mitten in der Aufnahme verliert nichts; Online-Spiel mit zwei Browsern; Turnier über Reloads hinweg
 - TV-Scoreboard mit zwei Fenstern: wartet, folgt live, zeigt Momente, übersteht Reload
+- Glücksrad auf Handy und Desktop: bildschirmfüllend, Zeiger schlägt nie mehr als 30° aus
 - Barrierefreiheit (axe-core auf 21 Seiten + Spielmodi, Trefferflächen) und Kontrast (12 Seiten, beide Themes)
 
 ### CI/CD
@@ -919,6 +920,14 @@ Contributions sind willkommen! Bitte:
 ---
 
 ## 📝 Changelog
+
+### v0.31.4 (11. Oktober 2026) - Glücksrad bildschirmfüllend, längerer Spin
+
+Das Glücksrad füllt jetzt den Bildschirm: am Handy fast die ganze Breite, am Desktop und im Querformat fast die ganze Höhe – Titel, Startknöpfe und Ergebnis stehen dann rechts daneben. Namen und Symbole auf dem Rad, die Überschrift, der Siegername und die Startknöpfe wachsen mit der Bildschirmgröße (bis 2560 px und darüber). Der Spin dauert etwa 6,5 statt 4,3 Sekunden. Passt etwas auf einem sehr kleinen Bildschirm nicht ganz, lässt sich scrollen, statt dass der Titel oben abgeschnitten wird. **Behoben:** Ein Doku-Test schlug in der CI fehl, weil er einen nur lokal vorhandenen Screenshot-Ordner erwartete.
+
+### v0.31.3 (11. Oktober 2026) - Glücksrad repariert und größer
+
+**Behoben:** Der Zeiger oben am Glücksrad drehte sich während des Spins wild im Kreis – jeder Stift startete eine neue Feder, die den Schwung der vorherigen erbte, bis sie sich aufschaukelte. Jetzt wird er an jedem Stift aus der Ruhe angestoßen und schlägt höchstens 28° aus. Das Siegerfeld ragt beim Hervortreten nicht mehr über den Rand. **Größer:** Das Rad nutzt jetzt bis zu 86 % der Bildschirmbreite bzw. 60 % der Höhe (max. 38 rem, vorher 20 rem); Nabe und Zeiger wachsen mit. Auf kleinen Handys passen Rad, Startknöpfe und „Überspringen“ ohne Scrollen ins Bild, und das Rad springt nicht, wenn das Ergebnis erscheint. Ein neuer Browser-Test misst Zeiger und Radgröße.
 
 ### v0.31.2 (11. Oktober 2026) - Neue README, Mockups und Social Preview
 

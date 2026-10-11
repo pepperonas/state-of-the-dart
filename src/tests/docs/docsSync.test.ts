@@ -205,7 +205,7 @@ describe('documented paths exist', () => {
         // …and paths that are produced at runtime rather than committed. The
         // docs legitimately name them (the E2E database, the build output), but
         // they do not exist in a clean checkout — which is exactly what CI is.
-        if (/^(server\/data|dist|coverage|node_modules)\//.test(p)) continue;
+        if (/^(server\/data|dist|coverage|node_modules|tools\/screenshots\/out)\//.test(p)) continue;
         if (!fs.existsSync(path.join(ROOT, p))) offenders.push(`${name}: ${p}`);
       }
     }

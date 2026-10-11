@@ -51,7 +51,7 @@
 
   ### 🧰 Tech stack
 
-  React 19 · TypeScript 5 · Vite · Tailwind · Material 3 Expressive (own springs, shapes, icons) · Framer Motion · WebGL · Express · SQLite · Socket.IO · Workbox. **1154 unit tests + 43 E2E tests.** MIT-licensed.
+  React 19 · TypeScript 5 · Vite · Tailwind · Material 3 Expressive (own springs, shapes, icons) · Framer Motion · WebGL · Express · SQLite · Socket.IO · Workbox. **1154 unit tests + 45 E2E tests.** MIT-licensed.
 
   <!-- ── Headline metrics ─────────────────────────────────────── -->
   <p>
@@ -64,14 +64,14 @@
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml" title="Playwright end-to-end tests against a real backend">
-      <img src="https://img.shields.io/badge/E2E_Tests-43-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
+      <img src="https://img.shields.io/badge/E2E_Tests-45-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
     </a>
   </p>
 
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="../LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="../CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.31.2-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="../CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.31.4-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
@@ -375,7 +375,7 @@ admin-only.
 | Layer | Count | Tool |
 |---|---|---|
 | Unit / component | **1154** | Vitest + React Testing Library |
-| End-to-end | **43** | Playwright (preview build + isolated backend) |
+| End-to-end | **45** | Playwright (preview build + isolated backend) |
 
 ```bash
 npm test              # watch mode
