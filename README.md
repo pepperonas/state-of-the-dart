@@ -51,27 +51,27 @@
 
   ### 🧰 Tech-Stack
 
-  React 19 · TypeScript 5 · Vite · Tailwind · Material 3 Expressive (eigene Federn, Formen, Icons) · Framer Motion · WebGL · Express · SQLite · Socket.IO · Workbox. **1154 Unit-Tests + 45 E2E-Tests.** MIT-lizenziert.
+  React 19 · TypeScript 5 · Vite · Tailwind · Material 3 Expressive (eigene Federn, Formen, Icons) · Framer Motion · WebGL · Express · SQLite · Socket.IO · Workbox. **1188 Unit-Tests + 46 E2E-Tests.** MIT-lizenziert.
 
   <!-- ── Headline metrics ─────────────────────────────────────── -->
   <p>
     <a href="https://github.com/pepperonas/state-of-the-dart" title="Lines of code — measured by scripts/count-loc.mjs, checked by the docs test">
-      <img src="https://img.shields.io/badge/lines_of_code-~57k-2b3137?style=for-the-badge&logo=typescript&logoColor=white" height="64" alt="Lines of code" />
+      <img src="https://img.shields.io/badge/lines_of_code-~58k-2b3137?style=for-the-badge&logo=typescript&logoColor=white" height="64" alt="Lines of code" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml" title="Vitest unit and component tests, all passing">
-      <img src="https://img.shields.io/badge/Unit_Tests-1154-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
+      <img src="https://img.shields.io/badge/Unit_Tests-1188-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml" title="Playwright end-to-end tests against a real backend">
-      <img src="https://img.shields.io/badge/E2E_Tests-45-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
+      <img src="https://img.shields.io/badge/E2E_Tests-46-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
     </a>
   </p>
 
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.31.4-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.32.0-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
@@ -592,7 +592,8 @@ state-of-the-dart/
 - **Darts**: jeder Dart einzeln über S/D/T und die Zahl (exakte Felder, für Statistik und Heatmap)
 - **Schnell**: häufige Scores mit einem Klick (26, 41, 45, 60, 81, 85, 100, 121, 140, 180)
 - **Dartboard**: auf dem Desktop unter der Eingabe, auf dem Handy einklappbar
-- **Korrektur**: „Wurf zurück“, Backspace oder Strg+Z holt die letzte Aufnahme zurück
+- **Korrektur**: „Wurf zurück“, Backspace oder Strg+Z holt die letzte Aufnahme zurück. Eine getippte Summe kommt als Summe zurück („60 → _“): richtige Zahl tippen, Enter – Esc behält sie. Jede frühere Aufnahme im laufenden Leg lässt sich über ihre Pille auf der Spielerkarte oder den Stift im Wurf-Verlauf korrigieren (Summe oder einzelne Darts).
+- **Wie geworfen?** Nach einer getippten Summe schlägt die App 2–3 wahrscheinliche Zerlegungen vor (bei 60 z. B. „20 · 20 · 20“ oder „T20 · 0 · 0“). Ein Tipp macht die Darts genau, ignorieren kostet nichts. Getippte Summen zählen nicht in die Heatmap – unter jeder Heatmap steht, wie viele Darts genau erfasst sind.
 - **Checkout-Weg** steht in der Eingabekarte; der **Platz im Leg** (1 grün, 2 gelb, 3 orange …) auf jeder Spielerkarte
 
 ### 4. Statistiken ansehen
@@ -806,7 +807,7 @@ scheitern. Das Badge darf laut Doku-Abgleich **nie mehr** behaupten, als gemesse
 > **Doku-Abgleich:** `src/tests/docs/docsSync.test.ts` lässt die Dokumentation nicht driften. Es prüft, dass jede Zahl in einem Badge zum Code passt, dass jeder dokumentierte `npm run …`-Befehl existiert, dass jeder erwähnte Pfad und jeder Markdown-Link auflösbar ist und dass beide READMEs denselben Badge-Satz tragen. Wer eine Zahl ändert, ohne die Doku nachzuziehen, bekommt einen roten Test statt einer stillen Lüge.
 
 ### E2E-Tests (Playwright)
-**45 Tests** in `e2e/` gegen `vite preview` + isoliertes Backend mit eigener SQLite-DB.
+**46 Tests** in `e2e/` gegen `vite preview` + isoliertes Backend mit eigener SQLite-DB.
 
 ```bash
 npm run test:e2e       # Headless
@@ -826,6 +827,7 @@ Was die Suite abdeckt:
 - Refresh mitten in der Aufnahme verliert nichts; Online-Spiel mit zwei Browsern; Turnier über Reloads hinweg
 - TV-Scoreboard mit zwei Fenstern: wartet, folgt live, zeigt Momente, übersteht Reload
 - Glücksrad auf Handy und Desktop: bildschirmfüllend, Zeiger schlägt nie mehr als 30° aus
+- Getippte Summe bleibt aus der Heatmap, Chip macht sie genau, „Wurf zurück“ als Summe, ältere Aufnahme korrigieren, gespeicherte Heatmap zählt nichts doppelt
 - Barrierefreiheit (axe-core auf 21 Seiten + Spielmodi, Trefferflächen) und Kontrast (12 Seiten, beide Themes)
 
 ### CI/CD
@@ -920,6 +922,10 @@ Contributions sind willkommen! Bitte:
 ---
 
 ## 📝 Changelog
+
+### v0.32.0 (11. Oktober 2026) - Summe korrigieren, ehrliche Heatmap
+
+**Für Kopfrechner:** „Wurf zurück“ holt eine getippte Aufnahme als Summe zurück („60 → _“) – richtige Zahl tippen, Enter, fertig; Esc behält sie. Jede frühere Aufnahme im laufenden Leg lässt sich über ihre Pille auf der Spielerkarte oder den Stift im Wurf-Verlauf korrigieren, als Summe oder Dart für Dart; spätere Reste werden automatisch neu berechnet. **Heatmap:** Getippte Summen zählen nicht mehr – bisher wurde aus jeder 60 ein erfundenes T20, die Heatmap eines Kopfrechners war fast nur T20. Nach einer getippten Aufnahme schlägt die App wahrscheinliche Zerlegungen vor („20 · 20 · 20“, „T20 · 0 · 0“); ein Tipp macht die Darts genau. Unter jeder Heatmap steht, wie viele Darts genau erfasst sind, der Wurf-Verlauf zeigt „Summe getippt“ statt erfundener Darts. **Behoben:** Nach jedem „Wurf zurück“ wurde die vorherige Aufnahme ein zweites Mal in die gespeicherte Spieler-Heatmap gebucht und die zurückgenommene nie abgezogen. Bereits gespeicherte erfundene T20 lassen sich nicht herausrechnen – sie tragen keine Markierung.
 
 ### v0.31.4 (11. Oktober 2026) - Glücksrad bildschirmfüllend, längerer Spin
 

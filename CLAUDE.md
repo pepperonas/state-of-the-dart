@@ -320,6 +320,15 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - Game screen below `lg`: `ScoreStrip` replaces the stacked `PlayerScore` cards and ScoreInput hides its own "remaining" header. `e2e/layout.spec.ts` asserts the confirm button and all scores are on screen at 390×844 and 1280×800. ⚠️ Locators like `getByText('501')` must add `.locator('visible=true')` — the strip exists (hidden) on desktop too.
 - ScoreInput has three modes (`numpad` / `darts` / `quick`, remembered in `sotd-input-mode`); the dart grid adds exact beds.
 
+### Typed totals, corrections, honest heatmap (0.32.0)
+- **Heatmaps count exact darts only.** A numpad total is reconstructed into guessed darts (`estimated: true`, no coordinates since 0.32.0). `exactDarts`/`exactShare` (`utils/heatmap.ts`) filter every heatmap: live, match history, and the stored player aggregate (`updatePlayerHeatmap` filters itself, so training is covered). `ExactShareNote` shows "N of M darts recorded exactly"; a board with only typed totals shows `heatmap.only_typed`. Old aggregates may still hold guessed T20s — they carry no flag, nothing to recompute.
+- **The stored aggregate is booked by visit id** (`diffVisitDarts`): new visit adds, vanished visit (undo) subtracts, changed visit swaps. ⚠️ The old effect booked "the last visit whenever its id changed" — an undo made the previous visit the last one and booked it a second time. No status gate: the checkout that completes a match arrives with `completed`.
+- **`EDIT_THROW { throwId, darts }`** (rules in `utils/editVisit.ts`): in the leg in play it replaces the darts and re-scores every later visit (`evaluateVisit` in order); a correction that would create a checkout is refused (finishing has its own flow — undo and retype). In a finished leg / completed match only a swap with the same score, remaining and bust is allowed (how a typed checkout was thrown). Stats via `recomputePlayers` (shared with undo). GameScreen checks with `editVisit` first so a refusal can say why.
+- **Undo of a typed visit = sum correction:** ScoreInput is `correcting` when `isEditingThrow` and every dart in the input is estimated: "60 → _", typed total + Enter → `onReplaceVisit` (CLEAR + ADD + confirm), Esc / empty Enter keep the visit. The darts stay in the input meanwhile, so a refresh loses nothing.
+- **"How was it thrown?" chips** (`VisitChips`, `utils/decompose.ts` `likelyDecompositions`): for the newest visit if it is a typed total of a person (not bust, > 0). Ranked by a plausibility model (singles before trebles, aim clusters 20/19/18, one aim per visit); a checkout ends on a dart that satisfies the out rule. A tap = `EDIT_THROW` with the same total. The chips never take focus (pointerdown prevented) — Enter stays with the numpad.
+- **Correcting older visits:** hero last-visit pills (`visit-pill`) and the pencil in the visit history (`history-edit`) open `EditVisitDialog` (Summe / Darts, the grid is the shared `DartGrid`). Typed visits show "Summe getippt" in the history instead of invented darts.
+- Insight cards follow `visitRevision` (ids + scores + darts), not the visit count — a correction changes no count.
+
 ### TV scoreboard (0.31.0)
 - `/scoreboard` renders a snapshot published by GameScreen (`ScoreboardPublisher` → `utils/scoreboard.ts`): BroadcastChannel `sotd-scoreboard` for live updates plus a localStorage copy (`state-of-the-dart-scoreboard`, in `DEVICE_GAME_KEYS`) for a window that opens mid-match and for the `storage`-event fallback. Same device and browser only — no backend.
 - ⚠️ The scoreboard must never use GameContext: a second window restoring the match there could write a stale state back. It only reads snapshots; `isNewer` drops older ones (publish stamps are strictly increasing, `nextStamp`).
@@ -517,7 +526,8 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **45 tests** currently:
+- Specs in `e2e/`. **46 tests** currently:
+  - `correction.spec.ts` — a typed 60 stays out of the heatmap, a chip makes it exact, undo brings a typed visit back as "26 → …", an older visit is corrected from its pill, the stored heatmap never counts twice, reload keeps it all
   - `wheel.spec.ts` — the start wheel on phone and desktop: size, and the flapper rotation sampled every frame never exceeds 30°
   - `scoreboard.spec.ts` — a waiting scoreboard window picks up a new match, follows visits live (rows, active player, visit and 180 moments) and shows the match at once after a reload
   - `arena.spec.ts` — phone: input dock in reach, hero above it, stats sheet; hero swaps on the turn; 2 panes at 1024, 3 panes + board above the fold at 1440; no width cap at 2560; a 180 shows the hero moment without blocking input, a won leg its recap

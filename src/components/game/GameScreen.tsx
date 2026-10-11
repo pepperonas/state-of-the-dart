@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useDeferredValue, Suspense, lazy } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, X, Bot, ChevronDown, AlertTriangle, Smile, Flame, UserMinus, Volume2, VolumeX, BarChart3, Tv } from 'lucide-react';
+import { ArrowLeft, RotateCcw, X, Bot, ChevronDown, AlertTriangle, Smile, Flame, UserMinus, Volume2, VolumeX, BarChart3, Tv, Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 const ThrowChart = lazy(() => import('./ThrowChart'));
 import { useGame, MIN_MATCH_PLAYERS } from '../../context/GameContext';
@@ -11,7 +11,8 @@ import { useGameAchievements } from '../../hooks/useGameAchievements';
 import { useAchievementHints } from '../../hooks/useAchievementHints';
 import Dartboard from '../dartboard/Dartboard';
 import { DartboardHeatmap } from '../dartboard/DartboardHeatmap';
-import { heatmapFromThrows } from '../../utils/heatmap';
+import { heatmapFromThrows, exactShare } from '../../utils/heatmap';
+import { ExactShareNote } from '../dartboard/ExactShareNote';
 import { setCelebrationMoment } from '../../utils/celebrationMoment';
 import { legRanks } from '../../utils/legRanks';
 import ScoreInput from './ScoreInput';
@@ -36,6 +37,9 @@ import { feedbackLevel, personalBestHits, type Baseline, type PersonalBestHit } 
 import { burst, originOf } from '../../utils/celebration';
 import { shapePolygon } from '../../utils/shapes';
 import Spotlight, { type SpotPlayer } from './Spotlight';
+import EditVisitDialog, { type EditVisitTab } from './EditVisitDialog';
+import { editVisit } from '../../utils/editVisit';
+import { likelyDecompositions } from '../../utils/decompose';
 import { lastVisits, dartsInLeg } from '../../utils/arena';
 import { haptic } from '../../utils/haptics';
 import { useWakeLock } from '../../hooks/useWakeLock';
@@ -466,7 +470,13 @@ const GameScreen: React.FC = () => {
   // The insight cards (table, chart, heatmap, history) follow a visit at low
   // priority: rendering them in the same commit as the turn change cost
   // 100+ ms long tasks right in the middle of the card morph.
-  const deferredThrows = useDeferredValue(totalThrowsCount);
+  // A corrected visit changes darts and scores, not the count — the cards
+  // follow a revision of the visits instead of the count alone.
+  const visitRevision = useMemo(() => (state.currentMatch?.legs ?? [])
+    .flatMap(leg => leg.throws ?? [])
+    .map(v => `${v.id}:${v.score}:${v.darts.map(d => `${d.segment}x${d.multiplier}${d.estimated ? '~' : ''}`).join(',')}`)
+    .join('|'), [state.currentMatch?.legs]);
+  const deferredThrows = useDeferredValue(visitRevision);
   const deferredPlayerIndex = useDeferredValue(state.currentPlayerIndex);
 
   // Personal-best baselines per player for live "new best" chips, read once
@@ -539,11 +549,11 @@ const GameScreen: React.FC = () => {
   }, [state.currentMatch?.status, state.currentMatch?.id]);
 
   // Calculate live heatmap data from current match throws
-  const liveHeatmapData = useMemo((): Record<string, HeatmapData> => {
+  const liveHeatmapData = useMemo((): Record<string, HeatmapData & { share: { exact: number; total: number } }> => {
     // Only while the section is open — it used to rebuild after every visit.
     if (!state.currentMatch || !heatmapVisible) return {};
 
-    const heatmaps: Record<string, HeatmapData> = {};
+    const heatmaps: Record<string, HeatmapData & { share: { exact: number; total: number } }> = {};
 
     // Collect throws based on view mode
     const allThrows: Throw[] = heatmapView === 'leg'
@@ -551,7 +561,7 @@ const GameScreen: React.FC = () => {
       : state.currentMatch.legs.flatMap(leg => leg.throws || []);
     
     state.currentMatch.players.forEach(player => {
-      heatmaps[player.playerId] = heatmapFromThrows(allThrows, player.playerId);
+      heatmaps[player.playerId] = { ...heatmapFromThrows(allThrows, player.playerId), share: exactShare(allThrows, player.playerId) };
     });
 
     return heatmaps;
@@ -962,6 +972,45 @@ const GameScreen: React.FC = () => {
     setEditingDartIndex(null);
     dispatch({ type: 'UNDO_THROW', payload: { skipBots: true } });
   };
+
+  // A taken-back typed visit corrected as a sum: swap its darts, then book it.
+  const handleReplaceVisit = React.useCallback((darts: Dart[]) => {
+    dispatch({ type: 'CLEAR_THROW' });
+    darts.forEach(dart => dispatch({ type: 'ADD_DART', payload: dart }));
+    confirmVisit(darts, true);
+  }, [confirmVisit, dispatch]);
+
+  // Correcting any booked visit (dialog, chips). The check runs first so a
+  // refused correction can say why; the reducer applies the same rule.
+  const [editTarget, setEditTarget] = useState<{ throwId: string; tab: EditVisitTab } | null>(null);
+  const handleEditVisit = React.useCallback((throwId: string) => setEditTarget({ throwId, tab: 'sum' }), []);
+  const applyVisitEdit = React.useCallback((throwId: string, darts: Dart[]): string | null => {
+    const match = state.currentMatch;
+    if (!match) return t('correction.error_not_found');
+    const result = editVisit(match, throwId, darts);
+    if (!result.ok) return t(`correction.error_${result.reason}`);
+    dispatch({ type: 'EDIT_THROW', payload: { throwId, darts } });
+    haptic('undo', settings.vibrationEnabled);
+    return null;
+  }, [state.currentMatch, dispatch, t, settings.vibrationEnabled]);
+
+  // "How was it thrown?" — the newest visit, if it was a typed total of a person.
+  const visitChips = useMemo(() => {
+    const match = state.currentMatch;
+    if (!match || match.status !== 'in-progress') return null;
+    const history = match.legs.slice(0, match.currentLegIndex + 1).flatMap(l => l.throws);
+    const last = history[history.length - 1];
+    if (!last || last.isBust || last.score <= 0 || last.darts.length === 0 || !last.darts.every(d => d.estimated)) return null;
+    if (players.find(p => p.id === last.playerId)?.isBot) return null;
+    const options = likelyDecompositions(last.score, { isCheckout: last.remaining === 0, outRule: outRuleOf(match.settings) });
+    if (options.length === 0) return null;
+    return {
+      visitId: last.id,
+      playerName: match.players.find(p => p.playerId === last.playerId)?.name ?? '',
+      score: last.score,
+      options,
+    };
+  }, [state.currentMatch, players]);
 
   // Stable identity: hero card and rows are memoized, an inline arrow would re-render them.
   const handleRequestRemovePlayer = React.useCallback((playerId: string) => {
@@ -1605,6 +1654,7 @@ const GameScreen: React.FC = () => {
       rowColumns={widthClass === 'xl' && spotPlayers.length >= 5 ? 2 : 1}
       onRemove={canRemovePlayers ? handleRequestRemovePlayer : undefined}
       removeLabel={t('game.remove_player')}
+      onEditVisit={handleEditVisit}
     />
   );
   const scoreInput = (
@@ -1631,6 +1681,15 @@ const GameScreen: React.FC = () => {
       bust={!!liveVisit?.bust}
       previewRemaining={liveVisit ? liveVisit.newRemaining : null}
       dense={windowClass.width === 'compact' && !windowClass.compactHeight}
+      onReplaceVisit={handleReplaceVisit}
+      chips={visitChips && {
+        ...visitChips,
+        onPick: (darts: Dart[]) => {
+          const problem = applyVisitEdit(visitChips.visitId, darts);
+          if (problem) notify(problem);
+        },
+        onOther: () => setEditTarget({ throwId: visitChips.visitId, tab: 'darts' }),
+      }}
     />
   );
   const alternatives = panes > 1 && settings.showCheckoutHints && state.checkoutSuggestion && outRule === 'double' ? (
@@ -1774,9 +1833,22 @@ const GameScreen: React.FC = () => {
                         <span className="text-on-surface-variant text-sm">
                           → {throwData.remaining}
                         </span>
+                        <IconButton
+                          label={t('correction.edit_visit', { score: throwData.isBust ? t('game.bust') : throwData.score })}
+                          onClick={() => handleEditVisit(throwData.id)}
+                          data-testid="history-edit"
+                        >
+                          <Pencil size={16} />
+                        </IconButton>
                       </div>
                     </div>
 
+                    {/* A typed total has no known beds: say so instead of showing invented darts. */}
+                    {throwData.darts.length > 0 && throwData.darts.every(d => d.estimated) ? (
+                      <div className="text-center py-2 rounded-m3-sm bg-surface-container-highest text-on-surface-variant text-xs font-semibold" data-testid="history-typed">
+                        {t('correction.typed')}
+                      </div>
+                    ) : (
                     <div className="flex gap-2">
                       {throwData.darts.map((dart, dartIndex) => (
                         <div
@@ -1804,6 +1876,7 @@ const GameScreen: React.FC = () => {
                         </div>
                       ))}
                     </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -1880,7 +1953,12 @@ const GameScreen: React.FC = () => {
             <div className="text-center py-12">
               <Flame size={48} className="mx-auto mb-4 text-on-surface-variant" />
               <p className="text-on-surface-variant text-lg">{t('game_screen.no_heatmap_data', { name: playerName })}</p>
-              <p className="text-on-surface-variant text-sm mt-2">{t('game_screen.heatmap_hint')}</p>
+              {/* Typed totals only: say why the board stays empty and how to fill it. */}
+              <p className="text-on-surface-variant text-sm mt-2" data-testid={playerHeatmap && playerHeatmap.share.total > 0 ? 'heatmap-only-typed' : undefined}>
+                {playerHeatmap && playerHeatmap.share.total > 0
+                  ? `${t('heatmap.only_typed')} ${t('heatmap.exact_hint')}`
+                  : t('game_screen.heatmap_hint')}
+              </p>
             </div>
           );
         }
@@ -1892,6 +1970,7 @@ const GameScreen: React.FC = () => {
               <span className="text-on-surface-variant ml-2">{t('game_screen.darts_count', { count: playerHeatmap.totalDarts })}</span>
             </div>
             <DartboardHeatmap heatmapData={playerHeatmap} maxWidth={460} compact />
+            <div className="mt-3"><ExactShareNote {...playerHeatmap.share} /></div>
           </div>
         );
       })()}
@@ -1953,6 +2032,26 @@ const GameScreen: React.FC = () => {
   return (
     <div data-game-screen className={`min-h-dvh p-4 md:p-6 phoneland:p-2 gradient-mesh overflow-x-hidden ${usesSheet && !compactHeight ? 'flex flex-col' : ''}`}>
       <GameAnnouncer match={state.currentMatch} />
+      {(() => {
+        if (!editTarget || !state.currentMatch) return null;
+        const target = state.currentMatch.legs.flatMap(l => l.throws).find(v => v.id === editTarget.throwId);
+        if (!target) return null;
+        return (
+          <EditVisitDialog
+            key={`${target.id}-${editTarget.tab}`}
+            open
+            onClose={() => setEditTarget(null)}
+            playerName={state.currentMatch.players.find(p => p.playerId === target.playerId)?.name ?? ''}
+            visitNumber={target.visitNumber}
+            score={target.score}
+            darts={target.darts}
+            remainingBefore={target.isBust ? target.remaining : target.remaining + target.score}
+            outRule={outRuleOf(state.currentMatch.settings)}
+            initialTab={editTarget.tab}
+            onSave={darts => applyVisitEdit(target.id, darts)}
+          />
+        );
+      })()}
       <HeroMoment moment={heroMoment} onDone={clearHeroMoment} />
       <ScoreboardPublisher data={scoreboardData} />
 

@@ -7,6 +7,41 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.32.0] - 2026-10-11
+
+### Added
+- Undo of a typed visit comes back as a total to correct ("60 → _"): type
+  the right total + Enter replaces the visit, Esc / an empty Enter keep it.
+- Correct any earlier visit: the hero card's last-visit pills and a pencil in
+  the visit history open a dialog (total or darts). `EDIT_THROW` re-scores
+  every later visit of the leg in play; a correction that would create a
+  checkout is refused; a finished leg only takes a swap with the same score.
+- "How was it thrown?" chips after a typed total: up to three likely
+  decompositions (`utils/decompose.ts`); a tap makes the darts exact.
+- "N of M darts recorded exactly" under the live and match heatmaps; the
+  visit history shows "total typed" instead of invented darts.
+
+### Changed
+- Heatmaps count exact darts only. Typed totals were reconstructed into
+  guessed darts (60 → T20) with invented coordinates and painted a
+  mental-arithmetic player's board solid T20. Guessed darts no longer carry
+  coordinates.
+- The S/D/T grid is a shared `DartGrid` component.
+
+### Fixed
+- Stored player heatmap: every undo booked the previous visit a second time
+  and never subtracted the undone one. It is now booked by visit id
+  (`diffVisitDarts`): added, subtracted, swapped. Guessed T20s already stored
+  cannot be removed — the aggregate carries no flag.
+- Insight cards follow a revision of the visits, not their count, so a
+  correction updates them.
+- The confirm button no longer runs past the card edge on narrow phones.
+
+### Tests
+- `heatmapExact`, `decompose`, `editVisit`, `gameReducer.edit`,
+  `ScoreInput.correction`, `EditVisitDialog`, announce; `e2e/correction.spec.ts`.
+  Ten mutation probes, all caught.
+
 ## [0.31.4] - 2026-10-11
 
 ### Changed

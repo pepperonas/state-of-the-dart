@@ -6,7 +6,7 @@ import { LayoutGroup } from 'framer-motion';
 import HeroCard, { type HeroCardProps, type HeroSize } from './HeroCard';
 import PlayerRow, { type PlayerRowProps } from './PlayerRow';
 
-export type SpotPlayer = Omit<HeroCardProps, 'size' | 'fireHost' | 'checkoutRoute' | 'checkoutMax' | 'onRemove' | 'removeLabel' | 'previousRemaining' | 'turnKey'>;
+export type SpotPlayer = Omit<HeroCardProps, 'size' | 'fireHost' | 'checkoutRoute' | 'checkoutMax' | 'onRemove' | 'removeLabel' | 'previousRemaining' | 'turnKey' | 'onEditVisit'>;
 
 interface SpotlightProps {
   players: SpotPlayer[];
@@ -23,6 +23,8 @@ interface SpotlightProps {
   rowColumns?: 1 | 2;
   onRemove?: PlayerRowProps['onRemove'];
   removeLabel?: string;
+  /** Correct one of the hero's last visits. */
+  onEditVisit?: (throwId: string) => void;
 }
 
 /**
@@ -33,7 +35,7 @@ interface SpotlightProps {
  */
 const Spotlight: React.FC<SpotlightProps> = ({
   players, activeIndex, showSets, legsToWin, checkoutRoute, checkoutMax, size, flames,
-  rowsFirst = false, rowColumns = 1, onRemove, removeLabel,
+  rowsFirst = false, rowColumns = 1, onRemove, removeLabel, onEditVisit,
 }) => {
   const { t } = useTranslation();
   // Remaining scores of the previous render: when the turn passes, the card
@@ -76,6 +78,7 @@ const Spotlight: React.FC<SpotlightProps> = ({
       removeLabel={removeLabel}
       previousRemaining={prev[hero.player.playerId]}
       turnKey={turnKey}
+      onEditVisit={onEditVisit}
     />
   ) : null;
 

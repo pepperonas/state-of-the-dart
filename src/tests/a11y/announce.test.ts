@@ -39,6 +39,14 @@ describe('announcementFor', () => {
     expect(r).toContain('announce.match_won');
   });
 
+  it('announces a corrected visit with the new remaining (0.32.0)', () => {
+    const before = match([[visit('a', 60, 441, { id: 'x' }), visit('a', 20, 421, { id: 'y' })]]);
+    const after = match([[visit('a', 45, 456, { id: 'x' }), visit('a', 20, 436, { id: 'y' })]]);
+    expect(announcementFor(before, after, t)).toBe('announce.corrected {"name":"Anna","from":60,"to":45,"remaining":436}');
+    // Same scores, only the darts changed (a chip): silence.
+    expect(announcementFor(before, match([[visit('a', 60, 441, { id: 'x' }), visit('a', 20, 421, { id: 'y' })]]), t)).toBeNull();
+  });
+
   it('announces an undo with the restored remaining', () => {
     const r = announcementFor(match([[visit('a', 100, 401), visit('b', 60, 441)]]), match([[visit('a', 100, 401)]]), t);
     expect(r).toBe('announce.undo_to {"name":"Anna","remaining":401}');

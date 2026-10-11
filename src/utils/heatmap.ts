@@ -14,13 +14,45 @@ interface DartWithCoords extends Dart {
 }
 
 /**
- * Updates heatmap data with new darts
+ * Darts that were entered bed by bed. A typed total ("60") is reconstructed
+ * into plausible darts marked `estimated` (60 → T20); counting those painted
+ * a mental-arithmetic player's board solid T20. Every heatmap goes through this.
+ */
+export const exactDarts = <D extends Pick<Dart, 'estimated'>>(darts: D[] | undefined): D[] =>
+  (darts ?? []).filter(dart => !dart.estimated);
+
+/** How many of a player's darts in these visits are exact — shown under each heatmap. */
+export const exactShare = (
+  throws: { playerId: string; darts?: Pick<Dart, 'estimated'>[] }[],
+  playerId: string,
+): { exact: number; total: number } => {
+  let exact = 0;
+  let total = 0;
+  for (const visit of throws) {
+    if (visit.playerId !== playerId) continue;
+    for (const dart of visit.darts ?? []) {
+      total++;
+      if (!dart.estimated) exact++;
+    }
+  }
+  return { exact, total };
+};
+
+const storedKey = (dart: Pick<Dart, 'segment' | 'multiplier'>): string => {
+  if (dart.segment === 0) return '0-0';
+  if (dart.segment === 25 || dart.segment === 50) return dart.segment === 50 ? '25-2' : '25-1';
+  return `${dart.segment}-${dart.multiplier}`;
+};
+
+/**
+ * Updates heatmap data with new darts (exact ones only).
  * Stores x/y coordinates for visual heatmap rendering
  */
 export const updateHeatmapData = (
   currentData: HeatmapData,
-  newDarts: Dart[]
+  allDarts: Dart[]
 ): HeatmapData => {
+  const newDarts = exactDarts(allDarts);
   // Deep clone segments to avoid mutation
   const segments: Record<string, SegmentData> = {};
 
@@ -420,18 +452,84 @@ export const boardStats = (agg: BedAggregate): BoardStats => {
  * share the basis of the stored heatmap.
  */
 export const heatmapFromThrows = (
-  throws: { playerId: string; darts?: Pick<Dart, 'segment' | 'multiplier'>[] }[],
+  throws: { playerId: string; darts?: Pick<Dart, 'segment' | 'multiplier' | 'estimated'>[] }[],
   playerId: string,
 ): HeatmapData => {
   const segments: Record<string, number> = {};
   let totalDarts = 0;
   for (const visit of throws) {
     if (visit.playerId !== playerId) continue;
-    for (const dart of visit.darts ?? []) {
+    for (const dart of exactDarts(visit.darts)) {
       const key = bedKey(dart.segment, dart.multiplier);
       segments[key] = (segments[key] ?? 0) + 1;
       totalDarts++;
     }
   }
   return { playerId, segments, totalDarts, lastUpdated: new Date() };
+};
+
+/**
+ * Takes darts back out of a stored heatmap — a visit that was undone or
+ * corrected. Counts never drop below zero; one stored coordinate per dart is
+ * dropped with it.
+ */
+export const removeFromHeatmapData = (currentData: HeatmapData, allDarts: Dart[]): HeatmapData => {
+  const segments: Record<string, { x: number[]; y: number[]; count: number }> = {};
+  Object.entries(currentData.segments).forEach(([key, value]) => {
+    if (typeof value === 'number') segments[key] = { x: [], y: [], count: value };
+    else if (value && typeof value === 'object') {
+      const data = value as unknown as { x?: number[]; y?: number[]; count?: number };
+      segments[key] = { x: [...(data.x || [])], y: [...(data.y || [])], count: data.count || data.x?.length || 0 };
+    }
+  });
+  let removed = 0;
+  for (const dart of exactDarts(allDarts)) {
+    const seg = segments[storedKey(dart)];
+    if (!seg || seg.count <= 0) continue;
+    seg.count--;
+    seg.x.pop();
+    seg.y.pop();
+    removed++;
+  }
+  return {
+    ...currentData,
+    segments: segments as unknown as Record<string, number>,
+    totalDarts: Math.max(0, currentData.totalDarts - removed),
+    lastUpdated: new Date(),
+  };
+};
+
+export interface HeatmapChange { playerId: string; add: Dart[]; remove: Dart[] }
+export type BookedVisits = Map<string, { playerId: string; darts: Dart[] }>;
+
+/**
+ * What the stored per-player heatmap must change between the visits booked so
+ * far and the visits the match holds now — keyed by visit id. A new visit adds
+ * its exact darts, a vanished one (undo) subtracts them, a changed one
+ * (correction) swaps old for new. Booking "whatever is the last visit" instead
+ * counted the visit before an undo a second time.
+ */
+export const diffVisitDarts = (
+  booked: BookedVisits,
+  visits: { id: string; playerId: string; darts?: Dart[] }[],
+): { next: BookedVisits; changes: HeatmapChange[] } => {
+  const next: BookedVisits = new Map();
+  const byPlayer = new Map<string, HeatmapChange>();
+  const change = (playerId: string) => {
+    let c = byPlayer.get(playerId);
+    if (!c) { c = { playerId, add: [], remove: [] }; byPlayer.set(playerId, c); }
+    return c;
+  };
+  for (const visit of visits) {
+    const darts = exactDarts(visit.darts);
+    next.set(visit.id, { playerId: visit.playerId, darts });
+    const before = booked.get(visit.id);
+    if (before && JSON.stringify(before.darts) === JSON.stringify(darts)) continue;
+    if (before && before.darts.length) change(before.playerId).remove.push(...before.darts);
+    if (darts.length) change(visit.playerId).add.push(...darts);
+  }
+  for (const [id, before] of booked) {
+    if (!next.has(id) && before.darts.length) change(before.playerId).remove.push(...before.darts);
+  }
+  return { next, changes: [...byPlayer.values()].filter(c => c.add.length || c.remove.length) };
 };

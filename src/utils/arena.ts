@@ -5,11 +5,11 @@ import type { Throw } from '../types/index';
 import { dartsInVisit } from './scoring';
 
 /** The player's last `n` visits in the given throws, oldest first, newest last. */
-export const lastVisits = (throws: Throw[], playerId: string, n: number): { score: number; bust: boolean }[] =>
+export const lastVisits = (throws: Throw[], playerId: string, n: number): { id: string; score: number; bust: boolean }[] =>
   throws
     .filter(t => t.playerId === playerId)
     .slice(-n)
-    .map(t => ({ score: t.isBust ? 0 : t.score, bust: !!t.isBust }));
+    .map(t => ({ id: t.id, score: t.isBust ? 0 : t.score, bust: !!t.isBust }));
 
 /** Darts thrown in the leg (three per visit, the darts used on a checkout). */
 export const dartsInLeg = (throws: Throw[], playerId: string): number =>

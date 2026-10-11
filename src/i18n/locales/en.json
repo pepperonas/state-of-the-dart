@@ -1152,6 +1152,9 @@
     "login": "Sign in"
   },
   "heatmap": {
+    "exact_share": "{{exact}} of {{total}} darts recorded exactly.",
+    "exact_hint": "Typed totals do not count – pick how it was thrown after the visit, or enter darts one by one.",
+    "only_typed": "Only typed totals so far – they do not tell which beds were hit.",
     "triple_rate": "Triple rate",
     "double_rate": "Double rate",
     "legend": "Heatmap legend",
@@ -2127,7 +2130,8 @@
     "leg_won": "{{name}} checks out {{score}} and wins the leg",
     "match_won": "{{name}} checks out {{score}} and wins the match",
     "undo": "Visit taken back",
-    "undo_to": "Visit taken back, {{name}} is on {{remaining}} again"
+    "undo_to": "Visit taken back, {{name}} is on {{remaining}} again",
+    "corrected": "{{name}}'s visit corrected: {{from}} → {{to}}, {{remaining}} left"
   },
   "export": {
     "date": "Date",
@@ -4047,5 +4051,28 @@
     "standings": "Standings",
     "remaining": "Remaining",
     "open": "Open on a second screen"
+  },
+  "correction": {
+    "label": "Correction",
+    "hint": "Type the new total · Enter takes it · Esc keeps {{score}}",
+    "how_thrown": "{{name}} {{score}} – how was it thrown?",
+    "how_thrown_label": "How did {{name}} throw the {{score}}?",
+    "pick": "Thrown: {{darts}}",
+    "other": "Other…",
+    "title": "Correct visit – {{name}}, visit {{n}}",
+    "booked": "Booked: {{score}}",
+    "mode": "Correct by",
+    "tab_sum": "Total",
+    "tab_darts": "Darts",
+    "new_sum": "Correct total",
+    "remove_dart": "Remove {{dart}}",
+    "save": "Apply",
+    "edit_visit": "Correct visit {{score}}",
+    "typed": "Total typed – beds unknown",
+    "error_invalid": "That total is not possible with three darts.",
+    "error_no_darts": "Pick at least one dart.",
+    "error_not_found": "This visit no longer exists.",
+    "error_finished_leg": "A finished leg only takes how the same total was thrown. For a different total, take the visits back to there.",
+    "error_checkout": "That would finish the leg. For a finish: undo and enter it again."
   }
 }

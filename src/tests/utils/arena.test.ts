@@ -34,7 +34,7 @@ describe('lastVisits', () => {
   const throws = [visit('a', 60), visit('b', 26), visit('a', 100), visit('a', 0, { isBust: true }), visit('a', 140)];
 
   it('newest last, only the player, at most n', () => {
-    expect(lastVisits(throws, 'a', 3)).toEqual([
+    expect(lastVisits(throws, 'a', 3)).toMatchObject([
       { score: 100, bust: false },
       { score: 0, bust: true },
       { score: 140, bust: false },

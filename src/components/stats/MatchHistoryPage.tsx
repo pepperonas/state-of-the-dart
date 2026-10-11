@@ -10,7 +10,8 @@ import LoadingIndicator from '../common/LoadingIndicator';
 
 const MatchChart = lazy(() => import('./MatchChart'));
 import { DartboardHeatmap } from '../dartboard/DartboardHeatmap';
-import { heatmapFromThrows } from '../../utils/heatmap';
+import { heatmapFromThrows, exactShare } from '../../utils/heatmap';
+import { ExactShareNote } from '../dartboard/ExactShareNote';
 import PlayerAvatar from '../player/PlayerAvatar';
 import { BackButton, Card, Chip, TextField, IconButton, Button, Select } from '../common';
 import { staggerChild } from '../../utils/motion';
@@ -395,19 +396,26 @@ const MatchHistoryPage: React.FC = () => {
                           {/* Per-player heatmaps */}
                           <div className={`grid gap-4 ${players.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-1'}`}>
                             {(detail.players || players).map((p: any) => {
-                              const heatmap = heatmapFromThrows((detail.legs || []).flatMap((leg: any) => leg.throws || []), p.playerId);
-                              if (heatmap.totalDarts === 0) return null;
+                              const visits = (detail.legs || []).flatMap((leg: any) => leg.throws || []);
+                              const heatmap = heatmapFromThrows(visits, p.playerId);
+                              const share = exactShare(visits, p.playerId);
+                              if (share.total === 0) return null;
                               return (
                                 <Card key={p.playerId} variant="filled" className="p-4">
                                   <h4 className="font-bold text-on-surface mb-3 m3-title-medium flex items-center gap-2">
                                     <Target size={16} className="text-primary" />
                                     {t('match_history.heatmap')} — {p.name}
                                   </h4>
-                                  <DartboardHeatmap
-                                    heatmapData={heatmap}
-                                    maxWidth={320}
-                                    compact
-                                  />
+                                  {heatmap.totalDarts > 0 ? (
+                                    <DartboardHeatmap
+                                      heatmapData={heatmap}
+                                      maxWidth={320}
+                                      compact
+                                    />
+                                  ) : (
+                                    <p className="m3-body-medium text-on-surface-variant text-center py-6">{t('heatmap.only_typed')}</p>
+                                  )}
+                                  <div className="mt-3"><ExactShareNote {...share} /></div>
                                 </Card>
                               );
                             })}

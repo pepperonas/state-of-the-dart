@@ -36,7 +36,10 @@ describe('numpadDarts — checkout on the numpad', () => {
   });
 
   it('leaves every other entry to the usual reconstruction', () => {
-    expect(numpadDarts(60, 141, 3, true)).toEqual(convertScoreToDarts(60).map(d => ({ ...d, x: expect.any(Number), y: expect.any(Number), estimated: true })));
+    // A guess carries no invented board coordinates (0.32.0).
+    const strip = ({ x: _x, y: _y, ...d }: any) => ({ ...d, estimated: true });
+    expect(numpadDarts(60, 141, 3, true)).toEqual(convertScoreToDarts(60).map(strip));
+    expect(numpadDarts(60, 141, 3, true).every(d => !('x' in d) && !('y' in d))).toBe(true);
     expect(calculateThrowScore(numpadDarts(141, 141, 3, false))).toBe(141);
   });
 });

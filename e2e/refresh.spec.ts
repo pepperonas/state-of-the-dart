@@ -96,5 +96,9 @@ test('a refresh mid-match keeps scores, turn and the darts of the current visit'
   expect(Math.abs(heat.y - stats.y)).toBeLessThan(2);
   await expect(page.getByText('Wurf #1').first()).toBeVisible();
   await expect(page.locator('.recharts-line-dots circle').first()).toBeVisible({ timeout: 10_000 });
-  await expect(grid.getByTestId('heatmap-board')).toBeVisible();
+  // Ann only typed a total: her heatmap says so (0.32.0). Cid's dart was exact.
+  const heatCard = grid.getByTestId('insight-heatmap');
+  await expect(heatCard.getByTestId('heatmap-only-typed')).toBeVisible();
+  await heatCard.getByRole('button', { name: names[2] }).click();
+  await expect(heatCard.getByTestId('heatmap-board')).toBeVisible();
 });
