@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, Suspense, lazy } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, X, Bot, ChevronDown, AlertTriangle, Smile, Flame, UserMinus, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, RotateCcw, X, Bot, ChevronDown, AlertTriangle, Smile, Flame, UserMinus, Volume2, VolumeX, BarChart3 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 const Confetti = lazy(() => import('react-confetti'));
 const ThrowChart = lazy(() => import('./ThrowChart'));
@@ -17,7 +17,6 @@ import { setCelebrationMoment } from '../../utils/celebrationMoment';
 import { legRanks } from '../../utils/legRanks';
 import ScoreInput from './ScoreInput';
 import GameAnnouncer from './GameAnnouncer';
-import PlayerScore from './PlayerScore';
 import ScoreStrip from './ScoreStrip';
 import CheckoutSuggestion from '../dartboard/CheckoutSuggestion';
 import AchievementHint from '../achievements/AchievementHint';
@@ -28,9 +27,11 @@ import AvatarPicker from '../player/AvatarPicker';
 import { Dart, Player, GameType, MatchSettings, Throw, HeatmapData } from '../../types/index';
 import { calculateThrowScore } from '../../utils/scoring';
 import { evaluateVisit, rulesOf } from '../../utils/visit';
-import { inRuleOf, outRuleOf, ruleSettings, type CheckRule } from '../../utils/checkRules';
+import { inRuleOf, outRuleOf, ruleSettings, maxFinish, type CheckRule } from '../../utils/checkRules';
 import { Handoff, HANDOFF_MS, LEG_WON_MS } from '../../utils/handoff';
-import { useMediaQuery, DESKTOP_QUERY } from '../../hooks/useMediaQuery';
+import { useWindowClass } from '../../hooks/useWindowClass';
+import Spotlight, { type SpotPlayer } from './Spotlight';
+import { lastVisits, dartsInLeg } from '../../utils/arena';
 import { haptic } from '../../utils/haptics';
 import { useWakeLock } from '../../hooks/useWakeLock';
 import { getCheckoutAlternatives } from '../../data/checkoutTable';
@@ -46,19 +47,11 @@ const MatchDetailModal = lazy(() => import('../dashboard/MatchDetailModal'));
 import { springSpatialDefault, springSpatialFast, effectsDefault } from '../../utils/motion';
 import { Icon, iconForEmoji } from '../icons';
 
-/** Phones: whether the dartboard helper is unfolded (UI state, per device). */
-const BOARD_OPEN_KEY = 'sotd-board-open';
-
 const GameScreen: React.FC = () => {
   const { notify } = useFeedback();
-  const isDesktop = useMediaQuery(DESKTOP_QUERY);
-  const [boardOpen, setBoardOpen] = useState(() => {
-    try { return localStorage.getItem(BOARD_OPEN_KEY) === '1'; } catch { return false; }
-  });
-  const toggleBoard = () => setBoardOpen(open => {
-    try { localStorage.setItem(BOARD_OPEN_KEY, open ? '0' : '1'); } catch { /* storage unavailable */ }
-    return !open;
-  });
+  const windowClass = useWindowClass();
+  // Phones and tablets in portrait: stats, history and the board open in a sheet.
+  const [insightsOpen, setInsightsOpen] = useState(false);
   const { t, i18n } = useTranslation();
   const isGerman = (i18n.language || 'de').startsWith('de');
   const navigate = useNavigate();
@@ -124,7 +117,7 @@ const GameScreen: React.FC = () => {
   const [showBackConfirm, setShowBackConfirm] = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
   // Player pending removal from the running match (id, so the callback stays stable
-  // across renders and PlayerScore's React.memo keeps working).
+  // across renders and the spotlight's React.memo keeps working).
   const [playerToRemoveId, setPlayerToRemoveId] = useState<string | null>(null);
 
   // Leg won animation state
@@ -858,7 +851,7 @@ const GameScreen: React.FC = () => {
     dispatch({ type: 'UNDO_THROW', payload: { skipBots: true } });
   };
 
-  // Stable identity: PlayerScore is memoized, an inline arrow would re-render every card.
+  // Stable identity: hero card and rows are memoized, an inline arrow would re-render them.
   const handleRequestRemovePlayer = React.useCallback((playerId: string) => {
     setPlayerToRemoveId(playerId);
   }, []);
@@ -1431,31 +1424,375 @@ const GameScreen: React.FC = () => {
     isActive: i === state.currentPlayerIndex,
     rank: ranks.get(p.playerId) ?? null,
   }));
-  // Desktop: from three players on, the cards split — the first half left of
-  // the input, the rest right of it above the stats. Four stacked cards ran
-  // far below the fold while the right column stood empty.
-  const playerCount = state.currentMatch.players.length;
-  const leftPlayerCount = playerCount <= 2 ? playerCount : Math.ceil(playerCount / 2);
-
-  const renderPlayerCard = (player: typeof state.currentMatch.players[number], index: number) => (
-    <PlayerScore
-      key={player.playerId}
-      player={player}
-      remaining={remainingOf(index)}
-      isActive={index === state.currentPlayerIndex}
-      legRank={ranks.get(player.playerId) ?? null}
-      average={player.matchAverage}
-      legsWon={player.legsWon}
-      setsWon={player.setsWon}
+  const outRule = outRuleOf(state.currentMatch.settings);
+  const spotPlayers: SpotPlayer[] = state.currentMatch.players.map((p, i) => ({
+    player: p,
+    avatar: players.find(x => x.id === p.playerId)?.avatar,
+    remaining: remainingOf(i),
+    rank: ranks.get(p.playerId) ?? null,
+    average: p.matchAverage,
+    legsWon: p.legsWon,
+    setsWon: p.setsWon,
+    dartsInLeg: dartsInLeg(currentLeg.throws, p.playerId),
+    visits: lastVisits(currentLeg.throws, p.playerId, 5),
+  }));
+  // M3 window size classes decide the layout: one pane with the input docked
+  // at the bottom (phone, tablet portrait), two panes from 840 px, three from
+  // 1200 px with a context pane (board, stats). A phone held sideways keeps
+  // its compact strip layout.
+  const { width: widthClass, compactHeight, panes } = windowClass;
+  const usesSheet = panes === 1;
+  const spotlight = (
+    <Spotlight
+      players={spotPlayers}
+      activeIndex={state.currentPlayerIndex}
       showSets={showSets}
-      legsToWin={state.currentMatch!.settings.legsToWin || 3}
+      legsToWin={state.currentMatch.settings.legsToWin || 3}
+      checkoutRoute={settings.showCheckoutHints ? state.checkoutSuggestion : null}
+      checkoutMax={maxFinish(outRule)}
+      size={widthClass === 'compact' ? 'compact' : widthClass === 'xl' ? 'large' : 'regular'}
+      flames={widthClass !== 'compact'}
+      rowsFirst={panes === 1}
+      rowColumns={widthClass === 'xl' && spotPlayers.length >= 5 ? 2 : 1}
       onRemove={canRemovePlayers ? handleRequestRemovePlayer : undefined}
       removeLabel={t('game.remove_player')}
     />
   );
+  const scoreInput = (
+    <ScoreInput
+      currentThrow={state.currentThrow}
+      onAddDart={handleDartHit}
+      onRemoveDart={handleRemoveDart}
+      onClearThrow={handleClearThrow}
+      onConfirm={handleConfirmThrow}
+      onReplaceDart={handleReplaceDart}
+      editingDartIndex={editingDartIndex}
+      onSetEditingDartIndex={setEditingDartIndex}
+      isEditingThrow={isEditingThrow}
+      remaining={remaining}
+      outRule={outRuleOf(state.currentMatch.settings)}
+      isCheckout={isEarlyCheckout}
+      onUndoThrow={handleUndoThrow}
+      lastThrow={lastThrowInfo}
+      onAddDarts={handleDartsHit}
+      onCommitDarts={handleCommitDarts}
+      handoff={handoff}
+      awaitingNextPlayer={awaitingNextPlayer ? state.currentMatch.players[(state.currentPlayerIndex + 1) % state.currentMatch.players.length]?.name ?? null : null}
+      onNextPlayer={handleNextPlayer}
+      bust={!!liveVisit?.bust}
+      previewRemaining={liveVisit ? liveVisit.newRemaining : null}
+      dense={windowClass.width === 'compact' && !windowClass.compactHeight}
+    />
+  );
+  const alternatives = panes > 1 && settings.showCheckoutHints && state.checkoutSuggestion && outRule === 'double' ? (
+    <CheckoutSuggestion
+      hidePrimary
+      suggestion={state.checkoutSuggestion}
+      alternatives={getCheckoutAlternatives(remaining, 3 - state.currentThrow.length, true)}
+      remaining={remaining}
+    />
+  ) : null;
+  const boardHelper = settings.showDartboardHelper ? (
+    <div className="w-full max-w-lg space-y-3">
+      <Dartboard
+        onDartHit={handleDartHit}
+        highlightedSegments={dartboardHighlights}
+        size={480}
+      />
+      {/* Miss Button */}
+      <Button
+        variant="outlined"
+        fullWidth
+        onClick={() => handleDartHit({ segment: 0, multiplier: 0, score: 0 })}
+        disabled={state.currentThrow.length >= 3}
+        icon={<X size={20} />}
+      >
+        {t('game_screen.miss_no_score')}
+      </Button>
+    </div>
+
+  ) : null;
+  const insights = (
+    <div className="space-y-4">
+      {settings.showStatsDuringGame && (
+        <div>
+          <button
+            onClick={() => setShowMatchStats(!showMatchStats)}
+            className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition"
+          >
+            <h3 className="m3-title-medium text-on-surface">{t('game_screen.match_statistics')}</h3>
+            <ChevronDown size={24} className={`m3-chevron ${showMatchStats ? 'm3-open' : ''}`} />
+          </button>
+
+          {showMatchStats && (
+            <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-on-surface-variant">{t('game_screen.stat_average')}</span>
+                  <span className="font-semibold text-on-surface">{currentPlayer!.matchAverage.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-on-surface-variant">{t('game_screen.stat_highest')}</span>
+                  <span className="font-semibold text-on-surface">{currentPlayer!.matchHighestScore}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-on-surface-variant">180s:</span>
+                  <span className="font-semibold text-on-surface">{currentPlayer!.match180s}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-on-surface-variant">140+:</span>
+                  <span className="font-semibold text-on-surface">{currentPlayer!.match140Plus}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-on-surface-variant">100+:</span>
+                  <span className="font-semibold text-on-surface">{currentPlayer!.match100Plus}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-on-surface-variant">{t('game_screen.stat_checkout')}</span>
+                  <span className="font-semibold text-on-surface">
+                    {currentPlayer!.checkoutAttempts > 0
+                      ? ((currentPlayer!.checkoutsHit / currentPlayer!.checkoutAttempts) * 100).toFixed(1)
+                      : '0.0'}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      {/* Throw History - Collapsable */}
+      <div>
+        <button
+          onClick={() => setShowThrowHistory(!showThrowHistory)}
+          className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition"
+        >
+          <h3 className="m3-title-medium text-on-surface">{t('game_screen.throw_history')}</h3>
+          <ChevronDown size={24} className={`m3-chevron ${showThrowHistory ? 'm3-open' : ''}`} />
+        </button>
+
+        {showThrowHistory && (
+          <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
+            {/* Leg/Match Toggle */}
+            <SegmentedButton<'leg' | 'match'>
+              className="mb-4"
+              label={t('game.stats_scope')}
+              value={statsView}
+              onChange={setStatsView}
+              options={[
+                { value: 'leg', label: t('game.current_leg') },
+                { value: 'match', label: t('game.whole_match') },
+              ]}
+            />
+            {state.currentMatch.players.map((player) => {
+              const allPlayerThrowsView = statsView === 'leg'
+                ? currentLeg.throws.filter(t => t.playerId === player.playerId)
+                : state.currentMatch!.legs.flatMap(l => l.throws.filter(t => t.playerId === player.playerId));
+              const playerThrows = allPlayerThrowsView;
+
+              return (
+                <div key={player.playerId} className="mb-6 last:mb-0">
+                  <h4 className="text-on-surface font-bold mb-3 flex items-center gap-2">
+                    <span>{player.name}</span>
+                    <span className="text-sm text-on-surface-variant">
+                      {t('game_screen.visit_count', { count: playerThrows.length })}
+                    </span>
+                  </h4>
+
+                  {playerThrows.length === 0 ? (
+                    <p className="text-on-surface-variant text-sm italic">{t('game_screen.no_visits')}</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {playerThrows.map((throwData, index) => (
+                        <div
+                          key={throwData.id}
+                          className="bg-surface-container rounded-m3-lg p-3 border border-outline-variant"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-on-surface-variant text-sm">
+                              {t('game_screen.visit_number', { n: index + 1 })}
+                            </span>
+                            <div className="flex items-center gap-3">
+                              {throwData.isBust && (
+                                <span className="text-on-error-container text-xs font-bold bg-error-container px-2 py-1 rounded-m3-sm">
+                                  {t('game_screen.bust')}
+                                </span>
+                              )}
+                              <span className={`font-bold text-lg ${
+                                throwData.isBust
+                                  ? 'text-error line-through'
+                                  : throwData.score >= 140
+                                    ? 'text-tertiary'
+                                    : throwData.score >= 100
+                                      ? 'text-primary'
+                                      : 'text-on-surface'
+                              }`}>
+                                {throwData.score}
+                              </span>
+                              <span className="text-on-surface-variant text-sm">
+                                → {throwData.remaining}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2">
+                            {throwData.darts.map((dart, dartIndex) => (
+                              <div
+                                key={dartIndex}
+                                className={`flex-1 text-center py-2 rounded-m3-sm ${
+                                  dart.multiplier === 3
+                                    ? 'bg-success-container text-on-success-container'
+                                    : dart.multiplier === 2
+                                      ? 'bg-error-container text-on-error-container'
+                                      : dart.score === 0
+                                        ? 'bg-surface-container-highest text-on-surface-variant'
+                                        : 'bg-primary-container text-on-primary-container'
+                                }`}
+                              >
+                                <span className="text-xs font-semibold">
+                                  {dart.score === 0
+                                    ? t('game.miss')
+                                    : dart.multiplier === 3
+                                      ? `T${dart.segment}`
+                                      : dart.multiplier === 2
+                                        ? `D${dart.segment}`
+                                        : dart.segment
+                                  }
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Throw Chart - Collapsable */}
+      <div>
+        <button
+          onClick={() => setShowThrowChart(!showThrowChart)}
+          className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition"
+        >
+          <h3 className="m3-title-medium text-on-surface">{t('game_screen.throw_chart')}</h3>
+          <ChevronDown size={24} className={`m3-chevron ${showThrowChart ? 'm3-open' : ''}`} />
+        </button>
+
+        {showThrowChart && (() => {
+          const chartThrows = statsView === 'leg'
+            ? currentLeg.throws
+            : state.currentMatch.legs.flatMap(l => l.throws);
+          return (
+            <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
+              {/* Leg/Match Toggle */}
+              <SegmentedButton<'leg' | 'match'>
+                className="mb-4"
+                label={t('game.stats_scope')}
+                value={statsView}
+                onChange={setStatsView}
+                options={[
+                  { value: 'leg', label: t('game.current_leg') },
+                  { value: 'match', label: t('game.whole_match') },
+                ]}
+              />
+              <Suspense fallback={<div className="h-[600px] flex items-center justify-center"><LoadingIndicator /></div>}>
+                <ThrowChart players={state.currentMatch.players} chartThrows={chartThrows} />
+              </Suspense>
+            </div>
+          );
+        })()}
+      </div>
+
+      {/* Live Heatmap - Collapsable */}
+      <div>
+        <button
+          onClick={() => setShowLiveHeatmap(!showLiveHeatmap)}
+          className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition"
+        >
+          <div className="flex items-center gap-3">
+            <Flame size={24} className="text-tertiary" aria-hidden="true" />
+            <h3 className="m3-title-medium text-on-surface">{t('game_screen.live_heatmap')}</h3>
+          </div>
+          <ChevronDown size={24} className={`m3-chevron ${showLiveHeatmap ? 'm3-open' : ''}`} />
+        </button>
+
+        {showLiveHeatmap && (
+          <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
+            {/* Leg/Match Toggle */}
+            <SegmentedButton
+              className="mb-4"
+              label={t('game_screen.live_heatmap')}
+              value={heatmapView}
+              onChange={setHeatmapView}
+              options={[
+                { value: 'leg', label: t('game.current_leg') },
+                { value: 'match', label: t('game.whole_match') },
+              ]}
+            />
+            {/* Player Selector */}
+            {state.currentMatch.players.length > 1 && (
+              <div className="mb-6">
+                <label className="block m3-label-large text-on-surface-variant mb-2">{t('game.select_players')}</label>
+                <div className="flex flex-wrap gap-2">
+                  {state.currentMatch.players.map(player => (
+                    <button
+                      key={player.playerId}
+                      onClick={() => setSelectedHeatmapPlayer(
+                        selectedHeatmapPlayer === player.playerId ? null : player.playerId
+                      )}
+                      className={`px-4 py-2 rounded-m3-lg font-medium transition flex items-center gap-2 ${
+                        selectedHeatmapPlayer === player.playerId || (!selectedHeatmapPlayer && state.currentMatch!.players[0].playerId === player.playerId)
+                          ? 'bg-primary text-on-primary'
+                          : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
+                      }`}
+                    >
+                      <PlayerAvatar avatar={players.find(p => p.id === player.playerId)?.avatar} name={player.name} size="sm" />
+                      {player.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Heatmap Display */}
+            {(() => {
+              const displayPlayerId = selectedHeatmapPlayer || state.currentMatch.players[0]?.playerId;
+              const playerHeatmap = displayPlayerId ? liveHeatmapData[displayPlayerId] : null;
+              const playerName = state.currentMatch.players.find(p => p.playerId === displayPlayerId)?.name || '';
+
+              if (!playerHeatmap || playerHeatmap.totalDarts === 0) {
+                return (
+                  <div className="text-center py-12">
+                    <Flame size={48} className="mx-auto mb-4 text-on-surface-variant" />
+                    <p className="text-on-surface-variant text-lg">{t('game_screen.no_heatmap_data', { name: playerName })}</p>
+                    <p className="text-on-surface-variant text-sm mt-2">{t('game_screen.heatmap_hint')}</p>
+                  </div>
+                );
+              }
+
+              return (
+                <div>
+                  <div className="text-center mb-4">
+                    <span className="text-lg font-bold text-on-surface">{playerName}</span>
+                    <span className="text-on-surface-variant ml-2">{t('game_screen.darts_count', { count: playerHeatmap.totalDarts })}</span>
+                  </div>
+                  <DartboardHeatmap heatmapData={playerHeatmap} maxWidth={460} compact />
+                </div>
+              );
+            })()}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+  const containerWidth = widthClass === 'xl' ? 'max-w-[2400px]' : widthClass === 'large' ? 'max-w-[1600px]' : 'max-w-7xl';
 
   return (
-    <div className="min-h-dvh p-4 md:p-6 phoneland:p-2 gradient-mesh overflow-x-hidden">
+    <div data-game-screen className={`min-h-dvh p-4 md:p-6 phoneland:p-2 gradient-mesh overflow-x-hidden ${usesSheet && !compactHeight ? 'flex flex-col' : ''}`}>
       <GameAnnouncer match={state.currentMatch} />
       {showConfetti && (
         <Suspense fallback={null}>
@@ -1463,11 +1800,21 @@ const GameScreen: React.FC = () => {
         </Suspense>
       )}
 
-      <div className="max-w-7xl mx-auto">
+      <div className={`${containerWidth} w-full mx-auto ${usesSheet && !compactHeight ? 'flex-1 flex flex-col' : ''}`} data-panes={panes}>
         <div className="flex items-center justify-between mb-3 lg:mb-4 phoneland:mb-1">
           <BackButton onClick={handleBackToMenu} inline />
           
           <div className="flex gap-2">
+            {/* Phones and tablets in portrait: stats, history and the board live in a sheet. */}
+            {usesSheet && (
+              <IconButton
+                variant="tonal"
+                label={t('game_screen.insights')}
+                onClick={() => setInsightsOpen(true)}
+              >
+                <BarChart3 size={20} />
+              </IconButton>
+            )}
             <IconButton
               variant="tonal"
               label={muted ? t('game.unmute') : t('game.mute')}
@@ -1495,378 +1842,72 @@ const GameScreen: React.FC = () => {
           </div>
         </div>
         
-        {/* Phone/tablet: all scores in one row, so the input stays on screen. */}
-        {!isDesktop && (
-          <ScoreStrip
-            className="lg:hidden sticky top-0 z-20 -mx-4 px-4 py-2 mb-4 phoneland:-mx-2 phoneland:px-2 phoneland:py-1 phoneland:mb-2 bg-[color-mix(in_srgb,var(--m3-surface)_92%,transparent)] backdrop-blur"
-            showSets={showSets}
-            legsToWin={state.currentMatch.settings.legsToWin || 3}
-            players={stripPlayers}
-          />
-        )}
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Players Section (desktop) */}
-          <div className="hidden lg:block lg:col-span-1 space-y-4">
-            {isDesktop && state.currentMatch.players.slice(0, leftPlayerCount).map((player, i) => renderPlayerCard(player, i))}
-          </div>
-          
-          {/* Center Section - Input first, then optional Dartboard helper */}
-          <div className="lg:col-span-1 flex flex-col items-center space-y-6 phoneland:space-y-3">
-            <ScoreInput
-              currentThrow={state.currentThrow}
-              onAddDart={handleDartHit}
-              onRemoveDart={handleRemoveDart}
-              onClearThrow={handleClearThrow}
-              onConfirm={handleConfirmThrow}
-              onReplaceDart={handleReplaceDart}
-              editingDartIndex={editingDartIndex}
-              onSetEditingDartIndex={setEditingDartIndex}
-              isEditingThrow={isEditingThrow}
-              remaining={remaining}
-              outRule={outRuleOf(state.currentMatch.settings)}
-              isCheckout={isEarlyCheckout}
-              onUndoThrow={handleUndoThrow}
-              lastThrow={lastThrowInfo}
-              onAddDarts={handleDartsHit}
-              onCommitDarts={handleCommitDarts}
-              checkoutRoute={settings.showCheckoutHints ? state.checkoutSuggestion : null}
-              handoff={handoff}
-              awaitingNextPlayer={awaitingNextPlayer ? state.currentMatch.players[(state.currentPlayerIndex + 1) % state.currentMatch.players.length]?.name ?? null : null}
-              onNextPlayer={handleNextPlayer}
-              bust={!!liveVisit?.bust}
+        {compactHeight ? (
+          <>
+            {/* Phone on its side: the score strip and the input, nothing else. */}
+            <ScoreStrip
+              className="sticky top-0 z-20 -mx-2 px-2 py-1 mb-2 bg-[color-mix(in_srgb,var(--m3-surface)_92%,transparent)] backdrop-blur"
+              showSets={showSets}
+              legsToWin={state.currentMatch.settings.legsToWin || 3}
+              players={stripPlayers}
             />
-
-            {/* The main route sits inside the input card; the alternatives
-                follow here on desktop, where there is room. */}
-            {isDesktop && settings.showCheckoutHints && state.checkoutSuggestion && (
-              <CheckoutSuggestion
-                hidePrimary
-                suggestion={state.checkoutSuggestion}
-                alternatives={outRuleOf(state.currentMatch.settings) === 'double' ? getCheckoutAlternatives(remaining, 3 - state.currentThrow.length, true) : []}
-                remaining={remaining}
-              />
-            )}
-
-            {/* Phones: the board sits behind a toggle (remembered per device) so
-                a whole visit fits on one screen. The setting still decides
-                whether it is offered at all. */}
-            {settings.showDartboardHelper && !isDesktop && (
-              <Button
-                variant="text"
-                size="sm"
-                aria-expanded={boardOpen}
-                onClick={toggleBoard}
-                icon={<ChevronDown size={18} className={`m3-chevron ${boardOpen ? 'm3-open' : ''}`} />}
-              >
-                {boardOpen ? t('game_screen.hide_dartboard') : t('game_screen.show_dartboard')}
-              </Button>
-            )}
-            {settings.showDartboardHelper && (isDesktop || boardOpen) && (
-              <div className="w-full max-w-lg space-y-3">
-                <Dartboard
-                  onDartHit={handleDartHit}
-                  highlightedSegments={dartboardHighlights}
-                  size={480}
-                />
-                {/* Miss Button */}
-                <Button
-                  variant="outlined"
-                  fullWidth
-                  onClick={() => handleDartHit({ segment: 0, multiplier: 0, score: 0 })}
-                  disabled={state.currentThrow.length >= 3}
-                  icon={<X size={20} />}
-                >
-                  {t('game_screen.miss_no_score')}
-                </Button>
-              </div>
-            )}
+            {scoreInput}
+          </>
+        ) : panes === 1 ? (
+          <>
+            {spotlight}
+            {/* The input docks at the bottom — in reach of the thumb. */}
+            <div
+              data-testid="input-dock"
+              className="mt-auto sticky bottom-0 z-20 -mx-4 md:-mx-6 px-4 md:px-6 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] flex justify-center bg-[color-mix(in_srgb,var(--m3-surface)_92%,transparent)] backdrop-blur"
+            >
+              {scoreInput}
+            </div>
+          </>
+        ) : panes === 2 ? (
+          <div className="grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-6 items-start">
+            <div className="space-y-4 min-w-0">
+              {spotlight}
+              {insights}
+            </div>
+            <div className="space-y-4 min-w-0 sticky top-4 flex flex-col items-center">
+              {scoreInput}
+              {alternatives}
+              {boardHelper}
+            </div>
           </div>
-          
-          {/* Right column: players 3+ (desktop), then the collapsible stats */}
-          <div className="lg:col-span-1 space-y-4">
-            {isDesktop && state.currentMatch.players.length > leftPlayerCount && (
-              <div className="hidden lg:block space-y-4">
-                {state.currentMatch.players.slice(leftPlayerCount).map((player, i) => renderPlayerCard(player, leftPlayerCount + i))}
-              </div>
-            )}
-            {settings.showStatsDuringGame && (
-              <div>
-                <button
-                  onClick={() => setShowMatchStats(!showMatchStats)}
-                  className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition"
-                >
-                  <h3 className="m3-title-medium text-on-surface">{t('game_screen.match_statistics')}</h3>
-                  <ChevronDown size={24} className={`m3-chevron ${showMatchStats ? 'm3-open' : ''}`} />
-                </button>
-
-                {showMatchStats && (
-                  <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-on-surface-variant">{t('game_screen.stat_average')}</span>
-                        <span className="font-semibold text-on-surface">{currentPlayer!.matchAverage.toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-on-surface-variant">{t('game_screen.stat_highest')}</span>
-                        <span className="font-semibold text-on-surface">{currentPlayer!.matchHighestScore}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-on-surface-variant">180s:</span>
-                        <span className="font-semibold text-on-surface">{currentPlayer!.match180s}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-on-surface-variant">140+:</span>
-                        <span className="font-semibold text-on-surface">{currentPlayer!.match140Plus}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-on-surface-variant">100+:</span>
-                        <span className="font-semibold text-on-surface">{currentPlayer!.match100Plus}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-on-surface-variant">{t('game_screen.stat_checkout')}</span>
-                        <span className="font-semibold text-on-surface">
-                          {currentPlayer!.checkoutAttempts > 0
-                            ? ((currentPlayer!.checkoutsHit / currentPlayer!.checkoutAttempts) * 100).toFixed(1)
-                            : '0.0'}%
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+        ) : (
+          <div className="grid grid-cols-[minmax(0,1.15fr)_minmax(22.5rem,27.5rem)_minmax(0,1fr)] gap-6 items-start">
+            <div className="min-w-0">{spotlight}</div>
+            <div className="space-y-4 min-w-0 flex flex-col items-center">
+              {scoreInput}
+              {alternatives}
+            </div>
+            {/* Context pane: the board above the fold, stats below — side by
+                side on very wide screens. */}
+            <div data-testid="context-pane" className="min-w-0 space-y-4 min-[2200px]:space-y-0 min-[2200px]:grid min-[2200px]:grid-cols-2 min-[2200px]:gap-6 min-[2200px]:items-start">
+              {boardHelper}
+              {insights}
+            </div>
           </div>
-        </div>
-
-        {/* Throw History - Collapsable */}
-        <div className="mt-6">
-          <button
-            onClick={() => setShowThrowHistory(!showThrowHistory)}
-            className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition"
-          >
-            <h3 className="m3-title-medium text-on-surface">{t('game_screen.throw_history')}</h3>
-            <ChevronDown size={24} className={`m3-chevron ${showThrowHistory ? 'm3-open' : ''}`} />
-          </button>
-
-          {showThrowHistory && (
-            <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
-              {/* Leg/Match Toggle */}
-              <SegmentedButton<'leg' | 'match'>
-                className="mb-4"
-                label={t('game.stats_scope')}
-                value={statsView}
-                onChange={setStatsView}
-                options={[
-                  { value: 'leg', label: t('game.current_leg') },
-                  { value: 'match', label: t('game.whole_match') },
-                ]}
-              />
-              {state.currentMatch.players.map((player) => {
-                const allPlayerThrowsView = statsView === 'leg'
-                  ? currentLeg.throws.filter(t => t.playerId === player.playerId)
-                  : state.currentMatch!.legs.flatMap(l => l.throws.filter(t => t.playerId === player.playerId));
-                const playerThrows = allPlayerThrowsView;
-
-                return (
-                  <div key={player.playerId} className="mb-6 last:mb-0">
-                    <h4 className="text-on-surface font-bold mb-3 flex items-center gap-2">
-                      <span>{player.name}</span>
-                      <span className="text-sm text-on-surface-variant">
-                        {t('game_screen.visit_count', { count: playerThrows.length })}
-                      </span>
-                    </h4>
-
-                    {playerThrows.length === 0 ? (
-                      <p className="text-on-surface-variant text-sm italic">{t('game_screen.no_visits')}</p>
-                    ) : (
-                      <div className="space-y-2">
-                        {playerThrows.map((throwData, index) => (
-                          <div
-                            key={throwData.id}
-                            className="bg-surface-container rounded-m3-lg p-3 border border-outline-variant"
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-on-surface-variant text-sm">
-                                {t('game_screen.visit_number', { n: index + 1 })}
-                              </span>
-                              <div className="flex items-center gap-3">
-                                {throwData.isBust && (
-                                  <span className="text-on-error-container text-xs font-bold bg-error-container px-2 py-1 rounded-m3-sm">
-                                    {t('game_screen.bust')}
-                                  </span>
-                                )}
-                                <span className={`font-bold text-lg ${
-                                  throwData.isBust
-                                    ? 'text-error line-through'
-                                    : throwData.score >= 140
-                                      ? 'text-tertiary'
-                                      : throwData.score >= 100
-                                        ? 'text-primary'
-                                        : 'text-on-surface'
-                                }`}>
-                                  {throwData.score}
-                                </span>
-                                <span className="text-on-surface-variant text-sm">
-                                  → {throwData.remaining}
-                                </span>
-                              </div>
-                            </div>
-
-                            <div className="flex gap-2">
-                              {throwData.darts.map((dart, dartIndex) => (
-                                <div
-                                  key={dartIndex}
-                                  className={`flex-1 text-center py-2 rounded-m3-sm ${
-                                    dart.multiplier === 3
-                                      ? 'bg-success-container text-on-success-container'
-                                      : dart.multiplier === 2
-                                        ? 'bg-error-container text-on-error-container'
-                                        : dart.score === 0
-                                          ? 'bg-surface-container-highest text-on-surface-variant'
-                                          : 'bg-primary-container text-on-primary-container'
-                                  }`}
-                                >
-                                  <span className="text-xs font-semibold">
-                                    {dart.score === 0
-                                      ? t('game.miss')
-                                      : dart.multiplier === 3
-                                        ? `T${dart.segment}`
-                                        : dart.multiplier === 2
-                                          ? `D${dart.segment}`
-                                          : dart.segment
-                                    }
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Throw Chart - Collapsable */}
-        <div className="mt-6">
-          <button
-            onClick={() => setShowThrowChart(!showThrowChart)}
-            className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition"
-          >
-            <h3 className="m3-title-medium text-on-surface">{t('game_screen.throw_chart')}</h3>
-            <ChevronDown size={24} className={`m3-chevron ${showThrowChart ? 'm3-open' : ''}`} />
-          </button>
-
-          {showThrowChart && (() => {
-            const chartThrows = statsView === 'leg'
-              ? currentLeg.throws
-              : state.currentMatch.legs.flatMap(l => l.throws);
-            return (
-              <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
-                {/* Leg/Match Toggle */}
-                <SegmentedButton<'leg' | 'match'>
-                  className="mb-4"
-                  label={t('game.stats_scope')}
-                  value={statsView}
-                  onChange={setStatsView}
-                  options={[
-                    { value: 'leg', label: t('game.current_leg') },
-                    { value: 'match', label: t('game.whole_match') },
-                  ]}
-                />
-                <Suspense fallback={<div className="h-[600px] flex items-center justify-center"><LoadingIndicator /></div>}>
-                  <ThrowChart players={state.currentMatch.players} chartThrows={chartThrows} />
-                </Suspense>
-              </div>
-            );
-          })()}
-        </div>
-
-        {/* Live Heatmap - Collapsable */}
-        <div className="mt-6">
-          <button
-            onClick={() => setShowLiveHeatmap(!showLiveHeatmap)}
-            className="w-full m3-card m3-elevated rounded-m3-lg p-4 flex items-center justify-between transition"
-          >
-            <div className="flex items-center gap-3">
-              <Flame size={24} className="text-tertiary" aria-hidden="true" />
-              <h3 className="m3-title-medium text-on-surface">{t('game_screen.live_heatmap')}</h3>
-            </div>
-            <ChevronDown size={24} className={`m3-chevron ${showLiveHeatmap ? 'm3-open' : ''}`} />
-          </button>
-
-          {showLiveHeatmap && (
-            <div className="m3-card m3-elevated rounded-m3-lg p-6 mt-2 m3-enter">
-              {/* Leg/Match Toggle */}
-              <SegmentedButton
-                className="mb-4"
-                label={t('game_screen.live_heatmap')}
-                value={heatmapView}
-                onChange={setHeatmapView}
-                options={[
-                  { value: 'leg', label: t('game.current_leg') },
-                  { value: 'match', label: t('game.whole_match') },
-                ]}
-              />
-              {/* Player Selector */}
-              {state.currentMatch.players.length > 1 && (
-                <div className="mb-6">
-                  <label className="block m3-label-large text-on-surface-variant mb-2">{t('game.select_players')}</label>
-                  <div className="flex flex-wrap gap-2">
-                    {state.currentMatch.players.map(player => (
-                      <button
-                        key={player.playerId}
-                        onClick={() => setSelectedHeatmapPlayer(
-                          selectedHeatmapPlayer === player.playerId ? null : player.playerId
-                        )}
-                        className={`px-4 py-2 rounded-m3-lg font-medium transition flex items-center gap-2 ${
-                          selectedHeatmapPlayer === player.playerId || (!selectedHeatmapPlayer && state.currentMatch!.players[0].playerId === player.playerId)
-                            ? 'bg-primary text-on-primary'
-                            : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
-                        }`}
-                      >
-                        <PlayerAvatar avatar={players.find(p => p.id === player.playerId)?.avatar} name={player.name} size="sm" />
-                        {player.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Heatmap Display */}
-              {(() => {
-                const displayPlayerId = selectedHeatmapPlayer || state.currentMatch.players[0]?.playerId;
-                const playerHeatmap = displayPlayerId ? liveHeatmapData[displayPlayerId] : null;
-                const playerName = state.currentMatch.players.find(p => p.playerId === displayPlayerId)?.name || '';
-
-                if (!playerHeatmap || playerHeatmap.totalDarts === 0) {
-                  return (
-                    <div className="text-center py-12">
-                      <Flame size={48} className="mx-auto mb-4 text-on-surface-variant" />
-                      <p className="text-on-surface-variant text-lg">{t('game_screen.no_heatmap_data', { name: playerName })}</p>
-                      <p className="text-on-surface-variant text-sm mt-2">{t('game_screen.heatmap_hint')}</p>
-                    </div>
-                  );
-                }
-
-                return (
-                  <div>
-                    <div className="text-center mb-4">
-                      <span className="text-lg font-bold text-on-surface">{playerName}</span>
-                      <span className="text-on-surface-variant ml-2">{t('game_screen.darts_count', { count: playerHeatmap.totalDarts })}</span>
-                    </div>
-                    <DartboardHeatmap heatmapData={playerHeatmap} maxWidth={460} compact />
-                  </div>
-                );
-              })()}
-            </div>
-          )}
-        </div>
+        )}
       </div>
+
+      {/* Phones and tablets in portrait: stats, history, heatmap and the board. */}
+      {usesSheet && (
+        <Dialog
+          variant="sheet"
+          open={insightsOpen}
+          onClose={() => setInsightsOpen(false)}
+          title={t('game_screen.insights')}
+        >
+          <div className="space-y-4">
+            {boardHelper}
+            {insights}
+          </div>
+        </Dialog>
+      )}
 
       {/* Achievement Hints */}
       {hints.length > 0 && (

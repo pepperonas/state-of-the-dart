@@ -49,7 +49,9 @@ test('achievements: toast closes on an outside tap mid-leg, centre stage at the 
   // then a tap elsewhere closes them (later arrivals would rightly reappear).
   await page.waitForLoadState('networkidle');
   await page.waitForTimeout(1500);
-  await page.mouse.click(1100, 500);
+  // An empty spot below the player rows (since 0.28.0 the context pane fills
+  // the right side and the toast stack the middle).
+  await page.mouse.click(200, 600);
   await expect(stage).toHaveCount(0);
 
   await visit(ben, '0');

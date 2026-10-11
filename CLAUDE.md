@@ -321,6 +321,14 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - Game screen below `lg`: `ScoreStrip` replaces the stacked `PlayerScore` cards and ScoreInput hides its own "remaining" header. `e2e/layout.spec.ts` asserts the confirm button and all scores are on screen at 390×844 and 1280×800. ⚠️ Locators like `getByText('501')` must add `.locator('visible=true')` — the strip exists (hidden) on desktop too.
 - ScoreInput has three modes (`numpad` / `darts` / `quick`, remembered in `sotd-input-mode`); the dart grid adds exact beds.
 
+### Game screen "Arena" (0.28.0)
+- Scoreboard = `Spotlight` → `HeroCard` (player at the oche, `data-hero`, `aria-current`) + `PlayerRow`s (`role=listitem`). Shared `layoutId`s `spot-<id>`, `spot-name-<id>`, `spot-rest-<id>` make the turn change one morph. All keep `data-testid="player-card-<name>"`.
+- Layout from `useWindowClass()` (`hooks/useWindowClass.ts`, pure `widthClassFor`/`paneCountFor`): 1 pane (compact/medium, input in a sticky bottom dock `input-dock`, insights in `Dialog variant="sheet"`), phone landscape keeps `ScoreStrip` + input, 2 panes (expanded), 3 panes (large/xl, `context-pane` with board + insights). GameScreen builds `spotlight`, `scoreInput`, `boardHelper`, `insights` once and places them per layout — don't duplicate the JSX.
+- `html:has([data-game-screen])` scales the root font-size above 1600 px — keep game-screen sizes in rem, not px.
+- The remaining score is shown once (hero/row); ScoreInput shows `previewRemaining` under the total. The checkout route lives on the hero card (`checkout-route`).
+- ⚠️ E2E clicks "on empty space" must avoid the context pane (right) and the toast stack (middle); `achievements-flow` clicks below the player rows.
+- ⚠️ `Select.test` "multi-character prefix" depends on the typeahead window and fails under very high machine load (load avg > 100); it passes alone.
+
 ### Check rules, legs to win, numpad fold (0.27.0)
 - In/out rules live in `utils/checkRules.ts` (`inRuleOf`/`outRuleOf` from the settings flags, `ruleSettings` writes consistent flags, `checkoutRoute` dispatches: triple → solver, else the table). Always go through `rulesOf()` → `evaluateVisit` — `VisitRules.inRule/outRule` are optional and fall back to the double flags, so hand-built rules in tests still work. `isBust` and `numpadDarts` take `boolean | CheckRule` (true = double).
 - Triple out: 1 and 2 left are a bust; checkouts go up to 180. Bots and online play are still double-out only.
@@ -486,7 +494,8 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **35 tests** currently:
+- Specs in `e2e/`. **40 tests** currently:
+  - `arena.spec.ts` — phone: input dock in reach, hero above it, stats sheet; hero swaps on the turn; 2 panes at 1024, 3 panes + board above the fold at 1440; no width cap at 2560
   - `fast-play.spec.ts` — visits typed back to back without waiting land with the right player; a bust never shows a negative score; the leg overlay closes on a tap; checkout route on screen at 390×844; no player cards (fire canvas) mounted on phones; no endless animation under reduced motion; triple out chosen at setup checks out on a triple
   - `achievements-flow.spec.ts` — mid-leg toast closes on an outside tap; a numpad 141 checkout ends the leg; achievements go centre stage and stay until "Weiter"
   - `refresh.spec.ts` — four players: leg ranks 1/2/3/3, desktop column split, refresh mid-visit keeps scores, turn and entered darts; history, charts and live heatmap sections render

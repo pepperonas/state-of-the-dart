@@ -47,6 +47,11 @@ interface ScoreInputProps {
   onNextPlayer?: () => void;
   /** The darts entered so far bust the visit (shake + BUST in the total box). */
   bust?: boolean;
+  /** What the visit leaves (unchanged on a bust) — shown under the total. */
+  previewRemaining?: number | null;
+  /** Phones in portrait: tighter keys, undo as an icon in the action row, so
+   *  the whole dock fits under the scoreboard. */
+  dense?: boolean;
 }
 
 /** Delay between darts that land together, from the stagger token (45 ms). */
@@ -80,11 +85,12 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   lastThrow = null,
   onAddDarts,
   onCommitDarts,
-  checkoutRoute = null,
   handoff = null,
   awaitingNextPlayer = null,
   onNextPlayer,
   bust = false,
+  previewRemaining = null,
+  dense = false,
 }) => {
   const { t } = useTranslation();
   const [currentInput, setCurrentInput] = useState('');
@@ -330,7 +336,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   return (
     // Phone landscape: two columns — numpad right, everything else left — so a
     // whole turn fits into ~390px of height.
-    <div className="relative m3-card m3-elevated rounded-m3-lg p-3 sm:p-4 md:p-5 w-full max-w-md phoneland:max-w-none phoneland:p-2 phoneland:grid phoneland:grid-cols-2 phoneland:gap-x-3 phoneland:items-start">
+    <div className={`relative m3-card m3-elevated rounded-m3-lg ${dense ? 'sotd-dense' : ''} p-3 sm:p-4 md:p-5 w-full max-w-md phoneland:max-w-none phoneland:p-2 phoneland:grid phoneland:grid-cols-2 phoneland:gap-x-3 phoneland:items-start`}>
       {/* The visit just handed over — floats over the card edge, so it costs no
           height. The live region announces it; this is for the eyes. */}
       {handoff && (
@@ -345,17 +351,6 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
             : t('game_screen.handoff', { name: handoff.name, score: handoff.score, remaining: handoff.remaining })}
         </div>
       )}
-      {/* Header with Remaining Score */}
-      {/* On phones the score strip above already shows the remaining score. */}
-      <div className="mb-3 text-center hidden lg:block">
-        <div className="m3-label-medium text-on-surface-variant mb-1 uppercase tracking-wide">{t('game.remaining')}</div>
-        <AnimatedNumber
-          value={remaining}
-          className="block text-5xl font-bold"
-          style={{ color: remaining <= 170 ? 'var(--m3-primary)' : 'var(--m3-on-surface)' }}
-        />
-      </div>
-
       {/* Current Throw Display — shakes once when the visit busts. */}
       <motion.div
         data-testid="dart-slots"
@@ -449,47 +444,15 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
           ) : (
             <AnimatedNumber value={currentScore} className="text-2xl font-bold tabular-nums text-on-tertiary-container" />
           )}
+          {/* What the visit leaves — the remaining score itself lives on the
+              hero card, once. */}
+          {!typing && previewRemaining != null && currentThrow.length > 0 && (
+            <span data-testid="visit-preview" className={`m3-label-small tabular-nums ${bust ? 'text-on-error-container' : 'text-on-tertiary-container'}`}>
+              → {previewRemaining}
+            </span>
+          )}
         </div>
       </motion.div>
-
-      {/* Checkout route for the darts left — inside the card, so it is on
-          screen while typing. Its height is ALWAYS reserved: appearing and
-          vanishing on every turn change made the numpad jump under the thumb. */}
-      <div data-testid="checkout-slot" className="relative h-10 mb-3 phoneland:mb-2 phoneland:col-start-1">
-        <AnimatePresence initial={false}>
-          {checkoutRoute && checkoutRoute.length > 0 && (
-            <motion.div
-              key="route"
-              data-testid="checkout-route"
-              aria-label={`${t('score_input.checkout')}: ${checkoutRoute.join(' ')}`}
-              initial={{ opacity: 0, y: 8, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.98 }}
-              transition={springSpatialDefault}
-              className="absolute inset-0 flex items-center gap-2 px-3 rounded-m3-md bg-success-container text-on-success-container"
-            >
-              <span className="m3-label-medium uppercase tracking-wide">{t('score_input.checkout')}</span>
-              <span className="flex gap-1.5 ml-auto">
-                <AnimatePresence mode="popLayout" initial={false}>
-                  {checkoutRoute.map((d, i) => (
-                    <motion.span
-                      layout
-                      key={`${i}-${d}`}
-                      initial={{ opacity: 0, scale: 0.6 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.6 }}
-                      transition={springSpatialFast}
-                      className="px-2 py-0.5 rounded-m3-sm bg-surface text-on-surface m3-label-large tabular-nums"
-                    >
-                      {d}
-                    </motion.span>
-                  ))}
-                </AnimatePresence>
-              </span>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
 
       {/* Mode switcher */}
       <SegmentedButton<InputMode>
@@ -648,7 +611,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
 
       {/* Take back the last CONFIRMED throw. Sits with the other actions instead of
           hiding in a header icon — it is the correction players reach for most. */}
-      {onUndoThrow && (
+      {onUndoThrow && !dense && (
         <button
           onClick={() => canUndoThrow && onUndoThrow()}
           disabled={!canUndoThrow}
@@ -673,7 +636,18 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
       )}
 
       {/* Action Buttons — confirm gets the most room, it is the one used every visit. */}
-      <div className="grid grid-cols-[1fr_1fr_1.6fr] gap-2 phoneland:col-start-1">
+      <div className={`grid ${dense && onUndoThrow ? 'grid-cols-[auto_auto_auto_1fr]' : 'grid-cols-[1fr_1fr_1.6fr]'} gap-2 phoneland:col-start-1`}>
+        {dense && onUndoThrow && (
+          <button
+            onClick={() => canUndoThrow && onUndoThrow()}
+            disabled={!canUndoThrow}
+            aria-label={lastThrow ? `${t('game.undo_last_throw')}: ${lastThrow.playerName} · ${lastThrow.isBust ? t('game.bust') : lastThrow.score}` : t('game.undo_last_throw')}
+            title={!lastThrow ? t('game.no_throw_to_undo') : t('game.undo_last_throw')}
+            className="flex items-center justify-center px-4 rounded-m3-full bg-tertiary-container text-on-tertiary-container m3-state-layer disabled:opacity-30 disabled:cursor-not-allowed transition"
+          >
+            <RotateCcw size={18} />
+          </button>
+        )}
         <button
           onClick={onRemoveDart}
           disabled={currentThrow.length === 0}
@@ -690,10 +664,10 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
           disabled={currentThrow.length === 0}
           aria-label={t('game.clear_visit_long')}
           title={t('game.clear_visit_long')}
-          className="flex items-center justify-center gap-1 p-3 rounded-m3-full bg-error-container text-on-error-container disabled:opacity-30 disabled:cursor-not-allowed transition font-bold"
+          className="flex items-center justify-center gap-1 p-3 px-4 rounded-m3-full bg-error-container text-on-error-container disabled:opacity-30 disabled:cursor-not-allowed transition font-bold"
         >
           <X size={18} />
-          <span>{t('game.clear_visit')}</span>
+          <span className={dense ? 'sr-only' : ''}>{t('game.clear_visit')}</span>
         </button>
 
         <button

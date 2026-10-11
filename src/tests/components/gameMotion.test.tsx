@@ -39,18 +39,16 @@ describe('ScoreInput motion', () => {
     expect(screen.getByTestId('dart-slots')).not.toHaveAttribute('data-bust');
   });
 
-  it('the checkout row keeps its height without a route (no jump on turn change)', () => {
-    const { rerender } = setup();
-    const slot = screen.getByTestId('checkout-slot');
-    expect(slot.className).toContain('h-10');
-    expect(screen.queryByTestId('checkout-route')).toBeNull();
-    rerender(
-      <ScoreInput currentThrow={[]} onAddDart={vi.fn()} onRemoveDart={vi.fn()} onClearThrow={vi.fn()}
-        onConfirm={vi.fn()} editingDartIndex={null} onSetEditingDartIndex={vi.fn()} remaining={40}
-        checkoutRoute={['D20']} />,
-    );
-    expect(screen.getByTestId('checkout-slot')).toBe(slot);
-    expect(screen.getByTestId('checkout-route')).toBeInTheDocument();
+  it('no remaining score and no empty checkout row inside the input (both live on the hero card)', () => {
+    setup();
+    expect(screen.queryByText('Rest')).toBeNull();
+    expect(screen.queryByTestId('checkout-slot')).toBeNull();
+    expect(screen.queryByTestId('visit-preview')).toBeNull();
+  });
+
+  it('a bust previews the score it keeps', () => {
+    setup({ currentThrow: [T20, T20], bust: true, previewRemaining: 101 });
+    expect(screen.getByTestId('visit-preview')).toHaveTextContent('→ 101');
   });
 
   it('every input key carries the spring shape morph, state layer and ripple', () => {

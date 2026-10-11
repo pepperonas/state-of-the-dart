@@ -53,13 +53,15 @@ test('a refresh mid-match keeps scores, turn and the darts of the current visit'
   await expect(rank(names[2])).toHaveAttribute('data-rank', '3');
   await expect(rank(names[3])).toHaveAttribute('data-rank', '3');
 
-  // Desktop: players 1+2 left of the input, 3+4 right of it.
+  // Three panes (1440 px): the whole scoreboard sits left of the input — the
+  // player at the oche as the hero card on top, the others as rows.
   const box = async (name: string) => (await page.getByTestId(`player-card-${name}`).boundingBox())!;
   const input = (await page.getByRole('radiogroup', { name: 'Eingabemodus' }).first().boundingBox())!;
-  expect((await box(names[0])).x).toBeLessThan(input.x);
-  expect((await box(names[1])).x).toBeLessThan(input.x);
-  expect((await box(names[2])).x).toBeGreaterThan(input.x + input.width);
-  expect((await box(names[3])).x).toBeGreaterThan(input.x + input.width);
+  for (const n of names) {
+    const b = await box(n);
+    expect(b.x + b.width).toBeLessThan(input.x);
+  }
+  await expect(page.getByTestId(`player-card-${names[2]}`)).toHaveAttribute('data-hero', 'true');
 
   // Cid enters one dart (T20) without confirming the visit yet.
   await page.getByRole('radio', { name: 'Darts' }).click();
