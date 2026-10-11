@@ -4022,5 +4022,30 @@
       "name": "Fail Sammler",
       "description": "Schalte 50 Fail-Achievements frei"
     }
+  },
+  "scoreboard": {
+    "title": "Scoreboard",
+    "waiting": "Warte auf ein laufendes Spiel",
+    "waiting_hint": "Starte auf diesem Gerät ein X01-Spiel und öffne den Scoreboard über das Bildschirm-Symbol im Spiel. Der Spielstand erscheint hier sofort.",
+    "legs_to_win_one": "{{count}} Leg zum Sieg",
+    "legs_to_win_other": "{{count}} Legs zum Sieg",
+    "sets_to_win_one": "{{count}} Satz zum Sieg",
+    "sets_to_win_other": "{{count}} Sätze zum Sieg",
+    "live": "Live",
+    "paused": "Pausiert",
+    "visit": "Aufnahme",
+    "checkout": "Checkout",
+    "average": "Ø",
+    "darts_in_leg": "Darts im Leg",
+    "legs": "Legs",
+    "sets": "Sätze",
+    "bust": "Bust",
+    "leg_won": "Leg an {{name}}",
+    "match_won": "{{name}} gewinnt das Match",
+    "fullscreen": "Vollbild",
+    "exit_fullscreen": "Vollbild beenden",
+    "standings": "Spielstand",
+    "remaining": "Rest",
+    "open": "Auf zweitem Bildschirm öffnen"
   }
 }

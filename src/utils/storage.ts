@@ -237,6 +237,8 @@ export const DEVICE_GAME_KEYS = [
   'state-of-the-dart-atc-game',
   'state-of-the-dart-shanghai-game',
   'state-of-the-dart-cricket-game',
+  // The TV scoreboard's copy of the running match (utils/scoreboard.ts).
+  'state-of-the-dart-scoreboard',
 ];
 
 /** Signing out hands the device on: drop the running games with it. */

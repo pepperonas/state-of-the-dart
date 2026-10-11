@@ -112,7 +112,7 @@ async function setTheme(page: Page, theme: 'modern' | 'modern-light') {
   expect(res.ok()).toBeTruthy();
 }
 
-const SCREENS = ['/', '/stats', '/players', '/achievements', '/settings', '/game?new=1', '/dashboard', '/match-history', '/leaderboard', '/training'];
+const SCREENS = ['/', '/stats', '/players', '/achievements', '/settings', '/game?new=1', '/dashboard', '/match-history', '/leaderboard', '/training', '/scoreboard'];
 
 test.describe.configure({ mode: 'serial' });
 

@@ -66,6 +66,7 @@ const lazyWithRetry = (componentImport: () => Promise<any>) =>
 // Lazy load heavy components
 const Landing = lazyWithRetry(() => import('./components/landing/Landing'));
 const GameScreen = lazyWithRetry(() => import('./components/game/GameScreen'));
+const ScoreboardScreen = lazyWithRetry(() => import('./components/game/ScoreboardScreen'));
 const PlayerManagement = lazyWithRetry(() => import('./components/player/PlayerManagement'));
 const PlayerProfile = lazyWithRetry(() => import('./components/player/PlayerProfile'));
 const StatsOverview = lazyWithRetry(() => import('./components/stats/StatsOverview'));
@@ -285,6 +286,12 @@ function AppContent() {
                       <Route path="/game" element={
                         <ProtectedRoute>
                           <GameScreen />
+                        </ProtectedRoute>
+                      } />
+
+                      <Route path="/scoreboard" element={
+                        <ProtectedRoute>
+                          <ScoreboardScreen />
                         </ProtectedRoute>
                       } />
 

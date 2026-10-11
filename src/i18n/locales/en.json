@@ -4022,5 +4022,30 @@
       "name": "Fail Collector",
       "description": "Unlock 50 fail achievements"
     }
+  },
+  "scoreboard": {
+    "title": "Scoreboard",
+    "waiting": "Waiting for a match",
+    "waiting_hint": "Start an X01 match on this device and open the scoreboard with the screen button in the game. The score appears here instantly.",
+    "legs_to_win_one": "First to {{count}} leg",
+    "legs_to_win_other": "First to {{count}} legs",
+    "sets_to_win_one": "first to {{count}} set",
+    "sets_to_win_other": "first to {{count}} sets",
+    "live": "Live",
+    "paused": "Paused",
+    "visit": "Visit",
+    "checkout": "Checkout",
+    "average": "Avg",
+    "darts_in_leg": "Darts in leg",
+    "legs": "Legs",
+    "sets": "Sets",
+    "bust": "Bust",
+    "leg_won": "Leg to {{name}}",
+    "match_won": "{{name}} wins the match",
+    "fullscreen": "Full screen",
+    "exit_fullscreen": "Exit full screen",
+    "standings": "Standings",
+    "remaining": "Remaining",
+    "open": "Open on a second screen"
   }
 }

@@ -11,7 +11,7 @@
 <!-- Links -->
 [![Live Demo](https://img.shields.io/badge/Live_Demo-stateofthedart.com-22c55e?style=for-the-badge&logo=googlechrome&logoColor=white)](https://stateofthedart.com)
 [![Website](https://img.shields.io/badge/Website-stateofthedart.celox.io-a855f7?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://stateofthedart.celox.io)
-[![Version](https://img.shields.io/badge/Version-0.30.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-0.31.0-3b82f6?style=for-the-badge)](CHANGELOG.md)
 
 <!-- Build & Repo (live) -->
 [![Tests](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml/badge.svg)](https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml)
@@ -46,8 +46,8 @@
 <!-- Qualität -->
 ![Vitest](https://img.shields.io/badge/Vitest-1.x-6E9F18?logo=vitest&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-1.60-2EAD33?logo=playwright&logoColor=white)
-![Unit Tests](https://img.shields.io/badge/Unit_Tests-1139-brightgreen)
-![E2E Tests](https://img.shields.io/badge/E2E_Tests-41-brightgreen)
+![Unit Tests](https://img.shields.io/badge/Unit_Tests-1153-brightgreen)
+![E2E Tests](https://img.shields.io/badge/E2E_Tests-42-brightgreen)
 ![Coverage](https://img.shields.io/badge/Coverage-24%25_stmts_%7C_75%25_branches-yellow)
 ![ESLint](https://img.shields.io/badge/ESLint-configured-4B32C3?logo=eslint&logoColor=white)
 
@@ -795,6 +795,10 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 ---
 
 ## 📝 Changelog
+
+### v0.31.0 (11. Oktober 2026) - TV-Scoreboard
+
+**Spielstand auf dem zweiten Bildschirm:** Ein neues Bildschirm-Symbol in der Spielansicht öffnet `/scoreboard` in einem eigenen Fenster – für Fernseher, Beamer oder einen zweiten Monitor. Die Anzeige folgt jeder Aufnahme sofort, ohne Server und ohne Neuladen (gleiches Gerät, gleicher Browser): riesiger Rest des Spielers am Zug, laufende Aufnahme mit Dart-Punkten, Checkout-Weg, Schnitt, Darts im Leg, Legs als Punkte und die letzten Aufnahmen; daneben alle Spieler mit Platz und Rest. Große Momente bekommen die Bühne: 180 mit Strahlenkranz und Konfetti, 100+ mit Funken, Bust mit Schütteln, gewonnenes Leg und am Ende der Sieger. Ein frisch geöffnetes Fenster zeigt das laufende Spiel sofort, Vollbild per Knopf, Mauszeiger und Knöpfe blenden sich aus. Das Fenster liest nur – es kann nie einen alten Spielstand zurückschreiben.
 
 ### v0.30.0 (11. Oktober 2026) - Einblicke, Glücksrad, flüssiger Spielerwechsel
 

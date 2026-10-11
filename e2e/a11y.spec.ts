@@ -17,7 +17,7 @@ import { BACKEND_PORT } from './fixtures';
 
 const API = `http://localhost:${BACKEND_PORT}/api`;
 const SCREENS = ['/', '/stats', '/players', '/achievements', '/settings', '/game?new=1', '/dashboard', '/match-history', '/leaderboard', '/training',
-  '/cricket', '/around-the-clock', '/shanghai', '/tournament', '/online', '/resume', '/account', '/global-leaderboard', '/training-stats', '/pricing'];
+  '/cricket', '/around-the-clock', '/shanghai', '/tournament', '/online', '/resume', '/account', '/global-leaderboard', '/training-stats', '/pricing', '/scoreboard'];
 
 async function axe(page: Page) {
   const result = await new AxeBuilder({ page })
