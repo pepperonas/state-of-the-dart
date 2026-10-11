@@ -320,6 +320,12 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - Game screen below `lg`: `ScoreStrip` replaces the stacked `PlayerScore` cards and ScoreInput hides its own "remaining" header. `e2e/layout.spec.ts` asserts the confirm button and all scores are on screen at 390×844 and 1280×800. ⚠️ Locators like `getByText('501')` must add `.locator('visible=true')` — the strip exists (hidden) on desktop too.
 - ScoreInput has three modes (`numpad` / `darts` / `quick`, remembered in `sotd-input-mode`); the dart grid adds exact beds.
 
+### TV scoreboard (0.31.0)
+- `/scoreboard` renders a snapshot published by GameScreen (`ScoreboardPublisher` → `utils/scoreboard.ts`): BroadcastChannel `sotd-scoreboard` for live updates plus a localStorage copy (`state-of-the-dart-scoreboard`, in `DEVICE_GAME_KEYS`) for a window that opens mid-match and for the `storage`-event fallback. Same device and browser only — no backend.
+- ⚠️ The scoreboard must never use GameContext: a second window restoring the match there could write a stale state back. It only reads snapshots; `isNewer` drops older ones (publish stamps are strictly increasing, `nextStamp`).
+- Moments come from the difference between snapshots (`momentBetween`): match won > leg won > newest visit (bust/180/ton/visit), only when a player's `dartsInLeg` grew — an undo shows nothing.
+- ⚠️ No exit animations on the hero content: framer runs them on requestAnimationFrame, which sleeps in a window that is not in front (Playwright's second page, a TV window behind another) — the old content lingered in the DOM. The first render does not fade in either.
+
 ### Feedback ladder (0.29.0)
 - One effect in GameScreen (`seenThrowsRef`) reacts to the newest booked visit: level from `feedbackLevel`, PB chips from `personalBestHits` against baselines read once per match from `storage.personalBests` (`pbRef`, raised as records fall). Checkouts are skipped there — the leg overlay celebrates them (recap, radial burst, morph, best-leg chip).
 - `HeroMoment` sits at `z-[10000]` (above the achievement stack at 9999) and is `pointer-events: none`; canvas-confetti uses `zIndex: 10001`. Keep both — below the toasts the moment was invisible.
@@ -502,7 +508,8 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **41 tests** currently:
+- Specs in `e2e/`. **42 tests** currently:
+  - `scoreboard.spec.ts` — a waiting scoreboard window picks up a new match, follows visits live (rows, active player, visit and 180 moments) and shows the match at once after a reload
   - `arena.spec.ts` — phone: input dock in reach, hero above it, stats sheet; hero swaps on the turn; 2 panes at 1024, 3 panes + board above the fold at 1440; no width cap at 2560; a 180 shows the hero moment without blocking input, a won leg its recap
   - `fast-play.spec.ts` — visits typed back to back without waiting land with the right player; a bust never shows a negative score; the leg overlay closes on a tap; checkout route on screen at 390×844; no player cards (fire canvas) mounted on phones; no endless animation under reduced motion; triple out chosen at setup checks out on a triple
   - `achievements-flow.spec.ts` — mid-leg toast closes on an outside tap; a numpad 141 checkout ends the leg; achievements go centre stage and stay until "Weiter"

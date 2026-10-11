@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useDeferredValue, Suspense, lazy } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, X, Bot, ChevronDown, AlertTriangle, Smile, Flame, UserMinus, Volume2, VolumeX, BarChart3 } from 'lucide-react';
+import { ArrowLeft, RotateCcw, X, Bot, ChevronDown, AlertTriangle, Smile, Flame, UserMinus, Volume2, VolumeX, BarChart3, Tv } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 const ThrowChart = lazy(() => import('./ThrowChart'));
 import { useGame, MIN_MATCH_PLAYERS } from '../../context/GameContext';
@@ -26,7 +26,9 @@ import AvatarPicker from '../player/AvatarPicker';
 import { Dart, Player, GameType, MatchSettings, Throw, HeatmapData, MatchPlayer } from '../../types/index';
 import { calculateThrowScore } from '../../utils/scoring';
 import { evaluateVisit, rulesOf } from '../../utils/visit';
-import { inRuleOf, outRuleOf, ruleSettings, maxFinish, type CheckRule } from '../../utils/checkRules';
+import { inRuleOf, outRuleOf, ruleSettings, maxFinish, ruleTags, type CheckRule } from '../../utils/checkRules';
+import ScoreboardPublisher from './ScoreboardPublisher';
+import { readScoreboard, type ScoreboardData } from '../../utils/scoreboard';
 import { Handoff, HANDOFF_MS, LEG_WON_MS } from '../../utils/handoff';
 import { useWindowClass } from '../../hooks/useWindowClass';
 import HeroMoment, { type HeroMomentState } from './HeroMoment';
@@ -1396,9 +1398,24 @@ const GameScreen: React.FC = () => {
     const table = standings(currentMatch);
     const winner = table[0];
     const isSetsMatch = (currentMatch.settings.setsToWin ?? 1) > 1;
+    // The TV scoreboard keeps the last picture of the match and adds the winner.
+    const lastBoard = readScoreboard();
+    const finalBoard: ScoreboardData | null = lastBoard?.matchId === currentMatch.id ? {
+      ...(({ v: _v, updatedAt: _u, ...rest }) => rest)(lastBoard),
+      status: 'completed',
+      winnerName: winner.name,
+      throwTotal: 0,
+      throwDarts: 0,
+      checkoutRoute: null,
+      players: lastBoard.players.map(p => {
+        const mp = currentMatch.players.find(x => x.playerId === p.id);
+        return mp ? { ...p, legsWon: mp.legsWon, setsWon: mp.setsWon, average: mp.matchAverage } : p;
+      }),
+    } : null;
 
     return (
       <div className="min-h-dvh p-4 gradient-mesh flex items-center justify-center">
+        {finalBoard && <ScoreboardPublisher data={finalBoard} />}
         <div className="max-w-4xl w-full relative z-10">
           <motion.div
             className="m3-card m3-elevated p-6 sm:p-12 text-center"
@@ -1541,6 +1558,32 @@ const GameScreen: React.FC = () => {
     dartsInLeg: dartsInLeg(currentLeg.throws, p.playerId),
     visits: lastVisits(currentLeg.throws, p.playerId, 5),
   }));
+  const scoreboardData: ScoreboardData = {
+    matchId: state.currentMatch.id,
+    startScore: state.currentMatch.settings.startScore || 501,
+    status: state.currentMatch.status === 'paused' ? 'paused' : 'in-progress',
+    players: spotPlayers.map(sp => ({
+      id: sp.player.playerId,
+      name: sp.player.name,
+      avatar: sp.avatar,
+      remaining: sp.remaining,
+      rank: sp.rank,
+      average: sp.average,
+      legsWon: sp.legsWon,
+      setsWon: sp.setsWon,
+      dartsInLeg: sp.dartsInLeg,
+      visits: sp.visits,
+    })),
+    activeIndex: state.currentPlayerIndex,
+    legsToWin: state.currentMatch.settings.legsToWin || 3,
+    showSets,
+    setsToWin: state.currentMatch.settings.setsToWin || 1,
+    rules: ruleTags(state.currentMatch.settings).map(r => r.short).join(' '),
+    checkoutRoute: settings.showCheckoutHints ? state.checkoutSuggestion ?? null : null,
+    throwTotal: currentThrowScore,
+    throwDarts: state.currentThrow.length,
+    winnerName: null,
+  };
   // M3 window size classes decide the layout: one pane with the input docked
   // at the bottom (phone, tablet portrait), two panes from 840 px, three from
   // 1200 px with a context pane (board, stats). A phone held sideways keeps
@@ -1910,6 +1953,7 @@ const GameScreen: React.FC = () => {
     <div data-game-screen className={`min-h-dvh p-4 md:p-6 phoneland:p-2 gradient-mesh overflow-x-hidden ${usesSheet && !compactHeight ? 'flex flex-col' : ''}`}>
       <GameAnnouncer match={state.currentMatch} />
       <HeroMoment moment={heroMoment} onDone={clearHeroMoment} />
+      <ScoreboardPublisher data={scoreboardData} />
 
       <div className={`${containerWidth} w-full mx-auto ${usesSheet && !compactHeight ? 'flex-1 flex flex-col' : ''}`} data-panes={panes}>
         <div className="flex items-center justify-between mb-3 lg:mb-4 phoneland:mb-1">
@@ -1924,6 +1968,16 @@ const GameScreen: React.FC = () => {
                 onClick={() => setInsightsOpen(true)}
               >
                 <BarChart3 size={20} />
+              </IconButton>
+            )}
+            {/* A second screen (TV, beamer): the score as a display-only page. */}
+            {!usesSheet && (
+              <IconButton
+                variant="tonal"
+                label={t('scoreboard.open')}
+                onClick={() => window.open('/scoreboard', 'sotd-scoreboard')}
+              >
+                <Tv size={20} />
               </IconButton>
             )}
             <IconButton

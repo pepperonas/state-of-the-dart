@@ -7,6 +7,24 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.31.0] - 2026-10-11
+
+### Added — TV / second-screen scoreboard
+- `/scoreboard` (`ScoreboardScreen`, a game route: no navigation, screen kept
+  awake): display only, sized in viewport units — hero with the remaining
+  score (~32 vh), live visit, checkout route, average, darts in leg, leg pips,
+  last visits; every player as a row with rank and remaining; moments for
+  visit / ton / 180 / bust / leg; a winner panel; full screen button; pointer
+  hides when idle.
+- `utils/scoreboard.ts`: snapshot type, `momentBetween` (forward steps only —
+  an undo shows nothing), `isNewer`, `publishScoreboard` (BroadcastChannel +
+  localStorage copy), `subscribeScoreboard` (channel + `storage` event).
+- `ScoreboardPublisher` in GameScreen publishes only when the content
+  changed; the completed screen republishes the last snapshot with the
+  winner. The scoreboard never touches GameContext.
+- "Open on a second screen" button in the game header (2/3-pane layouts).
+- The scoreboard copy is cleared on sign-out with the other device games.
+
 ## [0.30.0] - 2026-10-11
 
 ### Changed — insights

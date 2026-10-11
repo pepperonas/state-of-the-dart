@@ -3,6 +3,6 @@
  * footer, no floating report buttons, no "new version" prompt, and the screen
  * is kept awake.
  */
-const GAME_ROUTE = /^\/(game|cricket|around-the-clock|shanghai|online|training\/[^/]+)\/?$/;
+const GAME_ROUTE = /^\/(game|cricket|around-the-clock|shanghai|online|training\/[^/]+|scoreboard)\/?$/;
 
 export const isGameRoute = (pathname: string): boolean => GAME_ROUTE.test(pathname);
