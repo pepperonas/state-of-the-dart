@@ -10,6 +10,7 @@ import { springHandover, springSpatialDefault, springSpatialFast } from '../../u
 import { CONTAINER_MORPH, CONTENT_IN, FLAMES_AFTER_MS } from './spotlightMotion';
 import NameReveal from './NameReveal';
 import RankStamp from './RankStamp';
+import LegPips, { MAX_PIPS } from './LegPips';
 import ScoreDelta from './ScoreDelta';
 
 export type HeroSize = 'compact' | 'regular' | 'large';
@@ -277,8 +278,12 @@ const HeroCard: React.FC<HeroCardProps> = ({
           <span>Ø <span className="text-on-surface font-semibold">{average.toFixed(1)}</span></span>
           <span data-testid="darts-in-leg">{t('game_screen.darts_in_leg')} <span className="text-on-surface font-semibold">{dartsInLeg}</span></span>
           {legsToWin ? (
-            <span data-testid="legs-to-win" className={legsWon > 0 ? 'text-tertiary font-semibold' : ''}>
-              {t(showSets ? 'player_score.legs_to_win_set' : 'player_score.legs_to_win', { won: legsWon, total: legsToWin })}
+            <span className="flex items-center gap-1.5" data-testid="legs-tile">
+              {t('game.legs')} <span className={`font-semibold ${legsWon > 0 ? 'text-tertiary' : 'text-on-surface'}`}>{legsWon}</span>
+              {legsToWin <= MAX_PIPS ? <LegPips won={legsWon} total={legsToWin} size="sm" /> : <span aria-hidden="true">/ {legsToWin}</span>}
+              <span data-testid="legs-to-win" className="sr-only">
+                {t(showSets ? 'player_score.legs_to_win_set' : 'player_score.legs_to_win', { won: legsWon, total: legsToWin })}
+              </span>
             </span>
           ) : null}
           {visits.length > 0 && (
@@ -317,22 +322,8 @@ const HeroCard: React.FC<HeroCardProps> = ({
             </div>
             <div className="flex items-center gap-2.5 mt-1">
               <AnimatedNumber value={legsWon} className={`${TILE_VALUE} !mt-0 ${legsWon > 0 ? '!text-on-tertiary-container' : ''}`} />
-              {legsToWin && legsToWin <= 9 ? (
-                <div aria-hidden="true" data-testid="legs-pips" className="flex flex-1 gap-1 min-w-0">
-                  {Array.from({ length: legsToWin }, (_, i) => (
-                    <span
-                      key={i}
-                      data-on={i < legsWon ? 'true' : undefined}
-                      className={`h-1.5 flex-1 max-w-6 rounded-m3-full transition-colors ${
-                        i < legsWon
-                          ? 'bg-on-tertiary-container'
-                          : legsWon > 0
-                            ? 'bg-[color-mix(in_srgb,var(--m3-on-tertiary-container)_28%,transparent)]'
-                            : 'bg-outline-variant'
-                      }`}
-                    />
-                  ))}
-                </div>
+              {legsToWin && legsToWin <= MAX_PIPS ? (
+                <LegPips won={legsWon} total={legsToWin} tone={legsWon > 0 ? 'container' : 'surface'} />
               ) : legsToWin ? (
                 <span aria-hidden="true" className={`m3-title-small ${legsWon > 0 ? 'text-on-tertiary-container' : 'text-on-surface-variant'}`}>/ {legsToWin}</span>
               ) : null}

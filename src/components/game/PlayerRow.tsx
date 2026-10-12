@@ -10,6 +10,7 @@ import { CONTAINER_MORPH, CONTENT_IN } from './spotlightMotion';
 import { useReducedMotion } from 'framer-motion';
 import { rankTone } from '../../utils/legRanks';
 import RankStamp from './RankStamp';
+import LegPips, { MAX_PIPS } from './LegPips';
 import ScoreDelta from './ScoreDelta';
 
 export interface PlayerRowProps {
@@ -44,7 +45,6 @@ const PlayerRow: React.FC<PlayerRowProps> = ({
   const { t } = useTranslation();
   const reduce = useReducedMotion();
   const id = player.playerId;
-  const legs = legsToWin ? `${legsWon}/${legsToWin}` : String(legsWon);
   return (
     <motion.div
       // Container transform: shares the hero card's layout id, so the row
@@ -74,14 +74,26 @@ const PlayerRow: React.FC<PlayerRowProps> = ({
         <motion.div layoutId={`spot-name-${id}`} layout="position" layoutDependency={turnKey} transition={{ layout: CONTAINER_MORPH }} className="m3-title-small text-on-surface truncate">
           {player.name}
         </motion.div>
+        {/* The figures echo the hero card's tiles: value emphasised, legs as pips. */}
         <motion.div
           initial={reduce ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={CONTENT_IN}
-          className="m3-label-small text-on-surface-variant tabular-nums truncate"
+          className="flex items-center gap-2.5 m3-label-small text-on-surface-variant tabular-nums whitespace-nowrap overflow-hidden"
         >
-          Ø {average.toFixed(1)} · {showSets ? `${setsWon}S · ` : ''}{legs} L
-          {legsToWin ? <span className="sr-only"> {t('player_score.legs_to_win_long', { won: legsWon, total: legsToWin })}</span> : null}
+          <span>Ø <span className="text-on-surface font-semibold">{average.toFixed(1)}</span></span>
+          {showSets && (
+            <span data-testid="row-sets">
+              <span className="text-on-surface font-semibold">{setsWon}</span> {t('game_screen.sets_short')}
+            </span>
+          )}
+          <span data-testid="row-legs" className="flex items-center gap-1.5">
+            <span className={`font-semibold ${legsWon > 0 ? 'text-tertiary' : 'text-on-surface'}`}>{legsWon}</span>
+            {legsToWin && legsToWin <= MAX_PIPS
+              ? <LegPips won={legsWon} total={legsToWin} size="sm" />
+              : <span>{legsToWin ? `/ ${legsToWin} ` : ''}{t('game_screen.legs_short')}</span>}
+          </span>
+          {legsToWin ? <span className="sr-only">{t('player_score.legs_to_win_long', { won: legsWon, total: legsToWin })}</span> : null}
         </motion.div>
       </div>
       {rank && <RankStamp rank={rank} size="strip" />}
