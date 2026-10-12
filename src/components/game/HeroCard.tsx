@@ -59,6 +59,11 @@ const NUMBER_SIZE: Record<HeroSize, string> = {
   large: 'text-[clamp(5rem,13vh,11rem)]',
 };
 
+/** Stat tile: a tonal well, a quiet label, a big number (like the score above). */
+const TILE = 'flex flex-col bg-surface-container-highest rounded-m3-md px-3 py-2.5 min-w-0';
+const TILE_LABEL = 'm3-label-small uppercase tracking-wider text-on-surface-variant truncate';
+const TILE_VALUE = 'block mt-1 m3-headline-small font-semibold text-on-surface tabular-nums leading-none';
+
 /** Visit pill colour: 180 and 140+ tertiary, 100+ primary, bust error. */
 const visitTone = (v: { score: number; bust: boolean }) =>
   v.bust ? 'bg-error-container text-on-error-container'
@@ -285,14 +290,16 @@ const HeroCard: React.FC<HeroCardProps> = ({
         </div>
       ) : (
         <>
-      <div className={`grid ${showSets ? 'grid-cols-4' : 'grid-cols-3'} gap-2 mt-3 text-sm`}>
-          <div className="bg-surface-container-highest rounded-m3-sm p-2">
-            <div className="text-on-surface-variant m3-label-medium">{t('game.average')}</div>
-            <div className="font-semibold text-on-surface tabular-nums">{average.toFixed(2)}</div>
+      {/* The stat tiles echo the top of the card: a quiet label, a big tallying
+          number. Legs show the way to the win as pips, one per leg needed. */}
+      <div className={`grid ${showSets ? 'grid-cols-4' : 'grid-cols-3'} gap-2 mt-4`}>
+          <div className={TILE} data-testid="average-tile">
+            <div className={TILE_LABEL}>{t('game.average')}</div>
+            <AnimatedNumber value={average} decimals={2} className={TILE_VALUE} />
           </div>
-          <div className="bg-surface-container-highest rounded-m3-sm p-2" data-testid="darts-in-leg">
-            <div className="text-on-surface-variant m3-label-medium">{t('game_screen.darts_in_leg')}</div>
-            <div className="font-semibold text-on-surface tabular-nums">{dartsInLeg}</div>
+          <div className={TILE} data-testid="darts-in-leg">
+            <div className={TILE_LABEL}>{t('game_screen.darts_in_leg')}</div>
+            <AnimatedNumber value={dartsInLeg} className={TILE_VALUE} />
           </div>
           <motion.div
             key={legPulse}
@@ -302,30 +309,48 @@ const HeroCard: React.FC<HeroCardProps> = ({
             initial={legPulse > 0 ? { scale: 1.1 } : false}
             animate={{ scale: 1 }}
             transition={springSpatialDefault}
-            className={`rounded-m3-sm p-2 ${legsWon > 0 ? 'bg-tertiary-container' : 'bg-surface-container-highest'} ${legPulse > 0 ? 'sotd-leg-won' : ''}`}
+            className={`${TILE} ${legsWon > 0 ? '!bg-tertiary-container' : ''} ${legPulse > 0 ? 'sotd-leg-won' : ''}`}
           >
-            <div className={`m3-label-medium ${legsWon > 0 ? 'text-on-tertiary-container' : 'text-on-surface-variant'}`}>{t('game.legs')}</div>
-            <div className={`font-semibold flex items-center gap-1 ${legsWon > 0 ? 'text-on-tertiary-container' : 'text-on-surface'}`}>
-              {legsWon}
-              {legsWon > 0
-                ? Array.from({ length: Math.min(legsWon, 5) }, (_, i) => (
-                    <Trophy key={i} size={14} fill="currentColor" aria-hidden="true" />
-                  ))
-                : <Trophy size={14} className="text-tertiary" aria-hidden="true" />}
+            <div className={`${TILE_LABEL} flex items-center gap-1 ${legsWon > 0 ? '!text-on-tertiary-container' : ''}`}>
+              <Trophy size={12} className={legsWon > 0 ? '' : 'text-tertiary'} fill={legsWon > 0 ? 'currentColor' : 'none'} aria-hidden="true" />
+              {t('game.legs')}
             </div>
+            <div className="flex items-center gap-2.5 mt-1">
+              <AnimatedNumber value={legsWon} className={`${TILE_VALUE} !mt-0 ${legsWon > 0 ? '!text-on-tertiary-container' : ''}`} />
+              {legsToWin && legsToWin <= 9 ? (
+                <div aria-hidden="true" data-testid="legs-pips" className="flex flex-1 gap-1 min-w-0">
+                  {Array.from({ length: legsToWin }, (_, i) => (
+                    <span
+                      key={i}
+                      data-on={i < legsWon ? 'true' : undefined}
+                      className={`h-1.5 flex-1 max-w-6 rounded-m3-full transition-colors ${
+                        i < legsWon
+                          ? 'bg-on-tertiary-container'
+                          : legsWon > 0
+                            ? 'bg-[color-mix(in_srgb,var(--m3-on-tertiary-container)_28%,transparent)]'
+                            : 'bg-outline-variant'
+                      }`}
+                    />
+                  ))}
+                </div>
+              ) : legsToWin ? (
+                <span aria-hidden="true" className={`m3-title-small ${legsWon > 0 ? 'text-on-tertiary-container' : 'text-on-surface-variant'}`}>/ {legsToWin}</span>
+              ) : null}
+            </div>
+            {/* The pips say it at a glance; the sentence is for screen readers. */}
             {legsToWin ? (
-              <div data-testid="legs-to-win" className={`m3-label-small tabular-nums ${legsWon > 0 ? 'text-on-tertiary-container' : 'text-on-surface-variant'}`}>
+              <span data-testid="legs-to-win" className="sr-only">
                 {t(showSets ? 'player_score.legs_to_win_set' : 'player_score.legs_to_win', { won: legsWon, total: legsToWin })}
-              </div>
+              </span>
             ) : null}
           </motion.div>
           {showSets && (
-            <div className="bg-surface-container-highest rounded-m3-sm p-2">
-              <div className="text-on-surface-variant m3-label-medium">{t('game.sets')}</div>
-              <div className="font-semibold text-on-surface flex items-center gap-1">
-                {setsWon}
-                <Trophy size={14} className="text-primary" aria-hidden="true" />
+            <div className={TILE} data-testid="sets-tile">
+              <div className={`${TILE_LABEL} flex items-center gap-1`}>
+                <Trophy size={12} className="text-primary" aria-hidden="true" />
+                {t('game.sets')}
               </div>
+              <AnimatedNumber value={setsWon} className={TILE_VALUE} />
             </div>
           )}
         </div>

@@ -62,11 +62,18 @@ describe('legs to win', () => {
     match180s: 0, match140Plus: 0, match100Plus: 0, matchHighestScore: 0,
   } as unknown as MatchPlayer;
 
-  it('the card says how far from the win, small', () => {
+  it('the card shows how far from the win as pips, and says it to screen readers', () => {
     render(<HeroCard player={player} remaining={301} rank={null} average={0} legsWon={1} setsWon={0} legsToWin={2} dartsInLeg={0} visits={[]} />);
-    const line = screen.getByTestId('legs-to-win');
-    expect(line).toHaveTextContent('1/2 zum Sieg');
-    expect(line.className).toContain('m3-label-small');
+    expect(screen.getByTestId('legs-to-win')).toHaveTextContent('1/2 zum Sieg');
+    const pips = screen.getByTestId('legs-pips').children;
+    expect(pips).toHaveLength(2);
+    expect([...pips].filter(p => p.getAttribute('data-on') === 'true')).toHaveLength(1);
+  });
+
+  it('a long match shows "/ N" instead of a row of pips', () => {
+    render(<HeroCard player={player} remaining={301} rank={null} average={0} legsWon={4} setsWon={0} legsToWin={11} dartsInLeg={0} visits={[]} />);
+    expect(screen.queryByTestId('legs-pips')).toBeNull();
+    expect(screen.getByTestId('legs-tile')).toHaveTextContent('/ 11');
   });
 
   it('in a sets match it counts towards the set', () => {

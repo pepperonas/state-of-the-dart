@@ -13,7 +13,7 @@ import { api } from '../../services/api';
 import { useGameAchievements } from '../../hooks/useGameAchievements';
 import BackButton from '../common/BackButton';
 import { Button, Card, AnimatedNumber } from '../common';
-import { AvatarGlyph } from '../icons';
+import { AvatarGlyph, avatarGlyphSize } from '../icons';
 import { advanceThroughSequence, bobs27Round, BOBS_27_ROUNDS, BOBS_27_BULL } from '../../utils/training';
 import { useWakeLock } from '../../hooks/useWakeLock';
 import { haptic } from '../../utils/haptics';
@@ -536,12 +536,12 @@ const TrainingScreen: React.FC = () => {
                         <img
                           src={player.avatar}
                           alt={player.name}
-                          className="w-16 h-16 rounded-full object-cover ring-2 ring-outline-variant group-hover:ring-[var(--m3-primary)]"
+                          className="w-[4.5rem] h-[4.5rem] rounded-full object-cover ring-2 ring-outline-variant group-hover:ring-[var(--m3-primary)]"
                         />
                       ) : (
-                        <div className="w-16 h-16 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold ring-2 ring-outline-variant group-hover:ring-[var(--m3-primary)]">
+                        <div className="w-[4.5rem] h-[4.5rem] rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold ring-2 ring-outline-variant group-hover:ring-[var(--m3-primary)]">
                           {player.avatar
-                            ? <AvatarGlyph avatar={player.avatar} size={34} />
+                            ? <AvatarGlyph avatar={player.avatar} size={avatarGlyphSize(player.avatar)} />
                             : <span className="m3-headline-small">{player.name.charAt(0).toUpperCase()}</span>}
                         </div>
                       )}

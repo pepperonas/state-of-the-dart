@@ -27,6 +27,7 @@ import BackButton from '../common/BackButton';
 import { staggerChild } from '../../utils/motion';
 import { Card, Button, Chip, Select, Menu, useFeedback } from '../common';
 import { Icon, AvatarGlyph } from '../icons';
+import PlayerAvatar from '../player/PlayerAvatar';
 import ErrorState from '../common/ErrorState';
 import { useChartTheme } from '../../utils/chartTheme';
 
@@ -366,7 +367,7 @@ const StatsOverview: React.FC = () => {
                 value: player.id,
                 label: player.name,
                 text: player.name,
-                icon: <AvatarGlyph avatar={player.avatar} size={18} />,
+                icon: <AvatarGlyph avatar={player.avatar} size={22} />,
               }))}
             />
           </div>
@@ -1328,7 +1329,7 @@ const PlayerComparisonView: React.FC<{
                   : 'cursor-pointer hover:scale-105'
               }`}
             >
-              <div className="mb-3 flex justify-center"><AvatarGlyph avatar={player.avatar} size={40} /></div>
+              <div className="mb-3 flex justify-center"><PlayerAvatar avatar={player.avatar} name={player.name} size="md" /></div>
               <div className="font-bold text-on-surface m3-body-large">{player.name}</div>
               {comparePlayerIds.includes(player.id) && (
                 <div className="m3-body-small text-primary mt-2 font-semibold">{t('stats_overview.selected')}</div>
@@ -1390,7 +1391,7 @@ const PlayerComparisonView: React.FC<{
                     {comparisonData.map((data, index) => (
                       <th key={index} className="text-center p-3 text-on-surface font-semibold">
                         <div className="flex flex-col items-center gap-2">
-                          <AvatarGlyph avatar={data!.player.avatar} size={24} />
+                          <PlayerAvatar avatar={data!.player.avatar} name={data!.player.name} size="sm" />
                           <span>{data!.player.name}</span>
                         </div>
                       </th>

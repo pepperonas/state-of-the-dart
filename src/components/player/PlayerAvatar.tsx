@@ -1,29 +1,43 @@
 import React from 'react';
 import { getInitial } from '../../utils/avatar';
-import { AvatarGlyph } from '../icons';
+import { AvatarGlyph, avatarGlyphSize } from '../icons';
+
+export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 interface PlayerAvatarProps {
   avatar?: string;
   name: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: AvatarSize;
   showBadge?: boolean;
   className?: string;
 }
 
-const sizeClasses = {
-  sm: 'w-8 h-8',
-  md: 'w-12 h-12',
-  lg: 'w-16 h-16',
+/**
+ * Disc sizes (0.35.1: one step up). `xs` is the old `sm` (32 px) for the few
+ * places where a row must stay as low as before — a chip, a table header.
+ */
+const sizeClasses: Record<AvatarSize, string> = {
+  xs: 'w-8 h-8',
+  sm: 'w-10 h-10',
+  md: 'w-14 h-14',
+  lg: 'w-[4.5rem] h-[4.5rem]',
   xl: 'w-24 h-24 md:w-32 md:h-32',
 };
 
-/** Glyph is ~55% of the disc, the optical ratio M3 uses for avatars. */
-const glyphSize = { sm: 18, md: 26, lg: 34, xl: 52 };
+/** Initials scale with the disc too (they were title-medium at every size). */
+const letterClasses: Record<AvatarSize, string> = {
+  xs: 'm3-title-small',
+  sm: 'm3-title-medium',
+  md: 'm3-title-large',
+  lg: 'm3-headline-small',
+  xl: 'm3-headline-large',
+};
 
-const badgeSizeClasses = {
-  sm: 'w-4 h-4',
-  md: 'w-5 h-5',
-  lg: 'w-6 h-6',
+const badgeSizeClasses: Record<AvatarSize, string> = {
+  xs: 'w-4 h-4',
+  sm: 'w-5 h-5',
+  md: 'w-6 h-6',
+  lg: 'w-7 h-7',
   xl: 'w-8 h-8 md:w-10 md:h-10',
 };
 
@@ -64,22 +78,22 @@ const PlayerAvatar: React.FC<PlayerAvatarProps> = ({
         />
       ) : isLetter ? (
         <div className={disc}>
-          <span className="m3-title-medium m3-emphasized">{avatar}</span>
+          <span className={`${letterClasses[size]} m3-emphasized`}>{avatar}</span>
         </div>
       ) : avatar ? (
         <div className={disc}>
-          <AvatarGlyph avatar={avatar} size={glyphSize[size]} />
+          <AvatarGlyph avatar={avatar} size={avatarGlyphSize(avatar)} />
         </div>
       ) : (
         <div className={disc}>
-          <span className="m3-title-medium m3-emphasized">{initial}</span>
+          <span className={`${letterClasses[size]} m3-emphasized`}>{initial}</span>
         </div>
       )}
       {showBadge && !isUrl && (
         <div
           className={`absolute -bottom-1 -right-1 ${badgeSizeClasses[size]} bg-tertiary-container text-on-tertiary-container rounded-full border-2 border-surface flex items-center justify-center`}
         >
-          <AvatarGlyph avatar={avatar} size={size === 'sm' ? 10 : 12} />
+          <AvatarGlyph avatar={avatar} size={avatarGlyphSize(avatar)} />
         </div>
       )}
     </div>

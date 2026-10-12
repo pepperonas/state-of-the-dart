@@ -1972,7 +1972,7 @@ const GameScreen: React.FC = () => {
                     : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
                 }`}
               >
-                <PlayerAvatar avatar={players.find(p => p.id === player.playerId)?.avatar} name={player.name} size="sm" />
+                <PlayerAvatar avatar={players.find(p => p.id === player.playerId)?.avatar} name={player.name} size="xs" />
                 {player.name}
               </button>
             ))}

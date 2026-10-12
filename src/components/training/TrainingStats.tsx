@@ -181,7 +181,7 @@ const TrainingStats: React.FC = () => {
                     value: player.id,
                     label: player.name,
                     text: player.name,
-                    icon: <AvatarGlyph avatar={player.avatar} size={18} />,
+                    icon: <AvatarGlyph avatar={player.avatar} size={22} />,
                   }))}
                 />
               </div>
@@ -220,7 +220,7 @@ const TrainingStats: React.FC = () => {
                   value: player.id,
                   label: player.name,
                   text: player.name,
-                  icon: <AvatarGlyph avatar={player.avatar} size={18} />,
+                  icon: <AvatarGlyph avatar={player.avatar} size={22} />,
                 }))}
               />
             </div>
