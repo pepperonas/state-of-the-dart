@@ -70,6 +70,30 @@ test('the turn passing makes the next player the hero', async ({ page }) => {
   await expect(page.getByTestId(`player-card-${names[0]}`)).toContainText('441');
 });
 
+test('relay turn change: the visit lands on the thrower, then the card hands over', async ({ page }) => {
+  const names = await start(page, 1440, 900);
+  const ann = page.getByTestId(`player-card-${names[0]}`);
+  const ben = page.getByTestId(`player-card-${names[1]}`);
+  await page.keyboard.type('60');
+  const t0 = Date.now();
+  await page.keyboard.press('Enter');
+  // The game has moved on at once (screen readers, input) …
+  await expect(ben).toHaveAttribute('aria-current', 'true');
+  // … while the picture holds: Ann is still the hero card with the stamp on it.
+  await expect(ann).toHaveAttribute('data-hero', 'true');
+  await expect(ann.getByTestId('score-delta')).toHaveAttribute('data-variant', 'stamp');
+  await expect(ann.getByTestId('score-delta')).toContainText('60');
+  expect(Date.now() - t0).toBeLessThan(450);
+  // Then Ben's card arrives: name built up, a ring, and Ann's row shows 441.
+  await expect(ben).toHaveAttribute('data-hero', 'true', { timeout: 2000 });
+  expect(Date.now() - t0).toBeGreaterThanOrEqual(250);
+  await expect(ben).toHaveAttribute('data-arrived', 'true');
+  await expect(ben.getByTestId('turn-ring')).toHaveCount(1);
+  await expect(ann).toContainText('441');
+  await expect(ann.getByTestId('score-delta')).toHaveCount(0); // not shown twice
+  await expect(ben.getByRole('heading', { name: names[1] })).toBeVisible();
+});
+
 test('tablet landscape: two panes', async ({ page }) => {
   await start(page, 1024, 768);
   await expect(page.locator('[data-panes]')).toHaveAttribute('data-panes', '2');

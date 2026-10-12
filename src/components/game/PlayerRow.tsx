@@ -14,6 +14,8 @@ import ScoreDelta from './ScoreDelta';
 
 export interface PlayerRowProps {
   player: MatchPlayer;
+  /** Really at the oche while the hero card still shows the thrower (0.34.0). */
+  isCurrent?: boolean;
   avatar?: string;
   remaining: number;
   rank: number | null;
@@ -37,7 +39,7 @@ export interface PlayerRowProps {
  */
 const PlayerRow: React.FC<PlayerRowProps> = ({
   player, avatar, remaining, rank, average, legsWon, setsWon, showSets = false, legsToWin,
-  onRemove, removeLabel, previousRemaining, turnKey,
+  onRemove, removeLabel, previousRemaining, turnKey, isCurrent = false,
 }) => {
   const { t } = useTranslation();
   const reduce = useReducedMotion();
@@ -54,6 +56,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({
       // score fly in from the card. The opposite way the card still grows.
       transition={{ layout: { duration: 0 } }}
       role="listitem"
+      aria-current={isCurrent ? 'true' : undefined}
       data-testid={`player-card-${player.name}`}
       style={{ borderRadius: 'var(--m3-shape-lg)', ...(rank ? { '--rank-color': `var(--m3-rank-${rankTone(rank)})` } : {}) } as React.CSSProperties}
       className="relative m3-card bg-surface-container overflow-hidden"

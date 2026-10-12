@@ -7,6 +7,33 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.34.0] - 2026-10-12
+
+### Changed — the turn change ("relay")
+- After a visit the thrower stays the hero card for 450 ms (`useHandover`,
+  display only — the game, input, bots and `aria-current` move on at once);
+  the visit lands there as a `stamp` ScoreDelta and the score tallies down.
+  A second change during the hold jumps straight to the newest player;
+  undo, new legs, resume and reduced motion never hold.
+- Then the next player's card opens out of its row on the slower `HANDOVER`
+  spring (stiffness 120, ζ 0.82): name built up letter by letter
+  (`NameReveal`, mask reveal, plain text afterwards), the number grows with a
+  uniform scale from row size, one "your turn" ring (`.sotd-turn-ring`), the
+  flames after 1050 ms.
+- The checkout route on the hero shows only once the hero is the player at
+  the oche.
+
+### Fixed
+- The growing card no longer squashes avatar and number: it moves by
+  position only and opens with a clip (removed once open, so shadow and fire
+  glow are not cut) instead of being scaled by `layout`.
+- The row the thrower turns into no longer repeats the "−60".
+
+### Tests
+- `useHandover`, `handover` (aria-current, stamp, arrival, NameReveal), the
+  relay E2E in `arena.spec.ts`; seven mutation probes caught.
+- `e2e/avatars.spec.ts` no longer depends on the player list's pagination.
+
 ## [0.33.0] - 2026-10-12
 
 ### Added

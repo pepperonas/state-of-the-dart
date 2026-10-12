@@ -49,7 +49,8 @@ import audioSystem from '../../utils/audio';
 import { api } from '../../services/api';
 import { createAdaptiveBotPlayer, getAdaptiveBotConfigs, generateBotTurn, AdaptiveBotCategory } from '../../utils/botLogic';
 import BackButton from '../common/BackButton';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { useHandover } from '../../hooks/useHandover';
 import { Button, IconButton, Card, Dialog, Select, Switch, Snackbar, SegmentedButton, LoadingIndicator, useFeedback } from '../common';
 import { loadLastGameSettings, saveLastGameSettings, rotateForRematch, standings, findReusableGuest, GUEST_NAME } from '../../utils/matchSetup';
 const MatchDetailModal = lazy(() => import('../dashboard/MatchDetailModal'));
@@ -467,6 +468,16 @@ const GameScreen: React.FC = () => {
   const totalThrowsCount = state.currentMatch?.legs.reduce(
     (total, leg) => total + (leg.throws?.length || 0), 0
   ) || 0;
+  // The relay turn change (0.34.0): after a visit the thrower stays the hero
+  // card a moment, so the score lands where it was thrown. Display only — the
+  // real current player drives input, bots, announcements and aria-current.
+  const reduceMotion = useReducedMotion();
+  const shownPlayerIndex = useHandover(
+    state.currentPlayerIndex,
+    totalThrowsCount,
+    state.currentMatch?.currentLegIndex ?? 0,
+    !reduceMotion,
+  );
   // The insight cards (table, chart, heatmap, history) follow a visit at low
   // priority: rendering them in the same commit as the turn change cost
   // 100+ ms long tasks right in the middle of the card morph.
@@ -1643,10 +1654,13 @@ const GameScreen: React.FC = () => {
   const spotlight = (
     <Spotlight
       players={spotPlayers}
-      activeIndex={state.currentPlayerIndex}
+      activeIndex={Math.min(shownPlayerIndex, spotPlayers.length - 1)}
+      currentId={state.currentMatch.players[state.currentPlayerIndex]?.playerId}
       showSets={showSets}
       legsToWin={state.currentMatch.settings.legsToWin || 3}
-      checkoutRoute={settings.showCheckoutHints ? state.checkoutSuggestion : null}
+      // The route belongs to the player at the oche — not to the thrower the
+      // hero card still shows for a moment after the visit.
+      checkoutRoute={settings.showCheckoutHints && shownPlayerIndex === state.currentPlayerIndex ? state.checkoutSuggestion : null}
       checkoutMax={maxFinish(outRule)}
       size={widthClass === 'compact' ? 'compact' : widthClass === 'xl' ? 'large' : 'regular'}
       flames={widthClass !== 'compact'}

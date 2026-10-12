@@ -1,13 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion, useReducedMotion } from 'framer-motion';
+import { animate, motion, useMotionValue, useReducedMotion } from 'framer-motion';
 import { Trophy, UserMinus } from 'lucide-react';
 import type { MatchPlayer } from '../../types/index';
 import PlayerAvatar from '../player/PlayerAvatar';
 import AnimatedNumber from '../common/AnimatedNumber';
 import IconButton from '../common/IconButton';
-import { springSpatialDefault, springSpatialFast } from '../../utils/motion';
+import { springHandover, springSpatialDefault, springSpatialFast } from '../../utils/motion';
 import { CONTAINER_MORPH, CONTENT_IN, FLAMES_AFTER_MS } from './spotlightMotion';
+import NameReveal from './NameReveal';
 import RankStamp from './RankStamp';
 import ScoreDelta from './ScoreDelta';
 
@@ -42,6 +43,13 @@ export interface HeroCardProps {
   previousRemaining?: number;
   /** Changes when the turn passes — the only time the layout is measured. */
   turnKey?: string;
+  /** This card just became the hero through a turn change (not the first
+   *  render, not a reload): the name builds up, the number grows, a ring pulses. */
+  arrived?: boolean;
+  /** Whether this player is really at the oche. The hero card can still show
+   *  the thrower for a moment after the visit (0.34.0); `aria-current` follows
+   *  the game, not the picture. */
+  isCurrent?: boolean;
 }
 
 /** The remaining score, sized by viewport height so a big screen gets a big number. */
@@ -68,7 +76,7 @@ const visitTone = (v: { score: number; bust: boolean }) =>
 const HeroCard: React.FC<HeroCardProps> = ({
   player, avatar, remaining, rank, average, legsWon, setsWon, showSets = false, legsToWin,
   dartsInLeg, visits, checkoutRoute, checkoutMax = 170, size = 'regular', fireHost = null,
-  onRemove, removeLabel, previousRemaining, turnKey, onEditVisit,
+  onRemove, removeLabel, previousRemaining, turnKey, onEditVisit, arrived = false, isCurrent = true,
 }) => {
   const { t } = useTranslation();
   // A pill is a button when the visit can be corrected; the invisible ::before
@@ -100,6 +108,25 @@ const HeroCard: React.FC<HeroCardProps> = ({
   };
   const id = player.playerId;
   const reduce = useReducedMotion();
+  const play = arrived && !reduce;
+  const [opened, setOpened] = useState(!play);
+
+  // The number grows from the row's size into the hero's: a UNIFORM scale on
+  // top of the shared-element flight, so the digits are never stretched.
+  // Measured before paint, from the row number's rem size (text-3xl).
+  const grow = useMotionValue(1);
+  const numberRef = useRef<HTMLSpanElement>(null);
+  useLayoutEffect(() => {
+    if (!play || !numberRef.current) return;
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    const heroPx = parseFloat(getComputedStyle(numberRef.current).fontSize) || rem * 4;
+    const from = Math.min(1, (1.875 * rem) / heroPx);
+    grow.set(from);
+    const controls = animate(grow, 1, springHandover);
+    return () => controls.stop();
+    // Only on arrival; the card is keyed by player, so this runs once per hand-over.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const breathing = !reduce && remaining > 1 && remaining <= checkoutMax;
 
   // A leg just won: the legs tile springs once and glows. Counted from the
@@ -130,17 +157,31 @@ const HeroCard: React.FC<HeroCardProps> = ({
     // M3 container transform: the card morphs out of the player's row. The
     // content stays inside it, clipped, and `layout` on the content wrapper
     // makes framer counter-scale it — text is never stretched.
+    // The card travels from the row's place (shared layout id, POSITION only)
+    // and opens from the row's height with a clip (0.34.0). Growing it by
+    // `layout` scaled the surface, and framer's counter-scale on the content
+    // fell short on a slow spring — avatar and number stood visibly squashed.
+    // A clip never distorts what is inside.
     <motion.article
       layoutId={`spot-${id}`}
+      layout="position"
       layoutDependency={turnKey}
-      transition={{ layout: CONTAINER_MORPH }}
+      initial={play ? { clipPath: 'inset(0% 0% 64% 0% round 16px)' } : false}
+      animate={opened ? { clipPath: 'none' } : { clipPath: 'inset(0% 0% 0% 0% round 16px)' }}
+      transition={{ layout: CONTAINER_MORPH, clipPath: opened ? { duration: 0 } : CONTAINER_MORPH }}
+      // The clip would also cut the card's shadow and the fire's glow: gone
+      // as soon as the card is open.
+      onAnimationComplete={() => { if (play) setOpened(true); }}
       data-testid={`player-card-${player.name}`}
       data-hero="true"
-      aria-current="true"
+      data-arrived={play ? 'true' : undefined}
+      aria-current={isCurrent ? 'true' : undefined}
       className={`relative overflow-hidden m3-card m3-elevated sotd-on-fire bg-surface-container-high ${size === 'compact' ? 'p-3' : 'p-4 md:p-5'}`}
       style={{ borderRadius: 'var(--m3-shape-lg)' }}
     >
       <div ref={fireSlot} aria-hidden="true" className="sotd-fire-slot absolute inset-0 rounded-m3-lg overflow-hidden pointer-events-none" />
+      {/* "Your turn": one ring once the card has grown. */}
+      {play && <div aria-hidden="true" data-testid="turn-ring" className="sotd-turn-ring absolute inset-0 rounded-m3-lg pointer-events-none" />}
       <motion.div
         layout="position"
         layoutDependency={turnKey}
@@ -155,7 +196,7 @@ const HeroCard: React.FC<HeroCardProps> = ({
             <PlayerAvatar avatar={avatar} name={player.name} size={size === 'compact' ? 'sm' : 'md'} />
           </motion.div>
           <motion.h3 layoutId={`spot-name-${id}`} layout="position" layoutDependency={turnKey} transition={{ layout: CONTAINER_MORPH }} className="m3-title-large text-on-surface truncate">
-            {player.name}
+            <NameReveal name={player.name} play={play} />
           </motion.h3>
         </div>
         {onRemove && (
@@ -179,6 +220,7 @@ const HeroCard: React.FC<HeroCardProps> = ({
             transition={breathing ? { duration: 2.4, repeat: Infinity, ease: 'easeInOut' } : springSpatialDefault}
             style={{ transformOrigin: 'left bottom' }}
           >
+          <motion.span ref={numberRef} className={`block ${NUMBER_SIZE[size]}`} style={{ scale: grow, transformOrigin: 'left bottom' }}>
           <AnimatedNumber
             numeral
             value={remaining}
@@ -186,8 +228,10 @@ const HeroCard: React.FC<HeroCardProps> = ({
               remaining <= checkoutMax ? 'text-primary' : 'text-on-surface'
             }`}
           />
+          </motion.span>
           </motion.div>
-          <ScoreDelta value={remaining} from={previousRemaining} className="left-full ml-2 top-0 m3-title-large" />
+          {/* The visit lands here, big, while the card is still the hero. */}
+          <ScoreDelta variant="stamp" value={remaining} from={previousRemaining} className="left-full ml-3 top-1 m3-title-large" />
         </motion.div>
         {rank && <RankStamp rank={rank} size={size === 'large' ? 'large' : 'card'} />}
       </div>
