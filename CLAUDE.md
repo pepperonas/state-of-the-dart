@@ -335,6 +335,11 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - `redoTarget(state)` decides availability (top player at the oche, input empty or holding exactly the top's darts); GameScreen labels the button from it. Typing a different visit kills the history — pinned in `gameReducer.redo.test.ts`.
 - `shouldHandleGameKey` lets Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z and Ctrl/Cmd+Y through (never with Alt).
 
+### Avatar sizes (0.35.1)
+- `PlayerAvatar` sizes: xs 32 / sm 40 / md 56 / lg 72 px / xl 96→128. Use `xs` only where a row must stay low (heatmap player chip).
+- The glyph is a percentage of its disc: `glyphFill`/`avatarGlyphSize` (`icons/avatarFill.ts`), per kind (game icons fill their grid, app icons carry padding). A hand-made avatar disc must use `avatarGlyphSize(avatar)`, never a pixel size — pinned by `avatarSize.test.tsx`.
+- Hero stat tiles: `TILE`/`TILE_LABEL`/`TILE_VALUE` in `HeroCard.tsx`; legs to win = `legs-pips` (sr-only sentence in `legs-to-win`).
+
 ### Emoji avatars (0.35.0)
 - Value `em:<emoji>`; a BARE emoji (old profiles) still goes through `iconForEmoji` — never change that, it would silently change existing avatars. `AvatarGlyph` draws `em:` as SVG `<text>` (viewBox 100), so `size` incl. `100%` works like for icons; SpinnerWheel draws a `<text>` in the wedge.
 - Catalogue: `node tools/gen-emoji.mjs` (devDependency `emojibase-data`) writes `emojiData.ts` (lazy — `emojiSource.ts` `loadEmojiData`/`useEmojiData`; a test fails on any static import) and `emojiGroups.ts` (eager, keys + count). Rows: `[emoji, group, de, en, keywords, skins?]`; component group and loose regional letters are left out; skins = the five uniform tones.

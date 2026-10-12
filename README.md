@@ -60,7 +60,7 @@
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml" title="Vitest unit and component tests, all passing">
-      <img src="https://img.shields.io/badge/Unit_Tests-1240-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
+      <img src="https://img.shields.io/badge/Unit_Tests-1247-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml" title="Playwright end-to-end tests against a real backend">
@@ -71,7 +71,7 @@
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.35.0-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.35.1-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
@@ -927,6 +927,10 @@ Contributions sind willkommen! Bitte:
 ---
 
 ## 📝 Changelog
+
+### v0.35.1 (13. Oktober 2026) - Größere Spieler-Symbole, schönere Karten
+
+**Spieler-Symbole größer:** Das Symbol füllt seinen Kreis jetzt zu rund zwei Dritteln statt zur Hälfte, und die Kreise sind eine Stufe größer – im Spiel, in Listen, Bestenlisten, Statistik, Training und bei den Profilen. Das große Symbol (Leg gewonnen, Profil, Turnier, TV) wächst am Desktop endlich mit; es füllte dort nur 41 % seines Kreises. Wo es eng ist (Spielerwahl über der Heatmap), bleibt der kleine Kreis. Die Spielerzeilen im Spiel sind dadurch nicht höher geworden. **Statistik-Kacheln in der Spielerkarte:** Average, Darts und Legs sehen jetzt aus wie der obere Teil der Karte – ruhige Beschriftung, große Zahl, die mitzählt. Der Weg zum Sieg steht als Leiste neben den gewonnenen Legs (ein Strich je benötigtem Leg) statt als Textzeile; alle Kacheln sind gleich hoch.
 
 ### v0.35.0 (12. Oktober 2026) - Wurf vor, alle Emojis
 

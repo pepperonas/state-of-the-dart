@@ -38,7 +38,7 @@ const renderAvatar = (avatarValue: string, alt: string, size: 'sm' | 'md' | 'lg'
       />
     );
   }
-  return <AvatarGlyph avatar={avatarValue} size={size === 'sm' ? 20 : size === 'lg' ? 40 : 28} />;
+  return <AvatarGlyph avatar={avatarValue} size={size === 'sm' ? 22 : size === 'lg' ? 48 : 40} />;
 };
 
 const UserSettings: React.FC = () => {

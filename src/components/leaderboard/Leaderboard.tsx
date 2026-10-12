@@ -12,7 +12,7 @@ import { ACHIEVEMENTS } from '../../types/achievements';
 import { BackButton, Card, Chip, PageShell } from '../common';
 import { motion } from 'framer-motion';
 import { staggerChild } from '../../utils/motion';
-import { AvatarGlyph } from '../icons';
+import PlayerAvatar from '../player/PlayerAvatar';
 
 type LeaderboardCategory = 
   | 'average'
@@ -241,9 +241,7 @@ const Leaderboard: React.FC = () => {
 
                       {/* Avatar & Name */}
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center text-2xl shadow-m3-1">
-                          <AvatarGlyph avatar={player.avatar} size={22} />
-                        </div>
+                        <PlayerAvatar avatar={player.avatar} name={player.name} size="md" />
                         <div>
                           <h3 className="m3-title-medium text-on-surface">{player.name}</h3>
                           <p className="m3-body-medium text-on-surface-variant">

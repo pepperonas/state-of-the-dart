@@ -7,6 +7,27 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.35.1] - 2026-10-13
+
+### Changed — player icons drawn larger
+- `PlayerAvatar`: the glyph is a fraction of its disc (`GLYPH_FILL` in
+  `icons/avatarFill.ts`: game icons 62 %, emoji 66 %, app icons 70 %) instead
+  of fixed pixels at ~55 % — the xl disc grows to 128 px on desktop while its
+  glyph stayed at 52 px (41 %). Discs one step up (sm 40, md 56, lg 72 px);
+  new `xs` = the old 32 px, used by the heatmap player chip. Initials scale
+  with the disc.
+- Hand-made discs now use the same rule (`avatarGlyphSize`) or `PlayerAvatar`:
+  leaderboard, training player picker, stats comparison, tenant selector,
+  settings profile, user settings; select option icons 18 → 22 px.
+- Measured at 320/390/1440 px in both themes: no glyph outside its disc, no
+  horizontal overflow, player rows still 56 px, the confirm button where it was.
+
+### Changed — hero card stat tiles
+- Average, darts and legs tiles echo the top of the card: small uppercase
+  label, big tallying number (`AnimatedNumber`), equal heights. Legs to win
+  are pips beside the legs won (`legs-pips`, "/ N" above 9 legs); the sentence
+  stays for screen readers.
+
 ## [0.35.0] - 2026-10-12
 
 ### Added — redo

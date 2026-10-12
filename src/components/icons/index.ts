@@ -8,3 +8,4 @@ export { GAME_ICON_GROUPS, GAME_ICON_AUTHORS, GAME_ICON_AUTHOR_NAMES } from './a
 export { EMOJI_PREFIX, EMOJI_FONT, isEmojiAvatar, emojiOf, loadEmojiData, useEmojiData } from './emojiSource';
 export { EMOJI_GROUP_KEYS, EMOJI_COUNT } from './emojiGroups';
 export type { EmojiRow } from './emojiData';
+export { GLYPH_FILL, glyphFill, avatarGlyphSize } from './avatarFill';
