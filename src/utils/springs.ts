@@ -42,6 +42,10 @@ export const EFFECTS = {
  *  its target and show a wrong digit — and slow enough to be seen counting. */
 export const TALLY: SpringSpec = { stiffness: 260, dampingRatio: 1 };
 
+/** The turn change ("relay", 0.34.0): a big card travelling far, slower than
+ *  SPATIAL.slow so the hand-over is seen, with a slight overshoot. */
+export const HANDOVER: SpringSpec = { stiffness: 120, dampingRatio: 0.82 };
+
 /** framer-motion takes an absolute damping: ratio · 2 · √(stiffness · mass), mass = 1. */
 export const framerDamping = (s: SpringSpec): number => s.dampingRatio * 2 * Math.sqrt(s.stiffness);
 

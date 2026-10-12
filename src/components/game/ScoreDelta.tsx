@@ -8,6 +8,9 @@ interface ScoreDeltaProps {
    *  back) is a new element, but the visit still has to show. */
   from?: number;
   className?: string;
+  /** `stamp`: the hero card's big landing (0.34.0) — a pill that pops in,
+   *  holds and lifts away; `float` (default): the small rising "−60". */
+  variant?: 'float' | 'stamp';
 }
 
 /**
@@ -16,7 +19,7 @@ interface ScoreDeltaProps {
  * and shows nothing. Decorative (`aria-hidden`; the live region announces
  * visits) and absent under reduced motion.
  */
-const ScoreDelta: React.FC<ScoreDeltaProps> = ({ value, from, className = '' }) => {
+const ScoreDelta: React.FC<ScoreDeltaProps> = ({ value, from, className = '', variant = 'float' }) => {
   const reduce = useReducedMotion();
   const [prev, setPrev] = useState(value);
   const [delta, setDelta] = useState<{ n: number; id: number } | null>(() => {
@@ -36,12 +39,25 @@ const ScoreDelta: React.FC<ScoreDeltaProps> = ({ value, from, className = '' }) 
         <motion.span
           key={delta.id}
           data-testid="score-delta"
+          data-variant={variant}
           aria-hidden="true"
-          initial={{ opacity: 0, y: 6, scale: 0.8 }}
-          animate={{ opacity: [0, 1, 1, 0], y: -26, scale: 1 }}
-          transition={{ duration: 1.1, times: [0, 0.12, 0.7, 1], ease: [0.2, 0, 0, 1] }}
+          {...(variant === 'stamp'
+            ? {
+              initial: { opacity: 0, scale: 0.3, rotate: -10, y: 0 },
+              animate: { opacity: [0, 1, 1, 0], scale: [0.3, 1.18, 1, 1], rotate: [-10, 3, 0, 0], y: [0, 0, 0, -18] },
+              transition: { duration: 1.4, times: [0, 0.18, 0.75, 1], ease: [0.2, 0, 0, 1] },
+            }
+            : {
+              initial: { opacity: 0, y: 6, scale: 0.8 },
+              animate: { opacity: [0, 1, 1, 0], y: -26, scale: 1 },
+              transition: { duration: 1.1, times: [0, 0.12, 0.7, 1], ease: [0.2, 0, 0, 1] },
+            })}
           onAnimationComplete={() => setDelta(d => (d?.id === delta.id ? null : d))}
-          className={`pointer-events-none absolute font-bold tabular-nums text-primary ${className}`}
+          className={`pointer-events-none absolute font-bold tabular-nums ${
+            variant === 'stamp'
+              ? 'px-2.5 py-0.5 rounded-m3-full bg-primary-container text-on-primary-container shadow-m3-2 whitespace-nowrap'
+              : 'text-primary'
+          } ${className}`}
         >
           −{delta.n}
         </motion.span>

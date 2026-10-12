@@ -51,7 +51,7 @@
 
   ### 🧰 Tech-Stack
 
-  React 19 · TypeScript 5 · Vite · Tailwind · Material 3 Expressive (eigene Federn, Formen, Icons) · Framer Motion · WebGL · Express · SQLite · Socket.IO · Workbox. **1201 Unit-Tests + 47 E2E-Tests.** MIT-lizenziert.
+  React 19 · TypeScript 5 · Vite · Tailwind · Material 3 Expressive (eigene Federn, Formen, Icons) · Framer Motion · WebGL · Express · SQLite · Socket.IO · Workbox. **1212 Unit-Tests + 48 E2E-Tests.** MIT-lizenziert.
 
   <!-- ── Headline metrics ─────────────────────────────────────── -->
   <p>
@@ -60,18 +60,18 @@
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml" title="Vitest unit and component tests, all passing">
-      <img src="https://img.shields.io/badge/Unit_Tests-1201-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
+      <img src="https://img.shields.io/badge/Unit_Tests-1212-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml" title="Playwright end-to-end tests against a real backend">
-      <img src="https://img.shields.io/badge/E2E_Tests-47-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
+      <img src="https://img.shields.io/badge/E2E_Tests-48-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
     </a>
   </p>
 
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.33.0-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.34.0-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
@@ -248,6 +248,7 @@
 
 ### 🖥️ Spielansicht „Arena“ & TV-Scoreboard (v0.28–v0.31)
 - **Spotlight** — wer am Zug ist, bekommt eine große Hero-Karte (riesiger Rest, Checkout-Weg, Platz im Leg, Darts im Leg, Schnitt, Legs bis zum Sieg, letzte Aufnahmen); alle anderen stehen als kompakte Zeilen darunter. Beim Spielerwechsel wächst die Zeile des Nächsten als Ganzes zur Hero-Karte (M3 Container Transform), ohne dass Schrift gestreckt wird.
+- **Spielerwechsel als Staffelstab (v0.34.0)** — nach einer Aufnahme bleibt die Karte des Werfers einen Moment groß: „−60“ landet als Stempel, der Rest zählt sichtbar herunter. Dann öffnet sich die Karte des Nächsten aus seiner Zeile, sein Name baut sich Buchstabe für Buchstabe auf, die Zahl wächst mit, ein Ring sagt „du bist dran“, danach kommt das Feuer. Die Eingabe ist dabei sofort frei; Screenreader hören sofort den richtigen Spieler.
 - **Für jede Bildschirmgröße** (M3 Window Size Classes) — Handy: Eingabe unten im Daumenbereich, Statistik/Verlauf/Heatmap/Board als Bottom Sheet mit Reitern; Tablet quer: zwei Spalten; ab Laptop: drei Spalten mit Dartboard daneben; sehr große Monitore ohne schmale Begrenzung.
 - **Einblicke unter dem Spielfeld** — Match-Statistik (alle Spieler nebeneinander), Wurf-Verlauf, Wurf-Chart und Live-Heatmap als Karten in zwei Spalten, immer offen.
 - **Feedback-Leiter** — große Zahlen in Roboto Flex, die bei jeder Änderung kurz anschwellen; Funken ab 100, eine 180 bekommt den Bildschirm (Formwechsel Kreis → Strahlenkranz, Konfetti), Leg-Rückblick mit Darts/Schnitt/Checkout, neue Bestwerte live — nie blockierend, ein eigenes Vibrationsmuster je Stufe.
@@ -808,7 +809,7 @@ scheitern. Das Badge darf laut Doku-Abgleich **nie mehr** behaupten, als gemesse
 > **Doku-Abgleich:** `src/tests/docs/docsSync.test.ts` lässt die Dokumentation nicht driften. Es prüft, dass jede Zahl in einem Badge zum Code passt, dass jeder dokumentierte `npm run …`-Befehl existiert, dass jeder erwähnte Pfad und jeder Markdown-Link auflösbar ist und dass beide READMEs denselben Badge-Satz tragen. Wer eine Zahl ändert, ohne die Doku nachzuziehen, bekommt einen roten Test statt einer stillen Lüge.
 
 ### E2E-Tests (Playwright)
-**47 Tests** in `e2e/` gegen `vite preview` + isoliertes Backend mit eigener SQLite-DB.
+**48 Tests** in `e2e/` gegen `vite preview` + isoliertes Backend mit eigener SQLite-DB.
 
 ```bash
 npm run test:e2e       # Headless
@@ -828,6 +829,7 @@ Was die Suite abdeckt:
 - Refresh mitten in der Aufnahme verliert nichts; Online-Spiel mit zwei Browsern; Turnier über Reloads hinweg
 - TV-Scoreboard mit zwei Fenstern: wartet, folgt live, zeigt Momente, übersteht Reload
 - Glücksrad auf Handy und Desktop: bildschirmfüllend, Zeiger schlägt nie mehr als 30° aus
+- Spielerwechsel: Stempel auf der Karte des Werfers, Übergabe danach, `aria-current` sofort beim Nächsten
 - Spieler-Symbol über den deutschen Namen wählen, gespeichert als `gi:<name>`, Pfaddaten nie im Startpaket
 - Getippte Summe bleibt aus der Heatmap, Chip macht sie genau, „Wurf zurück“ als Summe, ältere Aufnahme korrigieren, gespeicherte Heatmap zählt nichts doppelt
 - Barrierefreiheit (axe-core auf 21 Seiten + Spielmodi, Trefferflächen) und Kontrast (12 Seiten, beide Themes)
@@ -924,6 +926,10 @@ Contributions sind willkommen! Bitte:
 ---
 
 ## 📝 Changelog
+
+### v0.34.0 (12. Oktober 2026) - Spielerwechsel als Staffelstab
+
+Der Wechsel zum nächsten Spieler ist langsamer, sichtbarer und erzählt jetzt, was passiert ist: Die Karte des Werfers bleibt nach der Aufnahme einen Moment groß, die abgezogenen Punkte landen als großer Stempel („−60“) daneben und der Rest zählt sichtbar herunter. Danach öffnet sich die Karte des Nächsten aus seiner Zeile, sein Name baut sich Buchstabe für Buchstabe auf, seine Zahl wächst von Zeilen- auf Kartengröße, ein Ring pulsiert einmal, dann kommt das Feuer. Die Eingabe ist dabei sofort frei – wer schnell tippt, bucht weiterhin beim richtigen Spieler. **Behoben:** Beim Wachsen der Karte wurden Avatar und Zahl kurz verzerrt; die Karte öffnet sich jetzt über einen Ausschnitt statt skaliert zu werden.
 
 ### v0.33.0 (12. Oktober 2026) - Neue Spieler-Symbole
 

@@ -14,7 +14,7 @@
  * Reference: https://m3.material.io/styles/motion/overview/how-it-works
  */
 import type { Transition } from 'framer-motion';
-import { SPATIAL, STANDARD, EFFECTS, framerDamping, type SpringSpec } from './springs';
+import { SPATIAL, STANDARD, EFFECTS, HANDOVER, framerDamping, type SpringSpec } from './springs';
 
 /** A framer spring from an M3 spec (`utils/springs.ts` is the one source). */
 export const toFramer = (s: SpringSpec): Transition =>
@@ -24,6 +24,8 @@ export const toFramer = (s: SpringSpec): Transition =>
 export const springSpatialFast: Transition = toFramer(SPATIAL.fast);
 export const springSpatialDefault: Transition = toFramer(SPATIAL.default);
 export const springSpatialSlow: Transition = toFramer(SPATIAL.slow);
+/** The spotlight's turn change — see `HANDOVER`. */
+export const springHandover: Transition = toFramer(HANDOVER);
 
 /* Spatial — standard (barely any bounce) */
 export const springStandardFast: Transition = toFramer(STANDARD.fast);

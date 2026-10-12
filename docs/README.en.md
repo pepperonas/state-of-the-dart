@@ -51,7 +51,7 @@
 
   ### 🧰 Tech stack
 
-  React 19 · TypeScript 5 · Vite · Tailwind · Material 3 Expressive (own springs, shapes, icons) · Framer Motion · WebGL · Express · SQLite · Socket.IO · Workbox. **1201 unit tests + 47 E2E tests.** MIT-licensed.
+  React 19 · TypeScript 5 · Vite · Tailwind · Material 3 Expressive (own springs, shapes, icons) · Framer Motion · WebGL · Express · SQLite · Socket.IO · Workbox. **1212 unit tests + 48 E2E tests.** MIT-licensed.
 
   <!-- ── Headline metrics ─────────────────────────────────────── -->
   <p>
@@ -60,18 +60,18 @@
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml" title="Vitest unit and component tests, all passing">
-      <img src="https://img.shields.io/badge/Unit_Tests-1201-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
+      <img src="https://img.shields.io/badge/Unit_Tests-1212-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml" title="Playwright end-to-end tests against a real backend">
-      <img src="https://img.shields.io/badge/E2E_Tests-47-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
+      <img src="https://img.shields.io/badge/E2E_Tests-48-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
     </a>
   </p>
 
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="../LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="../CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.33.0-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="../CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.34.0-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
@@ -217,6 +217,7 @@
 
 ### 🖥️ Game screen "Arena" & TV scoreboard (v0.28–v0.31)
 - **Spotlight** — the player at the oche gets a large hero card (huge remaining score, checkout route, place in the leg, darts in the leg, average, legs to win, last visits); everyone else is a compact row. When the turn passes, the next row grows into the hero card as a whole (M3 container transform) — text is never stretched.
+- **Relay turn change (v0.34.0)** — after a visit the thrower's card stays big for a moment: "−60" lands as a stamp and the score counts down visibly. Then the next player's card opens out of its row, the name builds up letter by letter, the number grows, a ring says "your turn", then the flames. Input is free at once; screen readers hear the right player at once.
 - **Every screen size** (M3 window size classes) — phone: input docked at the bottom, stats/history/heatmap/board in a bottom sheet with tabs; tablet landscape: two panes; laptop and up: three panes with the board alongside; very large monitors without a narrow width cap.
 - **Insights below the board** — match stats (all players side by side), visit history, throw chart and live heatmap as always-open cards in two columns.
 - **Feedback ladder** — big Roboto Flex numerals that swell on every change; sparks from 100, a 180 takes the screen (circle → burst morph, confetti), a leg recap with darts/average/checkout, new personal bests live — never blocking, one haptic pattern per level.
@@ -375,8 +376,8 @@ admin-only.
 
 | Layer | Count | Tool |
 |---|---|---|
-| Unit / component | **1201** | Vitest + React Testing Library |
-| End-to-end | **47** | Playwright (preview build + isolated backend) |
+| Unit / component | **1212** | Vitest + React Testing Library |
+| End-to-end | **48** | Playwright (preview build + isolated backend) |
 
 ```bash
 npm test              # watch mode

@@ -7,7 +7,7 @@ import { BACKEND_PORT } from './fixtures';
  * stored as gi:<name>, drawn in the player list; the path data is a separate
  * chunk that loads only when needed; the picker credits the icons (CC BY 3.0).
  */
-test('a game-icons avatar is picked by name and shown in the player list', async ({ page }) => {
+test('a game-icons avatar is picked by name, drawn and stored', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await login(page);
   const chunk: string[] = [];
@@ -36,11 +36,13 @@ test('a game-icons avatar is picked by name and shown in the player list', async
 
   const name = `Wolfi${String(Date.now()).slice(-5)}`;
   await page.getByPlaceholder('Spielername eingeben').fill(name);
-  await page.getByRole('button', { name: 'Hinzufügen', exact: true }).click();
+  // Drawn in the new-player preview (the list itself is paginated: in a full
+  // suite run the new player can land on a later page).
   const glyph = page.locator('[data-avatar="gi:wolf-head"]').first();
   await expect(glyph).toBeVisible();
   await expect(glyph.locator('path')).toHaveAttribute('d', /^[Mm]/);
   expect(chunk).toHaveLength(1);
+  await page.getByRole('button', { name: 'Hinzufügen', exact: true }).click();
 
   // Stored in the database as gi:<name> (the list is paginated, so a full
   // suite's worth of players can push the new one off the first page).
