@@ -2203,6 +2203,8 @@
     "join_room": "Join {{name}}"
   },
   "game_screen": {
+    "sets_short": "S",
+    "legs_short": "L",
     "click_to_remove": "Click to remove",
     "choose_bot": "Choose a bot opponent",
     "bot_adaptive_hint": "Difficulty adapts to your skill automatically",

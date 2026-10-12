@@ -338,7 +338,7 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 ### Avatar sizes (0.35.1)
 - `PlayerAvatar` sizes: xs 32 / sm 40 / md 56 / lg 72 px / xl 96→128. Use `xs` only where a row must stay low (heatmap player chip).
 - The glyph is a percentage of its disc: `glyphFill`/`avatarGlyphSize` (`icons/avatarFill.ts`), per kind (game icons fill their grid, app icons carry padding). A hand-made avatar disc must use `avatarGlyphSize(avatar)`, never a pixel size — pinned by `avatarSize.test.tsx`.
-- Hero stat tiles: `TILE`/`TILE_LABEL`/`TILE_VALUE` in `HeroCard.tsx`; legs to win = `legs-pips` (sr-only sentence in `legs-to-win`).
+- Hero stat tiles: `TILE`/`TILE_LABEL`/`TILE_VALUE` in `HeroCard.tsx`. Legs to win everywhere = `LegPips` (0.35.2: hero tile, phone hero line, `PlayerRow`); the sentence stays sr-only in `legs-to-win` / the row.
 
 ### Emoji avatars (0.35.0)
 - Value `em:<emoji>`; a BARE emoji (old profiles) still goes through `iconForEmoji` — never change that, it would silently change existing avatars. `AvatarGlyph` draws `em:` as SVG `<text>` (viewBox 100), so `size` incl. `100%` works like for icons; SpinnerWheel draws a `<text>` in the wedge.

@@ -7,6 +7,15 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.35.2] - 2026-10-13
+
+### Changed — player rows like the hero tiles
+- `LegPips` (shared): one stroke per leg needed, won ones filled, decorative;
+  `MAX_PIPS` = 9, above that "/ N". Used by the hero tile, the phone hero
+  meta line (replaces "0/3 zum Sieg") and `PlayerRow` (replaces "0/3 L").
+- `PlayerRow` meta line: average emphasised, sets when played (`row-sets`),
+  legs won + pips (`row-legs`); the sentence stays sr-only. Rows still 56 px.
+
 ## [0.35.1] - 2026-10-13
 
 ### Changed — player icons drawn larger

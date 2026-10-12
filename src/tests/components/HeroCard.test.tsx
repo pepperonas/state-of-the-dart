@@ -50,6 +50,13 @@ describe('HeroCard', () => {
     expect(screen.getByTestId('legs-to-win')).toHaveTextContent('1/3 zum Sieg');
   });
 
+  it('on a phone the legs are pips in the meta line too', () => {
+    render(<HeroCard {...hero({ size: 'compact', legsWon: 2, legsToWin: 3 })} />);
+    const pips = within(screen.getByTestId('legs-tile')).getByTestId('legs-pips').children;
+    expect([...pips].map(p => p.getAttribute('data-on'))).toEqual(['true', 'true', null]);
+    expect(screen.getByTestId('legs-to-win')).toHaveTextContent('2/3 zum Sieg');
+  });
+
   it('springs only when a leg is won during play, not on mount or resume', () => {
     const { rerender } = render(<HeroCard {...hero({ legsWon: 2 })} />);
     expect(screen.getByTestId('legs-tile')).toHaveAttribute('data-pulse', '0');
@@ -68,8 +75,18 @@ describe('PlayerRow', () => {
     expect(row).not.toHaveAttribute('aria-current');
     expect(row.style.getPropertyValue('--rank-color')).toBe('var(--m3-rank-1)');
     expect(row).toHaveTextContent('441');
-    expect(row).toHaveTextContent('1/3 L');
+    // Legs as pips like the hero card's tile: three strokes, one filled.
+    const pips = within(screen.getByTestId('row-legs')).getByTestId('legs-pips').children;
+    expect(pips).toHaveLength(3);
+    expect([...pips].filter(p => p.getAttribute('data-on') === 'true')).toHaveLength(1);
     expect(row).toHaveTextContent('1 von 3 Legs zum Sieg');
+  });
+
+  it('a long match shows "/ N" instead of pips, sets when played', () => {
+    render(<PlayerRow player={mp('b', 'Ben')} remaining={441} rank={null} average={60} legsWon={4} setsWon={2} showSets legsToWin={11} />);
+    expect(screen.queryByTestId('legs-pips')).toBeNull();
+    expect(screen.getByTestId('row-legs')).toHaveTextContent('4/ 11 L');
+    expect(screen.getByTestId('row-sets')).toHaveTextContent('2 S');
   });
 });
 
