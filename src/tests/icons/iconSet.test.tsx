@@ -118,6 +118,8 @@ describe('the data files carry icon names, not emoji', () => {
     const offenders: string[] = [];
     for (const file of walk(SRC)) {
       if (file.includes(`${path.sep}icons${path.sep}emojiMap`)) continue; // the table itself
+      // The emoji avatar catalogue (0.35.0): emoji are its data, a deliberate pick.
+      if (file.endsWith(`${path.sep}icons${path.sep}emojiData.ts`)) continue;
       const lines = fs.readFileSync(file, 'utf8').split('\n');
       lines.forEach((line, i) => {
         if (EXEMPT.test(line)) return;

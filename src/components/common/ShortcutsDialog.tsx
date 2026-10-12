@@ -9,6 +9,7 @@ const SHORTCUTS: { keys: string[]; action: string }[] = [
   { keys: ['Enter'], action: 'confirm' },
   { keys: ['Backspace'], action: 'back' },
   { keys: ['Ctrl', 'Z'], action: 'undo' },
+  { keys: ['Ctrl', 'Shift', 'Z'], action: 'redo' },
   { keys: ['Esc'], action: 'clear' },
   { keys: ['?'], action: 'help' },
 ];

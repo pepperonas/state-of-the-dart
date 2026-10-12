@@ -3,7 +3,7 @@ import { motion, AnimatePresence, animate, useMotionValue, useReducedMotion, typ
 import { useTranslation } from 'react-i18next';
 import { Player } from '../../types';
 import { audioSystem } from '../../utils/audio';
-import { iconForEmoji, ICON_PATHS, AvatarGlyph, isGameIcon, gameIconName, useAvatarPaths } from '../icons';
+import { iconForEmoji, ICON_PATHS, AvatarGlyph, isGameIcon, gameIconName, useAvatarPaths, isEmojiAvatar, emojiOf, EMOJI_FONT } from '../icons';
 import { randomIndex, randomBetween } from '../../utils/random';
 import { planSpin, angleAt, landingAngle, crossings } from '../../utils/wheelPhysics';
 import { shapePolygon } from '../../utils/shapes';
@@ -264,7 +264,20 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
                       strokeWidth={3}
                     />
                     {/* Avatar near the rim, where the wedge is widest. */}
-                    {isGameIcon(p.avatar) ? (
+                    {isEmojiAvatar(p.avatar) ? (
+                      // Emoji avatar: a text glyph, upright along the radius like the icons.
+                      <text
+                        transform={`rotate(${mid} ${ix} ${iy})`}
+                        x={ix}
+                        y={iy + 1}
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                        fontSize={26}
+                        style={{ fontFamily: EMOJI_FONT }}
+                      >
+                        {emojiOf(p.avatar)}
+                      </text>
+                    ) : isGameIcon(p.avatar) ? (
                       // game-icons.net avatar: 512 grid, default nonzero fill.
                       <g transform={`translate(${ix - 15} ${iy - 15}) rotate(${mid} 15 15) scale(${30 / 512})`}>
                         {gamePaths?.[gameIconName(p.avatar)] && <path d={gamePaths[gameIconName(p.avatar)]} fill={ink} />}

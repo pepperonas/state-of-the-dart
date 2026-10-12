@@ -89,3 +89,46 @@ describe('ScoreInput — taking back a throw', () => {
     expect(screen.queryByRole('button', { name: /wurf zurück/i })).toBeNull();
   });
 });
+
+describe('ScoreInput — redo after one undo too many (0.35.0)', () => {
+  const redoButton = () => screen.getByTestId('redo-throw');
+
+  it('appears only when there is a visit to bring back, named after it', () => {
+    setup({ onRedoThrow: vi.fn(), nextThrow: null });
+    expect(screen.queryByTestId('redo-throw')).toBeNull();
+  });
+
+  it('brings the visit back on a click', async () => {
+    const props = setup({ onRedoThrow: vi.fn(), nextThrow: { playerName: 'Bob', score: 60 } });
+    expect(redoButton()).toHaveAccessibleName(/Wurf vor: Bob · 60/);
+    await userEvent.click(redoButton());
+    expect(props.onRedoThrow).toHaveBeenCalledTimes(1);
+  });
+
+  it('works while undo put the darts back into the input', async () => {
+    const props = setup({ currentThrow: [T20], onRedoThrow: vi.fn(), nextThrow: { playerName: 'Bob', score: 60 } });
+    await userEvent.click(redoButton());
+    expect(props.onRedoThrow).toHaveBeenCalledTimes(1);
+  });
+
+  it('Ctrl+Shift+Z and Ctrl+Y redo, Ctrl+Z still undoes', async () => {
+    const props = setup({ onRedoThrow: vi.fn(), nextThrow: { playerName: 'Bob', score: 60 } });
+    await userEvent.keyboard('{Control>}{Shift>}z{/Shift}{/Control}');
+    await userEvent.keyboard('{Control>}y{/Control}');
+    expect(props.onRedoThrow).toHaveBeenCalledTimes(2);
+    expect(props.onUndoThrow).not.toHaveBeenCalled();
+    await userEvent.keyboard('{Control>}z{/Control}');
+    expect(props.onUndoThrow).toHaveBeenCalledTimes(1);
+  });
+
+  it('has a compact icon button on phones too', async () => {
+    const props = setup({ dense: true, onRedoThrow: vi.fn(), nextThrow: { playerName: 'Bob', score: 60 } });
+    await userEvent.click(redoButton());
+    expect(props.onRedoThrow).toHaveBeenCalledTimes(1);
+  });
+
+  it('is not offered while a confirmed visit waits for the next player', () => {
+    setup({ onRedoThrow: vi.fn(), nextThrow: { playerName: 'Bob', score: 60 }, awaitingNextPlayer: 'Bob', onNextPlayer: vi.fn() });
+    expect(screen.queryByTestId('redo-throw')).toBeNull();
+  });
+});
