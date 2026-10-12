@@ -5,3 +5,6 @@ export { EMOJI_TO_ICON, iconForEmoji } from './emojiMap';
 export { default as AvatarGlyph } from './AvatarGlyph';
 export { GAME_ICON_PREFIX, isGameIcon, gameIconName, loadAvatarPaths, useAvatarPaths } from './avatarSource';
 export { GAME_ICON_GROUPS, GAME_ICON_AUTHORS, GAME_ICON_AUTHOR_NAMES } from './avatarCatalog';
+export { EMOJI_PREFIX, EMOJI_FONT, isEmojiAvatar, emojiOf, loadEmojiData, useEmojiData } from './emojiSource';
+export { EMOJI_GROUP_KEYS, EMOJI_COUNT } from './emojiGroups';
+export type { EmojiRow } from './emojiData';

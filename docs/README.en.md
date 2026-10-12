@@ -56,22 +56,22 @@
   <!-- ── Headline metrics ─────────────────────────────────────── -->
   <p>
     <a href="https://github.com/pepperonas/state-of-the-dart" title="Lines of code — measured by scripts/count-loc.mjs, checked by the docs test">
-      <img src="https://img.shields.io/badge/lines_of_code-~59k-2b3137?style=for-the-badge&logo=typescript&logoColor=white" height="64" alt="Lines of code" />
+      <img src="https://img.shields.io/badge/lines_of_code-~60k-2b3137?style=for-the-badge&logo=typescript&logoColor=white" height="64" alt="Lines of code" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml" title="Vitest unit and component tests, all passing">
-      <img src="https://img.shields.io/badge/Unit_Tests-1212-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
+      <img src="https://img.shields.io/badge/Unit_Tests-1240-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml" title="Playwright end-to-end tests against a real backend">
-      <img src="https://img.shields.io/badge/E2E_Tests-48-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
+      <img src="https://img.shields.io/badge/E2E_Tests-52-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
     </a>
   </p>
 
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="../LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="../CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.34.0-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="../CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.35.0-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
@@ -217,6 +217,7 @@
 
 ### 🖥️ Game screen "Arena" & TV scoreboard (v0.28–v0.31)
 - **Spotlight** — the player at the oche gets a large hero card (huge remaining score, checkout route, place in the leg, darts in the leg, average, legs to win, last visits); everyone else is a compact row. When the turn passes, the next row grows into the hero card as a whole (M3 container transform) — text is never stretched.
+- **Redo (v0.35.0)** — taken back one visit too many? "Redo" (or Ctrl+Shift+Z / Ctrl+Y) books it again, in order, bot visits included.
 - **Relay turn change (v0.34.0)** — after a visit the thrower's card stays big for a moment: "−60" lands as a stamp and the score counts down visibly. Then the next player's card opens out of its row, the name builds up letter by letter, the number grows, a ring says "your turn", then the flames. Input is free at once; screen readers hear the right player at once.
 - **Every screen size** (M3 window size classes) — phone: input docked at the bottom, stats/history/heatmap/board in a bottom sheet with tabs; tablet landscape: two panes; laptop and up: three panes with the board alongside; very large monitors without a narrow width cap.
 - **Insights below the board** — match stats (all players side by side), visit history, throw chart and live heatmap as always-open cards in two columns.
@@ -546,7 +547,7 @@ See [DEPLOYMENT_VPS.md](DEPLOYMENT_VPS.md) for full deployment guide.
 - **Numpad:** type the visit total and press Enter (or "Confirm") — the turn passes at once, so the next player can type straight away. A short chip shows the visit just booked.
 - **Darts:** enter each dart via S/D/T and the number (exact beds, for stats and the heatmap)
 - **Quick:** common scores with one tap
-- **Undo:** "Take back", Backspace or Ctrl+Z returns the last visit for correction. A typed total comes back as a total ("60 → _"): type the right number, Enter — Esc keeps it. Any earlier visit of the leg in play can be corrected from its pill on the player card or the pencil in the visit history (total or single darts).
+- **Undo:** "Take back", Backspace or Ctrl+Z returns the last visit for correction; taken back too much? "Redo" (Ctrl+Shift+Z or Ctrl+Y) books them again, one by one. A typed total comes back as a total ("60 → _"): type the right number, Enter — Esc keeps it. Any earlier visit of the leg in play can be corrected from its pill on the player card or the pencil in the visit history (total or single darts).
 - **How was it thrown?** After a typed total the app suggests 2–3 likely decompositions (for 60, e.g. "20 · 20 · 20" or "T20 · 0 · 0"). One tap makes the darts exact; ignoring it costs nothing. Typed totals stay out of the heatmap — every heatmap says how many darts were recorded exactly.
 - The checkout route sits inside the input card; every player card shows the **place in the leg** (1 green, 2 yellow, 3 orange …)
 - Audio announcements guide you through the game
@@ -815,6 +816,8 @@ A ⭐ on GitHub helps too — and tell your dart club.
 ## 📄 License
 
 [MIT](../LICENSE) — © 2026 Martin Pfeffer | [celox.io](https://celox.io)
+
+Every Unicode emoji (1906, since v0.35.0) can be a player avatar as well; names and keywords from [emojibase](https://emojibase.dev) (MIT).
 
 Player avatar icons from [game-icons.net](https://game-icons.net) are licensed [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) — authors: Delapouite, Lorc, Skoll, Caro Asercion, Kier Heyl, Cathelineau, Sbed, Various artists, DarkZaitzev, Carl Olsen (per icon: `tools/avatar-icons/manifest.tsv`).
 

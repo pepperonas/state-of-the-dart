@@ -227,7 +227,8 @@
     "check_out_hint": "Womit ein Leg beendet wird",
     "rule_single": "Single",
     "rule_double": "Double",
-    "rule_triple": "Triple"
+    "rule_triple": "Triple",
+    "redo_throw": "Wurf vor"
   },
   "stats": {
     "statistics": "Statistiken",
@@ -1631,7 +1632,26 @@
       "dutch-bike": "Fahrrad",
       "police-car": "Polizeiauto"
     },
-    "credit": "Viele Symbole: game-icons.net von {{authors}} · CC BY 3.0"
+    "credit": "Viele Symbole: game-icons.net von {{authors}} · CC BY 3.0",
+    "kind": "Art des Avatars",
+    "tab_icons": "Icons",
+    "tab_emoji": "Emojis",
+    "skin_tone": "Hautton",
+    "tone_0": "Neutral",
+    "tone_1": "Hell",
+    "tone_2": "Mittelhell",
+    "tone_3": "Mittel",
+    "tone_4": "Mitteldunkel",
+    "tone_5": "Dunkel",
+    "emoji_group_smileys": "Smileys",
+    "emoji_group_people": "Menschen",
+    "emoji_group_nature": "Tiere & Natur",
+    "emoji_group_food": "Essen & Trinken",
+    "emoji_group_travel": "Reisen & Orte",
+    "emoji_group_activities": "Aktivitäten",
+    "emoji_group_objects": "Gegenstände",
+    "emoji_group_symbols": "Symbole",
+    "emoji_group_flags": "Flaggen"
   },
   "back_to_landing": {
     "label": "Zur Startseite"
@@ -2298,7 +2318,8 @@
     "back": "Letzten Dart oder letzte Aufnahme zurücknehmen",
     "undo": "Letzte Aufnahme zurücknehmen",
     "clear": "Eingabe leeren, Dialog schließen",
-    "help": "Diese Übersicht öffnen"
+    "help": "Diese Übersicht öffnen",
+    "redo": "Zurückgenommene Aufnahme wiederherstellen"
   },
   "announce": {
     "visit": "{{name}}: {{score}}, Rest {{remaining}}",

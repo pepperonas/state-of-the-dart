@@ -329,6 +329,18 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - **Correcting older visits:** hero last-visit pills (`visit-pill`) and the pencil in the visit history (`history-edit`) open `EditVisitDialog` (Summe / Darts, the grid is the shared `DartGrid`). Typed visits show "Summe getippt" in the history instead of invented darts.
 - Insight cards follow `visitRevision` (ids + scores + darts), not the visit count — a correction changes no count.
 
+### Redo (0.35.0)
+- `GameState.redoStack` (memory only, newest-undone LAST = top comes back first). The exported `gameReducer` wraps `baseReducer`: UNDO_THROW/UNDO_END_MATCH push what disappeared; CONFIRM_THROW pops the top if the confirmed darts equal it (`sameDarts`: segment + multiplier) for the player at the oche, otherwise clears; START/LOAD/EDIT/REMOVE_PLAYER/END/RESET clear.
+- `REDO_THROW` re-books via the real CONFIRM_THROW (+ NEXT_PLAYER unless it was a checkout), then keeps going while the top belongs to a bot at the oche — the mirror of `skipBots`. Re-booked visits get new ids (heatmap books by id, so that is right).
+- `redoTarget(state)` decides availability (top player at the oche, input empty or holding exactly the top's darts); GameScreen labels the button from it. Typing a different visit kills the history — pinned in `gameReducer.redo.test.ts`.
+- `shouldHandleGameKey` lets Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z and Ctrl/Cmd+Y through (never with Alt).
+
+### Emoji avatars (0.35.0)
+- Value `em:<emoji>`; a BARE emoji (old profiles) still goes through `iconForEmoji` — never change that, it would silently change existing avatars. `AvatarGlyph` draws `em:` as SVG `<text>` (viewBox 100), so `size` incl. `100%` works like for icons; SpinnerWheel draws a `<text>` in the wedge.
+- Catalogue: `node tools/gen-emoji.mjs` (devDependency `emojibase-data`) writes `emojiData.ts` (lazy — `emojiSource.ts` `loadEmojiData`/`useEmojiData`; a test fails on any static import) and `emojiGroups.ts` (eager, keys + count). Rows: `[emoji, group, de, en, keywords, skins?]`; component group and loose regional letters are left out; skins = the five uniform tones.
+- The emoji guard in `iconSet.test.tsx` exempts `emojiData.ts` only. The picker writes its skin-tone swatches as `\u` escapes for that reason.
+- Searching the picker matches icons AND emoji ("Drache", "Wolf" exist in both) — scope test locators to `icon-grid` / `emoji-grid`.
+
 ### Avatar icons from game-icons.net (0.33.0)
 - 165 single-colour glyphs, CC BY 3.0, stored as avatar value `gi:<name>`. Originals + `manifest.tsv` (group, name, author, source path) in `tools/avatar-icons/`; `python3 tools/gen-avatar-icons.py` writes `src/components/icons/avatarCatalog.ts` (groups/authors, eager) and `avatarPaths.ts` (path data, **lazy** — `avatarSource.ts` `loadAvatarPaths`/`useAvatarPaths`). ⚠️ Never import `avatarPaths` statically: it would merge ~127 kB gzip into the main chunk (`e2e/avatars.spec.ts` searches the eager JS for path data).
 - Render every player/profile avatar with `AvatarGlyph` (not `<Icon name={iconForEmoji(avatar)}>`): game icons use a 512 view box and the default **nonzero** fill — evenodd would punch wrong holes. `SpinnerWheel` draws them in its own SVG (scale 30/512).
@@ -533,8 +545,9 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **48 tests** currently:
-  - `avatars.spec.ts` — a game-icons avatar is found by its German name, the picker closes, the list draws it, the path chunk loads once and never rides in an eager bundle, the value is stored
+- Specs in `e2e/`. **52 tests** currently:
+  - `redo.spec.ts` — undo three visits, redo them one by one (button, Ctrl+Shift+Z, Ctrl+Y) at phone and desktop size, reload keeps it; a different visit after an undo drops the way forward
+  - `avatars.spec.ts` — an emoji avatar (tab, skin tone, `em:` stored, lazy catalogue); a game-icons avatar is found by its German name, the picker closes, the list draws it, the path chunk loads once and never rides in an eager bundle, the value is stored
   - `correction.spec.ts` — a typed 60 stays out of the heatmap, a chip makes it exact, undo brings a typed visit back as "26 → …", an older visit is corrected from its pill, the stored heatmap never counts twice, reload keeps it all
   - `wheel.spec.ts` — the start wheel on phone and desktop: size, and the flapper rotation sampled every frame never exceeds 30°
   - `scoreboard.spec.ts` — a waiting scoreboard window picks up a new match, follows visits live (rows, active player, visit and 180 moments) and shows the match at once after a reload

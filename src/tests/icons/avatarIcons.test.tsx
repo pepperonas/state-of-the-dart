@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import fs from 'fs';
 import path from 'path';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import '../../i18n/config';
@@ -96,7 +96,8 @@ describe('AvatarPicker with game icons', () => {
     render(<AvatarPicker onSelect={onSelect} onClose={vi.fn()} />);
     // "Drache" is only in the German label (the stored name is dragon-head).
     await userEvent.type(screen.getByRole('textbox'), 'Drache');
-    await userEvent.click(screen.getByRole('button', { name: 'Drache' }));
+    // The icon grid — the emoji 🐉 is called "Drache" too (0.35.0).
+    await userEvent.click(within(screen.getByTestId('icon-grid')).getByRole('button', { name: 'Drache' }));
     expect(onSelect).toHaveBeenCalledWith('gi:dragon-head');
   });
 

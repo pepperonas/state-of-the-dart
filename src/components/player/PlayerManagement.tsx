@@ -151,7 +151,8 @@ const PlayerManagement: React.FC = () => {
                 <label className="block m3-label-large text-on-surface mb-2">
                   {t('player_management.avatar_label')}
                 </label>
-                <div className="flex items-center gap-3">
+                {/* Wraps on a phone: preview + remove + "choose" did not fit in one row. */}
+                <div className="flex flex-wrap items-center gap-3">
                   <div className="flex-1">
                     {newPlayerAvatar ? (
                       <div className="flex items-center gap-3">
@@ -177,9 +178,9 @@ const PlayerManagement: React.FC = () => {
                   </Button>
                 </div>
               </div>
-              <div className="flex items-end gap-2">
+              <div className="flex flex-wrap items-end gap-2">
                 <TextField
-                  className="flex-1"
+                  className="flex-1 min-w-[12rem]"
                   type="text"
                   value={newPlayerName}
                   onChange={(e) => setNewPlayerName(e.target.value)}

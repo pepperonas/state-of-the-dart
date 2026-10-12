@@ -227,7 +227,8 @@
     "check_out_hint": "What finishes a leg",
     "rule_single": "Single",
     "rule_double": "Double",
-    "rule_triple": "Triple"
+    "rule_triple": "Triple",
+    "redo_throw": "Redo visit"
   },
   "stats": {
     "statistics": "Statistics",
@@ -1631,7 +1632,26 @@
       "dutch-bike": "Bicycle",
       "police-car": "Police car"
     },
-    "credit": "Many icons: game-icons.net by {{authors}} · CC BY 3.0"
+    "credit": "Many icons: game-icons.net by {{authors}} · CC BY 3.0",
+    "kind": "Kind of avatar",
+    "tab_icons": "Icons",
+    "tab_emoji": "Emoji",
+    "skin_tone": "Skin tone",
+    "tone_0": "Neutral",
+    "tone_1": "Light",
+    "tone_2": "Medium-light",
+    "tone_3": "Medium",
+    "tone_4": "Medium-dark",
+    "tone_5": "Dark",
+    "emoji_group_smileys": "Smileys",
+    "emoji_group_people": "People",
+    "emoji_group_nature": "Animals & nature",
+    "emoji_group_food": "Food & drink",
+    "emoji_group_travel": "Travel & places",
+    "emoji_group_activities": "Activities",
+    "emoji_group_objects": "Objects",
+    "emoji_group_symbols": "Symbols",
+    "emoji_group_flags": "Flags"
   },
   "back_to_landing": {
     "label": "Back to home page"
@@ -2298,7 +2318,8 @@
     "back": "Take back the last dart or visit",
     "undo": "Take back the last visit",
     "clear": "Clear the input, close a dialog",
-    "help": "Open this overview"
+    "help": "Open this overview",
+    "redo": "Bring back a visit taken back"
   },
   "announce": {
     "visit": "{{name}}: {{score}}, {{remaining}} left",

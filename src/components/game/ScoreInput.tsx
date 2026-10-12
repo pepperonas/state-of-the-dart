@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
-import { Check, X, Delete, Keyboard, RotateCcw, ChevronDown } from 'lucide-react';
+import { Check, X, Delete, Keyboard, RotateCcw, RotateCw, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Dart } from '../../types/index';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -35,6 +35,10 @@ interface ScoreInputProps {
   /** The throw `onUndoThrow` would take back — shown on the button so the player
    *  can see what they are about to undo. `null` = nothing to undo. */
   lastThrow?: { playerName: string; score: number; isBust?: boolean } | null;
+  /** Book again the visit undo took back last — for "one undo too many". */
+  onRedoThrow?: () => void;
+  /** The visit `onRedoThrow` would bring back; `null` = nothing to redo. */
+  nextThrow?: { playerName: string; score: number; isBust?: boolean } | null;
   /** Several darts at once (a numpad total) — one sound and one haptic, not three. */
   onAddDarts?: (darts: Dart[]) => void;
   /** Adds the darts AND confirms the visit in one go (numpad total + Enter).
@@ -90,6 +94,8 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   outRule = 'double',
   onUndoThrow,
   lastThrow = null,
+  onRedoThrow,
+  nextThrow = null,
   onAddDarts,
   onCommitDarts,
   handoff = null,
@@ -169,6 +175,10 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   // silently overwrite darts that are already sitting there — only offer it on an
   // empty visit.
   const canUndoThrow = Boolean(onUndoThrow && lastThrow && currentThrow.length === 0);
+  // The parent only offers a redo that is valid right now (input empty or
+  // still holding exactly the visit taken back).
+  const canRedoThrow = Boolean(onRedoThrow && nextThrow && !awaitingNextPlayer);
+  const redoName = nextThrow ? `${nextThrow.playerName} · ${nextThrow.isBust ? t('game.bust') : nextThrow.score}` : '';
 
   // Bring the checkout button into view on an early checkout — 'nearest', so a
   // button that is already on screen does not make the page jump.
@@ -230,6 +240,11 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
         } else if (canUndoThrow) {
           // Nothing left to delete in this visit — walk back one confirmed throw.
           onUndoThrow?.();
+        }
+      } else if ((e.ctrlKey || e.metaKey) && ((e.key.toLowerCase() === 'z' && e.shiftKey) || e.key.toLowerCase() === 'y')) {
+        if (canRedoThrow) {
+          e.preventDefault();
+          onRedoThrow?.();
         }
       } else if ((e.key === 'z' || e.key === 'Z') && (e.ctrlKey || e.metaKey)) {
         if (canUndoThrow) {
@@ -620,6 +635,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
       {/* Take back the last CONFIRMED throw. Sits with the other actions instead of
           hiding in a header icon — it is the correction players reach for most. */}
       {onUndoThrow && !dense && (
+        <div className="flex gap-2 mb-2 phoneland:mb-1.5 phoneland:col-start-1">
         <button
           onClick={() => canUndoThrow && onUndoThrow()}
           disabled={!canUndoThrow}
@@ -631,29 +647,54 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
                 ? t('game.undo_throw_blocked')
                 : t('game.undo_last_throw')
           }
-          className="w-full mb-2 min-h-[52px] phoneland:min-h-[44px] phoneland:py-2 phoneland:mb-1.5 phoneland:col-start-1 flex items-center justify-center gap-2 px-4 py-3 rounded-m3-full bg-tertiary-container text-on-tertiary-container m3-state-layer disabled:opacity-30 disabled:cursor-not-allowed transition font-bold"
+          className="flex-1 min-w-0 min-h-[52px] phoneland:min-h-[44px] phoneland:py-2 flex items-center justify-center gap-2 px-4 py-3 rounded-m3-full bg-tertiary-container text-on-tertiary-container m3-state-layer disabled:opacity-30 disabled:cursor-not-allowed transition font-bold"
         >
-          <RotateCcw size={18} />
-          <span>{t('game.undo_last_throw')}</span>
-          {lastThrow && (
+          <RotateCcw size={18} className="shrink-0" />
+          <span className="whitespace-nowrap">{t('game.undo_last_throw')}</span>
+          {/* With "Wurf vor" beside it there is no room for the name; it stays in the title. */}
+          {lastThrow && !canRedoThrow && (
             <span className="m3-label-large px-2 py-0.5 rounded-m3-full bg-[color-mix(in_srgb,var(--m3-on-tertiary-container)_14%,transparent)] max-w-[45%] truncate">
               {lastThrow.playerName} · {lastThrow.isBust ? t('game.bust') : lastThrow.score}
             </span>
           )}
         </button>
+        {canRedoThrow && (
+          <button
+            onClick={onRedoThrow}
+            aria-label={`${t('game.redo_throw')}: ${redoName}`}
+            title={t('game.redo_throw')}
+            data-testid="redo-throw"
+            className="shrink-0 max-w-[45%] min-h-[52px] phoneland:min-h-[44px] phoneland:py-2 flex items-center justify-center gap-2 px-4 py-3 rounded-m3-full bg-secondary-container text-on-secondary-container m3-state-layer transition font-bold"
+          >
+            <span className="truncate">{redoName}</span>
+            <RotateCw size={18} className="shrink-0" />
+          </button>
+        )}
+        </div>
       )}
 
       {/* Action Buttons — confirm gets the most room, it is the one used every visit. */}
-      <div className={`grid ${dense && onUndoThrow ? 'grid-cols-[auto_auto_auto_1fr]' : 'grid-cols-[1fr_1fr_1.6fr]'} gap-2 phoneland:col-start-1`}>
+      <div className={`grid ${dense && onUndoThrow ? (canRedoThrow ? 'grid-cols-[auto_auto_auto_auto_1fr] gap-1.5' : 'grid-cols-[auto_auto_auto_1fr] gap-2') : 'grid-cols-[1fr_1fr_1.6fr] gap-2'} phoneland:col-start-1`}>
         {dense && onUndoThrow && (
           <button
             onClick={() => canUndoThrow && onUndoThrow()}
             disabled={!canUndoThrow}
             aria-label={lastThrow ? `${t('game.undo_last_throw')}: ${lastThrow.playerName} · ${lastThrow.isBust ? t('game.bust') : lastThrow.score}` : t('game.undo_last_throw')}
             title={!lastThrow ? t('game.no_throw_to_undo') : t('game.undo_last_throw')}
-            className="flex items-center justify-center px-4 rounded-m3-full bg-tertiary-container text-on-tertiary-container m3-state-layer disabled:opacity-30 disabled:cursor-not-allowed transition"
+            className={`flex items-center justify-center ${canRedoThrow ? 'px-2.5' : 'px-4'} rounded-m3-full bg-tertiary-container text-on-tertiary-container m3-state-layer disabled:opacity-30 disabled:cursor-not-allowed transition`}
           >
             <RotateCcw size={18} />
+          </button>
+        )}
+        {dense && onUndoThrow && canRedoThrow && (
+          <button
+            onClick={onRedoThrow}
+            aria-label={`${t('game.redo_throw')}: ${redoName}`}
+            title={t('game.redo_throw')}
+            data-testid="redo-throw"
+            className="flex items-center justify-center px-2.5 rounded-m3-full bg-secondary-container text-on-secondary-container m3-state-layer transition"
+          >
+            <RotateCw size={18} />
           </button>
         )}
         <button
@@ -690,7 +731,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
                 : 'bg-primary text-on-primary'
           }`}
         >
-          <Check size={20} />
+          {!(dense && canRedoThrow) && <Check size={20} className="shrink-0" />}
           <span className="truncate">{awaitingNextPlayer
             ? t('game_screen.next_player', { name: awaitingNextPlayer })
             : isCheckout ? t('score_input.checkout') : isEditingThrow ? (dense ? t('correction.save') : t('game.confirm_correction')) : t('game.confirm_visit')}</span>

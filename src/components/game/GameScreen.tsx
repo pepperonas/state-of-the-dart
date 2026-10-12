@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, RotateCcw, X, Bot, ChevronDown, AlertTriangle, Smile, Flame, UserMinus, Volume2, VolumeX, BarChart3, Tv, Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 const ThrowChart = lazy(() => import('./ThrowChart'));
-import { useGame, MIN_MATCH_PLAYERS } from '../../context/GameContext';
+import { useGame, MIN_MATCH_PLAYERS, redoTarget } from '../../context/GameContext';
 import { usePlayer } from '../../context/PlayerContext';
 import { useSettings } from '../../context/SettingsContext';
 import { useTenant } from '../../context/TenantContext';
@@ -984,6 +984,28 @@ const GameScreen: React.FC = () => {
     dispatch({ type: 'UNDO_THROW', payload: { skipBots: true } });
   };
 
+  // Taken back one visit too many: book it again (0.35.0). Undo keeps what it
+  // took back; the button names the visit that would return.
+  const nextRedo = redoTarget(state);
+  const redoInfo = useMemo(() => {
+    if (!nextRedo || !state.currentMatch) return null;
+    return {
+      playerName: state.currentMatch.players.find(p => p.playerId === nextRedo.playerId)?.name ?? '?',
+      score: nextRedo.score,
+      isBust: nextRedo.isBust,
+    };
+  }, [nextRedo, state.currentMatch]);
+
+  const handleRedoThrow = () => {
+    if (!nextRedo) return;
+    setAwaitingNextPlayer(false);
+    setHandoff(null);
+    haptic('undo', settings.vibrationEnabled);
+    setIsEditingThrow(false);
+    setEditingDartIndex(null);
+    dispatch({ type: 'REDO_THROW' });
+  };
+
   // A taken-back typed visit corrected as a sum: swap its darts, then book it.
   const handleReplaceVisit = React.useCallback((darts: Dart[]) => {
     dispatch({ type: 'CLEAR_THROW' });
@@ -1687,6 +1709,8 @@ const GameScreen: React.FC = () => {
       isCheckout={isEarlyCheckout}
       onUndoThrow={handleUndoThrow}
       lastThrow={lastThrowInfo}
+      onRedoThrow={handleRedoThrow}
+      nextThrow={redoInfo}
       onAddDarts={handleDartsHit}
       onCommitDarts={handleCommitDarts}
       handoff={handoff}

@@ -7,6 +7,34 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.35.0] - 2026-10-12
+
+### Added — redo
+- `REDO_THROW`: visits taken back by undo are kept in `GameState.redoStack`
+  (memory only) and booked again in order — across a leg boundary, out of a
+  completed match, and with the bot visits undo stepped over. `redoTarget()`
+  says what would come back: the top visit, if it belongs to the player at
+  the oche and the input is empty or still holds exactly its darts.
+- Confirming the darts undo put back unchanged keeps the rest of the history;
+  any other visit, a correction, removing a player, a new/loaded match or a
+  refresh drops it.
+- "Wurf vor" button (with the visit's name; an icon on phones) and
+  Ctrl/Cmd+Shift+Z / Ctrl/Cmd+Y. `shouldHandleGameKey` now lets the redo
+  chords through (it only knew Ctrl+Z).
+
+### Added — every emoji as an avatar
+- Avatar picker tab "Emojis": all 1906 emoji (emojibase-data 16.0.3, MIT;
+  generator `tools/gen-emoji.mjs` → `emojiData.ts`, lazy, ~80 kB gzip), nine
+  groups, five skin tones, search by German/English name and keywords.
+- Stored as `em:<emoji>` and drawn as the emoji (SVG text, system colour
+  font) in `AvatarGlyph` and on the start wheel; a bare emoji from an older
+  profile still resolves to an app icon.
+
+### Fixed
+- New-player form on phones: the name field was squeezed and "Avatar wählen"
+  ran out of the card; both rows wrap now.
+- The picker's header rows no longer shrink under the grid.
+
 ## [0.34.0] - 2026-10-12
 
 ### Changed — the turn change ("relay")

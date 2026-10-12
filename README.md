@@ -56,22 +56,22 @@
   <!-- ── Headline metrics ─────────────────────────────────────── -->
   <p>
     <a href="https://github.com/pepperonas/state-of-the-dart" title="Lines of code — measured by scripts/count-loc.mjs, checked by the docs test">
-      <img src="https://img.shields.io/badge/lines_of_code-~59k-2b3137?style=for-the-badge&logo=typescript&logoColor=white" height="64" alt="Lines of code" />
+      <img src="https://img.shields.io/badge/lines_of_code-~60k-2b3137?style=for-the-badge&logo=typescript&logoColor=white" height="64" alt="Lines of code" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml" title="Vitest unit and component tests, all passing">
-      <img src="https://img.shields.io/badge/Unit_Tests-1212-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
+      <img src="https://img.shields.io/badge/Unit_Tests-1240-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml" title="Playwright end-to-end tests against a real backend">
-      <img src="https://img.shields.io/badge/E2E_Tests-48-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
+      <img src="https://img.shields.io/badge/E2E_Tests-52-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
     </a>
   </p>
 
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.34.0-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.35.0-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
@@ -248,6 +248,7 @@
 
 ### 🖥️ Spielansicht „Arena“ & TV-Scoreboard (v0.28–v0.31)
 - **Spotlight** — wer am Zug ist, bekommt eine große Hero-Karte (riesiger Rest, Checkout-Weg, Platz im Leg, Darts im Leg, Schnitt, Legs bis zum Sieg, letzte Aufnahmen); alle anderen stehen als kompakte Zeilen darunter. Beim Spielerwechsel wächst die Zeile des Nächsten als Ganzes zur Hero-Karte (M3 Container Transform), ohne dass Schrift gestreckt wird.
+- **Wurf vor (v0.35.0)** — zu viel zurückgenommen? „Wurf vor“ (oder Strg+Umschalt+Z / Strg+Y) bucht die Aufnahmen der Reihe nach wieder, Bot-Aufnahmen inklusive.
 - **Spielerwechsel als Staffelstab (v0.34.0)** — nach einer Aufnahme bleibt die Karte des Werfers einen Moment groß: „−60“ landet als Stempel, der Rest zählt sichtbar herunter. Dann öffnet sich die Karte des Nächsten aus seiner Zeile, sein Name baut sich Buchstabe für Buchstabe auf, die Zahl wächst mit, ein Ring sagt „du bist dran“, danach kommt das Feuer. Die Eingabe ist dabei sofort frei; Screenreader hören sofort den richtigen Spieler.
 - **Für jede Bildschirmgröße** (M3 Window Size Classes) — Handy: Eingabe unten im Daumenbereich, Statistik/Verlauf/Heatmap/Board als Bottom Sheet mit Reitern; Tablet quer: zwei Spalten; ab Laptop: drei Spalten mit Dartboard daneben; sehr große Monitore ohne schmale Begrenzung.
 - **Einblicke unter dem Spielfeld** — Match-Statistik (alle Spieler nebeneinander), Wurf-Verlauf, Wurf-Chart und Live-Heatmap als Karten in zwei Spalten, immer offen.
@@ -335,7 +336,7 @@
   - **Skill-Radar** - 5-dimensionale Skill-Visualisierung
   - **Karriere-Zeitachse** - Vom ersten bis zum letzten Spiel mit allen Stats
   - **Achievement-Showcase** - Zeige freigeschaltete Achievements
-  - **Player Avatar System** - Tonale Avatar-Discs mit Icons aus dem hauseigenen Set (siehe [Design-System](docs/DESIGN_SYSTEM.md)); ältere Profile mit Emoji werden automatisch übersetzt. Seit v0.33.0 zusätzlich **165 Spieler-Symbole von [game-icons.net](https://game-icons.net)** (Tiere, Fantasy, Sport & Spiel, Kneipe, Musik & Party, Natur & Weltall, Zeichen, Fahrzeuge), auf Deutsch durchsuchbar, einfarbig im Theme; die Pfaddaten werden erst bei Bedarf geladen
+  - **Player Avatar System** - Tonale Avatar-Discs mit Icons aus dem hauseigenen Set (siehe [Design-System](docs/DESIGN_SYSTEM.md)); ältere Profile mit Emoji werden automatisch übersetzt. Seit v0.33.0 zusätzlich **165 Spieler-Symbole von [game-icons.net](https://game-icons.net)** (Tiere, Fantasy, Sport & Spiel, Kneipe, Musik & Party, Natur & Weltall, Zeichen, Fahrzeuge), auf Deutsch durchsuchbar, einfarbig im Theme; die Pfaddaten werden erst bei Bedarf geladen. Seit v0.35.0 außerdem **alle Emojis** (1906, neun Gruppen, fünf Hauttöne) im Reiter „Emojis“, auf Deutsch und Englisch durchsuchbar
   - **🔥 Feldgenaue Heatmap (neu gebaut in v0.19.0)** - Wurfverteilung auf der Scheibe:
     - Jedes echte Feld (Single, Triple, Double, Single-Bull, Bull) wird nach seiner Trefferquote eingefärbt — scharfes SVG in jeder Größe, folgt hellem und dunklem Theme
     - Eine warme, wahrnehmungstreue Farbrampe (`--m3-heat-1…6`), Wurzel-Skala, damit ein Hauptfeld nicht alles andere ausgraut
@@ -594,7 +595,7 @@ state-of-the-dart/
 - **Darts**: jeder Dart einzeln über S/D/T und die Zahl (exakte Felder, für Statistik und Heatmap)
 - **Schnell**: häufige Scores mit einem Klick (26, 41, 45, 60, 81, 85, 100, 121, 140, 180)
 - **Dartboard**: auf dem Desktop unter der Eingabe, auf dem Handy einklappbar
-- **Korrektur**: „Wurf zurück“, Backspace oder Strg+Z holt die letzte Aufnahme zurück. Eine getippte Summe kommt als Summe zurück („60 → _“): richtige Zahl tippen, Enter – Esc behält sie. Jede frühere Aufnahme im laufenden Leg lässt sich über ihre Pille auf der Spielerkarte oder den Stift im Wurf-Verlauf korrigieren (Summe oder einzelne Darts).
+- **Korrektur**: „Wurf zurück“, Backspace oder Strg+Z holt die letzte Aufnahme zurück; wer zu viel zurückgenommen hat, holt sie mit „Wurf vor“ (Strg+Umschalt+Z oder Strg+Y) der Reihe nach wieder. Eine getippte Summe kommt als Summe zurück („60 → _“): richtige Zahl tippen, Enter – Esc behält sie. Jede frühere Aufnahme im laufenden Leg lässt sich über ihre Pille auf der Spielerkarte oder den Stift im Wurf-Verlauf korrigieren (Summe oder einzelne Darts).
 - **Wie geworfen?** Nach einer getippten Summe schlägt die App 2–3 wahrscheinliche Zerlegungen vor (bei 60 z. B. „20 · 20 · 20“ oder „T20 · 0 · 0“). Ein Tipp macht die Darts genau, ignorieren kostet nichts. Getippte Summen zählen nicht in die Heatmap – unter jeder Heatmap steht, wie viele Darts genau erfasst sind.
 - **Checkout-Weg** steht in der Eingabekarte; der **Platz im Leg** (1 grün, 2 gelb, 3 orange …) auf jeder Spielerkarte
 
@@ -926,6 +927,10 @@ Contributions sind willkommen! Bitte:
 ---
 
 ## 📝 Changelog
+
+### v0.35.0 (12. Oktober 2026) - Wurf vor, alle Emojis
+
+**Wurf vor:** Wer zu viele Aufnahmen zurückgenommen hat, holt sie jetzt mit „Wurf vor“ wieder – eine pro Druck, in der richtigen Reihenfolge, auch über ein Leg-Ende hinweg; Bot-Aufnahmen kommen mit. Der Knopf erscheint nach einem „Wurf zurück“ und nennt die Aufnahme, die zurückkommt; Strg+Umschalt+Z und Strg+Y gehen auch. Wird stattdessen eine andere Aufnahme eingegeben, gilt der neue Stand. **Alle Emojis:** Neben den Icons gibt es in der Avatar-Auswahl einen Reiter „Emojis“ mit allen 1906 Emojis in neun Gruppen, wählbarem Hautton und Suche auf Deutsch und Englisch. Emoji-Avatare werden als Emoji gezeigt, ältere Profile behalten ihr Icon. Die Emoji-Liste wird erst beim Öffnen der Auswahl geladen. **Behoben:** Beim Anlegen eines Spielers am Handy war das Namensfeld zusammengedrückt und „Avatar wählen“ ragte aus der Karte.
 
 ### v0.34.0 (12. Oktober 2026) - Spielerwechsel als Staffelstab
 
@@ -1468,6 +1473,8 @@ Ein ⭐ auf GitHub hilft ebenfalls — und erzähl es deinem Dart-Verein.
 ## 📄 Lizenz
 
 [MIT](LICENSE) — © 2026 Martin Pfeffer | [celox.io](https://celox.io)
+
+Alle Unicode-Emojis (1906, seit v0.35.0) stehen ebenfalls als Avatar zur Wahl; Namen und Suchbegriffe aus [emojibase](https://emojibase.dev) (MIT).
 
 Spieler-Symbole aus [game-icons.net](https://game-icons.net) stehen unter [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/deed.de) — Urheber: Delapouite, Lorc, Skoll, Caro Asercion, Kier Heyl, Cathelineau, Sbed, Various artists, DarkZaitzev, Carl Olsen (Liste je Symbol: `tools/avatar-icons/manifest.tsv`).
 

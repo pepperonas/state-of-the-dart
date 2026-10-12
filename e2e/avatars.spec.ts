@@ -31,7 +31,8 @@ test('a game-icons avatar is picked by name, drawn and stored', async ({ page })
   const picker = page.getByRole('dialog');
   await expect(picker.getByTestId('avatar-credit')).toContainText('CC BY 3.0');
   await picker.getByRole('textbox').fill('Wolf');
-  await picker.getByRole('button', { name: 'Wolf', exact: true }).click();
+  // The icon grid: the wolf emoji answers to "Wolf" too (0.35.0).
+  await picker.getByTestId('icon-grid').getByRole('button', { name: 'Wolf', exact: true }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0); // a pick closes the picker
 
   const name = `Wolfi${String(Date.now()).slice(-5)}`;
@@ -51,4 +52,42 @@ test('a game-icons avatar is picked by name, drawn and stored', async ({ page })
   const body = await res.json();
   const list = (Array.isArray(body) ? body : body.players ?? body.data ?? []) as { name: string; avatar: string }[];
   expect(list.find(p => p.name === name)?.avatar).toBe('gi:wolf-head');
+});
+
+/**
+ * Every emoji besides the icons (0.35.0): the emoji tab, a skin tone, stored as
+ * em:<emoji>, drawn as the emoji itself; the catalogue is a lazy chunk.
+ */
+test('an emoji avatar is picked, drawn and stored', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await login(page);
+  const chunk: string[] = [];
+  page.on('request', r => { if (r.url().includes('emojiData')) chunk.push(r.url()); });
+
+  await page.goto('/players');
+  await page.getByRole('button', { name: 'Spieler hinzufügen' }).first().click();
+  expect(chunk, 'no emoji catalogue before the picker opens').toHaveLength(0);
+
+  await page.getByRole('button', { name: 'Avatar wählen' }).first().click();
+  const picker = page.getByRole('dialog');
+  await picker.getByRole('radio', { name: 'Emojis' }).click();
+  await picker.getByRole('radio', { name: 'Mittel', exact: true }).click();
+  await picker.getByRole('textbox').fill('daumen hoch');
+  await picker.getByTestId('emoji-grid').getByRole('button', { name: 'Daumen hoch' }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  expect(chunk).toHaveLength(1);
+  await expect(page.locator('[data-avatar="em:👍🏽"]').first()).toBeVisible();
+  // No horizontal scroll from the picker's new rows.
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+
+  const name = `Emo${String(Date.now()).slice(-5)}`;
+  await page.getByPlaceholder('Spielername eingeben').fill(name);
+  await page.getByRole('button', { name: 'Hinzufügen', exact: true }).click();
+  const token = await page.evaluate(() => localStorage.getItem('auth_token'));
+  await expect.poll(async () => {
+    const res = await page.request.get(`http://localhost:${BACKEND_PORT}/api/players`, { headers: { Authorization: `Bearer ${token}` } });
+    const body = await res.json();
+    const list = (Array.isArray(body) ? body : body.players ?? body.data ?? []) as { name: string; avatar: string }[];
+    return list.find(p => p.name === name)?.avatar;
+  }).toBe('em:👍🏽');
 });

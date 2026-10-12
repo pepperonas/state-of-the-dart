@@ -21,6 +21,13 @@ export interface GameState {
   checkoutSuggestion: string[] | null;
   currentPlayerIndex: number;
   currentThrow: Dart[];
+  /**
+   * Visits taken back by undo, newest-undone last (the top is the visit that
+   * comes back first). Redo books them again in order. Kept in memory only:
+   * a refresh, a new or loaded match, a correction or a different visit than
+   * the one taken back clears it.
+   */
+  redoStack?: Throw[];
 }
 
 type GameAction =
@@ -32,6 +39,8 @@ type GameAction =
   | { type: 'REPLACE_DART'; payload: { index: number; dart: Dart } }
   | { type: 'CONFIRM_THROW' }
   | { type: 'UNDO_THROW'; payload?: { skipBots?: boolean } }
+  /** Book the visit taken back last once more (and the bot visits after it). */
+  | { type: 'REDO_THROW' }
   /** Replace the darts of a booked visit in the leg in play; later visits are re-scored. */
   | { type: 'EDIT_THROW'; payload: { throwId: string; darts: Dart[] } }
   | { type: 'REMOVE_PLAYER'; payload: { playerId: string } }
@@ -219,7 +228,7 @@ const isPlayableMatch = (match: Match | null | undefined): match is Match =>
   Array.isArray(match.legs[match.currentLegIndex].throws) &&
   !!match.settings;
 
-export const gameReducer = (state: GameState, action: GameAction): GameState => {
+const baseReducer = (state: GameState, action: GameAction): GameState => {
   switch (action.type) {
     case 'LOAD_MATCH': {
       const match = action.payload;
@@ -708,6 +717,97 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
 
     default:
       return state;
+  }
+};
+
+/** Two visits were thrown the same way (beds, not object identity). */
+const sameDarts = (a: Dart[], b: Dart[]) =>
+  a.length === b.length && a.every((d, i) => d.segment === b[i].segment && d.multiplier === b[i].multiplier);
+
+/**
+ * The visit redo would book now, or null. It must belong to the player at the
+ * oche, and the input must be empty or still hold exactly that visit (undo
+ * puts the darts back there).
+ */
+// eslint-disable-next-line react-refresh/only-export-components -- pure helper next to the reducer it reads
+export const redoTarget = (state: GameState): Throw | null => {
+  const stack = state.redoStack ?? [];
+  const top = stack[stack.length - 1];
+  const m = state.currentMatch;
+  if (!top || !m || m.status !== 'in-progress') return null;
+  if (m.players[state.currentPlayerIndex]?.playerId !== top.playerId) return null;
+  if (state.currentThrow.length > 0 && !sameDarts(state.currentThrow, top.darts)) return null;
+  return top;
+};
+
+/** Books one taken-back visit and passes the turn the way play would. */
+const rebook = (state: GameState, visit: Throw): GameState => {
+  const legIndex = state.currentMatch!.currentLegIndex;
+  const booked = baseReducer({ ...state, currentThrow: visit.darts }, { type: 'CONFIRM_THROW' });
+  const m = booked.currentMatch!;
+  // A checkout has already moved on to the next leg (or ended the match).
+  if (m.legs[legIndex]?.winner || m.status === 'completed') return booked;
+  return baseReducer(booked, { type: 'NEXT_PLAYER' });
+};
+
+const redo = (state: GameState): GameState => {
+  const first = redoTarget(state);
+  if (!first) return state;
+  const stack = [...(state.redoStack ?? [])];
+  let next = rebook(state, stack.pop()!);
+  // Mirror of undo with skipBots: the bot visits that followed come back too,
+  // otherwise the bot would throw new darts in their place.
+  for (;;) {
+    const top = stack[stack.length - 1];
+    const m = next.currentMatch;
+    if (!top || !m || m.status !== 'in-progress') break;
+    const atOche = m.players[next.currentPlayerIndex];
+    if (!atOche?.isBot || atOche.playerId !== top.playerId) break;
+    next = rebook(next, stack.pop()!);
+  }
+  return { ...next, redoStack: stack };
+};
+
+const allThrows = (m: Match | null) => (m ? m.legs.flatMap(l => l.throws) : []);
+
+/**
+ * The game reducer with a redo history around it. Undo remembers what it took
+ * back; booking the very visit that sits on top (redo, or confirming the
+ * darts undo put back unchanged) keeps the rest; anything that changes the
+ * history differently forgets it.
+ */
+export const gameReducer = (state: GameState, action: GameAction): GameState => {
+  const stack = state.redoStack ?? [];
+  switch (action.type) {
+    case 'REDO_THROW':
+      return redo(state);
+    case 'UNDO_THROW':
+    case 'UNDO_END_MATCH': {
+      const next = baseReducer(state, action);
+      if (next === state) return state;
+      const kept = new Set(allThrows(next.currentMatch).map(t => t.id));
+      const removed = allThrows(state.currentMatch).filter(t => !kept.has(t.id));
+      return { ...next, redoStack: [...stack, ...removed.reverse()] };
+    }
+    case 'CONFIRM_THROW': {
+      const next = baseReducer(state, action);
+      if (next === state) return state;
+      const top = redoTarget(state);
+      const same = !!top && sameDarts(top.darts, state.currentThrow);
+      return { ...next, redoStack: same ? stack.slice(0, -1) : [] };
+    }
+    case 'START_MATCH':
+    case 'LOAD_MATCH':
+    case 'EDIT_THROW':
+    case 'REMOVE_PLAYER':
+    case 'END_MATCH':
+    case 'RESET_GAME': {
+      const next = baseReducer(state, action);
+      if (next === state) return state;
+      return stack.length ? { ...next, redoStack: [] } : next;
+    }
+    default:
+      return baseReducer(state, action);
   }
 };
 
