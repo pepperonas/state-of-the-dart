@@ -7,6 +7,28 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.38.0] - 2026-10-13
+
+### Changed — home and statistics
+- Home: every game mode has its own glyph — Cricket (new: the circled-and-crossed
+  "closed" mark, computed in `tools/gen-icons.py`), Around the Clock (clock),
+  Shanghai (dart), Online (globe); four of them shared the target before.
+- Home: one tone per kind — play primary, practice secondary, review tertiary —
+  instead of colours that followed no rule.
+- Home: the last tile of a section stretches over the empty cells of its row
+  (`utils/tileSpan.ts`), so "Auswerten" no longer ends in a hole.
+- Statistics overview: three headline figures (games, win rate with a ring,
+  average with the best average beneath), then eight calm detail tiles. Zeros
+  are shown in the quiet text colour, "never yet" as —. The randomly coloured
+  tiles and the label dimmed with opacity are gone.
+- The win/loss pie chart is gone (the ring says the same); the performance radar
+  lost the scale numbers that sat on top of its axis labels.
+
+### Tests
+- `homeStats.test.tsx` (glyphs, tones, last-tile span, quiet zeros, ring share,
+  shared baseline) and a home grid check in `page-frame.spec.ts` at 700 and
+  1440 px. Every new assertion mutation-probed (8 probes).
+
 ## [0.37.0] - 2026-10-13
 
 ### Changed — game screen

@@ -7,7 +7,7 @@ import { usePlayer } from '../../context/PlayerContext';
 import { useTenant } from '../../context/TenantContext';
 import { 
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   AreaChart, Area, ComposedChart
 } from 'recharts';
 import MatchHistory from './MatchHistory';
@@ -205,13 +205,6 @@ const StatsOverview: React.FC = () => {
   }, [selectedPlayer, t]);
 
   // Win/Loss data
-  const winLossData = useMemo(() => {
-    if (!selectedPlayer) return [];
-    return [
-      { name: t('stats_overview.won'), value: selectedPlayer.stats.gamesWon, color: chart.success },
-      { name: t('stats_overview.lost'), value: selectedPlayer.stats.gamesPlayed - selectedPlayer.stats.gamesWon, color: chart.error },
-    ];
-  }, [selectedPlayer, t, chart.success, chart.error]);
 
   // Time series performance data (daily/weekly/monthly/yearly)
   const timeSeriesData = useMemo(() => {
@@ -433,59 +426,53 @@ const StatsOverview: React.FC = () => {
             {/* Tab Content */}
             {selectedTab === 'overview' && (
               <div className="space-y-6 m3-enter">
-                {/* Stats Grid */}
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* 0.38.0: three headline figures, then calm detail tiles.
+                    Twelve equal tiles, four of them randomly coloured, made
+                    every number shout; a zero now reads as one. */}
+                <div data-testid="stats-hero" className="grid sm:grid-cols-3 gap-4">
                   <motion.div {...staggerChild(0)}>
-                    <StatCard label={t('stats_overview.games')} value={selectedPlayer.stats.gamesPlayed} />
+                    <HeroStat label={t('stats_overview.games')} value={String(selectedPlayer.stats.gamesPlayed)} />
                   </motion.div>
                   <motion.div {...staggerChild(1)}>
-                    <StatCard label={t('stats_overview.won')} value={selectedPlayer.stats.gamesWon} color="green" />
-                  </motion.div>
-                  <motion.div {...staggerChild(2)}>
-                    <StatCard
+                    <HeroStat
                       label={t('stats_overview.win_rate')}
-                      value={
-                        selectedPlayer.stats.gamesPlayed > 0
-                          ? `${((selectedPlayer.stats.gamesWon / selectedPlayer.stats.gamesPlayed) * 100).toFixed(1)}%`
-                          : '0%'
-                      }
-                      color="blue"
+                      value={selectedPlayer.stats.gamesPlayed > 0
+                        ? `${((selectedPlayer.stats.gamesWon / selectedPlayer.stats.gamesPlayed) * 100).toFixed(0)}%`
+                        : '—'}
+                      sub={t('stats_overview.won_of', { won: selectedPlayer.stats.gamesWon, total: selectedPlayer.stats.gamesPlayed })}
+                      ring={selectedPlayer.stats.gamesPlayed > 0 ? selectedPlayer.stats.gamesWon / selectedPlayer.stats.gamesPlayed : null}
                     />
                   </motion.div>
-                  <motion.div {...staggerChild(3)}>
-                    <StatCard label={t('stats_overview.average_long')} value={selectedPlayer.stats.averageOverall.toFixed(2)} color="purple" />
+                  <motion.div {...staggerChild(2)}>
+                    <HeroStat
+                      label={t('stats_overview.average_long')}
+                      value={selectedPlayer.stats.gamesPlayed > 0 ? selectedPlayer.stats.averageOverall.toFixed(2) : '—'}
+                      sub={selectedPlayer.stats.bestAverage > 0 ? `${t('stats_overview.best_avg')} ${selectedPlayer.stats.bestAverage.toFixed(2)}` : undefined}
+                    />
                   </motion.div>
-                  <motion.div {...staggerChild(4)}>
-                    <StatCard label={t('stats_overview.best_avg')} value={selectedPlayer.stats.bestAverage.toFixed(2)} color="yellow" />
-                  </motion.div>
-                  <motion.div {...staggerChild(5)}>
-                    <StatCard label="180s" value={selectedPlayer.stats.total180s} icon=""/>
-                  </motion.div>
-                  <motion.div {...staggerChild(6)}>
-                    <StatCard label={t('stats_overview.high_checkout')} value={selectedPlayer.stats.highestCheckout || '-'} />
-                  </motion.div>
-                  <motion.div {...staggerChild(7)}>
-                    <StatCard label={t('stats_overview.checkout_rate')} value={`${selectedPlayer.stats.checkoutPercentage.toFixed(1)}%`} />
-                  </motion.div>
-                  <motion.div {...staggerChild(8)}>
-                    <StatCard label={t('stats_overview.scores_140')} value={selectedPlayer.stats.total140Plus} />
-                  </motion.div>
-                  <motion.div {...staggerChild(9)}>
-                    <StatCard label={t('stats_overview.scores_100')} value={selectedPlayer.stats.total100Plus} />
-                  </motion.div>
-                  <motion.div {...staggerChild(10)}>
-                    <StatCard label={t('stats_overview.scores_60')} value={selectedPlayer.stats.total60Plus} />
-                  </motion.div>
-                  <motion.div {...staggerChild(11)}>
-                    <StatCard label={t('stats_overview.nine_darters')} value={selectedPlayer.stats.nineDartFinishes} icon=""/>
-                  </motion.div>
+                </div>
+                <div data-testid="stats-details" className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                  {[
+                    { label: '180s', value: selectedPlayer.stats.total180s },
+                    { label: t('stats_overview.high_checkout'), value: selectedPlayer.stats.highestCheckout || null },
+                    { label: t('stats_overview.checkout_rate'), value: selectedPlayer.stats.gamesPlayed > 0 ? `${selectedPlayer.stats.checkoutPercentage.toFixed(1)}%` : null },
+                    { label: t('stats_overview.nine_darters'), value: selectedPlayer.stats.nineDartFinishes },
+                    { label: t('stats_overview.scores_140'), value: selectedPlayer.stats.total140Plus },
+                    { label: t('stats_overview.scores_100'), value: selectedPlayer.stats.total100Plus },
+                    { label: t('stats_overview.scores_60'), value: selectedPlayer.stats.total60Plus },
+                    { label: t('stats_overview.won'), value: selectedPlayer.stats.gamesWon },
+                  ].map((d, i) => (
+                    <motion.div key={d.label} {...staggerChild(Math.min(3 + i, 10))}>
+                      <DetailStat label={d.label} value={d.value} />
+                    </motion.div>
+                  ))}
                 </div>
 
                 {/* Charts Section */}
                 {selectedPlayer.stats.gamesPlayed > 0 && (
                   <>
-                    {/* Performance Radar & Win/Loss Pie */}
-                    <div className="grid md:grid-cols-2 gap-6">
+                    {/* The win/loss pie is gone: the ring above says the same. */}
+                    <div className="grid gap-6">
                       {/* Performance Radar */}
                       <Card variant="elevated" className="p-6">
                         <h3 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
@@ -501,12 +488,8 @@ const StatsOverview: React.FC = () => {
                                 stroke={chart.axis}
                                 style={{ fontSize: '12px', fontWeight: 'bold' }}
                               />
-                              <PolarRadiusAxis 
-                                angle={90} 
-                                domain={[0, 100]}
-                                stroke={chart.axis}
-                                style={{ fontSize: '10px' }}
-                              />
+                              {/* No scale numbers: they sat on top of the axis labels. */}
+                              <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
                               <Radar 
                                 name={t('stats_overview.performance')} 
                                 dataKey="value" 
@@ -530,42 +513,6 @@ const StatsOverview: React.FC = () => {
                         </div>
                       </Card>
 
-                      {/* Win/Loss Pie */}
-                      <Card variant="elevated" className="p-6">
-                        <h3 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
-                            <Icon name="trophy" size={22} />
-                          {t('stats_overview.win_stats')}
-                        </h3>
-                        <div className="bg-surface-container rounded-m3-md p-4">
-                          <div className="h-[220px] sm:h-[300px]"><ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                              <Pie
-                                data={winLossData}
-                                cx="50%"
-                                cy="50%"
-                                labelLine={false}
-                                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                                outerRadius={100}
-                                fill={chart.series[1]}
-                                dataKey="value"
-                              >
-                                {winLossData.map((entry, index) => (
-                                  <Cell key={`cell-${index}`} fill={entry.color} />
-                                ))}
-                              </Pie>
-                              <Tooltip 
-                                contentStyle={{ 
-                                  backgroundColor: chart.tooltip.contentStyle.backgroundColor, 
-                                  border: chart.tooltip.contentStyle.border as string,
-                                  borderRadius: '8px',
-                                  padding: '12px'
-                                }}
-                                labelStyle={{ color: chart.text, fontWeight: 'bold' }}
-                              />
-                            </PieChart>
-                          </ResponsiveContainer></div>
-                        </div>
-                      </Card>
                     </div>
 
                     {/* Score Distribution */}
@@ -1173,27 +1120,46 @@ const StatsOverview: React.FC = () => {
   );
 };
 
-const StatCard: React.FC<{ label: string; value: string | number; color?: string; icon?: string }> = ({ 
-  label, 
-  value, 
-  color = 'gray',
-  icon 
-}) => {
-  const colorClasses = {
-    gray: 'bg-surface-container-highest text-on-surface',
-    green: 'bg-success-container text-on-success-container',
-    blue: 'bg-primary-container text-on-primary-container',
-    purple: 'bg-tertiary-container text-on-tertiary-container',
-    yellow: 'bg-secondary-container text-on-secondary-container',
-  };
-  const tone = colorClasses[color as keyof typeof colorClasses] || colorClasses.gray;
+/** A headline figure: big number, optional line under it, optional win ring. */
+export const HeroStat: React.FC<{ label: string; value: string; sub?: string; ring?: number | null }> = ({ label, value, sub, ring }) => (
+  <div className="h-full rounded-m3-lg bg-surface-container-high p-5 flex items-center gap-4">
+    {ring != null && <WinRing share={ring} />}
+    <div className="min-w-0">
+      <div className="m3-label-large text-on-surface-variant">{label}</div>
+      <div className="m3-display-small m3-emphasized text-on-surface tabular-nums">{value}</div>
+      {/* The line is reserved even when empty, so the three figures share a baseline. */}
+      <div className="m3-body-medium text-on-surface-variant mt-0.5" aria-hidden={sub ? undefined : true}>{sub ?? '\u00a0'}</div>
+    </div>
+  </div>
+);
 
+/** The share of games won as a ring — replaces the pie chart (0.38.0). */
+export const WinRing: React.FC<{ share: number }> = ({ share }) => {
+  const r = 26;
+  const c = 2 * Math.PI * r;
+  const clamped = Math.max(0, Math.min(1, share));
   return (
-    <div className={`rounded-m3-lg shadow-m3-1 p-6 ${tone}`}>
-      <div className="m3-label-large opacity-80 mb-2">{label}</div>
-      <div className="m3-headline-small m3-emphasized flex items-center gap-2">
-        {icon && <span className="text-2xl">{icon}</span>}
-        {value}
+    <svg data-testid="win-ring" width="64" height="64" viewBox="0 0 64 64" aria-hidden="true" className="shrink-0 -rotate-90">
+      <circle cx="32" cy="32" r={r} fill="none" stroke="var(--m3-surface-container-highest)" strokeWidth="7" />
+      <circle
+        cx="32" cy="32" r={r} fill="none" stroke="var(--m3-success)" strokeWidth="7" strokeLinecap="round"
+        strokeDasharray={`${c * clamped} ${c}`}
+      />
+    </svg>
+  );
+};
+
+/**
+ * A detail figure. A zero or a "never yet" is real information, but it should
+ * not shout like a record: it is shown in the quiet text colour, "never" as —.
+ */
+export const DetailStat: React.FC<{ label: string; value: string | number | null }> = ({ label, value }) => {
+  const quiet = value === null || value === 0;
+  return (
+    <div className="h-full rounded-m3-md bg-surface-container p-4" data-quiet={quiet ? 'true' : undefined}>
+      <div className="m3-label-medium text-on-surface-variant">{label}</div>
+      <div className={`m3-title-large tabular-nums ${quiet ? 'text-on-surface-variant' : 'text-on-surface font-semibold'}`}>
+        {value === null ? '—' : value}
       </div>
     </div>
   );

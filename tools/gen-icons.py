@@ -48,6 +48,14 @@ def ngon(cx, cy, n, r, rot=-90):
     return poly([(cx + r*math.cos(math.radians(rot + i*360.0/n)),
                   cy + r*math.sin(math.radians(rot + i*360.0/n))) for i in range(n)])
 
+def cross(cx, cy, arm, t, rot=45):
+    """A plus (rot=0) or an X (rot=45) as ONE polygon — two overlapping bars
+    would XOR into a hole under evenodd."""
+    h = t / 2
+    pts = [(-h,-arm),(h,-arm),(h,-h),(arm,-h),(arm,h),(h,h),(h,arm),(-h,arm),(-h,h),(-arm,h),(-arm,-h),(-h,-h)]
+    a = math.radians(rot)
+    return poly([(cx + x*math.cos(a) - y*math.sin(a), cy + x*math.sin(a) + y*math.cos(a)) for x, y in pts])
+
 def bar(x, y, w, h, r=None):
     return rrect(x, y, w, h, r if r is not None else min(w, h) / 2)
 
@@ -200,6 +208,9 @@ I['slot']    = (rrect(3,4.6,15,16.8,3) + rrect(5.6,7.6,9.8,7,1.4) + circle(7.4,1
                 + rrect(19.4,7,1.8,7.6,0.9) + circle(20.3,5.4,2))
 I['upload']  = poly([(12,2.6),(18.4,9.6),(14.4,9.6),(14.4,15.6),(9.6,15.6),(9.6,9.6),(5.6,9.6)]) + rrect(3.4,18,17.2,2.6,1.3)
 I['clipboard']= rrect(4.4,3.6,15.2,18,3) + rrect(8.4,1.6,7.2,4.4,1.6) + rrect(7.6,9.4,8.8,1.8,0.9) + rrect(7.6,13.4,6,1.8,0.9)
+
+# Cricket's "closed" mark: a number is closed once it is circled and crossed.
+I['cricket'] = ring(12,12,10,7.8) + cross(12,12,5.2,2.4)
 
 print(len(I))
 import json, io

@@ -55,3 +55,21 @@ for (const size of [{ name: 'phone', width: 390, height: 844 }, { name: 'desktop
     await expect(page.locator('[data-page-header]').getByRole('button', { name: /Zurück/ })).toBeVisible();
   });
 }
+
+/** 0.38.0 — no section on the home screen ends in a hole. */
+for (const width of [700, 1440]) {
+  test(`home sections fill their last row at ${width} px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 1000 });
+    await login(page);
+    await page.goto('/');
+    for (const id of ['play', 'review']) {
+      const grid = page.locator(`section[aria-labelledby="sec-${id}"] > div`);
+      await expect(grid).toBeVisible();
+      await page.waitForTimeout(500);
+      const g = (await grid.boundingBox())!;
+      const tiles = grid.locator('> button');
+      const last = (await tiles.last().boundingBox())!;
+      expect(Math.abs(last.x + last.width - (g.x + g.width)), `${id}: last tile leaves a hole`).toBeLessThanOrEqual(1);
+    }
+  });
+}

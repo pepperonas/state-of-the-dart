@@ -1392,6 +1392,7 @@
     "weekly": "Weekly",
     "win_rate": "Win rate",
     "win_rate_percent": "Win rate %",
+    "won_of": "{{won}} of {{total}} won",
     "win_stats": "Win statistics",
     "wins": "Wins",
     "won": "Won",

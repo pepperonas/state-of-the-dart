@@ -147,6 +147,10 @@ M3 primitive library (barrel `src/components/common/index.ts`). **Prefer these o
 - `ErrorBoundary` — top-level React error boundary. Wraps `<App>` in `main.tsx` so a render-time throw (bad `JSON.parse` in match reconstruction, failed lazy chunk, etc.) shows an M3 recovery screen (reload / back-to-menu) instead of white-screening the PWA. The `window.error`/`unhandledrejection` handlers in `App.tsx` only log — they do NOT catch render errors, so don't remove the boundary.
 - `BackButton.tsx` — canonical back button. **Always use this** for screen-level back navigation. An M3 **tonal** button with a leading `<ArrowLeft>`. In **block mode (default)** it wraps itself in a `mb-6` block so the gap to the page heading is uniform across all screens; pass **`inline`** when it sits in a flex header row / form (opts out of the wrapper — the row/form controls spacing). Override text via `label`.
 
+### Home and statistics (0.38.0)
+- Home tiles take a lucide component or a glyph name (`icon: 'cricket'`); game modes use the app's own glyphs. Tones by kind: play `primary`, practice `secondary`, review `tertiary`, admin `error`. The last tile of a section gets `lastTileSpan(count)` (`utils/tileSpan.ts`) — pinned by `page-frame.spec.ts`.
+- Statistics overview: `HeroStat` ×3 (`stats-hero`, sub line always reserved) + `DetailStat` ×8 (`stats-details`; 0 → quiet, null → —). `WinRing` replaces the pie. Never dim a label with `opacity`.
+
 ### Game input (0.37.0)
 - Player rows: the leg rank is `RankStamp size="badge"` on the avatar (`.sotd-rank-badge`), never beside the remaining score. The hero card keeps the poster (number left, stamp right).
 - Under the input exactly one filled button (`input-actions`): confirm. Undo/redo are `secondary-container`, remove-dart/clear neutral. Numpad bottom row = backspace (`numpad-back`: digit, then last dart — never a confirmed visit) + `0` (2 columns); no check key. Confirm takes a typed total (`commitsTyped`) and sets an edited dart (`setsDart`). The "remove dart" button only shows when the numpad is not open.
@@ -562,8 +566,8 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **54 tests** currently:
-  - `page-frame.spec.ts` — page titles and frames line up on nine pages (phone + desktop), back on the title line, no back on the navigation destinations
+- Specs in `e2e/`. **56 tests** currently:
+  - `page-frame.spec.ts` — page titles and frames line up on nine pages (phone + desktop), back on the title line, no back on the navigation destinations; home sections end without a hole (700 + 1440 px)
   - `redo.spec.ts` — undo three visits, redo them one by one (button, Ctrl+Shift+Z, Ctrl+Y) at phone and desktop size, reload keeps it; a different visit after an undo drops the way forward
   - `avatars.spec.ts` — an emoji avatar (tab, skin tone, `em:` stored, lazy catalogue); a game-icons avatar is found by its German name, the picker closes, the list draws it, the path chunk loads once and never rides in an eager bundle, the value is stored
   - `correction.spec.ts` — a typed 60 stays out of the heatmap, a chip makes it exact, undo brings a typed visit back as "26 → …", an older visit is corrected from its pill, the stored heatmap never counts twice, reload keeps it all
