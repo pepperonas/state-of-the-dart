@@ -23,9 +23,8 @@ import { aggregateBeds } from '../../utils/heatmap';
 import { Flame, FileSpreadsheet, FileText } from 'lucide-react';
 import { api } from '../../services/api';
 import { formatDate, getTimestampForSort } from '../../utils/dateUtils';
-import BackButton from '../common/BackButton';
 import { staggerChild } from '../../utils/motion';
-import { Card, Button, Chip, Select, Menu, useFeedback } from '../common';
+import { Card, Button, Chip, Select, Menu, PageShell, useFeedback } from '../common';
 import { Icon, AvatarGlyph } from '../icons';
 import PlayerAvatar from '../player/PlayerAvatar';
 import ErrorState from '../common/ErrorState';
@@ -304,10 +303,7 @@ const StatsOverview: React.FC = () => {
   
   if (players.length === 0) {
     return (
-      <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-        <div className="max-w-7xl mx-auto m3-view">
-          <BackButton onClick={() => navigate('/')} />
-          <h1 className="m3-headline-medium text-on-surface mb-6">{t('stats.statistics')}</h1>
+      <PageShell title={t('stats.statistics')} back={false}>
 
           <Card variant="elevated" className="p-12">
             <div className="text-center py-12">
@@ -323,22 +319,15 @@ const StatsOverview: React.FC = () => {
               </div>
             </div>
           </Card>
-        </div>
-      </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-      <div className="max-w-7xl mx-auto">
-        {loadError && <ErrorState className="mb-4" onRetry={loadMatches} />}
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6 gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <BackButton onClick={() => navigate('/')} inline />
-            <h1 className="m3-headline-medium text-on-surface truncate">{t('stats.statistics')}</h1>
-          </div>
-
+    <PageShell
+      title={t('stats.statistics')}
+      back={false}
+      actions={
           <Menu
             label={t('stats_overview.export')}
             triggerClassName="m3-button m3-filled m3-state-layer inline-flex items-center gap-2"
@@ -350,14 +339,16 @@ const StatsOverview: React.FC = () => {
             ]}
           >
             <Download size={18} aria-hidden="true" />
-            {t('stats_overview.export')}
+            <span className="sr-only sm:not-sr-only">{t('stats_overview.export')}</span>
           </Menu>
-        </div>
+      }
+    >
+        {loadError && <ErrorState className="mb-4" onRetry={loadMatches} />}
 
         {/* Player Selector */}
-        <Card variant="elevated" className="p-4 mb-6">
+        <div className="mb-6">
           <div className="flex items-center gap-4">
-            <label className="text-on-surface m3-label-large">{t('stats_overview.player_label')}</label>
+            <label className="text-on-surface-variant m3-label-large">{t('stats_overview.player_label')}</label>
             <Select<string>
               value={selectedPlayerId}
               onChange={setSelectedPlayerId}
@@ -371,7 +362,7 @@ const StatsOverview: React.FC = () => {
               }))}
             />
           </div>
-        </Card>
+        </div>
 
         {selectedPlayer && (
           <>
@@ -1178,8 +1169,7 @@ const StatsOverview: React.FC = () => {
             )}
           </>
         )}
-      </div>
-    </div>
+    </PageShell>
   );
 };
 

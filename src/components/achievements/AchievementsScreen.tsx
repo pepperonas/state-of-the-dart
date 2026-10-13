@@ -1,6 +1,5 @@
 import { shapePolygon, TIER_SHAPE } from '../../utils/shapes';
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Trophy, Lock, Star, Award, Filter } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -19,14 +18,13 @@ import {
 } from '../../types/achievements';
 import { formatDate } from '../../utils/dateUtils';
 import logger from '../../utils/logger';
-import { BackButton, Card, Chip, Select } from '../common';
+import { Card, Chip, PageShell, Select } from '../common';
 import { Icon, iconForEmoji } from '../icons';
 import { readableTextOn } from '../../utils/color';
 import { achievementName, achievementDescription } from '../../utils/achievementText';
 
 const AchievementsScreen: React.FC = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { players } = usePlayer();
   const {
     getPlayerProgress,
@@ -35,9 +33,13 @@ const AchievementsScreen: React.FC = () => {
     isAchievementUnlocked,
   } = useAchievements();
 
-  const [selectedPlayerId, setSelectedPlayerId] = useState<string>(
-    players.length > 0 ? players[0].id : ''
-  );
+  // The picked id only counts while that player exists; otherwise the first
+  // player is shown. Taking players[0] as the initial state left the picker
+  // empty, because the list is still loading on the first render (0.36.0).
+  const [pickedPlayerId, setSelectedPlayerId] = useState<string>('');
+  const selectedPlayerId = players.some(p => p.id === pickedPlayerId)
+    ? pickedPlayerId
+    : players[0]?.id ?? '';
   const [filterCategory, setFilterCategory] = useState<AchievementCategory | 'all'>('all');
   const [filterScope, setFilterScope] = useState<AchievementScope | 'all'>('all');
   const [showOnlyUnlocked, setShowOnlyUnlocked] = useState(false);
@@ -105,10 +107,7 @@ const AchievementsScreen: React.FC = () => {
 
   if (players.length === 0) {
     return (
-      <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-        <div className="max-w-6xl mx-auto m3-view">
-          <BackButton onClick={() => navigate('/')} />
-          <h1 className="m3-headline-medium text-on-surface mb-6">{t('achievements.achievements')}</h1>
+      <PageShell title={t('achievements.achievements')} back={false}>
 
           <Card variant="filled" className="p-8 text-center">
             <Trophy size={64} className="mx-auto mb-4 text-on-surface-variant" />
@@ -117,22 +116,13 @@ const AchievementsScreen: React.FC = () => {
               {t('achievements.create_players_first')}
             </p>
           </Card>
-        </div>
-      </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <BackButton onClick={() => navigate('/')} />
-
+    <PageShell title={t('achievements.achievements')} back={false}>
         <Card variant="elevated" className="p-6 mb-6">
-          <div className="flex items-center gap-3 mb-6">
-            <Trophy size={32} className="text-primary" />
-            <h1 className="m3-headline-medium text-on-surface">{t('achievements.achievements')}</h1>
-          </div>
 
           {/* Player Selection */}
           <div className="mb-6">
@@ -178,7 +168,7 @@ const AchievementsScreen: React.FC = () => {
           <div className="mt-6">
             <div className="flex justify-between m3-label-medium text-on-surface-variant mb-2">
               <span>{t('achievements.total_progress')}</span>
-              <span>
+              <span data-testid="achievements-total">
                 {unlockedAchievements.length}/{ACHIEVEMENTS.length}
               </span>
             </div>
@@ -267,8 +257,7 @@ const AchievementsScreen: React.FC = () => {
             </p>
           </Card>
         )}
-      </div>
-    </div>
+    </PageShell>
   );
 };
 

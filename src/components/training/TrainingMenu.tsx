@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Target, Crosshair, Clock, TrendingUp, Award, Zap, BarChart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { BackButton, Button, Card, PageShell } from '../common';
+import { Button, Card, PageShell } from '../common';
 import { staggerChild } from '../../utils/motion';
 import { motion } from 'framer-motion';
 
@@ -63,22 +63,18 @@ const TrainingMenu: React.FC = () => {
 
   return (
     <PageShell
-      width="md"
-      back={false}
+      title={t('training.training_modes')}
+      actions={
+        <Button
+          variant="tonal"
+          icon={<BarChart size={20} />}
+          onClick={() => navigate('/training-stats')}
+        >
+          <span className="sr-only sm:not-sr-only">{t('training_menu.statistics')}</span>
+        </Button>
+      }
     >
-        <div className="flex items-center justify-between mb-6">
-          <BackButton onClick={() => navigate('/')} inline />
-          <Button
-            variant="tonal"
-            icon={<BarChart size={20} />}
-            onClick={() => navigate('/training-stats')}
-          >
-            {t('training_menu.statistics')}
-          </Button>
-        </div>
-
         <Card variant="elevated" className="p-6 md:p-8">
-          <h1 className="m3-headline-medium text-on-surface mb-6">{t('training.training_modes')}</h1>
 
           <div className="grid md:grid-cols-2 gap-4">
             {trainingModes.map((mode, index) => {

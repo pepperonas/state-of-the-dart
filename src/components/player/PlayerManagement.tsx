@@ -7,7 +7,7 @@ import { usePlayer } from '../../context/PlayerContext';
 import { api } from '../../services/api';
 import PlayerAvatar from './PlayerAvatar';
 import AvatarPicker from './AvatarPicker';
-import { BackButton, Button, TextField, Card, IconButton, PageShell } from '../common';
+import { Button, TextField, Card, IconButton, PageShell } from '../common';
 import { staggerChild } from '../../utils/motion';
 import LoadingIndicator from '../common/LoadingIndicator';
 import { useFeedback } from '../common/feedbackContext';
@@ -128,23 +128,19 @@ const PlayerManagement: React.FC = () => {
   
   return (
     <PageShell
-      width="md"
+      title={t('players.title')}
       back={false}
+      actions={
+        <Button
+          variant="filled"
+          icon={<Plus size={20} />}
+          onClick={() => setShowAddPlayer(true)}
+        >
+          <span className="sr-only sm:not-sr-only">{t('players.add_player')}</span>
+        </Button>
+      }
     >
-        <BackButton onClick={() => navigate('/')} />
-        
-        <Card variant="elevated" className="p-6 md:p-8">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="m3-headline-medium text-on-surface">{t('players.title')}</h1>
-            <Button
-              variant="filled"
-              icon={<Plus size={20} />}
-              onClick={() => setShowAddPlayer(true)}
-            >
-              {t('players.add_player')}
-            </Button>
-          </div>
-          
+        <div>
           {showAddPlayer && (
             <Card variant="filled" className="mb-6 p-4">
               <div className="mb-4">
@@ -271,7 +267,11 @@ const PlayerManagement: React.FC = () => {
                           )}
                         </h3>
                         <p className="m3-body-medium text-on-surface-variant">
-                          {t('player_management.stats_line', { games: player.stats.gamesPlayed, avg: player.stats.averageOverall.toFixed(2) })}
+                          {t('player_management.stats_line', {
+                            count: player.stats.gamesPlayed,
+                            // No games, no average: "0.00" read like a real (terrible) score.
+                            avg: player.stats.gamesPlayed > 0 ? player.stats.averageOverall.toFixed(2) : '—',
+                          })}
                         </p>
                       </button>
                     )}
@@ -347,7 +347,7 @@ const PlayerManagement: React.FC = () => {
               ))
             )}
           </div>
-        </Card>
+        </div>
 
       {/* Emoji Picker Modal */}
       {showEmojiPicker && (

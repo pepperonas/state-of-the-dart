@@ -16,6 +16,12 @@ interface BackButtonProps {
    * distance to the page heading is consistent across all screens.
    */
   inline?: boolean;
+  /**
+   * Hide the label below the `sm` breakpoint (arrow only, label kept for
+   * assistive tech). Used by the page header, where back, title and actions
+   * share one row on a phone.
+   */
+  compact?: boolean;
 }
 
 /**
@@ -23,9 +29,10 @@ interface BackButtonProps {
  * (default) it wraps in a `mb-6` block so the gap to the page heading is uniform
  * app-wide; pass `inline` to opt out for row/header layouts.
  */
-const BackButton: React.FC<BackButtonProps> = ({ onClick, label, className = '', inline = false }) => {
+const BackButton: React.FC<BackButtonProps> = ({ onClick, label, className = '', inline = false, compact = false }) => {
   const { t } = useTranslation();
 
+  const text = label ?? t('common.back');
   const button = (
     <Button
       variant="tonal"
@@ -33,8 +40,9 @@ const BackButton: React.FC<BackButtonProps> = ({ onClick, label, className = '',
       onClick={onClick}
       className={inline ? className : ''}
       icon={<ArrowLeft size={18} />}
+      aria-label={compact ? text : undefined}
     >
-      {label ?? t('common.back')}
+      {compact ? <span className="hidden sm:inline">{text}</span> : text}
     </Button>
   );
 

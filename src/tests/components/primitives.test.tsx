@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import {
   Button, IconButton, Fab, Card, TextField, Switch, Chip, Dialog, BackButton, PageShell,
 } from '../../components/common';
@@ -236,6 +236,35 @@ describe('PageShell', () => {
   it('back={false} omits the back button', () => {
     render(<MemoryRouter><PageShell title="T" back={false}>x</PageShell></MemoryRouter>);
     expect(screen.queryByRole('button')).toBeNull();
+  });
+
+  it('back, title and actions share one header row (0.36.0)', () => {
+    render(<MemoryRouter><PageShell title="T" actions={<button>Aktion</button>}>x</PageShell></MemoryRouter>);
+    const header = document.querySelector('[data-page-header]')!;
+    expect(header).toContainElement(screen.getByRole('button', { name: /zurück|common\.back/i }));
+    expect(header).toContainElement(screen.getByRole('heading', { level: 1 }));
+    expect(header).toContainElement(screen.getByRole('button', { name: 'Aktion' }));
+  });
+
+  it('the frame is the same for every body width — only the body narrows', () => {
+    for (const width of ['sm', 'md', 'lg'] as const) {
+      const { container, unmount } = render(<MemoryRouter><PageShell title="T" width={width}>x</PageShell></MemoryRouter>);
+      expect(container.querySelector('[data-page-frame]')!.className).toContain('max-w-6xl');
+      unmount();
+    }
+  });
+
+  it('back without a handler goes home through the router, not a reload', async () => {
+    render(
+      <MemoryRouter initialEntries={['/stats']}>
+        <Routes>
+          <Route path="/" element={<p>Start</p>} />
+          <Route path="/stats" element={<PageShell title="T">x</PageShell>} />
+        </Routes>
+      </MemoryRouter>
+    );
+    await userEvent.click(screen.getByRole('button', { name: /zurück|common\.back/i }));
+    expect(screen.getByText('Start')).toBeInTheDocument();
   });
 
   it('renders subtitle and actions when given', () => {

@@ -8,7 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import type { BugReport } from '../../types';
 import type { DebugFlag } from '../../types/debugFlag';
 import { formatDebugFlagForAI } from '../../utils/debugExport';
-import { BackButton, Button, Card, Chip, IconButton, Dialog, Select } from '../common';
+import { Button, Card, Chip, IconButton, Dialog, Select, PageShell } from '../common';
 import ActivitySparkline from './ActivitySparkline';
 import { relativeTime, recencyOf } from '../../utils/activity';
 import { reporterOptions, filterByReporter } from '../../utils/reporters';
@@ -320,50 +320,35 @@ const AdminPanel: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-dvh flex items-center justify-center gradient-mesh">
-        <div className="text-center">
+      <PageShell width="xl" title={t('admin.admin_panel')} icon={<Shield size={28} />}>
+        <div className="text-center py-16">
           <LoadingIndicator size={56} className="mb-4" />
           <p className="text-on-surface-variant">{t('admin.loading_panel')}</p>
         </div>
-      </div>
+      </PageShell>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-dvh flex items-center justify-center gradient-mesh">
+      <PageShell width="xl" title={t('admin.admin_panel')} icon={<Shield size={28} />}>
         <Card variant="elevated" className="p-8 text-center">
           <p className="text-error m3-title-large mb-4">{error}</p>
           <Button variant="filled" onClick={loadData}>
             {t('admin.retry')}
           </Button>
         </Card>
-      </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <BackButton onClick={() => navigate('/')} />
-
-          <div className="flex items-center gap-4 mb-2">
-            <div className="w-12 h-12 rounded-m3-lg bg-tertiary-container text-on-tertiary-container flex items-center justify-center shrink-0">
-              <Shield size={28} />
-            </div>
-            <div className="min-w-0">
-              <h1 className="m3-headline-medium text-on-surface">{t('admin.admin_panel')}</h1>
-              <p className="m3-body-medium text-on-surface-variant">{t('admin.subtitle')}</p>
-            </div>
-          </div>
-        </motion.div>
-
+    <PageShell
+      width="xl"
+      title={t('admin.admin_panel')}
+      subtitle={t('admin.subtitle')}
+      icon={<Shield size={28} />}
+    >
         {/* Stats */}
         {stats && (
           <motion.div
@@ -1421,8 +1406,7 @@ const AdminPanel: React.FC = () => {
             </div>
           </div>
         )}
-      </div>
-    </div>
+    </PageShell>
   );
 };
 

@@ -13,7 +13,7 @@ import { DartboardHeatmap } from '../dartboard/DartboardHeatmap';
 import { heatmapFromThrows, exactShare } from '../../utils/heatmap';
 import { ExactShareNote } from '../dartboard/ExactShareNote';
 import PlayerAvatar from '../player/PlayerAvatar';
-import { BackButton, Card, Chip, TextField, IconButton, Button, Select } from '../common';
+import { Card, Chip, TextField, IconButton, Button, PageShell, Select } from '../common';
 import { staggerChild } from '../../utils/motion';
 
 const MatchHistoryPage: React.FC = () => {
@@ -166,19 +166,14 @@ const MatchHistoryPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-dvh p-4 md:p-8 gradient-mesh flex items-center justify-center">
-        <LoadingIndicator size={48} />
-      </div>
+      <PageShell title={t('match_history.title', 'Spielhistorie')}>
+        <div className="flex justify-center py-16"><LoadingIndicator size={48} /></div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-      <div className="max-w-6xl mx-auto">
-        {/* Back button */}
-        <BackButton onClick={() => { window.location.href = '/'; }} />
-
-        <h1 className="m3-headline-medium m3-emphasized text-on-surface mb-6">{t('match_history.title', 'Spielhistorie')}</h1>
+    <PageShell title={t('match_history.title', 'Spielhistorie')}>
 
         {/* Filters */}
         <div className="mb-6 space-y-3">
@@ -461,8 +456,7 @@ const MatchHistoryPage: React.FC = () => {
             })}
           </div>
         )}
-      </div>
-    </div>
+    </PageShell>
   );
 };
 

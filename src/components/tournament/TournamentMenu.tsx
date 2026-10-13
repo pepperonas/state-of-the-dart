@@ -8,7 +8,7 @@ import { Player, Tournament, TournamentSettings, TournamentParticipant, Tourname
 import PlayerAvatar from '../player/PlayerAvatar';
 import { v4 as uuidv4 } from 'uuid';
 import { celebrate as confetti } from '../../utils/celebration';
-import { Button, Card, TextField, Chip, IconButton, BackButton, LoadingIndicator, ErrorState, useFeedback } from '../common';
+import { Button, Card, TextField, Chip, IconButton, LoadingIndicator, ErrorState, useFeedback, PageShell } from '../common';
 import { useTournaments } from '../../hooks/useTournaments';
 import { staggerChild } from '../../utils/motion';
 import { BYE, advanceWinner, buildKnockoutBracket, fromStoredTournament, isPlayable, knockoutChampion, recordResult, roundRobinChampion, tournamentProgress, type StoredTournament, type TournamentScores } from '../../utils/tournament';
@@ -249,29 +249,26 @@ const TournamentMenu: React.FC = () => {
     const winnerPlayer = winner ? getParticipantPlayer(winner) : null;
     
     return (
-      <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-        <div className="max-w-4xl mx-auto">
-          <BackButton onClick={leaveTournament} label={t('tournament_menu.to_overview')} />
-
-          <Card variant="elevated" className="p-6 mb-6 mt-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="m3-title-large text-on-surface">{activeTournament.name}</h2>
-                <p className="m3-body-medium text-on-surface-variant">
-                  {t('tournament_menu.subtitle', {
-                    mode: activeTournament.type === 'knockout' ? t('tournament_menu.knockout') : t('tournament_menu.round_robin'),
-                    count: tournamentLegsToWin * 2 - 1,
-                  })}
-                </p>
-              </div>
-              <div className={`px-4 py-2 rounded-m3-full m3-label-large ${
-                activeTournament.status === 'completed'
-                  ? 'bg-success-container text-on-success-container'
-                  : 'bg-primary-container text-on-primary-container'
-              }`}>
-                {activeTournament.status === 'completed' ? t('tournament_menu.status_completed') : t('tournament_menu.status_running')}
-              </div>
-            </div>
+      <PageShell
+        width="md"
+        onBack={leaveTournament}
+        backLabel={t('tournament_menu.to_overview')}
+        title={activeTournament.name}
+        subtitle={t('tournament_menu.subtitle', {
+          mode: activeTournament.type === 'knockout' ? t('tournament_menu.knockout') : t('tournament_menu.round_robin'),
+          count: tournamentLegsToWin * 2 - 1,
+        })}
+        actions={
+          <div className={`px-4 py-2 rounded-m3-full m3-label-large ${
+            activeTournament.status === 'completed'
+              ? 'bg-success-container text-on-success-container'
+              : 'bg-primary-container text-on-primary-container'
+          }`}>
+            {activeTournament.status === 'completed' ? t('tournament_menu.status_completed') : t('tournament_menu.status_running')}
+          </div>
+        }
+      >
+          <Card variant="elevated" className="p-6 mb-6">
 
             {/* Winner Banner */}
             {activeTournament.status === 'completed' && winnerPlayer && (
@@ -414,20 +411,15 @@ const TournamentMenu: React.FC = () => {
               </div>
             </div>
           </Card>
-        </div>
-      </div>
+      </PageShell>
     );
   }
 
   // Create tournament view
   if (showCreate) {
     return (
-      <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-        <div className="max-w-4xl mx-auto">
-          <BackButton onClick={() => setShowCreate(false)} />
-
-          <Card variant="elevated" className="p-6 mt-6">
-            <h2 className="m3-title-large text-on-surface mb-6">{t('tournament_menu.create')}</h2>
+      <PageShell width="md" title={t('tournament_menu.create')} onBack={() => setShowCreate(false)}>
+          <Card variant="elevated" className="p-6">
 
             {/* Tournament Name */}
             <div className="mb-6">
@@ -530,27 +522,14 @@ const TournamentMenu: React.FC = () => {
               {t('tournament_menu.start')}
             </Button>
           </Card>
-        </div>
-      </div>
+      </PageShell>
     );
   }
 
   // Main menu view
   return (
-    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-      <div className="max-w-4xl mx-auto">
-        <BackButton onClick={() => navigate('/')} />
-
-        <Card variant="elevated" className="p-6 md:p-8 mt-6">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="p-3 rounded-m3-lg bg-tertiary-container shadow-m3-1">
-              <Trophy size={32} className="text-on-tertiary-container" />
-            </div>
-            <div>
-              <h1 className="m3-headline-medium text-on-surface">{t('tournament_menu.title')}</h1>
-              <p className="m3-body-medium text-on-surface-variant">{t('tournament_menu.subtitle_menu')}</p>
-            </div>
-          </div>
+    <PageShell width="md" title={t('tournament_menu.title')} subtitle={t('tournament_menu.subtitle_menu')}>
+        <Card variant="elevated" className="p-6 md:p-8">
 
           {/* Create Tournament Button */}
           <Button
@@ -612,8 +591,7 @@ const TournamentMenu: React.FC = () => {
             })}
           </div>
         </Card>
-      </div>
-    </div>
+    </PageShell>
   );
 };
 

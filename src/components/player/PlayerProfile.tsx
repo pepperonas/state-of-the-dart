@@ -13,7 +13,7 @@ import { calculateAccuracyStats } from '../../utils/heatmap';
 import { formatDate } from '../../utils/dateUtils';
 import { ACHIEVEMENTS } from '../../types/achievements';
 import PlayerAvatar from './PlayerAvatar';
-import { BackButton, Card, Button, Dialog } from '../common';
+import { Card, Button, Dialog, PageShell } from '../common';
 import { Icon, iconForEmoji } from '../icons';
 import { useChartTheme } from '../../utils/chartTheme';
 import { achievementName } from '../../utils/achievementText';
@@ -168,14 +168,11 @@ const PlayerProfile: React.FC = () => {
 
   if (!player || !playerId) {
     return (
-      <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-        <div className="max-w-6xl mx-auto m3-view">
-          <BackButton onClick={() => navigate('/players')} />
+      <PageShell onBack={() => navigate('/players')}>
           <Card variant="elevated" className="p-8 text-center">
-            <h2 className="m3-headline-small text-on-surface mb-2">{t('player_profile.not_found')}</h2>
+            <h1 className="m3-headline-small text-on-surface mb-2">{t('player_profile.not_found')}</h1>
           </Card>
-        </div>
-      </div>
+      </PageShell>
     );
   }
 
@@ -184,10 +181,9 @@ const PlayerProfile: React.FC = () => {
     : 0;
 
   return (
-    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-      <div className="max-w-6xl mx-auto m3-view">
-        {/* Header */}
-        <BackButton onClick={() => navigate('/players')} />
+    // The profile card carries the name as the page h1, so the frame shows the
+    // back button only.
+    <PageShell onBack={() => navigate('/players')}>
 
         {/* Player Info Card */}
         <Card variant="elevated" className="p-6 md:p-8 mb-6">
@@ -592,8 +588,7 @@ const PlayerProfile: React.FC = () => {
             {t('players.reset_stats_confirm_text', { name: player.name })}
           </p>
         </Dialog>
-      </div>
-    </div>
+    </PageShell>
   );
 };
 

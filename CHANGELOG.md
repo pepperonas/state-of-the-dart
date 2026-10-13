@@ -7,6 +7,35 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.36.0] - 2026-10-13
+
+### Changed — one page frame
+- Every screen behind the navigation goes through `PageShell`: one frame
+  (1152 px, 1280 px for admin), back, title and actions in one header row, the
+  body starts flush under the title. Before, players and the leaderboard centred
+  a narrow card, history and achievements went full width and stats put back
+  beside the title — the title jumped from page to page. Now it sits at the same
+  spot on every page (±2 px, measured at 390 and 1440 px).
+- The navigation destinations (Statistics, Achievements, Players) have no back
+  button any more — the bar/rail is the way back. On a phone the back button
+  shows the arrow only, page actions show their icon.
+- A subtitle sits in its own header row and can no longer push the title up.
+
+### Fixed
+- Achievements: the player picker was empty and showed 0/463, because it took
+  the first player once, while the list was still loading.
+- "1 pausierte Spiele" / "1 paused games" — singular forms.
+- Players without a game showed "Ø 0.00"; now "Ø —". The line reads
+  "1 Spiel · Ø 112.88" instead of "Spiele: 1 | Ø: 112.88".
+
+### Tests
+- `e2e/page-frame.spec.ts`: titles line up and frames match on nine pages, back
+  sits on the title line, no horizontal scroll, destinations have no back button.
+- Consistency guards: no own page frame outside games/auth, no second back
+  button or second h1 in a PageShell page, no `max-*` breakpoint variants (the
+  raw `phoneland` screen makes Tailwind drop them silently — `max-sm:hidden`
+  shipped once and did nothing).
+
 ## [0.35.2] - 2026-10-13
 
 ### Changed — player rows like the hero tiles

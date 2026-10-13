@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import BackButton from './BackButton';
 
 /**
@@ -10,13 +11,19 @@ import BackButton from './BackButton';
  * with no way back at all. `PageShell` is the fix — a page states *what* it is,
  * not how wide it should be.
  *
+ * 0.36.0 — the head sits in ONE frame on every page. Pages used to centre
+ * themselves at their own width, so the title jumped sideways from page to page
+ * (players at 896 px centred, history at 1152 px, stats at 1280 px). Now the
+ * frame is always the same; `width` only limits the body, which starts flush
+ * under the title. Back, title and actions share one row.
+ *
  * The width scale is deliberately short. Four named steps that a reviewer can
  * hold in their head beat five ad-hoc `max-w-*` values that drift apart:
  *
  *   sm  672px  forms, single-column dialogs-as-pages
- *   md  896px  the default for content screens
- *   lg 1152px  card grids and overviews
- *   xl 1280px  wide tables and the in-game board
+ *   md  896px  reading width: settings, legal text
+ *   lg 1152px  lists, card grids and overviews — also the frame of every page
+ *   xl 1280px  wide tables (widens the frame too)
  *
  * The heading is always `m3-headline-medium` — the level 14 of 27 screens had
  * already converged on before this component existed.
@@ -38,10 +45,14 @@ interface PageShellProps {
   subtitle?: React.ReactNode;
   /** Icon tile left of the title. */
   icon?: React.ReactNode;
-  /** Content width. See the scale above. */
+  /** Body width. See the scale above. */
   width?: PageWidth;
-  /** Show the back button. Omit `onBack` to fall back to the app home. */
+  /**
+   * Show the back button. Pages that the navigation bar/rail leads to pass
+   * `false` — the bar is their way back.
+   */
   back?: boolean;
+  /** Defaults to the app home. */
   onBack?: () => void;
   backLabel?: string;
   /** Controls on the right of the title row. */
@@ -54,43 +65,54 @@ const PageShell: React.FC<PageShellProps> = ({
   title,
   subtitle,
   icon,
-  width = 'md',
+  width = 'lg',
   back = true,
   onBack,
   backLabel,
   actions,
   className = '',
   children,
-}) => (
-  <div className="min-h-dvh p-4 md:p-8 gradient-mesh overflow-x-hidden">
-    <div className={`${WIDTH[width]} mx-auto m3-view ${className}`}>
-      {back && (
-        <BackButton
-          onClick={onBack ?? (() => { window.location.href = '/'; })}
-          label={backLabel}
-        />
-      )}
-
-      {(title || actions) && (
-        <div className="flex items-start justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3 min-w-0">
-            {icon && (
-              <span className="w-12 h-12 rounded-m3-lg bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">
-                {icon}
-              </span>
+}) => {
+  const navigate = useNavigate();
+  const hasHead = back || title || actions;
+  return (
+    <div className="min-h-dvh p-4 md:p-8 gradient-mesh overflow-x-hidden">
+      <div className={`${width === 'xl' ? 'max-w-7xl' : 'max-w-6xl'} mx-auto m3-view`} data-page-frame>
+        {hasHead && (
+          // A grid, not a flex row: the title line is always the first row, so
+          // a subtitle (second row) can never push the title up. The title sits
+          // at the same height on every page (0.36.0, pinned by page-frame.spec).
+          <header
+            className="grid items-center gap-x-3 gap-y-1 mb-6"
+            style={{ gridTemplateColumns: `${back ? 'auto ' : ''}minmax(0, 1fr)${actions ? ' auto' : ''}` }}
+            data-page-header
+          >
+            {back && (
+              <BackButton inline compact onClick={onBack ?? (() => navigate('/'))} label={backLabel} />
             )}
-            <div className="min-w-0">
-              {title && <h1 className="m3-headline-medium text-on-surface truncate">{title}</h1>}
-              {subtitle && <p className="m3-body-medium text-on-surface-variant">{subtitle}</p>}
+            <div className="flex items-center gap-3 min-w-0 min-h-12">
+              {icon && (
+                <span className="w-12 h-12 rounded-m3-lg bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">
+                  {icon}
+                </span>
+              )}
+              {title && <h1 className="m3-headline-medium text-on-surface truncate" data-page-title>{title}</h1>}
             </div>
-          </div>
-          {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
-        </div>
-      )}
+            {actions && <div className="flex items-center gap-2 justify-self-end">{actions}</div>}
+            {subtitle && (
+              <p
+                className={`m3-body-medium text-on-surface-variant ${back ? 'col-start-2' : 'col-start-1'} ${icon ? 'pl-[3.75rem]' : ''}`}
+              >
+                {subtitle}
+              </p>
+            )}
+          </header>
+        )}
 
-      {children}
+        <div className={`${WIDTH[width]} ${className}`}>{children}</div>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default PageShell;

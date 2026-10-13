@@ -9,7 +9,7 @@ import { useTenant } from '../../context/TenantContext';
 import { api } from '../../services/api';
 import { PersonalBests, createEmptyPersonalBests } from '../../types/personalBests';
 import { ACHIEVEMENTS } from '../../types/achievements';
-import { BackButton, Card, Chip, PageShell } from '../common';
+import { Card, Chip, PageShell } from '../common';
 import { motion } from 'framer-motion';
 import { staggerChild } from '../../utils/motion';
 import PlayerAvatar from '../player/PlayerAvatar';
@@ -183,18 +183,8 @@ const Leaderboard: React.FC = () => {
   };
 
   return (
-    <PageShell
-      width="md"
-      back={false}
-    >
-        {/* Header */}
-        <BackButton onClick={() => navigate('/')} />
-
+    <PageShell title={t('leaderboard.title')}>
         <Card variant="elevated" className="p-6 md:p-8">
-          <div className="flex items-center gap-3 mb-6">
-            <Trophy size={32} className="text-[var(--m3-medal-gold)]" />
-            <h1 className="m3-headline-medium text-on-surface">{t('leaderboard.title')}</h1>
-          </div>
 
           {/* Category Selection */}
           <div className="flex flex-wrap gap-2 mb-6">
