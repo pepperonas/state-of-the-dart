@@ -234,6 +234,7 @@ export const claimDefaultCache = (userId: string): void => {
 export const DEVICE_GAME_KEYS = [
   'state-of-the-dart-active-match',
   'state-of-the-dart-active-throw',
+  'state-of-the-dart-active-redo',
   'state-of-the-dart-atc-game',
   'state-of-the-dart-shanghai-game',
   'state-of-the-dart-cricket-game',

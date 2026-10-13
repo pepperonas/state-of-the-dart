@@ -147,6 +147,10 @@ M3 primitive library (barrel `src/components/common/index.ts`). **Prefer these o
 - `ErrorBoundary` — top-level React error boundary. Wraps `<App>` in `main.tsx` so a render-time throw (bad `JSON.parse` in match reconstruction, failed lazy chunk, etc.) shows an M3 recovery screen (reload / back-to-menu) instead of white-screening the PWA. The `window.error`/`unhandledrejection` handlers in `App.tsx` only log — they do NOT catch render errors, so don't remove the boundary.
 - `BackButton.tsx` — canonical back button. **Always use this** for screen-level back navigation. An M3 **tonal** button with a leading `<ArrowLeft>`. In **block mode (default)** it wraps itself in a `mb-6` block so the gap to the page heading is uniform across all screens; pass **`inline`** when it sits in a flex header row / form (opts out of the wrapper — the row/form controls spacing). Override text via `label`.
 
+### Fixes (0.40.0)
+- Correction label is always `correction.save` ("Übernehmen"), long form as `title`; `confirm-visit` testid on the confirm button.
+- Radar axes come from `radarValues()` (`utils/performanceRadar.ts`), clamped 0–100, average full mark 100.
+
 ### Lists (0.39.0)
 - Achievement card: tier = badge shape + `getTierColor` fill when unlocked (`achievement-badge`), `achievement-meta` = tier word + one outlined rarity chip (`achievements.rarity_*`). No scope chip on cards; scope is a `Select` in `achievement-filters`, "unlocked only" a `Switch`.
 - Leaderboard row (`leaderboard-row`): `bg-surface-container`, medal colour only as `medal-stripe` + place number (sr-only "Platz N"); no borders.
@@ -351,10 +355,11 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - Insight cards follow `visitRevision` (ids + scores + darts), not the visit count — a correction changes no count.
 
 ### Redo (0.35.0)
-- `GameState.redoStack` (memory only, newest-undone LAST = top comes back first). The exported `gameReducer` wraps `baseReducer`: UNDO_THROW/UNDO_END_MATCH push what disappeared; CONFIRM_THROW pops the top if the confirmed darts equal it (`sameDarts`: segment + multiplier) for the player at the oche, otherwise clears; START/LOAD/EDIT/REMOVE_PLAYER/END/RESET clear.
+- `GameState.redoStack` (persisted since 0.40.0, see below; newest-undone LAST = top comes back first). The exported `gameReducer` wraps `baseReducer`: UNDO_THROW/UNDO_END_MATCH push what disappeared; CONFIRM_THROW pops the top if the confirmed darts equal it (`sameDarts`: segment + multiplier) for the player at the oche, otherwise clears; START/EDIT/REMOVE_PLAYER/END/RESET clear, LOAD restores a saved stack or clears.
 - `REDO_THROW` re-books via the real CONFIRM_THROW (+ NEXT_PLAYER unless it was a checkout), then keeps going while the top belongs to a bot at the oche — the mirror of `skipBots`. Re-booked visits get new ids (heatmap books by id, so that is right).
 - `redoTarget(state)` decides availability (top player at the oche, input empty or holding exactly the top's darts); GameScreen labels the button from it. Typing a different visit kills the history — pinned in `gameReducer.redo.test.ts`.
 - `shouldHandleGameKey` lets Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z and Ctrl/Cmd+Y through (never with Alt).
+- Since 0.40.0 the stack is persisted in `state-of-the-dart-active-redo` (`{matchId, stack}`, in `DEVICE_GAME_KEYS`, written in progress/paused, same first-render guard as the active throw) and handed to `LOAD_MATCH` as `redoStack`; `sanitizeRestoredRedo` keeps it only if every entry is valid (player of the match, throwable darts, id not booked any more). Any other LOAD_MATCH still clears it.
 
 ### Avatar sizes (0.35.1)
 - `PlayerAvatar` sizes: xs 32 / sm 40 / md 56 / lg 72 px / xl 96→128. Use `xs` only where a row must stay low (heatmap player chip).
@@ -571,9 +576,9 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **56 tests** currently:
+- Specs in `e2e/`. **57 tests** currently:
   - `page-frame.spec.ts` — page titles and frames line up on nine pages (phone + desktop), back on the title line, no back on the navigation destinations; home sections end without a hole (700 + 1440 px)
-  - `redo.spec.ts` — undo three visits, redo them one by one (button, Ctrl+Shift+Z, Ctrl+Y) at phone and desktop size, reload keeps it; a different visit after an undo drops the way forward
+  - `redo.spec.ts` — undo three visits, redo them one by one (button, Ctrl+Shift+Z, Ctrl+Y) at phone and desktop size, reload keeps it; a different visit after an undo drops the way forward; the way forward survives a reload (and the correction label fits)
   - `avatars.spec.ts` — an emoji avatar (tab, skin tone, `em:` stored, lazy catalogue); a game-icons avatar is found by its German name, the picker closes, the list draws it, the path chunk loads once and never rides in an eager bundle, the value is stored
   - `correction.spec.ts` — a typed 60 stays out of the heatmap, a chip makes it exact, undo brings a typed visit back as "26 → …", an older visit is corrected from its pill, the stored heatmap never counts twice, reload keeps it all
   - `wheel.spec.ts` — the start wheel on phone and desktop: size, and the flapper rotation sampled every frame never exceeds 30°

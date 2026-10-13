@@ -157,3 +157,40 @@ describe('REDO_THROW', () => {
     expect(s.redoStack ?? []).toEqual([]);
   });
 });
+
+/** 0.40.0 — the redo history survives a refresh (LOAD_MATCH with the saved stack). */
+describe('redo after a refresh', () => {
+  const twoUndone = () => {
+    let s = visit(start(), [20, 3], [20, 3], [20, 3]); // Alice 180
+    s = visit(s, [20, 1], [20, 1], [20, 1]); // Bob 60
+    s = visit(s, [19, 1], [19, 1], [19, 1]); // Alice 57
+    s = clear(undo(clear(undo(s))));
+    return s;
+  };
+  const reload = (s: GameState, stack: unknown) =>
+    act(initialState, { type: 'LOAD_MATCH', payload: JSON.parse(JSON.stringify(s.currentMatch)), redoStack: stack });
+
+  it('a reloaded match takes its saved redo history and redo walks on', () => {
+    const s = twoUndone();
+    const r = reload(s, JSON.parse(JSON.stringify(s.redoStack)));
+    expect(r.redoStack).toHaveLength(2);
+    expect(redoTarget(r)?.score).toBe(60);
+    expect(scores(redo(redo(r)))).toEqual(['a180', 'b60', 'a57']);
+  });
+
+  it('a broken or foreign history is dropped whole, never half', () => {
+    const s = twoUndone();
+    const stack = JSON.parse(JSON.stringify(s.redoStack));
+    expect(reload(s, [...stack.slice(0, 1), { ...stack[1], playerId: 'stranger' }]).redoStack ?? []).toEqual([]);
+    expect(reload(s, [{ ...stack[0], darts: [{ segment: 21, multiplier: 3, score: 63 }] }]).redoStack ?? []).toEqual([]);
+    // An id the match still holds was never undone.
+    const booked = s.currentMatch!.legs[0].throws[0].id;
+    expect(reload(s, [{ ...stack[0], id: booked }]).redoStack ?? []).toEqual([]);
+    expect(reload(s, 'nonsense').redoStack ?? []).toEqual([]);
+  });
+
+  it('a load without a saved history still clears the old one', () => {
+    const s = twoUndone();
+    expect(act(s, { type: 'LOAD_MATCH', payload: s.currentMatch }).redoStack ?? []).toEqual([]);
+  });
+});

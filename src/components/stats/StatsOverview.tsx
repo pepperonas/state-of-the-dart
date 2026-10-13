@@ -28,6 +28,7 @@ import { Card, Button, Chip, Select, Menu, PageShell, useFeedback } from '../com
 import { Icon, AvatarGlyph } from '../icons';
 import PlayerAvatar from '../player/PlayerAvatar';
 import ErrorState from '../common/ErrorState';
+import { radarValues } from '../../utils/performanceRadar';
 import { useChartTheme } from '../../utils/chartTheme';
 
 const VALID_TABS = ['overview', 'progress', 'history', 'compare', 'heatmap'] as const;
@@ -176,32 +177,15 @@ const StatsOverview: React.FC = () => {
 
   // Performance radar data
   const performanceRadar = useMemo(() => {
-    if (!selectedPlayer || selectedPlayer.stats.gamesPlayed === 0) return [];
-    const maxAvg = 80;
-    const max180s = Math.max(10, selectedPlayer.stats.total180s);
-    const maxGames = Math.max(50, selectedPlayer.stats.gamesPlayed);
-    
-    return [{
-      metric: t('stats_overview.average'),
-      value: (selectedPlayer.stats.averageOverall / maxAvg) * 100,
-      fullMark: 100,
-    }, {
-      metric: t('stats_overview.checkout_rate'),
-      value: selectedPlayer.stats.checkoutPercentage,
-      fullMark: 100,
-    }, {
-      metric: '180s',
-      value: (selectedPlayer.stats.total180s / max180s) * 100,
-      fullMark: 100,
-    }, {
-      metric: t('stats_overview.win_rate'),
-      value: (selectedPlayer.stats.gamesWon / selectedPlayer.stats.gamesPlayed) * 100,
-      fullMark: 100,
-    }, {
-      metric: t('stats_overview.experience'),
-      value: (selectedPlayer.stats.gamesPlayed / maxGames) * 100,
-      fullMark: 100,
-    }];
+    const v = selectedPlayer ? radarValues(selectedPlayer.stats) : null;
+    if (!v) return [];
+    return [
+      { metric: t('stats_overview.average'), value: v.average, fullMark: 100 },
+      { metric: t('stats_overview.checkout_rate'), value: v.checkout, fullMark: 100 },
+      { metric: '180s', value: v.oneEighties, fullMark: 100 },
+      { metric: t('stats_overview.win_rate'), value: v.winRate, fullMark: 100 },
+      { metric: t('stats_overview.experience'), value: v.experience, fullMark: 100 },
+    ];
   }, [selectedPlayer, t]);
 
   // Win/Loss data

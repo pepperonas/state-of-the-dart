@@ -2,6 +2,7 @@ import React, { createContext, useContext, useReducer, useEffect, ReactNode } fr
 import { v4 as uuidv4 } from 'uuid';
 import { Match, Player, Dart, Throw, GameType, MatchSettings } from '../types/index';
 import { sanitizeRestoredThrow } from '../utils/restoredThrow';
+import { sanitizeRestoredRedo } from '../utils/restoredRedo';
 import { calculateThrowScore, calculateAverage } from '../utils/scoring';
 import { evaluateVisit, rulesOf } from '../utils/visit';
 import { checkoutRoute } from '../utils/checkRules';
@@ -32,7 +33,7 @@ export interface GameState {
 
 type GameAction =
   | { type: 'START_MATCH'; payload: { players: Player[]; settings: MatchSettings; gameType: GameType } }
-  | { type: 'LOAD_MATCH'; payload: Match; currentThrow?: Dart[] }
+  | { type: 'LOAD_MATCH'; payload: Match; currentThrow?: Dart[]; redoStack?: unknown }
   | { type: 'ADD_DART'; payload: Dart }
   | { type: 'REMOVE_DART' }
   | { type: 'CLEAR_THROW' }
@@ -796,8 +797,15 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
       const same = !!top && sameDarts(top.darts, state.currentThrow);
       return { ...next, redoStack: same ? stack.slice(0, -1) : [] };
     }
+    case 'LOAD_MATCH': {
+      // A refresh restores the redo history that was saved with this match;
+      // any other load starts without one.
+      const next = baseReducer(state, action);
+      if (next === state) return state;
+      const restored = next.currentMatch ? sanitizeRestoredRedo(action.redoStack, next.currentMatch) : [];
+      return restored.length || stack.length ? { ...next, redoStack: restored } : next;
+    }
     case 'START_MATCH':
-    case 'LOAD_MATCH':
     case 'EDIT_THROW':
     case 'REMOVE_PLAYER':
     case 'END_MATCH':
@@ -873,6 +881,8 @@ export const reviveMatchDates = (match: any): Match => {
 const ACTIVE_MATCH_KEY = 'state-of-the-dart-active-match';
 /** Darts of the unconfirmed visit, so a refresh mid-visit loses nothing. */
 const ACTIVE_THROW_KEY = 'state-of-the-dart-active-throw';
+/** The redo history (visits undone), so "undo too many" survives a refresh. */
+const ACTIVE_REDO_KEY = 'state-of-the-dart-active-redo';
 
 export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { storage } = useTenant();
@@ -907,7 +917,12 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const savedThrow = JSON.parse(localStorage.getItem(ACTIVE_THROW_KEY) || 'null');
             if (savedThrow?.matchId === restoredMatch.id) currentThrow = savedThrow.darts;
           } catch { /* a broken entry only costs the unconfirmed darts */ }
-          dispatch({ type: 'LOAD_MATCH', payload: restoredMatch, currentThrow });
+          let redoStack: unknown;
+          try {
+            const savedRedo = JSON.parse(localStorage.getItem(ACTIVE_REDO_KEY) || 'null');
+            if (savedRedo?.matchId === restoredMatch.id) redoStack = savedRedo.stack;
+          } catch { /* a broken entry only costs the redo history */ }
+          dispatch({ type: 'LOAD_MATCH', payload: restoredMatch, currentThrow, redoStack });
         } else {
           // Match was completed, clear it
           localStorage.removeItem(ACTIVE_MATCH_KEY);
@@ -947,6 +962,20 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     } catch { /* storage unavailable */ }
   }, [state.currentMatch, state.currentThrow]);
+
+  // Save the redo history next to it — same first-render guard.
+  useEffect(() => {
+    const match = state.currentMatch;
+    if (!match) return;
+    try {
+      const stack = state.redoStack ?? [];
+      if ((match.status === 'in-progress' || match.status === 'paused') && stack.length > 0) {
+        localStorage.setItem(ACTIVE_REDO_KEY, JSON.stringify({ matchId: match.id, stack }));
+      } else {
+        localStorage.removeItem(ACTIVE_REDO_KEY);
+      }
+    } catch { /* storage unavailable */ }
+  }, [state.currentMatch, state.redoStack]);
   
   // Track if match has been created in DB
   const matchCreatedRef = React.useRef<string | null>(null);
