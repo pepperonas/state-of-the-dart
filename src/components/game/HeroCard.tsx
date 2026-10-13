@@ -119,14 +119,14 @@ const HeroCard: React.FC<HeroCardProps> = ({
 
   // The number grows from the row's size into the hero's: a UNIFORM scale on
   // top of the shared-element flight, so the digits are never stretched.
-  // Measured before paint, from the row number's rem size (text-3xl).
+  // Measured before paint, from the row number's rem size (m3-headline-large, 2rem).
   const grow = useMotionValue(1);
   const numberRef = useRef<HTMLSpanElement>(null);
   useLayoutEffect(() => {
     if (!play || !numberRef.current) return;
     const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
     const heroPx = parseFloat(getComputedStyle(numberRef.current).fontSize) || rem * 4;
-    const from = Math.min(1, (1.875 * rem) / heroPx);
+    const from = Math.min(1, (2 * rem) / heroPx);
     grow.set(from);
     const controls = animate(grow, 1, springHandover);
     return () => controls.stop();

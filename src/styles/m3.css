@@ -251,6 +251,14 @@ body {
 .m3-label-large     { font-size: 0.875rem;  line-height: 1.25rem; font-weight: 600; letter-spacing: 0.00625rem; }
 .m3-label-medium    { font-size: 0.75rem;   line-height: 1rem;    font-weight: 600; letter-spacing: 0.03125rem; }
 .m3-label-small     { font-size: 0.6875rem; line-height: 1rem;    font-weight: 600; letter-spacing: 0.03125rem; }
+/* The statistics headline figure: headline-small on a phone, display-small from sm (0.43.0). */
+@media (max-width: 639.98px) {
+  .sotd-hero-value { font-size: 1.5rem; line-height: 2rem; }
+}
+/* The phone score strip in landscape: headline-small, the height is short there. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .sotd-strip-score { font-size: 1.5rem; line-height: 2rem; }
+}
 /* M3 Expressive emphasized type: the same size, a heavier cut and slightly
    tighter tracking — for hero numbers and titles that should carry weight.
    Replaces the ad-hoc `m3-headline-* font-bold` combinations. */
@@ -658,6 +666,8 @@ button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surfa
 .m3-chip {
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
+  white-space: nowrap;
   gap: 0.5rem;
   height: 2rem;
   padding: 0 1rem;

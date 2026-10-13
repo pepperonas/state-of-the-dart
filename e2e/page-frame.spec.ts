@@ -31,7 +31,8 @@ for (const size of [{ name: 'phone', width: 390, height: 844 }, { name: 'desktop
       const f = (await page.locator('[data-page-frame]').boundingBox())!;
       boxes[url] = { x: b.x, y: b.y, frameX: f.x };
       // One header row: back (if any) sits on the title's line.
-      const back = page.locator('[data-page-header] button').first();
+      // Visible header buttons only: the report actions are md:hidden on desktop.
+      const back = page.locator('[data-page-header] button').locator('visible=true').first();
       if (await back.count()) {
         const bb = (await back.boundingBox())!;
         expect(Math.abs(bb.y + bb.height / 2 - (b.y + b.height / 2)), `${url}: back off the title line`).toBeLessThan(8);
@@ -71,5 +72,68 @@ for (const width of [700, 1440]) {
       const last = (await tiles.last().boundingBox())!;
       expect(Math.abs(last.x + last.width - (g.x + g.width)), `${id}: last tile leaves a hole`).toBeLessThanOrEqual(1);
     }
+  });
+}
+
+/**
+ * 0.43.0 — the four game setups sit in the same frame as every other page,
+ * the report buttons never float over content, and filter chips stay one row.
+ */
+for (const size of [{ name: 'phone', width: 390, height: 844 }, { name: 'desktop', width: 1440, height: 900 }]) {
+  test(`game setups, report buttons and chip rows on ${size.name}`, async ({ page }) => {
+    await page.setViewportSize({ width: size.width, height: size.height });
+    await login(page);
+
+    await page.goto('/stats');
+    await expect(page.locator('[data-page-title]')).toBeVisible();
+    await page.waitForTimeout(400);
+    const ref = (await page.locator('[data-page-title]').boundingBox())!;
+
+    for (const url of ['/game?new=1', '/cricket', '/around-the-clock', '/shanghai']) {
+      await page.goto(url);
+      const title = page.locator('[data-page-title]');
+      await expect(title, url).toBeVisible();
+      await page.waitForTimeout(400);
+      const b = (await title.boundingBox())!;
+      expect(Math.abs(b.y - ref.y), `${url}: title not on the page line`).toBeLessThanOrEqual(2);
+      const back = page.locator('[data-page-header]').getByRole('button', { name: /Zurück/ });
+      const bb = (await back.boundingBox())!;
+      expect(Math.abs(bb.y + bb.height / 2 - (b.y + b.height / 2)), `${url}: back off the title line`).toBeLessThan(8);
+      expect(await page.locator('h1').count(), `${url}: one h1`).toBe(1);
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+      expect(overflow, `${url}: horizontal scroll`).toBeLessThanOrEqual(0);
+    }
+
+    // Report buttons: in the title row on phones, at the foot of the rail on desktop.
+    await page.goto('/players');
+    await expect(page.locator('[data-page-title]')).toBeVisible();
+    const where = size.name === 'phone' ? 'report-actions-header' : 'report-actions-rail';
+    const actions = page.getByTestId(where).locator('visible=true');
+    await expect(actions).toBeVisible();
+    await expect(actions.getByRole('button', { name: 'Bug melden' })).toBeVisible();
+    if (size.name === 'desktop') {
+      const nav = (await page.locator('nav').locator('visible=true').boundingBox())!;
+      const a = (await actions.boundingBox())!;
+      expect(a.x + a.width, 'report buttons leave the rail').toBeLessThanOrEqual(nav.x + nav.width + 1);
+    }
+    // Nothing fixed sits over the content except the navigation itself.
+    const floaters = await page.evaluate(() =>
+      [...document.querySelectorAll('body *')].filter((el) => {
+        const s = getComputedStyle(el);
+        if (s.position !== 'fixed' || s.visibility === 'hidden' || s.display === 'none') return false;
+        if (el.closest('nav') || el.closest('[role="dialog"]') || el.closest('[aria-live]')) return false;
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && r.height > 0 && r.width < innerWidth * 0.5;
+      }).map((el) => el.outerHTML.slice(0, 80)));
+    expect(floaters, 'floating elements over the content').toEqual([]);
+
+    // The leaderboard's chips stay one scrolling row.
+    await page.goto('/leaderboard');
+    const row = page.locator('[data-chip-row]').first();
+    await expect(row).toBeVisible();
+    // offsetTop, not the box: the chips are still in their entrance motion.
+    const tops = await row.evaluate((el) => [...el.querySelectorAll('button')].map((b) => (b as HTMLElement).offsetTop));
+    expect(tops.length).toBeGreaterThan(3);
+    expect(new Set(tops).size, `chips wrap into several lines: ${tops}`).toBe(1);
   });
 }

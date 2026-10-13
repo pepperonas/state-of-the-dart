@@ -527,7 +527,7 @@ const ThrowHistory: React.FC<{ detail: any; players: any[] }> = ({ detail, playe
               <div key={leg.id || legIdx}>
                 <div className="m3-body-small text-on-surface-variant font-semibold mb-2">{t('match_history.leg_number', { number: legIdx + 1 })}</div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-xs">
+                  <table className="w-full m3-body-small">
                     <thead>
                       <tr className="border-b border-outline-variant">
                         <th className="text-on-surface-variant text-left py-1 pr-1 w-6">#</th>

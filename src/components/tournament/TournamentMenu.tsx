@@ -343,7 +343,7 @@ const TournamentMenu: React.FC = () => {
                       <IconButton variant="tonal" label={t('tournament_menu.leg_minus', { name: getParticipantName(currentMatch.participant1Id) })} onClick={() => handleScoreChange(currentMatch.id, 'p1', -1)}>
                         <Minus size={20} />
                       </IconButton>
-                      <span className="text-4xl font-bold text-on-surface w-16 text-center">
+                      <span className="m3-display-small m3-emphasized text-on-surface w-16 text-center">
                         {matchScores[currentMatch.id]?.p1 || 0}
                       </span>
                       <IconButton variant="filled" label={t('tournament_menu.leg_plus', { name: getParticipantName(currentMatch.participant1Id) })} onClick={() => handleScoreChange(currentMatch.id, 'p1', 1)}>
@@ -352,7 +352,7 @@ const TournamentMenu: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="text-4xl font-bold text-on-surface-variant">vs</div>
+                  <div className="m3-display-small m3-emphasized text-on-surface-variant">vs</div>
 
                   {/* Player 2 */}
                   <div className="text-center">
@@ -366,7 +366,7 @@ const TournamentMenu: React.FC = () => {
                       <IconButton variant="tonal" label={t('tournament_menu.leg_minus', { name: getParticipantName(currentMatch.participant2Id) })} onClick={() => handleScoreChange(currentMatch.id, 'p2', -1)}>
                         <Minus size={20} />
                       </IconButton>
-                      <span className="text-4xl font-bold text-on-surface w-16 text-center">
+                      <span className="m3-display-small m3-emphasized text-on-surface w-16 text-center">
                         {matchScores[currentMatch.id]?.p2 || 0}
                       </span>
                       <IconButton variant="filled" label={t('tournament_menu.leg_plus', { name: getParticipantName(currentMatch.participant2Id) })} onClick={() => handleScoreChange(currentMatch.id, 'p2', 1)}>
@@ -379,7 +379,7 @@ const TournamentMenu: React.FC = () => {
                 <p className="text-center m3-body-medium text-on-surface-variant mb-4">{t('tournament_menu.first_to', { count: tournamentLegsToWin })}</p>
 
                 <Button
-                  variant="success"
+                  variant="filled"
                   fullWidth
                   size="lg"
                   onClick={handleConfirmMatch}

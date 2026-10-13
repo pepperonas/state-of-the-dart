@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Home, TrendingUp, Users, Award } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { showsAppNavigation } from './navVisibility';
+import ReportActions from '../bugReport/ReportActions';
 
 const DESTINATIONS = [
   { to: '/', key: 'nav.home', icon: Home, end: true },
@@ -61,9 +62,11 @@ const AppNavigation: React.FC = () => {
       </nav>
       <nav
         aria-label={t('nav.label')}
-        className="hidden md:flex fixed left-0 inset-y-0 z-40 w-20 flex-col items-center gap-3 pt-8 bg-surface-container"
+        className="hidden md:flex fixed left-0 inset-y-0 z-40 w-20 flex-col items-center gap-3 pt-8 pb-4 bg-surface-container"
       >
         {item('rail')}
+        {/* Report actions at the foot of the rail — never over the content (0.43.0). */}
+        <ReportActions layout="rail" className="mt-auto" />
       </nav>
     </>
   );

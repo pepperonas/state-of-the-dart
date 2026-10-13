@@ -432,7 +432,7 @@ const UserGuideModal: React.FC<UserGuideModalProps> = ({ onClose }) => {
                     }`}
                   >
                     <Icon size={18} className="flex-shrink-0 md:[&]:w-5 md:[&]:h-5" />
-                    <span className="m3-label-large m3-body-medium md:text-base">{t(`guide.nav.${section.id}`)}</span>
+                    <span className="m3-label-large">{t(`guide.nav.${section.id}`)}</span>
                     {activeSection === section.id && (
                       <ChevronRight size={16} className="ml-auto hidden md:block" />
                     )}

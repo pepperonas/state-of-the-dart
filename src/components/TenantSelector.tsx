@@ -92,7 +92,7 @@ const TenantSelector: React.FC = () => {
                   onClick={() => setCurrentTenant(tenant)}
                   className="w-full flex items-center gap-5 p-5 bg-surface-container hover:bg-surface-container-high rounded-m3-lg transition border border-outline-variant hover:border-[var(--m3-primary)] shadow-m3-1"
                 >
-                  <div className="w-20 h-20 bg-primary-container rounded-m3-full flex items-center justify-center text-4xl shadow-m3-1">
+                  <div className="w-20 h-20 bg-primary-container rounded-m3-full flex items-center justify-center m3-display-small shadow-m3-1">
                     <AvatarGlyph avatar={tenant.avatar} size={avatarGlyphSize(tenant.avatar)} />
                   </div>
                   <div className="flex-1 text-left">
@@ -165,7 +165,7 @@ const TenantSelector: React.FC = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setShowNewTenant(true)}
-            className="w-full py-5 bg-primary hover:opacity-90 text-on-primary rounded-m3-full font-bold text-lg flex items-center justify-center gap-3 transition shadow-m3-1"
+            className="w-full py-5 bg-primary hover:opacity-90 text-on-primary rounded-m3-full m3-title-medium flex items-center justify-center gap-3 transition shadow-m3-1"
           >
             <Plus size={28} />
             {t('tenant_selector.create_new')}
@@ -203,7 +203,7 @@ const TenantSelector: React.FC = () => {
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setNewTenantAvatar(avatar)}
-                    className={`p-4 text-3xl rounded-m3-md transition ${
+                    className={`p-4 m3-headline-large rounded-m3-md transition ${
                       newTenantAvatar === avatar
                         ? 'bg-primary-container shadow-m3-1 ring-2 ring-[var(--m3-primary)]'
                         : 'bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant'
@@ -237,7 +237,7 @@ const TenantSelector: React.FC = () => {
               whileTap={{ scale: 0.98 }}
               onClick={handleAddTenant}
               disabled={!newTenantName.trim()}
-              className="w-full py-4 bg-success hover:opacity-90 disabled:bg-surface-container-high disabled:text-on-surface-variant disabled:cursor-not-allowed text-on-success rounded-m3-full font-bold text-lg transition shadow-m3-1 disabled:shadow-none"
+              className="w-full py-4 bg-primary hover:opacity-90 disabled:bg-surface-container-high disabled:text-on-surface-variant disabled:cursor-not-allowed text-on-primary rounded-m3-full m3-title-medium transition shadow-m3-1 disabled:shadow-none"
             >
               {t('tenant_selector.create')}
             </motion.button>

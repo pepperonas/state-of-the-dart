@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Trophy, TrendingUp, Target, Award, RefreshCw } from 'lucide-react';
 import api from '../../services/api';
-import { Card, Chip, Button, IconButton, PageShell } from '../common';
+import { Card, Chip, ChipRow, Button, IconButton, PageShell } from '../common';
 import { useAuth } from '../../context/AuthContext';
 import { motion } from 'framer-motion';
 import { staggerChild } from '../../utils/motion';
@@ -97,7 +97,7 @@ const GlobalLeaderboard: React.FC = () => {
 
         {/* Metric Selector */}
         <Card variant="elevated" className="p-4 mb-6">
-          <div className="flex flex-wrap gap-2 justify-center">
+          <ChipRow label={t('global_leaderboard.metric_label')}>
             {metrics.map((m) => {
               const Icon = m.icon;
               return (
@@ -112,7 +112,7 @@ const GlobalLeaderboard: React.FC = () => {
                 </Chip>
               );
             })}
-          </div>
+          </ChipRow>
         </Card>
 
         {/* Loading State */}
@@ -169,7 +169,7 @@ const GlobalLeaderboard: React.FC = () => {
                     }`}
                   >
                     {/* Rank */}
-                    <div className={`text-2xl font-bold w-16 text-center ${getRankColor(entry.rank)}`}>
+                    <div className={`m3-headline-small w-16 text-center ${getRankColor(entry.rank)}`}>
                       {getRankBadge(entry.rank)}
                     </div>
 
@@ -188,7 +188,7 @@ const GlobalLeaderboard: React.FC = () => {
                               className="w-5 h-5 rounded-full object-cover"
                             />
                           ) : (
-                            <span className="text-xl">{entry.userAvatar}</span>
+                            <span className="m3-title-large">{entry.userAvatar}</span>
                           )}
                           {entry.userName}
                         </p>
@@ -227,7 +227,7 @@ const GlobalLeaderboard: React.FC = () => {
               {t('global_leaderboard.cta_text')}
             </p>
             <div className="flex gap-4 justify-center">
-              <Button variant="success" onClick={() => navigate('/register')}>
+              <Button variant="filled" onClick={() => navigate('/register')}>
                 {t('global_leaderboard.register')}
               </Button>
               <Button variant="tonal" onClick={() => navigate('/login')}>

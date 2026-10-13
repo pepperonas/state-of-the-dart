@@ -172,7 +172,7 @@ const OnlineGamePanel: React.FC<Props> = ({ room, myId, visits, winnerId, onThro
                 <Button variant="filled" size="lg" onClick={() => submit()} disabled={input === ''}>{t('online_game.submit')}</Button>
               </div>
               {myRemaining <= 170 && (
-                <Button variant="success" fullWidth className="mt-3" onClick={() => submit(String(myRemaining))}>
+                <Button variant="filled" fullWidth className="mt-3" onClick={() => submit(String(myRemaining))}>
                   {t('online_game.checkout_button', { score: myRemaining })}
                 </Button>
               )}

@@ -603,20 +603,20 @@ const TrainingScreen: React.FC = () => {
               value={trainingState.attempts}
               className="block m3-headline-small m3-emphasized text-on-surface"
             />
-            <p className="m3-body-small sm:text-sm text-on-surface-variant">{t('training_screen.attempts')}</p>
+            <p className="m3-body-small text-on-surface-variant">{t('training_screen.attempts')}</p>
           </Card>
           <Card variant="elevated" className="p-2 sm:p-4 text-center">
             <AnimatedNumber
               value={trainingState.hits}
               className="block m3-headline-small m3-emphasized text-success"
             />
-            <p className="m3-body-small sm:text-sm text-on-surface-variant">{t('training.hits')}</p>
+            <p className="m3-body-small text-on-surface-variant">{t('training.hits')}</p>
           </Card>
           <Card variant="elevated" className="p-2 sm:p-4 text-center">
             <p className="m3-headline-small m3-emphasized text-primary">
               <AnimatedNumber value={accuracy} />%
             </p>
-            <p className="m3-body-small sm:text-sm text-on-surface-variant">{t('training.accuracy')}</p>
+            <p className="m3-body-small text-on-surface-variant">{t('training.accuracy')}</p>
           </Card>
         </div>
 
@@ -664,7 +664,7 @@ const TrainingScreen: React.FC = () => {
 
               <div className="flex gap-2">
                 <Button
-                  variant="success"
+                  variant="filled"
                   fullWidth
                   icon={<Check size={20} />}
                   onClick={handleConfirmThrow}
@@ -724,7 +724,7 @@ const TrainingScreen: React.FC = () => {
                   )}
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="success" fullWidth onClick={handleRestart}>
+                  <Button variant="filled" fullWidth onClick={handleRestart}>
                     {t('training_screen.try_again')}
                   </Button>
                   <Button variant="tonal" fullWidth onClick={() => navigate('/training')}>

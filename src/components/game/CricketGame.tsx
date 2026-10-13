@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, RotateCcw, Trophy, Target, X, Check } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Trophy, X, Check } from 'lucide-react';
 import { usePlayer } from '../../context/PlayerContext';
 import { Player, CricketState, Dart } from '../../types/index';
 import PlayerAvatar from '../player/PlayerAvatar';
 import { celebrate as confetti } from '../../utils/celebration';
 import { saveGameState, loadGameState, clearGameState, STORAGE_KEYS, CricketSavedState } from '../../utils/gameStorage';
 import { SpinnerWheel } from './SpinnerWheel';
+import SetupPlayerPicker from './SetupPlayerPicker';
 import { CRICKET_NUMBERS, applyCricketVisit, emptyCricketState, isCricketWinner } from '../../utils/cricket';
-import { BackButton, Button, IconButton, Card, Dialog } from '../common';
+import { Button, IconButton, Card, Dialog, PageShell } from '../common';
+import { Icon } from '../icons';
 import { useWakeLock } from '../../hooks/useWakeLock';
 import { haptic } from '../../utils/haptics';
 import { useSettings } from '../../context/SettingsContext';
@@ -225,47 +227,18 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
   // Setup screen
   if (showSetup) {
     return (
-      <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-        <div className="max-w-4xl mx-auto m3-view">
-          <BackButton onClick={onBack || (() => { navigate('/'); })} />
-
+      <PageShell
+        title="Cricket"
+        icon={<Icon name="cricket" size={26} />}
+        width="md"
+        onBack={onBack || (() => { navigate('/'); })}
+      >
           <Card variant="elevated" className="rounded-m3-lg p-6">
-            <h1 className="m3-headline-medium text-on-surface mb-6 flex items-center gap-3">
-              <Target style={{ color: 'var(--m3-primary)' }} />
-              Cricket
-            </h1>
-
-            <div className="mb-6">
-              <h2 className="m3-title-medium text-on-surface mb-3">{t('game.select_players')}</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {players.filter(p => !p.isBot).map(player => (
-                  <button
-                    key={player.id}
-                    onClick={() => {
-                      if (selectedPlayers.find(p => p.id === player.id)) {
-                        setSelectedPlayers(prev => prev.filter(p => p.id !== player.id));
-                      } else if (selectedPlayers.length < 4) {
-                        setSelectedPlayers(prev => [...prev, player]);
-                      }
-                    }}
-                    className={`p-3 rounded-m3-md transition ${
-                      selectedPlayers.find(p => p.id === player.id)
-                        ? 'bg-surface-container-high ring-2 ring-[var(--m3-primary)] shadow-m3-1'
-                        : 'bg-surface-container border border-outline-variant hover:bg-surface-container-high'
-                    }`}
-                  >
-                    <div className="flex justify-center mb-1">
-                      <PlayerAvatar avatar={player.avatar} name={player.name} size="sm" />
-                    </div>
-                    <div className="m3-label-large text-on-surface text-center">{player.name}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
+            <SetupPlayerPicker players={players} selected={selectedPlayers} onChange={setSelectedPlayers} />
 
             <div className="bg-surface-container rounded-m3-md p-4 mb-6">
               <h3 className="m3-title-small text-on-surface mb-2">{t('cricket_game.rules_title')}</h3>
-              <ul className="text-on-surface-variant text-sm space-y-1">
+              <ul className="text-on-surface-variant m3-body-medium space-y-1">
                 <li>• {t('cricket_game.rule_close')}</li>
                 <li>• {t('cricket_game.rule_marks')}</li>
                 <li>• {t('cricket_game.rule_points')}</li>
@@ -286,8 +259,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
               }
             </Button>
           </Card>
-        </div>
-      </div>
+      </PageShell>
     );
   }
 
@@ -390,7 +362,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
                           name={player.name}
                           size="sm"
                         />
-                        <span className="text-on-surface font-medium text-sm mt-1">
+                        <span className="text-on-surface m3-label-large mt-1">
                           {player.name}
                         </span>
                       </div>
@@ -401,7 +373,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
               <tbody className="m3-stagger-fade">
                 {CRICKET_NUMBERS.map(num => (
                   <tr key={num} className="border-t border-outline-variant">
-                    <td className="text-on-surface font-bold p-3 text-lg">
+                    <td className="text-on-surface p-3 m3-title-medium">
                       {num === 25 ? 'Bull' : num}
                     </td>
                     {matchPlayers.map((player, idx) => {
@@ -415,7 +387,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
                               : ''
                           }`}
                         >
-                          <span className={`text-2xl font-bold ${getMarkColor(marks)}`}>
+                          <span className={`m3-headline-small ${getMarkColor(marks)}`}>
                             {getMarkDisplay(marks)}
                           </span>
                         </td>
@@ -435,7 +407,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
                           : ''
                       }`}
                     >
-                      <span className="text-2xl font-bold text-on-surface">
+                      <span className="m3-headline-small text-on-surface">
                         {cricketState[player.playerId]?.points || 0}
                       </span>
                     </td>
@@ -466,7 +438,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
             {[0, 1, 2].map(idx => (
               <div
                 key={idx}
-                className={`flex-1 h-16 rounded-m3-md flex items-center justify-center text-xl font-bold ${
+                className={`flex-1 h-16 rounded-m3-md flex items-center justify-center m3-title-large ${
                   currentDarts[idx]
                     ? 'bg-primary-container text-on-primary-container border-2 border-[var(--m3-primary)]'
                     : 'bg-surface-container text-on-surface-variant/40 border-2 border-dashed border-outline-variant'
@@ -485,7 +457,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
           </div>
 
           <Button
-            variant="success"
+            variant="filled"
             size="lg"
             fullWidth
             icon={<Check size={24} />}
@@ -504,12 +476,12 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
           <div className="grid grid-cols-4 gap-3">
             {CRICKET_NUMBERS.map(num => (
               <div key={num} className="space-y-2">
-                <div className="text-center text-on-surface-variant text-sm font-medium">
+                <div className="text-center text-on-surface-variant m3-label-large">
                   {num === 25 ? 'Bull' : num}
                 </div>
                 <div className="flex flex-col gap-1">
                   <Button
-                    variant="tonal"
+                    variant="outlined"
                     size="sm"
                     fullWidth
                     onClick={() => handleDartHit(num, 1)}
@@ -518,7 +490,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
                     S
                   </Button>
                   <Button
-                    variant="success"
+                    variant="tonal"
                     size="sm"
                     fullWidth
                     onClick={() => handleDartHit(num, 2)}
@@ -528,7 +500,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
                   </Button>
                   {num !== 25 && (
                     <Button
-                      variant="danger"
+                      variant="accent"
                       size="sm"
                       fullWidth
                       onClick={() => handleDartHit(num, 3)}
@@ -543,7 +515,7 @@ const CricketGame: React.FC<CricketGameProps> = ({ onBack }) => {
 
             {/* Miss button */}
             <div className="space-y-2">
-              <div className="text-center text-on-surface-variant text-sm font-medium">{t('cricket_game.miss')}</div>
+              <div className="text-center text-on-surface-variant m3-label-large">{t('cricket_game.miss')}</div>
               <button
                 onClick={() => handleDartHit(0, 0 as any)}
                 disabled={currentDarts.length >= 3}

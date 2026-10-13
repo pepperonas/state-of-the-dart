@@ -332,14 +332,14 @@ const OnlineMultiplayer: React.FC = () => {
                   }`}
                 >
                   <div className="relative inline-block">
-                    <div className="w-12 h-12 rounded-m3-full bg-primary flex items-center justify-center text-on-primary text-xl font-bold">
+                    <div className="w-12 h-12 rounded-m3-full bg-primary flex items-center justify-center text-on-primary m3-title-large">
                       {player.name.charAt(0).toUpperCase()}
                     </div>
                     {player.id === currentRoom.host && (
                       <Crown size={16} className="absolute -top-1 -right-1 text-tertiary" />
                     )}
                   </div>
-                  <p className="text-on-surface font-medium mt-2 text-sm truncate">{player.name}</p>
+                  <p className="text-on-surface mt-2 m3-label-large truncate">{player.name}</p>
                 </div>
               ))}
 
@@ -352,7 +352,7 @@ const OnlineMultiplayer: React.FC = () => {
                   <div className="w-12 h-12 rounded-m3-full bg-surface-container-high flex items-center justify-center mx-auto">
                     <Users size={20} className="text-on-surface-variant" />
                   </div>
-                  <p className="text-on-surface-variant mt-2 text-sm">{t('online_game.empty_slot')}</p>
+                  <p className="text-on-surface-variant mt-2 m3-body-medium">{t('online_game.empty_slot')}</p>
                 </div>
               ))}
             </div>
@@ -360,7 +360,7 @@ const OnlineMultiplayer: React.FC = () => {
             {/* Start Button (Host only) */}
             {currentRoom.status === 'waiting' && isHost && (
               <Button
-                variant="success"
+                variant="filled"
                 size="lg"
                 fullWidth
                 onClick={handleStartGame}
@@ -404,10 +404,10 @@ const OnlineMultiplayer: React.FC = () => {
 
             <div className="h-48 overflow-y-auto mb-3 space-y-2 bg-surface-container rounded-m3-md p-3">
               {chatMessages.length === 0 ? (
-                <p className="text-on-surface-variant text-center text-sm">{t('online_game.no_messages')}</p>
+                <p className="text-on-surface-variant text-center m3-body-medium">{t('online_game.no_messages')}</p>
               ) : (
                 chatMessages.map((msg, idx) => (
-                  <div key={idx} className="text-sm">
+                  <div key={idx} className="m3-body-medium">
                     <span className="text-primary font-medium">{msg.from}:</span>
                     <span className="text-on-surface-variant ml-2">{msg.message}</span>
                   </div>
@@ -573,7 +573,7 @@ const OnlineMultiplayer: React.FC = () => {
             <div className="text-center py-12">
               <Users size={48} className="mx-auto text-on-surface-variant mb-4" />
               <p className="text-on-surface-variant">{t('online_game.no_rooms')}</p>
-              <p className="text-on-surface-variant text-sm">{t('online_game.create_new_room_hint')}</p>
+              <p className="text-on-surface-variant m3-body-medium">{t('online_game.create_new_room_hint')}</p>
             </div>
           ) : (
             <ul className="space-y-3">
@@ -584,7 +584,7 @@ const OnlineMultiplayer: React.FC = () => {
                 >
                   <div>
                     <h3 className="text-on-surface m3-title-small">{room.name}</h3>
-                    <p className="text-on-surface-variant text-sm">
+                    <p className="text-on-surface-variant m3-body-medium">
                       {t('online_game.room_summary', { score: room.settings.startScore, count: room.players.length, max: 4 })}
                     </p>
                   </div>

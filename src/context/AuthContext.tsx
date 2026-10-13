@@ -1,38 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { useContext, useState, useEffect, ReactNode } from 'react';
 import api, { setAuthToken, removeAuthToken } from '../services/api';
 import { syncService } from '../services/sync';
 import { logBuffer } from '../utils/logBuffer';
 import { clearDeviceGameState } from '../utils/storage';
 
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  avatar: string;
-  emailVerified: boolean;
-  isAdmin?: boolean;
-  subscriptionStatus: string;
-  subscriptionPlan?: string;
-  trialEndsAt?: number;
-  subscriptionEndsAt?: number;
-  createdAt: number;
-}
-
-interface AuthContextType {
-  user: User | null;
-  loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
-  logout: () => void;
-  googleAuth: () => void;
-  refreshUser: () => Promise<void>;
-  triggerSync: () => Promise<void>;
-  isAuthenticated: boolean;
-  hasActiveSubscription: boolean;
-  trialDaysLeft: number;
-}
-
-const AuthContext = createContext<AuthContextType | null>(null);
+import { AuthContext, type User } from './authContextValue';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);

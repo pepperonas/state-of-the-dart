@@ -139,13 +139,22 @@ M3 primitive library (barrel `src/components/common/index.ts`). **Prefer these o
 - `TextField` — outlined field with `label`, leading `icon`, `error`.
 - `Switch` — M3 switch (`checked`, `onChange`), thumb grows when on.
 - `Select` — **the app's only dropdown.** Generic in the value type: `<Select<number> value={10} onChange={n => …} options={[{value, label, icon?, text?, disabled?}]} />`. `size`: `sm|md|lg`, `inline` to size to content, `placeholder` for "no selection". Native `<select>` is **banned** (a consistency test fails the build) — its popup is drawn by the OS, so it ignored every token, could not be themed light/dark and could not hold an icon. The menu is **portalled to `<body>` at z-60** so it escapes `overflow-x-auto` tables and dialog stacking contexts, and it re-measures on scroll/resize. Keyboard = APG combobox: arrows/Home/End move, Enter/Space commit, Escape discards, Tab leaves without committing, typing jumps by prefix.
-- `Chip` — filter/assist chip (`selected`, `icon`).
+- `Chip` — filter/assist chip (`selected`, `icon`). Rows of chips: `ChipRow` (`label` for the group).
 - `Dialog` — scrim + spring-animated container (`open`, `onClose`, `title`, `actions`, `widthClassName`, `hideClose`, `persistent`, `ariaLabel`). Real modal behaviour: initial focus, Tab trap, Escape, focus returns to the opener, labelled by its title. Use it for every overlay.
 - `useFeedback()` (`feedbackContext.ts`, provider in App) — `notify(msg)` snackbar and `await confirm({ title, danger })`. `alert`/`confirm` are banned by test.
 - `Snackbar`, `SegmentedButton` (N options, radio group), `LoadingIndicator` (M3 Expressive morphing shape; one for the whole app), `ErrorState` (retry), `TextArea`.
 - `AnimatedNumber` — spring number transition (overdamped → no overshoot/jitter), reduced-motion aware; "tallies" to its new value. Used for in-game scores (`PlayerScore`, `ScoreInput`) and Dashboard KPIs (counts up as async data loads).
 - `ErrorBoundary` — top-level React error boundary. Wraps `<App>` in `main.tsx` so a render-time throw (bad `JSON.parse` in match reconstruction, failed lazy chunk, etc.) shows an M3 recovery screen (reload / back-to-menu) instead of white-screening the PWA. The `window.error`/`unhandledrejection` handlers in `App.tsx` only log — they do NOT catch render errors, so don't remove the boundary.
 - `BackButton.tsx` — canonical back button. **Always use this** for screen-level back navigation. An M3 **tonal** button with a leading `<ArrowLeft>`. In **block mode (default)** it wraps itself in a `mb-6` block so the gap to the page heading is uniform across all screens; pass **`inline`** when it sits in a flex header row / form (opts out of the wrapper — the row/form controls spacing). Override text via `label`.
+
+### Consistency rules (0.43.0)
+- **Green is an outcome, not "go".** The main action is `variant="filled"`; `success` only on the ATC Hit key and a copy button that has copied (allowlist in `pageConsistency.test.ts`, also catches `'success'` inside a variant expression).
+- **Game setups render through `PageShell`** (title, icon, `width="md"`); the in-game screens keep their own frame. Standalone setups share `SetupPlayerPicker`; option choices use the shared `SegmentedButton`.
+- **No raw Tailwind text sizes** (`text-sm`, `sm:text-2xl` …) — m3 type classes only. A size that must change per breakpoint gets a named class in `m3.css` (`sotd-hero-value`, `sotd-strip-score`). A bold on a light step (display/body) is `m3-emphasized`; m3 classes win over `font-bold` anyway.
+- **Shadows only `shadow-m3-*`** (exception: the wheel pointer's drop shadow).
+- **Filter chips go in `ChipRow`** (one scrolling row, chips `flex-shrink: 0; white-space: nowrap`).
+- Training tiles use the practice tone (`secondary-container`) only.
+- `useOptionalAuth()` lives in `context/authContextValue.ts` (with the context object) so `AuthContext.tsx` exports only the provider + `useAuth` (fast-refresh lint).
 
 ### Heatmap focus and visit sheet (0.42.0)
 - Live heatmap player = `heatmapPlayer(pick, turnId, activeId)` (`utils/heatmapFocus.ts`); `turnId` = visits booked in the match, so a chip pick (`heatmap-player`, `aria-pressed`) lasts until the turn passes or an undo.
@@ -266,8 +275,10 @@ clocks disagree, and "in 3 days" would be nonsense.
 
 `/api/bug-reports` carries only `authenticateToken`; `/api/debug-flags` adds
 `router.use(requireAdmin)` to **every** endpoint. Bug reporting was always open
-to all users — what was missing was a way to find it, so `BugReportButton` now
-sits beside the admin-only `DebugFlagButton` at the bottom-left of every screen.
+to all users — what was missing was a way to find it. Since 0.43.0 both live in
+`ReportActions` (bug for everyone, flag for admins): at the foot of the rail
+from md up, in the PageShell title row (and the home header) on phones. Never
+as a fixed FAB again — it covered content on every phone page (test-guarded).
 `utils/reporters.ts` builds the admin "filter by user" options from the rows on
 screen, not from the user table.
 
@@ -585,8 +596,8 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **57 tests** currently:
-  - `page-frame.spec.ts` — page titles and frames line up on nine pages (phone + desktop), back on the title line, no back on the navigation destinations; home sections end without a hole (700 + 1440 px)
+- Specs in `e2e/`. **59 tests** currently:
+  - `page-frame.spec.ts` — page titles and frames line up on nine pages (phone + desktop), back on the title line, no back on the navigation destinations; home sections end without a hole (700 + 1440 px); the four game setups on the page line, report buttons in header/rail, nothing fixed over the content, leaderboard chips in one row (0.43.0)
   - `redo.spec.ts` — undo three visits, redo them one by one (button, Ctrl+Shift+Z, Ctrl+Y) at phone and desktop size, reload keeps it; a different visit after an undo drops the way forward; the way forward survives a reload (and the correction label fits)
   - `avatars.spec.ts` — an emoji avatar (tab, skin tone, `em:` stored, lazy catalogue); a game-icons avatar is found by its German name, the picker closes, the list draws it, the path chunk loads once and never rides in an eager bundle, the value is stored
   - `correction.spec.ts` — a typed 60 stays out of the heatmap, a chip makes it exact, undo brings a typed visit back as "26 → …", an older visit is corrected from its pill, the stored heatmap never counts twice, reload keeps it all

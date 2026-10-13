@@ -54,7 +54,7 @@ export const DartGrid: React.FC<DartGridProps> = ({
             onClick={() => onPick(n)}
             disabled={disabled}
             aria-label={`${name} ${n}`}
-            className={`${key} ${keyTone} text-on-surface text-lg`}
+            className={`${key} ${keyTone} text-on-surface m3-title-medium`}
           >
             {n}
           </button>

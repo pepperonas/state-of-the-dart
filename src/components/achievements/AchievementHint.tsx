@@ -62,7 +62,7 @@ const AchievementHint: React.FC<AchievementHintProps> = ({ hints, onDismiss }) =
 
             {/* Achievement Info */}
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 flex-shrink-0 bg-surface-container-highest rounded-m3-full flex items-center justify-center text-on-surface border border-outline-variant shadow-inner">
+              <div className="w-10 h-10 flex-shrink-0 bg-surface-container-highest rounded-m3-full flex items-center justify-center text-on-surface border border-outline-variant">
                 {/* The icon NAME used to be printed as text ("target"). */}
                 <Icon name={iconForEmoji(hint.achievementIcon)} size={22} />
               </div>

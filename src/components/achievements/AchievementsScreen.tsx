@@ -16,7 +16,7 @@ import {
 } from '../../types/achievements';
 import { formatDate } from '../../utils/dateUtils';
 import logger from '../../utils/logger';
-import { Card, Chip, PageShell, Select, Switch } from '../common';
+import { Card, Chip, ChipRow, PageShell, Select, Switch } from '../common';
 import { Icon, iconForEmoji } from '../icons';
 import { readableTextOn } from '../../utils/color';
 import { achievementName, achievementDescription } from '../../utils/achievementText';
@@ -138,25 +138,25 @@ const AchievementsScreen: React.FC = () => {
           {selectedPlayer && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-surface-container-low rounded-m3-md p-4 text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-primary">
+                <div className="m3-headline-small text-primary">
                   {unlockedAchievements.length}
                 </div>
                 <div className="m3-label-medium text-on-surface-variant mt-1">{t('achievements.unlocked')}</div>
               </div>
               <div className="bg-surface-container-low rounded-m3-md p-4 text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-on-surface-variant">
+                <div className="m3-headline-small text-on-surface-variant">
                   {lockedAchievements.length}
                 </div>
                 <div className="m3-label-medium text-on-surface-variant mt-1">{t('achievements.locked')}</div>
               </div>
               <div className="bg-surface-container-low rounded-m3-md p-4 text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-tertiary">
+                <div className="m3-headline-small text-tertiary">
                   {playerProgress?.totalPoints || 0}
                 </div>
                 <div className="m3-label-medium text-on-surface-variant mt-1">{t('achievements.points')}</div>
               </div>
               <div className="bg-surface-container-low rounded-m3-md p-4 text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-success">{completionPercentage}%</div>
+                <div className="m3-headline-small text-success">{completionPercentage}%</div>
                 <div className="m3-label-medium text-on-surface-variant mt-1">{t('achievements.completed')}</div>
               </div>
             </div>
@@ -183,18 +183,17 @@ const AchievementsScreen: React.FC = () => {
             sit beside it as a dropdown and a switch instead of a second row of
             nine chips and a checkbox inside a box. */}
         <div className="mb-6 space-y-3" data-testid="achievement-filters">
-          <div role="group" aria-label={t('achievements.filter')} className="flex flex-nowrap gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+          <ChipRow label={t('achievements.filter')}>
             {categories.map(cat => (
               <Chip
                 key={cat}
                 selected={filterCategory === cat}
                 onClick={() => setFilterCategory(cat)}
-                className="shrink-0 whitespace-nowrap"
               >
                 {cat === 'all' ? t('achievements.all') : t(`achievements.category_${cat}`)}
               </Chip>
             ))}
-          </div>
+          </ChipRow>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
             <div className="flex items-center gap-2">
               <Filter size={18} className="text-on-surface-variant" aria-hidden="true" />
@@ -309,7 +308,7 @@ const AchievementCard = React.memo<AchievementCardProps>(({ achievement, unlocke
         </div>
       )}
 
-      <div className="flex items-center justify-between text-xs flex-wrap gap-1">
+      <div className="flex items-center justify-between m3-body-small flex-wrap gap-1">
         {/* Tier in words (the shape is not enough for a screen reader) and
             rarity as one quiet chip. The area lives in the filter only. */}
         <div className="flex items-center gap-2 flex-wrap m3-label-medium text-on-surface-variant" data-testid="achievement-meta">

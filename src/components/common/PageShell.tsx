@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import BackButton from './BackButton';
+import ReportActions from '../bugReport/ReportActions';
 
 /**
  * One page frame for the whole app.
@@ -84,7 +85,7 @@ const PageShell: React.FC<PageShellProps> = ({
           // at the same height on every page (0.36.0, pinned by page-frame.spec).
           <header
             className="grid items-center gap-x-3 gap-y-1 mb-6"
-            style={{ gridTemplateColumns: `${back ? 'auto ' : ''}minmax(0, 1fr)${actions ? ' auto' : ''}` }}
+            style={{ gridTemplateColumns: `${back ? 'auto ' : ''}minmax(0, 1fr) auto` }}
             data-page-header
           >
             {back && (
@@ -98,7 +99,11 @@ const PageShell: React.FC<PageShellProps> = ({
               )}
               {title && <h1 className="m3-headline-medium text-on-surface truncate" data-page-title>{title}</h1>}
             </div>
-            {actions && <div className="flex items-center gap-2 justify-self-end">{actions}</div>}
+            {/* On phones the report actions sit here; from md up they are in the rail. */}
+            <div className="flex items-center gap-2 justify-self-end">
+              {actions}
+              <ReportActions layout="header" className="md:hidden" />
+            </div>
             {subtitle && (
               <p
                 className={`m3-body-medium text-on-surface-variant ${back ? 'col-start-2' : 'col-start-1'} ${icon ? 'pl-[3.75rem]' : ''}`}

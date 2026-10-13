@@ -474,7 +474,7 @@ const Dashboard: React.FC = () => {
                   return (
                     <Button
                       key={index}
-                      variant={index === 0 ? 'filled' : index === 1 ? 'accent' : 'success'}
+                      variant={index === 0 ? 'filled' : 'tonal'}
                       fullWidth
                       size="lg"
                       onClick={action.onClick}

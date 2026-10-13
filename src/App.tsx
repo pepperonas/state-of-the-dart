@@ -11,8 +11,6 @@ import { AchievementProvider } from './context/AchievementContext';
 import MainMenu from './components/MainMenu';
 import AchievementNotification from './components/achievements/AchievementNotification';
 import OfflineIndicator from './components/sync/OfflineIndicator';
-import DebugFlagButton from './components/debug/DebugFlagButton';
-import BugReportButton from './components/bugReport/BugReportButton';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import ThemeManager from './components/ThemeManager';
 import Footer from './components/Footer';
@@ -228,10 +226,6 @@ function AppContent() {
                     <OfflineIndicator />
                     <UpdatePrompt />
                     <ShortcutsDialog />
-                    <OutsideGames>
-                      <BugReportButton />
-                      <DebugFlagButton />
-                    </OutsideGames>
                     <AppNavigation />
                     <NavAwareContent>
                       <RouteFade>

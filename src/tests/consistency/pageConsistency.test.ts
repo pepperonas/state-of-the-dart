@@ -309,7 +309,8 @@ describe('page frame', () => {
 
   it('a PageShell page never builds a second back button', () => {
     const offenders = FILES
-      .filter(([rel, src]) => rel !== 'common/PageShell.tsx' && /<PageShell/.test(src) && /<BackButton/.test(stripComments(src)))
+      // GameScreen: PageShell frames only its setup; the running game keeps its own header.
+      .filter(([rel, src]) => rel !== 'common/PageShell.tsx' && rel !== 'game/GameScreen.tsx' && /<PageShell/.test(src) && /<BackButton/.test(stripComments(src)))
       .map(([rel]) => rel);
     expect(offenders).toEqual([]);
   });
@@ -337,6 +338,19 @@ describe('page frame', () => {
     expect(offenders).toEqual([]);
   });
 
+  it('the game setups sit in the page frame, not in a card of their own (0.43.0)', () => {
+    // The four setups still had a "Zurück" pill over a narrow card with the
+    // title inside it — on a phone a different page from every other screen.
+    for (const rel of ['game/GameScreen.tsx', 'game/CricketGame.tsx', 'game/AroundTheClockGame.tsx', 'game/ShanghaiGame.tsx']) {
+      const src = stripComments(FILES.find(([r]) => r === rel)![1]);
+      const setup = src.slice(src.indexOf('if (showSetup) {'));
+      expect(setup.indexOf('if (showSetup) {'), rel).toBe(0);
+      const body = setup.slice(0, setup.indexOf('\n  }\n'));
+      expect(body, rel).toMatch(/return \(\s*<PageShell\b/);
+      expect(body, rel).not.toMatch(/<BackButton|<h1\b/);
+    }
+  });
+
   it('the navigation destinations carry no back button — the bar is the way back', () => {
     for (const rel of ['stats/StatsOverview.tsx', 'achievements/AchievementsScreen.tsx', 'player/PlayerManagement.tsx']) {
       const src = stripComments(FILES.find(([r]) => r === rel)![1]);
@@ -344,5 +358,76 @@ describe('page frame', () => {
       expect(shells.length, rel).toBeGreaterThan(0);
       for (const m of shells) expect(m[1], rel).toContain('back={false}');
     }
+  });
+});
+
+describe('call to action colour', () => {
+  /**
+   * Green means "that worked" (a hit, a win), not "go". Until 0.43.0 "Spiel
+   * starten", "Caller testen" and the import button were green while "Raum
+   * erstellen" was blue — the main action had two colours. The main action is
+   * the filled button; `success` stays for the one place where the button IS
+   * the outcome: the Hit key of Around the Clock, a copy button that has copied.
+   */
+  const SUCCESS_ALLOWED = new Set([
+    'game/AroundTheClockGame.tsx', // the Hit key
+    'admin/AdminPanel.tsx', // the copy button turns green once it HAS copied
+  ]);
+
+  it('no green call to action outside the hit key', () => {
+    const offenders = ALL_FILES
+      // Also inside an expression: the dashboard picked it by index (`… : 'success'}`).
+      .filter(([rel, src]) => !SUCCESS_ALLOWED.has(rel) && /variant=(["']success["']|\{[^}]*['"]success['"][^}]*\})/.test(stripComments(src)))
+      .map(([rel]) => rel);
+    expect(offenders, `Green main action:\n${offenders.join('\n')}`).toEqual([]);
+  });
+});
+
+describe('one type scale, one shadow scale (0.43.0)', () => {
+  it('text sizes come from the M3 type classes, never raw Tailwind sizes', () => {
+    // 110 raw text-sm / text-lg / text-2xl … had crept in, mostly in the game
+    // modes. Mobile-first sizes that need a breakpoint get a named class in
+    // m3.css (sotd-hero-value, sotd-strip-score) — m3-* classes have no variants.
+    const raw = /(^|[\s"'`{])((sm|md|lg|xl|phoneland):)?text-(xs|sm|base|lg|xl|[2-9]xl)(?=[\s"'`}])/;
+    const offenders = ALL_FILES
+      .filter(([, src]) => raw.test(stripComments(src)))
+      .map(([rel, src]) => `${rel}: ${stripComments(src).match(raw)![0].trim()}`);
+    expect(offenders, `Raw text size:\n${offenders.join('\n')}`).toEqual([]);
+  });
+
+  it('shadows come from the elevation scale', () => {
+    // The start wheel's pointer keeps its drop shadow: a filter on a small
+    // static glyph that has to read on every wedge colour.
+    const ALLOWED = new Set(['game/SpinnerWheel.tsx']);
+    const raw = /(^|[\s"'`])(drop-)?shadow-(?!m3-|none\b)[\w[\]/.-]+|(^|[\s"'`])shadow(-inner)?(?=[\s"'`])/;
+    const offenders = ALL_FILES
+      .filter(([rel, src]) => !ALLOWED.has(rel) && raw.test(stripComments(src)))
+      .map(([rel, src]) => `${rel}: ${stripComments(src).match(raw)![0].trim()}`);
+    expect(offenders, `Off-scale shadow:\n${offenders.join('\n')}`).toEqual([]);
+  });
+
+  it('the training modes share the practice tone of the home screen', () => {
+    const src = stripComments(FILES.find(([r]) => r === 'training/TrainingMenu.tsx')![1]);
+    expect(src).toContain('bg-secondary-container');
+    expect(src).not.toMatch(/bg-(primary|tertiary|success)-container/);
+  });
+
+  it('chip rows scroll instead of wrapping on the leaderboards', () => {
+    for (const rel of ['leaderboard/Leaderboard.tsx', 'leaderboard/GlobalLeaderboard.tsx', 'achievements/AchievementsScreen.tsx']) {
+      const src = stripComments(FILES.find(([r]) => r === rel)![1]);
+      expect(src, rel).toMatch(/<ChipRow\b/);
+      expect(src, rel).not.toMatch(/flex-wrap[^"]*"\s*>\s*\{\w+\.map\(\(?\w+\)? => (\{|\()\s*(const|<Chip)/);
+    }
+  });
+
+  it('nothing floats over the content: no fixed FAB for reports', () => {
+    // The bug/flag buttons sat fixed in the bottom-left corner — over player
+    // rows and achievement cards on every phone page (0.43.0).
+    const offenders = ALL_FILES
+      .filter(([, src]) => /<Fab\b[^>]*className="[^"]*\bfixed\b/.test(stripComments(src)))
+      .map(([rel]) => rel);
+    expect(offenders).toEqual([]);
+    const app = stripComments(ALL_FILES.find(([r]) => r === '../App.tsx')![1]);
+    expect(app).not.toMatch(/BugReportButton|DebugFlagButton/);
   });
 });

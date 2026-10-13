@@ -49,7 +49,7 @@ const AuthCallback: React.FC = () => {
       <div className="text-center m3-enter-pop">
         {error ? (
           <>
-            <div className="text-error text-5xl mb-4">!</div>
+            <div className="text-error m3-display-medium mb-4">!</div>
             <h2 className="m3-headline-small text-on-surface mb-2">
               {t('common.error')}
             </h2>

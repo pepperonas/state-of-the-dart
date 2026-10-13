@@ -76,7 +76,7 @@ const ScoreStrip: React.FC<ScoreStripProps> = ({ players, showSets, legsToWin, c
           {/* Phone landscape: name and score on one line — height is what runs out. */}
           <div className="flex items-baseline justify-between gap-2 phoneland:flex-1">
             <span className="relative">
-              <AnimatedNumber value={p.remaining} className="text-3xl phoneland:text-2xl font-bold tabular-nums" />
+              <AnimatedNumber value={p.remaining} className="m3-headline-large sotd-strip-score tabular-nums" />
               <ScoreDelta value={p.remaining} className="left-full ml-1 bottom-0 m3-label-large" />
             </span>
             <span
