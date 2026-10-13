@@ -147,6 +147,13 @@ M3 primitive library (barrel `src/components/common/index.ts`). **Prefer these o
 - `ErrorBoundary` — top-level React error boundary. Wraps `<App>` in `main.tsx` so a render-time throw (bad `JSON.parse` in match reconstruction, failed lazy chunk, etc.) shows an M3 recovery screen (reload / back-to-menu) instead of white-screening the PWA. The `window.error`/`unhandledrejection` handlers in `App.tsx` only log — they do NOT catch render errors, so don't remove the boundary.
 - `BackButton.tsx` — canonical back button. **Always use this** for screen-level back navigation. An M3 **tonal** button with a leading `<ArrowLeft>`. In **block mode (default)** it wraps itself in a `mb-6` block so the gap to the page heading is uniform across all screens; pass **`inline`** when it sits in a flex header row / form (opts out of the wrapper — the row/form controls spacing). Override text via `label`.
 
+### Page frame (0.36.0)
+- Every screen behind the navigation renders through `PageShell` (games, auth, landing, payment, MainMenu, TenantSelector and TrainingScreen draw their own frame — allowlist in `pageConsistency.test.ts`). Pass `title`, `subtitle`, `actions`, `onBack`/`backLabel`; never a hand-made `<BackButton>` or a second `<h1>` inside it. A page whose own card carries the h1 (player profile, online room) passes no `title`.
+- The frame is always `max-w-6xl` (`xl` → 7xl); `width` only narrows the body, which starts flush under the title. The header is a grid: the title line is row 1, the subtitle row 2 — so a subtitle never moves the title. `e2e/page-frame.spec.ts` asserts the title top and frame x match on nine pages at 390 and 1440 px.
+- Navigation destinations (`/stats`, `/achievements`, `/players`) pass `back={false}`.
+- ⚠️ **No `max-sm:`/`max-md:` …** — the raw `phoneland` screen makes Tailwind drop every `max-*` variant silently. Write mobile-first (`hidden sm:inline`, `sr-only sm:not-sr-only`). Guarded by test.
+- Selections that default to "the first player" must be DERIVED (`players.some(...) ? picked : players[0]?.id`), not `useState(players[0]?.id)` — the list is empty on the first render.
+
 ### Shapes, landscape, motion (0.18.0)
 - `utils/shapes.ts`: M3 Expressive shapes as `clip-path: polygon(...)` — computed polar curves (like the icons), every radius ≤ 50 %. Achievement badges: `TIER_SHAPE` (bronze circle → silver cookie → gold sunny → platinum clover → diamond gem). ⚠️ The badge fill must differ from the card surface, or the shape is invisible (locked cards are `filled`; the badge uses an on-surface tint).
 - `phoneland` Tailwind screen = `(orientation: landscape) and (max-height: 500px)`. ScoreInput becomes a two-column grid (numpad `col-start-2 row-span-6`, the rest `col-start-1`). Pinned by the phone-landscape case in `e2e/layout.spec.ts`.
@@ -550,7 +557,8 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **52 tests** currently:
+- Specs in `e2e/`. **54 tests** currently:
+  - `page-frame.spec.ts` — page titles and frames line up on nine pages (phone + desktop), back on the title line, no back on the navigation destinations
   - `redo.spec.ts` — undo three visits, redo them one by one (button, Ctrl+Shift+Z, Ctrl+Y) at phone and desktop size, reload keeps it; a different visit after an undo drops the way forward
   - `avatars.spec.ts` — an emoji avatar (tab, skin tone, `em:` stored, lazy catalogue); a game-icons avatar is found by its German name, the picker closes, the list draws it, the path chunk loads once and never rides in an eager bundle, the value is stored
   - `correction.spec.ts` — a typed 60 stays out of the heatmap, a chip makes it exact, undo brings a typed visit back as "26 → …", an older visit is corrected from its pill, the stored heatmap never counts twice, reload keeps it all

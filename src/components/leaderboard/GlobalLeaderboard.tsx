@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Trophy, TrendingUp, Target, Award, RefreshCw } from 'lucide-react';
 import api from '../../services/api';
-import { BackButton, Card, Chip, Button, IconButton, PageShell } from '../common';
+import { Card, Chip, Button, IconButton, PageShell } from '../common';
 import { useAuth } from '../../context/AuthContext';
 import { motion } from 'framer-motion';
 import { staggerChild } from '../../utils/motion';
@@ -89,23 +89,11 @@ const GlobalLeaderboard: React.FC = () => {
 
   return (
     <PageShell
-      width="lg"
-      back={false}
+      title={t('global_leaderboard.title')}
+      subtitle={t('global_leaderboard.subtitle')}
+      onBack={() => navigate(isAuthenticated ? '/' : '/login')}
+      backLabel={isAuthenticated ? t('common.back') : t('global_leaderboard.to_login')}
     >
-        {/* Header */}
-        <BackButton
-          onClick={() => navigate(isAuthenticated ? '/' : '/login')}
-          label={isAuthenticated ? t('common.back') : t('global_leaderboard.to_login')}
-        />
-
-        <div className="text-center mb-8">
-          <h1 className="m3-headline-medium text-on-surface mb-2">
-            {t('global_leaderboard.title')}
-          </h1>
-          <p className="m3-title-medium text-on-surface-variant">
-            {t('global_leaderboard.subtitle')}
-          </p>
-        </div>
 
         {/* Metric Selector */}
         <Card variant="elevated" className="p-4 mb-6">

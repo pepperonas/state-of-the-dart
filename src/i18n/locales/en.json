@@ -651,7 +651,8 @@
   "resume": {
     "title": "Resume Games",
     "menu_title": "Resume Game",
-    "menu_desc": "{{count}} paused games",
+    "menu_desc_one": "{{count}} paused game",
+    "menu_desc_other": "{{count}} paused games",
     "no_matches": "No paused games available",
     "continue": "Resume",
     "delete": "Delete",
@@ -1743,7 +1744,8 @@
     "to_profile": "Open profile",
     "change_avatar": "Change avatar",
     "main_profile": "Main profile",
-    "stats_line": "Games: {{games}} | Avg: {{avg}}",
+    "stats_line_one": "{{count}} game · Ø {{avg}}",
+    "stats_line_other": "{{count}} games · Ø {{avg}}",
     "show_stats": "Show statistics",
     "set_main_profile": "Set as main profile",
     "delete_confirm": "Delete player “{{name}}”?"

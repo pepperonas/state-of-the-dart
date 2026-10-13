@@ -281,3 +281,68 @@ describe('page consistency', () => {
     expect(scanNestedElevation('const X = () => <Card><Card variant="filled">x</Card></Card>;')).toHaveLength(0);
   });
 });
+
+/**
+ * 0.36.0 — one page frame. Pages built their own head: some centred a narrow
+ * card, some went full width, one put back beside the title, so the title
+ * jumped sideways from page to page. Every screen behind the navigation now
+ * goes through PageShell, which keeps one frame and one header row.
+ */
+describe('page frame', () => {
+  /** Screens that legitimately draw their own full-height frame. */
+  const OWN_FRAME = new Set([
+    'common/PageShell.tsx', 'common/ErrorBoundary.tsx', 'MainMenu.tsx', 'TenantSelector.tsx',
+    'auth/AuthCallback.tsx', 'auth/ForgotPassword.tsx', 'auth/Login.tsx', 'auth/ProtectedRoute.tsx',
+    'auth/Register.tsx', 'auth/ResendVerification.tsx', 'auth/ResetPassword.tsx', 'auth/VerifyEmail.tsx',
+    'landing/Landing.tsx', 'payment/PaymentSuccess.tsx', 'payment/Pricing.tsx',
+    // Game screens: no app navigation, their own header with pause/sound/close.
+    'game/GameScreen.tsx', 'game/CricketGame.tsx', 'game/AroundTheClockGame.tsx', 'game/ShanghaiGame.tsx',
+    'training/TrainingScreen.tsx',
+  ]);
+
+  it('every other screen goes through PageShell', () => {
+    const offenders = FILES
+      .filter(([rel, src]) => !OWN_FRAME.has(rel) && /gradient-mesh/.test(stripComments(src)))
+      .map(([rel]) => rel);
+    expect(offenders, `Own page frame instead of PageShell:\n${offenders.join('\n')}`).toEqual([]);
+  });
+
+  it('a PageShell page never builds a second back button', () => {
+    const offenders = FILES
+      .filter(([rel, src]) => rel !== 'common/PageShell.tsx' && /<PageShell/.test(src) && /<BackButton/.test(stripComments(src)))
+      .map(([rel]) => rel);
+    expect(offenders).toEqual([]);
+  });
+
+  it('a PageShell page renders no page h1 of its own unless the shell has no title', () => {
+    // Two titles was the old pattern: an empty shell plus a hand-made heading.
+    const offenders: string[] = [];
+    for (const [rel, src] of FILES) {
+      if (rel === 'common/PageShell.tsx' || rel.startsWith('legal/')) continue;
+      const code = stripComments(src);
+      for (const m of code.matchAll(/<PageShell([\s\S]*?)>/g)) {
+        if (/\btitle=/.test(m[1]) && /<h1\b/.test(code.slice(m.index!, code.indexOf('</PageShell>', m.index!)))) {
+          offenders.push(rel);
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it('no max-* breakpoint variants — they compile to nothing here', () => {
+    // tailwind.config adds a raw `phoneland` screen; with a non-min-width screen
+    // Tailwind drops every max-* variant silently. `max-sm:hidden` shipped and
+    // did nothing (0.36.0). Write it mobile-first: `hidden sm:inline`.
+    const offenders = ALL_FILES.filter(([, src]) => /\bmax-(sm|md|lg|xl|2xl):/.test(stripComments(src))).map(([rel]) => rel);
+    expect(offenders).toEqual([]);
+  });
+
+  it('the navigation destinations carry no back button — the bar is the way back', () => {
+    for (const rel of ['stats/StatsOverview.tsx', 'achievements/AchievementsScreen.tsx', 'player/PlayerManagement.tsx']) {
+      const src = stripComments(FILES.find(([r]) => r === rel)![1]);
+      const shells = [...src.matchAll(/<PageShell([\s\S]*?)>/g)];
+      expect(shells.length, rel).toBeGreaterThan(0);
+      for (const m of shells) expect(m[1], rel).toContain('back={false}');
+    }
+  });
+});

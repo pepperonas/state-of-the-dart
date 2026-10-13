@@ -7,7 +7,7 @@ import {
 import { Trans, useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
-import { BackButton, Button, Card, TextField, PageShell } from '../common';
+import { Button, Card, TextField, PageShell } from '../common';
 import { type IconName, AvatarGlyph } from '../icons';
 
 /** The avatar choices, as names from the app's own icon set. */
@@ -148,14 +148,7 @@ const UserSettings: React.FC = () => {
   if (!user) return null;
 
   return (
-    <PageShell
-      width="md"
-      back={false}
-    >
-        {/* Header */}
-        <BackButton onClick={() => navigate(-1)} />
-
-        <h1 className="m3-headline-medium text-on-surface mb-8">{t('user_settings.title')}</h1>
+    <PageShell title={t('user_settings.title')} width="md" onBack={() => navigate(-1)}>
 
         {/* Success/Error Messages */}
         {success && (

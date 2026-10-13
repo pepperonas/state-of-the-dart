@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Users, Plus, Play, RefreshCw, Send,
-  Globe, Lock, Wifi, WifiOff, Crown, MessageCircle, Copy, Check, LogIn
+  Lock, Wifi, WifiOff, Crown, MessageCircle, Copy, Check, LogIn
 } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import { usePlayer } from '../../context/PlayerContext';
 import { useAuth } from '../../context/AuthContext';
 import PlayerAvatar from '../player/PlayerAvatar';
-import { Button, Card, TextField, Dialog, IconButton, Chip, BackButton } from '../common';
+import { Button, Card, TextField, Dialog, IconButton, Chip, PageShell } from '../common';
 import { useFeedback } from '../common/feedbackContext';
 import OnlineGamePanel, { type OnlineVisit } from './OnlineGamePanel';
 import { getOnlineClientSecret } from '../../utils/onlineVisit';
@@ -260,11 +260,12 @@ const OnlineMultiplayer: React.FC = () => {
   // Room View
   if (currentRoom) {
     return (
-      <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-        <div className="max-w-4xl mx-auto m3-view">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <BackButton onClick={handleLeaveRoom} label={t('online_game.leave_room')} inline />
+      // The room card carries the room name as the page h1.
+      <PageShell
+        width="md"
+        onBack={handleLeaveRoom}
+        backLabel={t('online_game.leave_room')}
+        actions={
             <div className="flex items-center gap-2">
               {connected ? (
                 <span className="flex items-center gap-1 px-3 py-1.5 rounded-m3-full bg-success-container text-on-success-container m3-label-large">
@@ -276,7 +277,8 @@ const OnlineMultiplayer: React.FC = () => {
                 </span>
               )}
             </div>
-          </div>
+        }
+      >
 
           {/* Room Info */}
           <Card variant="elevated" className="p-6 mb-6">
@@ -426,18 +428,17 @@ const OnlineMultiplayer: React.FC = () => {
               </IconButton>
             </div>
           </Card>
-        </div>
-      </div>
+      </PageShell>
     );
   }
 
   // Lobby View
   return (
-    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-      <div className="max-w-4xl mx-auto m3-view">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <BackButton onClick={() => navigate('/')} inline />
+    <PageShell
+      width="md"
+      title={t('online_game.title')}
+      subtitle={t('online_game.subtitle')}
+      actions={
           <div className="flex items-center gap-2">
             {connected ? (
               <span className="flex items-center gap-1 px-3 py-1.5 rounded-m3-full bg-success-container text-on-success-container m3-label-large">
@@ -449,15 +450,8 @@ const OnlineMultiplayer: React.FC = () => {
               </span>
             )}
           </div>
-        </div>
-
-        <Card variant="elevated" className="p-6 mb-6">
-          <h1 className="m3-headline-medium text-on-surface mb-2 flex items-center gap-3">
-            <Globe className="text-primary" />
-            {t('online_game.title')}
-          </h1>
-          <p className="text-on-surface-variant">{t('online_game.subtitle')}</p>
-        </Card>
+      }
+    >
 
         {/* Create Room Button */}
         <Button
@@ -602,8 +596,7 @@ const OnlineMultiplayer: React.FC = () => {
             </ul>
           )}
         </Card>
-      </div>
-    </div>
+    </PageShell>
   );
 };
 

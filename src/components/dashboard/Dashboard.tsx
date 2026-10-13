@@ -13,7 +13,7 @@ import { formatDate, formatDateTime } from '../../utils/dateUtils';
 import { Match } from '../../types';
 import MatchDetailModal from './MatchDetailModal';
 import { motion } from 'framer-motion';
-import { BackButton, Button, Card, AnimatedNumber } from '../common';
+import { Button, Card, AnimatedNumber, PageShell } from '../common';
 import { staggerChild } from '../../utils/motion';
 import { Icon, iconForEmoji } from '../icons';
 import ErrorState from '../common/ErrorState';
@@ -288,24 +288,18 @@ const Dashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-dvh flex items-center justify-center gradient-mesh">
-        <LoadingIndicator size={48} />
-      </div>
+      <PageShell title={t('dashboard.welcome_back', { name: user?.name })}>
+        <div className="flex justify-center py-16"><LoadingIndicator size={48} /></div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-      <div className="max-w-7xl mx-auto">
-        {/* Back Button */}
-        <BackButton onClick={() => navigate('/')} />
+    <PageShell title={t('dashboard.welcome_back', { name: user?.name })}>
         {loadError && <ErrorState className="mb-6" onRetry={loadDashboardData} />}
 
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="m3-headline-medium m3-emphasized text-on-surface mb-2">
-            {t('dashboard.welcome_back', { name: user?.name })}
-          </h1>
+        {/* Membership line */}
+        <div className="mb-8 -mt-3">
           <p className="text-on-surface-variant">
             {hasActiveSubscription ? (
               user?.subscriptionStatus === 'lifetime' ? (
@@ -532,8 +526,7 @@ const Dashboard: React.FC = () => {
             <LoadingIndicator size={48} />
           </div>
         )}
-      </div>
-    </div>
+    </PageShell>
   );
 };
 

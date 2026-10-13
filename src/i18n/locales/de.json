@@ -651,7 +651,8 @@
   "resume": {
     "title": "Spiele fortsetzen",
     "menu_title": "Spiel fortsetzen",
-    "menu_desc": "{{count}} pausierte Spiele",
+    "menu_desc_one": "{{count}} pausiertes Spiel",
+    "menu_desc_other": "{{count}} pausierte Spiele",
     "no_matches": "Keine pausierten Spiele vorhanden",
     "continue": "Fortsetzen",
     "delete": "Löschen",
@@ -1743,7 +1744,8 @@
     "to_profile": "Zum Profil",
     "change_avatar": "Avatar ändern",
     "main_profile": "Haupt-Profil",
-    "stats_line": "Spiele: {{games}} | Ø: {{avg}}",
+    "stats_line_one": "{{count}} Spiel · Ø {{avg}}",
+    "stats_line_other": "{{count}} Spiele · Ø {{avg}}",
     "show_stats": "Statistiken anzeigen",
     "set_main_profile": "Als Haupt-Profil setzen",
     "delete_confirm": "Spieler „{{name}}“ löschen?"

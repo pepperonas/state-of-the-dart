@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BarChart, TrendingUp, Target, Calendar, Filter, Trophy } from 'lucide-react';
+import { TrendingUp, Target, Calendar, Filter, Trophy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { TrainingSession, TrainingType } from '../../types';
 import { usePlayer } from '../../context/PlayerContext';
@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 import { api } from '../../services/api';
 import { toDateOrNow, formatDateTime, formatDateShort } from '../../utils/dateUtils';
 import { staggerChild } from '../../utils/motion';
-import { BackButton, Button, Card, Select } from '../common';
+import { Button, Card, PageShell, Select } from '../common';
 import { AvatarGlyph } from '../icons';
 import { useChartTheme } from '../../utils/chartTheme';
 
@@ -152,11 +152,7 @@ const TrainingStats: React.FC = () => {
 
   if (!currentPlayer) {
     return (
-      <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-        <div className="max-w-6xl mx-auto">
-          {/* Back Button */}
-          <BackButton onClick={() => navigate('/training')} />
-          <h1 className="m3-headline-medium text-on-surface mb-6">{t('training_stats.title')}</h1>
+      <PageShell title={t('training_stats.title')} onBack={() => navigate('/training')}>
 
           <Card variant="elevated" className="p-8">
             <p className="m3-body-large text-on-surface-variant mb-6 text-center">{t('training_stats.select_prompt')}</p>
@@ -187,23 +183,12 @@ const TrainingStats: React.FC = () => {
               </div>
             )}
           </Card>
-        </div>
-      </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <BackButton onClick={() => navigate('/training')} inline />
-          <h1 className="m3-headline-medium text-on-surface flex items-center gap-2">
-            <BarChart size={32} />
-            {t('training_stats.title')}
-          </h1>
-          <div className="w-24" /> {/* Spacer for alignment */}
-        </div>
+    <PageShell title={t('training_stats.title')} onBack={() => navigate('/training')}>
 
         {/* Filters */}
         <Card variant="filled" className="p-4 mb-6">
@@ -439,8 +424,7 @@ const TrainingStats: React.FC = () => {
             </div>
           )}
         </Card>
-      </div>
-    </div>
+    </PageShell>
   );
 };
 

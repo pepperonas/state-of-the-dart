@@ -9,7 +9,7 @@ import ResumeScoreTable from './ResumeScoreTable';
 import { generateMatchName } from '../../utils/matchNames';
 import { reconstructMatch } from '../../utils/matchReconstruction';
 import { getLocalGameSummaries, clearGameState, LocalGameSummary } from '../../utils/gameStorage';
-import { BackButton, Button, Card, PageShell } from '../common';
+import { Button, Card, PageShell } from '../common';
 import { ruleTags } from '../../utils/checkRules';
 import LoadingIndicator from '../common/LoadingIndicator';
 
@@ -168,15 +168,7 @@ const ResumeGameScreen: React.FC = () => {
   const isEmpty = matches.length === 0 && localGames.length === 0;
 
   return (
-    <PageShell
-      width="sm"
-      back={false}
-    >
-        <BackButton onClick={() => navigate('/')} />
-
-        <h1 className="m3-headline-medium text-on-surface mb-6">
-          {t('resume.title')}
-        </h1>
+    <PageShell title={t('resume.title')} width="sm">
 
         {loading ? (
           <div className="flex justify-center py-16">
