@@ -7,6 +7,27 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.41.0] - 2026-10-13
+
+### Changed — favicon and app icon
+- New mark: a dartboard (red/green rings, cream and black segments) with a dart
+  in the bull on a deep blue tile. The old favicon was hairlines on black and
+  disappeared in a browser tab.
+- Geometry is computed (`tools/app-icon/gen.mjs`), PNGs rendered with Chromium
+  (`tools/app-icon/render.mjs`): `icon-192/512.png` (rounded, "any"),
+  `icon-maskable-512.png` (edge to edge, board in the 80 % safe zone),
+  `apple-touch-icon.png` (180, no transparent corners), `favicon.ico` (16 + 32),
+  `favicon.svg`. Favicon sizes use a simplified board (rings only) and a
+  thicker dart — wedges blur to grey at 16 px.
+- The manifest no longer declares one 2048 px JPEG as 192 and 512 and as
+  "any" and "maskable" at once. The two old JPEGs (830 KB, precached by the
+  service worker) are gone. The landing page uses the same favicon.
+
+### Tests
+- `appIcon.test.ts`: SVGs equal the generator output, manifest PNG sizes are
+  real, links exist, ico entries, no transparent corners on the masked icons.
+  4 mutation probes caught.
+
 ## [0.40.0] - 2026-10-13
 
 ### Fixed
