@@ -19,6 +19,9 @@ import { loadLastGameSettings } from '../utils/matchSetup';
 import InstallCard from '../pwa/InstallCard';
 import { ruleTags } from '../utils/checkRules';
 import OnboardingCard from './onboarding/OnboardingCard';
+import { Icon } from './icons';
+import { lastTileSpan } from '../utils/tileSpan';
+import type { IconName } from './icons/paths';
 
 /** M3 tonal presets — full class strings (Tailwind JIT can't see interpolated names). */
 type Tone = 'primary' | 'secondary' | 'tertiary' | 'success' | 'error';
@@ -32,13 +35,15 @@ const TONE_CHIP: Record<Tone, string> = {
 
 type MenuItem = {
   title: string;
-  icon: typeof Target;
+  /** A lucide component or a glyph of the app's own set (game modes). */
+  icon: typeof Target | IconName;
   description: string;
   onClick: () => void;
   tone: Tone;
   /** Shown as a "Beta" label — works partly, not finished. */
   beta?: boolean;
 };
+
 
 /**
  * The home screen.
@@ -85,21 +90,23 @@ const MainMenu: React.FC = () => {
       id: 'play',
       title: t('home.section_play'),
       items: [
-        { title: t('menu.cricket'), icon: Target, description: t('menu.cricket_desc'), onClick: () => navigate('/cricket'), tone: 'success' },
-        { title: t('menu.around_the_clock'), icon: Target, description: t('menu.around_the_clock_desc'), onClick: () => navigate('/around-the-clock'), tone: 'secondary' },
-        { title: t('menu.shanghai'), icon: Target, description: t('menu.shanghai_desc'), onClick: () => navigate('/shanghai'), tone: 'tertiary' },
-        { title: t('menu.training'), icon: Dumbbell, description: t('menu.training_desc'), onClick: () => navigate('/training'), tone: 'success' },
-        { title: t('menu.tournaments'), icon: Trophy, description: t('menu.tournaments_desc'), onClick: () => navigate('/tournament'), tone: 'secondary' },
-        { title: t('menu.online_multiplayer'), icon: Target, description: t('menu.online_multiplayer_desc'), onClick: () => navigate('/online'), tone: 'tertiary' },
+        // 0.38.0: one tone per kind — play primary, practice secondary, review
+        // tertiary — and every game mode its own glyph (four shared the target).
+        { title: t('menu.cricket'), icon: 'cricket', description: t('menu.cricket_desc'), onClick: () => navigate('/cricket'), tone: 'primary' },
+        { title: t('menu.around_the_clock'), icon: 'clock', description: t('menu.around_the_clock_desc'), onClick: () => navigate('/around-the-clock'), tone: 'primary' },
+        { title: t('menu.shanghai'), icon: 'dart', description: t('menu.shanghai_desc'), onClick: () => navigate('/shanghai'), tone: 'primary' },
+        { title: t('menu.training'), icon: Dumbbell, description: t('menu.training_desc'), onClick: () => navigate('/training'), tone: 'secondary' },
+        { title: t('menu.tournaments'), icon: Trophy, description: t('menu.tournaments_desc'), onClick: () => navigate('/tournament'), tone: 'primary' },
+        { title: t('menu.online_multiplayer'), icon: 'globe', description: t('menu.online_multiplayer_desc'), onClick: () => navigate('/online'), tone: 'primary' },
       ],
     },
     {
       id: 'review',
       title: t('home.section_review'),
       items: [
-        { title: t('menu.dashboard'), icon: TrendingUp, description: t('menu.dashboard_desc'), onClick: () => navigate('/dashboard'), tone: 'primary' },
-        { title: t('menu.match_history'), icon: ClipboardList, description: t('menu.match_history_desc'), onClick: () => navigate('/match-history'), tone: 'secondary' },
-        { title: t('menu.leaderboard'), icon: Medal, description: t('menu.leaderboard_desc'), onClick: () => navigate('/leaderboard'), tone: 'primary' },
+        { title: t('menu.dashboard'), icon: TrendingUp, description: t('menu.dashboard_desc'), onClick: () => navigate('/dashboard'), tone: 'tertiary' },
+        { title: t('menu.match_history'), icon: ClipboardList, description: t('menu.match_history_desc'), onClick: () => navigate('/match-history'), tone: 'tertiary' },
+        { title: t('menu.leaderboard'), icon: Medal, description: t('menu.leaderboard_desc'), onClick: () => navigate('/leaderboard'), tone: 'tertiary' },
         { title: t('menu.global_leaderboard'), icon: Trophy, description: t('menu.global_leaderboard_desc'), onClick: () => navigate('/global-leaderboard'), tone: 'tertiary' },
         { title: t('menu.achievements'), icon: Award, description: t('menu.achievements_desc'), onClick: () => navigate('/achievements'), tone: 'tertiary' },
       ],
@@ -206,8 +213,8 @@ const MainMenu: React.FC = () => {
           <section key={section.id} className="mb-8" aria-labelledby={`sec-${section.id}`}>
             <h2 id={`sec-${section.id}`} className="m3-title-medium text-on-surface-variant mb-3">{section.title}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {section.items.map(item => {
-                const Icon = item.icon;
+              {section.items.map((item, i) => {
+                const LucideIcon = typeof item.icon === 'string' ? null : item.icon;
                 return (
                   <motion.button
                     key={item.title}
@@ -216,11 +223,15 @@ const MainMenu: React.FC = () => {
                     whileTap={{ scale: 0.97 }}
                     transition={springSpatialFast}
                     onClick={item.onClick}
-                    className="m3-card m3-elevated m3-interactive m3-state-layer text-left p-4 relative overflow-hidden"
+                    className={`m3-card m3-elevated m3-interactive m3-state-layer text-left p-4 relative overflow-hidden ${
+                      i === section.items.length - 1 ? lastTileSpan(section.items.length) : ''
+                    }`}
                   >
                     <div className="flex items-center gap-4">
                       <div className={`flex-shrink-0 w-12 h-12 rounded-m3-lg flex items-center justify-center ${TONE_CHIP[item.tone]}`}>
-                        <Icon size={24} aria-hidden="true" />
+                        {LucideIcon
+                          ? <LucideIcon size={24} aria-hidden="true" />
+                          : <Icon name={item.icon as IconName} size={24} />}
                       </div>
                       <div className="min-w-0">
                         <h3 className="m3-title-medium text-on-surface flex items-center gap-2 min-w-0">

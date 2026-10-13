@@ -1392,6 +1392,7 @@
     "weekly": "Wöchentlich",
     "win_rate": "Siegquote",
     "win_rate_percent": "Siegquote %",
+    "won_of": "{{won}} von {{total}} gewonnen",
     "win_stats": "Sieg-Statistik",
     "wins": "Siege",
     "won": "Gewonnen",
