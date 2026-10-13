@@ -11,14 +11,12 @@ import {
   AchievementCategory,
   AchievementScope,
   getTierColor,
-  getRarityColor,
   getAchievementScope,
-  getScopeColor,
   ACHIEVEMENTS,
 } from '../../types/achievements';
 import { formatDate } from '../../utils/dateUtils';
 import logger from '../../utils/logger';
-import { Card, Chip, PageShell, Select } from '../common';
+import { Card, Chip, PageShell, Select, Switch } from '../common';
 import { Icon, iconForEmoji } from '../icons';
 import { readableTextOn } from '../../utils/color';
 import { achievementName, achievementDescription } from '../../utils/achievementText';
@@ -181,57 +179,40 @@ const AchievementsScreen: React.FC = () => {
           </div>
         </Card>
 
-        {/* Filters */}
-        <Card variant="filled" className="p-4 mb-6">
-          <div className="flex items-center gap-2 mb-3 text-on-surface">
-            <Filter size={20} />
-            <span className="m3-title-small">{t('achievements.filter')}</span>
-          </div>
-
-          {/* Category Filter */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            {categories.map((cat, i) => (
-              <motion.div key={cat} {...staggerChild(Math.min(i, 8))}>
-                <Chip
-                  selected={filterCategory === cat}
-                  onClick={() => setFilterCategory(cat)}
-                >
-                  {cat === 'all' ? t('achievements.all') : t(`achievements.category_${cat}`)}
-                </Chip>
-              </motion.div>
+        {/* Filters — 0.39.0: one row of categories; area and "unlocked only"
+            sit beside it as a dropdown and a switch instead of a second row of
+            nine chips and a checkbox inside a box. */}
+        <div className="mb-6 space-y-3" data-testid="achievement-filters">
+          <div role="group" aria-label={t('achievements.filter')} className="flex flex-nowrap gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+            {categories.map(cat => (
+              <Chip
+                key={cat}
+                selected={filterCategory === cat}
+                onClick={() => setFilterCategory(cat)}
+                className="shrink-0 whitespace-nowrap"
+              >
+                {cat === 'all' ? t('achievements.all') : t(`achievements.category_${cat}`)}
+              </Chip>
             ))}
           </div>
-
-          {/* Scope Filter */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            {scopes.map((scope, i) => {
-              const isActive = filterScope === scope;
-              const color = scope === 'all' ? undefined : getScopeColor(scope);
-              return (
-                <motion.div key={scope} {...staggerChild(Math.min(i, 8))}>
-                  <Chip
-                    selected={isActive}
-                    onClick={() => setFilterScope(scope)}
-                    style={isActive && color ? { backgroundColor: color + '40', color, borderColor: color } : undefined}
-                  >
-                    {t(`achievements.scope_${scope}`)}
-                  </Chip>
-                </motion.div>
-              );
-            })}
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+            <div className="flex items-center gap-2">
+              <Filter size={18} className="text-on-surface-variant" aria-hidden="true" />
+              <Select<AchievementScope | 'all'>
+                value={filterScope}
+                onChange={setFilterScope}
+                size="sm"
+                inline
+                aria-label={t('achievements.scope_filter')}
+                options={scopes.map(scope => ({ value: scope, label: t(`achievements.scope_${scope}`) }))}
+              />
+            </div>
+            <label className="flex items-center gap-3 cursor-pointer min-h-12">
+              <Switch checked={showOnlyUnlocked} onChange={setShowOnlyUnlocked} label={t('achievements.show_unlocked_only')} />
+              <span className="m3-body-medium text-on-surface-variant" aria-hidden="true">{t('achievements.show_unlocked_only')}</span>
+            </label>
           </div>
-
-          {/* Show Only Unlocked Toggle */}
-          <label className="flex items-center gap-2 cursor-pointer min-h-12">
-            <input
-              type="checkbox"
-              checked={showOnlyUnlocked}
-              onChange={(e) => setShowOnlyUnlocked(e.target.checked)}
-              className="w-5 h-5 rounded accent-[var(--m3-primary)]"
-            />
-            <span className="m3-body-medium text-on-surface-variant">{t('achievements.show_unlocked_only')}</span>
-          </label>
-        </Card>
+        </div>
 
         {/* Achievements Grid */}
         {filteredAchievements.length > 0 ? (
@@ -271,8 +252,6 @@ interface AchievementCardProps {
 const AchievementCard = React.memo<AchievementCardProps>(({ achievement, unlocked, progress, unlockedAt }) => {
   const { t } = useTranslation();
   const isHidden = achievement.hidden && !unlocked;
-  const scope = getAchievementScope(achievement);
-  const scopeColor = getScopeColor(scope);
 
   return (
     <Card
@@ -286,13 +265,19 @@ const AchievementCard = React.memo<AchievementCardProps>(({ achievement, unlocke
       <div className="flex items-start gap-3 mb-3">
         {/* The outline tells the tier at a glance (circle → cookie → sunny →
             clover → gem); computed M3 Expressive shapes, utils/shapes.ts. */}
+        {/* 0.39.0: the tier is the shape AND its colour once unlocked — the
+            "BRONZE" chip said it a third time. */}
         <div
           className={`w-12 h-12 flex-shrink-0 flex items-center justify-center ${
-            unlocked ? 'bg-secondary-container text-on-secondary-container' : 'bg-[color-mix(in_srgb,var(--m3-on-surface)_12%,transparent)] text-on-surface-variant'
+            unlocked ? '' : 'bg-[color-mix(in_srgb,var(--m3-on-surface)_12%,transparent)] text-on-surface-variant'
           }`}
-          style={{ clipPath: shapePolygon(TIER_SHAPE[achievement.tier]) }}
-          title={achievement.tier}
+          style={{
+            clipPath: shapePolygon(TIER_SHAPE[achievement.tier]),
+            ...(unlocked ? { backgroundColor: getTierColor(achievement.tier), color: readableTextOn(getTierColor(achievement.tier)) } : {}),
+          }}
+          title={t(`achievement_toast.tier_${achievement.tier}`)}
           data-shape={TIER_SHAPE[achievement.tier]}
+          data-testid="achievement-badge"
         >
           <Icon name={isHidden ? 'question' : iconForEmoji(achievement.icon)} size={26} />
         </div>
@@ -325,27 +310,15 @@ const AchievementCard = React.memo<AchievementCardProps>(({ achievement, unlocke
       )}
 
       <div className="flex items-center justify-between text-xs flex-wrap gap-1">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span
-            className="px-2 py-1 rounded-m3-full m3-label-small"
-            style={{ backgroundColor: getTierColor(achievement.tier), color: readableTextOn(getTierColor(achievement.tier)) }}
-          >
-            {achievement.tier.toUpperCase()}
-          </span>
+        {/* Tier in words (the shape is not enough for a screen reader) and
+            rarity as one quiet chip. The area lives in the filter only. */}
+        <div className="flex items-center gap-2 flex-wrap m3-label-medium text-on-surface-variant" data-testid="achievement-meta">
+          <span>{t(`achievement_toast.tier_${achievement.tier}`)}</span>
           {achievement.rarity && (
-            <span
-              className="px-2 py-1 rounded-m3-full m3-label-small"
-              style={{ backgroundColor: getRarityColor(achievement.rarity), color: readableTextOn(getRarityColor(achievement.rarity)) }}
-            >
-              {achievement.rarity.toUpperCase()}
+            <span className="px-2 py-0.5 rounded-m3-full border border-outline-variant">
+              {t(`achievements.rarity_${achievement.rarity}`)}
             </span>
           )}
-          <span
-            className="px-2 py-1 rounded-m3-full m3-label-small"
-            style={{ backgroundColor: scopeColor, color: readableTextOn(scopeColor) }}
-          >
-            {t(`achievements.scope_${scope}`)}
-          </span>
         </div>
         <div className="flex items-center gap-1 px-2 py-1 rounded-m3-full bg-tertiary-container text-on-tertiary-container m3-label-medium">
           <Star size={14} />
