@@ -1155,7 +1155,8 @@
     "cta_title": "Want to appear on the leaderboard?",
     "cta_text": "Sign up for free and start your 30-day trial!",
     "register": "Sign up now",
-    "login": "Sign in"
+    "login": "Sign in",
+    "metric_label": "Metric"
   },
   "heatmap": {
     "exact_share": "{{exact}} of {{total}} darts recorded exactly.",
@@ -1208,7 +1209,8 @@
     "active_players": "Active players",
     "avg_games": "Ø games",
     "total_180s": "Total 180s",
-    "total_achievements": "Total achievements"
+    "total_achievements": "Total achievements",
+    "category_label": "Category"
   },
   "match_detail_extra": {
     "average": "Average",

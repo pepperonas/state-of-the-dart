@@ -224,7 +224,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                     </div>
                     <div className="flex-1 text-left">
                       <p className={`font-semibold ${settings.theme === 'modern' ? 'text-on-primary-container' : 'text-on-surface'}`}>{t('settings.modern_minimalist')}</p>
-                      <p className={`text-sm ${settings.theme === 'modern' ? 'text-on-primary-container' : 'text-on-surface-variant'}`}>{t('settings.modern_desc')}</p>
+                      <p className={`m3-body-medium ${settings.theme === 'modern' ? 'text-on-primary-container' : 'text-on-surface-variant'}`}>{t('settings.modern_desc')}</p>
                     </div>
                     {settings.theme === 'modern' && (
                       <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
@@ -249,7 +249,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                     </div>
                     <div className="flex-1 text-left">
                       <p className={`font-semibold ${settings.theme === 'modern-light' ? 'text-on-primary-container' : 'text-on-surface'}`}>{t('settings.modern_light')}</p>
-                      <p className={`text-sm ${settings.theme === 'modern-light' ? 'text-on-primary-container' : 'text-on-surface-variant'}`}>{t('settings.modern_light_desc')}</p>
+                      <p className={`m3-body-medium ${settings.theme === 'modern-light' ? 'text-on-primary-container' : 'text-on-surface-variant'}`}>{t('settings.modern_light_desc')}</p>
                     </div>
                     {settings.theme === 'modern-light' && (
                       <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
@@ -321,7 +321,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 {/* Test Sound Buttons */}
                 <div className="grid grid-cols-2 gap-2">
                   <Button
-                    variant="success"
+                    variant="filled"
                     fullWidth
                     icon={<Play size={18} />}
                     onClick={() => audioSystem.playSound('/sounds/caller/180.mp3')}
@@ -436,7 +436,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 </Button>
 
                 <Button
-                  variant="success"
+                  variant="filled"
                   fullWidth
                   icon={<Upload size={20} />}
                   onClick={handleImportClick}
@@ -499,7 +499,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                     >
                       <div className="flex items-start justify-between mb-2">
                         <h4 className="font-semibold text-on-surface">{report.title}</h4>
-                        <span className={`px-2 py-1 text-xs rounded-full font-semibold uppercase ${
+                        <span className={`px-2 py-1 m3-label-medium rounded-full uppercase ${
                           report.status === 'open' ? 'bg-error-container text-on-error-container' :
                           report.status === 'in_progress' ? 'bg-primary-container text-on-primary-container' :
                           report.status === 'resolved' ? 'bg-success-container text-on-success-container' :
@@ -613,7 +613,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block m3-label-large text-on-surface-variant mb-2">{t('settings.status')}</label>
-                  <span className={`inline-block px-3 py-1.5 text-sm rounded-full font-semibold uppercase ${
+                  <span className={`inline-block px-3 py-1.5 m3-label-large rounded-full uppercase ${
                     selectedBugReport.status === 'open' ? 'bg-error-container text-on-error-container' :
                     selectedBugReport.status === 'in_progress' ? 'bg-primary-container text-on-primary-container' :
                     selectedBugReport.status === 'resolved' ? 'bg-success-container text-on-success-container' :
@@ -625,7 +625,7 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
 
                 <div>
                   <label className="block m3-label-large text-on-surface-variant mb-2">{t('settings.severity')}</label>
-                  <span className={`inline-block px-3 py-1.5 text-sm rounded font-semibold ${
+                  <span className={`inline-block px-3 py-1.5 m3-label-large rounded ${
                     selectedBugReport.severity === 'critical' ? 'bg-error-container text-on-error-container' :
                     selectedBugReport.severity === 'high' ? 'bg-tertiary-container text-on-tertiary-container' :
                     selectedBugReport.severity === 'medium' ? 'bg-secondary-container text-on-secondary-container' :

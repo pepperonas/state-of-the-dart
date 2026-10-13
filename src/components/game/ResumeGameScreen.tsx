@@ -202,7 +202,7 @@ const ResumeGameScreen: React.FC = () => {
                             {generateMatchName(match.id)}
                           </h3>
                           <span
-                            className={`m3-label-large text-xs px-2 py-0.5 rounded-m3-full shrink-0 ${
+                            className={`m3-label-medium px-2 py-0.5 rounded-m3-full shrink-0 ${
                               match.status === 'paused'
                                 ? 'bg-tertiary-container text-on-tertiary-container'
                                 : 'bg-primary-container text-on-primary-container'
@@ -301,7 +301,7 @@ const ResumeGameScreen: React.FC = () => {
                         <h3 className="m3-title-medium text-on-surface truncate">
                           {getGameTypeLabel(game.gameType)}
                         </h3>
-                        <span className="m3-label-large text-xs px-2 py-0.5 rounded-m3-full shrink-0 bg-secondary-container text-on-secondary-container">
+                        <span className="m3-label-medium px-2 py-0.5 rounded-m3-full shrink-0 bg-secondary-container text-on-secondary-container">
                           {t('resume.local_game')}
                         </span>
                       </div>

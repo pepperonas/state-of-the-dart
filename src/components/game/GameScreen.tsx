@@ -53,7 +53,7 @@ import { createAdaptiveBotPlayer, getAdaptiveBotConfigs, generateBotTurn, Adapti
 import BackButton from '../common/BackButton';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useHandover } from '../../hooks/useHandover';
-import { Button, IconButton, Card, Dialog, Select, Switch, Snackbar, SegmentedButton, LoadingIndicator, useFeedback } from '../common';
+import { Button, IconButton, Card, Dialog, Select, Switch, Snackbar, SegmentedButton, LoadingIndicator, useFeedback, PageShell } from '../common';
 import { loadLastGameSettings, saveLastGameSettings, rotateForRematch, standings, findReusableGuest, GUEST_NAME } from '../../utils/matchSetup';
 const MatchDetailModal = lazy(() => import('../dashboard/MatchDetailModal'));
 import { springSpatialDefault, springSpatialFast, effectsDefault } from '../../utils/motion';
@@ -1126,7 +1126,16 @@ const GameScreen: React.FC = () => {
   
   if (showSetup) {
     return (
-      <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
+      <PageShell
+        title={t('game.game_setup')}
+        icon={<Icon name="target" size={26} />}
+        width="md"
+        onBack={() => {
+          forceNewGameRef.current = false;
+          isNavigatingAwayRef.current = true;
+          navigate('/');
+        }}
+      >
         <Snackbar
           open={endedMatchId !== null && state.currentMatch?.id === endedMatchId}
           message={t('game.match_ended')}
@@ -1134,19 +1143,11 @@ const GameScreen: React.FC = () => {
           onAction={handleUndoEndMatch}
           onClose={() => setEndedMatchId(null)}
         />
-        <div className="max-w-4xl mx-auto">
-          <BackButton onClick={() => {
-              forceNewGameRef.current = false;
-              isNavigatingAwayRef.current = true;
-              navigate('/');
-            }} />
-          
           <Card variant="elevated" className="p-6 md:p-8">
-            <h2 className="m3-headline-medium mb-6 text-on-surface">{t('game.game_setup')}</h2>
 
             <div className="mb-6">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="m3-title-medium text-on-surface">{t('game.select_players')}</h3>
+                <h2 className="m3-title-medium text-on-surface">{t('game.select_players')}</h2>
                 {getLastPlayers().length > 0 && (
                   <Button
                     variant="tonal"
@@ -1322,7 +1323,7 @@ const GameScreen: React.FC = () => {
                       />
                       <div className="flex gap-2">
                         <Button
-                          variant="success"
+                          variant="filled"
                           size="sm"
                           fullWidth
                           onClick={async () => {
@@ -1439,7 +1440,7 @@ const GameScreen: React.FC = () => {
             </div>
 
             <Button
-              variant="success"
+              variant="filled"
               size="lg"
               fullWidth
               onClick={handleStartGame}
@@ -1448,8 +1449,7 @@ const GameScreen: React.FC = () => {
               {t('game.start_game')}
             </Button>
           </Card>
-        </div>
-      </div>
+      </PageShell>
     );
   }
   
@@ -1560,7 +1560,7 @@ const GameScreen: React.FC = () => {
 
             <div className="flex flex-col md:flex-row gap-4 justify-center">
               <Button
-                variant="success"
+                variant="filled"
                 size="lg"
                 onClick={() => {
                   // The other player throws first in the rematch.
@@ -1906,9 +1906,9 @@ const GameScreen: React.FC = () => {
           return (
             <div className="text-center py-12">
               <Flame size={48} className="mx-auto mb-4 text-on-surface-variant" />
-              <p className="text-on-surface-variant text-lg">{t('game_screen.no_heatmap_data', { name: playerName })}</p>
+              <p className="text-on-surface-variant m3-body-large">{t('game_screen.no_heatmap_data', { name: playerName })}</p>
               {/* Typed totals only: say why the board stays empty and how to fill it. */}
-              <p className="text-on-surface-variant text-sm mt-2" data-testid={playerHeatmap && playerHeatmap.share.total > 0 ? 'heatmap-only-typed' : undefined}>
+              <p className="text-on-surface-variant m3-body-medium mt-2" data-testid={playerHeatmap && playerHeatmap.share.total > 0 ? 'heatmap-only-typed' : undefined}>
                 {playerHeatmap && playerHeatmap.share.total > 0
                   ? `${t('heatmap.only_typed')} ${t('heatmap.exact_hint')}`
                   : t('game_screen.heatmap_hint')}
@@ -1920,7 +1920,7 @@ const GameScreen: React.FC = () => {
         return (
           <div>
             <div className="text-center mb-4">
-              <span className="text-lg font-bold text-on-surface">{playerName}</span>
+              <span className="m3-title-medium text-on-surface">{playerName}</span>
               <span className="text-on-surface-variant ml-2">{t('game_screen.darts_count', { count: playerHeatmap.totalDarts })}</span>
             </div>
             <DartboardHeatmap heatmapData={playerHeatmap} maxWidth={460} compact />
@@ -2188,7 +2188,7 @@ const GameScreen: React.FC = () => {
             </div>
 
             {/* LEG / SET text with glow */}
-            <div className="text-6xl md:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 mb-2"
+            <div className="m3-display-large m3-emphasized text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500 mb-2"
                  style={{ textShadow: '0 0 40px rgba(245, 158, 11, 0.5)' }}>
               {legWonAnimation.setWon
                 ? t('game_screen.set_number', { n: legWonAnimation.setWon.setNumber })
@@ -2196,7 +2196,7 @@ const GameScreen: React.FC = () => {
             </div>
 
             {/* Winner name */}
-            <div className="text-3xl md:text-4xl font-bold text-on-surface mb-4">
+            <div className="m3-headline-large text-on-surface mb-4">
               {legWonAnimation.winnerName}
             </div>
 
@@ -2213,14 +2213,14 @@ const GameScreen: React.FC = () => {
                           key={i}
                           className={`w-4 h-4 rounded-full transition ${
                             i < won
-                              ? 'bg-gradient-to-r from-yellow-400 to-amber-500 shadow-lg shadow-amber-500/50'
+                              ? 'bg-gradient-to-r from-yellow-400 to-amber-500 shadow-m3-2'
                               : 'bg-surface-container-highest'
                           }`}
                         />
                       ))}
                     </div>
                   </div>
-                  <div className="text-xl text-on-surface-variant">
+                  <div className="m3-title-large text-on-surface-variant">
                     {legWonAnimation.setWon
                       ? t('game_screen.sets_progress', { won, total })
                       : t('game_screen.legs_progress', { won, total })}

@@ -89,7 +89,7 @@ describe('PlayerRow', () => {
     expect(rank).toHaveClass('sotd-rank-badge');
     const avatarWrap = rank.parentElement!;
     expect(avatarWrap.querySelector('svg, img, span.rounded-full, .rounded-full')).toBeTruthy();
-    const restBox = container.querySelector('.text-3xl')!.closest('div')!;
+    const restBox = container.querySelector('.m3-headline-large')!.closest('div')!;
     expect(restBox.parentElement!.contains(rank) && restBox.parentElement === rank.parentElement).toBe(false);
     expect(rank.nextElementSibling).toBeNull();
     expect(rank).toHaveTextContent('Platz 2 im Leg');

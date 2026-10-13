@@ -413,7 +413,7 @@ const StatsOverview: React.FC = () => {
                 {/* 0.38.0: three headline figures, then calm detail tiles.
                     Twelve equal tiles, four of them randomly coloured, made
                     every number shout; a zero now reads as one. */}
-                <div data-testid="stats-hero" className="grid sm:grid-cols-3 gap-4">
+                <div data-testid="stats-hero" className="grid grid-cols-3 gap-2 sm:gap-4">
                   <motion.div {...staggerChild(0)}>
                     <HeroStat label={t('stats_overview.games')} value={String(selectedPlayer.stats.gamesPlayed)} />
                   </motion.div>
@@ -1074,7 +1074,6 @@ const StatsOverview: React.FC = () => {
                   </div>
                 ) : (
                   <Card variant="outlined" className="p-12 text-center border-2 border-dashed border-outline-variant">
-                    <div className="text-8xl mb-6"></div>
                     <h3 className="m3-headline-small text-on-surface mb-4">{t('stats_overview.no_throw_data')}</h3>
                     <p className="text-on-surface-variant m3-body-large mb-6">
                       {t('stats_overview.no_throw_data_hint')}
@@ -1105,14 +1104,19 @@ const StatsOverview: React.FC = () => {
 };
 
 /** A headline figure: big number, optional line under it, optional win ring. */
+/**
+ * A headline figure. 0.43.0: on a phone the three stand side by side as compact
+ * tiles — stacked, they were three tall cards that filled the first screen.
+ * There the ring and the sub line give way; the figure itself stays large.
+ */
 export const HeroStat: React.FC<{ label: string; value: string; sub?: string; ring?: number | null }> = ({ label, value, sub, ring }) => (
-  <div className="h-full rounded-m3-lg bg-surface-container-high p-5 flex items-center gap-4">
-    {ring != null && <WinRing share={ring} />}
+  <div className="h-full rounded-m3-lg bg-surface-container-high p-3 sm:p-5 flex items-center gap-4" data-hero-stat>
+    {ring != null && <span className="hidden sm:block shrink-0"><WinRing share={ring} /></span>}
     <div className="min-w-0">
-      <div className="m3-label-large text-on-surface-variant">{label}</div>
-      <div className="m3-display-small m3-emphasized text-on-surface tabular-nums">{value}</div>
+      <div className="m3-label-large text-on-surface-variant hyphens-auto break-words">{label}</div>
+      <div className="m3-display-small sotd-hero-value m3-emphasized text-on-surface tabular-nums">{value}</div>
       {/* The line is reserved even when empty, so the three figures share a baseline. */}
-      <div className="m3-body-medium text-on-surface-variant mt-0.5" aria-hidden={sub ? undefined : true}>{sub ?? '\u00a0'}</div>
+      <div className="hidden sm:block m3-body-medium text-on-surface-variant mt-0.5" aria-hidden={sub ? undefined : true}>{sub ?? '\u00a0'}</div>
     </div>
   </div>
 );

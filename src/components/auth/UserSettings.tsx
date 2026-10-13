@@ -185,7 +185,7 @@ const UserSettings: React.FC = () => {
                     onClick={() => !isAvatarUrl(avatar) && setShowAvatarPicker(!showAvatarPicker)}
                     aria-label={isAvatarUrl(avatar) ? t('user_settings.avatar') : t('user_settings.click_to_change_avatar')}
                     aria-expanded={isAvatarUrl(avatar) ? undefined : showAvatarPicker}
-                    className={`w-16 h-16 text-4xl bg-surface-container border border-outline-variant rounded-m3-md transition-colors flex items-center justify-center ${
+                    className={`w-16 h-16 m3-display-small bg-surface-container border border-outline-variant rounded-m3-md transition-colors flex items-center justify-center ${
                       isAvatarUrl(avatar) ? 'cursor-default' : 'hover:bg-surface-container-high'
                     }`}
                   >
@@ -208,7 +208,7 @@ const UserSettings: React.FC = () => {
                           setAvatar(emoji);
                           setShowAvatarPicker(false);
                         }}
-                        className={`w-10 h-10 text-2xl rounded-m3-md hover:bg-surface-container-high transition-colors ${
+                        className={`w-10 h-10 m3-headline-small rounded-m3-md hover:bg-surface-container-high transition-colors ${
                           avatar === emoji ? 'bg-primary-container ring-2 ring-primary' : ''
                         }`}
                       >

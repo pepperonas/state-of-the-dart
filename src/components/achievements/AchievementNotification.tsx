@@ -185,7 +185,7 @@ const NotificationCard: React.FC<{
           <div className="flex items-center justify-between mb-3">
             {/* No opacity loop on text — it dims the label below AA half the time. */}
             <span
-              className="text-xs font-bold tracking-[0.2em] uppercase"
+              className="m3-label-medium tracking-[0.2em] uppercase"
               style={{ color: tierColor }}
             >
               {t('achievement_toast.unlocked_by', { name: playerName })}
@@ -202,7 +202,7 @@ const NotificationCard: React.FC<{
           {/* Icon + Achievement Info */}
           <div className="flex items-center gap-3 mb-3">
             <motion.div
-              className={`${prominent ? 'w-20 h-20' : 'w-14 h-14'} rounded-xl flex items-center justify-center text-3xl flex-shrink-0`}
+              className={`${prominent ? 'w-20 h-20' : 'w-14 h-14'} rounded-m3-md flex items-center justify-center m3-headline-large flex-shrink-0`}
               style={{
                 background: `linear-gradient(135deg, ${tierColor}30, ${tierColor}10)`,
                 border: `1px solid ${tierColor}40`,
@@ -217,7 +217,7 @@ const NotificationCard: React.FC<{
               <div className="flex items-center gap-2 mb-0.5">
                 <h4 className={`text-on-surface ${prominent ? 'm3-headline-small m3-emphasized' : 'm3-title-small truncate'}`}>{achievementName(achievement, t)}</h4>
                 <span
-                  className="flex items-center gap-0.5 text-sm font-bold flex-shrink-0"
+                  className="flex items-center gap-0.5 m3-label-large flex-shrink-0"
                   style={{ color: tierColor }}
                 >
                   +{achievement.points} <Star size={12} fill={tierColor} />
@@ -230,7 +230,7 @@ const NotificationCard: React.FC<{
           {/* Badges */}
           <div className="flex items-center gap-2 flex-wrap mb-3">
             <span
-              className="px-2 py-0.5 rounded-md text-xs font-bold tracking-wider"
+              className="px-2 py-0.5 rounded-m3-sm m3-label-medium tracking-wider"
               style={{
                 backgroundColor: tierColor + '25',
                 color: tierColor,
@@ -241,7 +241,7 @@ const NotificationCard: React.FC<{
             </span>
             {achievement.rarity && (
               <span
-                className="px-2 py-0.5 rounded-md text-xs font-bold tracking-wider"
+                className="px-2 py-0.5 rounded-m3-sm m3-label-medium tracking-wider"
                 style={{
                   backgroundColor: getRarityColor(achievement.rarity) + '25',
                   color: getRarityColor(achievement.rarity),
@@ -256,7 +256,7 @@ const NotificationCard: React.FC<{
               const sc = getScopeColor(scope);
               return (
                 <span
-                  className="px-2 py-0.5 rounded-md text-xs font-bold tracking-wider"
+                  className="px-2 py-0.5 rounded-m3-sm m3-label-medium tracking-wider"
                   style={{
                     backgroundColor: sc + '25',
                     color: sc,
@@ -267,7 +267,7 @@ const NotificationCard: React.FC<{
                 </span>
               );
             })()}
-            <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-surface-container-highest text-on-surface-variant flex items-center gap-1 border border-outline-variant">
+            <span className="px-2 py-0.5 rounded-m3-sm m3-label-medium bg-surface-container-highest text-on-surface-variant flex items-center gap-1 border border-outline-variant">
               <Star size={10} />
               {t('achievement_toast.points_short', { count: achievement.points })}
             </span>
@@ -283,7 +283,7 @@ const NotificationCard: React.FC<{
             </div>
             <div className="h-1.5 bg-surface-container-highest rounded-m3-full overflow-hidden">
               <motion.div
-                className="h-full rounded-full"
+                className="h-full rounded-m3-full"
                 style={{ backgroundColor: tierColor }}
                 initial={{ width: `${((unlockedCount - 1) / totalAchievements) * 100}%` }}
                 animate={{ width: `${(unlockedCount / totalAchievements) * 100}%` }}
@@ -402,7 +402,7 @@ const AchievementNotification: React.FC = () => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             onClick={dismissAllNotifications}
-            className="self-end px-3 py-1.5 rounded-m3-full text-xs font-bold tracking-wide text-on-surface-variant hover:text-on-surface bg-surface-container-high hover:bg-surface-container-highest backdrop-blur-sm border border-outline-variant transition"
+            className="self-end px-3 py-1.5 rounded-m3-full m3-label-medium tracking-wide text-on-surface-variant hover:text-on-surface bg-surface-container-high hover:bg-surface-container-highest backdrop-blur-sm border border-outline-variant transition"
           >
             {t('achievement_toast.close_all', { count: allNotifications.length })}
           </motion.button>

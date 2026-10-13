@@ -2,7 +2,7 @@ import IconButton from '../common/IconButton';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, Trophy, Clock, Check, X } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Trophy, Check, X } from 'lucide-react';
 import { usePlayer } from '../../context/PlayerContext';
 import { useSettings } from '../../context/SettingsContext';
 import { Player, Dart } from '../../types/index';
@@ -11,8 +11,9 @@ import { celebrate as confetti } from '../../utils/celebration';
 import audioSystem from '../../utils/audio';
 import { saveGameState, loadGameState, clearGameState, STORAGE_KEYS, ATCSavedState } from '../../utils/gameStorage';
 import { SpinnerWheel } from './SpinnerWheel';
-import BackButton from '../common/BackButton';
-import { Button, Card, Dialog } from '../common';
+import SetupPlayerPicker from './SetupPlayerPicker';
+import { Button, Card, Dialog, PageShell, SegmentedButton } from '../common';
+import { Icon } from '../icons';
 import { useWakeLock } from '../../hooks/useWakeLock';
 import { haptic } from '../../utils/haptics';
 
@@ -461,27 +462,15 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
   };
 
   // Segmented button component with descriptions
-  const SegmentedButtons = ({ options, value, onChange }: {
+  /** The shared segmented button plus the description of the chosen option. */
+  const SegmentedButtons = ({ options, value, onChange, label }: {
     options: { value: string; label: string; desc?: string }[];
     value: string;
     onChange: (v: string) => void;
+    label: string;
   }) => (
     <div>
-      <div className="flex rounded-m3-full overflow-hidden border border-outline-variant">
-        {options.map(opt => (
-          <button
-            key={opt.value}
-            onClick={() => onChange(opt.value)}
-            className={`flex-1 py-2.5 px-3 m3-label-large transition ${
-              value === opt.value
-                ? 'bg-secondary-container text-on-secondary-container'
-                : 'bg-surface-container text-on-surface-variant hover:text-on-surface'
-            }`}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
+      <SegmentedButton label={label} value={value} onChange={onChange} options={options.map(o => ({ value: o.value, label: o.label }))} />
       {options.find(o => o.value === value)?.desc && (
         <p className="m3-body-small text-on-surface-variant mt-1.5 ml-1">
           {options.find(o => o.value === value)?.desc}
@@ -505,22 +494,15 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
   // Setup screen
   if (showSetup) {
     return (
-      <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
-        <div className="max-w-4xl mx-auto">
-          <BackButton onClick={handleBack} />
-
+      <PageShell title={t('atc.title')} icon={<Icon name="clock" size={26} />} width="md" onBack={handleBack}>
           <Card variant="elevated" className="p-6">
-            <h1 className="m3-headline-medium text-on-surface mb-6 flex items-center gap-3">
-              <Clock style={{ color: 'var(--m3-primary)' }} />
-              {t('atc.title')}
-            </h1>
-
             {/* Settings */}
             <div className="mb-6 space-y-4">
               {/* Bull Mode */}
               <div>
-                <label className="m3-label-large text-on-surface-variant mb-2 block">{t('atc.bull_mode')}</label>
+                <p className="m3-label-large text-on-surface-variant mb-2">{t('atc.bull_mode')}</p>
                 <SegmentedButtons
+                  label={t('atc.bull_mode')}
                   options={[
                     { value: 'off', label: t('atc.bull_off'), desc: t('atc.bull_off_desc') },
                     { value: 'standard', label: t('atc.bull_standard'), desc: t('atc.bull_standard_desc') },
@@ -533,8 +515,9 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
 
               {/* Direction */}
               <div>
-                <label className="m3-label-large text-on-surface-variant mb-2 block">{t('atc.direction')}</label>
+                <p className="m3-label-large text-on-surface-variant mb-2">{t('atc.direction')}</p>
                 <SegmentedButtons
+                  label={t('atc.direction')}
                   options={[
                     { value: 'ascending', label: t('atc.ascending') },
                     { value: 'descending', label: t('atc.descending') },
@@ -546,8 +529,9 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
 
               {/* Variant */}
               <div>
-                <label className="m3-label-large text-on-surface-variant mb-2 block">{t('atc.variant')}</label>
+                <p className="m3-label-large text-on-surface-variant mb-2">{t('atc.variant')}</p>
                 <SegmentedButtons
+                  label={t('atc.variant')}
                   options={[
                     { value: 'standard', label: t('atc.variant_standard'), desc: t('atc.variant_standard_desc') },
                     { value: 'doubles', label: t('atc.variant_doubles'), desc: t('atc.variant_doubles_desc') },
@@ -560,33 +544,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
             </div>
 
             {/* Player Selection */}
-            <div className="mb-6">
-              <h2 className="m3-title-large text-on-surface mb-3">{t('game.select_players')}</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {players.filter(p => !p.isBot).map(player => (
-                  <button
-                    key={player.id}
-                    onClick={() => {
-                      if (selectedPlayers.find(p => p.id === player.id)) {
-                        setSelectedPlayers(prev => prev.filter(p => p.id !== player.id));
-                      } else if (selectedPlayers.length < 4) {
-                        setSelectedPlayers(prev => [...prev, player]);
-                      }
-                    }}
-                    className={`p-3 rounded-m3-lg border transition ${
-                      selectedPlayers.find(p => p.id === player.id)
-                        ? 'border-[var(--m3-primary)] bg-surface-container-high ring-2 ring-[var(--m3-primary)] shadow-m3-1'
-                        : 'border-outline-variant bg-surface-container hover:bg-surface-container-high'
-                    }`}
-                  >
-                    <div className="flex justify-center mb-1">
-                      <PlayerAvatar avatar={player.avatar} name={player.name} size="sm" />
-                    </div>
-                    <div className="m3-label-large text-on-surface text-center truncate">{player.name}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
+            <SetupPlayerPicker players={players} selected={selectedPlayers} onChange={setSelectedPlayers} />
 
             {/* Rules */}
             <div className="bg-surface-container rounded-m3-lg p-4 mb-6">
@@ -614,8 +572,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
               }
             </Button>
           </Card>
-        </div>
-      </div>
+      </PageShell>
     );
   }
 
@@ -730,7 +687,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
               return (
                 <div
                   key={`${target.label}-${idx}`}
-                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-m3-full flex items-center justify-center font-bold text-xs sm:text-sm transition ${
+                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-m3-full flex items-center justify-center m3-label-medium transition ${
                     isPast
                       ? 'bg-success text-on-surface'
                       : isPending
@@ -777,7 +734,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
                           {t('atc_game.player_progress', { progress: effectiveProgress, total: targets.length, count: darts })}
                         </p>
                       </div>
-                      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-m3-md flex items-center justify-center font-bold text-sm sm:text-base flex-shrink-0 ${
+                      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-m3-md flex items-center justify-center m3-label-large flex-shrink-0 ${
                         isActive ? 'bg-primary-container text-on-primary-container' : 'bg-surface-container-highest text-on-surface-variant'
                       }`}>
                         {playerTarget ? playerTarget.shortLabel : <Check size={16} />}
@@ -795,7 +752,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
       <div className="max-w-4xl mx-auto mb-3">
         <Card variant="elevated" className="p-4 sm:p-6 text-center">
           <p className="text-on-surface-variant m3-body-medium mb-1">{t('atc.current_target')}</p>
-          <div className="text-5xl sm:text-6xl font-bold mb-1" style={{ color: 'var(--m3-primary)' }}>
+          <div className="m3-display-medium m3-emphasized mb-1" style={{ color: 'var(--m3-primary)' }}>
             {currentTarget ? currentTarget.label : '—'}
           </div>
           <p className="text-on-surface m3-body-medium">{currentPlayer?.name}</p>
@@ -832,7 +789,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
               return (
                 <div
                   key={idx}
-                  className={`flex-1 h-12 sm:h-14 rounded-m3-md flex items-center justify-center text-base sm:text-lg font-bold ${
+                  className={`flex-1 h-12 sm:h-14 rounded-m3-md flex items-center justify-center m3-title-medium ${
                     slot
                       ? slot.hit
                         ? 'bg-success-container text-on-success-container border-2 border-[var(--m3-primary)]'
@@ -854,7 +811,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
               onClick={handleHit}
               disabled={currentDarts.length >= 3 || !currentTarget}
               icon={<Check size={28} />}
-              className="flex-1 py-6 sm:py-8 text-xl sm:text-2xl active:scale-95"
+              className="flex-1 py-6 sm:py-8 m3-title-large active:scale-95"
             >
               {t('atc.hit')}
             </Button>
@@ -864,7 +821,7 @@ const AroundTheClockGame: React.FC<AroundTheClockGameProps> = ({ onBack }) => {
               onClick={handleMiss}
               disabled={currentDarts.length >= 3}
               icon={<X size={28} />}
-              className="flex-1 py-6 sm:py-8 text-xl sm:text-2xl active:scale-95"
+              className="flex-1 py-6 sm:py-8 m3-title-large active:scale-95"
             >
               {t('atc.miss')}
             </Button>

@@ -167,7 +167,7 @@ const Register: React.FC = () => {
                 required
               />
 
-              <Button type="submit" variant="success" size="lg" fullWidth loading={loading} icon={<UserPlus size={20} />}>
+              <Button type="submit" variant="filled" size="lg" fullWidth loading={loading} icon={<UserPlus size={20} />}>
                 {loading ? t('register.creating') : t('register.submit')}
               </Button>
             </form>

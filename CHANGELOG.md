@@ -7,6 +7,43 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.43.0] - 2026-10-13
+
+### Changed — one look across the app
+- The four game setups (X01, Cricket, Around the Clock, Shanghai) use the page
+  frame of every other screen: back and title on one line, the settings below.
+  They had a "Zurück" pill over a narrow card with the title inside it. The
+  three standalone setups share one player picker (`SetupPlayerPicker`) instead
+  of three drifted copies.
+- Green means "that worked", not "go": every main action is the filled
+  (primary) button. "Spiel starten", "Caller testen", import, register and
+  others were green while "Raum erstellen" was blue. `success` stays for the
+  Hit key of Around the Clock and a copy button that has copied.
+- Training modes and the dashboard quick actions follow the home rule:
+  practice is secondary, one tone; the quick actions are one filled button and
+  tonal ones, no longer blue, purple and green.
+- Shanghai's start number and rounds use the shared segmented button, like
+  Around the Clock (which now uses the shared one too).
+- The bug report and debug flag buttons no longer float in the bottom-left
+  corner, where they covered player rows and cards on phones. They sit at the
+  foot of the navigation rail from tablet width up, and in the title row on
+  phones (`ReportActions`).
+- Filter chips on both leaderboards scroll in one row (`ChipRow`) instead of
+  wrapping into four uneven lines; chips never shrink or wrap.
+- Statistics on a phone: the three headline figures stand side by side as
+  compact tiles instead of three tall cards.
+- Typography: 102 raw Tailwind text sizes replaced by the M3 type classes;
+  off-scale radii and shadows (achievement toast, hint, game end) moved to the
+  M3 scales.
+
+### Tests
+- Consistency tests: no green call to action, setups in the page frame, no raw
+  text size, shadows only from the elevation scale, training in the practice
+  tone, chip rows scroll, no fixed report FAB. 7 mutation probes caught.
+- `page-frame.spec`: setups' title on the page line at 390 and 1440 px, report
+  buttons in the header/rail, nothing fixed over the content, leaderboard chips
+  in one row.
+
 ## [0.42.0] - 2026-10-13
 
 ### Changed — live heatmap and visit history

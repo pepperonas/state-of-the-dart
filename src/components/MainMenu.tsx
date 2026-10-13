@@ -10,6 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { usePlayer } from '../context/PlayerContext';
 import { api } from '../services/api';
 import UserMenu from './auth/UserMenu';
+import ReportActions from './bugReport/ReportActions';
 import SyncStatus from './sync/SyncStatus';
 import UserGuideModal from './guide/UserGuideModal';
 import ContactModal from './contact/ContactModal';
@@ -137,6 +138,7 @@ const MainMenu: React.FC = () => {
           </h1>
           <div className="flex items-center gap-2 shrink-0">
             <SyncStatus />
+            <ReportActions layout="header" className="md:hidden" />
             <UserMenu onOpenGuide={() => setShowGuideModal(true)} onOpenContact={() => setShowContactModal(true)} />
           </div>
         </motion.header>

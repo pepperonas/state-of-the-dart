@@ -155,7 +155,7 @@ const Landing: React.FC = () => {
                   <span className="m3-label-medium text-on-surface-variant">{t('landing.checkout')}</span>
                 </div>
                 <div className="flex items-baseline justify-between">
-                  <span className="text-5xl font-bold text-primary tabular-nums">170</span>
+                  <span className="m3-display-medium m3-emphasized text-primary tabular-nums">170</span>
                   <span className="m3-title-medium text-tertiary">{CHECKOUT_EXAMPLE}</span>
                 </div>
               </div>

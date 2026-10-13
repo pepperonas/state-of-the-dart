@@ -439,7 +439,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
                   animate={{ scale: 1, opacity: 1, y: 0 }}
                   exit={{ scale: 0.5, opacity: 0, y: 8 }}
                   transition={{ ...springSpatialFast, delay }}
-                  className={`font-bold text-2xl ${correcting ? 'text-on-surface-variant line-through' : bust ? 'text-on-error-container' : 'text-on-secondary-container'}`}
+                  className={`m3-headline-small ${correcting ? 'text-on-surface-variant line-through' : bust ? 'text-on-error-container' : 'text-on-secondary-container'}`}
                 >
                   {dart.score}
                 </motion.span>
@@ -450,7 +450,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={effectsFast}
-                  className="text-on-surface-variant text-xl"
+                  className="text-on-surface-variant m3-title-large"
                   aria-hidden="true"
                 >
                   -
@@ -474,11 +474,11 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
             {correcting ? t('correction.label') : typing ? (editingDartIndex !== null ? t('game.new_dart_value') : t('score_input.typed')) : t('score_input.total')}
           </span>
           {correcting ? (
-            <span data-testid="visit-correction" className="text-2xl font-bold tabular-nums text-on-primary-container whitespace-nowrap">
+            <span data-testid="visit-correction" className="m3-headline-small tabular-nums text-on-primary-container whitespace-nowrap">
               {currentScore} → {currentInput || '…'}
             </span>
           ) : typing ? (
-            <span className="text-2xl font-bold tabular-nums text-on-primary-container">{currentInput || '…'}</span>
+            <span className="m3-headline-small tabular-nums text-on-primary-container">{currentInput || '…'}</span>
           ) : bust ? (
             <motion.span
               key="bust"
@@ -486,12 +486,12 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
               initial={{ scale: 0.4, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={springSpatialFast}
-              className="text-xl font-bold text-on-error-container"
+              className="m3-title-large text-on-error-container"
             >
               {t('game.bust')}
             </motion.span>
           ) : (
-            <AnimatedNumber numeral value={currentScore} className="text-2xl text-on-tertiary-container" />
+            <AnimatedNumber numeral value={currentScore} className="m3-headline-small text-on-tertiary-container" />
           )}
           {/* What the visit leaves — the remaining score itself lives on the
               hero card, once. */}
@@ -545,7 +545,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
                 key={score}
                 onClick={() => handleQuickScore(score)}
                 disabled={currentThrow.length >= 3}
-                className={`sotd-key m3-state-layer m3-ripple p-2 sm:p-3 text-lg font-bold min-h-[44px] disabled:opacity-30 disabled:cursor-not-allowed ${
+                className={`sotd-key m3-state-layer m3-ripple p-2 sm:p-3 m3-title-medium min-h-[44px] disabled:opacity-30 disabled:cursor-not-allowed ${
                   score === 180
                     ? 'bg-tertiary-container text-on-tertiary-container'
                     : score >= 100
@@ -604,7 +604,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
                 key={num}
                 {...keepFocus}
                 onClick={() => handleNumpadClick(num.toString())}
-                className="sotd-key m3-state-layer m3-ripple p-3 lg:p-4 phoneland:p-2 min-h-[48px] text-xl font-bold bg-surface-container-high text-on-surface"
+                className="sotd-key m3-state-layer m3-ripple p-3 lg:p-4 phoneland:p-2 min-h-[48px] m3-title-large bg-surface-container-high text-on-surface"
               >
                 {num}
               </button>
@@ -626,7 +626,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
             <button
               {...keepFocus}
               onClick={() => handleNumpadClick('0')}
-              className="sotd-key m3-state-layer m3-ripple col-span-2 p-3 lg:p-4 phoneland:p-2 min-h-[48px] text-xl font-bold bg-surface-container-high text-on-surface"
+              className="sotd-key m3-state-layer m3-ripple col-span-2 p-3 lg:p-4 phoneland:p-2 min-h-[48px] m3-title-large bg-surface-container-high text-on-surface"
             >
               0
             </button>

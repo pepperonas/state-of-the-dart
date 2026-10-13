@@ -1155,7 +1155,8 @@
     "cta_title": "Möchtest du auf der Rangliste erscheinen?",
     "cta_text": "Registriere dich kostenlos und starte deine 30-Tage-Testversion!",
     "register": "Jetzt registrieren",
-    "login": "Anmelden"
+    "login": "Anmelden",
+    "metric_label": "Kennzahl"
   },
   "heatmap": {
     "exact_share": "{{exact}} von {{total}} Darts genau erfasst.",
@@ -1208,7 +1209,8 @@
     "active_players": "Aktive Spieler",
     "avg_games": "Ø Spiele",
     "total_180s": "180er gesamt",
-    "total_achievements": "Erfolge gesamt"
+    "total_achievements": "Erfolge gesamt",
+    "category_label": "Kategorie"
   },
   "match_detail_extra": {
     "average": "Average",

@@ -75,7 +75,7 @@ const VerifyEmail: React.FC = () => {
             <p className="m3-body-medium text-on-surface-variant mb-6">
               {t('verify_email.trial_started')}
             </p>
-            <Button variant="success" fullWidth onClick={() => navigate('/login')}>
+            <Button variant="filled" fullWidth onClick={() => navigate('/login')}>
               {t('register.sign_in_now')}
             </Button>
             <p className="m3-body-small text-on-surface-variant mt-4">

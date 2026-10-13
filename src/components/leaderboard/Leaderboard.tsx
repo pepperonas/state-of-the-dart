@@ -9,7 +9,7 @@ import { useTenant } from '../../context/TenantContext';
 import { api } from '../../services/api';
 import { PersonalBests, createEmptyPersonalBests } from '../../types/personalBests';
 import { ACHIEVEMENTS } from '../../types/achievements';
-import { Card, Chip, PageShell } from '../common';
+import { Card, Chip, ChipRow, PageShell } from '../common';
 import { motion } from 'framer-motion';
 import { staggerChild } from '../../utils/motion';
 import PlayerAvatar from '../player/PlayerAvatar';
@@ -167,7 +167,7 @@ const Leaderboard: React.FC = () => {
         <Card variant="elevated" className="p-6 md:p-8">
 
           {/* Category Selection */}
-          <div className="flex flex-wrap gap-2 mb-6">
+          <ChipRow label={t('leaderboard.category_label')} className="mb-6">
             {categories.map((cat) => (
               <Chip
                 key={cat.id}
@@ -178,7 +178,7 @@ const Leaderboard: React.FC = () => {
                 {cat.name}
               </Chip>
             ))}
-          </div>
+          </ChipRow>
 
           {/* Leaderboard List */}
           {sortedData.length === 0 ? (

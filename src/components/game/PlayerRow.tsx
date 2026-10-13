@@ -100,7 +100,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({
         </motion.div>
       </div>
       <motion.div layoutId={`spot-rest-${id}`} layout="position" layoutDependency={turnKey} transition={{ layout: CONTAINER_MORPH }} className="relative" data-testid="row-rest">
-        <AnimatedNumber numeral value={remaining} className="block text-3xl text-on-surface" />
+        <AnimatedNumber numeral value={remaining} className="block m3-headline-large text-on-surface" />
         <ScoreDelta value={remaining} from={previousRemaining} className="right-full mr-1 bottom-0 m3-label-large" />
       </motion.div>
       {onRemove && (

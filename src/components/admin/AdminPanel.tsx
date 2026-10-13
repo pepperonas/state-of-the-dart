@@ -488,7 +488,7 @@ const AdminPanel: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase ${getStatusBadgeClass(u.subscription_status)}`}>
+                      <span className={`px-3 py-1.5 rounded-full m3-label-medium uppercase ${getStatusBadgeClass(u.subscription_status)}`}>
                         {u.subscription_status === 'lifetime' ? t('admin.status_lifetime') :
                          u.subscription_status === 'active' ? t('admin.status_active') :
                          u.subscription_status === 'trial' ? t('admin.status_trial') :
@@ -742,7 +742,7 @@ const AdminPanel: React.FC = () => {
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          <span className={`px-2 py-1 rounded-m3-sm text-xs font-semibold ${
+                          <span className={`px-2 py-1 rounded-m3-sm m3-label-medium ${
                             report.severity === 'critical' ? 'bg-error-container text-on-error-container' :
                             report.severity === 'high' ? 'bg-tertiary-container text-on-tertiary-container' :
                             report.severity === 'medium' ? 'bg-secondary-container text-on-secondary-container' :
@@ -1281,7 +1281,7 @@ const AdminPanel: React.FC = () => {
                       </p>
                     </div>
                     <div className="flex gap-2">
-                      <span className={`px-3 py-1 rounded-m3-sm font-semibold text-sm ${
+                      <span className={`px-3 py-1 rounded-m3-sm m3-label-large ${
                         selectedBugReport.severity === 'critical' ? 'bg-error-container text-on-error-container' :
                         selectedBugReport.severity === 'high' ? 'bg-tertiary-container text-on-tertiary-container' :
                         selectedBugReport.severity === 'medium' ? 'bg-secondary-container text-on-secondary-container' :

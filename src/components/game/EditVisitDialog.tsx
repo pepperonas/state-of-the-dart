@@ -107,7 +107,7 @@ export const EditVisitDialog: React.FC<EditVisitDialogProps> = ({
                     disabled={!d}
                     onClick={() => setPicked(p => p.filter((_, j) => j !== i))}
                     aria-label={d ? t('correction.remove_dart', { dart: shortDart(d) }) : t('game.empty_dart', { n: i + 1 })}
-                    className={`flex-1 h-12 rounded-m3-md border font-bold text-xl tabular-nums ${d ? 'bg-secondary-container text-on-secondary-container border-transparent m3-state-layer' : 'bg-surface-container border-outline-variant text-on-surface-variant'}`}
+                    className={`flex-1 h-12 rounded-m3-md border m3-title-large tabular-nums ${d ? 'bg-secondary-container text-on-secondary-container border-transparent m3-state-layer' : 'bg-surface-container border-outline-variant text-on-surface-variant'}`}
                   >
                     {d ? shortDart(d) : '–'}
                   </button>
@@ -115,7 +115,7 @@ export const EditVisitDialog: React.FC<EditVisitDialogProps> = ({
               })}
               <div className="min-w-[4rem] flex flex-col items-center justify-center rounded-m3-md bg-tertiary-container text-on-tertiary-container">
                 <span className="m3-label-small">{t('score_input.total')}</span>
-                <span className="font-bold text-xl tabular-nums">{calculateThrowScore(picked)}</span>
+                <span className="m3-title-large tabular-nums">{calculateThrowScore(picked)}</span>
               </div>
             </div>
             <DartGrid

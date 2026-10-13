@@ -12,6 +12,7 @@ export { default as Chip } from './Chip';
 export { default as Dialog } from './Dialog';
 export { default as BackButton } from './BackButton';
 export { default as PageShell } from './PageShell';
+export { default as ChipRow } from './ChipRow';
 export type { PageWidth } from './PageShell';
 export { default as AnimatedNumber } from './AnimatedNumber';
 export { default as Snackbar } from './Snackbar';

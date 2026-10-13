@@ -148,7 +148,7 @@ const ResetPassword: React.FC = () => {
                 required
               />
 
-              <Button type="submit" variant="success" size="lg" fullWidth loading={loading} icon={<Lock size={20} />}>
+              <Button type="submit" variant="filled" size="lg" fullWidth loading={loading} icon={<Lock size={20} />}>
                 {loading ? t('user_settings.saving') : t('reset_password.submit')}
               </Button>
             </form>

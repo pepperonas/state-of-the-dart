@@ -211,7 +211,7 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
                 <div className="text-on-surface font-semibold mt-1">{player.name}</div>
               </div>
               {index === 0 && matchPlayers.length > 1 && (
-                <div className="text-on-surface-variant text-2xl font-bold self-center">vs</div>
+                <div className="text-on-surface-variant m3-headline-small self-center">vs</div>
               )}
             </React.Fragment>
           ))}
@@ -346,10 +346,10 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
                 return (
                   <div key={leg.id || legIdx}>
                     {(match.legs || []).length > 1 && (
-                      <div className="text-xs text-on-surface-variant font-semibold mb-2">{t('match_detail_extra.leg', { n: legIdx + 1 })}</div>
+                      <div className="m3-label-medium text-on-surface-variant mb-2">{t('match_detail_extra.leg', { n: legIdx + 1 })}</div>
                     )}
                     <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
+                      <table className="w-full m3-body-medium">
                         <thead>
                           <tr className="border-b border-outline-variant">
                             <th className="text-on-surface-variant text-left py-2 pr-1 w-8">#</th>
@@ -363,13 +363,13 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
                         <tbody>
                           {rounds.map((round, rIdx) => (
                             <tr key={rIdx} className="border-b border-outline-variant/30">
-                              <td className="text-on-surface-variant py-2 pr-1 align-top text-xs">{rIdx + 1}</td>
+                              <td className="text-on-surface-variant py-2 pr-1 align-top m3-body-small">{rIdx + 1}</td>
                               {playersWithThrows.map(p => {
                                 const thr = round.find(r => r.playerId === p.playerId);
                                 if (!thr) return <td key={p.playerId} className="py-2 px-2"></td>;
                                 return (
                                   <td key={p.playerId} className="py-2 px-2 text-center">
-                                    <div className="font-mono text-on-surface-variant text-xs">
+                                    <div className="font-mono text-on-surface-variant m3-body-small">
                                       {(thr.darts || []).map((d, i) => (
                                         <span key={i} className={`${
                                           d.multiplier === 3 ? 'text-tertiary font-semibold' :
@@ -387,7 +387,7 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
                                       }`}>
                                         {thr.isBust ? '0' : thr.score}
                                       </span>
-                                      <span className="text-on-surface-variant text-xs">→{thr.remaining}</span>
+                                      <span className="text-on-surface-variant m3-body-small">→{thr.remaining}</span>
                                     </div>
                                   </td>
                                 );
@@ -430,8 +430,8 @@ const MatchDetailModal: React.FC<MatchDetailModalProps> = ({ match, onClose }) =
 
 const StatBox: React.FC<{ label: string; value: string | number }> = ({ label, value }) => (
   <div className="bg-surface-container-high rounded-m3-sm p-2">
-    <div className="text-xs text-on-surface-variant">{label}</div>
-    <div className="text-lg font-bold text-on-surface">{value}</div>
+    <div className="m3-body-small text-on-surface-variant">{label}</div>
+    <div className="m3-title-medium text-on-surface">{value}</div>
   </div>
 );
 
