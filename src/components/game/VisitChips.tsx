@@ -31,11 +31,14 @@ export const VisitChips: React.FC<VisitChipsProps> = ({ visitId, playerName, sco
       data-testid="visit-chips"
       role="group"
       aria-label={t('correction.how_thrown_label', { name: playerName, score })}
-      className="flex flex-wrap items-center gap-1.5 mb-3 phoneland:mb-2 phoneland:col-start-1"
+      className="mb-3 phoneland:mb-2 phoneland:col-start-1"
     >
-      <span className="m3-label-medium text-on-surface-variant mr-1">
+      <span className="block m3-label-medium text-on-surface-variant mb-1.5">
         {t('correction.how_thrown', { name: playerName, score })}
       </span>
+      {/* One row that scrolls sideways (0.37.0): wrapped over two lines the
+          chips pushed the input down and read as a jumble. */}
+      <div data-testid="visit-chip-row" className="flex flex-nowrap gap-1.5 overflow-x-auto pb-0.5 -mx-1 px-1">
       {options.map(darts => {
         const text = darts.map(shortDart).join(' · ');
         return (
@@ -46,7 +49,7 @@ export const VisitChips: React.FC<VisitChipsProps> = ({ visitId, playerName, sco
             onClick={() => onPick(darts)}
             data-testid="visit-chip"
             aria-label={t('correction.pick', { darts: text })}
-            className="m3-chip m3-state-layer m3-ripple tabular-nums"
+            className="m3-chip m3-state-layer m3-ripple tabular-nums shrink-0 whitespace-nowrap"
           >
             {text}
           </button>
@@ -57,10 +60,11 @@ export const VisitChips: React.FC<VisitChipsProps> = ({ visitId, playerName, sco
         onPointerDown={e => e.preventDefault()}
         onClick={onOther}
         data-testid="visit-chip-other"
-        className="m3-chip m3-state-layer m3-ripple"
+        className="m3-chip m3-state-layer m3-ripple shrink-0 whitespace-nowrap"
       >
         {t('correction.other')}
       </button>
+      </div>
     </motion.div>
   );
 };

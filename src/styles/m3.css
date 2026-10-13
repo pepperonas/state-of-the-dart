@@ -872,6 +872,31 @@ button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surfa
   user-select: none;
   pointer-events: none;
 }
+/* The place on a player row's avatar (0.37.0). A filled disc in the rank's
+   colour; the digit takes the surface colour, which is dark on the bright dark-
+   theme ranks and light on the deep light-theme ones. */
+.sotd-rank-badge {
+  position: absolute;
+  right: -0.3rem;
+  bottom: -0.3rem;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--m3-shape-full);
+  background: var(--rank-color);
+  color: var(--m3-surface);
+  box-shadow: 0 0 0 2px var(--m3-surface-container);
+  font-family: 'Google Sans Flex', 'Inter', system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+}
 /* The card behind it takes the rank's colour: a soft glow from the stamp's
    corner, and an outline in the same hue. */
 .sotd-rank-tint {

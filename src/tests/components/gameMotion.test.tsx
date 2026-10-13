@@ -56,7 +56,7 @@ describe('ScoreInput motion', () => {
     const keys = [
       screen.getByRole('button', { name: '7' }),
       screen.getByRole('button', { name: '0' }),
-      screen.getByRole('button', { name: 'Eingabe löschen' }),
+      screen.getByTestId('numpad-back'),
     ];
     for (const key of keys) {
       expect(key.className).toMatch(/sotd-key/);

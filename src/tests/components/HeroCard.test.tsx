@@ -82,6 +82,19 @@ describe('PlayerRow', () => {
     expect(row).toHaveTextContent('1 von 3 Legs zum Sieg');
   });
 
+  it('the place sits on the avatar, never beside the remaining score (0.37.0)', () => {
+    // As a poster next to the number, "2 75" read as 275.
+    const { container } = render(<PlayerRow player={mp('b', 'Ben')} avatar="trophy" remaining={75} rank={2} average={60} legsWon={0} setsWon={0} />);
+    const rank = screen.getByTestId('leg-rank');
+    expect(rank).toHaveClass('sotd-rank-badge');
+    const avatarWrap = rank.parentElement!;
+    expect(avatarWrap.querySelector('svg, img, span.rounded-full, .rounded-full')).toBeTruthy();
+    const restBox = container.querySelector('.text-3xl')!.closest('div')!;
+    expect(restBox.parentElement!.contains(rank) && restBox.parentElement === rank.parentElement).toBe(false);
+    expect(rank.nextElementSibling).toBeNull();
+    expect(rank).toHaveTextContent('Platz 2 im Leg');
+  });
+
   it('a long match shows "/ N" instead of pips, sets when played', () => {
     render(<PlayerRow player={mp('b', 'Ben')} remaining={441} rank={null} average={60} legsWon={4} setsWon={2} showSets legsToWin={11} />);
     expect(screen.queryByTestId('legs-pips')).toBeNull();

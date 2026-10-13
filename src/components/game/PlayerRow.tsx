@@ -68,7 +68,10 @@ const PlayerRow: React.FC<PlayerRowProps> = ({
         className="relative flex items-center gap-3 pl-4 pr-2 py-2"
       >
       <motion.div layoutId={`spot-avatar-${id}`} layout="position" layoutDependency={turnKey} transition={{ layout: CONTAINER_MORPH }} className="shrink-0">
-        <PlayerAvatar avatar={avatar} name={player.name} size="sm" />
+        <span className="relative block">
+          <PlayerAvatar avatar={avatar} name={player.name} size="sm" />
+          {rank && <RankStamp rank={rank} size="badge" />}
+        </span>
       </motion.div>
       <div className="min-w-0 flex-1">
         <motion.div layoutId={`spot-name-${id}`} layout="position" layoutDependency={turnKey} transition={{ layout: CONTAINER_MORPH }} className="m3-title-small text-on-surface truncate">
@@ -96,8 +99,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({
           {legsToWin ? <span className="sr-only">{t('player_score.legs_to_win_long', { won: legsWon, total: legsToWin })}</span> : null}
         </motion.div>
       </div>
-      {rank && <RankStamp rank={rank} size="strip" />}
-      <motion.div layoutId={`spot-rest-${id}`} layout="position" layoutDependency={turnKey} transition={{ layout: CONTAINER_MORPH }} className="relative">
+      <motion.div layoutId={`spot-rest-${id}`} layout="position" layoutDependency={turnKey} transition={{ layout: CONTAINER_MORPH }} className="relative" data-testid="row-rest">
         <AnimatedNumber numeral value={remaining} className="block text-3xl text-on-surface" />
         <ScoreDelta value={remaining} from={previousRemaining} className="right-full mr-1 bottom-0 m3-label-large" />
       </motion.div>
