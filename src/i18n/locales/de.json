@@ -2242,6 +2242,7 @@
     "heatmap_hint": "Die Heatmap wird mit jedem Wurf aktualisiert",
     "darts_count_one": "({{count}} Dart)",
     "darts_count_other": "({{count}} Darts)",
+    "sheet_round": "Runde",
     "leg_number": "LEG {{n}}",
     "legs_progress": "{{won}} / {{total}} Legs",
     "next_leg_starting": "Nächstes Leg startet...",

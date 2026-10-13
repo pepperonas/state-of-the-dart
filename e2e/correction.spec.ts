@@ -34,6 +34,9 @@ test('typed totals, chips, sum correction and an older visit corrected', async (
   await page.keyboard.press('Enter');
   await expect(card(ann)).toContainText('441');
   const heat = page.getByTestId('insight-heatmap');
+  // The heatmap follows the player at the oche (Ben now); pick Ann for this turn.
+  await heat.getByRole('button', { name: ann }).click();
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
   await expect(heat.getByTestId('heatmap-only-typed')).toBeVisible();
   await expect(heat.getByTestId('heatmap-board')).toHaveCount(0);
 

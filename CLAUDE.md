@@ -147,6 +147,11 @@ M3 primitive library (barrel `src/components/common/index.ts`). **Prefer these o
 - `ErrorBoundary` — top-level React error boundary. Wraps `<App>` in `main.tsx` so a render-time throw (bad `JSON.parse` in match reconstruction, failed lazy chunk, etc.) shows an M3 recovery screen (reload / back-to-menu) instead of white-screening the PWA. The `window.error`/`unhandledrejection` handlers in `App.tsx` only log — they do NOT catch render errors, so don't remove the boundary.
 - `BackButton.tsx` — canonical back button. **Always use this** for screen-level back navigation. An M3 **tonal** button with a leading `<ArrowLeft>`. In **block mode (default)** it wraps itself in a `mb-6` block so the gap to the page heading is uniform across all screens; pass **`inline`** when it sits in a flex header row / form (opts out of the wrapper — the row/form controls spacing). Override text via `label`.
 
+### Heatmap focus and visit sheet (0.42.0)
+- Live heatmap player = `heatmapPlayer(pick, turnId, activeId)` (`utils/heatmapFocus.ts`); `turnId` = visits booked in the match, so a chip pick (`heatmap-player`, `aria-pressed`) lasts until the turn passes or an undo.
+- Visit history = `VisitSheet` (`visit-sheet`, cells `history-edit` with `data-typed`, beds `sheet-darts` only for exact darts). Rounds are the n-th visit of each player in a leg.
+- E2E: after clicking a chip, blur before typing — Enter on a focused button is the button's, not the game's.
+
 ### App icon (0.41.0)
 - Generated: `node tools/app-icon/gen.mjs && node tools/app-icon/render.mjs [--preview out.png]` → `public/{icon,icon-maskable,apple-touch-icon,favicon}.svg`, the PNGs, `favicon.ico`, and copies into `website/public`. Never edit the outputs by hand — `appIcon.test.ts` compares the SVGs with the generator.
 - Render with Chromium (render.mjs), not ImageMagick. Manifest: `any` and `maskable` are separate files; touch + maskable icons are square edge to edge.

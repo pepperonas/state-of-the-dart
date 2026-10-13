@@ -106,11 +106,27 @@ test('a refresh mid-match keeps scores, turn and the darts of the current visit'
   const heat = (await grid.getByTestId('insight-heatmap').boundingBox())!;
   expect(heat.x).toBeGreaterThan(stats.x + stats.width - 1); // side by side
   expect(Math.abs(heat.y - stats.y)).toBeLessThan(2);
-  await expect(page.getByText('Wurf #1').first()).toBeVisible();
+  // The history is a score sheet (0.42.0): one row per round, a cell per visit.
+  const sheet = grid.getByTestId('insight-history').getByTestId('visit-sheet');
+  await expect(sheet).toBeVisible();
+  await expect(sheet.getByTestId('history-edit').first()).toBeVisible();
   await expect(page.locator('.recharts-line-dots circle').first()).toBeVisible({ timeout: 10_000 });
-  // Ann only typed a total: her heatmap says so (0.32.0). Cid's dart was exact.
+  // The live heatmap shows the player at the oche — Dan (0.42.0; it was stuck
+  // on the first player).
   const heatCard = grid.getByTestId('insight-heatmap');
+  const chip = (n: string) => heatCard.getByRole('button', { name: n });
+  await expect(chip(names[3])).toHaveAttribute('aria-pressed', 'true');
+  // Ann only typed a total: her heatmap says so (0.32.0). Cid's dart was exact.
+  await chip(names[0]).click();
   await expect(heatCard.getByTestId('heatmap-only-typed')).toBeVisible();
-  await heatCard.getByRole('button', { name: names[2] }).click();
+  await chip(names[2]).click();
   await expect(heatCard.getByTestId('heatmap-board')).toBeVisible();
+  // A pick holds for the turn; once Dan has thrown, the heatmap is on Ann.
+  // (Enter on a focused button is the button's, not the game's — blur first.)
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await page.keyboard.type('26');
+  await page.keyboard.press('Enter');
+  await active(names[0]);
+  await expect(chip(names[0])).toHaveAttribute('aria-pressed', 'true');
+  await expect(heatCard.getByTestId('heatmap-only-typed')).toBeVisible();
 });
