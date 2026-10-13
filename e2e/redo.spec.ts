@@ -113,3 +113,27 @@ test('a different visit after an undo drops the way forward', async ({ page }) =
   await expect(card(ann)).toContainText('441');
   await expect(page.getByTestId('redo-throw')).toHaveCount(0);
 });
+
+test('the way forward survives a reload (0.40.0)', async ({ page }) => {
+  const [ann, ben] = await start(page, 1440, 900);
+  const card = (n: string) => page.getByTestId(`player-card-${n}`).locator('visible=true').first();
+  await type(page, '60');
+  await type(page, '45');
+  await expect(card(ben)).toContainText('456');
+  await calm(page);
+  await page.getByRole('button', { name: /Wurf zurück/ }).first().click();
+  // Undo puts Ben's 45 back into the input as "45 → …".
+  await expect(page.getByTestId('visit-correction')).toBeVisible();
+  // The confirm label fits (it showed as "Korrektur bes…" before 0.40.0).
+  const confirm = page.getByTestId('confirm-visit').locator('visible=true');
+  await expect(confirm).toContainText('Übernehmen');
+  expect(await confirm.locator('span.truncate').evaluate(e => e.scrollWidth - e.clientWidth)).toBeLessThanOrEqual(0);
+  await page.waitForTimeout(800);
+  await page.reload();
+  const redo = page.getByTestId('redo-throw').locator('visible=true');
+  await expect(redo).toHaveAccessibleName(new RegExp(`${ben} · 45`));
+  await redo.click();
+  await expect(card(ben)).toContainText('456');
+  await expect(card(ann)).toContainText('441');
+  await expect(page.getByTestId('redo-throw')).toHaveCount(0);
+});

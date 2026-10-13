@@ -7,6 +7,27 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.40.0] - 2026-10-13
+
+### Fixed
+- Redo survives a refresh: the redo history is saved with the running match
+  (`state-of-the-dart-active-redo`, a device game key) and restored on reload.
+  It is validated first (`utils/restoredRedo.ts`): players of this match, darts
+  that could be thrown, ids the match no longer holds — one bad entry drops the
+  whole stack, never half of it.
+- The correction button on a desktop read "Korrektur bes…": it now says
+  "Übernehmen" everywhere (the box beside the slots already says "Korrektur");
+  the long form stays as the tooltip.
+- The statistics radar drew a spike past its outer ring: the average was divided
+  by 80 and never capped (112.88 → 141 %). Every axis is clamped to 0–100 and
+  the average's full mark is 100 (`utils/performanceRadar.ts`).
+
+### Tests
+- Reducer tests for the restored redo history (incl. foreign, broken and
+  still-booked entries), `performanceRadar.test.ts`, and a reload case in
+  `redo.spec.ts` that also checks the correction label fits. 6 mutation probes
+  caught.
+
 ## [0.39.0] - 2026-10-13
 
 ### Changed — achievements, leaderboard, player list

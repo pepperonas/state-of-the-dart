@@ -740,6 +740,11 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
 
         <button
           ref={confirmBtnRef}
+          data-testid="confirm-visit"
+          // "Korrektur bestätigen" did not fit beside "Dart" and "Leeren" on a
+          // desktop and showed as "Korrektur bes…" (0.40.0). The box beside the
+          // slots already says "Korrektur"; the long form stays as the tooltip.
+          title={isEditingThrow && !awaitingNextPlayer ? t('game.confirm_correction') : undefined}
           onClick={awaitingNextPlayer ? onNextPlayer : (commitsTyped || setsDart) ? () => handleNumpadClick('enter') : onConfirm}
           disabled={!awaitingNextPlayer && !commitsTyped && !setsDart && currentThrow.length === 0}
           className={`min-w-0 min-h-[48px] flex items-center justify-center gap-1 p-3 rounded-m3-full disabled:opacity-30 disabled:cursor-not-allowed transition font-bold shadow-m3-1 ${
@@ -754,7 +759,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
           <span className="truncate">{awaitingNextPlayer
             ? t('game_screen.next_player', { name: awaitingNextPlayer })
             : setsDart ? t('score_input.replace_dart')
-            : isCheckout ? t('score_input.checkout') : isEditingThrow ? (dense ? t('correction.save') : t('game.confirm_correction')) : t('game.confirm_visit')}</span>
+            : isCheckout ? t('score_input.checkout') : isEditingThrow ? t('correction.save') : t('game.confirm_visit')}</span>
         </button>
       </div>
         );
