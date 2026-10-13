@@ -7,6 +7,25 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.42.0] - 2026-10-13
+
+### Changed — live heatmap and visit history
+- The live heatmap shows the player at the oche. A tap on another player's chip
+  shows that player until the turn passes; then it is back on whoever throws
+  (`utils/heatmapFocus.ts`). Before, it was stuck on the first player.
+- The visit history is a score sheet (`VisitSheet`): one row per round, one
+  column per player, the current player's column marked. A cell shows the
+  score with the remaining score beside it and, only when the darts are known,
+  the beds ("T9 · 12 · T5"). Typed totals no longer carry the sentence
+  "Summe getippt – Felder unbekannt" (screen readers still hear it). A tap on a
+  cell opens the correction. The whole-match view heads each leg. Two rounds
+  of three players were six cards; now they are two rows.
+
+### Tests
+- `visitSheet.test.tsx` (rows/columns, typed cells, edit, active column, leg
+  headers, empty state, heatmap focus), `refresh.spec` checks the heatmap
+  follows the turn and a pick lasts one turn. 6 mutation probes caught.
+
 ## [0.41.0] - 2026-10-13
 
 ### Changed — favicon and app icon

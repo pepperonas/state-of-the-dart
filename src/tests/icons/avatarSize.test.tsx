@@ -54,7 +54,7 @@ describe('avatar glyph fill', () => {
 
   it('the heatmap player chip keeps the small disc (its row would grow to 56 px)', () => {
     const src = fs.readFileSync(path.resolve(__dirname, '../../components/game/GameScreen.tsx'), 'utf8');
-    const at = src.indexOf('onClick={() => setSelectedHeatmapPlayer(');
+    const at = src.indexOf('onClick={() => setHeatmapPick(');
     const chip = src.slice(at, at + 1200);
     expect(chip.match(/<PlayerAvatar[\s\S]*?size="(\w+)"/)?.[1]).toBe('xs');
   });

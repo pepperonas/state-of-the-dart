@@ -54,6 +54,8 @@ test('phone: input docked in reach, hero above it, stats in a sheet', async ({ p
   await sheet.getByRole('radio', { name: 'Heatmap' }).click();
   await expect(sheet.getByTestId('insight-heatmap')).toBeVisible();
   await expect(sheet.getByTestId('insight-stats')).toHaveCount(0);
+  // The heatmap is on the player at the oche (0.42.0); the visit was the first player's.
+  await sheet.getByTestId('heatmap-player').first().click();
   await expect(sheet.getByTestId('heatmap-board')).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(0);

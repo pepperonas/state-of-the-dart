@@ -2242,6 +2242,7 @@
     "heatmap_hint": "The heatmap updates with every throw",
     "darts_count_one": "({{count}} dart)",
     "darts_count_other": "({{count}} darts)",
+    "sheet_round": "Round",
     "leg_number": "LEG {{n}}",
     "legs_progress": "{{won}} / {{total}} legs",
     "next_leg_starting": "Next leg starting...",

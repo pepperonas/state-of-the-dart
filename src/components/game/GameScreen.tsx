@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useDeferredValue, Suspense, lazy } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, X, Bot, ChevronDown, AlertTriangle, Smile, Flame, UserMinus, Volume2, VolumeX, BarChart3, Tv, Pencil } from 'lucide-react';
+import { ArrowLeft, RotateCcw, X, Bot, ChevronDown, AlertTriangle, Smile, Flame, UserMinus, Volume2, VolumeX, BarChart3, Tv } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 const ThrowChart = lazy(() => import('./ThrowChart'));
 import { useGame, MIN_MATCH_PLAYERS, redoTarget } from '../../context/GameContext';
@@ -22,6 +22,8 @@ import CheckoutSuggestion from '../dartboard/CheckoutSuggestion';
 import AchievementHint from '../achievements/AchievementHint';
 import SpinnerWheel from './SpinnerWheel';
 import BugReportModal from '../bugReport/BugReportModal';
+import { heatmapPlayer, type HeatmapPick } from '../../utils/heatmapFocus';
+import VisitSheet from './VisitSheet';
 import PlayerAvatar from '../player/PlayerAvatar';
 import AvatarPicker from '../player/AvatarPicker';
 import { Dart, Player, GameType, MatchSettings, Throw, HeatmapData, MatchPlayer } from '../../types/index';
@@ -378,7 +380,9 @@ const GameScreen: React.FC = () => {
   const [newPlayerAvatar, setNewPlayerAvatar] = useState<string | undefined>(undefined);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showBotSelector, setShowBotSelector] = useState(false);
-  const [selectedHeatmapPlayer, setSelectedHeatmapPlayer] = useState<string | null>(null);
+  // The live heatmap follows the player at the oche; a picked player holds
+  // until the turn passes (utils/heatmapFocus.ts, 0.42.0).
+  const [heatmapPick, setHeatmapPick] = useState<HeatmapPick | null>(null);
   const [heatmapView, setHeatmapView] = useState<'leg' | 'match'>('match');
   const [statsView, setStatsView] = useState<'leg' | 'match'>('match');
   const [showBugReportModal, setShowBugReportModal] = useState(false);
@@ -1762,6 +1766,8 @@ const GameScreen: React.FC = () => {
     ? currentLeg.throws
     : state.currentMatch.legs.flatMap(l => l.throws);
   // Every player side by side — the old panel showed only the player up.
+  const heatmapTurnId = state.currentMatch.legs.reduce((n, l) => n + l.throws.length, 0);
+  const heatmapPlayerId = heatmapPlayer(heatmapPick, heatmapTurnId, state.currentMatch.players[state.currentPlayerIndex]?.playerId);
   const statRows: { label: string; value: (p: MatchPlayer) => string }[] = [
     { label: t('game_screen.stat_average'), value: p => p.matchAverage.toFixed(2) },
     { label: t('game_screen.stat_highest'), value: p => String(p.matchHighestScore) },
@@ -1823,105 +1829,15 @@ const GameScreen: React.FC = () => {
           { value: 'match', label: t('game.whole_match') },
         ]}
       />
-      {state.currentMatch.players.map((player) => {
-        const allPlayerThrowsView = statsView === 'leg'
-          ? currentLeg.throws.filter(t => t.playerId === player.playerId)
-          : state.currentMatch!.legs.flatMap(l => l.throws.filter(t => t.playerId === player.playerId));
-        const playerThrows = allPlayerThrowsView;
-
-        return (
-          <div key={player.playerId} className="mb-6 last:mb-0">
-            <h4 className="text-on-surface font-bold mb-3 flex items-center gap-2">
-              <span>{player.name}</span>
-              <span className="text-sm text-on-surface-variant">
-                {t('game_screen.visit_count', { count: playerThrows.length })}
-              </span>
-            </h4>
-
-            {playerThrows.length === 0 ? (
-              <p className="text-on-surface-variant text-sm italic">{t('game_screen.no_visits')}</p>
-            ) : (
-              <div className="space-y-2">
-                {playerThrows.map((throwData, index) => (
-                  <div
-                    key={throwData.id}
-                    className="bg-surface-container rounded-m3-lg p-3 border border-outline-variant"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-on-surface-variant text-sm">
-                        {t('game_screen.visit_number', { n: index + 1 })}
-                      </span>
-                      <div className="flex items-center gap-3">
-                        {throwData.isBust && (
-                          <span className="text-on-error-container text-xs font-bold bg-error-container px-2 py-1 rounded-m3-sm">
-                            {t('game_screen.bust')}
-                          </span>
-                        )}
-                        <span className={`font-bold text-lg ${
-                          throwData.isBust
-                            ? 'text-error line-through'
-                            : throwData.score >= 140
-                              ? 'text-tertiary'
-                              : throwData.score >= 100
-                                ? 'text-primary'
-                                : 'text-on-surface'
-                        }`}>
-                          {throwData.score}
-                        </span>
-                        <span className="text-on-surface-variant text-sm">
-                          → {throwData.remaining}
-                        </span>
-                        <IconButton
-                          label={t('correction.edit_visit', { score: throwData.isBust ? t('game.bust') : throwData.score })}
-                          onClick={() => handleEditVisit(throwData.id)}
-                          data-testid="history-edit"
-                        >
-                          <Pencil size={16} />
-                        </IconButton>
-                      </div>
-                    </div>
-
-                    {/* A typed total has no known beds: say so instead of showing invented darts. */}
-                    {throwData.darts.length > 0 && throwData.darts.every(d => d.estimated) ? (
-                      <div className="text-center py-2 rounded-m3-sm bg-surface-container-highest text-on-surface-variant text-xs font-semibold" data-testid="history-typed">
-                        {t('correction.typed')}
-                      </div>
-                    ) : (
-                    <div className="flex gap-2">
-                      {throwData.darts.map((dart, dartIndex) => (
-                        <div
-                          key={dartIndex}
-                          className={`flex-1 text-center py-2 rounded-m3-sm ${
-                            dart.multiplier === 3
-                              ? 'bg-success-container text-on-success-container'
-                              : dart.multiplier === 2
-                                ? 'bg-error-container text-on-error-container'
-                                : dart.score === 0
-                                  ? 'bg-surface-container-highest text-on-surface-variant'
-                                  : 'bg-primary-container text-on-primary-container'
-                          }`}
-                        >
-                          <span className="text-xs font-semibold">
-                            {dart.score === 0
-                              ? t('game.miss')
-                              : dart.multiplier === 3
-                                ? `T${dart.segment}`
-                                : dart.multiplier === 2
-                                  ? `D${dart.segment}`
-                                  : dart.segment
-                            }
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      })}
+      <VisitSheet
+        players={state.currentMatch.players}
+        legs={statsView === 'leg'
+          ? [{ number: state.currentMatch.currentLegIndex + 1, throws: currentLeg.throws }]
+          : state.currentMatch.legs.map((l, i) => ({ number: i + 1, throws: l.throws }))}
+        showLegHeaders={statsView === 'match' && state.currentMatch.legs.length > 1}
+        activeId={state.currentMatch.players[state.currentPlayerIndex]?.playerId}
+        onEdit={handleEditVisit}
+      />
     </div>
   );
   const chartBody = (
@@ -1963,11 +1879,11 @@ const GameScreen: React.FC = () => {
             {state.currentMatch.players.map(player => (
               <button
                 key={player.playerId}
-                onClick={() => setSelectedHeatmapPlayer(
-                  selectedHeatmapPlayer === player.playerId ? null : player.playerId
-                )}
+                onClick={() => setHeatmapPick({ playerId: player.playerId, turnId: heatmapTurnId })}
+                aria-pressed={heatmapPlayerId === player.playerId}
+                data-testid="heatmap-player"
                 className={`px-4 py-2 rounded-m3-lg font-medium transition flex items-center gap-2 ${
-                  selectedHeatmapPlayer === player.playerId || (!selectedHeatmapPlayer && state.currentMatch!.players[0].playerId === player.playerId)
+                  heatmapPlayerId === player.playerId
                     ? 'bg-primary text-on-primary'
                     : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest'
                 }`}
@@ -1982,7 +1898,7 @@ const GameScreen: React.FC = () => {
 
       {/* Heatmap Display */}
       {(() => {
-        const displayPlayerId = selectedHeatmapPlayer || state.currentMatch.players[0]?.playerId;
+        const displayPlayerId = heatmapPlayerId;
         const playerHeatmap = displayPlayerId ? liveHeatmapData[displayPlayerId] : null;
         const playerName = state.currentMatch.players.find(p => p.playerId === displayPlayerId)?.name || '';
 
@@ -2198,7 +2114,7 @@ const GameScreen: React.FC = () => {
             <DeferredSection
               depsKey={[
                 state.currentMatch.id, deferredThrows, deferredPlayerIndex, statsView, heatmapView,
-                selectedHeatmapPlayer ?? '', settings.showStatsDuringGame, i18n.language, state.currentMatch.currentLegIndex,
+                heatmapPlayerId ?? '', settings.showStatsDuringGame, i18n.language, state.currentMatch.currentLegIndex,
               ].join('|')}
               render={() => insights}
             />
