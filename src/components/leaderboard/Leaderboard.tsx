@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trophy, TrendingUp, Target, Zap, Award, Medal, Crown } from 'lucide-react';
+import { Trophy, TrendingUp, Target, Zap, Award, Crown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { playerTier } from '../../utils/playerOrder';
 import { usePlayer } from '../../context/PlayerContext';
@@ -156,31 +156,11 @@ const Leaderboard: React.FC = () => {
     }
   };
 
-  const getMedalIcon = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return <Trophy size={24} className="text-[var(--m3-medal-gold)]" />;
-      case 2:
-        return <Medal size={24} className="text-[var(--m3-medal-silver)]" />;
-      case 3:
-        return <Medal size={24} className="text-[var(--m3-medal-bronze)]" />;
-      default:
-        return <div className="text-lg font-bold text-on-surface-variant">#{rank}</div>;
-    }
-  };
-
-  const getRankColor = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return 'border-[var(--m3-medal-gold)] bg-[color-mix(in_srgb,var(--m3-medal-gold)_12%,transparent)]';
-      case 2:
-        return 'border-[var(--m3-medal-silver)] bg-[color-mix(in_srgb,var(--m3-medal-silver)_12%,transparent)]';
-      case 3:
-        return 'border-[var(--m3-medal-bronze)] bg-[color-mix(in_srgb,var(--m3-medal-bronze)_12%,transparent)]';
-      default:
-        return 'border-outline-variant bg-surface-container';
-    }
-  };
+  // 0.39.0: the medal colour is an accent — a stripe and the place number —
+  // not a frame. The silver frame was the brightest thing on the page, and a
+  // trophy icon for place 1 fought the trophy avatars.
+  const medalColor = (rank: number) =>
+    rank === 1 ? 'var(--m3-medal-gold)' : rank === 2 ? 'var(--m3-medal-silver)' : rank === 3 ? 'var(--m3-medal-bronze)' : null;
 
   return (
     <PageShell title={t('leaderboard.title')}>
@@ -213,20 +193,26 @@ const Leaderboard: React.FC = () => {
             <div className="space-y-3">
               {sortedData.map((player, index) => {
                 const rank = index + 1;
+                const medal = medalColor(rank);
                 return (
                   <motion.button
                     type="button"
                     key={player.id}
                     {...staggerChild(Math.min(index, 12))}
                     onClick={() => navigate(`/players/${player.id}`)}
-                    className={`w-full text-left flex items-center justify-between p-4 border-2 rounded-m3-lg transition cursor-pointer hover:scale-[1.02] ${getRankColor(
-                      rank
-                    )}`}
+                    data-testid="leaderboard-row"
+                    data-rank={rank}
+                    className="relative overflow-hidden w-full text-left flex items-center justify-between p-4 pl-5 rounded-m3-lg bg-surface-container m3-state-layer transition cursor-pointer"
                   >
+                    {medal && <span aria-hidden="true" data-testid="medal-stripe" className="absolute left-0 inset-y-0 w-1.5" style={{ background: medal }} />}
                     <div className="flex items-center gap-4">
                       {/* Rank */}
-                      <div className="flex-shrink-0 w-12 flex justify-center">
-                        {getMedalIcon(rank)}
+                      <div
+                        className={`flex-shrink-0 w-10 text-center m3-title-large font-bold tabular-nums ${medal ? '' : 'text-on-surface-variant'}`}
+                        style={medal ? { color: medal } : undefined}
+                      >
+                        <span aria-hidden="true">{rank}</span>
+                        <span className="sr-only">{t('leaderboard.rank', { rank })}</span>
                       </div>
 
                       {/* Avatar & Name */}
@@ -263,19 +249,19 @@ const Leaderboard: React.FC = () => {
                   <div className="m3-label-large text-on-surface-variant mt-1">{t('leaderboard.active_players')}</div>
                 </div>
                 <div className="text-center">
-                  <div className="m3-title-large text-primary">
+                  <div className="m3-title-large text-on-surface">
                     {(sortedData.reduce((sum, p) => sum + p.gamesPlayed, 0) / sortedData.length).toFixed(0)}
                   </div>
                   <div className="m3-label-large text-on-surface-variant mt-1">{t('leaderboard.avg_games')}</div>
                 </div>
                 <div className="text-center">
-                  <div className="m3-title-large text-[var(--m3-medal-gold)]">
+                  <div className="m3-title-large text-on-surface">
                     {sortedData.reduce((sum, p) => sum + p.total180s, 0)}
                   </div>
                   <div className="m3-label-large text-on-surface-variant mt-1">{t('leaderboard.total_180s')}</div>
                 </div>
                 <div className="text-center">
-                  <div className="m3-title-large text-tertiary">
+                  <div className="m3-title-large text-on-surface">
                     {sortedData.reduce((sum, p) => sum + p.achievementsCount, 0)}
                   </div>
                   <div className="m3-label-large text-on-surface-variant mt-1">{t('leaderboard.total_achievements')}</div>

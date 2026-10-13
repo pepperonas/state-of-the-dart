@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Edit2, Trash2, User, Eye, Crown, BarChart3, Smile, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Edit2, Trash2, User, Crown, BarChart3, Smile, MoreVertical } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { usePlayer } from '../../context/PlayerContext';
 import { api } from '../../services/api';
 import PlayerAvatar from './PlayerAvatar';
 import AvatarPicker from './AvatarPicker';
-import { Button, TextField, Card, IconButton, PageShell } from '../common';
+import { Button, TextField, Card, IconButton, PageShell, Menu } from '../common';
 import { staggerChild } from '../../utils/motion';
 import LoadingIndicator from '../common/LoadingIndicator';
 import { useFeedback } from '../common/feedbackContext';
@@ -277,20 +277,12 @@ const PlayerManagement: React.FC = () => {
                     )}
                   </div>
                   
-                  <div className="flex items-center justify-end gap-1 sm:gap-2 self-end sm:self-auto">
-                    <IconButton
-                      label={t('players.view_profile')}
-                      className="text-primary"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/players/${player.id}`);
-                      }}
-                    >
-                      <Eye size={18} />
-                    </IconButton>
+                  {/* 0.39.0: the name already opens the profile (the eye did the
+                      same), stats and rename stay one tap away, the rare and the
+                      destructive actions sit in the overflow menu. */}
+                  <div className="flex items-center justify-end gap-1 self-end sm:self-auto" data-testid="player-actions">
                     <IconButton
                       label={t('player_management.show_stats')}
-                      className="text-success"
                       onClick={(e) => {
                         e.stopPropagation();
                         // Set player as selected and navigate to stats
@@ -300,21 +292,8 @@ const PlayerManagement: React.FC = () => {
                     >
                       <BarChart3 size={18} />
                     </IconButton>
-                    {mainPlayerId !== player.id && (
-                      <IconButton
-                        label={t('player_management.set_main_profile')}
-                        className="text-tertiary"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSetMainPlayer(player.id);
-                        }}
-                      >
-                        <Crown size={18} />
-                      </IconButton>
-                    )}
                     <IconButton
                       label={t('players.edit_name')}
-                      className="text-secondary"
                       onClick={(e) => {
                         e.stopPropagation();
                         setEditingPlayer(player.id);
@@ -324,23 +303,39 @@ const PlayerManagement: React.FC = () => {
                     >
                       <Edit2 size={18} />
                     </IconButton>
-                    <IconButton
-                      label={t('players.delete_player')}
-                      className="text-error"
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        if (await confirm({ title: t('player_management.delete_confirm', { name: player.name }), danger: true, confirmLabel: t('common.delete') })) {
-                          try {
-                            await deletePlayer(player.id);
-                          } catch (error) {
-                            console.error('Failed to delete player:', error);
-                            notify(t('players.error_delete'));
-                          }
-                        }
-                      }}
+                    <Menu
+                      label={t('player_management.more_actions', { name: player.name })}
+                      triggerLabel={t('player_management.more_actions', { name: player.name })}
+                      triggerClassName="m3-icon-button m3-state-layer inline-flex items-center justify-center w-10 h-10 rounded-m3-full text-on-surface-variant"
+                      align="end"
+                      widthClassName="w-56"
+                      items={[
+                        ...(mainPlayerId !== player.id ? [{
+                          id: 'main',
+                          label: t('player_management.set_main_profile'),
+                          icon: <Crown size={18} />,
+                          onSelect: () => handleSetMainPlayer(player.id),
+                        }] : []),
+                        {
+                          id: 'delete',
+                          label: t('players.delete_player'),
+                          icon: <Trash2 size={18} />,
+                          tone: 'danger' as const,
+                          onSelect: async () => {
+                            if (await confirm({ title: t('player_management.delete_confirm', { name: player.name }), danger: true, confirmLabel: t('common.delete') })) {
+                              try {
+                                await deletePlayer(player.id);
+                              } catch (error) {
+                                console.error('Failed to delete player:', error);
+                                notify(t('players.error_delete'));
+                              }
+                            }
+                          },
+                        },
+                      ]}
                     >
-                      <Trash2 size={18} />
-                    </IconButton>
+                      <MoreVertical size={18} aria-hidden="true" />
+                    </Menu>
                   </div>
                 </Card>
                 </motion.div>

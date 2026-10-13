@@ -147,6 +147,11 @@ M3 primitive library (barrel `src/components/common/index.ts`). **Prefer these o
 - `ErrorBoundary` — top-level React error boundary. Wraps `<App>` in `main.tsx` so a render-time throw (bad `JSON.parse` in match reconstruction, failed lazy chunk, etc.) shows an M3 recovery screen (reload / back-to-menu) instead of white-screening the PWA. The `window.error`/`unhandledrejection` handlers in `App.tsx` only log — they do NOT catch render errors, so don't remove the boundary.
 - `BackButton.tsx` — canonical back button. **Always use this** for screen-level back navigation. An M3 **tonal** button with a leading `<ArrowLeft>`. In **block mode (default)** it wraps itself in a `mb-6` block so the gap to the page heading is uniform across all screens; pass **`inline`** when it sits in a flex header row / form (opts out of the wrapper — the row/form controls spacing). Override text via `label`.
 
+### Lists (0.39.0)
+- Achievement card: tier = badge shape + `getTierColor` fill when unlocked (`achievement-badge`), `achievement-meta` = tier word + one outlined rarity chip (`achievements.rarity_*`). No scope chip on cards; scope is a `Select` in `achievement-filters`, "unlocked only" a `Switch`.
+- Leaderboard row (`leaderboard-row`): `bg-surface-container`, medal colour only as `medal-stripe` + place number (sr-only "Platz N"); no borders.
+- Player row (`player-actions`): statistics + rename as IconButtons, `Menu` (⋮) for main profile / delete. The name opens the profile.
+
 ### Home and statistics (0.38.0)
 - Home tiles take a lucide component or a glyph name (`icon: 'cricket'`); game modes use the app's own glyphs. Tones by kind: play `primary`, practice `secondary`, review `tertiary`, admin `error`. The last tile of a section gets `lastTileSpan(count)` (`utils/tileSpan.ts`) — pinned by `page-frame.spec.ts`.
 - Statistics overview: `HeroStat` ×3 (`stats-hero`, sub line always reserved) + `DetailStat` ×8 (`stats-details`; 0 → quiet, null → —). `WinRing` replaces the pie. Never dim a label with `opacity`.

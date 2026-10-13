@@ -7,6 +7,28 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.39.0] - 2026-10-13
+
+### Changed — achievements, leaderboard, player list
+- Achievement cards: the tier is the badge's shape and, once unlocked, its
+  colour; below it the tier in words and the rarity as one quiet, translated
+  chip ("Selten" instead of "RARE"). The tier chip, the saturated rarity chip
+  and the area chip are gone — three rainbow chips per card.
+- Achievement filters: one scrolling row of categories; the area is a dropdown
+  and "unlocked only" a switch, instead of a second row of nine chips and a
+  checkbox inside a box.
+- Leaderboard: the medal colour is a stripe on the left and the place number;
+  no frames (the silver one was the brightest thing on the page) and no trophy
+  icon for place 1 next to trophy avatars. The summary figures are one colour.
+- Player list: two direct actions per row (statistics, rename) and an overflow
+  menu for "main profile" and "delete". The eye button went — the name already
+  opens the profile.
+
+### Tests
+- `lists.test.tsx` (card meta, tinted badge, filter controls, leaderboard
+  stripe/number, player row actions). 7 mutation probes caught, one no-op
+  control stayed green as it should.
+
 ## [0.38.0] - 2026-10-13
 
 ### Changed — home and statistics
