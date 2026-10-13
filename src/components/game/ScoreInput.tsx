@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { Check, X, Delete, Keyboard, RotateCcw, RotateCw, ChevronDown } from 'lucide-react';
+import { openShortcuts } from '../../utils/shortcuts';
 import { useTranslation } from 'react-i18next';
 import { Dart } from '../../types/index';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -170,6 +171,8 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
   // "Bestätigen" with a typed total takes it, like Enter — it used to stay
   // disabled until darts existed, so the labelled button was a dead end.
   const commitsTyped = currentInput !== '' && editingDartIndex === null && (correcting || (inputMode === 'numpad' && currentThrow.length < 3));
+  // With the numpad's check key gone, "Bestätigen" sets an edited dart, like Enter.
+  const setsDart = editingDartIndex !== null && inputMode === 'numpad';
 
   // Taking back a confirmed throw reloads its darts into the input, so it would
   // silently overwrite darts that are already sitting there — only offer it on an
@@ -276,6 +279,13 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
     if (awaitingNextPlayer) return;
     if (value === 'clear') {
       setCurrentInput('');
+      return;
+    }
+    // The backspace key does what Backspace does: a digit first, then the last dart
+    // (never a confirmed visit — that is the undo button's job).
+    if (value === 'back') {
+      if (currentInput) setCurrentInput(currentInput.slice(0, -1));
+      else if (currentThrow.length > 0) onRemoveDart();
       return;
     }
 
@@ -599,32 +609,26 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
                 {num}
               </button>
             ))}
+            {/* 0.37.0: a backspace key replaces "C", and the check key is gone — "Bestätigen" below
+                takes a typed total (and sets an edited dart), so there was one
+                filled button too many. */}
             <button
               {...keepFocus}
-              onClick={() => handleNumpadClick('clear')}
-              aria-label={t('game.clear_input')}
-              title={t('game.clear_input')}
-              className="sotd-key m3-state-layer m3-ripple p-3 lg:p-4 phoneland:p-2 min-h-[48px] text-lg font-bold bg-surface-container-highest text-on-surface"
+              onClick={() => handleNumpadClick('back')}
+              disabled={!currentInput && currentThrow.length === 0}
+              aria-label={t('score_input.backspace')}
+              title={t('score_input.backspace')}
+              data-testid="numpad-back"
+              className="sotd-key m3-state-layer m3-ripple p-3 lg:p-4 phoneland:p-2 min-h-[48px] flex items-center justify-center bg-surface-container-highest text-on-surface disabled:opacity-40"
             >
-              C
+              <Delete size={22} aria-hidden="true" />
             </button>
             <button
               {...keepFocus}
               onClick={() => handleNumpadClick('0')}
-              className="sotd-key m3-state-layer m3-ripple p-3 lg:p-4 phoneland:p-2 min-h-[48px] text-xl font-bold bg-surface-container-high text-on-surface"
+              className="sotd-key m3-state-layer m3-ripple col-span-2 p-3 lg:p-4 phoneland:p-2 min-h-[48px] text-xl font-bold bg-surface-container-high text-on-surface"
             >
               0
-            </button>
-            <button
-              {...keepFocus}
-              onClick={() => handleNumpadClick('enter')}
-              className="sotd-key m3-state-layer m3-ripple p-3 lg:p-4 phoneland:p-2 min-h-[48px] text-2xl font-bold bg-primary text-on-primary shadow-m3-1"
-              title={editingDartIndex !== null ? t('score_input.replace_dart') : t('score_input.submit_total')}
-              aria-label={editingDartIndex !== null ? t('score_input.replace_dart') : t('score_input.submit_total')}
-            >
-              {editingDartIndex !== null
-                ? t('game.set_dart')
-                : <Check size={28} strokeWidth={3} className="mx-auto" aria-hidden="true" />}
             </button>
           </motion.div>
           )}
@@ -647,13 +651,14 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
                 ? t('game.undo_throw_blocked')
                 : t('game.undo_last_throw')
           }
-          className="flex-1 min-w-0 min-h-[52px] phoneland:min-h-[44px] phoneland:py-2 flex items-center justify-center gap-2 px-4 py-3 rounded-m3-full bg-tertiary-container text-on-tertiary-container m3-state-layer disabled:opacity-30 disabled:cursor-not-allowed transition font-bold"
+          data-testid="undo-throw"
+          className="min-w-0 max-w-full min-h-[44px] flex items-center gap-2 px-4 py-2 rounded-m3-full bg-secondary-container text-on-secondary-container m3-state-layer m3-label-large disabled:opacity-30 disabled:cursor-not-allowed transition"
         >
           <RotateCcw size={18} className="shrink-0" />
           <span className="whitespace-nowrap">{t('game.undo_last_throw')}</span>
           {/* With "Wurf vor" beside it there is no room for the name; it stays in the title. */}
           {lastThrow && !canRedoThrow && (
-            <span className="m3-label-large px-2 py-0.5 rounded-m3-full bg-[color-mix(in_srgb,var(--m3-on-tertiary-container)_14%,transparent)] max-w-[45%] truncate">
+            <span className="m3-label-medium px-2 py-0.5 rounded-m3-full bg-[color-mix(in_srgb,var(--m3-on-secondary-container)_14%,transparent)] truncate">
               {lastThrow.playerName} · {lastThrow.isBust ? t('game.bust') : lastThrow.score}
             </span>
           )}
@@ -664,7 +669,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
             aria-label={`${t('game.redo_throw')}: ${redoName}`}
             title={t('game.redo_throw')}
             data-testid="redo-throw"
-            className="shrink-0 max-w-[45%] min-h-[52px] phoneland:min-h-[44px] phoneland:py-2 flex items-center justify-center gap-2 px-4 py-3 rounded-m3-full bg-secondary-container text-on-secondary-container m3-state-layer transition font-bold"
+            className="shrink-0 max-w-[45%] min-h-[44px] flex items-center justify-center gap-2 px-4 py-2 rounded-m3-full bg-secondary-container text-on-secondary-container m3-state-layer m3-label-large transition"
           >
             <span className="truncate">{redoName}</span>
             <RotateCw size={18} className="shrink-0" />
@@ -673,15 +678,27 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
         </div>
       )}
 
-      {/* Action Buttons — confirm gets the most room, it is the one used every visit. */}
-      <div className={`grid ${dense && onUndoThrow ? (canRedoThrow ? 'grid-cols-[auto_auto_auto_auto_1fr] gap-1.5' : 'grid-cols-[auto_auto_auto_1fr] gap-2') : 'grid-cols-[1fr_1fr_1.6fr] gap-2'} phoneland:col-start-1`}>
+      {/* Action Buttons — confirm gets the most room, it is the one used every visit.
+          0.37.0: confirm is the only filled button; undo is tonal, clear and
+          "remove dart" are neutral. With the numpad open its backspace key removes the
+          last dart, so the extra button is left out. */}
+      {(() => {
+        const showDartButton = !(inputMode === 'numpad' && numpadOpen);
+        const lead = (dense && onUndoThrow ? 1 : 0) + (dense && onUndoThrow && canRedoThrow ? 1 : 0)
+          + (showDartButton ? 1 : 0) + 1;
+        const columns = dense
+          ? `${'auto '.repeat(lead)}minmax(0, 1fr)`
+          : showDartButton ? '1fr 1fr 1.6fr' : '1fr 1.6fr';
+        return (
+      <div data-testid="input-actions" className={`grid ${dense && canRedoThrow ? 'gap-1.5' : 'gap-2'} phoneland:col-start-1`} style={{ gridTemplateColumns: columns }}>
         {dense && onUndoThrow && (
           <button
             onClick={() => canUndoThrow && onUndoThrow()}
             disabled={!canUndoThrow}
             aria-label={lastThrow ? `${t('game.undo_last_throw')}: ${lastThrow.playerName} · ${lastThrow.isBust ? t('game.bust') : lastThrow.score}` : t('game.undo_last_throw')}
             title={!lastThrow ? t('game.no_throw_to_undo') : t('game.undo_last_throw')}
-            className={`flex items-center justify-center ${canRedoThrow ? 'px-2.5' : 'px-4'} rounded-m3-full bg-tertiary-container text-on-tertiary-container m3-state-layer disabled:opacity-30 disabled:cursor-not-allowed transition`}
+            data-testid="undo-throw"
+            className={`flex items-center justify-center min-h-[48px] ${canRedoThrow ? 'px-3' : 'px-4'} rounded-m3-full bg-secondary-container text-on-secondary-container m3-state-layer disabled:opacity-30 disabled:cursor-not-allowed transition`}
           >
             <RotateCcw size={18} />
           </button>
@@ -692,28 +709,30 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
             aria-label={`${t('game.redo_throw')}: ${redoName}`}
             title={t('game.redo_throw')}
             data-testid="redo-throw"
-            className="flex items-center justify-center px-2.5 rounded-m3-full bg-secondary-container text-on-secondary-container m3-state-layer transition"
+            className="flex items-center justify-center min-h-[48px] px-3 rounded-m3-full bg-secondary-container text-on-secondary-container m3-state-layer transition"
           >
             <RotateCw size={18} />
           </button>
         )}
+        {showDartButton && (
         <button
           onClick={onRemoveDart}
           disabled={currentThrow.length === 0}
           aria-label={t('game.remove_dart')}
           title={t('game.remove_dart')}
-          className="flex items-center justify-center gap-1 p-3 rounded-m3-full bg-surface-container-high hover:bg-surface-container-highest text-on-surface disabled:opacity-30 disabled:cursor-not-allowed transition font-bold"
+          className="flex items-center justify-center gap-1 min-h-[48px] p-3 rounded-m3-full bg-surface-container-high text-on-surface m3-state-layer disabled:opacity-30 disabled:cursor-not-allowed transition font-bold"
         >
           <Delete size={18} />
           <span className="hidden sm:inline">{t('game.dart')}</span>
         </button>
+        )}
 
         <button
           onClick={onClearThrow}
           disabled={currentThrow.length === 0}
           aria-label={t('game.clear_visit_long')}
           title={t('game.clear_visit_long')}
-          className="flex items-center justify-center gap-1 p-3 px-4 rounded-m3-full bg-error-container text-on-error-container disabled:opacity-30 disabled:cursor-not-allowed transition font-bold"
+          className="flex items-center justify-center gap-1 min-h-[48px] p-3 px-4 rounded-m3-full bg-surface-container-high text-on-surface m3-state-layer disabled:opacity-30 disabled:cursor-not-allowed transition font-bold"
         >
           <X size={18} />
           <span className={dense ? 'sr-only' : ''}>{t('game.clear_visit')}</span>
@@ -721,9 +740,9 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
 
         <button
           ref={confirmBtnRef}
-          onClick={awaitingNextPlayer ? onNextPlayer : commitsTyped ? () => handleNumpadClick('enter') : onConfirm}
-          disabled={!awaitingNextPlayer && !commitsTyped && currentThrow.length === 0}
-          className={`min-w-0 flex items-center justify-center gap-1 p-3 rounded-m3-full disabled:opacity-30 disabled:cursor-not-allowed transition font-bold shadow-m3-1 ${
+          onClick={awaitingNextPlayer ? onNextPlayer : (commitsTyped || setsDart) ? () => handleNumpadClick('enter') : onConfirm}
+          disabled={!awaitingNextPlayer && !commitsTyped && !setsDart && currentThrow.length === 0}
+          className={`min-w-0 min-h-[48px] flex items-center justify-center gap-1 p-3 rounded-m3-full disabled:opacity-30 disabled:cursor-not-allowed transition font-bold shadow-m3-1 ${
             isCheckout
               ? 'bg-success text-on-success sotd-ring-pulse'
               : isEditingThrow
@@ -734,13 +753,24 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
           {!(dense && canRedoThrow) && <Check size={20} className="shrink-0" />}
           <span className="truncate">{awaitingNextPlayer
             ? t('game_screen.next_player', { name: awaitingNextPlayer })
+            : setsDart ? t('score_input.replace_dart')
             : isCheckout ? t('score_input.checkout') : isEditingThrow ? (dense ? t('correction.save') : t('game.confirm_correction')) : t('game.confirm_visit')}</span>
         </button>
       </div>
+        );
+      })()}
 
-      {/* Keyboard Shortcuts Hint */}
-      <div className="mt-3 text-center m3-body-small text-on-surface-variant hidden lg:block">
-        {t('game.keyboard_hint')}
+      {/* The keys live in the "?" dialog — a sentence under the pad was noise. */}
+      <div className="mt-3 text-center hidden lg:block">
+        <button
+          type="button"
+          onClick={openShortcuts}
+          data-testid="shortcuts-link"
+          className="m3-state-layer inline-flex items-center gap-1.5 px-3 min-h-[36px] rounded-m3-full m3-label-medium text-on-surface-variant"
+        >
+          <Keyboard size={16} aria-hidden="true" />
+          {t('score_input.shortcuts_link')}
+        </button>
       </div>
     </div>
   );

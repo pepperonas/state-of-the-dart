@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Dialog from './Dialog';
 import { shouldHandleGameKey } from '../../utils/gameKeys';
+import { SHORTCUTS_EVENT } from '../../utils/shortcuts';
 
 /** Keys and what they do. Keys are not translated; descriptions are. */
 const SHORTCUTS: { keys: string[]; action: string }[] = [
@@ -29,8 +30,14 @@ const ShortcutsDialog: React.FC = () => {
       e.preventDefault();
       setOpen(true);
     };
+    // The game screen links here instead of printing the keys as a sentence.
+    const onOpen = () => setOpen(true);
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener(SHORTCUTS_EVENT, onOpen);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener(SHORTCUTS_EVENT, onOpen);
+    };
   }, []);
 
   return (

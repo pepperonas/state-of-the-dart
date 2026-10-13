@@ -1798,7 +1798,7 @@ const GameScreen: React.FC = () => {
                 <td
                   key={p.playerId}
                   className={`px-2 py-1 text-right font-semibold text-on-surface ${
-                    i === state.currentPlayerIndex ? 'bg-[color-mix(in_srgb,var(--m3-primary-container)_45%,transparent)]' : ''
+                    i === state.currentPlayerIndex ? 'bg-[color-mix(in_srgb,var(--m3-primary-container)_18%,transparent)]' : ''
                   }`}
                 >
                   {row.value(p)}

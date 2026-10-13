@@ -7,6 +7,30 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.37.0] - 2026-10-13
+
+### Changed — game screen
+- Player rows show the place in the leg as a small disc on the avatar instead
+  of a poster beside the remaining score — "2 75" read as 275.
+- One filled button under the input: "Bestätigen". The numpad's check key is
+  gone (confirm takes a typed total and sets an edited dart, like Enter), undo
+  is tonal instead of a purple slab, clear is neutral instead of red.
+- The numpad's bottom-left key is backspace (last digit, then last dart)
+  instead of "C"; with the numpad open the separate "remove dart" button is
+  left out. "0" takes two columns.
+- Desktop: "Wurf zurück" is a compact tonal button; the "how was it thrown?"
+  chips sit in one scrolling row under their label; the keyboard sentence under
+  the input became a "Tastenkürzel" link that opens the shortcuts dialog.
+- Match statistics: labels without colons, the current player's column is a
+  faint tint (the header keeps the strong one).
+
+### Tests
+- `inputActions.test.tsx` (numpad keys, backspace order, confirm sets an edited
+  dart, one filled button, shortcuts link), badge placement in `HeroCard.test`,
+  and `refresh.spec` asserts the place sits left of the name, ≥ 48 px from the
+  score. A first version measured a 12 px gap and passed against the old
+  poster — it sat exactly one flex gap from the score.
+
 ## [0.36.0] - 2026-10-13
 
 ### Changed — one page frame
