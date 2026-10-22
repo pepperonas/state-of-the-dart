@@ -5,6 +5,7 @@ import { Trophy, UserMinus } from 'lucide-react';
 import type { MatchPlayer } from '../../types/index';
 import PlayerAvatar from '../player/PlayerAvatar';
 import AnimatedNumber from '../common/AnimatedNumber';
+import { GAME_TALLY } from '../../utils/springs';
 import IconButton from '../common/IconButton';
 import { springHandover, springSpatialDefault, springSpatialFast } from '../../utils/motion';
 import { CONTAINER_MORPH, CONTENT_IN, FLAMES_AFTER_MS } from './spotlightMotion';
@@ -229,6 +230,7 @@ const HeroCard: React.FC<HeroCardProps> = ({
           <motion.span ref={numberRef} className={`block ${NUMBER_SIZE[size]}`} style={{ scale: grow, transformOrigin: 'left bottom' }}>
           <AnimatedNumber
             numeral
+            tally={GAME_TALLY}
             value={remaining}
             className={`block leading-none tracking-tight ${NUMBER_SIZE[size]} ${
               remaining <= checkoutMax ? 'text-primary' : 'text-on-surface'
@@ -237,7 +239,7 @@ const HeroCard: React.FC<HeroCardProps> = ({
           </motion.span>
           </motion.div>
           {/* The visit lands here, big, while the card is still the hero. */}
-          <ScoreDelta variant="stamp" value={remaining} from={previousRemaining} className="left-full ml-3 top-1 m3-title-large" />
+          <ScoreDelta variant="stamp" value={remaining} from={previousRemaining} className="left-full ml-3 top-0 m3-headline-small" />
         </motion.div>
         {rank && <RankStamp rank={rank} size={size === 'large' ? 'large' : 'card'} />}
       </div>

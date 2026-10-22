@@ -79,7 +79,7 @@
   --m3-loop-shape-morph: 1.6s;
   --sotd-fire-glow-period: 4.3s;
   --sotd-fire-border-period: 2.7s;
-  --sotd-leg-won-duration: 1.4s;
+  --sotd-leg-won-duration: 2.2s;
 
   /* Aliases — the names `m3.css` and the components already use. Values are
      byte-identical to what they were; this only folds them into one scale. */

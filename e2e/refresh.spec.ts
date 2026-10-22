@@ -55,15 +55,20 @@ test('a refresh mid-match keeps scores, turn and the darts of the current visit'
 
   // 0.37.0: in a row the place sits on the avatar, well away from the remaining
   // score — as a poster beside it, "2 456" read as one number.
-  for (const n of [names[0], names[1], names[3]]) {
-    const r = (await rank(n).boundingBox())!;
-    const rest = (await page.getByTestId(`player-card-${n}`).getByTestId('row-rest').boundingBox())!;
-    const name = (await page.getByTestId(`player-card-${n}`).getByText(n, { exact: true }).boundingBox())!;
-    // On the avatar = left of the name. (A gap threshold alone was blind: the
-    // old poster sat exactly one 12 px flex gap from the score.)
-    expect(r.x + r.width, `${n}: place not on the avatar`).toBeLessThanOrEqual(name.x);
-    expect(rest.x - (r.x + r.width), `${n}: place too close to the score`).toBeGreaterThanOrEqual(48);
-  }
+  // Measured once the hand-over has settled (0.44.0: hold 1 s + ~1.2 s spring —
+  // mid-morph the row is still growing out of the hero card).
+  await expect(page.getByTestId(`player-card-${names[2]}`)).toHaveAttribute('data-hero', 'true', { timeout: 4000 });
+  await expect(async () => {
+    for (const n of [names[0], names[1], names[3]]) {
+      const r = (await rank(n).boundingBox())!;
+      const rest = (await page.getByTestId(`player-card-${n}`).getByTestId('row-rest').boundingBox())!;
+      const name = (await page.getByTestId(`player-card-${n}`).getByText(n, { exact: true }).boundingBox())!;
+      // On the avatar = left of the name. (A gap threshold alone was blind: the
+      // old poster sat exactly one 12 px flex gap from the score.)
+      expect(r.x + r.width, `${n}: place not on the avatar`).toBeLessThanOrEqual(name.x);
+      expect(rest.x - (r.x + r.width), `${n}: place too close to the score`).toBeGreaterThanOrEqual(48);
+    }
+  }).toPass({ timeout: 4000 });
 
   // Three panes (1440 px): the whole scoreboard sits left of the input — the
   // player at the oche as the hero card on top, the others as rows.

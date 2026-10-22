@@ -853,7 +853,7 @@ button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surfa
    comes from framer-motion). Off under reduced motion — the tint stays. */
 @keyframes sotd-leg-won {
   0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--m3-tertiary) 55%, transparent); }
-  40%  { box-shadow: 0 0 0 6px color-mix(in srgb, var(--m3-tertiary) 25%, transparent), 0 0 18px color-mix(in srgb, var(--m3-tertiary) 35%, transparent); }
+  40%  { box-shadow: 0 0 0 10px color-mix(in srgb, var(--m3-tertiary) 30%, transparent), 0 0 32px color-mix(in srgb, var(--m3-tertiary) 45%, transparent); }
   100% { box-shadow: 0 0 0 0 transparent; }
 }
 .sotd-leg-won { animation: sotd-leg-won var(--sotd-leg-won-duration) var(--m3-easing-standard) 1; }
@@ -1002,12 +1002,15 @@ button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surfa
 
 /* The turn change (0.34.0): one ring pulses on the incoming hero card once it
    has grown, then the flames take over. Inset, because the card clips. */
+/* 0.44.0: two beats, thicker, with an outer glow — "your turn" must be seen. */
 @keyframes sotd-turn-ring {
-  0% { box-shadow: inset 0 0 0 0 var(--m3-primary); }
-  35% { box-shadow: inset 0 0 0 4px var(--m3-primary); }
-  100% { box-shadow: inset 0 0 0 0 transparent; }
+  0% { box-shadow: inset 0 0 0 0 var(--m3-primary), 0 0 0 0 transparent; }
+  20% { box-shadow: inset 0 0 0 7px var(--m3-primary), 0 0 28px 4px color-mix(in srgb, var(--m3-primary) 45%, transparent); }
+  45% { box-shadow: inset 0 0 0 2px var(--m3-primary), 0 0 0 0 transparent; }
+  65% { box-shadow: inset 0 0 0 7px var(--m3-primary), 0 0 28px 4px color-mix(in srgb, var(--m3-primary) 45%, transparent); }
+  100% { box-shadow: inset 0 0 0 0 transparent, 0 0 0 0 transparent; }
 }
-.sotd-turn-ring { animation: sotd-turn-ring 0.9s var(--m3-easing-standard) 0.7s 1 both; z-index: 3; }
+.sotd-turn-ring { animation: sotd-turn-ring 1.8s var(--m3-easing-standard) 1.1s 1 both; z-index: 3; }
 @media (prefers-reduced-motion: reduce) {
   .sotd-turn-ring { animation: none; }
 }

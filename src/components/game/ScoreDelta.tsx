@@ -43,20 +43,20 @@ const ScoreDelta: React.FC<ScoreDeltaProps> = ({ value, from, className = '', va
           aria-hidden="true"
           {...(variant === 'stamp'
             ? {
-              initial: { opacity: 0, scale: 0.3, rotate: -10, y: 0 },
-              animate: { opacity: [0, 1, 1, 0], scale: [0.3, 1.18, 1, 1], rotate: [-10, 3, 0, 0], y: [0, 0, 0, -18] },
-              transition: { duration: 1.4, times: [0, 0.18, 0.75, 1], ease: [0.2, 0, 0, 1] },
+              initial: { opacity: 0, scale: 0.2, rotate: -14, y: 0 },
+              animate: { opacity: [0, 1, 1, 1, 0], scale: [0.2, 1.45, 0.94, 1, 1], rotate: [-14, 5, -1, 0, 0], y: [0, 0, 0, 0, -28] },
+              transition: { duration: 2.4, times: [0, 0.14, 0.26, 0.36, 1], ease: [0.2, 0, 0, 1] },
             }
             : {
-              initial: { opacity: 0, y: 6, scale: 0.8 },
-              animate: { opacity: [0, 1, 1, 0], y: -26, scale: 1 },
-              transition: { duration: 1.1, times: [0, 0.12, 0.7, 1], ease: [0.2, 0, 0, 1] },
+              initial: { opacity: 0, y: 6, scale: 0.6 },
+              animate: { opacity: [0, 1, 1, 0], y: [6, -10, -24, -40], scale: [0.6, 1.25, 1.1, 1] },
+              transition: { duration: 1.9, times: [0, 0.15, 0.7, 1], ease: [0.2, 0, 0, 1] },
             })}
           onAnimationComplete={() => setDelta(d => (d?.id === delta.id ? null : d))}
           className={`pointer-events-none absolute font-bold tabular-nums ${
             variant === 'stamp'
-              ? 'px-2.5 py-0.5 rounded-m3-full bg-primary-container text-on-primary-container shadow-m3-2 whitespace-nowrap'
-              : 'text-primary'
+              ? 'px-4 py-1 rounded-m3-full bg-primary-container text-on-primary-container shadow-m3-3 ring-2 ring-[var(--m3-primary)] whitespace-nowrap'
+              : 'text-primary m3-title-large'
           } ${className}`}
         >
           −{delta.n}

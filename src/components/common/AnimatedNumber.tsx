@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { motion, useSpring, useTransform, useReducedMotion, useAnimationControls } from 'framer-motion';
-import { TALLY, framerDamping } from '../../utils/springs';
+import { TALLY, framerDamping, type SpringSpec } from '../../utils/springs';
 
 interface AnimatedNumberProps {
   value: number;
@@ -11,6 +11,8 @@ interface AnimatedNumberProps {
   /** Roboto Flex numerals: on every change the digits swell for a beat
    *  (variable weight and width), then settle. */
   numeral?: boolean;
+  /** The count spring; `GAME_TALLY` for in-game scores. Must not overshoot. */
+  tally?: SpringSpec;
 }
 
 /**
@@ -20,10 +22,10 @@ interface AnimatedNumberProps {
  * (renders the raw value, no animation). The MotionValue updates the DOM
  * directly, so this does not re-render React on every frame.
  */
-const AnimatedNumber: React.FC<AnimatedNumberProps> = ({ value, decimals = 0, className, style, numeral = false }) => {
+const AnimatedNumber: React.FC<AnimatedNumberProps> = ({ value, decimals = 0, className, style, numeral = false, tally = TALLY }) => {
   const reduce = useReducedMotion();
   // Critically damped tally spring from the shared spec: no bounce.
-  const spring = useSpring(value, { stiffness: TALLY.stiffness, damping: framerDamping(TALLY), mass: 1 });
+  const spring = useSpring(value, { stiffness: tally.stiffness, damping: framerDamping(tally), mass: 1 });
   const display = useTransform(spring, (v) => v.toFixed(decimals));
 
   useEffect(() => {
@@ -39,7 +41,7 @@ const AnimatedNumber: React.FC<AnimatedNumberProps> = ({ value, decimals = 0, cl
     void controls.start({
       fontWeight: [700, 900, 700],
       fontStretch: ['100%', '116%', '100%'],
-      transition: { duration: 0.5, times: [0, 0.3, 1], ease: [0.2, 0, 0, 1] },
+      transition: { duration: tally === TALLY ? 0.5 : 1.1, times: [0, 0.3, 1], ease: [0.2, 0, 0, 1] },
     });
   }, [value, numeral, reduce, controls]);
 

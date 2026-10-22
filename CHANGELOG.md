@@ -7,6 +7,26 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.44.0] - 2026-10-22
+
+### Changed — in-game motion slower and more present
+- The thrower stays the hero card for 1 s after a visit (was 0.45 s), so the
+  visit is seen landing; input is free at once as before.
+- The hand-over spring takes ~1.2 s with a visible overshoot (was ~0.7 s);
+  the incoming name builds up at 65 ms per letter (was 30 ms).
+- The remaining score counts down on its own slower tally (`GAME_TALLY`,
+  ~1.1 s, never overshoots) on the hero card and the rows; the digits swell
+  for longer.
+- The "−60" stamp is larger (headline size, ring, stronger pop) and stays
+  2.4 s; the small rising delta on rows is larger and slower.
+- "Your turn" ring pulses twice, thicker, with an outer glow; flames follow
+  after 1.7 s.
+- A 180 holds the screen for 2.8 s (was 1.6 s), with a slower burst and a
+  bigger number swell; ton sparks and hero fountains carry more particles.
+- The leg-won overlay stays 3.2 s (was 2.5 s, still closes on a tap); the
+  legs tile glows longer and stronger.
+- `src/tests/motion/presence.test.ts` pins the slower timing.
+
 ## [0.43.0] - 2026-10-13
 
 ### Changed — one look across the app

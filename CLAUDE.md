@@ -147,6 +147,9 @@ M3 primitive library (barrel `src/components/common/index.ts`). **Prefer these o
 - `ErrorBoundary` — top-level React error boundary. Wraps `<App>` in `main.tsx` so a render-time throw (bad `JSON.parse` in match reconstruction, failed lazy chunk, etc.) shows an M3 recovery screen (reload / back-to-menu) instead of white-screening the PWA. The `window.error`/`unhandledrejection` handlers in `App.tsx` only log — they do NOT catch render errors, so don't remove the boundary.
 - `BackButton.tsx` — canonical back button. **Always use this** for screen-level back navigation. An M3 **tonal** button with a leading `<ArrowLeft>`. In **block mode (default)** it wraps itself in a `mb-6` block so the gap to the page heading is uniform across all screens; pass **`inline`** when it sits in a flex header row / form (opts out of the wrapper — the row/form controls spacing). Override text via `label`.
 
+### In-game motion timing (0.44.0)
+- Slower and more present on purpose (user request): `HOLD_MS` 1000, `HANDOVER` 40/0.74 (~1.2 s), `GAME_TALLY` 55/1 for the remaining score (`AnimatedNumber tally=`), `LETTER_STAGGER_S` 0.065, `FLAMES_AFTER_MS` 1700, turn ring 1.8 s two beats from 1.1 s, `HERO_MOMENT_MS` 2800, `LEG_WON_MS` 3200. Pinned by `src/tests/motion/presence.test.ts`. Only the DISPLAY waits — the game state still moves on in the same tick.
+
 ### Consistency rules (0.43.0)
 - **Green is an outcome, not "go".** The main action is `variant="filled"`; `success` only on the ATC Hit key and a copy button that has copied (allowlist in `pageConsistency.test.ts`, also catches `'success'` inside a variant expression).
 - **Game setups render through `PageShell`** (title, icon, `width="md"`); the in-game screens keep their own frame. Standalone setups share `SetupPlayerPicker`; option choices use the shared `SegmentedButton`.
