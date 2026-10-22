@@ -20,4 +20,4 @@ export interface Handoff {
 export const HANDOFF_MS = 2200;
 
 /** How long the leg-won overlay stays up unless dismissed. */
-export const LEG_WON_MS = 2500;
+export const LEG_WON_MS = 3200;

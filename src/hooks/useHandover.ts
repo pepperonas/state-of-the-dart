@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 
-/** How long the thrower stays the hero card after a visit (0.34.0). */
-export const HOLD_MS = 450;
+/** How long the thrower stays the hero card after a visit (0.34.0: 450 ms;
+ *  0.44.0: 1 s — the visit was gone before anyone saw it land). */
+export const HOLD_MS = 1000;
 
 interface Track {
   active: number;

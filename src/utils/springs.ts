@@ -42,9 +42,14 @@ export const EFFECTS = {
  *  its target and show a wrong digit — and slow enough to be seen counting. */
 export const TALLY: SpringSpec = { stiffness: 260, dampingRatio: 1 };
 
+/** The remaining score in a game (0.44.0): the same no-overshoot tally, but
+ *  slow enough (~1.2 s) that the count-down is the visit's own moment. */
+export const GAME_TALLY: SpringSpec = { stiffness: 55, dampingRatio: 1 };
+
 /** The turn change ("relay", 0.34.0): a big card travelling far, slower than
- *  SPATIAL.slow so the hand-over is seen, with a slight overshoot. */
-export const HANDOVER: SpringSpec = { stiffness: 120, dampingRatio: 0.82 };
+ *  SPATIAL.slow so the hand-over is seen, with a visible overshoot
+ *  (0.44.0: 120/0.82 → 40/0.74, ~1.2 s instead of ~0.7 s — the change has to be noticed). */
+export const HANDOVER: SpringSpec = { stiffness: 40, dampingRatio: 0.74 };
 
 /** framer-motion takes an absolute damping: ratio · 2 · √(stiffness · mass), mass = 1. */
 export const framerDamping = (s: SpringSpec): number => s.dampingRatio * 2 * Math.sqrt(s.stiffness);

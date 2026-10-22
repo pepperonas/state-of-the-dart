@@ -85,10 +85,11 @@ test('relay turn change: the visit lands on the thrower, then the card hands ove
   await expect(ann).toHaveAttribute('data-hero', 'true');
   await expect(ann.getByTestId('score-delta')).toHaveAttribute('data-variant', 'stamp');
   await expect(ann.getByTestId('score-delta')).toContainText('60');
-  expect(Date.now() - t0).toBeLessThan(450);
+  expect(Date.now() - t0).toBeLessThan(1000);
   // Then Ben's card arrives: name built up, a ring, and Ann's row shows 441.
-  await expect(ben).toHaveAttribute('data-hero', 'true', { timeout: 2000 });
-  expect(Date.now() - t0).toBeGreaterThanOrEqual(250);
+  // The hold is long enough to be seen (0.44.0: 1 s).
+  await expect(ben).toHaveAttribute('data-hero', 'true', { timeout: 3000 });
+  expect(Date.now() - t0).toBeGreaterThanOrEqual(800);
   await expect(ben).toHaveAttribute('data-arrived', 'true');
   await expect(ben.getByTestId('turn-ring')).toHaveCount(1);
   await expect(ann).toContainText('441');

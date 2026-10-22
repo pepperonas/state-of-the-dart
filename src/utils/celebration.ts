@@ -46,10 +46,10 @@ export type BurstKind = 'spark' | 'hero' | 'radial' | 'match';
 export function burst(kind: BurstKind, origin: { x: number; y: number } = { x: 0.5, y: 0.5 }): void {
   const base = { colors: tokenColors(), disableForReducedMotion: true, zIndex: 10001 };
   if (kind === 'spark') {
-    celebrate({ ...base, particleCount: 36, spread: 50, startVelocity: 26, scalar: 0.8, ticks: 110, origin });
+    celebrate({ ...base, particleCount: 70, spread: 70, startVelocity: 34, scalar: 1, ticks: 180, origin });
   } else if (kind === 'hero') {
-    celebrate({ ...base, particleCount: 90, angle: 60, spread: 60, startVelocity: 55, origin: { x: 0, y: 0.9 } });
-    celebrate({ ...base, particleCount: 90, angle: 120, spread: 60, startVelocity: 55, origin: { x: 1, y: 0.9 } });
+    celebrate({ ...base, particleCount: 140, angle: 60, spread: 65, startVelocity: 60, ticks: 260, origin: { x: 0, y: 0.9 } });
+    celebrate({ ...base, particleCount: 140, angle: 120, spread: 65, startVelocity: 60, ticks: 260, origin: { x: 1, y: 0.9 } });
   } else if (kind === 'radial') {
     celebrate({ ...base, particleCount: 140, spread: 360, startVelocity: 38, ticks: 160, origin });
   } else {

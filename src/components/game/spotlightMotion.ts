@@ -12,10 +12,10 @@ import type { Transition } from 'framer-motion';
 import { springHandover } from '../../utils/motion';
 
 export const CONTAINER_MORPH: Transition = springHandover;
-export const CONTENT_IN: Transition = { opacity: { duration: 0.24, delay: 0.08, ease: [0.2, 0, 0, 1] }, layout: springHandover };
+export const CONTENT_IN: Transition = { opacity: { duration: 0.4, delay: 0.15, ease: [0.2, 0, 0, 1] }, layout: springHandover };
 /** The flames wait until the surface has (nearly) settled. */
-export const FLAMES_AFTER_MS = 1050;
+export const FLAMES_AFTER_MS = 1700;
 /** The incoming name builds up letter by letter, this far apart. */
-export const LETTER_STAGGER_S = 0.03;
+export const LETTER_STAGGER_S = 0.065;
 /** When the one "your turn" ring pulses, after the card has grown. */
-export const RING_DELAY_S = 0.7;
+export const RING_DELAY_S = 1.1;
