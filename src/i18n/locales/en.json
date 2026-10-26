@@ -2218,6 +2218,9 @@
   "game_screen": {
     "sets_short": "S",
     "legs_short": "L",
+    "up_next": "Next",
+    "up_next_long": "throws next",
+    "throw_order": "Number {{n}} in the throwing order",
     "click_to_remove": "Click to remove",
     "choose_bot": "Choose a bot opponent",
     "bot_adaptive_hint": "Difficulty adapts to your skill automatically",

@@ -7,6 +7,31 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.45.0] - 2026-10-26
+
+### Changed — eight players in a quick match, readable at every size
+- From five players on the scoreboard tightens: on phones (and tablets in
+  portrait) the other players become half-width tiles in two columns, on
+  larger screens the rows get denser and go two columns wherever the pane is
+  wide enough. With eight players the whole field, the player at the oche
+  and the complete input now share one screen at 390×844, 768×1024,
+  1024×768, 1440×900 and 1920×1080.
+- The player who throws next is marked ("Nächster", ring; read out as
+  "throws next").
+- Phones: on every turn change the input dock is scrolled fully into view —
+  the confirm button never sits below the fold.
+- Setup: selected players show their place in the throwing order.
+- Start wheel: from five players the starter buttons sit two a line on
+  phones, labelled with the name alone (the accessible name keeps "… beginnt").
+
+### Fixed
+- The game screen used `overflow-x: hidden`, which made it a scroll
+  container of its own and silently broke every `position: sticky` inside
+  (the two-pane input column, the phone-landscape score strip). Now
+  `overflow-x: clip`.
+- The light theme's legacy border on bare buttons made the input keys and
+  actions 10 px taller than in the dark theme; they carry no border now.
+
 ## [0.44.0] - 2026-10-22
 
 ### Changed — in-game motion slower and more present

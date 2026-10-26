@@ -698,7 +698,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
             aria-label={lastThrow ? `${t('game.undo_last_throw')}: ${lastThrow.playerName} · ${lastThrow.isBust ? t('game.bust') : lastThrow.score}` : t('game.undo_last_throw')}
             title={!lastThrow ? t('game.no_throw_to_undo') : t('game.undo_last_throw')}
             data-testid="undo-throw"
-            className={`flex items-center justify-center min-h-[48px] ${canRedoThrow ? 'px-3' : 'px-4'} rounded-m3-full bg-secondary-container text-on-secondary-container m3-state-layer disabled:opacity-30 disabled:cursor-not-allowed transition`}
+            className={`sotd-input-action flex items-center justify-center min-h-[48px] ${canRedoThrow ? 'px-3' : 'px-4'} rounded-m3-full bg-secondary-container text-on-secondary-container m3-state-layer disabled:opacity-30 disabled:cursor-not-allowed transition`}
           >
             <RotateCcw size={18} />
           </button>
@@ -709,7 +709,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
             aria-label={`${t('game.redo_throw')}: ${redoName}`}
             title={t('game.redo_throw')}
             data-testid="redo-throw"
-            className="flex items-center justify-center min-h-[48px] px-3 rounded-m3-full bg-secondary-container text-on-secondary-container m3-state-layer transition"
+            className="sotd-input-action flex items-center justify-center min-h-[48px] px-3 rounded-m3-full bg-secondary-container text-on-secondary-container m3-state-layer transition"
           >
             <RotateCw size={18} />
           </button>
@@ -720,7 +720,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
           disabled={currentThrow.length === 0}
           aria-label={t('game.remove_dart')}
           title={t('game.remove_dart')}
-          className="flex items-center justify-center gap-1 min-h-[48px] p-3 rounded-m3-full bg-surface-container-high text-on-surface m3-state-layer disabled:opacity-30 disabled:cursor-not-allowed transition font-bold"
+          className="sotd-input-action flex items-center justify-center gap-1 min-h-[48px] p-3 rounded-m3-full bg-surface-container-high text-on-surface m3-state-layer disabled:opacity-30 disabled:cursor-not-allowed transition font-bold"
         >
           <Delete size={18} />
           <span className="hidden sm:inline">{t('game.dart')}</span>
@@ -732,7 +732,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
           disabled={currentThrow.length === 0}
           aria-label={t('game.clear_visit_long')}
           title={t('game.clear_visit_long')}
-          className="flex items-center justify-center gap-1 min-h-[48px] p-3 px-4 rounded-m3-full bg-surface-container-high text-on-surface m3-state-layer disabled:opacity-30 disabled:cursor-not-allowed transition font-bold"
+          className="sotd-input-action flex items-center justify-center gap-1 min-h-[48px] p-3 px-4 rounded-m3-full bg-surface-container-high text-on-surface m3-state-layer disabled:opacity-30 disabled:cursor-not-allowed transition font-bold"
         >
           <X size={18} />
           <span className={dense ? 'sr-only' : ''}>{t('game.clear_visit')}</span>
@@ -747,7 +747,7 @@ const ScoreInput: React.FC<ScoreInputProps> = ({
           title={isEditingThrow && !awaitingNextPlayer ? t('game.confirm_correction') : undefined}
           onClick={awaitingNextPlayer ? onNextPlayer : (commitsTyped || setsDart) ? () => handleNumpadClick('enter') : onConfirm}
           disabled={!awaitingNextPlayer && !commitsTyped && !setsDart && currentThrow.length === 0}
-          className={`min-w-0 min-h-[48px] flex items-center justify-center gap-1 p-3 rounded-m3-full disabled:opacity-30 disabled:cursor-not-allowed transition font-bold shadow-m3-1 ${
+          className={`sotd-input-action min-w-0 min-h-[48px] flex items-center justify-center gap-1 p-3 rounded-m3-full disabled:opacity-30 disabled:cursor-not-allowed transition font-bold shadow-m3-1 ${
             isCheckout
               ? 'bg-success text-on-success sotd-ring-pulse'
               : isEditingThrow

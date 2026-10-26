@@ -927,6 +927,13 @@ button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surfa
 /* ── Input keys (numpad, dart grid, quick scores) ─────────────────────────
    M3 Expressive shape morph: a pressed key rounds off, on the fast spatial
    spring (the generated `linear()` token — the same physics framer uses). */
+/* The legacy light theme draws a 1 px border on every bare button
+   (`:where(.modern-light) :where(button)` in index.css). On the input keys and
+   actions that made the light theme 10 px taller than the dark one — enough to
+   push eight players off a phone screen (0.45.0). These surfaces carry no
+   border in either theme. */
+.sotd-key,
+.sotd-input-action { border: 0; }
 .sotd-key {
   border-radius: var(--m3-shape-md);
   transition:

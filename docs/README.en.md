@@ -60,18 +60,18 @@
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml" title="Vitest unit and component tests, all passing">
-      <img src="https://img.shields.io/badge/Unit_Tests-1313-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
+      <img src="https://img.shields.io/badge/Unit_Tests-1323-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml" title="Playwright end-to-end tests against a real backend">
-      <img src="https://img.shields.io/badge/E2E_Tests-59-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
+      <img src="https://img.shields.io/badge/E2E_Tests-64-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
     </a>
   </p>
 
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="../LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="../CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.44.0-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="../CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.45.0-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
