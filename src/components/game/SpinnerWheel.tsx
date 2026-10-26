@@ -382,25 +382,34 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
         {/* The wheel runs on every game — never force it: anyone can be picked directly. */}
         {/* Kept in the layout (hidden, inert) once the result shows, so the cell keeps its height. */}
           <div className={`flex flex-col items-center gap-2 sm:gap-3 w-full ${phase === 'result' ? 'invisible' : ''}`} inert={phase === 'result'}>
-            <div className="flex flex-wrap justify-center gap-2 sm:gap-3" role="group" aria-label={t('game.who_starts')}>
+            {/* Five players and more on a phone: two buttons a line instead of
+                eight full-width pills below the fold (0.45.0). */}
+            <div
+              className={`gap-2 sm:gap-3 ${players.length >= 5 ? 'grid grid-cols-2 w-full sm:flex sm:flex-wrap sm:justify-center' : 'flex flex-wrap justify-center'}`}
+              role="group"
+              aria-label={t('game.who_starts')}
+              data-testid="starter-buttons"
+            >
               {players.map((p, i) => (
                 <motion.button
                   key={p.id}
                   type="button"
                   onClick={() => finish(i)}
+                  aria-label={players.length >= 5 ? t('game.starts', { name: p.name }) : undefined}
                   whileTap={{ scale: 0.94 }}
                   transition={springSpatialFast}
-                  className="m3-state-layer m3-ripple inline-flex items-center gap-[0.6em] min-h-[max(48px,3em)] phoneland:min-h-[44px] pl-[0.4em] pr-[1.1em] rounded-m3-full border border-outline-variant bg-surface-container text-on-surface m3-title-medium"
+                  className="m3-state-layer m3-ripple inline-flex min-w-0 items-center gap-[0.6em] min-h-[max(48px,3em)] phoneland:min-h-[44px] pl-[0.4em] pr-[1.1em] rounded-m3-full border border-outline-variant bg-surface-container text-on-surface m3-title-medium"
                   // Grows with the screen like the wheel; never below the 48 px touch target.
                   style={{ fontSize: 'clamp(1rem, 1.7vmin, 1.75rem)' }}
                 >
                   <span
-                    className="w-[2.2em] h-[2.2em] rounded-m3-full flex items-center justify-center"
+                    className="shrink-0 w-[2.2em] h-[2.2em] rounded-m3-full flex items-center justify-center"
                     style={{ background: TONES[i % TONES.length][0], color: TONES[i % TONES.length][1] }}
                   >
                     <AvatarGlyph avatar={p.avatar} size="1.2em" />
                   </span>
-                  {t('game.starts', { name: p.name })}
+                  {/* Two a line: the name alone fits; the heading says the rest. */}
+                  <span className="truncate">{players.length >= 5 ? p.name : t('game.starts', { name: p.name })}</span>
                 </motion.button>
               ))}
             </div>

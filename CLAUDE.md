@@ -147,6 +147,14 @@ M3 primitive library (barrel `src/components/common/index.ts`). **Prefer these o
 - `ErrorBoundary` — top-level React error boundary. Wraps `<App>` in `main.tsx` so a render-time throw (bad `JSON.parse` in match reconstruction, failed lazy chunk, etc.) shows an M3 recovery screen (reload / back-to-menu) instead of white-screening the PWA. The `window.error`/`unhandledrejection` handlers in `App.tsx` only log — they do NOT catch render errors, so don't remove the boundary.
 - `BackButton.tsx` — canonical back button. **Always use this** for screen-level back navigation. An M3 **tonal** button with a leading `<ArrowLeft>`. In **block mode (default)** it wraps itself in a `mb-6` block so the gap to the page heading is uniform across all screens; pass **`inline`** when it sits in a flex header row / form (opts out of the wrapper — the row/form controls spacing). Override text via `label`.
 
+### Many players (0.45.0)
+- `components/game/spotlightLayout.ts`: `rowDensity(count, size)` — `regular` up to 4, from `DENSE_FROM` (5) `dense`, or `tile` when the hero is `compact` (phones; tablets in portrait also get the compact hero from 5 players). Tiles sit two a line, drop the remove button (the hero keeps it) and show legs or "Nächster". `nextPlayerId` marks the row after the REAL current player (`data-next`). GameScreen: `rowColumns` 2 from 5 players except in the narrow `large` three-pane layout.
+- Phones scroll the input dock into view on every turn change (effect on `currentPlayerIndex`); the dock is no longer sticky — it would cover the hero with many players.
+- ⚠️ The game screen root is `overflow-x-clip`, not `hidden`: `hidden` makes it a scroll container and every `sticky` inside silently stopped working.
+- ⚠️ The legacy `:where(.modern-light) :where(button)` gives every bare button a 1 px border; `.sotd-key`/`.sotd-input-action` reset it (the light theme was 10 px taller and pushed the top row off a phone). Give new bare buttons in the input one of those classes or an explicit border.
+- Setup tiles carry `ThrowOrderBadge` (selection order = seat order; the wheel only rotates). Wheel: from 5 players a two-column grid, visible label = name, `aria-label` keeps "X beginnt".
+- Pinned by `src/tests/components/eightPlayers.test.tsx` and `e2e/eight-players.spec.ts` (390×844 all cards + dock on screen; 1024/1440/1920 all cards on screen).
+
 ### In-game motion timing (0.44.0)
 - Slower and more present on purpose (user request): `HOLD_MS` 1000, `HANDOVER` 40/0.74 (~1.2 s), `GAME_TALLY` 55/1 for the remaining score (`AnimatedNumber tally=`), `LETTER_STAGGER_S` 0.065, `FLAMES_AFTER_MS` 1700, turn ring 1.8 s two beats from 1.1 s, `HERO_MOMENT_MS` 2800, `LEG_WON_MS` 3200. Pinned by `src/tests/motion/presence.test.ts`. Only the DISPLAY waits — the game state still moves on in the same tick.
 
@@ -599,7 +607,8 @@ Static landing page at `website/` — separate Vite + Tailwind CSS build (not Re
 - Vitest is configured to exclude `e2e/**` — Playwright owns that directory.
 
 ### E2E (Playwright)
-- Specs in `e2e/`. **59 tests** currently:
+- Specs in `e2e/`. **64 tests** currently:
+  - `eight-players.spec.ts` — eight players: throwing order at setup, two-column wheel, and the whole field + hero + input on one screen at 390×844 in both themes; every card on screen at 1024, 1440 and 1920 (0.45.0)
   - `page-frame.spec.ts` — page titles and frames line up on nine pages (phone + desktop), back on the title line, no back on the navigation destinations; home sections end without a hole (700 + 1440 px); the four game setups on the page line, report buttons in header/rail, nothing fixed over the content, leaderboard chips in one row (0.43.0)
   - `redo.spec.ts` — undo three visits, redo them one by one (button, Ctrl+Shift+Z, Ctrl+Y) at phone and desktop size, reload keeps it; a different visit after an undo drops the way forward; the way forward survives a reload (and the correction label fits)
   - `avatars.spec.ts` — an emoji avatar (tab, skin tone, `em:` stored, lazy catalogue); a game-icons avatar is found by its German name, the picker closes, the list draws it, the path chunk loads once and never rides in an eager bundle, the value is stored

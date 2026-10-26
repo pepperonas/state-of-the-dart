@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { LayoutGroup } from 'framer-motion';
 import HeroCard, { type HeroCardProps, type HeroSize } from './HeroCard';
 import PlayerRow, { type PlayerRowProps } from './PlayerRow';
+import { rowDensity, nextPlayerId } from './spotlightLayout';
 
 export type SpotPlayer = Omit<HeroCardProps, 'size' | 'fireHost' | 'checkoutRoute' | 'checkoutMax' | 'onRemove' | 'removeLabel' | 'previousRemaining' | 'turnKey' | 'onEditVisit'>;
 
@@ -74,6 +75,10 @@ const Spotlight: React.FC<SpotlightProps> = ({
   }, []);
   const hero = players[activeIndex];
   const rows = players.filter((_, i) => i !== activeIndex);
+  // Five players and more (0.45.0): tighter rows, on phones two tiles a line,
+  // so the whole field stays in view next to the hero and the input.
+  const density = rowDensity(players.length, size);
+  const nextId = nextPlayerId(players.map(p => p.player.playerId), currentId ?? heroId);
 
   const heroCard = hero ? (
     <HeroCard
@@ -99,7 +104,8 @@ const Spotlight: React.FC<SpotlightProps> = ({
     <div
       role="list"
       aria-label={t('game.scoreboard')}
-      className={`grid gap-2 ${rowColumns === 2 ? 'sm:grid-cols-2' : ''}`}
+      data-density={density}
+      className={`grid ${density === 'tile' ? 'gap-1.5' : 'gap-2'} ${density === 'tile' ? 'grid-cols-2' : rowColumns === 2 ? 'sm:grid-cols-2' : ''}`}
     >
       {rows.map(p => (
         <PlayerRow
@@ -118,6 +124,8 @@ const Spotlight: React.FC<SpotlightProps> = ({
           previousRemaining={snap.heroAtChange === p.player.playerId ? undefined : prev[p.player.playerId]}
           turnKey={turnKey}
           isCurrent={currentId === p.player.playerId}
+          density={density}
+          isNext={nextId === p.player.playerId}
         />
       ))}
     </div>
@@ -126,7 +134,7 @@ const Spotlight: React.FC<SpotlightProps> = ({
   return (
     <LayoutGroup id="spotlight">
       {flames && fireHost && createPortal(<FireCanvas />, fireHost)}
-      <div className="flex flex-col gap-3" data-testid="spotlight">
+      <div className={`flex flex-col ${density === 'tile' ? 'gap-2' : 'gap-3'}`} data-testid="spotlight">
         {rowsFirst ? <>{rowList}{heroCard}</> : <>{heroCard}{rowList}</>}
       </div>
     </LayoutGroup>

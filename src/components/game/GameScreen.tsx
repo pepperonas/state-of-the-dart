@@ -38,7 +38,9 @@ import HeroMoment, { type HeroMomentState } from './HeroMoment';
 import { feedbackLevel, personalBestHits, type Baseline, type PersonalBestHit } from '../../utils/feedback';
 import { burst, originOf } from '../../utils/celebration';
 import { shapePolygon } from '../../utils/shapes';
+import ThrowOrderBadge from './ThrowOrderBadge';
 import Spotlight, { type SpotPlayer } from './Spotlight';
+import { DENSE_FROM } from './spotlightLayout';
 import EditVisitDialog, { type EditVisitTab } from './EditVisitDialog';
 import { editVisit } from '../../utils/editVisit';
 import { likelyDecompositions } from '../../utils/decompose';
@@ -482,6 +484,19 @@ const GameScreen: React.FC = () => {
     state.currentMatch?.currentLegIndex ?? 0,
     !reduceMotion,
   );
+  // Phones (one pane): with many players the page is taller than the screen.
+  // On every turn change bring the input dock fully into view — the confirm
+  // button must never sit below the fold (0.45.0).
+  const onePane = windowClass.panes === 1 && !windowClass.compactHeight;
+  const dockMatchId = state.currentMatch?.id;
+  useEffect(() => {
+    if (!onePane || !dockMatchId) return;
+    const dock = document.querySelector<HTMLElement>('[data-testid="input-dock"]');
+    if (!dock) return;
+    const box = dock.getBoundingClientRect();
+    const delta = Math.min(box.bottom - window.innerHeight, box.top);
+    if (delta > 1) window.scrollBy({ top: delta, behavior: reduceMotion ? 'auto' : 'smooth' });
+  }, [onePane, dockMatchId, state.currentPlayerIndex, reduceMotion]);
   // The insight cards (table, chart, heatmap, history) follow a visit at low
   // priority: rendering them in the same commit as the turn change cost
   // 100+ ms long tasks right in the middle of the card morph.
@@ -1175,12 +1190,13 @@ const GameScreen: React.FC = () => {
                         setSelectedPlayers([...selectedPlayers, player]);
                       }
                     }}
-                    className={`p-3 rounded-m3-lg border-2 transition-colors ${
+                    className={`relative p-3 rounded-m3-lg border-2 transition-colors ${
                       selectedPlayers.find(p => p.id === player.id)
                         ? 'border-[var(--m3-primary)] bg-primary-container shadow-m3-1'
                         : 'border-outline-variant hover:border-outline'
                     }`}
                   >
+                    <ThrowOrderBadge index={selectedPlayers.findIndex(p => p.id === player.id)} />
                     <div className="flex justify-center mb-1">
                       <PlayerAvatar avatar={player.avatar} name={player.name} size="sm" />
                     </div>
@@ -1198,6 +1214,7 @@ const GameScreen: React.FC = () => {
                     <div className="absolute top-1 right-1 text-primary opacity-0 group-hover:opacity-100 transition-opacity">
                       <X size={14} />
                     </div>
+                    <ThrowOrderBadge index={selectedPlayers.findIndex(p => p.id === bot.id)} />
                     <div className="flex justify-center mb-1">
                       <PlayerAvatar avatar={bot.avatar} name={bot.name} size="sm" />
                     </div>
@@ -1688,10 +1705,14 @@ const GameScreen: React.FC = () => {
       // hero card still shows for a moment after the visit.
       checkoutRoute={settings.showCheckoutHints && shownPlayerIndex === state.currentPlayerIndex ? state.checkoutSuggestion : null}
       checkoutMax={maxFinish(outRule)}
-      size={widthClass === 'compact' ? 'compact' : widthClass === 'xl' ? 'large' : 'regular'}
+      // A tablet in portrait with five players and more takes the phone's
+      // compact hero: the big one pushed the field off the screen (0.45.0).
+      size={widthClass === 'compact' || (widthClass === 'medium' && spotPlayers.length >= DENSE_FROM) ? 'compact' : widthClass === 'xl' ? 'large' : 'regular'}
       flames={widthClass !== 'compact'}
       rowsFirst={panes === 1}
-      rowColumns={widthClass === 'xl' && spotPlayers.length >= 5 ? 2 : 1}
+      // Five players and more: two columns wherever the scoreboard has the
+      // width for it — not in the narrow first pane of the three-pane layout.
+      rowColumns={widthClass !== 'large' && spotPlayers.length >= DENSE_FROM ? 2 : 1}
       onRemove={canRemovePlayers ? handleRequestRemovePlayer : undefined}
       removeLabel={t('game.remove_player')}
       onEditVisit={handleEditVisit}
@@ -1984,7 +2005,7 @@ const GameScreen: React.FC = () => {
   const containerWidth = widthClass === 'xl' ? 'max-w-[2400px]' : widthClass === 'large' ? 'max-w-[1600px]' : 'max-w-7xl';
 
   return (
-    <div data-game-screen className={`min-h-dvh p-4 md:p-6 phoneland:p-2 gradient-mesh overflow-x-hidden ${usesSheet && !compactHeight ? 'flex flex-col' : ''}`}>
+    <div data-game-screen className={`min-h-dvh p-4 md:p-6 phoneland:p-2 gradient-mesh overflow-x-clip ${usesSheet && !compactHeight ? 'flex flex-col pb-0 md:pb-0' : ''}`}>
       <GameAnnouncer match={state.currentMatch} />
       {(() => {
         if (!editTarget || !state.currentMatch) return null;
@@ -2076,10 +2097,12 @@ const GameScreen: React.FC = () => {
         ) : panes === 1 ? (
           <>
             {spotlight}
-            {/* The input docks at the bottom — in reach of the thumb. */}
+            {/* The input docks at the bottom — in reach of the thumb. Not
+                sticky: with many players it would cover the hero card; the
+                page scrolls it into view on every turn instead. */}
             <div
               data-testid="input-dock"
-              className="mt-auto sticky bottom-0 z-20 -mx-4 md:-mx-6 px-4 md:px-6 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] flex justify-center bg-[color-mix(in_srgb,var(--m3-surface)_92%,transparent)] backdrop-blur"
+              className="mt-auto relative z-20 -mx-4 md:-mx-6 px-4 md:px-6 pt-2 pb-[max(env(safe-area-inset-bottom),0.75rem)] flex justify-center bg-[color-mix(in_srgb,var(--m3-surface)_92%,transparent)] backdrop-blur"
             >
               {scoreInput}
             </div>
