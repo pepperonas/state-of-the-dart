@@ -132,6 +132,8 @@ The entire app is themed with a **Material 3 Expressive** token layer. **Use it 
 ### Type (0.46.0, after klatsch.celox.io)
 - Self-hosted in `public/fonts`, declared in `src/styles/fonts.css` (`--sotd-font-text` Roboto Flex, `--sotd-font-display` Bangers). No Google Fonts — `fonts.test.ts` fails on a link to them.
 - Bangers: `m3-display-*`, `m3-headline-large/medium` (page titles), `.sotd-numeral` (scores), rank stamp/badge, the start wheel. One weight, `font-synthesis: none` — `m3-emphasized`/`font-bold` do nothing on it. Everything else is Roboto Flex.
+- Bangers leans right: every Bangers class carries `padding-inline-end: 0.12em` + `margin-inline-end: -0.12em`, otherwise `truncate`/`overflow-hidden` cuts the last glyph ("DART" → "DAR1", 0.46.1). Page titles: `h1` clamp(2.25–3rem), `h2` clamp(1.875–2.375rem).
+- The footer comes from App (`OutsideGames`); a page must not render its own (`landingFacts.test.ts`).
 - ⚠️ `.sotd-numeral`'s `display: inline-block` sits in `:where()`. With normal specificity it beat Tailwind's `block` on the hero number and the line box grew the hero card by 28 px — eight players no longer fit on a phone. Likewise keep the rank stamp's `line-height: 0.78`; 0.82 cost 3 px and broke the same test.
 
 ### Shared UI Components (`src/components/common/`)

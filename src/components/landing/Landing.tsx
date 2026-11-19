@@ -19,7 +19,6 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { Button, Card } from '../common';
-import Footer from '../Footer';
 import { LANDING_FACTS } from './landingFacts';
 
 /**
@@ -259,7 +258,6 @@ const Landing: React.FC = () => {
         </section>
       </main>
 
-      <Footer />
     </div>
   );
 };

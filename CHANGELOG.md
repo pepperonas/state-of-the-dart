@@ -7,6 +7,20 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.46.1] - 2026-11-19
+
+### Fixed
+- Bangers leans right and its last glyph reached past the box: under
+  `truncate` the T of "DART" lost its bar. Display classes, scores and rank
+  stamps get `padding-inline-end: 0.12em` with a matching negative margin, so
+  nothing around them moves.
+- The landing drew its own footer on top of the app's — the footer showed
+  twice on `/`.
+
+### Changed
+- Page titles (`h1`) `clamp(2.25rem, …, 3rem)`, section titles (`h2`)
+  `clamp(1.875rem, …, 2.375rem)`, like the klatsch titles.
+
 ## [0.46.0] - 2026-11-19
 
 ### Changed — new look, after klatsch.celox.io

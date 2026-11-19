@@ -38,4 +38,13 @@ describe('self-hosted klatsch type', () => {
     expect(code).not.toMatch(/'Inter'|Google Sans/);
     expect(read('src/styles/fonts.css')).toMatch(/--sotd-font-text: 'Roboto Flex'/);
   });
+
+  it('Bangers glyphs get room on the right, so a leaning last letter is not clipped', () => {
+    const m3 = read('src/styles/m3.css');
+    const i = m3.indexOf('padding-inline-end: 0.12em');
+    expect(i, 'room rule').toBeGreaterThan(-1);
+    const rule = m3.slice(m3.lastIndexOf('}', i) + 1, m3.indexOf('}', i));
+    for (const c of ['.m3-display-large', '.m3-headline-medium', '.sotd-numeral', '.sotd-rank-stamp']) expect(rule, c).toContain(c);
+    expect(rule).toContain('margin-inline-end: -0.12em');
+  });
 });
