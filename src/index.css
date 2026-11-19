@@ -147,7 +147,7 @@ body {
   --ml-border: #e5e7eb;
   --ml-border-hover: #d1d5db;
 
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--sotd-font-text);
   font-weight: 400;
 }
 

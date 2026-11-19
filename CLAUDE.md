@@ -117,7 +117,7 @@ Express routes in `server/src/routes/`, registered in `server/src/index.ts`:
 
 ### Material 3 Expressive Design System
 The entire app is themed with a **Material 3 Expressive** token layer. **Use it for all new UI** — do not reintroduce `glass-card`, raw `bg-dark-*`/`text-white`/`text-dark-*`, or ad-hoc gradient buttons.
-- **Tokens**: `src/styles/m3.css` is the single source of truth — full M3 color roles (primary / secondary / **tertiary** = vibrant purple accent / error / success + the surface-container ramp + on-colors + outline), shape scale, 5-level elevation, motion springs/easing, state-layer opacities, and the M3 type scale. Dark (default `:root`/`.modern`) + light (`.modern-light`) schemes, applied via `ThemeManager` (class on `<html>`/`<body>`). Imported in `main.tsx` **after** `index.css` so component rules win specificity ties against legacy `.modern-light` overrides.
+- **Tokens**: `src/styles/m3.css` is the single source of truth — full M3 color roles (since 0.46.0 the klatsch.celox.io palette: primary = raspberry, warm rosé surfaces, **tertiary** = gold accent / error / success + the surface-container ramp + on-colors + outline), shape scale, 5-level elevation, motion springs/easing, state-layer opacities, and the M3 type scale. Dark (default `:root`/`.modern`) + light (`.modern-light`) schemes, applied via `ThemeManager` (class on `<html>`/`<body>`). Imported in `main.tsx` **after** `index.css` so component rules win specificity ties against legacy `.modern-light` overrides.
 - **Tailwind utilities** (token-backed, theme-aware): colors `bg-surface[-container[-low|-high|-highest]]`, `text-on-surface`, `text-on-surface-variant`, `bg-{primary|secondary|tertiary|success|error}-container` + `text-on-$-container`, bare roles `bg-primary`/`text-primary`/`bg-success`/`bg-tertiary`/`bg-error` (DEFAULTs added to legacy scales), `border-outline[-variant]`; radius `rounded-m3-{xs|sm|md|lg|xl|2xl|full}`; elevation `shadow-m3-{1..5}`. Type scale = **plain CSS classes** (`m3-display-*`, `m3-headline-*`, `m3-title-*`, `m3-body-*`, `m3-label-*`) — these are NOT Tailwind utilities, so `md:m3-...` responsive prefixes do NOT work.
 - **Motion**: `src/utils/motion.ts` exports M3-Expressive spring configs for framer-motion (`springSpatial*` with overshoot, `springStandard*`, `effects*` no-overshoot) + presets (`enterRise`, `enterPop`, `enterDrop`, `staggerChild(i)`, `pressable`, `dialogMotion`). The app is wrapped in `<MotionConfig reducedMotion="user">` (`App.tsx`), so **every** framer animation honours `prefers-reduced-motion` automatically — no per-component guard needed. For long lists, cap the stagger delay: `staggerChild(Math.min(index, 10))`. For gesture feedback prefer `whileTap`/`whileHover` with their own transition (don't let a delayed entrance `transition` leak into the gesture).
 - **State layer**: interactive primitives carry `.m3-state-layer` (a `::before` hover/press overlay tinted with `currentColor`). The `:where(.m3-state-layer) > *` rule lifts content above the overlay at **zero specificity**, so a child's own Tailwind position utility (e.g. `absolute` on a corner badge) still wins — don't fight it.
@@ -128,6 +128,11 @@ The entire app is themed with a **Material 3 Expressive** token layer. **Use it 
 - Colours on data-coloured chips: `readableTextOn(hex)` (`utils/color.ts`) picks black/white by luminance.
 - Charts: `useChartTheme()` (`utils/chartTheme.ts`) — never literal greys or a hard-coded tooltip.
 - Ranks: `--m3-medal-gold/silver/bronze` (per theme).
+
+### Type (0.46.0, after klatsch.celox.io)
+- Self-hosted in `public/fonts`, declared in `src/styles/fonts.css` (`--sotd-font-text` Roboto Flex, `--sotd-font-display` Bangers). No Google Fonts — `fonts.test.ts` fails on a link to them.
+- Bangers: `m3-display-*`, `m3-headline-large/medium` (page titles), `.sotd-numeral` (scores), rank stamp/badge, the start wheel. One weight, `font-synthesis: none` — `m3-emphasized`/`font-bold` do nothing on it. Everything else is Roboto Flex.
+- ⚠️ `.sotd-numeral`'s `display: inline-block` sits in `:where()`. With normal specificity it beat Tailwind's `block` on the hero number and the line box grew the hero card by 28 px — eight players no longer fit on a phone. Likewise keep the rank stamp's `line-height: 0.78`; 0.82 cost 3 px and broke the same test.
 
 ### Shared UI Components (`src/components/common/`)
 M3 primitive library (barrel `src/components/common/index.ts`). **Prefer these over ad-hoc styled elements.** Each carries an M3 state layer (`.m3-state-layer`) and token colors.
@@ -443,7 +448,7 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 
 ### Leg ranks (0.25.1)
 - `legRanks()` (`utils/legRanks.ts`) — place in the current leg from confirmed visits, shared score = shared rank, all level = nobody. `RankStamp` draws it (`data-testid="leg-rank"`, `data-rank`), colour via `--rank-color: var(--m3-rank-N)` (`rankTone`: 1–4, 5 = neutral).
-- `.sotd-rank-stamp` = gostumblr's score poster. ⚠️ Google Sans Flex is loaded with `text=0123456789` — only digits may go in, anything else falls back visibly.
+- `.sotd-rank-stamp` = a Bangers poster digit (0.46.0; was Google Sans Flex).
 - `.sotd-rank-tint` uses an **outline**, not a box-shadow: elevation and the burning frame live on box-shadow. ⚠️ `.sotd-on-fire > :not(...)` forces `position: relative` on card children; the stamp is exempted there, otherwise it drops into the flow on the active card.
 
 ### Quick play (0.25.0)

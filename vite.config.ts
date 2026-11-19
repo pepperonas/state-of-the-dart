@@ -29,8 +29,8 @@ export default defineConfig({
         start_url: '/',
         scope: '/',
         description: 'Professional Dart Scoring System with Multi-User Support',
-        theme_color: '#0a0a0a',
-        background_color: '#0a0a0a',
+        theme_color: '#191113',
+        background_color: '#191113',
         display: 'standalone',
         // No orientation lock: a tablet on a stand next to the board is landscape.
         orientation: 'any',
@@ -54,34 +54,7 @@ export default defineConfig({
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
         runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-webfonts',
-              expiration: {
-                maxEntries: 30,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          },
+          // Fonts are self-hosted (public/fonts) and precached above.
           {
             urlPattern: /\.mp3$/,
             handler: 'CacheFirst',
