@@ -699,7 +699,8 @@
     "home": "Start",
     "stats": "Statistik",
     "achievements": "Erfolge",
-    "players": "Spieler"
+    "players": "Spieler",
+    "account": "Konto"
   },
   "home": {
     "rematch": "Revanche",
@@ -710,8 +711,7 @@
     "section_play": "Weitere Spiele",
     "section_review": "Auswerten",
     "section_admin": "Verwaltung",
-    "skip_to_content": "Zum Inhalt springen",
-    "account_menu": "Konto-Menü"
+    "skip_to_content": "Zum Inhalt springen"
   },
   "onboarding": {
     "title": "Willkommen!",
@@ -1866,21 +1866,6 @@
     "profile_name": "Profilname",
     "name_placeholder": "Dein Name …",
     "create": "Profil erstellen"
-  },
-  "user_menu": {
-    "lifetime": "Lifetime",
-    "active": "Aktiv",
-    "trial_days_one": "{{count}} Tag Trial",
-    "trial_days_other": "{{count}} Tage Trial",
-    "no_subscription": "Kein Abo",
-    "trial_remaining_one": "Noch {{count}} Tag Premium-Trial",
-    "trial_remaining_other": "Noch {{count}} Tage Premium-Trial",
-    "upgrade_now": "Jetzt upgraden",
-    "account": "Account",
-    "app_settings": "App-Einstellungen",
-    "lifetime_license": "Lifetime-Lizenz",
-    "manage_subscription": "Abo verwalten",
-    "upgrade": "Upgrade"
   },
   "user_settings": {
     "avatar": "Avatar",
@@ -4290,5 +4275,35 @@
     "error_not_found": "Diese Aufnahme gibt es nicht mehr.",
     "error_finished_leg": "In einem beendeten Leg lässt sich nur eintragen, wie dieselbe Summe geworfen wurde. Für eine andere Summe nimm die Aufnahmen bis dorthin zurück.",
     "error_checkout": "Damit wäre das Leg beendet. Für ein Finish: „Wurf zurück“ und neu eingeben."
+  },
+  "account_hub": {
+    "title": "Konto",
+    "summary": "Angemeldet als",
+    "back": "Zum Konto",
+    "plan_lifetime": "Lifetime-Lizenz",
+    "plan_active": "Abo aktiv",
+    "plan_trial_one": "Testphase: noch {{count}} Tag",
+    "plan_trial_other": "Testphase: noch {{count}} Tage",
+    "plan_none": "Kein Abo",
+    "upgrade": "Jetzt upgraden",
+    "group_account": "Konto",
+    "profile": "Profil & Anmeldung",
+    "profile_desc": "Name, E-Mail, Passwort, Konto löschen",
+    "subscription": "Abo & Lizenz",
+    "group_app": "App",
+    "settings": "Einstellungen",
+    "settings_desc": "Theme, Sound, Vibration, Spielhilfen",
+    "group_help": "Hilfe",
+    "guide": "Anleitung",
+    "guide_desc": "Spielmodi, Eingabe und Statistik erklärt",
+    "shortcuts": "Tastenkürzel",
+    "shortcuts_desc": "Schneller zählen mit der Tastatur",
+    "contact": "Kontakt",
+    "contact_desc": "Frage oder Idee schicken",
+    "bug": "Fehler melden",
+    "bug_desc": "Etwas funktioniert nicht wie erwartet",
+    "group_admin": "Verwaltung",
+    "admin": "Admin-Panel",
+    "admin_desc": "Nutzer, Fehlermeldungen, Debug-Flags"
   }
 }

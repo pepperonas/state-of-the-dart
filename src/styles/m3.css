@@ -271,7 +271,9 @@ body {
 }
 /* Page titles (one h1 per screen) speak loud, like the klatsch titles. */
 h1:is(.m3-headline-medium, .m3-headline-large) {
-  font-size: clamp(2.25rem, 1.9rem + 1.4vw, 3rem);
+  /* 28 px on a phone (the app name must fit beside the header buttons at
+     390 px — 36 px cut it to "STATE OF THE DA…", 0.47.0), 48 px on desktop. */
+  font-size: clamp(1.75rem, 0.9rem + 3.4vw, 3rem);
   line-height: 1.1;
 }
 h2:is(.m3-headline-medium, .m3-headline-large) {

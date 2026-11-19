@@ -137,8 +137,8 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
     <PageShell
       title={t('settings.settings')}
       width="md"
-      onBack={() => navigate('/')}
-      backLabel={t('menu.back_to_menu')}
+      onBack={() => navigate('/me')}
+      backLabel={t('account_hub.back')}
     >
         <Card variant="elevated" className="p-6 md:p-8">
 

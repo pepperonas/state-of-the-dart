@@ -9,11 +9,8 @@ import { useTenant } from '../context/TenantContext';
 import { useAuth } from '../context/AuthContext';
 import { usePlayer } from '../context/PlayerContext';
 import { api } from '../services/api';
-import UserMenu from './auth/UserMenu';
 import ReportActions from './bugReport/ReportActions';
 import SyncStatus from './sync/SyncStatus';
-import UserGuideModal from './guide/UserGuideModal';
-import ContactModal from './contact/ContactModal';
 import { getLocalGameSummaries } from '../utils/gameStorage';
 import { enterDrop, staggerChild, springSpatialFast } from '../utils/motion';
 import { loadLastGameSettings } from '../utils/matchSetup';
@@ -69,8 +66,6 @@ const MainMenu: React.FC = () => {
       .catch(() => setResumableMatchCount(localCount));
   }, []);
 
-  const [showGuideModal, setShowGuideModal] = useState(false);
-  const [showContactModal, setShowContactModal] = useState(false);
 
   // The pairing and settings of the last X01 match — the rematch button.
   const lastPlayers = useMemo(() => {
@@ -139,7 +134,6 @@ const MainMenu: React.FC = () => {
           <div className="flex items-center gap-2 shrink-0">
             <SyncStatus />
             <ReportActions layout="header" className="md:hidden" />
-            <UserMenu onOpenGuide={() => setShowGuideModal(true)} onOpenContact={() => setShowContactModal(true)} />
           </div>
         </motion.header>
 
@@ -255,8 +249,6 @@ const MainMenu: React.FC = () => {
         ))}
       </div>
 
-      {showGuideModal && <UserGuideModal onClose={() => setShowGuideModal(false)} />}
-      {showContactModal && <ContactModal onClose={() => setShowContactModal(false)} />}
     </div>
   );
 };

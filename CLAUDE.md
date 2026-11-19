@@ -377,6 +377,11 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - Leaving X01 calls `pauseCurrentMatch()` (holds the save flag, one save) before navigating.
 - GameScreen uses multiple `useRef` flags: `isNavigatingAwayRef`, `forceNewGameRef`, `resumeRequestedRef`
 
+### Navigation (0.47.0)
+- Five destinations: Start, Statistik, Erfolge, Spieler, **Konto** (`/me`, `components/account/AccountHub.tsx`). Konto holds account, subscription, settings, guide, shortcuts, contact, bug report, admin. There is no account dropdown any more — don't bring one back into a page header.
+- `navigation/navSection.ts` maps every path to its destination (sub-pages light up their section; unknown → home). Add new routes there. Destinations are `<Link aria-current="page">`, testids `nav-<section>`.
+- Pages reached from Konto (`/settings`, `/account`) go back to `/me`.
+
 ### Navigation & home (0.12.0)
 - `components/navigation/AppNavigation.tsx`: M3 bottom bar (< md) / rail (≥ md); visibility from `navVisibility.ts` (signed in, not a game route, not a public page). `NavAwareContent` in App.tsx pads the content for it.
 - Home (`MainMenu.tsx`): the rematch button navigates to `/game?new=1&quick=1`; GameScreen then pre-selects the last players (`lastPlayerIds`) and starts with the last settings (`utils/matchSetup.ts`). Pinned by `e2e/game-flow.spec.ts`.

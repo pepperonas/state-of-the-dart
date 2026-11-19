@@ -16,7 +16,7 @@ import { BACKEND_PORT } from './fixtures';
  */
 
 const API = `http://localhost:${BACKEND_PORT}/api`;
-const SCREENS = ['/', '/stats', '/players', '/achievements', '/settings', '/game?new=1', '/dashboard', '/match-history', '/leaderboard', '/training',
+const SCREENS = ['/', '/stats', '/players', '/achievements', '/me', '/settings', '/game?new=1', '/dashboard', '/match-history', '/leaderboard', '/training',
   '/cricket', '/around-the-clock', '/shanghai', '/tournament', '/online', '/resume', '/account', '/global-leaderboard', '/training-stats', '/pricing', '/scoreboard'];
 
 async function axe(page: Page) {
@@ -129,12 +129,6 @@ test('axe finds no serious problems and every control is a 48px target', async (
   for (const v of await axe(page)) problems.push(`/game (in play): ${v}`);
   for (const s of await smallTargets(page)) problems.push(`/game (in play): small target ${s}`);
 
-  // The account menu, open (APG menu button: role=menu, menuitems).
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Konto-Menü' }).first().click();
-  await expect(page.getByRole('menu')).toBeVisible();
-  for (const v of await axe(page)) problems.push(`/ (account menu open): ${v}`);
-  await page.keyboard.press('Escape');
 
   // Cricket, Around the Clock and Shanghai in play — they had no ARIA at all.
   for (const [path, start] of [['/cricket', /Cricket starten/], ['/around-the-clock', /Spiel starten/], ['/shanghai', /Shanghai starten/]] as const) {
