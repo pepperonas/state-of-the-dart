@@ -22,7 +22,7 @@ describe('OnlineGamePanel', () => {
     renderPanel(room(), onThrow);
     expect(screen.getByRole('heading', { name: 'Du bist dran' })).toBeInTheDocument();
     await userEvent.keyboard('60{Enter}');
-    expect(onThrow).toHaveBeenCalledWith(60, false);
+    expect(onThrow).toHaveBeenCalledWith(60, false, 121);
   });
 
   it('refuses an impossible total with a reason instead of sending it', async () => {
@@ -37,7 +37,23 @@ describe('OnlineGamePanel', () => {
     const onThrow = vi.fn();
     renderPanel(room(), onThrow);
     await userEvent.click(screen.getByRole('button', { name: 'Check-out 121' }));
-    expect(onThrow).toHaveBeenCalledWith(121, true);
+    expect(onThrow).toHaveBeenCalledWith(121, true, 121);
+  });
+
+  // 0.47.1: the clicked checkout button kept focus. In the next leg (same
+  // player starts, the state not yet in) Enter belonged to that button and
+  // sent the old checkout again — the server booked 121 as the new leg's first
+  // visit. The button gives up focus once the visit is sent.
+  it('a clicked checkout button does not keep focus, so the next Enter enters the typed score', async () => {
+    const onThrow = vi.fn();
+    renderPanel(room(), onThrow);
+    const checkout = screen.getByRole('button', { name: 'Check-out 121' });
+    await userEvent.click(checkout);
+    expect(onThrow).toHaveBeenCalledTimes(1);
+    expect(document.activeElement).not.toBe(checkout);
+    await userEvent.keyboard('60{Enter}');
+    expect(onThrow).toHaveBeenCalledTimes(2);
+    expect(onThrow).toHaveBeenLastCalledWith(60, false, 121);
   });
 
   it('shows whose turn it is and ignores keys when it is not yours', async () => {

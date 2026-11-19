@@ -60,7 +60,7 @@
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml" title="Vitest unit and component tests, all passing">
-      <img src="https://img.shields.io/badge/Unit_Tests-1351-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
+      <img src="https://img.shields.io/badge/Unit_Tests-1354-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml" title="Playwright end-to-end tests against a real backend">
@@ -71,7 +71,7 @@
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.47.0-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.47.1-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
@@ -928,6 +928,10 @@ Contributions sind willkommen! Bitte:
 ---
 
 ## 📝 Changelog
+
+### v0.47.1 (19. November 2026) - Online: kein doppelter Check-out mehr
+
+Im Online-Spiel konnte ein Check-out doppelt verbucht werden. Wer mit der Maus auf „Check-out“ klickte und im nächsten Leg die Punkte per Tastatur eintippte, schickte mit Enter manchmal noch einmal den alten Check-out. Der Knopf hatte nämlich den Fokus behalten. Der Server buchte ihn dann als erste Aufnahme des neuen Legs. Jetzt gibt der Knopf den Fokus nach dem Absenden ab. Außerdem meldet jede Aufnahme mit, von welchem Rest sie ausgeht, und der Server lehnt eine veraltete Aufnahme ab, statt sie falsch zu verbuchen. Dieser Fehler war auch der Grund für den gelegentlich hängenden Online-Test.
 
 ### v0.47.0 (19. November 2026) - Konto in der Navigation
 
