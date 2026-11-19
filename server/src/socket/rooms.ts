@@ -106,7 +106,15 @@ export type ThrowResult =
   | { kind: 'leg'; winner: OnlinePlayer }
   | { kind: 'match'; winner: OnlinePlayer };
 
-interface ThrowInput { score: unknown; darts?: Array<{ multiplier?: number }> }
+interface ThrowInput {
+  score: unknown;
+  darts?: Array<{ multiplier?: number }>;
+  /** The remaining score the client saw when it sent the visit (0.47.1). A
+   *  checkout (score === expectedRemaining) for a remaining score that is no
+   *  longer current is stale — a focused checkout button "clicked" again by
+   *  Enter in the next leg sent exactly that. */
+  expectedRemaining?: unknown;
+}
 
 /**
  * Applies one visit to the room. The client-sent score is range-checked and
@@ -120,6 +128,15 @@ export const applyThrow = (room: GameRoom, playerId: string, input: ThrowInput):
   if (!current) return { kind: 'rejected', reason: 'no current player' };
   if (current.id !== playerId) return { kind: 'rejected', reason: 'not your turn' };
 
+  const before = gs.scores[playerId] ?? room.settings.startScore;
+  // Only a checkout depends on the remaining score: "finish my 121" sent for a
+  // leg that has moved on would be booked as a 121 visit of the new leg. A
+  // typed total means the same whatever the screen showed — it is booked
+  // against the real remaining score (rejecting it stalled the game, 0.47.1).
+  if (typeof input.expectedRemaining === 'number' && input.score === input.expectedRemaining && input.expectedRemaining !== before) {
+    return { kind: 'rejected', reason: 'stale' };
+  }
+
   const score = input.score;
   if (typeof score !== 'number' || !Number.isInteger(score) || score < 0 || score > 180) {
     return { kind: 'rejected', reason: 'invalid score' };
@@ -127,7 +144,7 @@ export const applyThrow = (room: GameRoom, playerId: string, input: ThrowInput):
 
   const doubleOut = room.settings.doubleOut ?? true;
   const lastDart = input.darts?.[input.darts.length - 1];
-  const remaining = (gs.scores[playerId] ?? room.settings.startScore) - score;
+  const remaining = before - score;
   const advance = () => { gs.currentPlayerIndex = (gs.currentPlayerIndex + 1) % room.players.length; };
 
   const bust = remaining < 0 ||

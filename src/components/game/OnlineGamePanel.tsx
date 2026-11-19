@@ -34,7 +34,8 @@ interface Props {
   myId: string;
   visits: OnlineVisit[];
   winnerId: string | null;
-  onThrow: (score: number, checkout: boolean) => void;
+  /** expectedRemaining: the remaining score this visit was entered against (the server refuses a stale one). */
+  onThrow: (score: number, checkout: boolean, expectedRemaining: number) => void;
   onRematch: () => void;
   onLeave: () => void;
 }
@@ -68,7 +69,11 @@ const OnlineGamePanel: React.FC<Props> = ({ room, myId, visits, winnerId, onThro
     }
     setError(null);
     setInput('');
-    onThrow(score, check.checkout);
+    onThrow(score, check.checkout, myRemaining);
+    // A clicked button (the checkout button above all) must not keep focus:
+    // Enter belongs to a focused button, so the next visit's Enter would
+    // "click" it again and send the old checkout (0.47.1).
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
   };
 
   const press = (digit: string) => {

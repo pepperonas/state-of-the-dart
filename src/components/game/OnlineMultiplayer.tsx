@@ -154,6 +154,9 @@ const OnlineMultiplayer: React.FC = () => {
     });
 
     newSocket.on('game:rejected', (data: { reason: string }) => {
+      // A stale checkout (the leg moved on before it arrived) was not booked —
+      // say so, the player has to enter the visit again.
+      if (data.reason === 'stale') { notifyRef.current(tRef.current('online_game.stale')); return; }
       notifyRef.current(tRef.current(data.reason === 'not your turn' ? 'online_game.not_your_turn' : 'online_game.throw_rejected'));
     });
 
@@ -221,10 +224,11 @@ const OnlineMultiplayer: React.FC = () => {
     socket.emit('game:start', currentRoom.id);
   };
 
-  const handleThrow = (score: number, checkout: boolean) => {
+  const handleThrow = (score: number, checkout: boolean, expectedRemaining: number) => {
     if (!socket || !currentRoom) return;
     // The server enforces double-out from the last dart; a typed checkout is a double finish.
-    socket.emit('game:throw', { roomId: currentRoom.id, score, darts: checkout ? [{ multiplier: 2 }] : [] });
+    // expectedRemaining lets it refuse a visit sent for a turn that has moved on (0.47.1).
+    socket.emit('game:throw', { roomId: currentRoom.id, score, darts: checkout ? [{ multiplier: 2 }] : [], expectedRemaining });
   };
 
   const handleRematch = () => {

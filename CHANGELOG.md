@@ -7,6 +7,32 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.47.2] - 2026-11-19
+
+### Fixed
+- 0.47.1 rejected every visit whose `expectedRemaining` was out of date —
+  including a total typed before the new leg's state reached the client. The
+  rejection was silent, so the game waited for a visit that never came (seen
+  on CI). Now only a stale **checkout** (`score === expectedRemaining`) is
+  rejected, with a notice to enter it again; typed totals are booked against
+  the real remaining score.
+
+## [0.47.1] - 2026-11-19
+
+### Fixed — online: a checkout could be booked twice
+- A clicked "Check-out" button kept focus. When the same player started the
+  next leg and typed a score before the new state arrived, Enter belonged to
+  that button (`shouldHandleGameKey` leaves Enter on a focused button alone),
+  so the old checkout was sent again and the server booked it as the new
+  leg's first visit (301 → 180, no checkout possible). This was the
+  `e2e/online.spec.ts` hang (3.0 min, then a pass on retry) since October,
+  which pushed CI past its 15-minute limit.
+- The panel drops focus after sending a visit; every visit carries
+  `expectedRemaining`, and `applyThrow` rejects a stale one (`stale`, shown to
+  nobody — nothing was booked). Clients without the field still play.
+- Pinned in `OnlineGamePanel.test.tsx` and `socketRooms.test.ts`, both
+  mutation-checked.
+
 ## [0.47.0] - 2026-11-19
 
 ### Changed — navigation: a fifth destination, "Konto"

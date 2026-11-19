@@ -55,6 +55,29 @@ describe('applyThrow', () => {
     expect(applyThrow(room, 'b', { score: 60 }).kind).toBe('rejected');
   });
 
+  // 0.47.1: a checkout button kept focus; Enter in the next leg "clicked" it
+  // again and the server booked the old 121 as the new leg's first visit.
+  it('a checkout sent for a remaining score that is no longer current is rejected, not booked', () => {
+    const room = playing(['a', 'b'], 0, 301);
+    expect(applyThrow(room, 'a', { score: 121, darts: [{ multiplier: 2 }], expectedRemaining: 121 })).toEqual({ kind: 'rejected', reason: 'stale' });
+    expect(room.gameState!.scores.a).toBe(301);
+    expect(room.gameState!.currentPlayerIndex).toBe(0);
+  });
+
+  // The second half of the same race: a total typed before the new leg's state
+  // reached the client. It means the same on any screen and must be booked —
+  // rejecting it left the game waiting for a visit that never came.
+  it('a typed total is booked against the real remaining score even if the client saw an old one', () => {
+    const room = playing(['a', 'b'], 0, 301);
+    expect(applyThrow(room, 'a', { score: 180, darts: [], expectedRemaining: 121 }).kind).toBe('scored');
+    expect(room.gameState!.scores.a).toBe(121);
+    expect(room.gameState!.currentPlayerIndex).toBe(1);
+  });
+
+  it('an old client without expectedRemaining still plays', () => {
+    expect(applyThrow(playing(['a', 'b'], 0), 'a', { score: 60 }).kind).toBe('scored');
+  });
+
   it('only the player at the oche may throw', () => {
     expect(applyThrow(playing(['a', 'b'], 0), 'b', { score: 60 }).kind).toBe('rejected');
   });
