@@ -164,7 +164,7 @@ export function setupSocketIO(server: HttpServer): Server {
     }));
 
     // Submit throw
-    socket.on('game:throw', safe('game:throw', (data: { roomId: string; darts?: Array<{ multiplier?: number }>; score: unknown }) => {
+    socket.on('game:throw', safe('game:throw', (data: { roomId: string; darts?: Array<{ multiplier?: number }>; score: unknown; expectedRemaining?: unknown }) => {
       const room = gameRooms.get(data?.roomId);
       const me = onlinePlayers.get(socket.id);
       if (!room || !me) return;

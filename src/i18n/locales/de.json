@@ -2198,7 +2198,8 @@
     "not_your_turn": "Du bist gerade nicht dran.",
     "throw_rejected": "Der Wurf wurde nicht angenommen.",
     "leg_won": "{{name}} gewinnt das Leg",
-    "join_room": "{{name}} beitreten"
+    "join_room": "{{name}} beitreten",
+    "stale": "Der Spielstand hatte sich gerade geändert. Bitte die Aufnahme noch einmal eingeben."
   },
   "game_screen": {
     "sets_short": "S",

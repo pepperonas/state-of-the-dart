@@ -2198,7 +2198,8 @@
     "not_your_turn": "It is not your turn.",
     "throw_rejected": "The throw was not accepted.",
     "leg_won": "{{name}} wins the leg",
-    "join_room": "Join {{name}}"
+    "join_room": "Join {{name}}",
+    "stale": "The score had just changed. Please enter the visit again."
   },
   "game_screen": {
     "sets_short": "S",
