@@ -62,6 +62,11 @@ describe('landing ↔ app seam', () => {
     expect(app).toContain('<Route path="/willkommen" element={<Landing />} />');
   });
 
+  it('the landing does not draw its own footer (App adds the one footer)', () => {
+    expect(read('components/landing/Landing.tsx')).not.toMatch(/<Footer\b/);
+    expect(app).toContain('<Footer />');
+  });
+
   it('the landing is a lazy chunk (it must not weigh down the login page)', () => {
     expect(app).toMatch(/const Landing = lazyWithRetry\(\(\) => import\('\.\/components\/landing\/Landing'\)\)/);
   });
