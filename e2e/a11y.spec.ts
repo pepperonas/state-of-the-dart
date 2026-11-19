@@ -170,3 +170,15 @@ test('the game announces each visit to screen readers', async ({ page }) => {
   await expect(live).toContainText('100');
   await expect(live).toContainText('401');
 });
+
+// The signed-out landing (0.48.0): the first page a visitor sees.
+for (const [name, w, h] of [['phone', 390, 844], ['desktop', 1440, 900]] as const) {
+  test(`landing (signed out, ${name}): axe and touch targets`, async ({ page }) => {
+    await page.setViewportSize({ width: w, height: h });
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(700);
+    const problems = [...(await axe(page)), ...(await smallTargets(page)).map(s => `small target ${s}`)];
+    expect(problems, problems.join('\n')).toEqual([]);
+  });
+}

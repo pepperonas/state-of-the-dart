@@ -181,3 +181,18 @@ for (const theme of ['modern', 'modern-light'] as const) {
     expect(all, `Contrast failures (${theme}):\n${all.join('\n')}`).toEqual([]);
   });
 }
+
+// The signed-out landing (0.48.0), on a phone and on a desktop. Reduced
+// motion: the demo shows its still frame (141 left, the finish route) — the
+// richest scoreboard state, and no entrance mid-fade to fool the measurement.
+for (const [name, w, h] of [['phone', 390, 844], ['desktop', 1440, 900]] as const) {
+  test(`landing (signed out, ${name}): text contrast meets WCAG AA`, async ({ page }) => {
+    await page.setViewportSize({ width: w, height: h });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(700);
+    const found = await measure(page);
+    expect(found, found.join('\n')).toEqual([]);
+  });
+}

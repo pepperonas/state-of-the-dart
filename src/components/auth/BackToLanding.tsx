@@ -11,15 +11,14 @@ import { useTranslation } from 'react-i18next';
  * what the product even is. This is that way back, and it sits in the same spot
  * on all of them so it is findable without looking.
  *
- * It points at `/willkommen` rather than `/`, because `/` is the auth switch: a
- * user who signed in in another tab would otherwise be bounced into the app
- * instead of the page they asked for.
+ * It points at `/`: signed out that is the landing (since 0.48.0 the only
+ * one — `/willkommen` redirects there).
  */
 const BackToLanding: React.FC<{ className?: string }> = ({ className = '' }) => {
   const { t } = useTranslation();
   return (
   <Link
-    to="/willkommen"
+    to="/"
     className={`inline-flex items-center gap-1.5 mb-4 m3-label-large text-on-surface-variant hover:text-on-surface transition-colors ${className}`}
   >
     <ArrowLeft size={16} />

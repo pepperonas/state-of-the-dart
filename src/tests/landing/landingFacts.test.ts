@@ -58,8 +58,21 @@ describe('landing ↔ app seam', () => {
     expect(body).toContain('<ProtectedRoute>');
   });
 
-  it('the landing stays reachable while signed in', () => {
-    expect(app).toContain('<Route path="/willkommen" element={<Landing />} />');
+  it('`/willkommen` is gone: old links redirect to `/`, nothing links to it', () => {
+    expect(app).toContain('<Route path="/willkommen" element={<Navigate to="/" replace />} />');
+    expect(app).not.toContain('<Route path="/willkommen" element={<Landing />} />');
+    for (const f of ['components/auth/BackToLanding.tsx', 'components/landing/Landing.tsx']) {
+      expect(read(f).replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, ''), f).not.toContain('/willkommen');
+    }
+  });
+
+  it('signing up and signing in are on the landing itself, twice', () => {
+    const landing = read('components/landing/Landing.tsx');
+    expect(landing).toContain('<JoinPanel id="hero" />');
+    expect(landing).toContain('<JoinPanel id="end" />');
+    expect(landing).toContain('googleAuth');
+    expect(landing).toContain("navigate('/register')");
+    expect(landing).toContain('to="/login"');
   });
 
   it('the landing does not draw its own footer (App adds the one footer)', () => {

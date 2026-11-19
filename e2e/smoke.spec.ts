@@ -21,8 +21,11 @@ test.describe('Production build smoke', () => {
     await expect(page).toHaveURL(/\/$/);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     // The two ways into the app must be on the page.
-    await expect(page.getByRole('button', { name: /Kostenlos starten/ }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: /Mit E-Mail registrieren/ }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: /Mit Google weiter/ }).first()).toBeVisible();
     await expect(page.getByRole('button', { name: /^Anmelden$/ }).first()).toBeVisible();
+    // The demo board is there, and the old second entrance redirects home.
+    await expect(page.getByTestId('leg-demo')).toBeVisible();
 
     expect(consoleErrors, `Unexpected console errors:\n${consoleErrors.join('\n')}`).toEqual([]);
   });
