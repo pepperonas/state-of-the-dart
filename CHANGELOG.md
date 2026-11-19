@@ -7,6 +7,22 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.47.0] - 2026-11-19
+
+### Changed — navigation: a fifth destination, "Konto"
+- Settings, account, subscription, guide, shortcuts, contact and bug report
+  lived in a dropdown behind the initial in the home header — on the home
+  screen only, and on a phone labelled by nothing but a letter. The bar and
+  rail now carry **Konto** (`/me`, `AccountHub`): a summary (name, email,
+  plan, upgrade) and labelled rows grouped Konto / App / Hilfe / Verwaltung.
+  The dropdown (`UserMenu`) is gone.
+- Every app screen lights up its section (`navSection`): match history,
+  dashboard and leaderboards → Statistik; settings, account, admin → Konto.
+  Settings and account lead back to the account page.
+- Page title on phones back to 28 px (36 px cut the app name at 390 px).
+- New `e2e/navigation.spec.ts` (phone + desktop), `navSection.test.ts`; `/me`
+  joined the axe and contrast sweeps.
+
 ## [0.46.1] - 2026-11-19
 
 ### Fixed

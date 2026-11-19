@@ -148,7 +148,7 @@ const UserSettings: React.FC = () => {
   if (!user) return null;
 
   return (
-    <PageShell title={t('user_settings.title')} width="md" onBack={() => navigate(-1)}>
+    <PageShell title={t('user_settings.title')} width="md" onBack={() => navigate('/me')} backLabel={t('account_hub.back')}>
 
         {/* Success/Error Messages */}
         {success && (

@@ -60,18 +60,18 @@
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml" title="Vitest unit and component tests, all passing">
-      <img src="https://img.shields.io/badge/Unit_Tests-1328-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
+      <img src="https://img.shields.io/badge/Unit_Tests-1351-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml" title="Playwright end-to-end tests against a real backend">
-      <img src="https://img.shields.io/badge/E2E_Tests-64-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
+      <img src="https://img.shields.io/badge/E2E_Tests-66-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
     </a>
   </p>
 
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.46.1-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.47.0-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
@@ -928,6 +928,10 @@ Contributions sind willkommen! Bitte:
 ---
 
 ## 📝 Changelog
+
+### v0.47.0 (19. November 2026) - Konto in der Navigation
+
+Einstellungen, Account, Abo & Lizenz, Anleitung, Tastenkürzel, Kontakt und „Fehler melden“ waren in einem Menü hinter der Initiale oben rechts versteckt, und das nur auf der Startseite. Jetzt hat die Navigation ein fünftes Ziel, **Konto**: am Handy unten in der Leiste, am Desktop in der Seitenleiste, von jeder Seite einen Tipp entfernt. Die Konto-Seite zeigt oben Name, E-Mail und Abo-Status und darunter alle Punkte als beschriftete Zeilen, gruppiert nach Konto, App, Hilfe und (für Admins) Verwaltung. Unterseiten markieren ihren Bereich: Spielhistorie, Dashboard und Ranglisten gehören zu „Statistik“, Einstellungen und Account zu „Konto“, und „Zurück“ führt dorthin. Der App-Titel passt am Handy wieder in eine Zeile.
 
 ### v0.46.1 (19. November 2026) - Größere Titel, nichts mehr abgeschnitten
 

@@ -699,7 +699,8 @@
     "home": "Home",
     "stats": "Stats",
     "achievements": "Awards",
-    "players": "Players"
+    "players": "Players",
+    "account": "Account"
   },
   "home": {
     "rematch": "Rematch",
@@ -710,8 +711,7 @@
     "section_play": "More games",
     "section_review": "Review",
     "section_admin": "Administration",
-    "skip_to_content": "Skip to content",
-    "account_menu": "Account menu"
+    "skip_to_content": "Skip to content"
   },
   "onboarding": {
     "title": "Welcome!",
@@ -1866,21 +1866,6 @@
     "profile_name": "Profile name",
     "name_placeholder": "Your name…",
     "create": "Create profile"
-  },
-  "user_menu": {
-    "lifetime": "Lifetime",
-    "active": "Active",
-    "trial_days_one": "{{count}}-day trial",
-    "trial_days_other": "{{count}} days of trial",
-    "no_subscription": "No subscription",
-    "trial_remaining_one": "{{count}} day of Premium trial left",
-    "trial_remaining_other": "{{count}} days of Premium trial left",
-    "upgrade_now": "Upgrade now",
-    "account": "Account",
-    "app_settings": "App settings",
-    "lifetime_license": "Lifetime license",
-    "manage_subscription": "Manage subscription",
-    "upgrade": "Upgrade"
   },
   "user_settings": {
     "avatar": "Avatar",
@@ -4290,5 +4275,35 @@
     "error_not_found": "This visit no longer exists.",
     "error_finished_leg": "A finished leg only takes how the same total was thrown. For a different total, take the visits back to there.",
     "error_checkout": "That would finish the leg. For a finish: undo and enter it again."
+  },
+  "account_hub": {
+    "title": "Account",
+    "summary": "Signed in as",
+    "back": "To account",
+    "plan_lifetime": "Lifetime licence",
+    "plan_active": "Subscription active",
+    "plan_trial_one": "Trial: {{count}} day left",
+    "plan_trial_other": "Trial: {{count}} days left",
+    "plan_none": "No subscription",
+    "upgrade": "Upgrade now",
+    "group_account": "Account",
+    "profile": "Profile & sign-in",
+    "profile_desc": "Name, email, password, delete account",
+    "subscription": "Subscription & licence",
+    "group_app": "App",
+    "settings": "Settings",
+    "settings_desc": "Theme, sound, vibration, game aids",
+    "group_help": "Help",
+    "guide": "Guide",
+    "guide_desc": "Game modes, input and statistics explained",
+    "shortcuts": "Keyboard shortcuts",
+    "shortcuts_desc": "Score faster with the keyboard",
+    "contact": "Contact",
+    "contact_desc": "Send a question or an idea",
+    "bug": "Report a bug",
+    "bug_desc": "Something does not work as expected",
+    "group_admin": "Administration",
+    "admin": "Admin panel",
+    "admin_desc": "Users, bug reports, debug flags"
   }
 }

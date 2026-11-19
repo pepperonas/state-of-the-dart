@@ -1,16 +1,19 @@
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Home, TrendingUp, Users, Award } from 'lucide-react';
+import { Home, TrendingUp, Users, Award, CircleUserRound } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { showsAppNavigation } from './navVisibility';
+import { navSection, type NavSection } from './navSection';
 import ReportActions from '../bugReport/ReportActions';
 
-const DESTINATIONS = [
-  { to: '/', key: 'nav.home', icon: Home, end: true },
-  { to: '/stats', key: 'nav.stats', icon: TrendingUp, end: false },
-  { to: '/achievements', key: 'nav.achievements', icon: Award, end: false },
-  { to: '/players', key: 'nav.players', icon: Users, end: false },
+const DESTINATIONS: Array<{ to: string; key: string; icon: typeof Home; section: NavSection }> = [
+  { to: '/', key: 'nav.home', icon: Home, section: 'home' },
+  { to: '/stats', key: 'nav.stats', icon: TrendingUp, section: 'stats' },
+  { to: '/achievements', key: 'nav.achievements', icon: Award, section: 'achievements' },
+  { to: '/players', key: 'nav.players', icon: Users, section: 'players' },
+  // 0.47.0: settings, account, subscription and help — one tap from everywhere.
+  { to: '/me', key: 'nav.account', icon: CircleUserRound, section: 'account' },
 ];
 
 /**
@@ -24,19 +27,21 @@ const AppNavigation: React.FC = () => {
   const { isAuthenticated } = useAuth();
   if (!showsAppNavigation(pathname, isAuthenticated)) return null;
 
+  // A sub-page lights up the destination it belongs to (navSection).
+  const current = navSection(pathname);
   const item = (layout: 'bar' | 'rail') =>
-    DESTINATIONS.map(({ to, key, icon: Icon, end }) => (
-      <NavLink
+    DESTINATIONS.map(({ to, key, icon: Icon, section }) => {
+      const isActive = section === current;
+      return (
+      <Link
         key={to}
         to={to}
-        end={end}
-        className={({ isActive }) =>
-          `group flex flex-col items-center gap-1 ${layout === 'bar' ? 'flex-1 py-3' : 'w-full py-2'} m3-label-medium ${
-            isActive ? 'text-on-surface' : 'text-on-surface-variant'
-          }`
-        }
+        aria-current={isActive ? 'page' : undefined}
+        data-testid={`nav-${section}`}
+        className={`group flex flex-col items-center gap-1 min-w-0 ${layout === 'bar' ? 'flex-1 py-3' : 'w-full py-2'} m3-label-medium ${
+          isActive ? 'text-on-surface' : 'text-on-surface-variant'
+        }`}
       >
-        {({ isActive }) => (
           <>
             {/* M3 active indicator: a pill behind the icon that widens in. */}
             <span
@@ -46,11 +51,11 @@ const AppNavigation: React.FC = () => {
             >
               <Icon size={22} aria-hidden="true" />
             </span>
-            <span className={isActive ? 'font-semibold' : ''}>{t(key)}</span>
+            <span className={`max-w-full truncate px-1 ${isActive ? 'font-semibold' : ''}`}>{t(key)}</span>
           </>
-        )}
-      </NavLink>
-    ));
+      </Link>
+      );
+    });
 
   return (
     <>
