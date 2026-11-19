@@ -597,6 +597,11 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - **Pagination**: Show max 3 page buttons (not 5) for compact mobile layout
 - **Overflow**: Use `truncate` on player names, `line-clamp-2` on descriptions, `overflow-x-auto` + `min-w-[...]` on wide tables
 
+## In-app landing (0.48.0)
+- `/` signed out = `components/landing/Landing.tsx`; `/willkommen` only redirects. Sign-up/in is on the page (`JoinPanel`, twice) — keep it there.
+- `LegDemo` + `legScript`: the demo leg's numbers are computed and pinned (`legScript.test.ts`); change the visits there, never type a score into the component. It runs only while intersecting; reduced motion shows `STILL_FRAME_INDEX`.
+- Screens in `public/landing/*.webp` come from the screenshot run (`npx playwright test -c tools/screenshots`, its git-ignored `out/` folder), converted with `magick … -resize 1440x -quality 80`. Refresh them after a visible game-screen change.
+
 ## Website (Landing Page)
 
 Static landing page at `website/` — separate Vite + Tailwind CSS build (not React).

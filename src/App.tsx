@@ -269,8 +269,8 @@ function AppContent() {
                           `start_url: /` correct in both states. */}
                       <Route path="/" element={<HomeRoute />} />
 
-                      {/* The landing stays reachable while signed in. */}
-                      <Route path="/willkommen" element={<Landing />} />
+                      {/* The old second entrance to the landing (until 0.47): old links land on `/`. */}
+                      <Route path="/willkommen" element={<Navigate to="/" replace />} />
                       
                       <Route path="/dashboard" element={
                         <ProtectedRoute>

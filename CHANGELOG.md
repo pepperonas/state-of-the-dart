@@ -7,6 +7,26 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.48.0] - 2026-11-20
+
+### Changed — a new landing at `/`
+- `/willkommen` is gone (redirects to `/`, nothing links to it); signed-out
+  visitors get the landing at `/` as before, and the auth screens' way back
+  points there.
+- Hero: what the app does, played out — `LegDemo` throws a nine-darter on a
+  real board (geometry from `boardGeometry`), the scoreboard counts along,
+  suggests T20 · T19 · D12 at 141 and ends with "Game shot! 9 darts ·
+  average 167". The numbers come from `legScript` (tested against the
+  checkout table). Runs only while on screen; reduced motion = one still
+  frame.
+- Sign up with email, continue with Google and sign in sit in the hero and
+  again at the end (`JoinPanel`), with the honest trial note (30 days, no
+  payment details).
+- Real screens from the app (laptop, phone, TV) in `public/landing/` as WebP.
+- `GoogleMark` shared by landing, login and register.
+- The signed-out landing joined the axe, touch-target and contrast sweeps
+  (phone + desktop).
+
 ## [0.47.2] - 2026-11-19
 
 ### Fixed

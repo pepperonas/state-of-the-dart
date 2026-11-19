@@ -56,22 +56,22 @@
   <!-- ── Headline metrics ─────────────────────────────────────── -->
   <p>
     <a href="https://github.com/pepperonas/state-of-the-dart" title="Lines of code — measured by scripts/count-loc.mjs, checked by the docs test">
-      <img src="https://img.shields.io/badge/lines_of_code-~61k-2b3137?style=for-the-badge&logo=typescript&logoColor=white" height="64" alt="Lines of code" />
+      <img src="https://img.shields.io/badge/lines_of_code-~62k-2b3137?style=for-the-badge&logo=typescript&logoColor=white" height="64" alt="Lines of code" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml" title="Vitest unit and component tests, all passing">
-      <img src="https://img.shields.io/badge/Unit_Tests-1355-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
+      <img src="https://img.shields.io/badge/Unit_Tests-1361-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml" title="Playwright end-to-end tests against a real backend">
-      <img src="https://img.shields.io/badge/E2E_Tests-66-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
+      <img src="https://img.shields.io/badge/E2E_Tests-70-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
     </a>
   </p>
 
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.47.2-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.48.0-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
@@ -928,6 +928,10 @@ Contributions sind willkommen! Bitte:
 ---
 
 ## 📝 Changelog
+
+### v0.48.0 (20. November 2026) - Neue Startseite
+
+Wer nicht angemeldet ist, landet auf `stateofthedart.com` direkt auf der neuen Startseite. Die zweite Adresse `/willkommen` gibt es nicht mehr, alte Links führen dorthin. Ganz oben steht, was die App tut, und daneben spielt sie es vor: Auf einer echten Dartscheibe fliegt ein Neun-Darter (180, 180, 141 über T20 · T19 · D12), die Anzeige zählt mit, schlägt bei 141 das Finish vor und endet mit „Game shot! 9 Darts · Average 167“. Die Zahlen stammen aus der App selbst und sind getestet. Registrieren mit E-Mail, „Mit Google weiter“ und „Anmelden“ stehen direkt daneben und am Ende der Seite noch einmal, dazu der Hinweis „30 Tage kostenlos testen, ohne Zahlungsdaten“. Darunter zeigen echte Bilder aus dem Spiel Laptop, Handy und Fernseher, dann Spielmodi und Funktionen. Die Animation läuft nur, solange sie zu sehen ist. Bei reduzierter Bewegung zeigt sie ein Standbild. Die Startseite ist jetzt Teil der Prüfungen für Barrierefreiheit und Kontrast.
 
 ### v0.47.2 (19. November 2026) - Online: getippte Aufnahme wird nie verworfen
 

@@ -13,7 +13,7 @@ describe('showsAppNavigation', () => {
     for (const p of ['/', '/stats', '/players', '/achievements', '/settings']) expect(showsAppNavigation(p, true)).toBe(true);
   });
   it('never on game screens, public pages, or signed out', () => {
-    for (const p of ['/game', '/cricket', '/training/doubles', '/login', '/impressum', '/willkommen', '/pricing']) {
+    for (const p of ['/game', '/cricket', '/training/doubles', '/login', '/impressum', '/pricing']) {
       expect(showsAppNavigation(p, true)).toBe(false);
     }
     expect(showsAppNavigation('/', false)).toBe(false);
