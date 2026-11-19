@@ -7,6 +7,23 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.46.0] - 2026-11-19
+
+### Changed — new look, after klatsch.celox.io
+- Type: **Bangers** for display (page titles, display/headline-large/medium,
+  scores, rank stamps, the start wheel) and **Roboto Flex** for all text.
+  Both self-hosted (`public/fonts`, `src/styles/fonts.css`, OFL licences in
+  `public/licenses`); Inter, Google Sans Flex and every Google Fonts request
+  are gone.
+- Palette: the klatsch scheme — raspberry primary, warm rosé neutrals — with
+  gold as tertiary, in both themes. Theme colour, manifest and app icon follow.
+- Scores (`.sotd-numeral`): Bangers with a hard drop shadow; `AnimatedNumber
+  numeral` punches with a scale beat instead of swelling variable axes.
+- Background: an arena — light from above, a gold glow from the floor, dark
+  corners.
+- Pinned by `src/tests/consistency/fonts.test.ts` (no third-party fonts, every
+  font file and licence present, display and scores in Bangers).
+
 ## [0.45.0] - 2026-10-26
 
 ### Changed — eight players in a quick match, readable at every size

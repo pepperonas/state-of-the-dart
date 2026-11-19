@@ -15,7 +15,7 @@ export type ThemeName = 'modern' | 'modern-light';
 
 const THEME_CLASSES = ['modern', 'modern-light', 'dark'];
 
-const BODY_FONT = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const BODY_FONT = "'Roboto Flex', system-ui, -apple-system, 'Segoe UI', sans-serif";
 
 /** Put `theme` on <html> and <body>. Idempotent. */
 export function applyTheme(theme: string): void {

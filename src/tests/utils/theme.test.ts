@@ -57,7 +57,7 @@ describe('applyTheme', () => {
 
   it('sets the body font', () => {
     applyTheme('modern');
-    expect(document.body.style.fontFamily).toContain('Inter');
+    expect(document.body.style.fontFamily).toContain('Roboto Flex');
   });
 });
 

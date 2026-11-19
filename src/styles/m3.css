@@ -10,8 +10,9 @@
    incremental migration.
 
    Color roles follow the M3 naming (primary / secondary / tertiary / error +
-   surface containers + on-* + outline). Brand identity is preserved:
-   blue primary, vibrant purple tertiary — the M3-Expressive accent pop.
+   surface containers + on-* + outline). Since 0.46.0 the palette is the one of
+   klatsch.celox.io: raspberry primary, warm rosé neutrals, gold tertiary (the
+   klatsch accent yellow) for the game moments.
    ========================================================================== */
 
 /* ----------------------------------------------------------------------------
@@ -19,23 +20,23 @@
    -------------------------------------------------------------------------- */
 :root,
 .modern {
-  /* Primary — blue */
-  --m3-primary: #8ed0ff;
-  --m3-on-primary: #00344e;
-  --m3-primary-container: #004c6e;
-  --m3-on-primary-container: #c9e6ff;
+  /* Primary — raspberry (klatsch) */
+  --m3-primary: #ffb1c4;
+  --m3-on-primary: #660030;
+  --m3-primary-container: #8e0039;
+  --m3-on-primary-container: #ffd9e1;
 
-  /* Secondary — desaturated steel blue */
-  --m3-secondary: #b6c9d8;
-  --m3-on-secondary: #21333e;
-  --m3-secondary-container: #374955;
-  --m3-on-secondary-container: #d2e5f5;
+  /* Secondary — muted rosé */
+  --m3-secondary: #e5bdc5;
+  --m3-on-secondary: #43292f;
+  --m3-secondary-container: #5b3f46;
+  --m3-on-secondary-container: #ffd9e1;
 
-  /* Tertiary — vibrant purple (the expressive accent) */
-  --m3-tertiary: #d6bbfb;
-  --m3-on-tertiary: #3b2459;
-  --m3-tertiary-container: #523a70;
-  --m3-on-tertiary-container: #ecdcff;
+  /* Tertiary — gold (the klatsch accent yellow) */
+  --m3-tertiary: #ffc93c;
+  --m3-on-tertiary: #2e1500;
+  --m3-tertiary-container: #5c4300;
+  --m3-on-tertiary-container: #ffe08f;
 
   /* Error */
   --m3-error: #ffb4ab;
@@ -60,28 +61,28 @@
   --m3-success-container: #00522e;
   --m3-on-success-container: #99f7b1;
 
-  /* Surfaces (cool-tinted neutrals) */
-  --m3-background: #101418;
-  --m3-on-background: #e1e2e8;
-  --m3-surface: #101418;
-  --m3-surface-dim: #101418;
-  --m3-surface-bright: #36393e;
-  --m3-surface-container-lowest: #0b0e12;
-  --m3-surface-container-low: #181c20;
-  --m3-surface-container: #1c2024;
-  --m3-surface-container-high: #272a2f;
-  --m3-surface-container-highest: #31353a;
-  --m3-on-surface: #e1e2e8;
-  --m3-on-surface-variant: #c0c7ce;
+  /* Surfaces (warm rosé neutrals) */
+  --m3-background: #191113;
+  --m3-on-background: #f0dee0;
+  --m3-surface: #191113;
+  --m3-surface-dim: #191113;
+  --m3-surface-bright: #413739;
+  --m3-surface-container-lowest: #140c0e;
+  --m3-surface-container-low: #22191b;
+  --m3-surface-container: #261d1f;
+  --m3-surface-container-high: #312829;
+  --m3-surface-container-highest: #3c3234;
+  --m3-on-surface: #f0dee0;
+  --m3-on-surface-variant: #d7c1c4;
 
   /* Outlines */
-  --m3-outline: #8a9197;
-  --m3-outline-variant: #41474d;
+  --m3-outline: #9f8c8f;
+  --m3-outline-variant: #524345;
 
   /* Inverse / scrim */
-  --m3-inverse-surface: #e1e2e8;
-  --m3-inverse-on-surface: #2e3135;
-  --m3-inverse-primary: #00658c;
+  --m3-inverse-surface: #f0dee0;
+  --m3-inverse-on-surface: #382e30;
+  --m3-inverse-primary: #b5124f;
   --m3-scrim: #000000;
 
   /* Elevation (dark: soft shadows; surfaces also tint via container tokens) */
@@ -97,20 +98,20 @@
    2. COLOR ROLES — LIGHT SCHEME (`.modern-light`)
    -------------------------------------------------------------------------- */
 .modern-light {
-  --m3-primary: #00658c;
+  --m3-primary: #b5124f;
   --m3-on-primary: #ffffff;
-  --m3-primary-container: #c9e6ff;
-  --m3-on-primary-container: #001e2e;
+  --m3-primary-container: #ffd9e1;
+  --m3-on-primary-container: #3f0019;
 
-  --m3-secondary: #4f616e;
+  --m3-secondary: #75565d;
   --m3-on-secondary: #ffffff;
-  --m3-secondary-container: #d2e5f5;
-  --m3-on-secondary-container: #0b1d29;
+  --m3-secondary-container: #ffd9e1;
+  --m3-on-secondary-container: #2b151b;
 
-  --m3-tertiary: #6b538b;
+  --m3-tertiary: #795900;
   --m3-on-tertiary: #ffffff;
-  --m3-tertiary-container: #ecdcff;
-  --m3-on-tertiary-container: #251431;
+  --m3-tertiary-container: #ffc93c;
+  --m3-on-tertiary-container: #2e1500;
 
   --m3-error: #ba1a1a;
   --m3-on-error: #ffffff;
@@ -131,25 +132,25 @@
   --m3-success-container: #99f7b1;
   --m3-on-success-container: #00210f;
 
-  --m3-background: #f6fafe;
-  --m3-on-background: #181c20;
-  --m3-surface: #f6fafe;
-  --m3-surface-dim: #d6dade;
-  --m3-surface-bright: #f6fafe;
+  --m3-background: #fff8f8;
+  --m3-on-background: #22191b;
+  --m3-surface: #fff8f8;
+  --m3-surface-dim: #e8d6d8;
+  --m3-surface-bright: #fff8f8;
   --m3-surface-container-lowest: #ffffff;
-  --m3-surface-container-low: #f0f4f8;
-  --m3-surface-container: #eaeef2;
-  --m3-surface-container-high: #e4e9ed;
-  --m3-surface-container-highest: #dee3e7;
-  --m3-on-surface: #181c20;
-  --m3-on-surface-variant: #41474d;
+  --m3-surface-container-low: #fff0f2;
+  --m3-surface-container: #fceaec;
+  --m3-surface-container-high: #f6e4e6;
+  --m3-surface-container-highest: #f0dee0;
+  --m3-on-surface: #22191b;
+  --m3-on-surface-variant: #524345;
 
-  --m3-outline: #71787e;
-  --m3-outline-variant: #c0c7ce;
+  --m3-outline: #857375;
+  --m3-outline-variant: #d7c1c4;
 
-  --m3-inverse-surface: #2d3135;
-  --m3-inverse-on-surface: #eef1f5;
-  --m3-inverse-primary: #8ed0ff;
+  --m3-inverse-surface: #382e30;
+  --m3-inverse-on-surface: #ffecef;
+  --m3-inverse-primary: #ffb1c4;
   --m3-scrim: #000000;
 
   --m3-elevation-0: none;
@@ -203,23 +204,30 @@ html,
 body {
   background-color: var(--m3-surface);
   color: var(--m3-on-surface);
-  font-family: 'Inter', 'Roboto Flex', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--sotd-font-text);
+  font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-/* Tokenised ambient background — subtle primary/tertiary radial bloom */
+/* The arena (0.46.0): a spotlight from above in the primary, a warm gold glow
+   rising from the floor, the corners falling off into the dark — a stage, not a
+   flat page. Fixed to the viewport so it does not slide with the content. */
 .gradient-mesh {
   background:
-    radial-gradient(at 0% 0%, color-mix(in srgb, var(--m3-primary) 10%, transparent) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, color-mix(in srgb, var(--m3-tertiary) 12%, transparent) 0px, transparent 55%),
+    radial-gradient(70% 55% at 50% -10%, color-mix(in srgb, var(--m3-primary) 16%, transparent), transparent 70%),
+    radial-gradient(60% 45% at 100% 110%, color-mix(in srgb, var(--m3-tertiary) 10%, transparent), transparent 70%),
+    radial-gradient(50% 40% at 0% 100%, color-mix(in srgb, var(--m3-primary-container) 22%, transparent), transparent 70%),
+    radial-gradient(120% 100% at 50% 40%, transparent 55%, color-mix(in srgb, var(--m3-surface-container-lowest) 85%, transparent)),
     var(--m3-surface);
+  background-attachment: fixed;
 }
 .modern-light .gradient-mesh {
   background:
-    radial-gradient(at 0% 0%, color-mix(in srgb, var(--m3-primary) 8%, transparent) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, color-mix(in srgb, var(--m3-tertiary) 8%, transparent) 0px, transparent 55%),
+    radial-gradient(70% 55% at 50% -10%, color-mix(in srgb, var(--m3-primary) 9%, transparent), transparent 70%),
+    radial-gradient(60% 45% at 100% 110%, color-mix(in srgb, var(--m3-tertiary-container) 30%, transparent), transparent 70%),
     var(--m3-surface);
+  background-attachment: fixed;
 }
 
 /* Tokenised scrollbar */
@@ -236,12 +244,23 @@ body {
 /* ----------------------------------------------------------------------------
    5. TYPE SCALE (M3) — utility classes
    -------------------------------------------------------------------------- */
-.m3-display-large   { font-size: 3.5625rem; line-height: 4rem;    font-weight: 400; letter-spacing: -0.015625rem; }
-.m3-display-medium  { font-size: 2.8125rem; line-height: 3.25rem; font-weight: 400; letter-spacing: 0; }
-.m3-display-small   { font-size: 2.25rem;   line-height: 2.75rem; font-weight: 400; letter-spacing: 0; }
-.m3-headline-large  { font-size: 2rem;      line-height: 2.5rem;  font-weight: 600; letter-spacing: 0; }
-.m3-headline-medium { font-size: 1.75rem;   line-height: 2.25rem; font-weight: 600; letter-spacing: 0; }
-.m3-headline-small  { font-size: 1.5rem;    line-height: 2rem;    font-weight: 600; letter-spacing: 0; }
+.m3-display-large   { font-size: 3.5625rem; line-height: 4rem; }
+.m3-display-medium  { font-size: 2.8125rem; line-height: 3.25rem; }
+.m3-display-small   { font-size: 2.25rem;   line-height: 2.75rem; }
+.m3-headline-large  { font-size: 2rem;      line-height: 2.5rem; }
+.m3-headline-medium { font-size: 1.75rem;   line-height: 2.25rem; }
+/* Display type (0.46.0): Bangers, the klatsch.celox.io display face — page
+   titles, big numbers, scores. One weight only: never let the browser fake a
+   bold or an italic (m3-emphasized / font-bold would smear it). */
+.m3-display-large, .m3-display-medium, .m3-display-small,
+.m3-headline-large, .m3-headline-medium {
+  font-family: var(--sotd-font-display);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  font-synthesis: none;
+  font-variant-numeric: tabular-nums;
+}
+.m3-headline-small  { font-size: 1.5rem;    line-height: 2rem;    font-weight: 650; letter-spacing: 0; }
 .m3-title-large     { font-size: 1.375rem;  line-height: 1.75rem; font-weight: 600; letter-spacing: 0; }
 .m3-title-medium    { font-size: 1rem;      line-height: 1.5rem;  font-weight: 600; letter-spacing: 0.009375rem; }
 .m3-title-small     { font-size: 0.875rem;  line-height: 1.25rem; font-weight: 600; letter-spacing: 0.00625rem; }
@@ -263,6 +282,11 @@ body {
    tighter tracking — for hero numbers and titles that should carry weight.
    Replaces the ad-hoc `m3-headline-* font-bold` combinations. */
 .m3-emphasized { font-weight: 700; letter-spacing: -0.01em; }
+/* Bangers has one weight: emphasis there is the face itself, not a fake bold. */
+.m3-emphasized:is(.m3-display-large, .m3-display-medium, .m3-display-small, .m3-headline-large, .m3-headline-medium) {
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
 
 /* ----------------------------------------------------------------------------
    6. STATE LAYER — shared overlay used by interactive components
@@ -862,21 +886,19 @@ button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surfa
 }
 
 /* ── Leg rank stamp ───────────────────────────────────────────────────────
-   The gostumblr "Übereinstimmung" poster: Google Sans Flex with fixed axes
-   (wght 925 / wdth 45 / slnt -10 / opsz 96), large, turned a little, with a
-   glow in its own colour. ⚠️ The font is cut to the digits 0–9 (index.html);
-   no other character may go in, it would fall back visibly. */
+   A poster digit: Bangers (0.46.0, was Google Sans Flex from Google's CDN),
+   large, turned a little, with a glow in its own colour. */
 .sotd-rank-stamp {
-  font-family: 'Google Sans Flex', 'Inter', system-ui, sans-serif;
-  font-weight: 925;
-  font-stretch: 45%;
-  font-style: oblique 10deg;
-  font-variation-settings: 'wght' 925, 'wdth' 45, 'slnt' -10, 'opsz' 96;
+  font-family: var(--sotd-font-display);
+  font-weight: 400;
+  font-synthesis: none;
   font-variant-numeric: tabular-nums;
   line-height: 0.78;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   color: var(--rank-color);
-  text-shadow: 0 0 32px color-mix(in srgb, var(--rank-color) 30%, transparent);
+  text-shadow:
+    0 3px 0 color-mix(in srgb, var(--rank-color) 35%, black),
+    0 0 32px color-mix(in srgb, var(--rank-color) 30%, transparent);
   transform: rotate(-8deg);
   transform-origin: 100% 100%;
   user-select: none;
@@ -899,9 +921,9 @@ button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surfa
   background: var(--rank-color);
   color: var(--m3-surface);
   box-shadow: 0 0 0 2px var(--m3-surface-container);
-  font-family: 'Google Sans Flex', 'Inter', system-ui, sans-serif;
-  font-weight: 800;
-  font-size: 0.8rem;
+  font-family: var(--sotd-font-display);
+  font-weight: 400;
+  font-size: 0.95rem;
   font-variant-numeric: tabular-nums;
   line-height: 1;
   user-select: none;
@@ -986,15 +1008,25 @@ button:where(.m3-select-trigger:disabled)             { color: var(--m3-on-surfa
   html:has([data-game-screen]) { font-size: clamp(16px, 0.85vw, 28px); }
 }
 
-/* Big scores: Roboto Flex, the M3 Expressive numerals. Weight and width are
-   variable axes, so a change can swell the digits for a beat (AnimatedNumber
-   `numeral`). ⚠️ Loaded cut to digits — only numbers may use this class. */
+/* Big scores (0.46.0): Bangers with a hard drop shadow in the primary's dark
+   tone — the arcade scoreboard look. `AnimatedNumber numeral` punches the
+   digits on every change (a scale beat; Bangers has no variable axes). */
+/* ⚠️ The display sits in :where() (zero specificity): the hero number carries
+   Tailwind's `block`, and an inline-block there grew the hero card by 28 px
+   (the line box made room for a text baseline) — eight players no longer fit
+   on a phone. Inline numbers still need inline-block for the punch transform. */
+:where(.sotd-numeral) { display: inline-block; vertical-align: bottom; }
 .sotd-numeral {
-  font-family: 'Roboto Flex', 'Inter', system-ui, sans-serif;
-  font-weight: 700;
-  font-stretch: 100%;
+  font-family: var(--sotd-font-display);
+  font-weight: 400;
+  font-synthesis: none;
   font-variant-numeric: tabular-nums;
-  font-optical-sizing: auto;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0.06em 0 var(--sotd-numeral-shadow, color-mix(in srgb, var(--m3-primary-container) 80%, black));
+  transform-origin: 0% 85%;
+}
+.modern-light .sotd-numeral {
+  text-shadow: 0 0.05em 0 color-mix(in srgb, var(--m3-primary) 22%, transparent);
 }
 
 /* The match's single fire canvas host, moved into the hero card after each

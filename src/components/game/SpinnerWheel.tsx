@@ -296,7 +296,7 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
                       textAnchor={leftHalf ? 'start' : 'end'}
                       dominantBaseline="middle"
                       fill={ink}
-                      style={{ fontSize: name.size, fontWeight: 800 }}
+                      style={{ fontSize: name.size * 1.15, fontFamily: 'var(--sotd-font-display)', letterSpacing: '0.02em' }}
                     >
                       {name.text}
                     </text>
@@ -329,7 +329,7 @@ export const SpinnerWheel: React.FC<SpinnerWheelProps> = ({ players, onComplete 
                   <AvatarGlyph avatar={players[winner].avatar} size="100%" />
                 </motion.span>
               ) : (
-                <motion.span key="spin" className="m3-title-large font-bold tracking-wider" style={{ fontSize: 'clamp(1.1rem, 2.6vmin, 2.75rem)' }} exit={{ scale: 0.4, opacity: 0 }}>
+                <motion.span key="spin" className="m3-title-large tracking-wider" style={{ fontFamily: "var(--sotd-font-display)", fontWeight: 400, fontSize: 'clamp(1.1rem, 2.6vmin, 2.75rem)' }} exit={{ scale: 0.4, opacity: 0 }}>
                   {t('spinner.spin')}
                 </motion.span>
               )}

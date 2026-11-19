@@ -8,8 +8,8 @@ interface AnimatedNumberProps {
   decimals?: number;
   className?: string;
   style?: React.CSSProperties;
-  /** Roboto Flex numerals: on every change the digits swell for a beat
-   *  (variable weight and width), then settle. */
+  /** Scoreboard numerals (Bangers, `.sotd-numeral`): on every change the
+   *  digits punch up for a beat, then settle. */
   numeral?: boolean;
   /** The count spring; `GAME_TALLY` for in-game scores. Must not overshoot. */
   tally?: SpringSpec;
@@ -32,15 +32,14 @@ const AnimatedNumber: React.FC<AnimatedNumberProps> = ({ value, decimals = 0, cl
     spring.set(value);
   }, [spring, value]);
 
-  // The swell: weight and width up and back, on the variable axes.
+  // The punch: the digits kick up and settle (Bangers has no variable axes).
   const controls = useAnimationControls();
   const first = useRef(true);
   useEffect(() => {
     if (first.current) { first.current = false; return; }
     if (!numeral || reduce) return;
     void controls.start({
-      fontWeight: [700, 900, 700],
-      fontStretch: ['100%', '116%', '100%'],
+      scale: [1, 1.12, 1],
       transition: { duration: tally === TALLY ? 0.5 : 1.1, times: [0, 0.3, 1], ease: [0.2, 0, 0, 1] },
     });
   }, [value, numeral, reduce, controls]);

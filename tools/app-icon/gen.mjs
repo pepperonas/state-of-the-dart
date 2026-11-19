@@ -17,10 +17,10 @@ const sector = (cx, cy, r0, r1, a0, a1) => {
 };
 
 export const COLORS = {
-  tileTop: '#0d4a6e', tileBottom: '#06263a',
+  tileTop: '#b5124f', tileBottom: '#5c0027',
   surround: '#0b0b0d', black: '#1c1c1f', cream: '#f3e7c6',
   red: '#e53935', green: '#2ea44f',
-  steel: '#cfd6dc', steelDark: '#7d8a94', flight: '#4fc3f7', flightDark: '#0288d1', outline: '#081018',
+  steel: '#cfd6dc', steelDark: '#7d8a94', flight: '#ffc93c', flightDark: '#c98a00', outline: '#1a070e',
 };
 const C = COLORS;
 
