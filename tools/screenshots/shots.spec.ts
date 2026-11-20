@@ -29,7 +29,9 @@ async function visit(page: Page, total: number) {
 async function closeToasts(page: Page) {
   const all = page.getByRole('button', { name: /Alle schließen/ });
   if (await all.count()) await all.first().click().catch(() => undefined);
-  await page.mouse.click(30, 880);
+  // Top edge, clear of every control: (30, 880) became the rail's bug-report
+  // button in 0.47 and opened its dialog over the home and achievement shots.
+  await page.mouse.click(200, 2);
   await page.waitForTimeout(300);
 }
 
