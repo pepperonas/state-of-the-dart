@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { ArrowLeft, Activity, TrendingUp, TrendingDown, Minus, Download, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { usePlayer } from '../../context/PlayerContext';
@@ -30,6 +30,10 @@ import PlayerAvatar from '../player/PlayerAvatar';
 import ErrorState from '../common/ErrorState';
 import { radarValues } from '../../utils/performanceRadar';
 import { useChartTheme } from '../../utils/chartTheme';
+import { useOptionalAuth } from '../../context/authContextValue';
+import PremiumLock from '../plan/PremiumLock';
+import { announcePlanLimit } from '../../utils/plan';
+import PremiumPerks from '../plan/PremiumPerks';
 
 const VALID_TABS = ['overview', 'progress', 'history', 'compare', 'heatmap'] as const;
 type TabType = typeof VALID_TABS[number];
@@ -38,6 +42,8 @@ type TimeInterval = 'daily' | 'weekly' | 'monthly' | 'yearly';
 const StatsOverview: React.FC = () => {
   const chart = useChartTheme();
   const { t } = useTranslation();
+  // Free tier (0.49.0): the heatmap is premium; the data keeps growing meanwhile.
+  const isFree = (useOptionalAuth()?.plan ?? 'premium') !== 'premium';
   const { notify } = useFeedback();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -253,6 +259,13 @@ const StatsOverview: React.FC = () => {
       .sort((a, b) => a.timestamp - b.timestamp);
   }, [playerMatches, selectedPlayerId, timeInterval, t]);
   
+  // Free tier (0.49.0): the CSV/Excel/PDF reports are premium (the JSON backup
+  // in the settings stays open to everyone — your data is yours).
+  const exportGuard = (run: () => void) => () => {
+    if (isFree) { announcePlanLimit({ feature: 'export' }); return; }
+    run();
+  };
+
   const handleExportCSV = () => {
     if (!selectedPlayer) return;
     exportMatchHistoryCSV(playerMatches, selectedPlayer.name);
@@ -310,13 +323,14 @@ const StatsOverview: React.FC = () => {
             triggerClassName="m3-button m3-filled m3-state-layer inline-flex items-center gap-2"
             widthClassName="w-52"
             items={[
-              { id: 'csv', label: t('stats_overview.export_csv'), icon: <FileText size={18} />, onSelect: handleExportCSV },
-              { id: 'xlsx', label: t('stats_overview.export_excel'), icon: <FileSpreadsheet size={18} />, onSelect: handleExportExcel },
-              { id: 'pdf', label: t('stats_overview.export_pdf'), icon: <FileText size={18} />, onSelect: handleExportPDF },
+              { id: 'csv', label: t('stats_overview.export_csv'), icon: <FileText size={18} />, onSelect: exportGuard(handleExportCSV) },
+              { id: 'xlsx', label: t('stats_overview.export_excel'), icon: <FileSpreadsheet size={18} />, onSelect: exportGuard(() => { void handleExportExcel(); }) },
+              { id: 'pdf', label: t('stats_overview.export_pdf'), icon: <FileText size={18} />, onSelect: exportGuard(() => { void handleExportPDF(); }) },
             ]}
           >
             <Download size={18} aria-hidden="true" />
             <span className="sr-only sm:not-sr-only">{t('stats_overview.export')}</span>
+            {isFree && <PremiumLock />}
           </Menu>
       }
     >
@@ -404,6 +418,7 @@ const StatsOverview: React.FC = () => {
                 onClick={() => setSelectedTab('heatmap')}
               >
                 {t('stats_overview.heatmap_tab')}
+                {isFree && <PremiumLock className="ml-1" />}
               </Chip>
             </div>
 
@@ -1011,7 +1026,20 @@ const StatsOverview: React.FC = () => {
               />
             )}
 
-            {selectedTab === 'heatmap' && (
+            {selectedTab === 'heatmap' && isFree && (
+              <Card variant="elevated" className="p-6" data-testid="heatmap-locked">
+                <h2 className="m3-headline-small text-on-surface flex items-center gap-3 mb-2">
+                  <Flame size={28} className="text-tertiary" aria-hidden="true" />
+                  {t('plan.gate_heatmap')}
+                  <PremiumLock />
+                </h2>
+                <p className="m3-body-large text-on-surface-variant mb-4">{t('plan.heatmap_locked_body')}</p>
+                <PremiumPerks className="mb-5" />
+                <Link to="/pricing" className="m3-label-large text-primary underline underline-offset-4">{t('plan.see_premium')}</Link>
+              </Card>
+            )}
+
+            {selectedTab === 'heatmap' && !isFree && (
               <div className="space-y-6 m3-enter">
                 {/* Heatmap Header */}
                 <Card variant="elevated" className="p-6">

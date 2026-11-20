@@ -5,6 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { Button, Card, PageShell } from '../common';
 import { staggerChild } from '../../utils/motion';
 import { motion } from 'framer-motion';
+import { useAuth } from '../../context/AuthContext';
+import { limitsOf, announcePlanLimit } from '../../utils/plan';
+import PremiumLock from '../plan/PremiumLock';
 
 /**
  * Practice is secondary — the home screen's rule (0.38.0: play primary,
@@ -16,6 +19,9 @@ const PRACTICE_CHIP = 'bg-secondary-container text-on-secondary-container';
 const TrainingMenu: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  // Free tier (0.49.0): two of the six modes.
+  const { plan } = useAuth();
+  const isOpen = limitsOf(plan).trainingOpen;
 
   const trainingModes = [
     {
@@ -79,7 +85,7 @@ const TrainingMenu: React.FC = () => {
                   <Card
                     variant="filled"
                     interactive
-                    onClick={() => navigate(`/training/${mode.mode}`)}
+                    onClick={() => isOpen(mode.mode) ? navigate(`/training/${mode.mode}`) : announcePlanLimit({ feature: 'training' })}
                     className="p-6 cursor-pointer"
                   >
                     <div className="flex items-center gap-4">
@@ -90,7 +96,10 @@ const TrainingMenu: React.FC = () => {
                         <Icon size={30} />
                       </div>
                       <div className="min-w-0 text-left">
-                        <h2 className="m3-title-large text-on-surface mb-0.5">{mode.title}</h2>
+                        <h2 className="m3-title-large text-on-surface mb-0.5 flex items-center gap-2 flex-wrap">
+                          {mode.title}
+                          {!isOpen(mode.mode) && <PremiumLock />}
+                        </h2>
                         <p className="m3-body-medium text-on-surface-variant line-clamp-2">{mode.description}</p>
                       </div>
                     </div>

@@ -35,6 +35,7 @@ import UserSettings from './components/auth/UserSettings';
 import Pricing from './components/payment/Pricing';
 import PaymentSuccess from './components/payment/PaymentSuccess';
 import LoadingIndicator from './components/common/LoadingIndicator';
+import PlanLimitDialog from './components/plan/PlanLimitDialog';
 import { FeedbackProvider } from './components/common/Feedback';
 import ShortcutsDialog from './components/common/ShortcutsDialog';
 
@@ -227,6 +228,7 @@ function AppContent() {
                     <OfflineIndicator />
                     <UpdatePrompt />
                     <ShortcutsDialog />
+                    <PlanLimitDialog />
                     <AppNavigation />
                     <NavAwareContent>
                       <RouteFade>
@@ -248,14 +250,14 @@ function AppContent() {
 
                       {/* Pricing (accessible to authenticated users) */}
                       <Route path="/pricing" element={
-                        <ProtectedRoute requireSubscription={false}>
+                        <ProtectedRoute>
                           <Pricing />
                         </ProtectedRoute>
                       } />
                       
                       {/* Payment Success */}
                       <Route path="/payment/success" element={
-                        <ProtectedRoute requireSubscription={false}>
+                        <ProtectedRoute>
                           <PaymentSuccess />
                         </ProtectedRoute>
                       } />
@@ -285,7 +287,7 @@ function AppContent() {
                       } />
 
                       <Route path="/scoreboard" element={
-                        <ProtectedRoute>
+                        <ProtectedRoute premium="scoreboard">
                           <ScoreboardScreen />
                         </ProtectedRoute>
                       } />
@@ -315,7 +317,7 @@ function AppContent() {
                       } />
                       
                       <Route path="/online" element={
-                        <ProtectedRoute>
+                        <ProtectedRoute premium="online">
                           <OnlineMultiplayer />
                         </ProtectedRoute>
                       } />
@@ -377,7 +379,7 @@ function AppContent() {
                       } />
                       
                       <Route path="/tournament" element={
-                        <ProtectedRoute>
+                        <ProtectedRoute premium="tournaments">
                           <TournamentMenu />
                         </ProtectedRoute>
                       } />
@@ -389,19 +391,19 @@ function AppContent() {
                       } />
                       
                       <Route path="/me" element={
-                        <ProtectedRoute requireSubscription={false}>
+                        <ProtectedRoute>
                           <AccountHub />
                         </ProtectedRoute>
                       } />
 
                       <Route path="/account" element={
-                        <ProtectedRoute requireSubscription={false}>
+                        <ProtectedRoute>
                           <UserSettings />
                         </ProtectedRoute>
                       } />
                       
                       <Route path="/admin" element={
-                        <ProtectedRoute requireSubscription={false}>
+                        <ProtectedRoute>
                           <AdminPanel />
                         </ProtectedRoute>
                       } />

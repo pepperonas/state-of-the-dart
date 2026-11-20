@@ -5,10 +5,10 @@ import { TEST_USER } from '../fixtures';
  * Log in using the seeded test user. Resolves once the app has left /login.
  * Callers receive control on whatever post-login route the app chose.
  */
-export async function login(page: Page): Promise<void> {
+export async function login(page: Page, user: { email: string; password: string } = TEST_USER): Promise<void> {
   await page.goto('/login');
-  await page.locator('input[type="email"]').fill(TEST_USER.email);
-  await page.locator('input[type="password"]').fill(TEST_USER.password);
+  await page.locator('input[type="email"]').fill(user.email);
+  await page.locator('input[type="password"]').fill(user.password);
 
   const loginPromise = page.waitForResponse(
     (r) => r.url().includes('/api/auth/login') && r.request().method() === 'POST'

@@ -99,6 +99,8 @@ const OnlineMultiplayer: React.FC = () => {
     const newSocket = io(apiUrl, {
       transports: ['websocket', 'polling'],
       withCredentials: true,
+      // The server admits signed-in premium accounts only (0.49.0).
+      auth: { token: localStorage.getItem('auth_token') ?? '' },
     });
 
     newSocket.on('connect', () => {
@@ -177,6 +179,14 @@ const OnlineMultiplayer: React.FC = () => {
 
     newSocket.on('chat:message', (msg: ChatMessage) => {
       setChatMessages(prev => [...prev, msg]);
+    });
+
+    // Refused at the door (0.49.0): signed out, or the plan is free now.
+    newSocket.on('connect_error', (err: Error) => {
+      if (err.message === 'premium_required' || err.message === 'unauthorized') {
+        notifyRef.current(tRef.current(`online_game.refused_${err.message}`));
+        newSocket.disconnect();
+      }
     });
 
     newSocket.on('error', (error: { message: string }) => {

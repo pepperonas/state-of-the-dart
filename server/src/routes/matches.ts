@@ -2,6 +2,7 @@ import express, { Response } from 'express';
 import { getDatabase } from '../database';
 import { AuthRequest, authenticateTenant } from '../middleware/auth';
 import { upsertMatch, updateMatch, currentLegState, deleteMatch } from '../services/matchStore';
+import { planForTenant, checkMatchSave, FREE_LIMITS } from '../services/plan';
 
 const router = express.Router();
 
@@ -35,7 +36,17 @@ router.get('/', authenticateTenant, (req: AuthRequest, res: Response) => {
         ELSE started_at 
       END DESC 
       LIMIT ? OFFSET ?`;
-    params.push(parseInt(limit as string), parseInt(offset as string));
+    // Free tier (0.49.0): the history ends after the 20 most recent finished
+    // matches. Unfinished ones (resume list) are never capped.
+    let lim = Math.max(0, parseInt(limit as string) || 0);
+    const off = Math.max(0, parseInt(offset as string) || 0);
+    const statusList = status ? (status as string).split(',').map(s => s.trim()) : [];
+    const touchesHistory = statusList.length === 0 || statusList.includes('completed');
+    if (touchesHistory && planForTenant(db, req.tenantId!) === 'free') {
+      lim = Math.max(0, Math.min(lim, FREE_LIMITS.matchHistory - off));
+      res.setHeader('X-History-Limit', String(FREE_LIMITS.matchHistory));
+    }
+    params.push(lim, off);
 
     const matches = db.prepare(query).all(...params);
 
@@ -210,7 +221,11 @@ router.post('/', authenticateTenant, (req: AuthRequest, res: Response) => {
   }
 
   try {
-    const outcome = upsertMatch(getDatabase(), req.tenantId!, req.body);
+    const db = getDatabase();
+    // Free tier (0.49.0): see checkMatchSave.
+    const refused = checkMatchSave(db, req.tenantId!, planForTenant(db, req.tenantId!), id, players);
+    if (refused) return res.status(402).json(refused);
+    const outcome = upsertMatch(db, req.tenantId!, req.body);
     if (outcome === 'gone') {
       return res.status(410).json({ error: 'Match deleted' });
     }

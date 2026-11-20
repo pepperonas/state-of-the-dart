@@ -15,9 +15,14 @@ import { ExactShareNote } from '../dartboard/ExactShareNote';
 import PlayerAvatar from '../player/PlayerAvatar';
 import { Card, Chip, TextField, IconButton, Button, PageShell, Select } from '../common';
 import { staggerChild } from '../../utils/motion';
+import { useOptionalAuth } from '../../context/authContextValue';
+import { FREE_LIMITS } from '../../utils/plan';
+import PremiumLock from '../plan/PremiumLock';
 
 const MatchHistoryPage: React.FC = () => {
   const { t } = useTranslation();
+  // Free tier (0.49.0): the server sends the last 20 finished matches; heatmaps are premium.
+  const isFree = (useOptionalAuth()?.plan ?? 'premium') !== 'premium';
   const navigate = useNavigate();
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
@@ -174,6 +179,13 @@ const MatchHistoryPage: React.FC = () => {
 
   return (
     <PageShell title={t('match_history.title', 'Spielhistorie')}>
+
+        {isFree && (
+          <p data-testid="history-limit" className="mb-4 flex flex-wrap items-center gap-2 m3-body-medium text-on-surface-variant">
+            {t('plan.history_hint', { count: FREE_LIMITS.matchHistory })}
+            <PremiumLock />
+          </p>
+        )}
 
         {/* Filters */}
         <div className="mb-6 space-y-3">
@@ -388,8 +400,8 @@ const MatchHistoryPage: React.FC = () => {
                             );
                           })()}
 
-                          {/* Per-player heatmaps */}
-                          <div className={`grid gap-4 ${players.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-1'}`}>
+                          {/* Per-player heatmaps (premium, 0.49.0) */}
+                          {!isFree && <div className={`grid gap-4 ${players.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-1'}`}>
                             {(detail.players || players).map((p: any) => {
                               const visits = (detail.legs || []).flatMap((leg: any) => leg.throws || []);
                               const heatmap = heatmapFromThrows(visits, p.playerId);
@@ -414,7 +426,7 @@ const MatchHistoryPage: React.FC = () => {
                                 </Card>
                               );
                             })}
-                          </div>
+                          </div>}
 
                           {/* Leg breakdown */}
                           {detail.legs && detail.legs.length > 0 && (

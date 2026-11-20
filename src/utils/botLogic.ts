@@ -259,10 +259,12 @@ export function getAdaptiveBotConfigs(): AdaptiveBotConfig[] {
 export function createAdaptiveBotPlayer(
   category: AdaptiveBotCategory,
   humanPlayerStats: PlayerStats | PlayerStats[],
-  existingBotCount: number = 0
+  existingBotCount: number = 0,
+  /** The plan's strongest bot (free: 5, 0.49.0). */
+  maxLevel: number = 10
 ): Player {
   const config = ADAPTIVE_BOT_CONFIGS.find(c => c.category === category);
-  const level = calculateAdaptiveBotLevel(humanPlayerStats, category);
+  const level = Math.min(calculateAdaptiveBotLevel(humanPlayerStats, category), maxLevel);
   const preset = getBotPreset(level);
   const botNumber = existingBotCount + 1;
 

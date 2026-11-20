@@ -184,23 +184,8 @@ router.post('/login', async (req: Request, res: Response) => {
       return res.status(403).json({ error: 'Please verify your email before logging in' });
     }
 
-    // Check subscription status
-    const now = Date.now();
-    if (user.subscription_status === 'trial' && user.trial_ends_at < now) {
-      db.prepare('UPDATE users SET subscription_status = ? WHERE id = ?').run('expired', user.id);
-      return res.status(403).json({ 
-        error: 'Your trial has expired. Please subscribe to continue.',
-        subscriptionExpired: true 
-      });
-    }
-
-    if (user.subscription_status === 'active' && user.subscription_ends_at && user.subscription_ends_at < now) {
-      db.prepare('UPDATE users SET subscription_status = ? WHERE id = ?').run('expired', user.id);
-      return res.status(403).json({ 
-        error: 'Your subscription has expired. Please renew to continue.',
-        subscriptionExpired: true 
-      });
-    }
+    // No lock-out after the trial (0.49.0): the account signs in and is on the
+    // free plan — services/plan.ts decides what it may do, request by request.
 
     // Update last active
     db.prepare('UPDATE users SET last_active = ? WHERE id = ?').run(Date.now(), user.id);

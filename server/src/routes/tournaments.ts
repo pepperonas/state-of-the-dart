@@ -1,6 +1,7 @@
 import express, { Response } from 'express';
 import { getDatabase } from '../database';
 import { AuthRequest, authenticateTenant } from '../middleware/auth';
+import { planForTenant, premiumRequired } from '../services/plan';
 import { deleteTournament, getTournament, listTournaments, saveTournament, validateTournament } from '../services/tournamentStore';
 
 /** Tournaments of the signed-in tenant. Logic and its tests: services/tournamentStore.ts. */
@@ -31,7 +32,11 @@ router.put('/:id', authenticateTenant, (req: AuthRequest, res: Response) => {
   const invalid = validateTournament(body);
   if (invalid) return res.status(400).json({ error: invalid });
   try {
-    const result = saveTournament(getDatabase(), req.tenantId!, body);
+    const db = getDatabase();
+    // Free tier (0.49.0): no new tournaments; one begun in the trial may be finished.
+    const exists = db.prepare('SELECT 1 FROM tournaments WHERE id = ? AND tenant_id = ?').get(body.id, req.tenantId);
+    if (!exists && planForTenant(db, req.tenantId!) === 'free') return res.status(402).json(premiumRequired('tournaments'));
+    const result = saveTournament(db, req.tenantId!, body);
     if (result === 'forbidden') return res.status(404).json({ error: 'Tournament not found' });
     res.status(result === 'created' ? 201 : 200).json({ id: body.id, result });
   } catch (error) {

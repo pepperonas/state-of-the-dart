@@ -7,6 +7,9 @@ import { useGame, MIN_MATCH_PLAYERS, redoTarget } from '../../context/GameContex
 import { usePlayer } from '../../context/PlayerContext';
 import { useSettings } from '../../context/SettingsContext';
 import { useTenant } from '../../context/TenantContext';
+import { useAuth } from '../../context/AuthContext';
+import { limitsOf, announcePlanLimit, countOwnPlayers } from '../../utils/plan';
+import PremiumLock from '../plan/PremiumLock';
 import { useGameAchievements } from '../../hooks/useGameAchievements';
 import { useAchievementHints } from '../../hooks/useAchievementHints';
 import Dartboard from '../dartboard/Dartboard';
@@ -84,6 +87,9 @@ const GameScreen: React.FC = () => {
   // multi-pane layouts, on phones while its tab is open in the sheet.
   const heatmapVisible = windowClass.panes > 1 || (insightsOpen && insightsTab === 'heatmap');
   const { t, i18n } = useTranslation();
+  // Free tier (0.49.0): two per match, three own players, bots up to level 5.
+  const { plan } = useAuth();
+  const limits = limitsOf(plan);
   const isGerman = (i18n.language || 'de').startsWith('de');
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -404,7 +410,7 @@ const GameScreen: React.FC = () => {
   
   const loadLastPlayers = () => {
     const lastPlayerIds = getLastPlayers();
-    const lastPlayers = players.filter(p => lastPlayerIds.includes(p.id));
+    const lastPlayers = players.filter(p => lastPlayerIds.includes(p.id)).slice(0, limits.matchPlayers);
     if (lastPlayers.length > 0) {
       setSelectedPlayers(lastPlayers);
     }
@@ -1161,8 +1167,14 @@ const GameScreen: React.FC = () => {
           <Card variant="elevated" className="p-6 md:p-8">
 
             <div className="mb-6">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                 <h2 className="m3-title-medium text-on-surface">{t('game.select_players')}</h2>
+                {plan !== 'premium' && (
+                  <span data-testid="free-player-limit" className="flex items-center gap-2 m3-body-small text-on-surface-variant">
+                    {t('plan.free_match_hint', { count: limits.matchPlayers })}
+                    <PremiumLock />
+                  </span>
+                )}
                 {getLastPlayers().length > 0 && (
                   <Button
                     variant="tonal"
@@ -1186,6 +1198,8 @@ const GameScreen: React.FC = () => {
                     onClick={() => {
                       if (selectedPlayers.find(p => p.id === player.id)) {
                         setSelectedPlayers(selectedPlayers.filter(p => p.id !== player.id));
+                      } else if (selectedPlayers.length >= limits.matchPlayers) {
+                        if (plan !== 'premium') announcePlanLimit({ feature: 'match_players', limit: limits.matchPlayers });
                       } else {
                         setSelectedPlayers([...selectedPlayers, player]);
                       }
@@ -1224,14 +1238,30 @@ const GameScreen: React.FC = () => {
                 {!showPlayerNameInput && !showBotSelector ? (
                   <>
                     <button
-                      onClick={() => setShowPlayerNameInput(true)}
+                      data-testid="add-player"
+                      onClick={() => {
+                        if (countOwnPlayers(players) >= limits.ownPlayers) {
+                          announcePlanLimit({ feature: 'players', limit: limits.ownPlayers });
+                        } else if (selectedPlayers.length >= limits.matchPlayers) {
+                          if (plan !== 'premium') announcePlanLimit({ feature: 'match_players', limit: limits.matchPlayers });
+                        } else {
+                          setShowPlayerNameInput(true);
+                        }
+                      }}
                       className="p-3 rounded-m3-lg border-2 border-dashed border-outline-variant hover:border-outline transition"
                     >
                       <div className="mb-1 flex justify-center"><Icon name="plus" size={24} /></div>
                       <div className="m3-label-large text-on-surface">{t('game.add_player')}</div>
+                      {countOwnPlayers(players) >= limits.ownPlayers && <PremiumLock className="mt-1" />}
                     </button>
                     <button
-                      onClick={() => setShowBotSelector(true)}
+                      onClick={() => {
+                        if (selectedPlayers.length >= limits.matchPlayers) {
+                          if (plan !== 'premium') announcePlanLimit({ feature: 'match_players', limit: limits.matchPlayers });
+                          return;
+                        }
+                        setShowBotSelector(true);
+                      }}
                       className="p-3 rounded-m3-lg border-2 border-dashed border-outline hover:border-[var(--m3-primary)] transition bg-primary-container/40"
                     >
                       <div className="mb-1 flex justify-center"><Icon name="robot" size={24} /></div>
@@ -1266,7 +1296,7 @@ const GameScreen: React.FC = () => {
                                 .filter(p => !p.isBot)
                                 .map(p => p.stats);
                               const existingBots = selectedPlayers.filter(p => p.isBot).length;
-                              const bot = createAdaptiveBotPlayer(config.category, humanStats, existingBots);
+                              const bot = createAdaptiveBotPlayer(config.category, humanStats, existingBots, limits.botMaxLevel);
 
                               // Save bot to database with its existing ID
                               try {
@@ -1330,7 +1360,8 @@ const GameScreen: React.FC = () => {
                               setShowPlayerNameInput(false);
                             } catch (error) {
                               console.error('Failed to add player:', error);
-                              notify(t('players.error_create'));
+                              // 402: the plan dialog already explains it.
+                              if ((error as { status?: number })?.status !== 402) notify(t('players.error_create'));
                             }
                           }
                         }}
@@ -1353,7 +1384,7 @@ const GameScreen: React.FC = () => {
                                 setShowPlayerNameInput(false);
                               } catch (error) {
                                 console.error('Failed to add player:', error);
-                                notify(t('players.error_create'));
+                                if ((error as { status?: number })?.status !== 402) notify(t('players.error_create'));
                               }
                             }
                           }}
@@ -2050,7 +2081,7 @@ const GameScreen: React.FC = () => {
               <IconButton
                 variant="tonal"
                 label={t('scoreboard.open')}
-                onClick={() => window.open('/scoreboard', 'sotd-scoreboard')}
+                onClick={() => plan === 'premium' ? window.open('/scoreboard', 'sotd-scoreboard') : announcePlanLimit({ feature: 'scoreboard' })}
               >
                 <Tv size={20} />
               </IconButton>

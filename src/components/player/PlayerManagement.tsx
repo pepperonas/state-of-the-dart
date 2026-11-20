@@ -11,12 +11,19 @@ import { Button, TextField, Card, IconButton, PageShell, Menu } from '../common'
 import { staggerChild } from '../../utils/motion';
 import LoadingIndicator from '../common/LoadingIndicator';
 import { useFeedback } from '../common/feedbackContext';
+import { useOptionalAuth } from '../../context/authContextValue';
+import { limitsOf, announcePlanLimit, countOwnPlayers } from '../../utils/plan';
+import PremiumLock from '../plan/PremiumLock';
 
 const PlayerManagement: React.FC = () => {
   const { notify, confirm } = useFeedback();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { players, loading, addPlayer, deletePlayer, updatePlayer } = usePlayer();
+  // Free tier (0.49.0): three own players.
+  const plan = useOptionalAuth()?.plan ?? 'premium';
+  const ownLimit = limitsOf(plan).ownPlayers;
+  const atLimit = countOwnPlayers(players) >= ownLimit;
   const [showAddPlayer, setShowAddPlayer] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
   const [newPlayerAvatar, setNewPlayerAvatar] = useState<string | undefined>(undefined);
@@ -52,7 +59,7 @@ const PlayerManagement: React.FC = () => {
         setShowAddPlayer(false);
       } catch (error) {
         console.error('Failed to add player:', error);
-        notify(t('players.error_create'));
+        if ((error as { status?: number })?.status !== 402) notify(t('players.error_create'));
       }
     }
   };
@@ -131,13 +138,17 @@ const PlayerManagement: React.FC = () => {
       title={t('players.title')}
       back={false}
       actions={
-        <Button
-          variant="filled"
-          icon={<Plus size={20} />}
-          onClick={() => setShowAddPlayer(true)}
-        >
-          <span className="sr-only sm:not-sr-only">{t('players.add_player')}</span>
-        </Button>
+        <span className="flex items-center gap-2">
+          {atLimit && <PremiumLock />}
+          <Button
+            variant="filled"
+            icon={<Plus size={20} />}
+            onClick={() => atLimit ? announcePlanLimit({ feature: 'players', limit: ownLimit }) : setShowAddPlayer(true)}
+            data-testid="players-add"
+          >
+            <span className="sr-only sm:not-sr-only">{t('players.add_player')}</span>
+          </Button>
+        </span>
       }
     >
         <div>

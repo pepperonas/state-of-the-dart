@@ -1,6 +1,7 @@
 import express, { Response } from 'express';
 import { getDatabase } from '../database';
 import { AuthRequest, authenticateTenant } from '../middleware/auth';
+import { planForTenant, checkTrainingMode } from '../services/plan';
 
 const router = express.Router();
 
@@ -81,6 +82,10 @@ router.post('/', authenticateTenant, (req: AuthRequest, res: Response) => {
   const db = getDatabase();
 
   try {
+    // Free tier (0.49.0): two training modes.
+    const refused = checkTrainingMode(planForTenant(db, req.tenantId!), type);
+    if (refused) return res.status(402).json(refused);
+
     db.prepare(`
       INSERT INTO training_sessions (id, tenant_id, player_id, type, started_at, settings)
       VALUES (?, ?, ?, ?, ?, ?)

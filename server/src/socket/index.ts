@@ -1,6 +1,8 @@
 import { Server as HttpServer } from 'http';
 import { Server, Socket } from 'socket.io';
 import { config } from '../config';
+import { getDatabase } from '../database';
+import { checkSocketAccess } from './access';
 
 import {
   OnlinePlayer, GameRoom, isMember, removeFromRoom, applyThrow, cleanChatMessage,
@@ -38,6 +40,13 @@ export function setupSocketIO(server: HttpServer): Server {
     },
     pingTimeout: 60000,
     pingInterval: 25000,
+  });
+
+  // Signed in and premium, or no connection at all (0.49.0).
+  io.use((socket, next) => {
+    const access = checkSocketAccess(socket.handshake.auth?.token, getDatabase(), config.jwtSecret);
+    if (access === 'ok') return next();
+    next(new Error(access));
   });
 
   io.on('connection', (socket: Socket) => {

@@ -16,6 +16,7 @@ import { enterDrop, staggerChild, springSpatialFast } from '../utils/motion';
 import { loadLastGameSettings } from '../utils/matchSetup';
 import InstallCard from '../pwa/InstallCard';
 import { ruleTags } from '../utils/checkRules';
+import PremiumLock from './plan/PremiumLock';
 import OnboardingCard from './onboarding/OnboardingCard';
 import { Icon } from './icons';
 import { lastTileSpan } from '../utils/tileSpan';
@@ -40,6 +41,8 @@ type MenuItem = {
   tone: Tone;
   /** Shown as a "Beta" label — works partly, not finished. */
   beta?: boolean;
+  /** Premium-only (0.49.0): a free account sees the lock; the screen explains. */
+  premium?: boolean;
 };
 
 
@@ -55,7 +58,7 @@ const MainMenu: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { storage } = useTenant();
-  const { user } = useAuth();
+  const { user, plan } = useAuth();
   const { players } = usePlayer();
 
   const [resumableMatchCount, setResumableMatchCount] = useState(0);
@@ -92,8 +95,8 @@ const MainMenu: React.FC = () => {
         { title: t('menu.around_the_clock'), icon: 'clock', description: t('menu.around_the_clock_desc'), onClick: () => navigate('/around-the-clock'), tone: 'primary' },
         { title: t('menu.shanghai'), icon: 'dart', description: t('menu.shanghai_desc'), onClick: () => navigate('/shanghai'), tone: 'primary' },
         { title: t('menu.training'), icon: Dumbbell, description: t('menu.training_desc'), onClick: () => navigate('/training'), tone: 'secondary' },
-        { title: t('menu.tournaments'), icon: Trophy, description: t('menu.tournaments_desc'), onClick: () => navigate('/tournament'), tone: 'primary' },
-        { title: t('menu.online_multiplayer'), icon: 'globe', description: t('menu.online_multiplayer_desc'), onClick: () => navigate('/online'), tone: 'primary' },
+        { title: t('menu.tournaments'), icon: Trophy, description: t('menu.tournaments_desc'), onClick: () => navigate('/tournament'), tone: 'primary', premium: true },
+        { title: t('menu.online_multiplayer'), icon: 'globe', description: t('menu.online_multiplayer_desc'), onClick: () => navigate('/online'), tone: 'primary', premium: true },
       ],
     },
     {
@@ -232,6 +235,7 @@ const MainMenu: React.FC = () => {
                       <div className="min-w-0">
                         <h3 className="m3-title-medium text-on-surface flex items-center gap-2 min-w-0">
                           <span className="truncate">{item.title}</span>
+                          {item.premium && plan !== 'premium' && <PremiumLock />}
                           {item.beta && (
                             <span className="shrink-0 m3-label-small px-2 py-0.5 rounded-m3-full bg-secondary-container text-on-secondary-container">
                               {t('common.beta')}
