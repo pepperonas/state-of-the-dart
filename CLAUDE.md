@@ -535,6 +535,9 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 ### Undo
 `UNDO_THROW` takes back the last visit **across leg and set boundaries** and out of a match won by a checkout. `legsWon` resets every set, so it is recomputed by **replaying the legs** (`replaySets`), never by counting leg winners over the whole match. `{ payload: { skipBots: true } }` (used by the human undo button) steps over bot visits — otherwise the bot would re-commit its own restored darts. `UNDO_END_MATCH` on a checkout-won match delegates to the same undo.
 
+### Mails (0.49.2)
+- Sent as **support@celox.io** via `mail.celox.io` (credentials only in the VPS `.env`, same as `/etc/msmtprc`). Templates in `server/src/services/emailTemplates.ts`: always a text part + simple inline-styled HTML, no emoji in subjects, user input escaped. ⚠️ Gmail silently drops (250 OK, then nothing) HTML-only, emoji-heavy "verify your email" mails — check delivery in the Stalwart log (`docker logs stalwart`) AND in the mailbox.
+
 ### Free and premium (0.49.0)
 - `server/src/services/plan.ts` is the rule and the limits; `src/utils/plan.ts` mirrors them (`plan.test.ts` fails on drift). Plan = premium for running trial / active / lifetime / admin, else free — **read from the DB per request**, never from the JWT.
 - The server enforces with **402** `{code:'premium_required', feature, limit}`: players (3 own, one "Guest" exempt, rename checked), bots ≤ 5, 2 per match (new or growing roster; 8 for everyone), training modes, new tournaments, heatmap GET, history capped at 20. The online socket needs a token + premium (`socket/access.ts`).
