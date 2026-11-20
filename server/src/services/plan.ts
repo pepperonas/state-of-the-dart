@@ -83,14 +83,18 @@ export const premiumRequired = (feature: PremiumFeature, limit?: number) => ({
 /** The auto-added opponent of a solo start; never counts as an own player (mirrors matchSetup GUEST_NAME). */
 export const GUEST_PLAYER_NAME = 'Guest';
 
+/** A bot level is an integer 1–10 or absent; anything else (NaN slipped past `> 5`) is refused. */
+export const validBotLevel = (botLevel: unknown): boolean =>
+  botLevel === undefined || botLevel === null || (Number.isInteger(Number(botLevel)) && Number(botLevel) >= 1 && Number(botLevel) <= PREMIUM_LIMITS.botMaxLevel);
+
 export interface PlayerInput { isBot?: unknown; botLevel?: unknown; name?: unknown }
 
 /** Can a free account create this player? Returns the refusal, or null. */
 export const checkNewPlayer = (db: Db, tenantId: string, plan: Plan, input: PlayerInput) => {
   if (plan === 'premium') return null;
   if (input.isBot) {
-    const level = Number(input.botLevel ?? 1);
-    return level > FREE_LIMITS.botMaxLevel ? premiumRequired('bot_level', FREE_LIMITS.botMaxLevel) : null;
+    // validBotLevel ran before (the route answers 400 otherwise).
+    return Number(input.botLevel ?? 1) > FREE_LIMITS.botMaxLevel ? premiumRequired('bot_level', FREE_LIMITS.botMaxLevel) : null;
   }
   // One guest is exempt — the auto-added opponent of a solo start. Only one:
   // the name is the client's word, so a second "Guest" counts like anyone.
@@ -133,6 +137,22 @@ export const checkNewMatch = (db: Db, tenantId: string, plan: Plan, players: unk
     if (strong.n > 0) return premiumRequired('bot_level', FREE_LIMITS.botMaxLevel);
   }
   return null;
+};
+
+/**
+ * A match save (POST is create-or-replace). New matches are checked in full.
+ * An existing one (begun in the trial) may be re-sent with its stored roster
+ * as it is; anything new on it — more players, or a swap such as a strong bot
+ * for a player — is checked like a new match (security review, 0.49.0).
+ */
+export const checkMatchSave = (db: Db, tenantId: string, plan: Plan, matchId: unknown, players: unknown) => {
+  const exists = db.prepare('SELECT 1 FROM matches WHERE id = ? AND tenant_id = ?').get(matchId, tenantId);
+  if (exists) {
+    const seated = new Set((db.prepare('SELECT player_id FROM match_players WHERE match_id = ?').all(matchId) as Array<{ player_id: string }>).map(r => r.player_id));
+    const posted = Array.isArray(players) ? players.map((p: { playerId?: unknown }) => p?.playerId) : [];
+    if (posted.length <= seated.size && posted.every(pid => typeof pid === 'string' && seated.has(pid))) return null;
+  }
+  return checkNewMatch(db, tenantId, plan, players);
 };
 
 export const checkTrainingMode = (plan: Plan, type: unknown) =>

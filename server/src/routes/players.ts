@@ -1,7 +1,7 @@
 import express, { Response } from 'express';
 import { getDatabase } from '../database';
 import { AuthRequest, authenticateTenant } from '../middleware/auth';
-import { planForTenant, checkNewPlayer, checkRename, premiumRequired } from '../services/plan';
+import { planForTenant, checkNewPlayer, checkRename, premiumRequired, validBotLevel } from '../services/plan';
 
 const router = express.Router();
 
@@ -182,6 +182,9 @@ router.post('/', authenticateTenant, (req: AuthRequest, res: Response) => {
   if (!id || !name) {
     return res.status(400).json({ error: 'id and name are required' });
   }
+  if (isBot && !validBotLevel(botLevel)) {
+    return res.status(400).json({ error: 'botLevel must be an integer from 1 to 10' });
+  }
 
   const db = getDatabase();
 
@@ -204,7 +207,7 @@ router.post('/', authenticateTenant, (req: AuthRequest, res: Response) => {
       name,
       avatar || name.charAt(0).toUpperCase(),
       isBot ? 1 : 0,
-      botLevel || null,
+      isBot && botLevel != null ? Number(botLevel) : null,
       Date.now()
     );
 

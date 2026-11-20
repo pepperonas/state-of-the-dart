@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { createRequire } from 'module';
 import { schema } from '../../../server/src/database/schema';
 import {
-  planOf, planForTenant, checkNewPlayer, checkNewMatch, checkTrainingMode, checkRename, FREE_LIMITS, PREMIUM_LIMITS, GUEST_PLAYER_NAME,
+  planOf, planForTenant, checkNewPlayer, checkNewMatch, checkTrainingMode, checkRename, validBotLevel, checkMatchSave, FREE_LIMITS, PREMIUM_LIMITS, GUEST_PLAYER_NAME,
 } from '../../../server/src/services/plan';
 import { GUEST_NAME } from '../../utils/matchSetup';
 import { checkSocketAccess } from '../../../server/src/socket/access';
@@ -86,6 +86,11 @@ describe('free tier limits', () => {
     expect(checkRename(db, 't', 'free', 'Guest', 'Dora')).toBeNull();
   });
 
+  it('a bot level is an integer 1-10 (NaN slipped past "> 5")', () => {
+    for (const ok of [undefined, null, 1, 5, 10, '7']) expect(validBotLevel(ok), String(ok)).toBe(true);
+    for (const bad of ['abc', 0, 11, 2.5, NaN, '']) expect(validBotLevel(bad), String(bad)).toBe(false);
+  });
+
   it('bots up to level 5', () => {
     expect(checkNewPlayer(db, 't', 'free', { isBot: true, botLevel: 6 })).toMatchObject({ feature: 'bot_level' });
     expect(checkNewPlayer(db, 't', 'premium', { isBot: true, botLevel: 10 })).toBeNull();
@@ -100,6 +105,17 @@ describe('free tier limits', () => {
     expect(checkNewMatch(db, 't', 'premium', [{ playerId: 'a' }, { playerId: 'bot9' }, { playerId: 'c' }])).toBeNull();
     const nine = Array.from({ length: 9 }, (_, i) => ({ playerId: `x${i}` }));
     expect(checkNewMatch(db, 't', 'premium', nine)).toMatchObject({ feature: 'match_players', limit: 8 });
+  });
+
+  it('an existing match may be re-sent with its roster; a swap or a bigger roster is checked', () => {
+    addPlayer('a'); addPlayer('b'); addPlayer('bot9', 1, 9); // bot9: left over from the trial
+    db.prepare("INSERT INTO matches (id, tenant_id, game_type, status, started_at, settings) VALUES ('m', 't', 'x01', 'in-progress', 0, '{}')").run();
+    for (const p of ['a', 'b']) db.prepare("INSERT INTO match_players (id, match_id, player_id) VALUES (?, 'm', ?)").run(`mp-${p}`, p);
+    expect(checkMatchSave(db, 't', 'free', 'm', [{ playerId: 'a' }, { playerId: 'b' }])).toBeNull();
+    expect(checkMatchSave(db, 't', 'free', 'm', [{ playerId: 'a' }, { playerId: 'bot9' }])).toMatchObject({ feature: 'bot_level' });
+    addPlayer('c');
+    expect(checkMatchSave(db, 't', 'free', 'm', [{ playerId: 'a' }, { playerId: 'b' }, { playerId: 'c' }])).toMatchObject({ feature: 'match_players' });
+    expect(checkMatchSave(db, 't', 'free', 'new', [{ playerId: 'a' }, { playerId: 'bot9' }])).toMatchObject({ feature: 'bot_level' });
   });
 
   it('two training modes', () => {

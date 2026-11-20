@@ -7,6 +7,19 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.49.1] - 2026-11-20
+
+### Security — free-plan bypasses (commit security review)
+- A stored match could be re-sent with the same number of players but a
+  swapped roster (a strong bot for a player) and skipped the check, which
+  only ran when the roster grew. `checkMatchSave` (services/plan.ts) lets an
+  existing match through only with its stored roster as it is.
+- `botLevel` was not validated: `"abc"` became `NaN`, and `NaN > 5` is false.
+  `validBotLevel` requires an integer 1–10 (400 otherwise); the stored value
+  is a number.
+- Unlimited bots on the free plan stay on purpose: bots throw on their own and
+  cannot stand in for a person; the per-game limit applies anyway.
+
 ## [0.49.0] - 2026-11-20
 
 ### Added — a real free plan

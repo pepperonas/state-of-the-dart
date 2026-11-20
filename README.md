@@ -60,7 +60,7 @@
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml" title="Vitest unit and component tests, all passing">
-      <img src="https://img.shields.io/badge/Unit_Tests-1380-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
+      <img src="https://img.shields.io/badge/Unit_Tests-1382-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml" title="Playwright end-to-end tests against a real backend">
@@ -71,7 +71,7 @@
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.49.0-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.49.1-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
@@ -928,6 +928,10 @@ Contributions sind willkommen! Bitte:
 ---
 
 ## 📝 Changelog
+
+### v0.49.1 (20. November 2026) - Kostenlose Stufe: zwei Lücken geschlossen
+
+Eine Sicherheitsprüfung hat zwei Wege um die Grenzen gefunden, beide sind jetzt zu. Erstens ließ sich ein bestehendes Spiel mit gleicher Spielerzahl neu speichern, nur mit einem starken Bot statt eines Spielers. Jetzt wird jede Änderung der Besetzung wie ein neues Spiel geprüft. Zweitens nahm der Server eine ungültige Bot-Stufe (etwa Text) ungeprüft an. Jetzt gilt eine ganze Zahl von 1 bis 10, alles andere wird abgelehnt. Außerdem ist nur noch ein „Gast“ von der Spielergrenze ausgenommen, und wer ihn umbenennt, zählt wie ein eigener Spieler.
 
 ### v0.49.0 (20. November 2026) - Kostenlose Stufe
 

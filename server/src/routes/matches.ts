@@ -2,7 +2,7 @@ import express, { Response } from 'express';
 import { getDatabase } from '../database';
 import { AuthRequest, authenticateTenant } from '../middleware/auth';
 import { upsertMatch, updateMatch, currentLegState, deleteMatch } from '../services/matchStore';
-import { planForTenant, checkNewMatch, FREE_LIMITS } from '../services/plan';
+import { planForTenant, checkMatchSave, FREE_LIMITS } from '../services/plan';
 
 const router = express.Router();
 
@@ -222,17 +222,9 @@ router.post('/', authenticateTenant, (req: AuthRequest, res: Response) => {
 
   try {
     const db = getDatabase();
-    // Free tier (0.49.0): new matches with at most two players and bots up to
-    // level 5. A match that exists already (begun in the trial) may go on —
-    // but POST replaces the roster, so it may not grow past the limit either.
-    const exists = db.prepare('SELECT 1 FROM matches WHERE id = ? AND tenant_id = ?').get(id, req.tenantId);
-    const seated = exists
-      ? (db.prepare('SELECT COUNT(*) AS n FROM match_players WHERE match_id = ?').get(id) as { n: number }).n
-      : 0;
-    if (!exists || (Array.isArray(players) && players.length > seated)) {
-      const refused = checkNewMatch(db, req.tenantId!, planForTenant(db, req.tenantId!), players);
-      if (refused) return res.status(402).json(refused);
-    }
+    // Free tier (0.49.0): see checkMatchSave.
+    const refused = checkMatchSave(db, req.tenantId!, planForTenant(db, req.tenantId!), id, players);
+    if (refused) return res.status(402).json(refused);
     const outcome = upsertMatch(db, req.tenantId!, req.body);
     if (outcome === 'gone') {
       return res.status(410).json({ error: 'Match deleted' });

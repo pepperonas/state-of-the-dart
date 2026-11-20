@@ -51,6 +51,10 @@ test('free plan: the app stays usable and shows its limits; the server enforces 
   expect(await three.json()).toMatchObject({ feature: 'match_players', limit: 2 });
   // Re-sending the two-player match with a third player is the same refusal (POST replaces the roster).
   expect((await post(page, '/matches', match(`m2-${s}`, ids))).status()).toBe(402);
+  // Same size, swapped roster — a strong bot for a player — is checked too (security review).
+  expect((await post(page, '/matches', match(`m2-${s}`, [ids[0], ids[1]]))).status()).toBe(200);
+  expect((await post(page, '/matches', match(`m2-${s}`, [ids[0], `free-bot5-${s}`]))).status()).toBe(200);
+  expect((await post(page, '/players', { id: `free-botx-${s}`, name: 'BotX', isBot: true, botLevel: 'abc' })).status()).toBe(400);
   // A second "Guest" is just another player (security review): the limit holds.
   expect((await post(page, '/players', { id: `free-guest2-${s}`, name: 'Guest', avatar: 'user' })).status()).toBe(402);
 
