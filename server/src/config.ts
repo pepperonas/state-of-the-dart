@@ -27,12 +27,12 @@ export const config = {
   
   // SMTP
   smtp: {
-    host: process.env.SMTP_HOST || 'premium269-4.web-hosting.com',
+    host: process.env.SMTP_HOST || 'mail.celox.io',
     port: parseInt(process.env.SMTP_PORT || '465', 10),
     secure: process.env.SMTP_SECURE === 'true' || true,
-    user: process.env.SMTP_USER || 'stateofthedart@celox.io',
+    user: process.env.SMTP_USER || 'support@celox.io',
     password: process.env.SMTP_PASSWORD || '',
-    from: process.env.SMTP_FROM || 'State of the Dart <stateofthedart@celox.io>',
+    from: process.env.SMTP_FROM || 'State of the Dart <support@celox.io>',
   },
   
   // Google OAuth

@@ -7,6 +7,26 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.49.2] - 2026-11-20
+
+### Fixed — registration mails never arrived at Gmail
+- Gmail accepted the verification mail (250 OK from gmail-smtp-in) and then
+  dropped it: not in the inbox, not in spam or trash. Plain test mails from
+  the same account, same sender name and a link to stateofthedart.com
+  arrived — the template was the cause: HTML only (no text part), emoji in
+  subject and title, gradient header, `<style>` block, the "verify your
+  email [button]" phishing shape.
+- All app mails (`server/src/services/emailTemplates.ts`, pure): text part +
+  simple HTML with inline styles, subjects without emoji, `Reply-To:
+  support@celox.io`. Verified: the new verification mail lands in the Gmail
+  inbox (Primary).
+- Sender is **support@celox.io** (production `.env` switched on the VPS,
+  backup `.env.bak-20261120-122526-smtp`); code defaults moved off the old
+  Namecheap host and `stateofthedart@celox.io`.
+- User input in mails is escaped (a name or contact message could carry
+  markup); subjects stay on one line.
+- `emailTemplates.test.ts`, mutation-checked.
+
 ## [0.49.1] - 2026-11-20
 
 ### Security — free-plan bypasses (commit security review)
