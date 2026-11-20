@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createRequire } from 'module';
 import { schema } from '../../../server/src/database/schema';
-import { toEpochMs, upsertMatch, updateMatch, currentLegState } from '../../../server/src/services/matchStore';
+import { toEpochMs, upsertMatch, updateMatch, currentLegState, deleteMatch } from '../../../server/src/services/matchStore';
 
 /** The real schema on a real in-memory SQLite — the value is all in the SQL. */
 const require_ = createRequire(import.meta.url);
@@ -175,5 +175,43 @@ describe('currentLegState — the resume list shows where a paused match stands'
   it('copes with a match without legs', () => {
     upsertMatch(db, 'tenant', paused([]));
     expect(currentLegState(db, 'm1', 501, ['alice'])).toEqual({ legNumber: 1, remaining: { alice: 501 }, visits: 0, totalVisits: 0 });
+  });
+});
+
+/**
+ * 0.48.1: "Spiel löschen" under "Spiel fortsetzen" did nothing visible — the
+ * browser still held a copy of the paused match, restored it on the next load
+ * and posted it again; POST is "create or replace", so the match came back
+ * (live logs: every DELETE followed by POST 201 seconds later).
+ */
+describe('deleteMatch — a deleted match stays deleted', () => {
+  const payload = () => ({ ...finishedMatch({ status: 'paused', winner: null, completedAt: null, legs: [] }) });
+
+  it('removes the match and leaves a tombstone', () => {
+    upsertMatch(db, 'tenant', payload());
+    expect(deleteMatch(db, 'tenant', 'm1')).toBe(true);
+    expect(db.prepare('SELECT id FROM matches WHERE id = ?').get('m1')).toBeUndefined();
+    expect(db.prepare('SELECT id FROM deleted_matches WHERE id = ?').get('m1')).toBeDefined();
+  });
+
+  it('a later create-or-replace of the same id is refused, not a resurrection', () => {
+    upsertMatch(db, 'tenant', payload());
+    deleteMatch(db, 'tenant', 'm1');
+    expect(upsertMatch(db, 'tenant', payload())).toBe('gone');
+    expect(db.prepare('SELECT id FROM matches WHERE id = ?').get('m1')).toBeUndefined();
+  });
+
+  it('an update of a deleted match finds nothing', () => {
+    upsertMatch(db, 'tenant', payload());
+    deleteMatch(db, 'tenant', 'm1');
+    expect(updateMatch(db, 'tenant', 'm1', { status: 'paused' })).toBe(false);
+  });
+
+  it('only the owner can delete, and a tombstone binds only its own tenant', () => {
+    upsertMatch(db, 'tenant', payload());
+    expect(deleteMatch(db, 'other-tenant', 'm1')).toBe(false);
+    expect(db.prepare('SELECT id FROM matches WHERE id = ?').get('m1')).toBeDefined();
+    deleteMatch(db, 'tenant', 'm1');
+    expect(upsertMatch(db, 'other-tenant', payload())).toBe('created');
   });
 });

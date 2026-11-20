@@ -7,6 +7,23 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.48.1] - 2026-11-20
+
+### Fixed — a deleted paused game came back
+- Deleting under "Spiel fortsetzen" removed the match on the server, but the
+  device kept its refresh copy (`state-of-the-dart-active-match`). On the next
+  load it was restored and posted again — POST is create-or-replace, so the
+  match was back (live logs: every DELETE followed by POST 201 seconds later).
+- Server: `deleted_matches` tombstones; `deleteMatch` (matchStore) deletes and
+  records; `upsertMatch` returns `gone` → POST answers **410** for a deleted id.
+- Client: `forgetMatch` / `FORGET_MATCH` drop the match from memory and the
+  refresh copies; the resume screen calls it after a delete, `persistMatch`
+  on 410 (create) or 404 (update). A failed delete is shown, not swallowed.
+- Tests: matchStore tombstones, GameProvider forget/410, and
+  `e2e/resume-delete.spec.ts` (pause, delete, reload — mutation-checked).
+- `e2e/eight-players.spec.ts` measures the start buttons once their entrance
+  has settled (CI caught the last row one pixel mid-animation).
+
 ## [0.48.0] - 2026-11-20
 
 ### Changed — a new landing at `/`

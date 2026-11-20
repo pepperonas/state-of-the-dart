@@ -51,7 +51,9 @@ type GameAction =
   | { type: 'PAUSE_MATCH' }
   | { type: 'RESUME_MATCH' }
   | { type: 'UPDATE_CHECKOUT_SUGGESTION' }
-  | { type: 'RESET_GAME' };
+  | { type: 'RESET_GAME' }
+  /** The match was deleted (here or on another device): drop it if it is the one in memory (0.48.1). */
+  | { type: 'FORGET_MATCH'; matchId: string };
 
 /**
  * A match needs at least two players — REMOVE_PLAYER refuses to strip it down
@@ -716,6 +718,9 @@ const baseReducer = (state: GameState, action: GameAction): GameState => {
     case 'RESET_GAME':
       return initialState;
 
+    case 'FORGET_MATCH':
+      return state.currentMatch?.id === action.matchId ? initialState : state;
+
     default:
       return state;
   }
@@ -809,6 +814,7 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
     case 'EDIT_THROW':
     case 'REMOVE_PLAYER':
     case 'END_MATCH':
+    case 'FORGET_MATCH':
     case 'RESET_GAME': {
       const next = baseReducer(state, action);
       if (next === state) return state;
@@ -825,6 +831,8 @@ interface GameContextValue {
   syncPlayerStats: (liveUpdate?: boolean) => void;
   pauseCurrentMatch: () => Promise<void>;
   loadMatchFromDb: (matchId: string) => void;
+  /** A match was deleted: drop it from memory and from this device's copy. */
+  forgetMatch: (matchId: string) => void;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -984,18 +992,44 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Track last saved state to prevent unnecessary saves
   const lastSavedStateRef = React.useRef<string>('');
 
-  /** Create on first save, update afterwards. A 409 means it exists already. */
+  /**
+   * A deleted match leaves nothing behind on this device: not in memory, not
+   * in the refresh copies. Before 0.48.1 the copy survived a delete, came back
+   * on the next load and was posted again — the match "would not delete".
+   */
+  const forgetMatch = (matchId: string) => {
+    dispatch({ type: 'FORGET_MATCH', matchId });
+    for (const key of [ACTIVE_MATCH_KEY, ACTIVE_THROW_KEY, ACTIVE_REDO_KEY]) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(key) || 'null');
+        if (saved && (saved.id === matchId || saved.matchId === matchId)) localStorage.removeItem(key);
+      } catch { /* storage unavailable or broken entry */ }
+    }
+    if (matchCreatedRef.current === matchId) matchCreatedRef.current = null;
+  };
+
+  /**
+   * Create on first save, update afterwards. A 409 means it exists already.
+   * 410 (create) / 404 (update after it existed) mean it was deleted: forget it
+   * instead of throwing — the server refuses to bring a deleted match back.
+   */
   const persistMatch = async (match: Match, options?: RequestInit) => {
     const apiMatch = toApiMatch(match);
     if (matchCreatedRef.current !== match.id) {
       try {
         await api.matches.create(apiMatch, options);
       } catch (err: any) {
+        if (err?.status === 410) { forgetMatch(match.id); return; }
         if (err?.status !== 409 && !/\b409\b/.test(err?.message ?? '')) throw err;
       }
       matchCreatedRef.current = match.id;
     } else {
-      await api.matches.update(match.id, apiMatch, options);
+      try {
+        await api.matches.update(match.id, apiMatch, options);
+      } catch (err: any) {
+        if (err?.status === 404) { forgetMatch(match.id); return; }
+        throw err;
+      }
     }
   };
 
@@ -1220,7 +1254,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <GameContext.Provider value={{ state, dispatch, syncPlayerStats, pauseCurrentMatch, loadMatchFromDb }}>
+    <GameContext.Provider value={{ state, dispatch, syncPlayerStats, pauseCurrentMatch, loadMatchFromDb, forgetMatch }}>
       {children}
     </GameContext.Provider>
   );

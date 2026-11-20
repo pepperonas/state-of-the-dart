@@ -674,7 +674,8 @@
     "local_game": "Lokal",
     "progress_atc": "{{done}}/{{total}} Ziele",
     "progress_shanghai": "Runde {{current}}/{{total}}",
-    "progress_cricket": "Cricket Match"
+    "progress_cricket": "Cricket Match",
+    "delete_failed": "Das Spiel konnte nicht gelöscht werden. Bitte prüfe die Verbindung und versuche es noch einmal."
   },
   "online": {
     "room_id": "Raum-ID",
