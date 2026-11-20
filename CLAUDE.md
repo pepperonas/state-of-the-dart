@@ -535,6 +535,10 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 ### Undo
 `UNDO_THROW` takes back the last visit **across leg and set boundaries** and out of a match won by a checkout. `legsWon` resets every set, so it is recomputed by **replaying the legs** (`replaySets`), never by counting leg winners over the whole match. `{ payload: { skipBots: true } }` (used by the human undo button) steps over bot visits — otherwise the bot would re-commit its own restored darts. `UNDO_END_MATCH` on a checkout-won match delegates to the same undo.
 
+### Deleting a match (0.48.1)
+- Always through `deleteMatch` (matchStore): it leaves a tombstone in `deleted_matches`, and `upsertMatch` then returns `gone` (POST → 410). POST is create-or-replace — without the tombstone any device with a copy brings a deleted match back.
+- After deleting on the client call `forgetMatch(id)` (GameContext): it clears the match from memory and the refresh copies (`ACTIVE_MATCH/THROW/REDO_KEY`). `persistMatch` forgets on its own on 410 (create) / 404 (update).
+
 ### Match persistence (`server/src/services/matchStore.ts`, `src/utils/matchApi.ts`)
 - `POST /api/matches` is a full upsert: winner, `completed_at`, players and legs/throws are written on **every** save. The upsert branch used to write three columns only — no match in the DB had a winner.
 - `PUT` writes a field only if it is **present** in the body; `null` clears. `toApiMatch()` therefore always sends `winner`/`completedAt` (as `null` when unset — `undefined` vanishes from JSON).

@@ -107,6 +107,16 @@ CREATE INDEX IF NOT EXISTS idx_matches_started_at ON matches(started_at);
 CREATE INDEX IF NOT EXISTS idx_matches_completed_at ON matches(completed_at);
 CREATE INDEX IF NOT EXISTS idx_matches_status ON matches(status);
 
+-- Deleted matches (0.48.1): a tombstone per deleted id. POST /api/matches is
+-- "create or replace", so a device that still holds a copy of a deleted match
+-- would bring it back on its next save; the tombstone makes that a 410.
+CREATE TABLE IF NOT EXISTS deleted_matches (
+  id TEXT PRIMARY KEY,
+  tenant_id TEXT NOT NULL,
+  deleted_at INTEGER NOT NULL,
+  FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
+);
+
 -- Match Players
 CREATE TABLE IF NOT EXISTS match_players (
   id TEXT PRIMARY KEY,

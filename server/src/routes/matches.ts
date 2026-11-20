@@ -1,7 +1,7 @@
 import express, { Response } from 'express';
 import { getDatabase } from '../database';
 import { AuthRequest, authenticateTenant } from '../middleware/auth';
-import { upsertMatch, updateMatch, currentLegState } from '../services/matchStore';
+import { upsertMatch, updateMatch, currentLegState, deleteMatch } from '../services/matchStore';
 
 const router = express.Router();
 
@@ -211,6 +211,9 @@ router.post('/', authenticateTenant, (req: AuthRequest, res: Response) => {
 
   try {
     const outcome = upsertMatch(getDatabase(), req.tenantId!, req.body);
+    if (outcome === 'gone') {
+      return res.status(410).json({ error: 'Match deleted' });
+    }
     if (outcome === 'updated') {
       return res.status(200).json({ id, message: 'Match updated successfully' });
     }
@@ -236,18 +239,11 @@ router.put('/:id', authenticateTenant, (req: AuthRequest, res: Response) => {
 
 // Delete match
 router.delete('/:id', authenticateTenant, (req: AuthRequest, res: Response) => {
-  const { id } = req.params;
-  const db = getDatabase();
-
   try {
-    // Verify ownership
-    const match = db.prepare('SELECT * FROM matches WHERE id = ? AND tenant_id = ?').get(id, req.tenantId);
-    if (!match) {
+    // Ownership checked inside; cascades, and leaves a tombstone (0.48.1).
+    if (!deleteMatch(getDatabase(), req.tenantId!, req.params.id)) {
       return res.status(404).json({ error: 'Match not found' });
     }
-
-    // Delete match (cascades)
-    db.prepare('DELETE FROM matches WHERE id = ?').run(id);
 
     res.json({ message: 'Match deleted successfully' });
   } catch (error) {

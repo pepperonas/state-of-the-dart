@@ -61,8 +61,13 @@ for (const theme of ['modern', 'modern-light'] as const) test(`phone (${theme}):
   expect(Math.abs(first.y - second.y)).toBeLessThan(2);
   // Two equal columns (a wrapping row of pills happened to pair up too, with
   // uneven widths — that was not the point), and the label is the name alone.
-  const boxes = await Promise.all([...Array(8).keys()].map(async i => (await starters.nth(i).boundingBox())!));
-  expect(new Set(boxes.map(b => Math.round(b.x))).size, JSON.stringify(boxes.map(b => [b.x, b.y, b.width].map(v => Math.round(v * 10) / 10)))).toBe(2);
+  // Measured once the entrance has settled: mid-animation the last row sat one
+  // pixel off (x 31.8 vs 32.8, width 159.4 vs 158.4 — CI, 0.48.1).
+  let boxes: Array<{ x: number; y: number; width: number; height: number }> = [];
+  await expect.poll(async () => {
+    boxes = await Promise.all([...Array(8).keys()].map(async i => (await starters.nth(i).boundingBox())!));
+    return new Set(boxes.map(b => Math.round(b.x))).size;
+  }, { message: JSON.stringify(boxes.map(b => [b.x, b.y, b.width].map(v => Math.round(v * 10) / 10))) }).toBe(2);
   for (const b of boxes) expect(Math.abs(b.width - boxes[0].width)).toBeLessThan(1);
   await expect(starters.nth(0)).toHaveText(names[0]);
   const last = (await starters.nth(7).boundingBox())!;

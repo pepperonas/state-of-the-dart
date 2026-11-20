@@ -122,3 +122,57 @@ describe('GameProvider — changing account', () => {
     expect(game.state.currentMatch).toBeNull();
   });
 });
+
+/**
+ * 0.48.1: deleting a paused match under "Spiel fortsetzen" did not stick. The
+ * device kept a copy for refresh safety, restored it on the next load and
+ * posted it again (create-or-replace) — the match came back.
+ */
+describe('GameProvider — a deleted match stays deleted', () => {
+  const pausedCopy = () => {
+    act_({
+      type: 'START_MATCH',
+      payload: { players, settings: { startScore: 501, legsToWin: 1, setsToWin: 1, doubleOut: true, doubleIn: false }, gameType: 'x01' },
+    });
+    act_({ type: 'PAUSE_MATCH' });
+    return game.state.currentMatch.id as string;
+  };
+
+  it('forgetMatch drops the match from memory and from the refresh copy', async () => {
+    mount();
+    const id = pausedCopy();
+    await act(async () => {});
+    expect(JSON.parse(localStorage.getItem('state-of-the-dart-active-match')!).id).toBe(id);
+    act(() => { game.forgetMatch(id); });
+    expect(game.state.currentMatch).toBeNull();
+    expect(localStorage.getItem('state-of-the-dart-active-match')).toBeNull();
+  });
+
+  it('forgetMatch leaves a different match alone', async () => {
+    mount();
+    const id = pausedCopy();
+    await act(async () => {});
+    act(() => { game.forgetMatch('someone-else'); });
+    expect(game.state.currentMatch?.id).toBe(id);
+    expect(localStorage.getItem('state-of-the-dart-active-match')).not.toBeNull();
+  });
+
+  it('a restored copy the server refuses (410 Gone) is dropped, not kept for another try', async () => {
+    mount();
+    const id = pausedCopy();
+    await act(async () => {});
+    const copy = localStorage.getItem('state-of-the-dart-active-match')!;
+    // Next load on the same device: the copy is restored and saved; the match was deleted meanwhile.
+    create.mockClear();
+    create.mockRejectedValueOnce(Object.assign(new Error('API Error 410'), { status: 410 }));
+    localStorage.clear();
+    localStorage.setItem('state-of-the-dart-active-match', copy);
+    mount();
+    await act(async () => {});
+    await act(async () => {});
+    expect(create).toHaveBeenCalled();
+    expect(game.state.currentMatch).toBeNull();
+    expect(localStorage.getItem('state-of-the-dart-active-match')).toBeNull();
+    expect(id).toBeTruthy();
+  });
+});

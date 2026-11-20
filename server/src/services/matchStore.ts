@@ -154,8 +154,10 @@ export const writeLegs = (db: Db, matchId: string, legs: Json[]) => {
  * match travels in the payload, so a re-sent final save must write the winner,
  * completion time and legs exactly like a first save.
  */
-export const upsertMatch = (db: Db, tenantId: string, body: Json): 'created' | 'updated' => {
+export const upsertMatch = (db: Db, tenantId: string, body: Json): 'created' | 'updated' | 'gone' => {
   const { id, gameType, status, players, settings, legs } = body;
+  // Deleted on purpose: a stale copy on some device must not bring it back.
+  if (db.prepare('SELECT 1 FROM deleted_matches WHERE id = ? AND tenant_id = ?').get(id, tenantId)) return 'gone';
   const startedAt = toEpochMs(body.startedAt) ?? Date.now();
   const completedAt = toEpochMs(body.completedAt);
   const winner = body.winner ?? null;
@@ -253,4 +255,19 @@ export const currentLegState = (db: Db, matchId: string, startScore: number, pla
   const total = db.prepare('SELECT count(*) AS n FROM throws t JOIN legs l ON t.leg_id = l.id WHERE l.match_id = ?')
     .get(matchId) as { n: number };
   return { legNumber: leg?.leg_number ?? 1, remaining, visits, totalVisits: total.n };
+};
+
+/**
+ * Deletes a match the tenant owns and leaves a tombstone, so a later
+ * create-or-replace of the same id is refused (see upsertMatch). Returns
+ * false when the tenant owns no such match.
+ */
+export const deleteMatch = (db: Db, tenantId: string, id: string): boolean => {
+  const owned = db.prepare('SELECT id FROM matches WHERE id = ? AND tenant_id = ?').get(id, tenantId);
+  if (!owned) return false;
+  db.transaction(() => {
+    db.prepare('DELETE FROM matches WHERE id = ? AND tenant_id = ?').run(id, tenantId);
+    db.prepare('INSERT OR REPLACE INTO deleted_matches (id, tenant_id, deleted_at) VALUES (?, ?, ?)').run(id, tenantId, Date.now());
+  })();
+  return true;
 };

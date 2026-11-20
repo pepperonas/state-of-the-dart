@@ -9,7 +9,7 @@ import ResumeScoreTable from './ResumeScoreTable';
 import { generateMatchName } from '../../utils/matchNames';
 import { reconstructMatch } from '../../utils/matchReconstruction';
 import { getLocalGameSummaries, clearGameState, LocalGameSummary } from '../../utils/gameStorage';
-import { Button, Card, PageShell } from '../common';
+import { Button, Card, PageShell, useFeedback } from '../common';
 import { ruleTags } from '../../utils/checkRules';
 import LoadingIndicator from '../common/LoadingIndicator';
 
@@ -47,7 +47,8 @@ type ResumableItem =
 const ResumeGameScreen: React.FC = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { state, dispatch, loadMatchFromDb } = useGame();
+  const { state, dispatch, loadMatchFromDb, forgetMatch } = useGame();
+  const { notify } = useFeedback();
 
   const [matches, setMatches] = useState<ResumableMatch[]>([]);
   const [localGames, setLocalGames] = useState<LocalGameSummary[]>([]);
@@ -110,8 +111,16 @@ const ResumeGameScreen: React.FC = () => {
     try {
       await api.matches.delete(matchId);
       setMatches((prev) => prev.filter((m) => m.id !== matchId));
-    } catch {
-      // silently fail
+      // The device's own copy goes too, or the next load posts it back (0.48.1).
+      forgetMatch(matchId);
+    } catch (err: any) {
+      if (err?.status === 404) {
+        // Already gone on the server: clean up here as well.
+        setMatches((prev) => prev.filter((m) => m.id !== matchId));
+        forgetMatch(matchId);
+      } else {
+        notify(t('resume.delete_failed'));
+      }
     } finally {
       setDeletingMatchId(null);
       setConfirmDeleteId(null);
