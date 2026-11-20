@@ -7,6 +7,40 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.49.0] - 2026-11-20
+
+### Added — a real free plan
+- After the trial the app no longer locks: login refused expired trials (403)
+  and `ProtectedRoute` sent every screen to `/pricing`. Free now means X01,
+  Cricket, Around the Clock and Shanghai with **2 per game**, **3 own
+  players** (one auto-added "Guest" exempt), **bots up to level 5**, training
+  *doubles* and *around-the-clock*, statistics with the **last 20 games**,
+  all achievements. Premium (trial, subscription, lifetime, admin) adds up to
+  8 per game, unlimited players, bots to 10, online, tournaments, all training
+  modes, heatmaps, full history, CSV/Excel/PDF reports, the TV scoreboard.
+- **Server-enforced** (`server/src/services/plan.ts`), plan read from the DB
+  on every request, never from the JWT: `POST /players` (count, bot level),
+  `POST /matches` (new or growing roster, strong bots), `POST /training`
+  (mode), `PUT /tournaments` (new ones), `GET /players/:id/heatmap`,
+  `GET /matches` (history capped at 20; the start-up heatmap batch returns
+  empty instead of 402). Refusals are **402** `{code: 'premium_required',
+  feature, limit}`; a hard ceiling of 8 per match applies to everyone.
+- **The online socket asked for nothing** — anyone could open rooms. It now
+  requires a valid token and premium (`socket/access.ts`, `io.use`).
+- App: `utils/plan.ts` mirrors the limits (test keeps them identical);
+  `useAuth().plan`; `PremiumLock`, `PremiumGate` (online, tournaments, TV,
+  locked training modes), `PlanLimitDialog` on any 402 with "Premium
+  ansehen"; locks in setup (X01 + Cricket/ATC/Shanghai picker), players,
+  training, statistics (heatmap, export), history, home tiles; account page
+  and pricing list what premium adds and what stays free. The JSON backup in
+  the settings stays open.
+- Security review: the guest exemption is keyed on a name — only one guest is
+  exempt, and renaming it into a real player counts (`checkRename`).
+- The unused, broken `middleware/subscription.ts` (looked up users by tenant
+  id) is removed.
+- Tests: `plan.test.ts` (server rules, socket access, app/server parity),
+  `e2e/free-tier.spec.ts` with a seeded free account (UI and direct API).
+
 ## [0.48.1] - 2026-11-20
 
 ### Fixed — a deleted paused game came back

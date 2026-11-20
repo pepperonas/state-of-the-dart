@@ -14,6 +14,7 @@ import type {
 } from '../types/api';
 import type { DebugFlagCreateRequest } from '../types/debugFlag';
 import { logBuffer } from '../utils/logBuffer';
+import { PLAN_LIMIT_EVENT } from '../utils/plan';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
@@ -77,9 +78,16 @@ const apiClient = async (endpoint: string, options: RequestInit = {}) => {
       }
     }
 
+    // 402: the free tier's limit (0.49.0). A change the user asked for gets
+    // the global upgrade dialog; reads stay quiet (the screens show locks).
+    if (response.status === 402 && method !== 'GET' && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent(PLAN_LIMIT_EVENT, { detail: { feature: error.feature, limit: error.limit } }));
+    }
+
     // Attach the HTTP status so callers can branch (e.g. 409 conflict handling).
-    const err = new Error(errorMsg) as Error & { status?: number };
+    const err = new Error(errorMsg) as Error & { status?: number; feature?: string };
     err.status = response.status;
+    if (error.feature) err.feature = error.feature;
     throw err;
   }
 

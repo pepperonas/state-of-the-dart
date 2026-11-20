@@ -25,6 +25,8 @@ export interface AuthContextType {
   triggerSync: () => Promise<void>;
   isAuthenticated: boolean;
   hasActiveSubscription: boolean;
+  /** Free or premium (0.49.0) — the same rule the server enforces. */
+  plan: import('../utils/plan').Plan;
   trialDaysLeft: number;
 }
 

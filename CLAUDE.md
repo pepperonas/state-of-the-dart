@@ -535,6 +535,12 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 ### Undo
 `UNDO_THROW` takes back the last visit **across leg and set boundaries** and out of a match won by a checkout. `legsWon` resets every set, so it is recomputed by **replaying the legs** (`replaySets`), never by counting leg winners over the whole match. `{ payload: { skipBots: true } }` (used by the human undo button) steps over bot visits — otherwise the bot would re-commit its own restored darts. `UNDO_END_MATCH` on a checkout-won match delegates to the same undo.
 
+### Free and premium (0.49.0)
+- `server/src/services/plan.ts` is the rule and the limits; `src/utils/plan.ts` mirrors them (`plan.test.ts` fails on drift). Plan = premium for running trial / active / lifetime / admin, else free — **read from the DB per request**, never from the JWT.
+- The server enforces with **402** `{code:'premium_required', feature, limit}`: players (3 own, one "Guest" exempt, rename checked), bots ≤ 5, 2 per match (new or growing roster; 8 for everyone), training modes, new tournaments, heatmap GET, history capped at 20. The online socket needs a token + premium (`socket/access.ts`).
+- The app shows locks (`PremiumLock`), gates whole screens (`ProtectedRoute premium=…` → `PremiumGate`), and `PlanLimitDialog` answers every non-GET 402. Cricket/ATC/Shanghai and the TV scoreboard are client-only — the app is their only lock.
+- A new premium feature needs: the server check, the app lock, `plan.*` texts in both languages, a line in `PREMIUM_PERKS`, and a case in `e2e/free-tier.spec.ts` (seeded free user `e2e-free@stateofthedart.test`).
+
 ### Deleting a match (0.48.1)
 - Always through `deleteMatch` (matchStore): it leaves a tombstone in `deleted_matches`, and `upsertMatch` then returns `gone` (POST → 410). POST is create-or-replace — without the tombstone any device with a copy brings a deleted match back.
 - After deleting on the client call `forgetMatch(id)` (GameContext): it clears the match from memory and the refresh copies (`ACTIVE_MATCH/THROW/REDO_KEY`). `persistMatch` forgets on its own on 410 (create) / 404 (update).

@@ -1,4 +1,5 @@
 import React, { useContext, useState, useEffect, ReactNode } from 'react';
+import { planOfUser } from '../utils/plan';
 import api, { setAuthToken, removeAuthToken } from '../services/api';
 import { syncService } from '../services/sync';
 import { logBuffer } from '../utils/logBuffer';
@@ -126,11 +127,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const isAuthenticated = !!user;
 
-  const hasActiveSubscription = user
-    ? user.subscriptionStatus === 'lifetime' ||
-      user.subscriptionStatus === 'active' ||
-      (user.subscriptionStatus === 'trial' && (user.trialEndsAt || 0) > Date.now())
-    : false;
+  // One rule for app and server (utils/plan.ts mirrors services/plan.ts).
+  const plan = planOfUser(user);
+  const hasActiveSubscription = !!user && plan === 'premium';
 
   const trialDaysLeft = user && user.subscriptionStatus === 'trial' && user.trialEndsAt
     ? Math.max(0, Math.ceil((user.trialEndsAt - Date.now()) / (1000 * 60 * 60 * 24)))
@@ -149,6 +148,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         triggerSync,
         isAuthenticated,
         hasActiveSubscription,
+        plan,
         trialDaysLeft,
       }}
     >

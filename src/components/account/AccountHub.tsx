@@ -11,6 +11,7 @@ import UserGuideModal from '../guide/UserGuideModal';
 import ContactModal from '../contact/ContactModal';
 import BugReportModal from '../bugReport/BugReportModal';
 import { openShortcuts } from '../../utils/shortcuts';
+import PremiumPerks from '../plan/PremiumPerks';
 
 type Row = {
   id: string;
@@ -31,7 +32,7 @@ type Row = {
 const AccountHub: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { user, logout, hasActiveSubscription, trialDaysLeft } = useAuth();
+  const { user, logout, hasActiveSubscription, trialDaysLeft, plan: planTier } = useAuth();
   const [guide, setGuide] = useState(false);
   const [contact, setContact] = useState(false);
   const [bug, setBug] = useState(false);
@@ -102,14 +103,23 @@ const AccountHub: React.FC = () => {
             {plan}
           </span>
         </span>
-        {status === 'trial' && (
+        {planTier !== 'premium' || status === 'trial' ? (
           <div className="w-full sm:w-auto">
             <Button variant="filled" fullWidth icon={<Crown size={18} />} onClick={() => navigate('/pricing')}>
               {t('account_hub.upgrade')}
             </Button>
           </div>
-        )}
+        ) : null}
       </section>
+
+      {/* Free (0.49.0): what premium would add, right where the plan is shown. */}
+      {planTier !== 'premium' && (
+        <section data-testid="account-free-plan" className="mb-6 rounded-m3-xl bg-surface-container p-5">
+          <h2 className="m3-title-medium text-on-surface mb-1">{t('plan.account_free_title')}</h2>
+          <p className="m3-body-medium text-on-surface-variant mb-4">{t('plan.account_free_body')}</p>
+          <PremiumPerks />
+        </section>
+      )}
 
       {groups.map(g => (
         <section key={g.id} aria-labelledby={`account-group-${g.id}`} className="mb-6">

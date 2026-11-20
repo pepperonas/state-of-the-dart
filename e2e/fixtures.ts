@@ -12,6 +12,13 @@ export const TEST_USER = {
   name: 'E2E Test User',
 };
 
+/** The free plan (0.49.0): same password, trial ended yesterday. */
+export const FREE_USER = {
+  email: 'e2e-free@stateofthedart.test',
+  password: 'TestPass123!',
+  name: 'E2E Free User',
+};
+
 export const PATHS = {
   testDb: path.resolve(__dirname, '..', 'server', 'data', 'e2e-test.db'),
   serverDir: path.resolve(__dirname, '..', 'server'),

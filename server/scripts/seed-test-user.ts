@@ -49,6 +49,20 @@ db.prepare(
    VALUES (?, ?, ?, '👤', ?, ?)`
 ).run(tenantId, userId, name, now, now);
 
+// A second account on the free plan (0.49.0): its trial ended yesterday.
+const freeUserId = uuidv4();
+db.prepare(
+  `INSERT INTO users (
+    id, email, password_hash, name, email_verified,
+    subscription_status, trial_ends_at,
+    created_at, last_active
+  ) VALUES (?, ?, ?, ?, 1, 'trial', ?, ?, ?)`
+).run(freeUserId, 'e2e-free@stateofthedart.test', passwordHash, 'E2E Free User', now - 24 * 60 * 60 * 1000, now, now);
+db.prepare(
+  `INSERT INTO tenants (id, user_id, name, avatar, created_at, last_active)
+   VALUES (?, ?, ?, '👤', ?, ?)`
+).run(uuidv4(), freeUserId, 'E2E Free User', now, now);
+
 db.close();
 
 console.log(JSON.stringify({ email, password, name, userId, tenantId, dbPath }));

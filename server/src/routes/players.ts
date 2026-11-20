@@ -1,6 +1,7 @@
 import express, { Response } from 'express';
 import { getDatabase } from '../database';
 import { AuthRequest, authenticateTenant } from '../middleware/auth';
+import { planForTenant, checkNewPlayer, checkRename, premiumRequired } from '../services/plan';
 
 const router = express.Router();
 
@@ -67,6 +68,9 @@ router.get('/heatmaps/batch', authenticateTenant, (req: AuthRequest, res: Respon
   const db = getDatabase();
 
   try {
+    // Loaded on every app start: a free account gets none, quietly (no 402
+    // on start-up). The aggregate keeps growing, so an upgrade shows it all.
+    if (planForTenant(db, req.tenantId!) === 'free') return res.json({ heatmaps: {}, locked: true });
     // Get all players for this tenant
     const players = db.prepare('SELECT id FROM players WHERE tenant_id = ?').all(req.tenantId) as any[];
     const playerIds = players.map(p => p.id);
@@ -182,6 +186,14 @@ router.post('/', authenticateTenant, (req: AuthRequest, res: Response) => {
   const db = getDatabase();
 
   try {
+    // Free tier (0.49.0): three own players, bots up to level 5. A re-sent
+    // existing player is not a new one.
+    const exists = db.prepare('SELECT 1 FROM players WHERE id = ? AND tenant_id = ?').get(id, req.tenantId);
+    if (!exists) {
+      const refused = checkNewPlayer(db, req.tenantId!, planForTenant(db, req.tenantId!), { isBot, botLevel, name });
+      if (refused) return res.status(402).json(refused);
+    }
+
     // Insert player
     db.prepare(`
       INSERT INTO players (id, tenant_id, name, avatar, is_bot, bot_level, created_at)
@@ -266,6 +278,12 @@ router.put('/:id', authenticateTenant, (req: AuthRequest, res: Response) => {
     const player = db.prepare('SELECT * FROM players WHERE id = ? AND tenant_id = ?').get(id, req.tenantId) as any;
     if (!player) {
       return res.status(404).json({ error: 'Player not found' });
+    }
+
+    // Free tier (0.49.0): the exempt guest renamed into a real player counts.
+    if (!player.is_bot) {
+      const refused = checkRename(db, req.tenantId!, planForTenant(db, req.tenantId!), player.name, name);
+      if (refused) return res.status(402).json(refused);
     }
 
     // Only update name/avatar if provided (use existing values otherwise)
@@ -361,6 +379,7 @@ router.get('/:id/heatmap', authenticateTenant, (req: AuthRequest, res: Response)
   const db = getDatabase();
 
   try {
+    if (planForTenant(db, req.tenantId!) === 'free') return res.status(402).json(premiumRequired('heatmap'));
     // Verify ownership
     const player = db.prepare('SELECT * FROM players WHERE id = ? AND tenant_id = ?').get(id, req.tenantId);
     if (!player) {

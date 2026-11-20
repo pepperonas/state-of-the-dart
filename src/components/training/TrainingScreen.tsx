@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { limitsOf } from '../../utils/plan';
+import PremiumGate from '../plan/PremiumGate';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Check, X, BarChart, ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -33,6 +36,7 @@ const TrainingScreen: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { mode } = useParams<{ mode: TrainingType }>();
+  const { plan } = useAuth();
   const { settings } = useSettings();
   const { players, currentPlayer, setCurrentPlayer, updatePlayerHeatmap } = usePlayer();
   const { storage } = useTenant();
@@ -493,6 +497,9 @@ const TrainingScreen: React.FC = () => {
   const accuracy = trainingState.attempts > 0 
     ? Math.round((trainingState.hits / trainingState.attempts) * 100) 
     : 0;
+
+  // Free tier (0.49.0): a premium mode opened by address shows what it is.
+  if (!limitsOf(plan).trainingOpen(mode ?? '')) return <PremiumGate feature="training" />;
 
   // Player Selection Screen
   if (!selectedPlayerId || !currentPlayer) {

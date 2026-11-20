@@ -4,20 +4,23 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { Mail, AlertTriangle } from 'lucide-react';
 import LoadingIndicator from '../common/LoadingIndicator';
+import PremiumGate from '../plan/PremiumGate';
+import type { PremiumFeature } from '../../utils/plan';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requireSubscription?: boolean;
+  /** A premium-only screen: free accounts see PremiumGate instead (0.49.0). */
+  premium?: PremiumFeature;
   requireEmailVerification?: boolean;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
-  requireSubscription = true,
+  premium,
   requireEmailVerification = true
 }) => {
   const { t } = useTranslation();
-  const { isAuthenticated, loading, hasActiveSubscription, user } = useAuth();
+  const { isAuthenticated, loading, plan, user } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -94,9 +97,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // No active subscription -> redirect to pricing
-  if (requireSubscription && !hasActiveSubscription) {
-    return <Navigate to="/pricing" state={{ from: location }} replace />;
+  // Free is a real tier since 0.49.0 — no lock-out after the trial. Only the
+  // premium screens show what they are and how to get them.
+  if (premium && plan !== 'premium') {
+    return <PremiumGate feature={premium} />;
   }
 
   return <>{children}</>;

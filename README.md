@@ -60,18 +60,18 @@
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml" title="Vitest unit and component tests, all passing">
-      <img src="https://img.shields.io/badge/Unit_Tests-1368-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
+      <img src="https://img.shields.io/badge/Unit_Tests-1380-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml" title="Playwright end-to-end tests against a real backend">
-      <img src="https://img.shields.io/badge/E2E_Tests-71-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
+      <img src="https://img.shields.io/badge/E2E_Tests-73-2ead33?style=for-the-badge&logo=playwright&logoColor=white" height="64" alt="E2E tests" />
     </a>
   </p>
 
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.48.1-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.49.0-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
@@ -928,6 +928,10 @@ Contributions sind willkommen! Bitte:
 ---
 
 ## 📝 Changelog
+
+### v0.49.0 (20. November 2026) - Kostenlose Stufe
+
+Nach den 30 Tagen Testphase war die App bisher komplett gesperrt, sogar die Anmeldung wurde abgelehnt. Jetzt geht es kostenlos weiter: X01, Cricket, Around the Clock und Shanghai mit 2 Spielern pro Spiel, 3 eigenen Spielern, Bots bis Stufe 5, Doppel und Around the Clock im Training, Statistik mit den letzten 20 Spielen und alle Erfolge. **Premium** (Abo oder Lifetime) bringt bis zu 8 Spieler pro Spiel, beliebig viele Spieler, Bots bis Stufe 10, Online-Duelle, Turniere, alle Trainingsmodi, Heatmaps, die komplette Historie, Berichte als CSV/Excel/PDF und die Fernseh-Anzeige. Was gesperrt ist, trägt ein „Premium“-Abzeichen und erklärt sich mit einem Klick. Die Datensicherung (JSON) bleibt für alle offen. **Der Server setzt die Grenzen selbst durch:** Er liest die Stufe bei jeder Anfrage frisch aus der Datenbank und lehnt Überschreitungen mit „402“ ab. Die Online-Verbindung verlangt jetzt eine Anmeldung mit Premium, vorher konnte sie jeder ohne Anmeldung öffnen.
 
 ### v0.48.1 (20. November 2026) - Gelöschte Spiele bleiben gelöscht
 

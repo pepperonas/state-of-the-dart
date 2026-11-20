@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Check, Crown, Zap, AlertCircle } from 'lucide-react';
+import { Crown, Zap, AlertCircle } from 'lucide-react';
 import { BackButton, Card, Chip, Button } from '../common';
 import { enterPop, staggerChild } from '../../utils/motion';
 import { useAuth } from '../../context/AuthContext';
+import PremiumPerks from '../plan/PremiumPerks';
 import api from '../../services/api';
 import { Trans, useTranslation } from 'react-i18next';
 
-const FEATURE_KEYS = ['unlimited_matches', 'stats_charts', 'heatmap', 'training', 'achievements', 'personal_bests', 'leaderboard', 'future_features'] as const;
 const FAQ_KEYS = ['cancel', 'after_trial', 'payment_methods', 'secure'] as const;
 
 const Pricing: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { user, hasActiveSubscription, trialDaysLeft } = useAuth();
+  const { user, hasActiveSubscription, trialDaysLeft, plan } = useAuth();
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState('');
 
@@ -34,7 +34,6 @@ const Pricing: React.FC = () => {
     }
   };
 
-  const features = FEATURE_KEYS.map((key) => t(`pricing.feature_${key}`));
 
   return (
     <div className="min-h-dvh p-4 md:p-8 gradient-mesh">
@@ -94,14 +93,7 @@ const Pricing: React.FC = () => {
                 </div>
               </div>
 
-              <ul className="space-y-3 mb-8">
-                {features.map((feature, index) => (
-                  <li key={index} className="flex items-center gap-2 text-on-surface m3-body-medium">
-                    <Check className="text-success flex-shrink-0" size={20} />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
+              <PremiumPerks className="mb-8" />
 
               <Button
                 variant="filled"
@@ -142,18 +134,11 @@ const Pricing: React.FC = () => {
                 </p>
               </div>
 
-              <ul className="space-y-3 mb-8">
-                {features.map((feature, index) => (
-                  <li key={index} className="flex items-center gap-2 text-on-surface m3-body-medium">
-                    <Check className="text-success flex-shrink-0" size={20} />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-                <li className="flex items-center gap-2 text-tertiary m3-label-large">
-                  <Crown className="flex-shrink-0" size={20} />
-                  <span>{t('pricing.lifetime_access')}</span>
-                </li>
-              </ul>
+              <PremiumPerks className="mb-3" />
+              <p className="flex items-center gap-2 text-tertiary m3-label-large mb-8">
+                <Crown className="flex-shrink-0" size={20} aria-hidden="true" />
+                <span>{t('pricing.lifetime_access')}</span>
+              </p>
 
               <Button
                 variant="filled"
@@ -168,6 +153,18 @@ const Pricing: React.FC = () => {
             </Card>
           </motion.div>
         </div>
+
+        {/* Free, for good (0.49.0) — what stays when nothing is paid. */}
+        <Card variant="filled" className="mt-8 p-8 max-w-4xl mx-auto" data-testid="pricing-free">
+          <div className="flex flex-wrap items-baseline justify-between gap-2 mb-4">
+            <h3 className="m3-title-large text-on-surface">{t('plan.free_title')}</h3>
+            <span className="m3-label-large text-on-surface-variant">
+              {plan === 'free' ? t('plan.your_plan') : t('plan.free_price')}
+            </span>
+          </div>
+          <p className="m3-body-medium text-on-surface-variant mb-4">{t('plan.free_body')}</p>
+          <PremiumPerks kind="free" className="sm:grid-cols-2" />
+        </Card>
 
         {/* FAQ */}
         <div className="mt-16 max-w-2xl mx-auto">
