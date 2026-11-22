@@ -91,7 +91,6 @@ const GameScreen: React.FC = () => {
   // Free tier (0.49.0): two per match, three own players, bots up to level 5.
   const { plan } = useAuth();
   const limits = limitsOf(plan);
-  const isGerman = (i18n.language || 'de').startsWith('de');
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const forceNewGameRef = useRef(searchParams.get('new') === '1');
@@ -1316,8 +1315,8 @@ const GameScreen: React.FC = () => {
                             className="p-3 rounded-m3-lg bg-surface-container-high hover:bg-surface-container-highest border-2 border-transparent hover:border-[var(--m3-primary)] transition text-center"
                           >
                             <div className="mb-2 flex justify-center"><Icon name={iconForEmoji(config.icon)} size={30} /></div>
-                            <div className="m3-label-large text-on-surface">{isGerman ? config.nameDE : config.name}</div>
-                            <div className="m3-body-small text-on-surface-variant mt-1">{isGerman ? config.descriptionDE : config.description}</div>
+                            <div className="m3-label-large text-on-surface">{t(`bots.adaptive.${config.category}.name`)}</div>
+                            <div className="m3-body-small text-on-surface-variant mt-1">{t(`bots.adaptive.${config.category}.description`)}</div>
                           </button>
                         ))}
                       </div>

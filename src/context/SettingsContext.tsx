@@ -2,7 +2,8 @@ import React, { createContext, useContext, useState, useEffect, useRef, useCallb
 import { AppSettings } from '../types/index';
 import { useAuth } from './AuthContext';
 import { api } from '../services/api';
-import i18n from '../i18n/config';
+import { changeAppLanguage } from '../i18n/config';
+import { isAppLanguage, languageFromBrowser } from '../i18n/languages';
 
 interface SettingsContextType {
   settings: AppSettings;
@@ -13,7 +14,8 @@ interface SettingsContextType {
 
 const defaultSettings: AppSettings = {
   theme: 'modern',
-  language: 'de',
+  // The browser's language until the account's settings arrive (0.50.0).
+  language: languageFromBrowser(typeof navigator !== 'undefined' ? navigator.languages : undefined),
   soundVolume: 70,
   callerVolume: 70,
   effectsVolume: 70,
@@ -61,7 +63,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     const loadSettings = async () => {
       if (!user) {
         setSettings(defaultSettings);
-        i18n.changeLanguage(defaultSettings.language);
+        changeAppLanguage(defaultSettings.language);
         setLoading(false);
         return;
       }
@@ -72,7 +74,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         
         const loadedSettings: AppSettings = {
           theme: normalizeTheme(response.theme || 'modern'),
-          language: response.language || 'de',
+          language: isAppLanguage(response.language) ? response.language : defaultSettings.language,
           soundVolume: response.sound_volume ?? 70,
           callerVolume: response.caller_volume ?? 70,
           effectsVolume: response.effects_volume ?? 70,
@@ -86,11 +88,11 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         };
         
         setSettings(loadedSettings);
-        i18n.changeLanguage(loadedSettings.language);
+        changeAppLanguage(loadedSettings.language);
       } catch (error) {
         console.error('Failed to load settings:', error);
         setSettings(defaultSettings);
-        i18n.changeLanguage(defaultSettings.language);
+        changeAppLanguage(defaultSettings.language);
       } finally {
         setLoading(false);
       }
@@ -102,7 +104,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
   }, [user?.id]);
 
   useEffect(() => {
-    i18n.changeLanguage(settings.language);
+    changeAppLanguage(settings.language);
   }, [settings.language]);
   
   // The latest settings, readable synchronously. updateSettings used to build
@@ -120,12 +122,15 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     settingsRef.current = next;
     setSettings(next);
 
-    if (updates.language && updates.language !== previous.language) {
-      await i18n.changeLanguage(updates.language);
-    }
+    // Save and load the language's strings at the same time: waiting for the
+    // download first lost the choice when someone navigated away (0.50.0).
+    const switching = updates.language && updates.language !== previous.language
+      ? changeAppLanguage(updates.language)
+      : null;
 
     try {
       await api.settings.update(toApiSettings(next));
+      await switching;
     } catch (error) {
       console.error('Failed to update settings:', error);
       // Roll back only what THIS call changed, and only where nothing newer
@@ -143,7 +148,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         settingsRef.current = rolledBack;
         setSettings(rolledBack);
         if (updates.language && rolledBack.language !== current.language) {
-          await i18n.changeLanguage(rolledBack.language);
+          await changeAppLanguage(rolledBack.language);
         }
       }
       throw error;

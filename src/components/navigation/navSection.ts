@@ -12,7 +12,7 @@ const SECTIONS: Array<[NavSection, RegExp]> = [
   ['stats', /^\/(stats|dashboard|match-history|leaderboard|global-leaderboard|training-stats)(\/|$)/],
   ['achievements', /^\/achievements(\/|$)/],
   ['players', /^\/players(\/|$)/],
-  ['account', /^\/(me|settings|account|admin)(\/|$)/],
+  ['account', /^\/(me|settings|account|admin|changelog)(\/|$)/],
 ];
 
 export const navSection = (pathname: string): NavSection =>

@@ -1,0 +1,4438 @@
+{
+  "common": {
+    "app_name": "State of the Dart",
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "confirm": "Confirmer",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "sort": "Trier",
+    "yes": "Oui",
+    "no": "Non",
+    "ok": "OK",
+    "error": "Erreur",
+    "success": "Succès",
+    "warning": "Avertissement",
+    "info": "Info",
+    "beta": "Bêta",
+    "undo": "Annuler",
+    "load_failed": "Chargement impossible. Vérifie ta connexion.",
+    "retry": "Réessayer"
+  },
+  "auth": {
+    "login": "Connexion",
+    "register": "Inscription",
+    "logout": "Déconnexion",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "name": "Nom",
+    "login_title": "Connexion",
+    "register_title": "Inscription",
+    "login_subtitle": "Connecte-toi pour continuer",
+    "register_subtitle": "Crée ton compte gratuit",
+    "forgot_password": "Mot de passe oublié ?",
+    "no_account": "Pas encore de compte ?",
+    "have_account": "Tu as déjà un compte ?",
+    "sign_in_google": "Se connecter avec Google",
+    "sign_up_google": "S'inscrire avec Google",
+    "email_placeholder": "ton@email.com",
+    "password_placeholder": "Ton mot de passe",
+    "name_placeholder": "Ton nom",
+    "login_button": "Se connecter",
+    "register_button": "Créer un compte",
+    "verify_email": "Vérifier l'e-mail",
+    "resend_verification": "Renvoyer la vérification",
+    "verification_sent": "E-mail de vérification envoyé !",
+    "email_verified": "E-mail vérifié avec succès !",
+    "reset_password": "Réinitialiser le mot de passe",
+    "new_password": "Nouveau mot de passe",
+    "confirm_password": "Confirmer le mot de passe"
+  },
+  "menu": {
+    "main_title": "Menu principal",
+    "back_to_menu": "Retour",
+    "continue_match": "Reprendre le match",
+    "new_game": "Nouvelle partie",
+    "quick_match": "Match rapide",
+    "training": "Entraînement",
+    "players": "Joueurs",
+    "statistics": "Statistiques",
+    "achievements": "Succès",
+    "tournaments": "Tournois",
+    "settings": "Paramètres",
+    "leaderboard": "Classement",
+    "global_leaderboard": "Classement mondial",
+    "dashboard": "Tableau de bord",
+    "admin_panel": "Administration",
+    "dashboard_desc": "Vue d'ensemble et statistiques",
+    "quick_match_desc": "Lance un match de fléchettes rapide",
+    "players_desc": "Gérer les joueurs",
+    "statistics_desc": "Statistiques détaillées",
+    "achievements_desc": "Succès et récompenses",
+    "leaderboard_desc": "Classement local",
+    "global_leaderboard_desc": "Classement mondial",
+    "tournaments_desc": "Tournois et compétitions",
+    "training_desc": "Modes et exercices d'entraînement",
+    "settings_desc": "Paramètres de l'app",
+    "admin_panel_desc": "Administration du système",
+    "cricket": "Cricket",
+    "cricket_desc": "Jouer en mode Cricket",
+    "around_the_clock": "Around the Clock",
+    "around_the_clock_desc": "Touche 1 à 20 dans l'ordre",
+    "shanghai": "Shanghai",
+    "shanghai_desc": "Mode avec manches bonus",
+    "online_multiplayer": "Multijoueur en ligne",
+    "online_multiplayer_desc": "Joue contre d'autres",
+    "guide": "Guide",
+    "guide_desc": "Guide complet de l'app",
+    "match_history": "Historique des matchs",
+    "match_history_desc": "Tous les matchs terminés",
+    "contact": "Contact",
+    "contact_desc": "Envoie-nous un message"
+  },
+  "players": {
+    "title": "Joueurs",
+    "add_player": "Ajouter un joueur",
+    "edit_player": "Modifier le joueur",
+    "delete_player": "Supprimer le joueur",
+    "view_profile": "Voir le profil",
+    "edit_name": "Modifier le nom",
+    "player_name": "Nom du joueur",
+    "enter_player_name": "Saisis le nom du joueur",
+    "no_players_yet": "Aucun joueur pour l'instant",
+    "add_first_player": "Ajoute ton premier joueur pour commencer",
+    "loading_players": "Chargement des joueurs...",
+    "delete_confirm": "Supprimer le joueur",
+    "games": "Parties",
+    "avg": "Moy.",
+    "add": "Ajouter",
+    "reset_stats": "Réinitialiser les statistiques",
+    "reset_stats_confirm_title": "Réinitialiser les statistiques ?",
+    "reset_stats_confirm_text": "Toutes les statistiques, données de match, heatmap, entraînements et succès de {{name}} seront définitivement supprimés. Le joueur lui-même est conservé.",
+    "reset_stats_success": "Les statistiques ont été réinitialisées",
+    "reset_stats_error": "Impossible de réinitialiser les statistiques",
+    "error_create": "Impossible de créer le joueur.",
+    "error_update": "Impossible d'enregistrer le joueur.",
+    "error_avatar": "Impossible d'enregistrer l'avatar.",
+    "error_main": "Impossible de définir le profil principal.",
+    "error_delete": "Impossible de supprimer le joueur.",
+    "choose_avatar": "Choisir un avatar",
+    "search_avatar": "Rechercher des avatars"
+  },
+  "game": {
+    "game": "Partie",
+    "game_setup": "Configuration de la partie",
+    "alternative": "Alternative",
+    "match": "Match",
+    "leg": "Leg",
+    "set": "Set",
+    "player": "Joueur",
+    "players": "Joueurs",
+    "score": "Score",
+    "average": "Moyenne",
+    "checkout": "Checkout",
+    "darts": "Fléchettes",
+    "throws": "Lancers",
+    "round": "Tour",
+    "winner": "Vainqueur",
+    "loser": "Perdant",
+    "bust": "Bust",
+    "undo": "Annuler",
+    "next_player": "Joueur suivant",
+    "finish": "Finish",
+    "pause": "Pause",
+    "resume": "Reprendre",
+    "end_match": "Terminer le match",
+    "confirm_end": "Vraiment terminer le match ?",
+    "select_players": "Choisir les joueurs",
+    "recent_players": "Joueurs récents",
+    "add_player": "Ajouter un joueur",
+    "add_bot": "Ajouter un bot",
+    "starting_score": "Score de départ",
+    "legs_to_win": "Legs à gagner",
+    "sets_to_win": "Sets à gagner",
+    "no_sets": "Sans sets",
+    "first_to": "Premier à",
+    "double_out": "Double Out",
+    "double_in": "Double In",
+    "start_game": "Lancer la partie",
+    "dart": "Fléchette",
+    "remove_dart": "Supprimer la dernière fléchette",
+    "undo_last_throw": "Annuler le lancer",
+    "undo_throw_blocked": "Efface d'abord le lancer en cours",
+    "no_throw_to_undo": "Aucun lancer à annuler",
+    "remove_player": "Retirer le joueur",
+    "remove_player_title": "Retirer {{name}} du match ?",
+    "remove_player_body": "Tous les lancers de {{name}} dans ce match sont supprimés. Le match continue avec les joueurs restants.",
+    "remove_player_irreversible": "Impossible de revenir en arrière.",
+    "remove_player_min": "Un match nécessite au moins 2 joueurs",
+    "more_scores": "Plus de scores (0–180)…",
+    "mute": "Couper le son",
+    "unmute": "Réactiver le son",
+    "match_ended": "Match terminé",
+    "winner_title": "{{name}} gagne !",
+    "sets": "Sets",
+    "legs": "Legs",
+    "highest": "Meilleur",
+    "rematch": "Revanche",
+    "match_details": "Détails du match",
+    "main_menu": "Menu principal",
+    "leave_title": "Quitter le match ?",
+    "pause_and_leave": "Mettre en pause et quitter",
+    "leave_body": "Le match est enregistré et peut être repris à tout moment sous « Reprendre ».",
+    "end_title": "Terminer le match ?",
+    "end_body": "Le match se termine sans vainqueur et ne compte pas dans les statistiques. Tu peux encore l'annuler juste après.",
+    "who_starts": "Qui lance en premier ?",
+    "starts": "{{name}} commence",
+    "skip_spinner": "Passer (aléatoire)",
+    "input_mode": "Mode de saisie",
+    "mode_numpad": "Pavé numérique",
+    "mode_darts": "Fléchettes",
+    "mode_quick": "Rapide",
+    "multiplier": "Multiplicateur",
+    "single": "Simple",
+    "double": "Double",
+    "triple": "Triple",
+    "miss": "Raté",
+    "clear_input": "Effacer la saisie",
+    "set_dart": "Définir",
+    "clear_visit": "Effacer",
+    "clear_visit_long": "Effacer la volée",
+    "confirm_visit": "Confirmer",
+    "confirm_correction": "Confirmer la correction",
+    "remaining": "Restant",
+    "edit_dart": "Fléchette {{n}} : {{score}} – touche pour modifier",
+    "empty_dart": "Fléchette {{n}} : vide",
+    "scoreboard": "Tableau des scores",
+    "numpad_hint": "Saisis le total, la coche valide",
+    "new_game_short": "Nouvelle partie",
+    "stats_scope": "Portée",
+    "current_leg": "Leg en cours",
+    "whole_match": "Match entier",
+    "new_dart_value": "Nouvelle valeur de fléchette…",
+    "triple_out": "Triple Out",
+    "triple_in": "Triple In",
+    "single_out": "Single Out",
+    "single_in": "Single In",
+    "check_in": "Check-in",
+    "check_out": "Check-out",
+    "check_in_hint": "Ce qui lance le comptage",
+    "check_out_hint": "Ce qui termine un leg",
+    "rule_single": "Simple",
+    "rule_double": "Double",
+    "rule_triple": "Triple",
+    "redo_throw": "Rétablir la volée"
+  },
+  "stats": {
+    "statistics": "Statistiques",
+    "overview": "Vue d'ensemble",
+    "progress": "Progression",
+    "history": "Historique",
+    "comparison": "Comparaison",
+    "games_played": "Parties jouées",
+    "games_won": "Parties gagnées",
+    "win_rate": "Taux de victoire",
+    "total_180s": "Total de 180",
+    "best_average": "Meilleure moyenne",
+    "highest_checkout": "Meilleur checkout",
+    "checkout_percentage": "Pourcentage de checkout",
+    "personal_bests": "Records personnels",
+    "select_player": "Choisir un joueur"
+  },
+  "training": {
+    "training": "Entraînement",
+    "training_modes": "Modes d'entraînement",
+    "start_training": "Commencer l'entraînement",
+    "cricket": "Cricket",
+    "around_the_clock": "Around the Clock",
+    "shanghai": "Shanghai",
+    "scoring": "Scoring",
+    "bullseye_summit": "Bullseye Summit",
+    "checkout_practice": "Entraînement au checkout",
+    "statistics": "Statistiques d'entraînement",
+    "session": "Session",
+    "accuracy": "Précision",
+    "hits": "Touchés",
+    "misses": "Ratés",
+    "duration": "Durée",
+    "doubles_practice": "Entraînement aux doubles",
+    "doubles_practice_desc": "Concentre-toi sur les doubles",
+    "triples_practice": "Entraînement aux triples",
+    "triples_practice_desc": "Maîtrise l'anneau des triples",
+    "around_the_clock_desc": "Touche chaque numéro dans l'ordre",
+    "checkout_training": "Entraînement au checkout",
+    "checkout_training_desc": "Entraîne les combinaisons de finish",
+    "bobs_27": "Bob's 27",
+    "bobs_27_desc": "Entraînement classique sous pression",
+    "score_training": "Entraînement au scoring",
+    "score_training_desc": "Améliore ta puissance de scoring",
+    "benefits_title": "Avantages de l'entraînement",
+    "benefit_1": "Suis ta progression dans le temps",
+    "benefit_2": "Améliore des points précis de ton jeu",
+    "benefit_3": "Compare tes scores à tes records personnels",
+    "benefit_4": "Gagne en régularité et en confiance"
+  },
+  "settings": {
+    "settings": "Paramètres",
+    "appearance": "Apparence",
+    "theme": "Thème / Apparence",
+    "language": "Langue",
+    "sound": "Son",
+    "volume": "Volume",
+    "caller_volume": "Volume de l'annonceur (scores)",
+    "effects_volume": "Volume des effets (interface)",
+    "vibration": "Vibration",
+    "notifications": "Notifications",
+    "game_settings": "Paramètres de jeu",
+    "show_checkout_hints": "Afficher les aides au checkout",
+    "auto_next_player": "Joueur suivant automatique",
+    "show_stats_during_game": "Afficher les stats pendant la partie",
+    "show_dartboard_helper": "Afficher l'aide de la cible",
+    "data": "Données",
+    "export_data": "Exporter les données",
+    "import_data": "Importer les données",
+    "pwa": "PWA / Installation",
+    "modern_minimalist": "Moderne minimaliste",
+    "modern_desc": "Épuré, sombre et professionnel",
+    "modern_light": "Moderne minimaliste clair",
+    "modern_light_desc": "Épuré, lumineux et professionnel",
+    "steampunk": "Steampunk victorien",
+    "steampunk_desc": "Bronze, laiton et engrenages",
+    "theme_instant": "Les changements de thème s'appliquent immédiatement à toutes les pages",
+    "pwa_title": "Progressive Web App",
+    "app_installed": "App installée !",
+    "install_app": "Installer l'app",
+    "pwa_benefits": "Avantages :",
+    "pwa_benefit_offline": "Fonctionne hors ligne",
+    "pwa_benefit_homescreen": "Accès plus rapide depuis l'écran d'accueil",
+    "pwa_benefit_native": "Expérience d'app native",
+    "pwa_benefit_no_browser": "Sans barre de navigateur",
+    "pwa_ios_tip": "iOS : utilise « Sur l'écran d'accueil » dans le menu de Safari",
+    "pwa_android_tip": "Android : clique sur « Installer l'app » en haut",
+    "test_sounds": "Tester les sons :",
+    "test_caller": "Tester l'annonceur",
+    "test_effect": "Tester l'effet",
+    "data_management": "Gestion des données",
+    "export": "Exporter",
+    "import": "Importer",
+    "export_info": "Exporté : joueurs, matchs, paramètres, statistiques, sessions d'entraînement",
+    "bug_reports": "Mes signalements de bugs",
+    "loading_reports": "Chargement des signalements...",
+    "no_bug_reports": "Tu n'as encore signalé aucun bug.",
+    "report_new_bug": "Signaler un nouveau bug",
+    "severity": "Gravité",
+    "category": "Catégorie",
+    "status": "Statut",
+    "created_at": "Créé le",
+    "profile": "Profil",
+    "profile_info": "Informations du profil",
+    "export_done": "Données exportées.",
+    "export_failed": "L'export a échoué. Réessaie.",
+    "import_pick_json": "Choisis un fichier JSON.",
+    "import_confirm_title": "Importer les données ?",
+    "import_confirm_body": "L'import remplace toutes les données actuelles. Exporte d'abord une sauvegarde si tu veux les garder.",
+    "import_confirm_action": "Importer",
+    "import_done": "Données importées – rechargement de la page.",
+    "import_failed": "L'import a échoué. Vérifie le fichier.",
+    "delete_bug_confirm": "Vraiment supprimer ce signalement ?"
+  },
+  "user": {
+    "account": "Compte",
+    "profile": "Profil",
+    "subscription": "Abonnement",
+    "manage_subscription": "Gérer l'abonnement",
+    "change_email": "Changer d'e-mail",
+    "change_password": "Changer le mot de passe",
+    "delete_account": "Supprimer le compte",
+    "danger_zone": "Zone de danger",
+    "logout_confirm": "Vraiment te déconnecter ?",
+    "delete_confirm": "Vraiment supprimer le compte ?",
+    "data_warning": "Toutes tes données seront définitivement supprimées"
+  },
+  "admin": {
+    "admin_panel": "Administration",
+    "loading_panel": "Chargement de l'administration...",
+    "retry": "Réessayer",
+    "subtitle": "Gérer les utilisateurs et les abonnements",
+    "user_management": "Gestion des utilisateurs",
+    "users": "Utilisateurs",
+    "total": "Total",
+    "active_subscriptions": "Abonnements actifs",
+    "lifetime": "À vie",
+    "trial": "Essai",
+    "expired": "Expiré",
+    "filter_all": "Tous",
+    "filter_lifetime": "À vie",
+    "filter_active": "Actif",
+    "filter_trial": "Essai",
+    "filter_expired": "Expiré",
+    "table_user": "Utilisateur",
+    "table_status": "Statut",
+    "table_plan": "Formule",
+    "table_created": "Créé",
+    "table_actions": "Actions",
+    "status_lifetime": "À vie",
+    "status_active": "Actif",
+    "status_trial": "Essai",
+    "status_expired": "Expiré",
+    "edit_subscription": "Modifier l'abonnement",
+    "grant_lifetime": "Accorder l'accès à vie",
+    "revoke_access": "Retirer l'accès",
+    "delete_user": "Supprimer l'utilisateur",
+    "no_users_found": "Aucun utilisateur trouvé avec le filtre « {{filter}} »",
+    "bug_reports": "Signalements de bugs",
+    "total_reports": "Total des signalements",
+    "open": "Ouvert",
+    "in_progress": "En cours",
+    "resolved": "Résolu",
+    "status_label": "Statut",
+    "severity_label": "Gravité",
+    "loading_bug_reports": "Chargement des signalements...",
+    "table_title": "Titre",
+    "table_reporter": "Auteur",
+    "table_severity": "Gravité",
+    "table_bug_status": "Statut",
+    "table_category": "Catégorie",
+    "table_date": "Date",
+    "edit_subscription_title": "Modifier l'abonnement",
+    "status_required": "Statut *",
+    "option_expired": "Expiré",
+    "option_trial": "Essai",
+    "option_active": "Actif",
+    "option_lifetime": "À vie",
+    "plan_label": "Formule",
+    "plan_none": "Aucune formule",
+    "plan_monthly": "Mensuel",
+    "plan_annual": "Annuel",
+    "plan_lifetime": "À vie",
+    "expiry_date": "Date d'expiration (facultatif)",
+    "expiry_hint": "Laisse vide pour illimité (p. ex. à vie)",
+    "bug_report_details": "Détails du signalement",
+    "reported_by": "Signalé par",
+    "description": "Description",
+    "screenshot": "Capture d'écran",
+    "download": "Télécharger",
+    "browser_info": "Infos navigateur",
+    "user_agent": "User Agent",
+    "screen": "Écran",
+    "viewport": "Fenêtre",
+    "route": "Route",
+    "admin_notes": "Notes admin",
+    "admin_notes_placeholder": "Ajoute des notes pour le suivi interne...",
+    "update_status": "Mettre à jour le statut",
+    "status_open": "Ouvert",
+    "status_in_progress": "En cours",
+    "status_resolved": "Résolu",
+    "status_closed": "Fermé",
+    "confirm_delete_bug": "Vraiment supprimer ce signalement ?",
+    "confirm_grant_lifetime": "Accorder l'accès à vie à cet utilisateur ?",
+    "confirm_revoke_access": "Retirer l'accès à cet utilisateur ?",
+    "confirm_delete_user": "SUPPRIMER définitivement cet utilisateur ? Impossible de revenir en arrière !",
+    "view_details": "Voir les détails",
+    "copy_clipboard": "Copier dans le presse-papiers",
+    "subscriptions": "Abonnements",
+    "manage_users": "Gérer les utilisateurs",
+    "activate": "Activer",
+    "deactivate": "Désactiver",
+    "grant_admin": "Donner les droits admin",
+    "revoke_admin": "Retirer les droits admin",
+    "select_all": "Tous",
+    "select_open": "Ouvert",
+    "select_in_progress": "En cours",
+    "select_resolved": "Résolu",
+    "select_closed": "Fermé",
+    "select_critical": "Critique",
+    "select_high": "Élevée",
+    "select_medium": "Moyenne",
+    "select_low": "Faible",
+    "table_activity": "Activité",
+    "table_last_seen": "Vu en dernier",
+    "never_seen": "jamais",
+    "usage_summary": "{{total}} parties",
+    "user_label": "Utilisateur",
+    "action_failed": "L'action a échoué : {{error}}"
+  },
+  "debug": {
+    "title": "Debug Flag",
+    "comment_label": "Qu'as-tu constaté ?",
+    "comment_placeholder": "Décris le problème ou le comportement inattendu...",
+    "comment_required": "Le commentaire est obligatoire",
+    "screenshot_preview": "Aperçu de la capture",
+    "auto_capture_info": "Capture d'écran, infos navigateur, état de la partie et logs récents sont enregistrés automatiquement.",
+    "submit": "Signaler",
+    "create_failed": "Impossible de créer le debug flag",
+    "created_success": "Debug flag créé !",
+    "created_hint": "Retrouve-le dans l'administration sous Debug Flags.",
+    "debug_flags": "Debug Flags",
+    "total_flags": "Total des flags",
+    "investigating": "En analyse",
+    "dismissed": "Écarté",
+    "loading_flags": "Chargement des debug flags...",
+    "table_comment": "Commentaire",
+    "table_route": "Route",
+    "table_status": "Statut",
+    "table_date": "Date",
+    "table_actions": "Actions",
+    "copy_for_ai": "Copier pour l'IA",
+    "copied": "Copié !",
+    "confirm_delete": "Supprimer ce debug flag ?",
+    "flag_details": "Détails du debug flag",
+    "game_state": "État de la partie",
+    "log_entries": "Entrées de log",
+    "no_logs": "Aucune entrée de log",
+    "status_open": "Ouvert",
+    "status_investigating": "En analyse",
+    "status_resolved": "Résolu",
+    "status_dismissed": "Écarté",
+    "select_all": "Tous",
+    "select_open": "Ouvert",
+    "select_investigating": "En analyse",
+    "select_resolved": "Résolu",
+    "select_dismissed": "Écarté"
+  },
+  "achievements": {
+    "achievements": "Succès",
+    "unlocked": "Débloqué",
+    "locked": "Verrouillé",
+    "progress": "Progression",
+    "points": "Points",
+    "rarity_common": "Commun",
+    "rarity_rare": "Rare",
+    "rarity_epic": "Épique",
+    "rarity_legendary": "Légendaire",
+    "scope_filter": "Domaine",
+    "rarity": "Rareté",
+    "common": "Commun",
+    "rare": "Rare",
+    "epic": "Épique",
+    "legendary": "Légendaire",
+    "new_achievement": "Nouveau succès débloqué !",
+    "scope": "Portée",
+    "scope_round": "Tour",
+    "scope_leg": "Leg",
+    "scope_match": "Match",
+    "scope_career": "Carrière",
+    "scope_training": "Entraînement",
+    "scope_event": "Événement",
+    "scope_meta": "Méta",
+    "scope_all": "Toutes les portées",
+    "completed": "Terminé",
+    "total_progress": "Progression totale",
+    "player": "Joueur",
+    "filter": "Filtre",
+    "all": "Tous",
+    "show_unlocked_only": "Afficher uniquement les débloqués",
+    "hidden_achievement": "Succès caché",
+    "no_players": "Aucun joueur",
+    "create_players_first": "Crée d'abord des joueurs pour débloquer des succès !",
+    "no_achievements_in_category": "Aucun succès dans cette catégorie",
+    "category_first_steps": "Premiers pas",
+    "category_scoring": "Scoring",
+    "category_checkout": "Checkout",
+    "category_training": "Entraînement",
+    "category_consistency": "Régularité",
+    "category_special": "Spécial",
+    "category_master": "Maîtrise",
+    "category_fail": "Ratés",
+    "hint_average": "Plus que {{remaining}} de moyenne pour le succès !",
+    "hint_180s": "Encore {{remaining}} 180 pour le succès !",
+    "hint_checkout": "Plus que {{remaining}} % de taux de checkout pour le succès !",
+    "hint_winstreak": "Encore {{remaining}} victoires d'affilée pour le succès !",
+    "select_player": "Choisir un joueur"
+  },
+  "subscription": {
+    "trial": "Essai",
+    "active": "Actif",
+    "lifetime": "À vie",
+    "expired": "Expiré",
+    "none": "Aucun abonnement",
+    "upgrade": "Passer à la version supérieure",
+    "manage": "Gérer",
+    "days_left": "jours restants",
+    "trial_days": "Jours d'essai"
+  },
+  "contact": {
+    "title": "Contact",
+    "menu_desc": "Envoie-nous un message",
+    "name": "Nom",
+    "name_placeholder": "Ton nom",
+    "email": "E-mail",
+    "email_placeholder": "ton@email.com",
+    "subject": "Objet",
+    "subject_placeholder": "De quoi s'agit-il ?",
+    "message": "Message",
+    "message_placeholder": "Ton message...",
+    "send": "Envoyer le message",
+    "sending": "Envoi...",
+    "success_title": "Message envoyé !",
+    "success_text": "Nous te répondrons dès que possible.",
+    "error": "L'envoi a échoué. Réessaie plus tard.",
+    "rate_limit": "Trop de demandes. Réessaie plus tard.",
+    "char_count": "{{count}} / {{max}} caractères"
+  },
+  "match_history": {
+    "title": "Historique des matchs",
+    "no_matches": "Aucun match terminé pour l'instant",
+    "search_placeholder": "Rechercher des joueurs...",
+    "all_types": "Tous les types de partie",
+    "per_page": "par page",
+    "page_info": "Page {{page}} sur {{total}}",
+    "winner": "Vainqueur",
+    "draw": "Égalité",
+    "legs": "Legs",
+    "avg": "Moy.",
+    "high": "Max",
+    "s180": "180",
+    "s140plus": "140+",
+    "checkout_pct": "CO%",
+    "leg_breakdown": "Détail par leg",
+    "leg_number": "Leg {{number}}",
+    "throw_history": "Historique des lancers",
+    "show_throws": "Afficher les lancers",
+    "hide_throws": "Masquer les lancers",
+    "round": "Tour",
+    "remaining": "Restant",
+    "heatmap": "Heatmap",
+    "player_stats": "Statistiques des joueurs",
+    "duration": "Durée",
+    "minutes_short": "min",
+    "round_chart": "Graphique par tour",
+    "showing": "Affichage de",
+    "of": "sur",
+    "matches": "matchs",
+    "no_results": "Aucun match trouvé",
+    "no_details": "Impossible de charger les détails",
+    "throw_details": "Détails des lancers"
+  },
+  "atc": {
+    "title": "Around the Clock",
+    "bull_mode": "Bull",
+    "bull_off": "Désactivé",
+    "bull_standard": "Standard",
+    "bull_split": "Séparé",
+    "bull_off_desc": "1-20 uniquement",
+    "bull_standard_desc": "25 ou 50 comptent tous les deux",
+    "bull_split_desc": "Bull extérieur et Bull intérieur séparés",
+    "direction": "Sens",
+    "ascending": "1 → 20",
+    "descending": "20 → 1",
+    "variant": "Variante",
+    "variant_standard": "Standard",
+    "variant_doubles": "Doubles",
+    "variant_triples": "Triples",
+    "variant_standard_desc": "Simple, double et triple comptent tous",
+    "variant_doubles_desc": "Seuls les doubles comptent",
+    "variant_triples_desc": "Seuls les triples comptent",
+    "rules_title": "Règles",
+    "rules_hit_targets": "Touche toutes les cibles dans l'ordre",
+    "rules_bull": "Le Bull est la dernière cible",
+    "rules_no_bull": "Sans Bull",
+    "rules_doubles_only": "Seuls les doubles comptent",
+    "rules_triples_only": "Seuls les triples comptent",
+    "rules_standard_all_count": "Simple, double et triple comptent tous comme touché",
+    "rules_first_wins": "Le premier à toucher toutes les cibles gagne !",
+    "current_target": "Cible actuelle",
+    "hit": "Touché",
+    "miss": "Raté",
+    "throw_count": "Lancer ({{current}}/3)",
+    "targets_progress": "{{done}}/{{total}}",
+    "darts_used": "{{count}} fléchettes",
+    "winner_title": "{{name}} gagne !",
+    "winner_time": "Around the Clock en {{time}}",
+    "winner_darts": "{{count}} fléchettes nécessaires",
+    "winner_hit_rate": "{{rate}} % de réussite",
+    "winner_avg_darts": "{{avg}} fléchettes/cible",
+    "new_game": "Nouvelle partie",
+    "start_game": "Lancer la partie",
+    "select_min": "Choisir les joueurs (min. 1)"
+  },
+  "resume": {
+    "title": "Reprendre des parties",
+    "menu_title": "Reprendre une partie",
+    "menu_desc_one": "{{count}} partie en pause",
+    "menu_desc_other": "{{count}} parties en pause",
+    "menu_desc_many": "{{count}} parties en pause",
+    "no_matches": "Aucune partie en pause",
+    "continue": "Reprendre",
+    "delete": "Supprimer",
+    "confirm_delete": "Sûr ?",
+    "paused": "En pause",
+    "in_progress": "Active",
+    "paused_banner": "Reprendre le match en pause",
+    "pause_title": "Quitter la partie ?",
+    "pause_message": "Ta partie est enregistrée et peut être reprise à tout moment depuis le menu principal.",
+    "pause_and_leave": "Mettre en pause et quitter",
+    "end_game": "Terminer la partie",
+    "game_type_atc": "Around the Clock",
+    "game_type_shanghai": "Shanghai",
+    "game_type_cricket": "Cricket",
+    "local_game": "Local",
+    "progress_atc": "{{done}}/{{total}} cibles",
+    "progress_shanghai": "Tour {{current}}/{{total}}",
+    "progress_cricket": "Match de Cricket",
+    "delete_failed": "Impossible de supprimer la partie. Vérifie la connexion et réessaie."
+  },
+  "online": {
+    "room_id": "ID du salon",
+    "join_private": "Rejoindre un salon privé",
+    "enter_room_id": "Saisis l'ID du salon...",
+    "join": "Rejoindre"
+  },
+  "tournament": {
+    "bye": "Exempt"
+  },
+  "pwa": {
+    "update_available": "Une nouvelle version est disponible",
+    "reload": "Recharger",
+    "install_title": "Installer l'app",
+    "install_body": "Icône sur l'écran d'accueil, plein écran et fonctionne hors ligne.",
+    "install_action": "Installer",
+    "install_later": "Plus tard",
+    "install_ios": "Dans Safari, touche « Partager », puis « Sur l'écran d'accueil »."
+  },
+  "nav": {
+    "label": "Navigation principale",
+    "home": "Accueil",
+    "stats": "Stats",
+    "achievements": "Succès",
+    "players": "Joueurs",
+    "account": "Compte"
+  },
+  "home": {
+    "rematch": "Revanche",
+    "new_game": "Nouvelle partie",
+    "new_setup": "Nouvelle config",
+    "first_to_legs": "Premier à {{count}} legs",
+    "first_to_sets": "Premier à {{count}} sets",
+    "section_play": "Plus de jeux",
+    "section_review": "Bilan",
+    "section_admin": "Administration",
+    "skip_to_content": "Aller au contenu"
+  },
+  "onboarding": {
+    "title": "Bienvenue !",
+    "body": "Trois étapes jusqu'à ta première partie :",
+    "step_player": "Crée ton profil de joueur",
+    "step_opponent": "Ajoute un adversaire ou un bot",
+    "step_match": "Joue ton premier 501",
+    "dismiss": "Masquer l'introduction",
+    "done": "fait"
+  },
+  "shanghai": {
+    "points": "{{count}} points"
+  },
+  "bug": {
+    "title": "Signaler un bug",
+    "fill_required": "Remplis le titre et la description.",
+    "send_failed": "Impossible d'envoyer le signalement.",
+    "severity_low": "Faible",
+    "severity_medium": "Moyenne",
+    "severity_high": "Élevée",
+    "severity_critical": "Critique",
+    "category_gameplay": "Jeu",
+    "category_ui": "Interface",
+    "category_audio": "Audio/son",
+    "category_performance": "Performances",
+    "category_auth": "Connexion/authentification",
+    "category_data": "Données/stockage",
+    "category_achievements": "Succès",
+    "category_other": "Autre",
+    "category_many": "Autre",
+    "thanks": "Merci !",
+    "sent": "Ton signalement a été envoyé.",
+    "field_title": "Titre",
+    "field_title_placeholder": "Résumé court du problème",
+    "field_description": "Description",
+    "field_description_placeholder": "Qu'attendais-tu, et que s'est-il passé à la place ?",
+    "field_severity": "Gravité",
+    "field_category": "Catégorie",
+    "field_screenshot": "Capture d'écran (facultatif)",
+    "remove_screenshot": "Supprimer la capture",
+    "capturing": "Capture en cours…",
+    "capture": "Prendre une capture",
+    "sending": "Envoi…",
+    "submit": "Signaler le bug"
+  },
+  "match_detail": {
+    "hidden_players": "{{count}} joueurs sans lancer dans ce match ne sont pas affichés.",
+    "round_chart": "Tours",
+    "round": "Tour",
+    "points": "Points",
+    "points_value": "{{count}} points",
+    "no_rounds": "Aucune donnée par tour disponible",
+    "no_rounds_hint": "Ce match a sans doute été joué avant le suivi par tour.",
+    "throw_history": "Historique des lancers",
+    "legs": "Legs",
+    "leg_winner": "Leg {{n}} : {{name}}",
+    "unknown": "Inconnu"
+  },
+  "guide": {
+    "title": "Guide d'utilisation",
+    "nav": {
+      "overview": "Vue d'ensemble",
+      "quickstart": "Démarrage rapide",
+      "game": "Modes de jeu",
+      "players": "Gérer les joueurs",
+      "training": "Entraînement",
+      "stats": "Statistiques",
+      "achievements": "Succès",
+      "settings": "Paramètres",
+      "admin": "Administration",
+      "tips": "Astuces"
+    },
+    "overview": {
+      "heading": "Bienvenue sur State of the Dart !",
+      "intro": "State of the Dart est une app de comptage de fléchettes professionnelle avec de nombreuses fonctions pour les joueurs de tout niveau. Du match tranquille au tournoi complet – tout est possible.",
+      "featuresTitle": "Fonctions principales",
+      "features": [
+        "<b>Plusieurs modes de jeu :</b> 501, Cricket, Around the Clock et plus",
+        "<b>Adversaires IA :</b> 10 niveaux de difficulté pour t'entraîner seul",
+        "<b>Statistiques détaillées :</b> heatmaps, moyennes, taux de checkout",
+        "<b>Modes d'entraînement :</b> doubles, triples, entraînement au checkout",
+        "<b>Succès :</b> plus de 145 succès à débloquer dans 7 catégories",
+        "<b>Multi-profils :</b> plusieurs profils (famille, club, etc.)",
+        "<b>Annonceur audio :</b> des annonces professionnelles comme à la télé"
+      ],
+      "tipTitle": "Astuce pour débuter",
+      "tip": "Commence par un <b>Match rapide</b> contre un bot pour découvrir l'app. Les adversaires IA s'adaptent à ton niveau !"
+    },
+    "quickstart": {
+      "heading": "Guide de démarrage rapide",
+      "steps": [
+        {
+          "title": "Créer des joueurs",
+          "text": "Va dans <b>Joueurs</b> → <b>+ Nouveau joueur</b>. Choisis un nom et un avatar. Les statistiques sont suivies automatiquement."
+        },
+        {
+          "title": "Lancer un match",
+          "text": "Touche <b>Match rapide</b> → choisis les joueurs → choisis un mode de jeu (p. ex. 501) → <b>Lancer la partie</b>"
+        },
+        {
+          "title": "Saisir tes lancers",
+          "text": "Touche les segments atteints sur la cible. Après 3 fléchettes → <b>Confirmer</b>. L'app calcule automatiquement les scores, les moyennes et plus."
+        },
+        {
+          "title": "Voir les statistiques",
+          "text": "Après le match : <b>Statistiques</b> → découvre heatmaps, graphiques, moyennes et plus !"
+        }
+      ],
+      "done": "<b>C'est prêt !</b> Tu peux lancer ton premier match. Bonne chance !"
+    },
+    "game": {
+      "heading": "Modes de jeu",
+      "x01": {
+        "title": "501 (standard)",
+        "text": "Chaque joueur commence à 501 points. Objectif : descendre à exactement 0. La dernière fléchette doit être un double (double out).",
+        "settingsTitle": "Paramètres :",
+        "settings": [
+          "Premier à : nombre de legs nécessaires pour gagner (best of 3, 5, 7, etc.)",
+          "Double out : obligatoire (par défaut) ou désactivé",
+          "Sets : facultatifs, pour des matchs plus longs"
+        ]
+      },
+      "cricket": {
+        "title": "Cricket",
+        "text": "Un jeu de stratégie : ferme les numéros 15 à 20 et le bull. Marque des points sur les numéros que tu as ouverts.",
+        "rules": [
+          "3 touches ferment un numéro",
+          "Les touches suivantes rapportent des points (seulement si ton adversaire ne l'a pas fermé)",
+          "Vainqueur : tous les numéros fermés + le plus de points"
+        ]
+      },
+      "atc": {
+        "title": "Around the Clock",
+        "text": "Touche chaque numéro de 1 à 20 dans l'ordre. Le plus rapide gagne !"
+      },
+      "bots": {
+        "title": "Adversaires IA (bots)",
+        "text": "Entraîne-toi contre une IA adaptative avec 10 niveaux de difficulté :",
+        "levels": [
+          "<b>Niveau 1-3 :</b> débutant (moyenne 30-50)",
+          "<b>Niveau 4-6 :</b> amateur (moyenne 50-70)",
+          "<b>Niveau 7-8 :</b> confirmé (moyenne 70-85)",
+          "<b>Niveau 9-10 :</b> pro (moyenne 85-100)"
+        ]
+      }
+    },
+    "players": {
+      "heading": "Gérer les joueurs",
+      "create": {
+        "title": "Créer des joueurs",
+        "path": "<b>Joueurs</b> → <b>+ Nouveau joueur</b>",
+        "items": [
+          "Saisis un nom",
+          "<b>Choisis un emoji :</b> sélecteur d'emoji façon WhatsApp avec 8 catégories",
+          "L'emoji remplace l'initiale comme avatar",
+          "Facultatif : marquer comme bot avec un niveau de difficulté"
+        ]
+      },
+      "main": {
+        "title": "Profil principal (joueur principal)",
+        "text": "Définis un joueur comme profil principal pour voir ses stats sur le tableau de bord.",
+        "hint": "<b>Touche la couronne</b> à côté d'un joueur pour en faire le joueur principal."
+      },
+      "profiles": {
+        "title": "Profils des joueurs",
+        "intro": "<b>Touche un joueur</b> dans la liste pour voir son profil complet :",
+        "items": [
+          "<b>Statistiques :</b> moyenne, 180, taux de checkout",
+          "<b>Heatmap :</b> chaque zone de la cible colorée selon la fréquence de tes touches",
+          "<b>Historique des matchs :</b> tous les matchs joués",
+          "<b>Records personnels :</b> meilleures performances",
+          "<b>Avatar :</b> design professionnel avec lettrage manuscrit ou emoji"
+        ],
+        "tip": "<b>Astuce :</b> toute la ligne est cliquable – pas seulement l'icône en forme d'œil !"
+      },
+      "search": {
+        "title": "Recherche et pagination",
+        "search": "<b>Rechercher des joueurs :</b> utilise le champ de recherche pour trouver vite un joueur.",
+        "paging": "<b>Parcourir les résultats :</b> choisis 10/20/50/100 éléments par page et utilise la navigation pour parcourir les longues listes."
+      },
+      "tenant": {
+        "title": "Astuce : multi-profils",
+        "text": "Tu peux créer plusieurs <b>profils</b> (p. ex. famille, club, amis). Passe d'un profil à l'autre dans les <b>Paramètres</b>."
+      }
+    },
+    "training": {
+      "heading": "Modes d'entraînement",
+      "modes": [
+        {
+          "title": "Entraînement aux doubles",
+          "text": "Entraîne chaque double de D1 à D20. Affûte ton checkout !"
+        },
+        {
+          "title": "Entraînement aux triples",
+          "text": "Entraîne chaque triple de T20 à T1. Perfectionne tes gros scores."
+        },
+        {
+          "title": "Around the Clock",
+          "text": "Touche chaque numéro de 1 à 20 dans l'ordre. Chaque segment compte (simple, double, triple)."
+        },
+        {
+          "title": "Entraînement au checkout",
+          "text": "Entraîne les combinaisons de checkout courantes (40, 60, 80, etc.). Améliore ton taux de finish !"
+        },
+        {
+          "title": "Bob's 27",
+          "text": "Commence à 27 points. Cible touchée : +3 points. Ratée : -3 points.",
+          "goal": "<b>Objectif :</b> ne descends pas à 0 point !"
+        },
+        {
+          "title": "Entraînement au scoring",
+          "text": "Marque 60 points ou plus par volée. Gagne en régularité et en puissance !"
+        }
+      ],
+      "statsTitle": "Stats d'entraînement",
+      "stats": "Chaque session d'entraînement est enregistrée et intégrée à ta <b>heatmap</b> ! Suis ta progression dans les statistiques."
+    },
+    "stats": {
+      "heading": "Statistiques et analyses",
+      "heatmap": {
+        "title": "Heatmap",
+        "intro": "Une carte visuelle de tous tes lancers. Tu vois d'un coup d'œil :",
+        "items": [
+          "Les segments que tu touches le plus souvent",
+          "Tes points forts et tes points faibles",
+          "Comment tes touches se répartissent sur tous les matchs"
+        ]
+      },
+      "average": {
+        "title": "Graphiques de moyenne",
+        "text": "Suis l'évolution de ta moyenne dans le temps. Filtre par période (7/30/90/365 jours)."
+      },
+      "checkout": {
+        "title": "Statistiques de checkout",
+        "intro": "Analyse détaillée des checkouts :",
+        "items": [
+          "Pourcentage de checkout",
+          "Checkouts les plus fréquents",
+          "Meilleures combinaisons de checkout",
+          "Checkouts par double"
+        ]
+      },
+      "history": {
+        "title": "Historique des matchs",
+        "text": "Tous les matchs joués, avec les détails : adversaire, score, date, moyenne, 180. Touche un match pour des statistiques détaillées.",
+        "items": [
+          "<b>Recherche :</b> par adversaire, date ou type de partie",
+          "<b>Pagination :</b> parcours les résultats (10/20/50/100 par page)",
+          "<b>Historique des lancers :</b> la vue détaillée montre chaque lancer de chaque joueur"
+        ]
+      },
+      "export": {
+        "title": "Export",
+        "text": "Exporte tes stats dans plusieurs formats : CSV, Excel, PDF, JSON. Parfait pour tes propres analyses !"
+      }
+    },
+    "achievements": {
+      "heading": "Succès",
+      "intro": "Débloque <b>plus de 145 succès</b> en atteignant des étapes précises !",
+      "categoriesTitle": "Catégories de succès",
+      "categories": [
+        "<b>Débutant :</b> premiers pas (premier match, première victoire)",
+        "<b>Adresse :</b> 180, 171+, gros checkouts",
+        "<b>Régularité :</b> séries de victoires, legs parfaits",
+        "<b>Étapes :</b> 100 matchs, 1000 180",
+        "<b>Spécial :</b> 9-darter, finish au bullseye"
+      ],
+      "examplesTitle": "Exemples de succès",
+      "examples": [
+        {
+          "name": "Premiers pas",
+          "desc": "Ton premier match terminé"
+        },
+        {
+          "name": "Century",
+          "desc": "100 points ou plus en une volée"
+        },
+        {
+          "name": "Maximum",
+          "desc": "180 points (3x T20)"
+        },
+        {
+          "name": "Série en feu",
+          "desc": "5 parties gagnées d'affilée"
+        }
+      ],
+      "notifyTitle": "Notifications",
+      "notify": "Les succès sont débloqués et affichés automatiquement pendant le jeu ! Active le son et les notifications dans les Paramètres."
+    },
+    "settings": {
+      "heading": "Paramètres",
+      "audio": {
+        "title": "Audio et son",
+        "items": [
+          "<b>Volume de l'annonceur :</b> annonces professionnelles (scores, checkouts)",
+          "<b>Volume des effets :</b> impacts de fléchettes, succès",
+          "<b>Volumes séparés :</b> annonceur et effets se règlent indépendamment"
+        ]
+      },
+      "theme": {
+        "title": "Thème / apparence",
+        "text": "Choisis entre le <b>mode sombre</b> et le <b>mode clair</b>."
+      },
+      "language": {
+        "title": "Langue",
+        "text": "Langues disponibles : <b>Deutsch</b>, <b>English</b>, <b>Italiano</b>, <b>Español</b> et <b>Français</b>."
+      },
+      "pwa": {
+        "title": "Progressive Web App (PWA)",
+        "intro": "Installe l'app sur ton appareil :",
+        "items": [
+          "<b>iOS :</b> Safari → Partager → « Sur l'écran d'accueil »",
+          "<b>Android :</b> Chrome → menu → « Installer l'application »",
+          "<b>Ordinateur :</b> Chrome/Edge → barre d'adresse → icône d'installation"
+        ]
+      },
+      "data": {
+        "title": "Gestion des données",
+        "items": [
+          "<b>Profils :</b> passe d'un profil à l'autre",
+          "<b>Nouveau profil :</b> crée des environnements séparés",
+          "<b>Données de démo :</b> génère des données de test pour essayer"
+        ]
+      },
+      "danger": {
+        "title": "Zone de danger",
+        "text": "<b>Supprimer toutes les données :</b> attention ! Supprime définitivement tous les matchs, joueurs et statistiques."
+      }
+    },
+    "admin": {
+      "heading": "Administration",
+      "notice": "<b>Remarque :</b> cette zone n'est visible que par les administrateurs.",
+      "users": {
+        "title": "Gestion des utilisateurs",
+        "items": [
+          "Voir tous les utilisateurs inscrits",
+          "Gérer le statut d'abonnement",
+          "Accorder l'accès à vie",
+          "Retirer l'accès",
+          "Donner/retirer les droits admin"
+        ]
+      },
+      "subscriptions": {
+        "title": "Gestion des abonnements",
+        "intro": "Contrôle total des abonnements :",
+        "items": [
+          "Changer le statut : actif, essai, expiré, à vie",
+          "Changer la formule : mensuelle, annuelle, à vie",
+          "Définir une date d'expiration"
+        ]
+      },
+      "bugs": {
+        "title": "Gestion des signalements de bugs",
+        "items": [
+          "Voir tous les signalements",
+          "Changer le statut : ouvert → en cours → résolu",
+          "Ajouter des notes admin",
+          "Supprimer des signalements",
+          "Filtrer par statut/gravité"
+        ]
+      },
+      "stats": {
+        "title": "Statistiques",
+        "text": "Vue d'ensemble : total des utilisateurs, abonnements actifs, utilisateurs en essai, utilisateurs expirés."
+      }
+    },
+    "tips": {
+      "heading": "Astuces",
+      "beginners": {
+        "title": "Pour débuter",
+        "items": [
+          "Commence avec des <b>bots de niveau 1-3</b> pour t'entraîner",
+          "Utilise les <b>modes d'entraînement</b> pour travailler des points précis",
+          "Jette un œil à la <b>table des checkouts</b> (affichée pendant le jeu)",
+          "Active l'<b>annonceur audio</b> pour un meilleur retour"
+        ]
+      },
+      "stats": {
+        "title": "Exploiter tes stats",
+        "items": [
+          "Consulte ta <b>heatmap</b> pour repérer tes faiblesses",
+          "Suis ta <b>moyenne</b> dans le temps",
+          "Analyse ton <b>taux de checkout</b> par double",
+          "Exporte tes stats pour tes propres analyses"
+        ]
+      },
+      "input": {
+        "title": "Saisie rapide et annulation",
+        "items": [
+          "Après 3 fléchettes, la volée est confirmée automatiquement (délai de 600 ms)",
+          "<b>Bouton Annuler :</b> annule ton dernier lancer",
+          "<b>Annuler la fin du match :</b> un match terminé par erreur peut être repris",
+          "<b>Aperçu de l'historique :</b> l'annulation affiche un panneau avec les lancers retirés",
+          "<b>Recalcul des stats :</b> toutes les stats sont correctement mises à jour lors d'une annulation",
+          "Touche <b>« Raté »</b> pour une fléchette manquée (0 point)"
+        ]
+      },
+      "farm": {
+        "title": "Collectionner les succès",
+        "items": [
+          "Joue différents modes pour différents succès",
+          "Utilise l'<b>entraînement</b> pour les succès d'adresse",
+          "Parcours la <b>liste des succès</b> pour trouver l'inspiration"
+        ]
+      },
+      "report": {
+        "title": "Signaler un problème",
+        "text": "Tu as trouvé un bug ? Utilise le <b>bouton de signalement</b> (à côté d'Annuler pendant le jeu). Les captures d'écran sont prises automatiquement !"
+      },
+      "pro": {
+        "title": "Astuce de pro",
+        "text": "Crée des <b>profils</b> séparés pour différentes situations : famille, club, entraînement solo. Tes stats restent bien rangées !"
+      }
+    }
+  },
+  "global_leaderboard": {
+    "metric_average": "Meilleure moyenne",
+    "metric_average_short": "Moyenne",
+    "metric_wins": "Le plus de victoires",
+    "metric_wins_short": "Victoires",
+    "metric_180s": "Le plus de 180",
+    "metric_checkout": "Meilleur checkout",
+    "metric_checkout_short": "Checkout",
+    "metric_best_leg": "Meilleur leg",
+    "metric_best_leg_short": "Leg",
+    "value_wins_one": "{{count}} victoire",
+    "value_wins_other": "{{count}} victoires",
+    "value_wins_many": "{{count}} victoires",
+    "value_darts_one": "{{count}} fléchette",
+    "value_darts_other": "{{count}} fléchettes",
+    "value_darts_many": "{{count}} fléchettes",
+    "load_failed": "Impossible de charger le classement",
+    "rank": "Rang {{rank}}",
+    "to_login": "Vers la connexion",
+    "title": "Classement mondial",
+    "subtitle": "Les meilleurs joueurs du monde",
+    "refresh": "Actualiser",
+    "empty": "Aucune entrée pour l'instant",
+    "empty_hint": "Sois le premier au classement !",
+    "games_one": "{{count}} partie",
+    "games_other": "{{count}} parties",
+    "games_many": "{{count}} parties",
+    "entries_one": "{{count}} entrée",
+    "entries_other": "{{count}} entrées",
+    "entries_many": "{{count}} entrées",
+    "cta_title": "Tu veux apparaître au classement ?",
+    "cta_text": "Inscris-toi gratuitement et commence ton essai de 30 jours !",
+    "register": "S'inscrire maintenant",
+    "login": "Se connecter",
+    "metric_label": "Critère"
+  },
+  "heatmap": {
+    "exact_share": "{{exact}} fléchettes sur {{total}} enregistrées exactement.",
+    "exact_hint": "Les totaux saisis ne comptent pas – indique comment la volée a été lancée après coup, ou saisis les fléchettes une par une.",
+    "only_typed": "Uniquement des totaux saisis pour l'instant – ils ne disent pas quelles zones ont été touchées.",
+    "triple_rate": "Taux de triples",
+    "double_rate": "Taux de doubles",
+    "legend": "Légende de la heatmap",
+    "legend_hint": "Chaque zone est colorée selon la fréquence de tes touches. Les simples couvrent les deux zones simples d'un numéro, car l'app enregistre la zone, pas le point exact.",
+    "top_hotspots_one": "Top {{count}} zone chaude",
+    "top_hotspots_other": "Top {{count}} zones chaudes",
+    "top_hotspots_many": "Top {{count}} zones chaudes",
+    "hits_one": "{{count}} touche",
+    "hits_other": "{{count}} touches",
+    "hits_many": "{{count}} touches",
+    "miss": "Raté",
+    "bull": "Bull",
+    "outer_bull": "Bull extérieur",
+    "board_label": "Heatmap de la cible : {{hits}} fléchettes sur {{total}} dans la cible. La liste ci-dessous nomme chaque zone.",
+    "tap_hint": "Touche une zone pour les détails",
+    "misses_one": "{{count}} raté ({{pct}} %)",
+    "misses_other": "{{count}} ratés ({{pct}} %)",
+    "misses_many": "{{count}} ratés ({{pct}} %)",
+    "bull_rate": "Taux de bull",
+    "miss_rate": "Taux de ratés",
+    "zone_title": "Zone favorite",
+    "zone_left": "Gauche",
+    "zone_target": "La plus touchée",
+    "zone_right": "Droite",
+    "zone_hint": "Ton numéro le plus fort avec ses voisins — montre de quel côté tes fléchettes dérivent.",
+    "legend_none": "Pas touchée",
+    "legend_one": "1 touche",
+    "legend_max": "{{count}} touches ({{pct}} %)",
+    "all_beds_one": "{{count}} zone touchée en tout",
+    "all_beds_other": "Les {{count}} zones touchées",
+    "all_beds_many": "Les {{count}} zones touchées",
+    "show_all": "Afficher les {{count}} zones",
+    "show_less": "Afficher moins"
+  },
+  "leaderboard": {
+    "cat_average": "Meilleure moyenne",
+    "cat_wins": "Le plus de victoires",
+    "cat_win_rate": "Taux de victoire",
+    "cat_180s": "Le plus de 180",
+    "cat_checkout_rate": "Taux de checkout",
+    "cat_achievements": "Succès",
+    "cat_total_points": "Points au total",
+    "title": "Classement",
+    "empty": "Aucune donnée pour l'instant",
+    "empty_hint": "Joue quelques matchs pour apparaître au classement !",
+    "games_one": "{{count}} partie",
+    "games_other": "{{count}} parties",
+    "games_many": "{{count}} parties",
+    "rank": "Place {{rank}}",
+    "active_players": "Joueurs actifs",
+    "avg_games": "Ø parties",
+    "total_180s": "Total de 180",
+    "total_achievements": "Total des succès",
+    "category_label": "Catégorie"
+  },
+  "match_detail_extra": {
+    "average": "Moyenne",
+    "highest_score": "Meilleur score",
+    "checkout_rate": "Checkout %",
+    "leg": "Leg {{n}}"
+  },
+  "match_history_page": {
+    "average": "Moyenne",
+    "legs": "Legs",
+    "high": "Max",
+    "checkout_rate": "Checkout %",
+    "loading": "Chargement…",
+    "previous": "Page précédente"
+  },
+  "match_list": {
+    "search_placeholder": "Rechercher par adversaire, date ou type de partie...",
+    "show": "Afficher :",
+    "per_page": "Entrées par page",
+    "of_matches_one": "sur {{count}} match",
+    "of_matches_other": "sur {{count}} matchs",
+    "of_matches_many": "sur {{count}} matchs",
+    "previous_page": "Page précédente",
+    "next_page": "Page suivante",
+    "none_found": "Aucun match trouvé",
+    "none_played": "Aucune partie jouée pour l'instant",
+    "none_found_for": "Aucun match trouvé pour « {{query}} »",
+    "win": "VICTOIRE",
+    "loss": "DÉFAITE",
+    "unknown": "Inconnu",
+    "score": "Score : {{own}} - {{opponent}}",
+    "avg": "Moy. : {{value}}",
+    "high": "Max : {{value}}",
+    "round_chart": "Historique par tour",
+    "loading_details": "Chargement des détails du match...",
+    "round": "Tour",
+    "points": "Points",
+    "points_value_one": "{{count}} point",
+    "points_value_other": "{{count}} points",
+    "points_value_many": "{{count}} points",
+    "no_rounds": "Aucune donnée par tour disponible",
+    "no_rounds_hint": "Ce match a sans doute été joué avant la mise à jour du suivi",
+    "average": "Moyenne",
+    "highest_score": "Meilleur score",
+    "checkout_rate": "Checkout %",
+    "leg_details": "Détails des legs",
+    "leg_label": "Leg {{n}} :"
+  },
+  "player_profile": {
+    "skill_average": "Moyenne",
+    "skill_checkout": "Checkout",
+    "skill_consistency": "Régularité",
+    "skill_achievements": "Succès",
+    "not_found": "Joueur introuvable",
+    "wins_count_one": "{{count}} victoire",
+    "wins_count_other": "{{count}} victoires",
+    "wins_count_many": "{{count}} victoires",
+    "points_count_one": "{{count}} point",
+    "points_count_other": "{{count}} points",
+    "points_count_many": "{{count}} points",
+    "achievements_count": "{{unlocked}}/{{total}} succès",
+    "games": "Parties",
+    "win_rate": "Taux de victoire",
+    "best_avg": "Meilleure moy.",
+    "total_180s": "Total de 180",
+    "personal_bests": "Records personnels",
+    "highest_score": "Meilleur score",
+    "best_average": "Meilleure moyenne",
+    "most_180s": "Le plus de 180",
+    "highest_checkout": "Meilleur checkout",
+    "best_checkout_rate": "Meilleur taux de checkout",
+    "shortest_leg": "Leg le plus court",
+    "darts_count_one": "{{count}} fléchette",
+    "darts_count_other": "{{count}} fléchettes",
+    "darts_count_many": "{{count}} fléchettes",
+    "longest_streak": "Plus longue série de victoires",
+    "streak_unit_one": "partie",
+    "streak_unit_other": "parties",
+    "streak_unit_many": "parties",
+    "most_legs_won": "Le plus de legs gagnés",
+    "performance_trend": "Tendance des performances",
+    "average": "Moyenne",
+    "checkout_rate": "Checkout %",
+    "no_matches": "Aucun match joué pour l'instant",
+    "skill_profile": "Profil de compétences",
+    "skills": "Compétences",
+    "throw_heatmap": "Heatmap des lancers",
+    "miss_rate": "Taux de ratés",
+    "triple_rate": "Taux de triples",
+    "double_rate": "Taux de doubles",
+    "favorite_segment": "Zone favorite",
+    "total_darts": "Total de fléchettes",
+    "no_throw_data": "Aucune donnée de lancer pour l'instant",
+    "no_throw_data_hint": "Joue un match pour voir ta heatmap des lancers !",
+    "heatmap_explainer": "La heatmap montre où tu touches le plus souvent :",
+    "hot_zones": "Zones chaudes (souvent touchées)",
+    "cold_zones": "Zones froides (rarement touchées)",
+    "recent_achievements": "Derniers succès ({{unlocked}}/{{total}})",
+    "show_all_achievements": "Afficher les {{count}} succès →",
+    "career": "Carrière",
+    "first_game": "Première partie",
+    "last_game": "Dernière partie",
+    "wins": "Victoires",
+    "losses": "Défaites",
+    "legs_won": "Legs gagnés",
+    "checkouts": "Checkouts"
+  },
+  "stats_overview": {
+    "all_recorded_darts": "Toutes les fléchettes enregistrées",
+    "average": "Moyenne",
+    "average_long": "Moyenne",
+    "average_trend": "Tendance de la moyenne",
+    "best_avg": "Meilleure moy.",
+    "category": "Catégorie",
+    "checkout_quote": "Taux de checkout",
+    "checkout_rate": "Checkout %",
+    "checkout_rate_long": "Taux de checkout",
+    "cold_zones": "Zones froides",
+    "consistency": "Régularité",
+    "create_player": "Créer un joueur",
+    "current_label": "Actuel :",
+    "daily": "Par jour",
+    "difference_label": "Différence :",
+    "distinct_beds": "Zones différentes",
+    "experience": "Expérience",
+    "export": "Exporter",
+    "export_csv": "Export CSV",
+    "export_excel": "Export Excel",
+    "export_pdf": "Export PDF",
+    "games": "Parties",
+    "head_to_head": "Face-à-face",
+    "heatmap_explainer": "La heatmap montre d'un coup d'œil où tu touches le plus souvent :",
+    "heatmap_subtitle": "Chaque lancer visualisé pour",
+    "heatmap_tab": "Heatmap",
+    "high_checkout": "Meilleur checkout",
+    "highest_score": "Meilleur score",
+    "highest_scores": "Meilleurs scores",
+    "historic_label": "Historique :",
+    "history_tab": "Historique ({{count}})",
+    "hit_often": "(souvent touchées)",
+    "hit_rarely": "(rarement touchées)",
+    "hot_zones": "Zones chaudes",
+    "improvement_trend": "Tendance de progression",
+    "legs_lost": "Legs perdus",
+    "legs_won": "Legs gagnés",
+    "legs_won_vs_lost": "Legs gagnés vs perdus",
+    "lost": "Perdus",
+    "match_history": "Historique des matchs",
+    "maximum_scores": "Scores maximum",
+    "monthly": "Par mois",
+    "nine_darters": "9-darters",
+    "no_game_data": "Aucune donnée de partie pour l'instant",
+    "no_game_data_hint": "Joue quelques matchs pour voir des graphiques et des statistiques détaillés",
+    "no_games_for_player": "Aucune partie pour ce joueur pour l'instant",
+    "no_games_for_player_hint": "Joue quelques matchs pour voir ta progression",
+    "no_matches": "Aucun match joué pour l'instant",
+    "no_matches_hint": "Lance une partie pour voir ton historique",
+    "no_players": "Aucun joueur pour l'instant",
+    "no_players_hint": "Crée des joueurs pour les comparer",
+    "no_stats": "Aucune statistique disponible",
+    "no_stats_hint": "Crée un joueur et joue quelques matchs pour voir des statistiques",
+    "no_throw_data": "Aucune donnée de lancer pour l'instant",
+    "no_throw_data_hint": "Joue un match pour voir ta heatmap des lancers !",
+    "no_time_series": "Aucune série temporelle disponible",
+    "no_time_series_hint": "Les données de match n'ont pas d'horodatage valide. Les nouveaux matchs sont enregistrés correctement.",
+    "no_timestamps": "(Pas d'horodatage valide dans les données de match)",
+    "performance": "Performance",
+    "performance_comparison": "Comparaison des performances",
+    "performance_profile": "Profil de performance",
+    "pick_at_least": "Choisis au moins {{min}} joueurs à comparer",
+    "pick_hint": "Clique sur les joueurs ci-dessus pour les sélectionner",
+    "player_label": "Joueur :",
+    "precision": "Précision",
+    "score": "Score",
+    "score_distribution": "Répartition des scores",
+    "score_distribution_per_match": "Répartition des scores par match",
+    "scores_100": "Scores 100+",
+    "scores_140": "Scores 140+",
+    "scores_60": "Scores 60+",
+    "segments_hit": "Segments touchés",
+    "select_players_max": "Choisir les joueurs (max. {{max}})",
+    "selected": "Sélectionnés",
+    "single_datapoint": "(Un seul point de données – joue davantage pour voir une tendance !)",
+    "stats_comparison": "Comparaison des statistiques",
+    "throw_heatmap": "Heatmap des lancers",
+    "time_range": "Période",
+    "total_throws": "Total des lancers",
+    "trend_declining": "Léger recul",
+    "trend_improving": "Tu progresses !",
+    "trend_over_time": "Tendance dans le temps",
+    "trend_stable": "Performance stable",
+    "week_key": "{{year}} S{{week}}",
+    "weekly": "Par semaine",
+    "win_rate": "Taux de victoire",
+    "win_rate_percent": "Taux de victoire %",
+    "won_of": "{{won}} gagnés sur {{total}}",
+    "win_stats": "Statistiques de victoires",
+    "wins": "Victoires",
+    "won": "Gagnés",
+    "yearly": "Par an",
+    "export_failed": "L'export a échoué."
+  },
+  "throw_chart": {
+    "scored_per_visit": "Points marqués par volée",
+    "remaining_points": "Points restants",
+    "visit": "Volée",
+    "points": "Points",
+    "remaining": "Restant"
+  },
+  "training_stats": {
+    "type_doubles": "Doubles",
+    "type_triples": "Triples",
+    "type_singles": "Simples",
+    "type_score_training": "Entraînement au scoring",
+    "title": "Statistiques d'entraînement",
+    "select_prompt": "Choisis un joueur pour voir ses statistiques d'entraînement.",
+    "no_players": "Aucun joueur pour l'instant.",
+    "create_player": "Créer un joueur",
+    "select_player": "Choisir un joueur :",
+    "select_player_placeholder": "Choisis un joueur...",
+    "player": "Joueur",
+    "player_label": "Joueur :",
+    "filter_label": "Filtre :",
+    "mode": "Mode d'entraînement",
+    "all_modes": "Tous les modes",
+    "sort_label": "Trier :",
+    "sort_date": "Date",
+    "score": "Score",
+    "accuracy": "Précision",
+    "accuracy_percent": "Précision %",
+    "sessions": "Sessions",
+    "avg_score": "Ø score",
+    "avg_accuracy": "Ø précision",
+    "personal_bests": "Records personnels",
+    "performance_history": "Historique des performances",
+    "mode_distribution": "Répartition des modes d'entraînement",
+    "session_history": "Historique des sessions",
+    "no_sessions": "Aucune session d'entraînement pour l'instant",
+    "pb": "Record",
+    "attempts": "Tentatives",
+    "time": "Temps"
+  },
+  "admin_panel": {
+    "load_failed": "Impossible de charger les données admin",
+    "error_lifetime_with_end_date": "Les abonnements à vie ne doivent pas avoir de date de fin.",
+    "error_past_end_date": "La date de fin doit être dans le futur.",
+    "admin_badge": "Admin",
+    "debug_screenshot_alt": "Capture d'écran du debug flag"
+  },
+  "auth_callback": {
+    "failed": "Échec de l'authentification",
+    "signing_in": "Connexion en cours…",
+    "redirecting": "Redirection en cours"
+  },
+  "avatar_picker": {
+    "group_darts": "Fléchettes",
+    "group_awards": "Récompenses",
+    "group_energy": "Énergie",
+    "group_figures": "Personnages",
+    "group_other": "Autres",
+    "group_many": "Autres",
+    "nothing_found": "Aucun résultat",
+    "group_animals": "Animaux",
+    "group_fantasy": "Fantastique",
+    "group_sport": "Sport et jeux",
+    "group_pub": "Bar",
+    "group_music": "Musique et fête",
+    "group_nature": "Nature et espace",
+    "group_symbols": "Symboles",
+    "group_vehicles": "Véhicules",
+    "gi": {
+      "wolf-head": "Loup",
+      "fox-head": "Renard",
+      "bear-head": "Ours",
+      "lion": "Lion",
+      "tiger-head": "Tigre",
+      "eagle-head": "Aigle",
+      "barn-owl": "Chouette",
+      "raven": "Corbeau",
+      "deer-head": "Cerf",
+      "horse-head": "Cheval",
+      "bull": "Taureau",
+      "boar": "Sanglier",
+      "gorilla": "Gorille",
+      "panda": "Panda",
+      "rabbit-head": "Lapin",
+      "penguin": "Pingouin",
+      "frog": "Grenouille",
+      "octopus": "Pieuvre",
+      "shark-jaws": "Requin",
+      "dolphin": "Dauphin",
+      "turtle": "Tortue",
+      "snake": "Serpent",
+      "bee": "Abeille",
+      "cat": "Chat",
+      "sitting-dog": "Chien",
+      "monkey": "Singe",
+      "elephant-head": "Éléphant",
+      "unicorn": "Licorne",
+      "saber-toothed-cat-head": "Tigre à dents de sabre",
+      "polar-bear": "Ours polaire",
+      "rooster": "Coq",
+      "hedgehog": "Hérisson",
+      "seahorse": "Hippocampe",
+      "jellyfish": "Méduse",
+      "dragon-head": "Dragon",
+      "spiked-dragon-head": "Dragon à piques",
+      "werewolf": "Loup-garou",
+      "wizard-face": "Sorcier",
+      "griffin-symbol": "Griffon",
+      "kraken-tentacle": "Tentacule",
+      "crowned-skull": "Crâne couronné",
+      "floating-ghost": "Fantôme",
+      "alien-stare": "Extraterrestre",
+      "vintage-robot": "Robot",
+      "robot-golem": "Golem",
+      "ninja-head": "Ninja",
+      "viking-head": "Viking",
+      "pirate-captain": "Pirate",
+      "black-knight-helm": "Chevalier noir",
+      "samurai-helmet": "Samouraï",
+      "elf-helmet": "Elfe",
+      "dwarf-helmet": "Nain",
+      "crystal-ball": "Boule de cristal",
+      "witch-face": "Sorcière",
+      "vampire-dracula": "Vampire",
+      "imp-laugh": "Diablotin",
+      "cyclops": "Cyclope",
+      "goblin-head": "Gobelin",
+      "pumpkin-lantern": "Citrouille",
+      "astronaut-helmet": "Astronaute",
+      "dart": "Fléchette",
+      "archery-target": "Cible",
+      "bullseye": "Bullseye",
+      "trophy-cup": "Trophée",
+      "laurels-trophy": "Trophée de lauriers",
+      "medal": "Médaille",
+      "sport-medal": "Médaille sportive",
+      "dice-six-faces-six": "Dé",
+      "dice-twenty-faces-twenty": "D20",
+      "chess-king": "Roi d'échecs",
+      "chess-knight": "Cavalier d'échecs",
+      "chess-queen": "Dame d'échecs",
+      "joystick": "Joystick",
+      "bowling-strike": "Strike",
+      "basketball-ball": "Basket",
+      "soccer-ball": "Football",
+      "american-football-helmet": "Casque de football américain",
+      "tennis-racket": "Tennis",
+      "ping-pong-bat": "Tennis de table",
+      "boxing-glove": "Gant de boxe",
+      "pool-triangle": "Billard",
+      "hockey": "Hockey sur glace",
+      "skateboard": "Skateboard",
+      "weight-lifting-up": "Haltérophilie",
+      "checkered-flag": "Drapeau à damier",
+      "beer-stein": "Chope de bière",
+      "beer-bottle": "Bouteille de bière",
+      "beer-horn": "Corne à boire",
+      "coffee-mug": "Café",
+      "full-pizza": "Pizza",
+      "hamburger": "Burger",
+      "hot-dog": "Hot-dog",
+      "martini": "Martini",
+      "wine-glass": "Vin",
+      "cupcake": "Cupcake",
+      "donut": "Donut",
+      "french-fries": "Frites",
+      "pretzel": "Bretzel",
+      "popcorn": "Pop-corn",
+      "cherry": "Cerises",
+      "shiny-apple": "Pomme",
+      "strawberry": "Fraise",
+      "banana": "Banane",
+      "guitar": "Guitare",
+      "drum": "Tambour",
+      "microphone": "Micro",
+      "musical-notes": "Notes",
+      "headphones": "Casque audio",
+      "drama-masks": "Masques de théâtre",
+      "carnival-mask": "Masque de carnaval",
+      "sunglasses": "Lunettes de soleil",
+      "party-popper": "Cotillon",
+      "balloons": "Ballons",
+      "magic-hat": "Chapeau de magicien",
+      "flame": "Flamme",
+      "fluffy-flame": "Boule de feu",
+      "heavy-lightning": "Éclair",
+      "sun": "Soleil",
+      "moon": "Lune",
+      "ringed-planet": "Planète",
+      "rocket": "Fusée",
+      "falling-star": "Étoile filante",
+      "mushroom": "Champignon",
+      "cactus": "Cactus",
+      "palm-tree": "Palmier",
+      "pine-tree": "Sapin",
+      "snowflake-1": "Flocon de neige",
+      "tornado": "Tornade",
+      "wave-crest": "Vague",
+      "crystal-cluster": "Cristaux",
+      "volcano": "Volcan",
+      "clover": "Trèfle",
+      "sunflower": "Tournesol",
+      "rose": "Rose",
+      "crown": "Couronne",
+      "imperial-crown": "Couronne impériale",
+      "crossed-swords": "Épées croisées",
+      "shield": "Bouclier",
+      "anchor": "Ancre",
+      "compass": "Boussole",
+      "skull-crossed-bones": "Tête de mort",
+      "hearts": "Cœur",
+      "spades": "Pique",
+      "clubs": "Trèfle (carte)",
+      "diamonds": "Carreau",
+      "yin-yang": "Yin et yang",
+      "peace-dove": "Colombe de la paix",
+      "diamond-hard": "Pierre précieuse",
+      "gem-pendant": "Bijou",
+      "hourglass": "Sablier",
+      "key": "Clé",
+      "eye-target": "Œil",
+      "infinity": "Infini",
+      "lightning-trio": "Triple éclair",
+      "race-car": "Voiture de course",
+      "scooter": "Scooter",
+      "spaceship": "Vaisseau spatial",
+      "paper-plane": "Avion en papier",
+      "sailboat": "Voilier",
+      "steam-locomotive": "Locomotive à vapeur",
+      "helicopter": "Hélicoptère",
+      "submarine": "Sous-marin",
+      "ufo": "OVNI",
+      "dutch-bike": "Vélo",
+      "police-car": "Voiture de police"
+    },
+    "credit": "Nombreuses icônes : game-icons.net par {{authors}} · CC BY 3.0",
+    "kind": "Type d'avatar",
+    "tab_icons": "Icônes",
+    "tab_emoji": "Emoji",
+    "skin_tone": "Teint",
+    "tone_0": "Neutre",
+    "tone_1": "Clair",
+    "tone_2": "Moyennement clair",
+    "tone_3": "Moyen",
+    "tone_4": "Moyennement foncé",
+    "tone_5": "Foncé",
+    "emoji_group_smileys": "Smileys",
+    "emoji_group_people": "Personnes",
+    "emoji_group_nature": "Animaux et nature",
+    "emoji_group_food": "Nourriture et boissons",
+    "emoji_group_travel": "Voyages et lieux",
+    "emoji_group_activities": "Activités",
+    "emoji_group_objects": "Objets",
+    "emoji_group_symbols": "Symboles",
+    "emoji_group_flags": "Drapeaux"
+  },
+  "back_to_landing": {
+    "label": "Retour à l'accueil"
+  },
+  "footer": {
+    "imprint": "Mentions légales",
+    "privacy": "Confidentialité",
+    "terms": "Conditions",
+    "github_profile": "Profil GitHub",
+    "version": "Version {{version}}"
+  },
+  "forgot_password": {
+    "failed": "Impossible d'envoyer l'e-mail",
+    "sent_title": "E-mail envoyé !",
+    "sent_body": "Nous avons envoyé un e-mail à <strong>{{email}}</strong>. Suis les instructions pour réinitialiser ton mot de passe.",
+    "subtitle": "Pas de souci ! On va t'aider.",
+    "back_to_login": "Retour à la connexion",
+    "intro": "Saisis ton adresse e-mail et nous t'enverrons un lien pour réinitialiser ton mot de passe.",
+    "sending": "Envoi de l'e-mail…",
+    "submit": "Envoyer le lien"
+  },
+  "landing": {
+    "hero_badge": "Pour téléphone, tablette et TV",
+    "hero_title": "Tu lances. On compte.",
+    "hero_body": "State of the Dart fait les calculs à chaque volée, te suggère ton finish et retient chaque fléchette. Pour le 501, le Cricket, l'entraînement et les matchs en ligne, dans le navigateur ou en app.",
+    "have_account": "Tu as déjà un compte ?",
+    "modes_title": "Cinq façons de jouer",
+    "modes_body": "Chaque mode compte, vérifie et se termine selon ses propres règles — busts, double out et sets compris.",
+    "mode_x01_title": "X01",
+    "mode_x01_text": "301 · 501 · 701 avec sets, legs, double out et suggestions de checkout.",
+    "mode_cricket_title": "Cricket",
+    "mode_cricket_text": "De 15 à 20 et le bull — ferme-les, marque, verrouille.",
+    "mode_atc_title": "Around the Clock",
+    "mode_atc_text": "De 1 à 20 dans l'ordre. Le classique de la précision.",
+    "mode_shanghai_title": "Shanghai",
+    "mode_shanghai_text": "Simple, double et triple du même numéro — la victoire immédiate.",
+    "mode_online_title": "En ligne",
+    "mode_online_text": "Salon privé par code, adversaires partout, synchronisé en direct.",
+    "features_title": "Et ensuite",
+    "features_body": "Compter n'est que le début. Ça devient intéressant quand les lancers s'accumulent.",
+    "feature_stats_title": "Des statistiques qui ont du sens",
+    "feature_stats_text": "Moyenne, first 9, taux de checkout, 180, progression par leg et par match — pas juste un chiffre à la fin.",
+    "feature_heatmaps_title": "Heatmaps",
+    "feature_heatmaps_text": "Où tes fléchettes atterrissent-elles vraiment ? La répartition de tes touches sur la cible, au fil des semaines.",
+    "feature_achievements_title_one": "{{count}} succès",
+    "feature_achievements_title_other": "{{count}} succès",
+    "feature_achievements_title_many": "{{count}} succès",
+    "feature_achievements_text": "Du « premier 180 » aux séries sur plusieurs mois. Avec des barres de progression plutôt que des pop-ups surprises.",
+    "feature_bots_title_one": "{{count}} niveau de bot",
+    "feature_bots_title_other": "{{count}} niveaux de bot",
+    "feature_bots_title_many": "{{count}} niveaux de bot",
+    "feature_bots_text": "Du débutant au pro — le bot s'adapte à ton niveau si tu le veux.",
+    "feature_training_title_one": "{{count}} mode d'entraînement",
+    "feature_training_title_other": "{{count}} modes d'entraînement",
+    "feature_training_title_many": "{{count}} modes d'entraînement",
+    "feature_training_text": "Doubles, triples, Around the Clock, Checkout 121, Bob’s 27 et entraînement au scoring.",
+    "feature_profiles_title": "Plusieurs profils",
+    "feature_profiles_text": "Un compte, des profils séparés — club, famille ou juste toi. Les données restent bien séparées.",
+    "offline_title": "Pas de Wi-Fi à la cave. L'app s'en fiche.",
+    "offline_body": "Installe-la comme une app sur ton téléphone. Un match en cours est gardé en local et se synchronise dès que tu es de nouveau en ligne — abandonner en plein leg, pas question.",
+    "cta_title": "Leg suivant ?",
+    "cta_body": "Crée un compte, ajoute tes joueurs, commence à lancer. Tes statistiques grandissent à chaque fléchette.",
+    "join_email": "S'inscrire par e-mail",
+    "join_google": "Continuer avec Google",
+    "trial_note": "30 jours avec tout, puis tu continues gratuitement. Aucun moyen de paiement requis.",
+    "demo_label": "Exemple : un nine-darter, {{darts}} fléchettes avec une moyenne de {{average}}. Le tableau compte en direct et suggère le finish T20, T19, D12 à 141.",
+    "demo_remaining": "Reste",
+    "demo_visit": "Volée",
+    "demo_checkout": "Finish",
+    "demo_gameshot": "Game shot !",
+    "demo_stats": "{{darts}} fléchettes · moyenne {{average}}",
+    "screens_title": "À quoi ça ressemble en partie",
+    "screens_body": "De vrais écrans de l'app, pas une maquette.",
+    "screen_desktop_title": "Sur un ordinateur portable",
+    "screen_desktop_text": "Joueurs, saisie et cible d'un coup d'œil.",
+    "screen_desktop_alt": "Un 301 en cours sur un ordinateur portable : trois joueurs, Ben au pas de tir avec 141 restants et le finish suggéré T20, T19, D12.",
+    "screen_phone_title": "Sur un téléphone",
+    "screen_phone_text": "Tout sur un seul écran, même à huit joueurs.",
+    "screen_phone_alt": "Une partie en cours sur un téléphone : les joueurs en haut, le pavé numérique en dessous.",
+    "screen_tv_title": "Sur la TV",
+    "screen_tv_text": "Le grand tableau des scores pour toute la pièce.",
+    "screen_tv_alt": "Le tableau des scores TV avec le joueur au pas de tir et le classement à côté.",
+    "demo_rules": "501 · double out"
+  },
+  "login": {
+    "failed": "Échec de la connexion",
+    "or": "Ou"
+  },
+  "payment_success": {
+    "title": "Paiement réussi !",
+    "body": "Merci pour ta confiance ! Ton abonnement est maintenant actif et tu as accès à toutes les fonctions.",
+    "to_app": "Aller à l'app",
+    "to_settings": "Aller aux paramètres",
+    "tip": "Astuce : tu peux gérer ton abonnement à tout moment dans les paramètres."
+  },
+  "player_management": {
+    "avatar_label": "Choisis un avatar (facultatif – remplace l'initiale)",
+    "remove": "Retirer",
+    "no_avatar": "Aucun avatar choisi",
+    "choose_avatar": "Choisir un avatar",
+    "no_results": "Aucun joueur trouvé",
+    "no_results_for": "Aucun joueur trouvé pour « {{query}} »",
+    "to_profile": "Ouvrir le profil",
+    "change_avatar": "Changer d'avatar",
+    "main_profile": "Profil principal",
+    "stats_line_one": "{{count}} partie · Ø {{avg}}",
+    "stats_line_other": "{{count}} parties · Ø {{avg}}",
+    "stats_line_many": "{{count}} parties · Ø {{avg}}",
+    "show_stats": "Afficher les statistiques",
+    "more_actions": "Plus d'actions pour {{name}}",
+    "set_main_profile": "Définir comme profil principal",
+    "delete_confirm": "Supprimer le joueur « {{name}} » ?"
+  },
+  "pricing": {
+    "checkout_failed": "Le paiement a échoué",
+    "title": "Choisis ta formule",
+    "upgrade_or_manage": "Passer à la version supérieure ou gérer",
+    "trial_left_one": "Il te reste <strong>{{count}} jour</strong> d'essai",
+    "trial_left_other": "Il te reste <strong>{{count}} jours</strong> d'essai",
+    "trial_left_many": "Il te reste <strong>{{count}} jours</strong> d'essai",
+    "start_free": "Commence maintenant avec 30 jours gratuits",
+    "monthly": "Mensuel",
+    "monthly_desc": "Flexible, résiliable à tout moment",
+    "monthly_price": "4,99 €",
+    "per_month": "/mois",
+    "redirecting": "Redirection…",
+    "subscribe_monthly": "S'abonner au mois",
+    "best_value": "MEILLEURE OFFRE",
+    "lifetime": "À vie",
+    "lifetime_desc": "Paiement unique",
+    "lifetime_price": "29,99 €",
+    "lifetime_saving": "Économise plus de 50 % par rapport à 6 mois",
+    "lifetime_access": "Accès à vie",
+    "buy_lifetime": "Acheter l'accès à vie",
+    "faq_title": "Questions fréquentes",
+    "faq_cancel_q": "Puis-je résilier à tout moment ?",
+    "faq_cancel_a": "Oui ! Tu peux résilier la formule mensuelle à tout moment. Tu gardes l'accès complet jusqu'à la fin de la période de facturation.",
+    "faq_after_trial_q": "Que se passe-t-il après l'essai ?",
+    "faq_after_trial_a": "Après 30 jours, tu continues à jouer gratuitement : X01, Cricket, Around the Clock et Shanghai à 2 joueurs par partie, 3 joueurs à toi, des bots jusqu'au niveau 5, deux modes d'entraînement et tes 20 dernières parties dans les statistiques. Un abonnement ou l'accès à vie débloque tout à nouveau. Tes données restent enregistrées.",
+    "faq_payment_methods_q": "Quels moyens de paiement sont acceptés ?",
+    "faq_payment_methods_a": "Nous acceptons toutes les grandes cartes bancaires, le prélèvement SEPA et d'autres moyens de paiement via Stripe.",
+    "faq_secure_q": "Mon paiement est-il sécurisé ?",
+    "faq_secure_a": "Oui ! Tous les paiements sont traités par Stripe – l'un des prestataires de paiement les plus sûrs au monde. Nous ne stockons aucune donnée de carte bancaire."
+  },
+  "protected_route": {
+    "verification_required": "Vérification de l'e-mail requise",
+    "confirm_email": "Confirme ton adresse e-mail <strong>{{email}}</strong> pour continuer.",
+    "check_spam": "Nous t'avons envoyé un e-mail avec un lien de vérification. Pense aussi à vérifier tes spams.",
+    "resend": "Renvoyer l'e-mail de vérification",
+    "reload": "Recharger la page",
+    "other_account": "Se connecter avec un autre compte"
+  },
+  "register": {
+    "password_too_short": "Le mot de passe doit contenir au moins 8 caractères",
+    "passwords_mismatch": "Les mots de passe ne correspondent pas",
+    "failed": "Échec de l'inscription",
+    "success_title": "Inscription réussie !",
+    "success_body": "Nous avons envoyé un e-mail à <strong>{{email}}</strong>. Vérifie ton adresse e-mail pour continuer.",
+    "to_login": "Aller à la connexion",
+    "resend": "Pas reçu l'e-mail ? Renvoie-le",
+    "subtitle": "Crée ton compte gratuit",
+    "trial_hint": "Essaie-le <strong>gratuitement pendant 30 jours</strong> !",
+    "password_placeholder": "Au moins 8 caractères",
+    "confirm_placeholder": "Répète le mot de passe",
+    "creating": "Création du compte…",
+    "submit": "S'inscrire gratuitement",
+    "sign_in_now": "Se connecter maintenant"
+  },
+  "resend_verification": {
+    "sent_body": "Nous avons envoyé un nouvel e-mail de vérification à <strong>{{email}}</strong>. Vérifie ta boîte de réception.",
+    "title": "Renvoyer l'e-mail de vérification",
+    "intro": "Pas reçu l'e-mail ? Saisis ton adresse e-mail et nous t'enverrons un nouveau lien de vérification.",
+    "submit": "Renvoyer"
+  },
+  "reset_password": {
+    "invalid_token": "Lien de réinitialisation invalide",
+    "failed": "Impossible de réinitialiser ton mot de passe",
+    "invalid_title": "Lien invalide",
+    "invalid_body": "Ce lien de réinitialisation est invalide ou a expiré.",
+    "request_new": "Demander un nouveau lien",
+    "success_title": "Mot de passe modifié avec succès !",
+    "redirecting": "Tu vas être redirigé automatiquement vers la connexion…",
+    "title": "Définir un nouveau mot de passe",
+    "submit": "Changer le mot de passe"
+  },
+  "settings_page": {
+    "app_standalone": "L'app fonctionne comme application autonome.",
+    "language_label": "Langue / Language",
+    "language_instant": "Les changements de langue s'appliquent immédiatement",
+    "export_json": "Exporter (JSON)",
+    "import_json": "Importer (JSON)",
+    "active_profile": "Profil actif",
+    "bug_screenshot_alt": "Capture d'écran du signalement",
+    "browser_info": "Informations du navigateur",
+    "user_agent": "User agent :",
+    "screen": "Écran :",
+    "viewport": "Fenêtre :"
+  },
+  "tenant_selector": {
+    "title": "Choisis ton profil",
+    "subtitle": "Tes stats et tes parties sont enregistrées séparément",
+    "empty_title": "Aucun profil pour l'instant",
+    "empty_body": "Crée ton premier profil pour commencer",
+    "last_active": "Dernière activité : {{date}}",
+    "delete_profile": "Supprimer le profil",
+    "delete_confirm": "Vraiment supprimer le profil « {{name}} » ?",
+    "delete_warning": "Toutes les données seront définitivement perdues !",
+    "create_new": "Créer un nouveau profil",
+    "new_profile": "Nouveau profil",
+    "choose_avatar": "Choisir un avatar",
+    "profile_name": "Nom du profil",
+    "name_placeholder": "Ton nom…",
+    "create": "Créer le profil"
+  },
+  "user_settings": {
+    "avatar": "Avatar",
+    "profile_updated": "Profil mis à jour avec succès !",
+    "profile_update_failed": "Impossible de mettre à jour ton profil",
+    "email_updated": "E-mail mis à jour ! Vérifie ta nouvelle adresse e-mail.",
+    "email_update_failed": "Impossible de mettre à jour ton e-mail",
+    "delete_failed": "Impossible de supprimer ton compte",
+    "portal_no_payments": "Tu n'as encore effectué aucun paiement. Le portail client est réservé aux clients payants.",
+    "portal_failed": "Impossible d'ouvrir le portail client",
+    "title": "Paramètres du compte",
+    "google_avatar_locked": "Avatar Google (non modifiable)",
+    "click_to_change_avatar": "Clique pour changer ton avatar",
+    "change_email_hint": "Pour changer ton e-mail, utilise la section ci-dessous",
+    "saving": "Enregistrement…",
+    "subscription_desc": "Gère ta formule, change de moyen de paiement ou résilie.",
+    "opening_portal": "Ouverture du portail…",
+    "open_portal": "Ouvrir le portail client",
+    "new_email": "Nouvel e-mail",
+    "new_email_placeholder": "nouveau@email.com",
+    "current_password_placeholder": "Ton mot de passe actuel",
+    "email_change_logout_hint": "Tu seras déconnecté et devras vérifier ta nouvelle adresse e-mail.",
+    "updating": "Mise à jour…",
+    "delete_explanation": "Supprimer ton compte <strong>efface définitivement toutes tes données</strong>. Cela inclut matchs, stats, succès, records personnels, profils et joueurs.",
+    "delete_warning": "ATTENTION : cette action est irréversible !",
+    "password_to_confirm": "Mot de passe pour confirmer",
+    "deleting": "Suppression…",
+    "delete_permanently": "Supprimer définitivement"
+  },
+  "verify_email": {
+    "no_token": "Aucun jeton de vérification trouvé",
+    "failed": "Échec de la vérification",
+    "verifying": "Vérification de l'e-mail…",
+    "please_wait": "Patiente un instant",
+    "trial_started": "Ton essai de 30 jours a commencé ! Tu peux te connecter et te lancer.",
+    "redirecting": "Tu vas être redirigé automatiquement…",
+    "invalid_link": "Ce lien de vérification est invalide ou a expiré."
+  },
+  "error_boundary": {
+    "title": "Un problème est survenu",
+    "message": "L'app a rencontré une erreur inattendue. Tes données sont bien enregistrées — un rechargement règle généralement le problème.",
+    "reload": "Recharger",
+    "home": "Retour au menu principal"
+  },
+  "sync_status": {
+    "syncing": "Synchronisation...",
+    "error": "Erreur de synchronisation",
+    "just_now": "à l'instant",
+    "minutes_ago_one": "il y a {{count}} min",
+    "minutes_ago_other": "il y a {{count}} min",
+    "minutes_ago_many": "il y a {{count}} min",
+    "last_sync": "Dernière synchro : {{time}}"
+  },
+  "debug_button": {
+    "label": "Debug flag"
+  },
+  "bug_button": {
+    "label": "Signaler un bug"
+  },
+  "checkout": {
+    "title": "Checkout : {{remaining}}"
+  },
+  "offline": {
+    "back_online": "De nouveau en ligne ! Synchronisation des données...",
+    "offline_banner": "Hors ligne – les modifications sont enregistrées localement",
+    "pending_one": "{{count}} en attente",
+    "pending_other": "{{count}} en attente",
+    "pending_many": "{{count}} en attente",
+    "offline": "Hors ligne"
+  },
+  "player_score": {
+    "remove": "Retirer le joueur",
+    "highest": "Max",
+    "leg_leader": "En tête de ce leg",
+    "leg_rank": "Place {{rank}} dans ce leg",
+    "legs_to_win": "{{won}}/{{total}} pour gagner",
+    "legs_to_win_set": "{{won}}/{{total}} pour le set",
+    "legs_to_win_long": "{{won}} legs sur {{total}} pour gagner"
+  },
+  "dartboard": {
+    "label": "Cible interactive"
+  },
+  "spinner": {
+    "spin": "LANCER",
+    "throws_first": "lance en premier !"
+  },
+  "resume_screen": {
+    "double_out_short": "DO",
+    "leg_n": "Leg {{n}}",
+    "best_of_one": "Best of {{count}}",
+    "best_of_other": "Best of {{count}}",
+    "best_of_many": "Best of {{count}}",
+    "table_caption": "Score",
+    "col_player": "Joueur",
+    "col_legs": "Legs",
+    "col_rest": "Reste",
+    "col_avg": "Moy.",
+    "no_throws": "Aucune fléchette lancée — le match a été lancé puis quitté aussitôt."
+  },
+  "atc_game": {
+    "player_progress_one": "{{progress}}/{{total}} • {{count}} fléchette",
+    "player_progress_other": "{{progress}}/{{total}} • {{count}} fléchettes",
+    "player_progress_many": "{{progress}}/{{total}} • {{count}} fléchettes"
+  },
+  "achievement_hint": {
+    "title": "Presque !",
+    "subtitle": "Succès à portée de main",
+    "close": "Fermer l'indice"
+  },
+  "training_menu": {
+    "statistics": "Statistiques"
+  },
+  "achievement_toast": {
+    "tier_bronze": "Bronze",
+    "tier_silver": "Argent",
+    "tier_gold": "Or",
+    "tier_platinum": "Platine",
+    "tier_diamond": "Diamant",
+    "unlocked_by": "{{name}} — succès débloqué",
+    "points_short_one": "{{count}} pt",
+    "points_short_other": "{{count}} pts",
+    "points_short_many": "{{count}} pts",
+    "unlocked_count_one": "{{count}}/{{total}} succès",
+    "unlocked_count_other": "{{count}}/{{total}} succès",
+    "unlocked_count_many": "{{count}}/{{total}} succès",
+    "close_all_one": "Tout fermer ({{count}})",
+    "close_all_other": "Tout fermer ({{count}})",
+    "close_all_many": "Tout fermer ({{count}})",
+    "continue": "Continuer",
+    "stage_label": "Nouveaux succès"
+  },
+  "score_input": {
+    "total": "Total",
+    "replace_dart": "Remplacer la fléchette",
+    "backspace": "Supprimer le dernier chiffre ou la dernière fléchette",
+    "shortcuts_link": "Raccourcis clavier",
+    "submit_total": "Saisir le total de la volée et confirmer",
+    "checkout": "Checkout !",
+    "typed": "Saisie",
+    "keyboard_entry": "Tape le total au clavier, Entrée l'enregistre",
+    "show_numpad": "Afficher le pavé numérique",
+    "hide_numpad": "Masquer le pavé numérique"
+  },
+  "cricket_game": {
+    "rules_title": "Règles du Cricket :",
+    "rule_close": "Touche 15–20 et le bull trois fois chacun pour les fermer",
+    "rule_marks": "Triple = 3 marques, double = 2 marques, simple = 1 marque",
+    "rule_points": "Une fois fermé : marque des points (tant que ton adversaire ne l'a pas fermé)",
+    "rule_winner": "Vainqueur : tous les numéros fermés + le plus de points",
+    "select_players_count": "Choisir les joueurs ({{count}}/{{min}})",
+    "start": "Lancer le Cricket",
+    "wins": "{{name}} gagne !",
+    "match_over": "Match de Cricket terminé",
+    "new_game": "Nouvelle partie",
+    "number": "Numéro",
+    "points": "Points",
+    "player_visit": "Volée de {{name}} ({{count}}/3)",
+    "confirm_visit": "Confirmer la volée",
+    "enter_hits": "Saisir les touches",
+    "miss": "Raté"
+  },
+  "shanghai_game": {
+    "options": "Options",
+    "start_number": "Numéro de départ",
+    "rounds": "Tours",
+    "plays_numbers": "Joue les numéros {{from}} à {{to}}",
+    "rules_title": "Règles :",
+    "rule_target": "Chaque tour vise un numéro précis",
+    "rule_only_target": "Seules les touches sur le numéro cible comptent",
+    "rule_multiplier": "Simple = numéro × 1, double = × 2, triple = × 3",
+    "rule_shanghai": "simple + double + triple = victoire immédiate !",
+    "rule_winner": "Le meilleur score à la fin gagne",
+    "select_players_count": "Choisir les joueurs ({{count}}/{{min}})",
+    "start": "Lancer le Shanghai",
+    "shanghai": "SHANGHAI !",
+    "round_of": "Tour {{current}}/{{total}}",
+    "target_number": "Numéro cible",
+    "player_turn": "À {{name}} de lancer",
+    "standings": "Classement",
+    "visit": "Volée ({{count}}/3)",
+    "miss": "Raté",
+    "target_label": "Cible :",
+    "single": "Simple {{number}}",
+    "double": "Double {{number}}",
+    "triple": "Triple {{number}}",
+    "miss_other": "Raté / autre numéro",
+    "miss_many": "Raté / autre numéro"
+  },
+  "dashboard": {
+    "unknown": "Inconnu",
+    "activity_played": "Match joué",
+    "activity_won": "Match gagné !",
+    "activity_winner": "{{name}} a gagné",
+    "quick_game": "Partie rapide",
+    "training": "Entraînement",
+    "players": "Joueurs",
+    "welcome_back": "Content de te revoir, {{name}} !",
+    "lifetime_member": "Membre à vie",
+    "premium_member": "Membre Premium",
+    "trial_days_left_one": "Il reste <strong>{{count}} jour</strong> d'essai",
+    "trial_days_left_other": "Il reste <strong>{{count}} jours</strong> d'essai",
+    "trial_days_left_many": "Il reste <strong>{{count}} jours</strong> d'essai",
+    "stats_for": "Stats de :",
+    "trial_banner_title_one": "Essai Premium : {{count}} jour restant",
+    "trial_banner_title_other": "Essai Premium : {{count}} jours restants",
+    "trial_banner_title_many": "Essai Premium : {{count}} jours restants",
+    "trial_banner_text": "Profite de toutes les fonctions Premium pendant ton essai",
+    "upgrade_now": "Passer à Premium",
+    "stat_matches": "Matchs",
+    "stat_wins": "Victoires",
+    "stat_win_rate": "Taux de victoire",
+    "stat_streak": "Série",
+    "stat_average": "Moyenne",
+    "recent_activity": "Activité récente",
+    "no_activity": "Aucune activité pour l'instant",
+    "start_first_game": "Lance ta première partie !",
+    "show_all_stats": "Afficher toutes les statistiques",
+    "quick_actions": "Actions rapides",
+    "motivation_streak_title": "Tu es en feu !",
+    "motivation_new_title": "C'est parti !",
+    "motivation_default_title": "Continue comme ça !",
+    "motivation_streak_text_one": "{{count}} victoire d'affilée !",
+    "motivation_streak_text_other": "{{count}} victoires d'affilée !",
+    "motivation_streak_text_many": "{{count}} victoires d'affilée !",
+    "motivation_new_text": "Joue ton premier match !",
+    "motivation_default_text": "La prochaine série t'attend !"
+  },
+  "tournament_menu": {
+    "knockout": "Élimination directe",
+    "knockout_desc": "Élimination simple – le perdant est éliminé",
+    "round_robin": "Toutes rondes",
+    "round_robin_desc": "Chacun affronte tout le monde",
+    "tbd": "À définir",
+    "unknown": "Inconnu",
+    "end_tournament": "Terminer le tournoi",
+    "subtitle_one": "{{mode}} • Best of {{count}}",
+    "subtitle_other": "{{mode}} • Best of {{count}}",
+    "subtitle_many": "{{mode}} • Best of {{count}}",
+    "status_completed": "Terminé",
+    "status_running": "En cours",
+    "champion": "Vainqueur du tournoi",
+    "standings": "Classement",
+    "player": "Joueur",
+    "wins": "Victoires",
+    "wins_short": "V",
+    "losses": "Défaites",
+    "losses_short": "D",
+    "legs": "Legs",
+    "current_match": "Match en cours",
+    "leg_minus": "Retirer un leg : {{name}}",
+    "leg_plus": "Ajouter un leg : {{name}}",
+    "first_to_one": "Premier à {{count}} leg",
+    "first_to_other": "Premier à {{count}} legs",
+    "first_to_many": "Premier à {{count}} legs",
+    "confirm_match": "Confirmer le match",
+    "played_matches": "Matchs joués",
+    "create": "Créer un nouveau tournoi",
+    "name": "Nom du tournoi",
+    "name_placeholder": "p. ex. Fléchettes du vendredi soir",
+    "mode": "Format du tournoi",
+    "legs_to_win": "Legs à gagner",
+    "players_count": "Joueurs ({{count}}/{{max}})",
+    "min_players_one": "Au moins {{count}} joueur requis",
+    "min_players_other": "Au moins {{count}} joueurs requis",
+    "min_players_many": "Au moins {{count}} joueurs requis",
+    "start": "Lancer le tournoi",
+    "title": "Tournois",
+    "subtitle_menu": "Organise des compétitions de fléchettes",
+    "available_modes": "Formats disponibles",
+    "player_range": "{{min}}–{{max}} joueurs",
+    "save_failed": "Impossible d'enregistrer le tournoi — la prochaine modification réessaiera.",
+    "to_overview": "Retour aux tournois",
+    "delete_confirm": "Supprimer le tournoi « {{name}} » ?",
+    "delete_failed": "Impossible de supprimer le tournoi.",
+    "load_failed": "Impossible de charger les tournois.",
+    "won_by": "Vainqueur : {{name}}",
+    "progress": "{{played}} matchs sur {{total}}",
+    "open": "Voir",
+    "resume": "Reprendre",
+    "delete": "Supprimer le tournoi {{name}}",
+    "running_title": "Tournois en cours",
+    "finished_title": "Tournois terminés"
+  },
+  "online_game": {
+    "guest": "Invité",
+    "leave_room": "Quitter le salon",
+    "online": "En ligne",
+    "offline": "Hors ligne",
+    "room_settings_one": "{{score}} • Best of {{count}}",
+    "room_settings_other": "{{score}} • Best of {{count}}",
+    "room_settings_many": "{{score}} • Best of {{count}}",
+    "copy_room_id": "Copier l'ID du salon",
+    "status_waiting": "En attente...",
+    "status_playing": "En cours",
+    "status_finished": "Terminé",
+    "players_count": "Joueurs ({{count}}/{{max}})",
+    "empty_slot": "Libre",
+    "start_game": "Lancer la partie",
+    "waiting_for_host": "En attente du lancement par l'hôte...",
+    "chat": "Chat",
+    "no_messages": "Aucun message pour l'instant",
+    "message_placeholder": "Message...",
+    "send_message": "Envoyer le message",
+    "online_count_one": "{{count}} en ligne",
+    "online_count_other": "{{count}} en ligne",
+    "online_count_many": "{{count}} en ligne",
+    "connecting": "Connexion...",
+    "title": "Multijoueur en ligne",
+    "subtitle": "Joue contre d'autres joueurs en temps réel",
+    "create_room": "Créer un salon",
+    "create": "Créer",
+    "room_name": "Nom du salon",
+    "room_name_placeholder": "p. ex. Vendredi soir",
+    "start_score": "Score de départ",
+    "legs_to_win": "Legs à gagner",
+    "private_room": "Salon privé",
+    "available_rooms": "Salons disponibles",
+    "refresh_rooms": "Actualiser les salons",
+    "no_rooms": "Aucun salon ouvert",
+    "create_new_room_hint": "Crée un nouveau salon !",
+    "room_summary_one": "{{score}} • {{count}}/{{max}} joueurs",
+    "room_summary_other": "{{score}} • {{count}}/{{max}} joueurs",
+    "room_summary_many": "{{score}} • {{count}}/{{max}} joueurs",
+    "you": "toi",
+    "legs_of": "Legs {{won}} / {{needed}}",
+    "waiting_reconnect": "Connexion perdue — la place est gardée",
+    "winner": "{{name}} gagne le match !",
+    "rematch": "Revanche",
+    "waiting_rematch": "En attente d'une revanche lancée par l'hôte …",
+    "your_turn": "À toi",
+    "checkout_hint": "Chemin : {{route}}",
+    "entered_score": "Score saisi",
+    "delete_digit": "Supprimer le dernier chiffre",
+    "clear": "Effacer",
+    "submit": "Valider",
+    "checkout_button": "Checkout {{score}}",
+    "their_turn": "À {{name}} de lancer",
+    "last_visits": "Dernières volées",
+    "bust_line": "bust ({{thrown}})",
+    "rest": "reste {{remaining}}",
+    "invalid_range": "{{score}} est impossible — une volée vaut de 0 à 180.",
+    "invalid_impossible": "{{score}} ne peut pas être fait avec trois fléchettes.",
+    "invalid_no_finish": "Il n'y a pas de finish sur un double depuis {{score}}.",
+    "rejoined": "Reconnecté — ta place a été gardée.",
+    "announce_visit": "{{name}} : {{score}}, reste {{remaining}}",
+    "announce_bust": "{{name}} : bust, reste {{remaining}}",
+    "not_your_turn": "Ce n'est pas ton tour.",
+    "throw_rejected": "Le lancer n'a pas été accepté.",
+    "leg_won": "{{name}} gagne le leg",
+    "join_room": "Rejoindre {{name}}",
+    "stale": "Le score venait de changer. Saisis à nouveau la volée.",
+    "refused_premium_required": "Les matchs en ligne sont réservés à Premium.",
+    "refused_unauthorized": "Reconnecte-toi pour jouer en ligne."
+  },
+  "game_screen": {
+    "sets_short": "S",
+    "legs_short": "L",
+    "up_next": "Ensuite",
+    "up_next_long": "lance ensuite",
+    "throw_order": "Numéro {{n}} dans l'ordre de passage",
+    "click_to_remove": "Clique pour retirer",
+    "choose_bot": "Choisis un bot adversaire",
+    "bot_adaptive_hint": "La difficulté s'adapte automatiquement à ton niveau",
+    "remove": "Retirer",
+    "no_emoji": "Aucun emoji choisi",
+    "emoji": "Emoji",
+    "player_name_placeholder": "Nom du joueur...",
+    "add": "Ajouter",
+    "no_active_game": "Aucune partie en cours",
+    "miss_no_score": "Raté / aucun point",
+    "match_statistics": "Statistiques du match",
+    "stat_average": "Moyenne",
+    "stat_highest": "Meilleur score",
+    "stat_checkout": "Checkout %",
+    "throw_history": "Historique des volées",
+    "visit_count_one": "({{count}} volée)",
+    "visit_count_other": "({{count}} volées)",
+    "visit_count_many": "({{count}} volées)",
+    "no_visits": "Aucune volée pour l'instant",
+    "visit_number": "Volée n°{{n}}",
+    "bust": "BUST",
+    "throw_chart": "Statistiques des volées (graphique)",
+    "live_heatmap": "Heatmap en direct (partie en cours)",
+    "no_heatmap_data": "Aucune donnée de lancer pour {{name}} pour l'instant",
+    "heatmap_hint": "La heatmap se met à jour à chaque lancer",
+    "darts_count_one": "({{count}} fléchette)",
+    "darts_count_other": "({{count}} fléchettes)",
+    "darts_count_many": "({{count}} fléchettes)",
+    "sheet_round": "Tour",
+    "leg_number": "LEG {{n}}",
+    "legs_progress": "{{won}} / {{total}} legs",
+    "next_leg_starting": "Le leg suivant commence...",
+    "set_number": "SET {{n}}",
+    "sets_progress": "{{won}} / {{total}} sets",
+    "next_set_starting": "Le set suivant commence…",
+    "tap_to_continue": "Touche pour continuer",
+    "handoff": "{{name}} · {{score}} → {{remaining}}",
+    "handoff_bust": "{{name}} · Bust → {{remaining}}",
+    "next_player": "Suivant : {{name}}",
+    "show_dartboard": "Afficher la cible",
+    "hide_dartboard": "Masquer la cible",
+    "darts_in_leg": "Fléchettes",
+    "last_visits": "Dernières",
+    "insights": "Stats et cible",
+    "hero_checkout": "Checkout · {{name}}",
+    "pb_visit": "Nouveau record : {{value}} en une volée",
+    "pb_leg": "Nouveau meilleur leg : {{value}} fléchettes",
+    "leg_recap": "{{darts}} fléchettes · moy. {{avg}} · checkout {{checkout}}",
+    "tab_stats": "Stats",
+    "tab_history": "Historique",
+    "tab_chart": "Graphique",
+    "tab_heatmap": "Heatmap"
+  },
+  "training_screen": {
+    "title_doubles": "Entraînement aux doubles",
+    "title_triples": "Entraînement aux triples",
+    "title_atc": "Around the Clock",
+    "title_checkout": "Entraînement au checkout",
+    "title_bobs27": "Bob's 27",
+    "title_score": "Entraînement au scoring",
+    "title_default": "Entraînement",
+    "desc_doubles": "Touche le double {{target}} | Progression : {{done}}/{{total}}",
+    "desc_triples": "Touche le triple {{target}} | Progression : {{done}}/{{total}}",
+    "desc_atc": "Touche le {{target}} (n'importe quel segment) | Progression : {{done}}/{{total}}",
+    "desc_checkout": "Checkout : {{remaining}} restants",
+    "desc_bobs27": "Points : {{score}} | Cible : {{target}}",
+    "desc_score": "Marque {{target}}+ avec 3 fléchettes",
+    "attempt_of": "Tentative {{current}} / {{total}}",
+    "round_of": "Tour {{current}} / {{total}}",
+    "who_trains": "Qui s'entraîne ?",
+    "who_trains_hint": "Choisis un joueur pour commencer l'entraînement. Tes lancers sont ajoutés à ta heatmap.",
+    "no_players": "Aucun joueur pour l'instant",
+    "create_player": "Créer un joueur",
+    "player_average": "Moyenne : {{value}}",
+    "restart": "Recommencer",
+    "points": "Points",
+    "attempts": "Tentatives",
+    "miss_no_score": "Raté / aucun point",
+    "current_visit": "Volée en cours",
+    "completed": "Entraînement terminé !",
+    "final_score": "Score final",
+    "hits_in_attempts_one": "{{hits}} touches en {{count}} tentative",
+    "hits_in_attempts_other": "{{hits}} touches en {{count}} tentatives",
+    "hits_in_attempts_many": "{{hits}} touches en {{count}} tentatives",
+    "perfect_doubles": "Parfait ! Tous les doubles touchés !",
+    "perfect_triples": "Parfait ! Tous les triples touchés !",
+    "perfect_atc": "Parfait ! Tour complet réussi !",
+    "checkout_success": "Checkout réussi !",
+    "try_again": "Réessayer",
+    "instructions": "Comment jouer",
+    "inst_doubles_1": "Touche chaque double de D1 à D20",
+    "inst_doubles_2": "Clique sur l'anneau des doubles de la cible",
+    "inst_doubles_3": "Chaque touche te fait passer au double suivant",
+    "inst_triples_1": "Touche chaque triple de T20 à T1",
+    "inst_triples_2": "Clique sur l'anneau des triples de la cible",
+    "inst_triples_3": "Chaque touche te fait passer au triple suivant",
+    "inst_atc_1": "Touche chaque numéro de 1 à 20 dans l'ordre",
+    "inst_atc_2": "Tout segment (simple, double, triple) compte",
+    "inst_atc_3": "Termine le tour le plus vite possible",
+    "inst_checkout_1": "Fais le checkout du score restant",
+    "inst_checkout_2": "Tu dois finir sur un double",
+    "inst_checkout_3": "Entraîne les chemins de checkout courants",
+    "inst_bobs27_1": "Commence avec 27 points",
+    "inst_bobs27_2": "Tour par tour de D1 à D20, le bull en dernier",
+    "inst_bobs27_3": "Chaque double touché : + la valeur du double",
+    "inst_bobs27_4": "Aucun double dans le tour : − la valeur du double",
+    "inst_bobs27_5": "Ne descends pas à 0 point !",
+    "inst_score_1": "Essaie de marquer 60+ par volée",
+    "inst_score_2": "Vise les segments qui rapportent le plus",
+    "inst_score_3": "Gagne en régularité et en puissance"
+  },
+  "shortcuts": {
+    "title": "Raccourcis clavier",
+    "intro": "En partie, chaque volée peut être saisie sans souris.",
+    "type": "Saisir le score",
+    "confirm": "Confirmer la volée",
+    "back": "Annuler la dernière fléchette ou volée",
+    "undo": "Annuler la dernière volée",
+    "clear": "Effacer la saisie, fermer une boîte de dialogue",
+    "help": "Ouvrir cet aperçu",
+    "redo": "Rétablir une volée annulée"
+  },
+  "announce": {
+    "visit": "{{name}} : {{score}}, reste {{remaining}}",
+    "bust": "{{name}} : bust, reste {{remaining}}",
+    "leg_won": "{{name}} fait le checkout de {{score}} et gagne le leg",
+    "match_won": "{{name}} fait le checkout de {{score}} et gagne le match",
+    "undo": "Volée annulée",
+    "undo_to": "Volée annulée, {{name}} est de nouveau à {{remaining}}",
+    "corrected": "Volée de {{name}} corrigée : {{from}} → {{to}}, reste {{remaining}}"
+  },
+  "export": {
+    "date": "Date",
+    "player": "Joueur",
+    "opponent": "Adversaire",
+    "result": "Résultat",
+    "score": "Score",
+    "average": "Moyenne",
+    "highest_score": "Meilleur score",
+    "checkout_pct": "Checkout %",
+    "darts_thrown": "Fléchettes lancées",
+    "first9_avg": "Moyenne first 9",
+    "legs_won": "Legs gagnés",
+    "legs_lost": "Legs perdus",
+    "win": "Victoire",
+    "loss": "Défaite",
+    "win_short": "V",
+    "loss_short": "D",
+    "wl": "V/D",
+    "avg": "Moy.",
+    "co_pct": "CO %",
+    "sheet_history": "Historique des matchs",
+    "sheet_summary": "Résumé",
+    "player_summary": "Résumé par joueur",
+    "player_name": "Nom du joueur",
+    "total_matches": "Total des matchs",
+    "wins": "Victoires",
+    "losses": "Défaites",
+    "win_rate": "Taux de victoire",
+    "total_180s": "Total de 180",
+    "export_date": "Date d'export",
+    "report_title": "Rapport de l'historique des matchs"
+  },
+  "bots": {
+    "player_name": "Bot {{number}} ({{level}})",
+    "adaptive": {
+      "beginner": {
+        "name": "Débutant",
+        "description": "Plus facile que toi - idéal pour s'entraîner"
+      },
+      "regular": {
+        "name": "Habitué",
+        "description": "À ton niveau"
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "Adversaire coriace"
+      }
+    }
+  },
+  "activity": {
+    "none": "Aucune activité ces {{days}} derniers jours",
+    "summary_one": "{{count}} partie sur {{active}} jours sur {{days}}, pic de {{peak}} en un jour",
+    "summary_other": "{{count}} parties sur {{active}} jours sur {{days}}, pic de {{peak}} en un jour",
+    "summary_many": "{{count}} parties sur {{active}} jours sur {{days}}, pic de {{peak}} en un jour"
+  },
+  "achievement_defs": {
+    "first_game": {
+      "name": "Premiers pas",
+      "description": "Termine ta première partie"
+    },
+    "rookie": {
+      "name": "Recrue",
+      "description": "Joue 10 parties"
+    },
+    "veteran": {
+      "name": "Vétéran",
+      "description": "Joue 50 parties"
+    },
+    "centurion": {
+      "name": "Centurion",
+      "description": "Joue 100 parties"
+    },
+    "legend": {
+      "name": "Légende",
+      "description": "Joue 500 parties"
+    },
+    "ton_80": {
+      "name": "Ton 80",
+      "description": "Marque ton premier 180"
+    },
+    "max_out": {
+      "name": "Max Out",
+      "description": "Marque 10 fois 180"
+    },
+    "high_roller": {
+      "name": "Gros joueur",
+      "description": "Atteins une moyenne de 60 dans une partie"
+    },
+    "pro_scorer": {
+      "name": "Scoreur pro",
+      "description": "Atteins une moyenne de 80 dans une partie"
+    },
+    "world_class": {
+      "name": "Classe mondiale",
+      "description": "Atteins une moyenne de 100 dans une partie"
+    },
+    "checkout_king": {
+      "name": "Roi du checkout",
+      "description": "Atteins un taux de checkout de 50 % (min. 10 tentatives)"
+    },
+    "big_fish": {
+      "name": "Big Fish",
+      "description": "Fais le checkout de 170"
+    },
+    "bullseye_master": {
+      "name": "Maître du bullseye",
+      "description": "Fais un checkout sur le double bull"
+    },
+    "perfect_finish": {
+      "name": "Finish parfait",
+      "description": "Fais le checkout d'un score exact sans bust"
+    },
+    "trainee": {
+      "name": "Apprenti",
+      "description": "Termine ta première session d'entraînement"
+    },
+    "dedicated": {
+      "name": "Assidu",
+      "description": "Termine 50 sessions d'entraînement"
+    },
+    "master_trainer": {
+      "name": "Maître de l'entraînement",
+      "description": "Termine les 6 modes d'entraînement"
+    },
+    "winning_streak": {
+      "name": "Série de victoires",
+      "description": "Gagne 5 parties d'affilée"
+    },
+    "no_bust": {
+      "name": "Zéro bust",
+      "description": "Gagne un leg sans un seul bust"
+    },
+    "nine_darter": {
+      "name": "9-Darter",
+      "description": "Termine un leg en seulement 9 fléchettes (501)"
+    },
+    "ton_plus": {
+      "name": "Ton Plus",
+      "description": "Marque 100+"
+    },
+    "century_club": {
+      "name": "Century Club",
+      "description": "Marque 100+ à 100 reprises"
+    },
+    "consistent_scorer": {
+      "name": "Scoreur régulier",
+      "description": "Marque 60+ sur 10 volées d'affilée"
+    },
+    "triple_master": {
+      "name": "Maître des triples",
+      "description": "Touche 100 triples"
+    },
+    "perfect_round": {
+      "name": "Volée parfaite",
+      "description": "Touche 3x triple 20 en une volée (180)"
+    },
+    "Shanghai": {
+      "name": "Shanghai",
+      "description": "Touche le simple, le double et le triple du même numéro"
+    },
+    "low_ton": {
+      "name": "Low Ton",
+      "description": "Marque exactement 100 points"
+    },
+    "checkout_novice": {
+      "name": "Novice du checkout",
+      "description": "Fais le checkout de ta première partie"
+    },
+    "madhouse": {
+      "name": "Madhouse",
+      "description": "Fais un checkout sur le double 1"
+    },
+    "century_checkout": {
+      "name": "Checkout centenaire",
+      "description": "Fais un checkout de 100 ou plus"
+    },
+    "double_trouble": {
+      "name": "Double Trouble",
+      "description": "Fais un checkout sur 10 doubles différents"
+    },
+    "favorite_double": {
+      "name": "Double favori",
+      "description": "Fais 25 checkouts sur le même double"
+    },
+    "quick_finish": {
+      "name": "Finish rapide",
+      "description": "Fais le checkout en moins de 12 fléchettes (301)"
+    },
+    "checkout_master": {
+      "name": "Maître du checkout",
+      "description": "Réussis 100 checkouts"
+    },
+    "big_40": {
+      "name": "Big 40",
+      "description": "Fais le checkout d'exactement 40 (D20)"
+    },
+    "comeback_king": {
+      "name": "Roi du come-back",
+      "description": "Gagne une partie après avoir été mené aux legs"
+    },
+    "unstoppable": {
+      "name": "Inarrêtable",
+      "description": "Gagne 10 parties d'affilée"
+    },
+    "perfect_leg": {
+      "name": "Leg parfait",
+      "description": "Gagne un leg avec une moyenne de plus de 100"
+    },
+    "clutch_player": {
+      "name": "Sang-froid",
+      "description": "Gagne 5 parties dans un leg décisif"
+    },
+    "never_give_up": {
+      "name": "Jamais abandonner",
+      "description": "Reviens d'un retard de 200 points ou plus"
+    },
+    "clean_sweep": {
+      "name": "Grand chelem",
+      "description": "Gagne un match sans perdre un set (best of 5)"
+    },
+    "training_addict": {
+      "name": "Accro à l'entraînement",
+      "description": "Termine 100 sessions d'entraînement"
+    },
+    "around_the_clock": {
+      "name": "Around the Clock",
+      "description": "Touche chaque numéro de 1 à 20 en une session d'entraînement"
+    },
+    "training_perfectionist": {
+      "name": "Perfectionniste",
+      "description": "Atteins 100 % dans une session d'entraînement"
+    },
+    "early_bird": {
+      "name": "Lève-tôt",
+      "description": "Termine une session d'entraînement avant 8 h"
+    },
+    "hat_trick": {
+      "name": "Coup du chapeau",
+      "description": "Marque 3x 180 dans une partie"
+    },
+    "twelve_darter": {
+      "name": "12-Darter",
+      "description": "Termine un leg en seulement 12 fléchettes (501)"
+    },
+    "grand_master": {
+      "name": "Grand maître",
+      "description": "Atteins 10 000 points de succès"
+    },
+    "all_rounder": {
+      "name": "Polyvalent",
+      "description": "Gagne 10 parties en 301, en 501 et en 701"
+    },
+    "speed_demon": {
+      "name": "Fou de vitesse",
+      "description": "Termine une partie en moins de 5 minutes"
+    },
+    "first_win": {
+      "name": "Première victoire",
+      "description": "Gagne ta première partie"
+    },
+    "champion": {
+      "name": "Champion",
+      "description": "Gagne 25 parties"
+    },
+    "master_champion": {
+      "name": "Grand champion",
+      "description": "Gagne 100 parties"
+    },
+    "ultimate_champion": {
+      "name": "Champion ultime",
+      "description": "Gagne 250 parties"
+    },
+    "millennium": {
+      "name": "Millénaire",
+      "description": "Joue 1000 parties"
+    },
+    "social_player": {
+      "name": "Joueur sociable",
+      "description": "Joue contre 10 adversaires différents"
+    },
+    "popular": {
+      "name": "Populaire",
+      "description": "Joue contre 50 adversaires différents"
+    },
+    "night_owl": {
+      "name": "Oiseau de nuit",
+      "description": "Joue un match après minuit"
+    },
+    "weekend_warrior": {
+      "name": "Guerrier du week-end",
+      "description": "Joue 25 parties le week-end"
+    },
+    "daily_grind": {
+      "name": "Tous les jours",
+      "description": "Joue 7 jours d'affilée"
+    },
+    "ton_40": {
+      "name": "Ton 40",
+      "description": "Marque 140"
+    },
+    "triple_twenty": {
+      "name": "Pro du triple 20",
+      "description": "Touche le triple 20 500 fois"
+    },
+    "triple_nineteen": {
+      "name": "Spécialiste du triple 19",
+      "description": "Touche le triple 19 250 fois"
+    },
+    "triple_collector": {
+      "name": "Collectionneur de triples",
+      "description": "Touche chaque triple au moins une fois"
+    },
+    "high_ton": {
+      "name": "High Ton",
+      "description": "Marque 150+"
+    },
+    "super_scorer": {
+      "name": "Super scoreur",
+      "description": "Marque 150+ à 50 reprises"
+    },
+    "bullseye_hunter": {
+      "name": "Chasseur de bullseye",
+      "description": "Touche le bullseye 50 fois"
+    },
+    "bullseye_legend": {
+      "name": "Légende du bullseye",
+      "description": "Touche le bullseye 200 fois"
+    },
+    "bed_and_breakfast": {
+      "name": "Bed & Breakfast",
+      "description": "Marque 26 points (5, 20, 1)"
+    },
+    "double_master": {
+      "name": "Maître des doubles",
+      "description": "Touche 200 doubles"
+    },
+    "single_precision": {
+      "name": "Précision simple",
+      "description": "Touche 1000 simples"
+    },
+    "average_joe": {
+      "name": "Monsieur Moyenne",
+      "description": "Atteins une moyenne de 45 dans une partie"
+    },
+    "consistent_average": {
+      "name": "Moyenne régulière",
+      "description": "Moyenne de 50+ sur 10 parties d'affilée"
+    },
+    "elite_scorer": {
+      "name": "Scoreur d'élite",
+      "description": "Atteins une moyenne de 90 dans une partie"
+    },
+    "ton_machine": {
+      "name": "Machine à 180",
+      "description": "Marque 50 fois 180"
+    },
+    "triple_triple": {
+      "name": "Triple triple",
+      "description": "Touche 3 triples en une volée (hors 180)"
+    },
+    "perfect_visit": {
+      "name": "Volée groupée",
+      "description": "Place les 3 fléchettes dans le même segment"
+    },
+    "unlucky": {
+      "name": "Pas de chance",
+      "description": "Touche le 1 avec les 3 fléchettes d'une volée"
+    },
+    "lucky_seven": {
+      "name": "Double sept",
+      "description": "Marque exactement 77 points"
+    },
+    "scoring_streak": {
+      "name": "Série de scoring",
+      "description": "Marque 45+ sur 20 volées d'affilée"
+    },
+    "checkout_apprentice": {
+      "name": "Apprenti du checkout",
+      "description": "Réussis 10 checkouts"
+    },
+    "checkout_expert": {
+      "name": "Expert du checkout",
+      "description": "Réussis 50 checkouts"
+    },
+    "tops": {
+      "name": "Tops",
+      "description": "Fais un checkout sur le double 20"
+    },
+    "favorite_tops": {
+      "name": "Fan de Tops",
+      "description": "Fais 50 checkouts sur le double 20"
+    },
+    "double_16": {
+      "name": "Spécialiste du double 16",
+      "description": "Fais 25 checkouts sur le double 16"
+    },
+    "big_checkout": {
+      "name": "Gros checkout",
+      "description": "Fais un checkout de 120 ou plus"
+    },
+    "massive_checkout": {
+      "name": "Checkout énorme",
+      "description": "Fais un checkout de 150 ou plus"
+    },
+    "checkout_efficiency": {
+      "name": "Efficacité au checkout",
+      "description": "Atteins un taux de checkout de 40 % (min. 20 tentatives)"
+    },
+    "checkout_legend": {
+      "name": "Légende du checkout",
+      "description": "Atteins un taux de checkout de 60 % (min. 20 tentatives)"
+    },
+    "one_dart_finish": {
+      "name": "Finish en une fléchette",
+      "description": "Fais le checkout avec une seule fléchette"
+    },
+    "two_dart_finish": {
+      "name": "Finish en deux fléchettes",
+      "description": "Fais le checkout avec seulement deux fléchettes"
+    },
+    "bogey_number": {
+      "name": "Bogey Number",
+      "description": "Fais le checkout de 169 (le plus grand nombre impair)"
+    },
+    "checkout_variety": {
+      "name": "Checkouts variés",
+      "description": "Fais le checkout de 15 scores différents"
+    },
+    "clutch_checkout": {
+      "name": "Checkout décisif",
+      "description": "Fais le checkout alors que ton adversaire est sur un finish"
+    },
+    "double_bull_lover": {
+      "name": "Fan du double bull",
+      "description": "Fais 10 checkouts sur le double bull"
+    },
+    "double_digit_wins": {
+      "name": "Deux chiffres",
+      "description": "Gagne 10 parties"
+    },
+    "fifty_wins": {
+      "name": "Club des 50",
+      "description": "Gagne 50 parties"
+    },
+    "win_streak_3": {
+      "name": "Coup du chapeau",
+      "description": "Gagne 3 parties d'affilée"
+    },
+    "iron_will": {
+      "name": "Volonté de fer",
+      "description": "Gagne une partie après avoir été mené 0-1 (best of 3)"
+    },
+    "domination": {
+      "name": "Domination",
+      "description": "Gagne 5 parties d'affilée sans perdre un set"
+    },
+    "efficient_winner": {
+      "name": "Vainqueur efficace",
+      "description": "Gagne une partie avec moins de 15 fléchettes par leg (en moyenne)"
+    },
+    "perfect_match": {
+      "name": "Match parfait",
+      "description": "Gagne un match sans un seul bust"
+    },
+    "rally_master": {
+      "name": "Roi de l'endurance",
+      "description": "Joue un leg d'au moins 20 volées"
+    },
+    "nail_biter": {
+      "name": "Suspense",
+      "description": "Gagne une partie avec un point d'écart"
+    },
+    "marathon_man": {
+      "name": "Marathonien",
+      "description": "Joue un match de plus de 30 minutes"
+    },
+    "late_bloomer": {
+      "name": "Diesel",
+      "description": "Gagne un leg après avoir été mené de 100 points ou plus"
+    },
+    "perfect_start": {
+      "name": "Départ parfait",
+      "description": "Gagne le premier leg de 10 parties d'affilée"
+    },
+    "finisher": {
+      "name": "Finisseur",
+      "description": "Gagne le dernier leg de 10 parties d'affilée"
+    },
+    "reverse_sweep": {
+      "name": "Remontada",
+      "description": "Gagne un best of 5 après avoir été mené 0-2"
+    },
+    "no_mercy": {
+      "name": "Sans pitié",
+      "description": "Gagne 3 parties d'affilée sans perdre un set"
+    },
+    "training_enthusiast": {
+      "name": "Passionné d'entraînement",
+      "description": "Termine 25 sessions d'entraînement"
+    },
+    "training_legend": {
+      "name": "Légende de l'entraînement",
+      "description": "Termine 250 sessions d'entraînement"
+    },
+    "doubles_master": {
+      "name": "As des doubles",
+      "description": "Atteins 80 % dans une session d'entraînement aux doubles"
+    },
+    "scoring_trainer": {
+      "name": "Entraîneur du scoring",
+      "description": "Moyenne de 100+ sur 10 sessions d'entraînement au scoring"
+    },
+    "training_variety": {
+      "name": "Entraînement varié",
+      "description": "Termine chaque type d'entraînement au moins 5 fois"
+    },
+    "late_night_training": {
+      "name": "Entraînement nocturne",
+      "description": "Termine une session d'entraînement après 22 h"
+    },
+    "morning_routine": {
+      "name": "Routine matinale",
+      "description": "Termine 10 sessions d'entraînement avant 10 h"
+    },
+    "training_marathon": {
+      "name": "Marathon d'entraînement",
+      "description": "Termine 5 sessions d'entraînement en une journée"
+    },
+    "checkout_training": {
+      "name": "Pro de l'entraînement au checkout",
+      "description": "Atteins 90 % dans une session d'entraînement au checkout"
+    },
+    "around_the_board": {
+      "name": "Tour de la cible",
+      "description": "Termine 50 sessions d'entraînement Around the Clock"
+    },
+    "training_streak": {
+      "name": "Série d'entraînement",
+      "description": "Entraîne-toi 14 jours d'affilée"
+    },
+    "weekend_training": {
+      "name": "Entraînement du week-end",
+      "description": "Termine 25 sessions d'entraînement le week-end"
+    },
+    "quick_learner": {
+      "name": "Apprentissage rapide",
+      "description": "Améliore ton résultat d'entraînement de 50 % dans un mode"
+    },
+    "triple_training": {
+      "name": "Entraînement aux triples",
+      "description": "Touche 100 triples en une session d'entraînement"
+    },
+    "training_consistency": {
+      "name": "Entraînement régulier",
+      "description": "Atteins 80 %+ dans le même entraînement 3 fois d'affilée"
+    },
+    "fifteen_darter": {
+      "name": "15-Darter",
+      "description": "Termine un leg en seulement 15 fléchettes (501)"
+    },
+    "eighteen_darter": {
+      "name": "18-Darter",
+      "description": "Termine un leg en seulement 18 fléchettes (501)"
+    },
+    "quick_301": {
+      "name": "301 express",
+      "description": "Termine un leg de 301 en moins de 9 fléchettes"
+    },
+    "perfect_301": {
+      "name": "301 parfait",
+      "description": "Termine un leg de 301 en 6 fléchettes"
+    },
+    "double_180": {
+      "name": "Double 180",
+      "description": "Marque 2x 180 dans une partie"
+    },
+    "ton_80_streak": {
+      "name": "Série de 180",
+      "description": "Marque un 180 dans 3 parties d'affilée"
+    },
+    "all_180s": {
+      "name": "Collectionneur de 180",
+      "description": "Marque 100 fois 180"
+    },
+    "new_year_player": {
+      "name": "Joueur du Nouvel An",
+      "description": "Joue le 1er janvier"
+    },
+    "christmas_special": {
+      "name": "Spécial Noël",
+      "description": "Joue à Noël (24-26 décembre)"
+    },
+    "midnight_winner": {
+      "name": "Vainqueur de minuit",
+      "description": "Gagne une partie entre 00 h 00 et 01 h 00"
+    },
+    "shutout": {
+      "name": "Blanchissage",
+      "description": "Gagne un leg avant que ton adversaire puisse faire un checkout (301)"
+    },
+    "robbery": {
+      "name": "Hold-up",
+      "description": "Gagne un leg avec ta première tentative de checkout"
+    },
+    "mirror_match": {
+      "name": "Match miroir",
+      "description": "Termine un leg exactement sur le même score que ton adversaire"
+    },
+    "speed_round": {
+      "name": "Partie éclair",
+      "description": "Termine une partie en moins de 3 minutes"
+    },
+    "rising_star": {
+      "name": "Étoile montante",
+      "description": "Atteins 2 500 points de succès"
+    },
+    "seasoned_pro": {
+      "name": "Pro aguerri",
+      "description": "Atteins 5 000 points de succès"
+    },
+    "elite_player": {
+      "name": "Joueur d'élite",
+      "description": "Atteins 7 500 points de succès"
+    },
+    "completionist": {
+      "name": "Complétiste",
+      "description": "Débloque 50 succès"
+    },
+    "achievement_hunter": {
+      "name": "Chasseur de succès",
+      "description": "Débloque 100 succès"
+    },
+    "perfectionist": {
+      "name": "Perfectionniste absolu",
+      "description": "Débloque les {{target}} succès"
+    },
+    "triple_threat": {
+      "name": "Triple menace",
+      "description": "Gagne 50 parties en 301, en 501 et en 701"
+    },
+    "jack_of_all_trades": {
+      "name": "Touche-à-tout",
+      "description": "Atteins le niveau or dans chaque catégorie"
+    },
+    "dedication": {
+      "name": "Dévouement",
+      "description": "Joue sur 100 jours différents"
+    },
+    "ultimate_master": {
+      "name": "Maître ultime",
+      "description": "Atteins 20 000 points de succès"
+    },
+    "ton_60": {
+      "name": "Ton 60",
+      "description": "Marque 160"
+    },
+    "ton_71": {
+      "name": "Ton 71",
+      "description": "Marque 171"
+    },
+    "single_bull_master": {
+      "name": "Maître du simple bull",
+      "description": "Touche le simple bull (25) 100 fois"
+    },
+    "outer_bull": {
+      "name": "Bull extérieur",
+      "description": "Touche le bull extérieur 25 fois"
+    },
+    "three_in_a_bed": {
+      "name": "Three in a Bed",
+      "description": "Touche le même numéro 3 fois en une volée"
+    },
+    "robin_hood": {
+      "name": "Robin des Bois",
+      "description": "Place 3 fléchettes exactement dans la même zone (même numéro, même multiplicateur)"
+    },
+    "low_blow": {
+      "name": "Coup bas",
+      "description": "Marque moins de 10 points en une volée"
+    },
+    "ton_26": {
+      "name": "Ton 26",
+      "description": "Marque 126"
+    },
+    "ton_41": {
+      "name": "Ton 41",
+      "description": "Marque 141"
+    },
+    "ninety_nine": {
+      "name": "Quatre-vingt-dix-neuf",
+      "description": "Marque exactement 99 points"
+    },
+    "double_double": {
+      "name": "Double double",
+      "description": "Touche 2 doubles en une volée"
+    },
+    "triple_single_double": {
+      "name": "Triple-simple-double",
+      "description": "Touche un triple, un simple et un double en une volée"
+    },
+    "five_tons": {
+      "name": "Cinq tons",
+      "description": "Marque plus de 100 sur 5 volées dans un match"
+    },
+    "ton_plus_streak": {
+      "name": "Série Ton Plus",
+      "description": "Marque 100+ 5 fois d'affilée"
+    },
+    "sixty_club": {
+      "name": "Club des 60",
+      "description": "Marque 60+ à 500 reprises"
+    },
+    "eighty_club": {
+      "name": "Club des 80",
+      "description": "Marque 80+ à 200 reprises"
+    },
+    "triple_eighteen": {
+      "name": "Fan du triple 18",
+      "description": "Touche le triple 18 100 fois"
+    },
+    "triple_seventeen": {
+      "name": "Adepte du triple 17",
+      "description": "Touche le triple 17 100 fois"
+    },
+    "century_average": {
+      "name": "Moyenne centenaire",
+      "description": "Atteins une moyenne arrondie d'exactement 100"
+    },
+    "checkout_32": {
+      "name": "Double 16",
+      "description": "Fais le checkout d'exactement 32"
+    },
+    "checkout_50": {
+      "name": "Bulls Out",
+      "description": "Fais le checkout d'exactement 50"
+    },
+    "checkout_110": {
+      "name": "Tops & Tops",
+      "description": "Fais le checkout d'exactement 110 (T20, T20, D25)"
+    },
+    "checkout_121": {
+      "name": "Finish au bull",
+      "description": "Fais le checkout d'exactement 121"
+    },
+    "checkout_141": {
+      "name": "Checkout maximum",
+      "description": "Fais le checkout d'exactement 141"
+    },
+    "checkout_160": {
+      "name": "Grand finish au bull",
+      "description": "Fais le checkout d'exactement 160"
+    },
+    "checkout_167": {
+      "name": "Checkout maximum",
+      "description": "Fais le checkout d'exactement 167 (T20, T19, Bull)"
+    },
+    "first_visit_checkout": {
+      "name": "Finish dès la première volée",
+      "description": "Fais le checkout dès la première volée d'un leg"
+    },
+    "pressure_checkout": {
+      "name": "Checkout sous pression",
+      "description": "Fais le checkout quand ton adversaire a moins de 40 points restants"
+    },
+    "checkout_artist": {
+      "name": "Artiste du checkout",
+      "description": "Fais le checkout de 20 scores différents"
+    },
+    "three_dart_checkout_streak": {
+      "name": "Série de checkouts en 3 fléchettes",
+      "description": "Fais le checkout en 3 fléchettes 3 fois d'affilée"
+    },
+    "double_twelve": {
+      "name": "Fan du double 12",
+      "description": "Fais 15 checkouts sur le double 12"
+    },
+    "double_eighteen": {
+      "name": "Fan du double 18",
+      "description": "Fais 15 checkouts sur le double 18"
+    },
+    "checkout_streak_5": {
+      "name": "Série de checkouts",
+      "description": "Fais le checkout de 5 legs d'affilée"
+    },
+    "checkout_percentage_70": {
+      "name": "Dieu du checkout",
+      "description": "Atteins un taux de checkout de 70 % (min. 30 tentatives)"
+    },
+    "impossible_checkout": {
+      "name": "Checkout impossible",
+      "description": "Fais le checkout de 163, 166 ou 169"
+    },
+    "checkout_180": {
+      "name": "Checkout après 180",
+      "description": "Fais le checkout dans la volée qui suit un 180"
+    },
+    "missed_double_comeback": {
+      "name": "Doubles ratés, finish réussi",
+      "description": "Fais le checkout après 5 doubles ratés ou plus"
+    },
+    "checkout_collection": {
+      "name": "Collection de checkouts",
+      "description": "Fais le checkout de 25 scores différents"
+    },
+    "checkout_50_plus": {
+      "name": "Checkout 50+",
+      "description": "Réussis 250 checkouts"
+    },
+    "win_streak_15": {
+      "name": "Série de 15",
+      "description": "Gagne 15 parties d'affilée"
+    },
+    "win_streak_20": {
+      "name": "Série de 20",
+      "description": "Gagne 20 parties d'affilée"
+    },
+    "hundred_wins_fast": {
+      "name": "100 express",
+      "description": "Atteins 100 victoires en moins de 30 jours"
+    },
+    "no_bust_match": {
+      "name": "Série sans bust",
+      "description": "Gagne 10 legs d'affilée sans bust"
+    },
+    "consistency_king": {
+      "name": "Roi de la régularité",
+      "description": "Moyenne de 40+ sur 20 parties d'affilée"
+    },
+    "quick_legs": {
+      "name": "Legs rapides",
+      "description": "Gagne 10 legs en moins de 15 fléchettes"
+    },
+    "unbeatable": {
+      "name": "Imbattable",
+      "description": "Gagne 25 parties d'affilée"
+    },
+    "month_champion": {
+      "name": "Champion du mois",
+      "description": "Gagne au moins 1 partie chaque jour d'un mois"
+    },
+    "perfect_week": {
+      "name": "Semaine parfaite",
+      "description": "Gagne au moins 3 parties par jour pendant 7 jours d'affilée"
+    },
+    "comeback_specialist": {
+      "name": "Spécialiste du come-back",
+      "description": "Gagne 10 parties après avoir été mené"
+    },
+    "best_of_five_king": {
+      "name": "Roi du best of 5",
+      "description": "Gagne 25 matchs en best of 5"
+    },
+    "decider_master": {
+      "name": "Maître du leg décisif",
+      "description": "Gagne 25 parties dans un leg décisif"
+    },
+    "whitewash_specialist": {
+      "name": "Spécialiste du sans-faute",
+      "description": "Gagne 10 parties sans perdre un set"
+    },
+    "close_call_master": {
+      "name": "Maître du suspense",
+      "description": "Gagne 15 parties avec 1 point d'écart"
+    },
+    "flawless_victory": {
+      "name": "Victoire parfaite",
+      "description": "Gagne une partie avec une moyenne de plus de 100 et sans bust"
+    },
+    "training_dedication": {
+      "name": "Entraînement acharné",
+      "description": "Termine 500 sessions d'entraînement"
+    },
+    "training_month": {
+      "name": "Mois d'entraînement",
+      "description": "Entraîne-toi 30 jours d'affilée"
+    },
+    "doubles_perfectionist": {
+      "name": "Perfectionniste des doubles",
+      "description": "Atteins 100 % dans une session d'entraînement aux doubles"
+    },
+    "scoring_machine": {
+      "name": "Machine à scorer",
+      "description": "Moyenne de 120+ dans une session d'entraînement au scoring"
+    },
+    "all_training_gold": {
+      "name": "Tout en or",
+      "description": "Atteins au moins 90 % dans chaque type d'entraînement"
+    },
+    "training_improvement": {
+      "name": "Progrès à l'entraînement",
+      "description": "Améliore ton score d'entraînement de 100 % dans un mode"
+    },
+    "speed_training": {
+      "name": "Entraînement éclair",
+      "description": "Termine une session d'entraînement en moins de 5 minutes avec 80 %+"
+    },
+    "hundred_triples_training": {
+      "name": "100 triples à l'entraînement",
+      "description": "Touche 100 triples en une session d'entraînement (moyenne 95 %+)"
+    },
+    "checkout_training_master": {
+      "name": "Maître de l'entraînement au checkout",
+      "description": "Atteins 95 % dans une session d'entraînement au checkout"
+    },
+    "training_variety_master": {
+      "name": "Maître de l'entraînement varié",
+      "description": "Termine chaque type d'entraînement au moins 25 fois"
+    },
+    "twenty_one_darter": {
+      "name": "21-Darter",
+      "description": "Termine un leg en seulement 21 fléchettes (501)"
+    },
+    "twenty_four_darter": {
+      "name": "24-Darter",
+      "description": "Termine un leg en seulement 24 fléchettes (501)"
+    },
+    "four_180s": {
+      "name": "Carré",
+      "description": "Marque 4x 180 dans une partie"
+    },
+    "five_180s": {
+      "name": "High Five",
+      "description": "Marque 5x 180 dans une partie"
+    },
+    "back_to_back_180": {
+      "name": "180 coup sur coup",
+      "description": "Marque 2x 180 d'affilée"
+    },
+    "triple_180": {
+      "name": "Triple 180",
+      "description": "Marque 3x 180 d'affilée"
+    },
+    "quick_701": {
+      "name": "701 express",
+      "description": "Termine un leg de 701 en moins de 21 fléchettes"
+    },
+    "perfect_501_game": {
+      "name": "501 parfait",
+      "description": "Gagne un match de 501 sans un seul bust"
+    },
+    "halloween_special": {
+      "name": "Spécial Halloween",
+      "description": "Joue à Halloween (31 octobre)"
+    },
+    "valentines_win": {
+      "name": "Victoire de la Saint-Valentin",
+      "description": "Gagne le jour de la Saint-Valentin (14 février)"
+    },
+    "late_night_warrior": {
+      "name": "Guerrier de la nuit",
+      "description": "Joue 25 matchs après 23 h"
+    },
+    "early_bird_champion": {
+      "name": "Champion matinal",
+      "description": "Gagne 25 parties avant 8 h"
+    },
+    "lunch_break_player": {
+      "name": "Joueur de la pause déj",
+      "description": "Joue 50 matchs entre 12 h et 14 h"
+    },
+    "weekend_grinder": {
+      "name": "Bosseur du week-end",
+      "description": "Gagne 100 parties le week-end"
+    },
+    "lucky_thirteen": {
+      "name": "13 porte-bonheur",
+      "description": "Gagne une partie en exactement 13 volées"
+    },
+    "perfect_nine": {
+      "name": "Neuf parfaits",
+      "description": "Marque plus de 60 sur 9 volées consécutives"
+    },
+    "world_record_pace": {
+      "name": "Rythme de record du monde",
+      "description": "Termine une partie en moins de 2 minutes"
+    },
+    "bouncer": {
+      "name": "Hors cible",
+      "description": "Touche hors de la cible 100 fois"
+    },
+    "loyalty": {
+      "name": "Fidélité",
+      "description": "Joue avec l'app pendant 365 jours"
+    },
+    "five_hundred_wins": {
+      "name": "Club des 500 victoires",
+      "description": "Gagne 500 parties"
+    },
+    "two_thousand_games": {
+      "name": "Club des 2K",
+      "description": "Joue 2000 parties"
+    },
+    "hundred_opponents": {
+      "name": "100 adversaires",
+      "description": "Joue contre 100 adversaires différents"
+    },
+    "bot_slayer": {
+      "name": "Tueur de bots",
+      "description": "Gagne 50 parties contre des bots"
+    },
+    "human_champion": {
+      "name": "Champion des humains",
+      "description": "Gagne 100 parties contre de vrais joueurs"
+    },
+    "monthly_player": {
+      "name": "Joueur du mois",
+      "description": "Joue 30 jours d'affilée"
+    },
+    "year_one": {
+      "name": "Première année",
+      "description": "Joue sur 180 jours différents"
+    },
+    "game_modes_master": {
+      "name": "Maître des modes de jeu",
+      "description": "Joue 100 parties en 301, en 501 et en 701"
+    },
+    "versatile_player": {
+      "name": "Joueur polyvalent",
+      "description": "Joue à tous les modes de jeu disponibles"
+    },
+    "daily_champion": {
+      "name": "Champion au quotidien",
+      "description": "Gagne sur 50 jours différents"
+    },
+    "achievement_god": {
+      "name": "Dieu des succès",
+      "description": "Atteins 30 000 points de succès"
+    },
+    "achievement_collector": {
+      "name": "Collectionneur de succès",
+      "description": "Débloque 150 succès"
+    },
+    "diamond_collector": {
+      "name": "Collectionneur de diamants",
+      "description": "Débloque tous les succès de niveau diamant"
+    },
+    "legend_status": {
+      "name": "Statut de légende",
+      "description": "Débloque 50 succès de rareté légendaire"
+    },
+    "the_one": {
+      "name": "L'Élu",
+      "description": "Atteins le rang 1 dans chaque catégorie"
+    },
+    "ton_collector": {
+      "name": "Collectionneur de tons",
+      "description": "Fais 500 scores de 100 ou plus"
+    },
+    "ton_hoarder": {
+      "name": "Amasseur de tons",
+      "description": "Fais 2000 scores de 100 ou plus"
+    },
+    "fifty_180s": {
+      "name": "Cinquante maximums",
+      "description": "Fais au total 50 maximums de 180"
+    },
+    "hundred_180s": {
+      "name": "Cent maximums",
+      "description": "Fais au total 100 maximums de 180"
+    },
+    "five_hundred_180s": {
+      "name": "Légende du maximum",
+      "description": "Fais au total 500 maximums de 180"
+    },
+    "triple_crown": {
+      "name": "Triple couronne",
+      "description": "Fais 3 fois 180 d'affilée dans un match"
+    },
+    "sixty_slinger": {
+      "name": "Lanceur de 60",
+      "description": "Fais 1000 scores de 60 ou plus"
+    },
+    "eighty_addict": {
+      "name": "Accro au 80",
+      "description": "Fais 500 scores de 80 ou plus"
+    },
+    "the_mathematiker": {
+      "name": "Le mathématicien",
+      "description": "Fais exactement 100 points en une volée"
+    },
+    "unlucky_score": {
+      "name": "Porte-malheur",
+      "description": "Fais un score d'exactement 13"
+    },
+    "devils_number": {
+      "name": "Le nombre du diable",
+      "description": "Fais un score d'exactement 66"
+    },
+    "the_answer": {
+      "name": "La réponse",
+      "description": "Fais exactement 42 points — la réponse à tout"
+    },
+    "one_fifty_plus_club": {
+      "name": "Club des 150+",
+      "description": "Fais 200 scores de 150 ou plus"
+    },
+    "average_sixty": {
+      "name": "Bases solides",
+      "description": "Atteins une moyenne de match d'au moins 60"
+    },
+    "average_eighty": {
+      "name": "Moyenne de pro",
+      "description": "Atteins une moyenne de match d'au moins 80"
+    },
+    "average_hundred": {
+      "name": "Moyenne à 100",
+      "description": "Atteins une moyenne de match d'au moins 100"
+    },
+    "five_tons_match": {
+      "name": "Parade de tons",
+      "description": "Fais 5 tons (100+) dans un seul match"
+    },
+    "ten_tons_match": {
+      "name": "Festival de tons",
+      "description": "Fais 10 tons (100+) dans un seul match"
+    },
+    "checkout_master_fifty": {
+      "name": "Machine à checkouts",
+      "description": "Termine 50 legs avec succès"
+    },
+    "checkout_legend_200": {
+      "name": "Légende du checkout",
+      "description": "Termine 200 legs avec succès"
+    },
+    "checkout_god_500": {
+      "name": "Dieu du checkout",
+      "description": "Termine 500 legs avec succès"
+    },
+    "bullseye_finisher": {
+      "name": "Finisseur au bullseye",
+      "description": "Fais 10 checkouts sur le bullseye"
+    },
+    "bullseye_surgeon": {
+      "name": "Chirurgien du bullseye",
+      "description": "Fais 50 checkouts sur le bullseye"
+    },
+    "one_dart_specialist": {
+      "name": "Spécialiste de la fléchette unique",
+      "description": "Fais 25 checkouts avec une seule fléchette"
+    },
+    "two_dart_wizard": {
+      "name": "Magicien des deux fléchettes",
+      "description": "Fais 50 checkouts avec seulement deux fléchettes"
+    },
+    "ice_cold_finisher": {
+      "name": "Sang-froid glacial",
+      "description": "Fais 25 checkouts sous pression (adversaire sur un finish)"
+    },
+    "nerves_of_steel": {
+      "name": "Nerfs d'acier",
+      "description": "Fais 50 checkouts sous pression (adversaire sur un finish)"
+    },
+    "after_the_storm": {
+      "name": "Après la tempête",
+      "description": "Fais un checkout juste après un 180"
+    },
+    "storm_chaser": {
+      "name": "Chasseur de tempêtes",
+      "description": "Fais 10 checkouts juste après un 180"
+    },
+    "perfect_legs_ten": {
+      "name": "Dix sans faute",
+      "description": "Gagne 10 legs sans un seul bust"
+    },
+    "perfect_legs_fifty": {
+      "name": "Perfection",
+      "description": "Gagne 50 legs sans un seul bust"
+    },
+    "double_tops_lover": {
+      "name": "Amoureux de Tops",
+      "description": "Fais 100 checkouts sur le double 20"
+    },
+    "double_16_specialist": {
+      "name": "Spécialiste D16",
+      "description": "Fais 75 checkouts sur le double 16"
+    },
+    "impossible_three": {
+      "name": "Le trio impossible",
+      "description": "Fais 3 fois un finish soi-disant impossible (163/166/169)"
+    },
+    "checkout_variety_master": {
+      "name": "Maître de la variété",
+      "description": "Fais un checkout sur 20 doubles différents"
+    },
+    "ten_game_streak": {
+      "name": "Série de dix",
+      "description": "Gagne 10 parties d'affilée"
+    },
+    "hundred_wins": {
+      "name": "100 victoires",
+      "description": "Gagne 100 parties au total"
+    },
+    "two_fifty_wins": {
+      "name": "250 victoires",
+      "description": "Gagne 250 parties au total"
+    },
+    "thousand_wins": {
+      "name": "Millième victoire",
+      "description": "Gagne 1000 parties au total"
+    },
+    "five_hundred_games": {
+      "name": "Cap des 500 parties",
+      "description": "Joue 500 parties"
+    },
+    "thousand_games": {
+      "name": "Mille et plus",
+      "description": "Joue 1000 parties"
+    },
+    "five_thousand_games": {
+      "name": "Joueur marathon",
+      "description": "Joue 5000 parties"
+    },
+    "daily_devotion": {
+      "name": "Dévotion quotidienne",
+      "description": "Joue sur 100 jours différents"
+    },
+    "year_round_player": {
+      "name": "Joueur toute l'année",
+      "description": "Joue sur 365 jours différents"
+    },
+    "whitewash_five": {
+      "name": "Série de sans-faute",
+      "description": "Gagne 5 matchs sans concéder un leg"
+    },
+    "whitewash_twenty": {
+      "name": "Dominateur",
+      "description": "Gagne 20 matchs sans concéder un leg"
+    },
+    "close_match_expert": {
+      "name": "Cœur accroché",
+      "description": "Gagne 25 matchs serrés (1 leg d'écart)"
+    },
+    "decider_king": {
+      "name": "Roi du leg décisif",
+      "description": "Gagne 30 legs décisifs (dernier leg à égalité)"
+    },
+    "comeback_legend": {
+      "name": "Légende du come-back",
+      "description": "Gagne 20 matchs après avoir été mené"
+    },
+    "triple_master_5k": {
+      "name": "Maître des triples",
+      "description": "Touche 5000 triples au total"
+    },
+    "double_master_5k": {
+      "name": "Maître des doubles",
+      "description": "Touche 5000 doubles au total"
+    },
+    "bullseye_500": {
+      "name": "500 bullseyes",
+      "description": "Touche 500 bullseyes au total"
+    },
+    "single_bull_500": {
+      "name": "500 simples bulls",
+      "description": "Touche 500 simples bulls au total (bull extérieur)"
+    },
+    "shanghai_artist": {
+      "name": "Artiste du Shanghai",
+      "description": "Fais 10 combinaisons Shanghai (S+D+T du même numéro)"
+    },
+    "robin_hood_10": {
+      "name": "Robin des Bois x10",
+      "description": "Lance trois fléchettes identiques 10 fois (même numéro + même multiplicateur)"
+    },
+    "missed_board_ten": {
+      "name": "À côté !",
+      "description": "Rate la cible 10 fois"
+    },
+    "missed_board_hundred": {
+      "name": "Tireur aveugle",
+      "description": "Rate la cible 100 fois"
+    },
+    "low_scorer_50": {
+      "name": "Profil bas",
+      "description": "Marque moins de 10 points en une volée 50 fois"
+    },
+    "shutout_master": {
+      "name": "Maître du blanchissage",
+      "description": "Gagne 10 legs où ton adversaire avait plus de 170 restants"
+    },
+    "first_leg_ace": {
+      "name": "Premier sang",
+      "description": "Gagne le premier leg d'un match 20 fois"
+    },
+    "last_leg_hero": {
+      "name": "Héros du dernier leg",
+      "description": "Gagne le leg décisif final 20 fois"
+    },
+    "mixed_visit": {
+      "name": "Volée complète",
+      "description": "Fais un triple, un simple et un double en une volée 100 fois"
+    },
+    "two_doubles_fifty": {
+      "name": "Double double",
+      "description": "Fais deux doubles en une volée 50 fois"
+    },
+    "same_number_lover": {
+      "name": "Fidèle au numéro",
+      "description": "Lance les 3 fléchettes sur le même numéro 50 fois"
+    },
+    "three_ones_again": {
+      "name": "Le trio magique",
+      "description": "Fais S1-S1-S1 (trois 1) 15 fois"
+    },
+    "night_owl_20": {
+      "name": "Oiseau de nuit",
+      "description": "Joue 20 parties après 22 h"
+    },
+    "night_owl_100": {
+      "name": "Créature de la nuit",
+      "description": "Joue 100 parties après 22 h"
+    },
+    "early_riser_10": {
+      "name": "Matinal",
+      "description": "Gagne 10 parties avant 8 h"
+    },
+    "lunch_regular": {
+      "name": "Habitué de la pause déj",
+      "description": "Joue 50 parties pendant ta pause déjeuner (12 h-14 h)"
+    },
+    "weekend_champion": {
+      "name": "Champion du week-end",
+      "description": "Joue 100 parties le week-end"
+    },
+    "speed_finish_120": {
+      "name": "Match éclair",
+      "description": "Termine un match en moins de 2 minutes"
+    },
+    "speed_finish_60": {
+      "name": "Fou de vitesse",
+      "description": "Termine un match en moins d'une minute"
+    },
+    "marathon_match_60": {
+      "name": "Match sans fin",
+      "description": "Joue un match de plus de 60 minutes"
+    },
+    "triple_20_thousand": {
+      "name": "Machine à T20",
+      "description": "Touche le triple 20 1000 fois"
+    },
+    "triple_19_500": {
+      "name": "Expert du T19",
+      "description": "Touche le triple 19 500 fois"
+    },
+    "triple_18_500": {
+      "name": "Virtuose du T18",
+      "description": "Touche le triple 18 500 fois"
+    },
+    "singles_10k": {
+      "name": "Collectionneur de simples",
+      "description": "Touche 10 000 simples au total"
+    },
+    "doubles_1k": {
+      "name": "Passionné de doubles",
+      "description": "Touche 1000 doubles au total"
+    },
+    "triples_1k": {
+      "name": "Passionné de triples",
+      "description": "Touche 1000 triples au total"
+    },
+    "twelve_dart_leg": {
+      "name": "12-Darter",
+      "description": "Gagne un leg de 501 en seulement 12 fléchettes"
+    },
+    "eleven_dart_leg": {
+      "name": "11-Darter",
+      "description": "Gagne un leg en seulement 11 fléchettes"
+    },
+    "ten_dart_leg": {
+      "name": "10-Darter",
+      "description": "Gagne un leg en seulement 10 fléchettes"
+    },
+    "legs_under_15_fifty": {
+      "name": "Monstre d'efficacité",
+      "description": "Gagne 50 legs en moins de 15 fléchettes"
+    },
+    "legs_under_15_200": {
+      "name": "Génie de l'efficacité",
+      "description": "Gagne 200 legs en moins de 15 fléchettes"
+    },
+    "leg_average_80": {
+      "name": "Leg solide",
+      "description": "Atteins une moyenne d'au moins 80 sur un leg"
+    },
+    "leg_average_100": {
+      "name": "Leg parfait",
+      "description": "Atteins une moyenne d'au moins 100 sur un leg"
+    },
+    "leg_average_120": {
+      "name": "Leg surhumain",
+      "description": "Atteins une moyenne d'au moins 120 sur un leg"
+    },
+    "training_25": {
+      "name": "Routine d'entraînement",
+      "description": "Termine 25 sessions d'entraînement"
+    },
+    "training_100": {
+      "name": "Drogué de l'entraînement",
+      "description": "Termine 100 sessions d'entraînement"
+    },
+    "training_500": {
+      "name": "Obsédé de l'entraînement",
+      "description": "Termine 500 sessions d'entraînement"
+    },
+    "training_1000": {
+      "name": "Dieu de l'entraînement",
+      "description": "Termine 1000 sessions d'entraînement"
+    },
+    "bot_destroyer_50": {
+      "name": "Destructeur de bots",
+      "description": "Bats des bots dans 50 parties"
+    },
+    "bot_annihilator": {
+      "name": "Annihilateur de bots",
+      "description": "Bats des bots dans 200 parties"
+    },
+    "human_rival_50": {
+      "name": "Chasseur d'humains",
+      "description": "Bats des adversaires humains dans 50 parties"
+    },
+    "human_rival_200": {
+      "name": "Dompteur d'humains",
+      "description": "Bats des adversaires humains dans 200 parties"
+    },
+    "opponent_variety": {
+      "name": "Sociable",
+      "description": "Joue contre 25 adversaires différents"
+    },
+    "opponent_collector": {
+      "name": "Collectionneur de rivaux",
+      "description": "Joue contre 50 adversaires différents"
+    },
+    "perfect_checkout_50": {
+      "name": "Finishs sans faute",
+      "description": "Fais 50 checkouts sans bust plus tôt dans le leg"
+    },
+    "checkout_percentage_80": {
+      "name": "Précision au checkout",
+      "description": "Atteins un taux de checkout de 80 % dans un match (min. 10 tentatives)"
+    },
+    "three_180_match": {
+      "name": "Triple maximum",
+      "description": "Fais 3 x 180 dans un seul match"
+    },
+    "five_180_match": {
+      "name": "Rafale de maximums",
+      "description": "Fais 5 x 180 dans un seul match"
+    },
+    "no_bust_match_win": {
+      "name": "Zéro faute",
+      "description": "Gagne 10 matchs complètement sans bust"
+    },
+    "score_69": {
+      "name": "Nice!",
+      "description": "Fais exactement 69 points en une volée"
+    },
+    "score_111": {
+      "name": "Nelson",
+      "description": "Fais exactement 111 points en une volée"
+    },
+    "score_123": {
+      "name": "Un, deux, trois",
+      "description": "Fais exactement 123 points en une volée"
+    },
+    "score_7": {
+      "name": "Chiffre porte-bonheur",
+      "description": "Fais exactement 7 points en une volée"
+    },
+    "score_3": {
+      "name": "Minimaliste",
+      "description": "Fais exactement 3 points en une volée (avec 3 fléchettes)"
+    },
+    "score_170": {
+      "name": "Plus gros checkout",
+      "description": "Fais exactement 170 points (T20+T20+Bull possible !)"
+    },
+    "three_triples_50": {
+      "name": "Tiercé de triples",
+      "description": "Fais trois triples en une volée 50 fois (hors 180)"
+    },
+    "five_best_of_five": {
+      "name": "Vétéran du best of 5",
+      "description": "Gagne 50 matchs en best of 5"
+    },
+    "checkout_d12_50": {
+      "name": "Spécialiste D12",
+      "description": "Fais 50 checkouts sur le double 12"
+    },
+    "checkout_d18_50": {
+      "name": "Spécialiste D18",
+      "description": "Fais 50 checkouts sur le double 18"
+    },
+    "checkout_d1_25": {
+      "name": "Expert Madhouse",
+      "description": "Fais 25 checkouts sur le double 1"
+    },
+    "score_consecutive_60": {
+      "name": "Machine à 60",
+      "description": "Marque 60+ en une volée 500 fois"
+    },
+    "perfect_checkout_100": {
+      "name": "Finisseur sans faute",
+      "description": "Fais 100 checkouts sans bust plus tôt dans le leg"
+    },
+    "all_achievements_v2": {
+      "name": "Complétiste V2",
+      "description": "Débloque les {{target}} succès"
+    },
+    "first_miss": {
+      "name": "À côté !",
+      "description": "Rate la cible pour la première fois"
+    },
+    "miss_10": {
+      "name": "Air guitar",
+      "description": "Rate la cible 10 fois"
+    },
+    "miss_25": {
+      "name": "Soufflerie",
+      "description": "Rate la cible 25 fois"
+    },
+    "miss_50": {
+      "name": "Fléchettes fantômes",
+      "description": "Rate la cible 50 fois"
+    },
+    "miss_100": {
+      "name": "Lanceur aveugle",
+      "description": "Rate la cible 100 fois"
+    },
+    "miss_250": {
+      "name": "Lanceur fantôme",
+      "description": "Rate la cible 250 fois"
+    },
+    "first_zero_visit": {
+      "name": "Gros zéro",
+      "description": "Marque 0 point en une volée (3 ratés)"
+    },
+    "zero_visit_5": {
+      "name": "Invisible",
+      "description": "Fais 5 volées à zéro (3 ratés)"
+    },
+    "zero_visit_10": {
+      "name": "Acrobate des airs",
+      "description": "Fais 10 volées à zéro"
+    },
+    "zero_visit_25": {
+      "name": "L'homme invisible",
+      "description": "Fais 25 volées à zéro"
+    },
+    "zero_visit_50": {
+      "name": "Rien du tout",
+      "description": "Fais 50 volées à zéro"
+    },
+    "zero_visit_100": {
+      "name": "Maître du vide",
+      "description": "Fais 100 volées à zéro"
+    },
+    "air_dart": {
+      "name": "Fléchette en l'air",
+      "description": "Rate 3 fléchettes d'affilée dans un leg"
+    },
+    "miss_streak_5": {
+      "name": "Série de ratés",
+      "description": "Rate 5 fléchettes d'affilée"
+    },
+    "double_zero": {
+      "name": "Double zéro",
+      "description": "Fais 2 volées à zéro dans un match"
+    },
+    "triple_zero": {
+      "name": "Triple zéro",
+      "description": "Fais 3 volées à zéro dans un match"
+    },
+    "miss_opening": {
+      "name": "Faux départ",
+      "description": "Commence un leg par une volée à zéro"
+    },
+    "miss_opening_5": {
+      "name": "Faux départ chronique",
+      "description": "Commence 5 legs par une volée à zéro"
+    },
+    "miss_under_pressure": {
+      "name": "Trac",
+      "description": "Rate la cible lors d'une tentative de checkout"
+    },
+    "miss_under_pressure_10": {
+      "name": "Phobie du checkout",
+      "description": "Rate la cible 10 fois lors de tentatives de checkout"
+    },
+    "first_bust": {
+      "name": "Bust !",
+      "description": "Subis ton premier bust"
+    },
+    "bust_5": {
+      "name": "Débutant du bust",
+      "description": "Subis 5 busts"
+    },
+    "bust_10": {
+      "name": "Pro du bust",
+      "description": "Subis 10 busts"
+    },
+    "bust_25": {
+      "name": "Expert du bust",
+      "description": "Subis 25 busts"
+    },
+    "bust_50": {
+      "name": "Roi du bust",
+      "description": "Subis 50 busts"
+    },
+    "bust_100": {
+      "name": "Légende du bust",
+      "description": "Subis 100 busts"
+    },
+    "bust_high_score": {
+      "name": "Si près, si loin",
+      "description": "Fais un bust avec plus de 100 restants"
+    },
+    "bust_high_score_10": {
+      "name": "Trop pressé",
+      "description": "Fais 10 busts avec plus de 100 restants"
+    },
+    "bust_low_score": {
+      "name": "Presque",
+      "description": "Fais un bust avec moins de 20 restants"
+    },
+    "bust_low_score_10": {
+      "name": "Raté, c'est raté",
+      "description": "Fais 10 busts avec moins de 20 restants"
+    },
+    "bust_on_2": {
+      "name": "Bust Madhouse",
+      "description": "Fais un bust sur 2 (D1 raté)"
+    },
+    "bust_on_2_multi": {
+      "name": "Habitué du Madhouse",
+      "description": "Fais 5 busts sur 2"
+    },
+    "bust_series_2": {
+      "name": "Double bust",
+      "description": "Fais 2 busts dans un match"
+    },
+    "bust_series_3": {
+      "name": "Coup du chapeau du bust",
+      "description": "Fais 3 busts dans un match"
+    },
+    "bust_series_5": {
+      "name": "Machine à bust",
+      "description": "Fais 5 busts dans un match"
+    },
+    "bust_after_180": {
+      "name": "180 puis bust",
+      "description": "Fais un bust dans la volée qui suit un 180"
+    },
+    "bust_twice_same_leg": {
+      "name": "Déjà bust",
+      "description": "Fais 2 busts dans le même leg"
+    },
+    "bust_three_same_leg": {
+      "name": "Leg à triple bust",
+      "description": "Fais 3 busts dans le même leg"
+    },
+    "bust_on_checkout": {
+      "name": "Checkout gâché",
+      "description": "Fais un bust alors que tu avais une tentative de checkout"
+    },
+    "bust_on_checkout_10": {
+      "name": "Fiasco du checkout",
+      "description": "Fais 10 busts sur une tentative de checkout"
+    },
+    "score_1": {
+      "name": "Score minimal",
+      "description": "Marque exactement 1 point en une volée"
+    },
+    "score_1_multi": {
+      "name": "Expert du simple 1",
+      "description": "Marque exactement 1 point en une volée 10 fois"
+    },
+    "score_3_ones": {
+      "name": "Trois 1",
+      "description": "Touche le 1 avec les 3 fléchettes d'une volée (score = 3)"
+    },
+    "low_score_under_10": {
+      "name": "Un seul chiffre",
+      "description": "Marque moins de 10 points 5 fois"
+    },
+    "low_score_under_10_25": {
+      "name": "Régulièrement mauvais",
+      "description": "Marque moins de 10 points 25 fois"
+    },
+    "low_score_under_10_50": {
+      "name": "Collectionneur de fonds de cale",
+      "description": "Marque moins de 10 points 50 fois"
+    },
+    "low_score_under_10_100": {
+      "name": "Puits sans fond",
+      "description": "Marque moins de 10 points 100 fois"
+    },
+    "worst_visit_under_5": {
+      "name": "Au fond du trou",
+      "description": "Pire volée d'un match sous les 5 points"
+    },
+    "worst_visit_under_5_10": {
+      "name": "Impossible de faire pire",
+      "description": "Pire volée sous les 5 points dans 10 matchs"
+    },
+    "worst_visit_under_5_25": {
+      "name": "Habitant du sous-sol",
+      "description": "Pire volée sous les 5 points dans 25 matchs"
+    },
+    "average_under_20": {
+      "name": "Moyenne sous 20",
+      "description": "Termine un match avec une moyenne inférieure à 20"
+    },
+    "average_under_30": {
+      "name": "Moyenne sous 30",
+      "description": "Termine un match avec une moyenne inférieure à 30"
+    },
+    "average_under_30_5": {
+      "name": "Chroniquement sous 30",
+      "description": "Termine 5 matchs avec une moyenne inférieure à 30"
+    },
+    "three_low_in_row": {
+      "name": "Série de petits scores",
+      "description": "Marque moins de 20 points 3 fois d'affilée"
+    },
+    "score_exactly_3": {
+      "name": "Triple échec",
+      "description": "Marque exactement 3 points en une volée"
+    },
+    "low_first_dart": {
+      "name": "Mauvais départ",
+      "description": "Commence 10 volées par un raté"
+    },
+    "descending_visit": {
+      "name": "Spirale descendante",
+      "description": "Chaque fléchette plus basse que la précédente (3 fléchettes, aucun raté)"
+    },
+    "all_different_low": {
+      "name": "Variété dans l'échec",
+      "description": "Touche 3 zones différentes sous 5 en une volée"
+    },
+    "same_low_score_repeat": {
+      "name": "Disque rayé",
+      "description": "Marque le même petit score (<20) 3x d'affilée"
+    },
+    "low_score_after_high": {
+      "name": "Atterrissage forcé",
+      "description": "Marque moins de 10 juste après un score de 100+"
+    },
+    "first_leg_lost": {
+      "name": "Première défaite",
+      "description": "Perds ton premier leg"
+    },
+    "legs_lost_5": {
+      "name": "Perdeur de legs",
+      "description": "Perds 5 legs"
+    },
+    "legs_lost_10": {
+      "name": "Série de défaites",
+      "description": "Perds 10 legs"
+    },
+    "legs_lost_25": {
+      "name": "Donneur de legs",
+      "description": "Perds 25 legs"
+    },
+    "legs_lost_50": {
+      "name": "Roi des défaites",
+      "description": "Perds 50 legs"
+    },
+    "legs_lost_100": {
+      "name": "Légende de la défaite",
+      "description": "Perds 100 legs"
+    },
+    "first_match_lost": {
+      "name": "Pas mon jour",
+      "description": "Perds ton premier match"
+    },
+    "matches_lost_5": {
+      "name": "Perdant en série",
+      "description": "Perds 5 matchs"
+    },
+    "matches_lost_10": {
+      "name": "Éternel perdant",
+      "description": "Perds 10 matchs"
+    },
+    "matches_lost_25": {
+      "name": "Perdant professionnel",
+      "description": "Perds 25 matchs"
+    },
+    "matches_lost_50": {
+      "name": "Maître de la défaite",
+      "description": "Perds 50 matchs"
+    },
+    "leg_lost_on_checkout": {
+      "name": "Checkout manqué",
+      "description": "Perds un leg malgré une tentative de checkout"
+    },
+    "leg_lost_on_checkout_10": {
+      "name": "Tragédie du checkout",
+      "description": "Perds 10 legs malgré une tentative de checkout"
+    },
+    "leg_lost_on_checkout_25": {
+      "name": "Éternel second",
+      "description": "Perds 25 legs malgré une tentative de checkout"
+    },
+    "whitewash_loss": {
+      "name": "Blanchi",
+      "description": "Perds un match sans gagner un seul leg"
+    },
+    "whitewash_loss_5": {
+      "name": "Collectionneur de blanchissages",
+      "description": "Perds 5 matchs sans gagner un leg"
+    },
+    "whitewash_loss_10": {
+      "name": "Balayé",
+      "description": "Perds 10 matchs sans gagner un leg"
+    },
+    "lost_with_higher_avg": {
+      "name": "Perdu avec la manière",
+      "description": "Perds un match malgré la meilleure moyenne"
+    },
+    "lost_big_average_diff": {
+      "name": "Pas dans ta catégorie",
+      "description": "Perds un match avec 50+ d'écart de moyenne sur ton adversaire"
+    },
+    "last_place": {
+      "name": "Dernière place",
+      "description": "Termine dernier d'un match à 3 joueurs ou plus"
+    },
+    "first_missed_checkout": {
+      "name": "Premier raté",
+      "description": "Rate ta première tentative de checkout"
+    },
+    "missed_checkout_5": {
+      "name": "Grincheux du checkout",
+      "description": "Rate 5 tentatives de checkout"
+    },
+    "missed_checkout_10": {
+      "name": "Angoisse du checkout",
+      "description": "Rate 10 tentatives de checkout"
+    },
+    "missed_checkout_25": {
+      "name": "Névrose du checkout",
+      "description": "Rate 25 tentatives de checkout"
+    },
+    "missed_checkout_50": {
+      "name": "Phobie du checkout V2",
+      "description": "Rate 50 tentatives de checkout"
+    },
+    "checkout_attempts_no_hit": {
+      "name": "Efforts perdus",
+      "description": "3+ tentatives de checkout dans un leg sans réussite"
+    },
+    "checkout_attempts_no_hit_5": {
+      "name": "5+ tentatives, aucune réussite",
+      "description": "5+ tentatives de checkout dans un leg sans réussite"
+    },
+    "low_checkout_pct": {
+      "name": "Checkout raté",
+      "description": "Taux de checkout inférieur à 10 % dans un match (min. 5 tentatives)"
+    },
+    "low_checkout_pct_5": {
+      "name": "Désastre au checkout",
+      "description": "Taux de checkout inférieur à 10 % dans 5 matchs"
+    },
+    "missed_match_dart": {
+      "name": "Fléchette de match ratée",
+      "description": "Rate une fléchette de match (dernier leg, checkout possible)"
+    },
+    "worse_than_bot_1": {
+      "name": "Pire qu'un bot",
+      "description": "Perds contre un bot (niveau 1-3)"
+    },
+    "worse_than_bot_5": {
+      "name": "Chair à bots",
+      "description": "Perds 5 fois contre un bot (niveau 1-3)"
+    },
+    "losing_streak_3": {
+      "name": "Série noire",
+      "description": "Perds 3 matchs d'affilée"
+    },
+    "losing_streak_5": {
+      "name": "Passage à vide",
+      "description": "Perds 5 matchs d'affilée"
+    },
+    "losing_streak_10": {
+      "name": "Malchance sans fin",
+      "description": "Perds 10 matchs d'affilée"
+    },
+    "opposite_day": {
+      "name": "Le monde à l'envers",
+      "description": "Perds alors que tu as gagné plus de legs que ton adversaire (multijoueur)"
+    },
+    "lead_blown": {
+      "name": "Avance gâchée",
+      "description": "Perds un match après avoir mené 2-0 (best of 5+)"
+    },
+    "worst_match_ever": {
+      "name": "Pire. Match. Jamais.",
+      "description": "Termine un match avec une moyenne inférieure à 15"
+    },
+    "no_ton_match": {
+      "name": "Sans éclat",
+      "description": "Termine un match sans score supérieur à 60"
+    },
+    "fail_collector": {
+      "name": "Collectionneur de ratés",
+      "description": "Débloque 50 succès de ratés"
+    }
+  },
+  "scoreboard": {
+    "title": "Tableau des scores",
+    "waiting": "En attente d'un match",
+    "waiting_hint": "Lance un match X01 sur cet appareil et ouvre le tableau des scores avec le bouton écran dans la partie. Le score s'affiche ici aussitôt.",
+    "legs_to_win_one": "Premier à {{count}} leg",
+    "legs_to_win_other": "Premier à {{count}} legs",
+    "legs_to_win_many": "Premier à {{count}} legs",
+    "sets_to_win_one": "premier à {{count}} set",
+    "sets_to_win_other": "premier à {{count}} sets",
+    "sets_to_win_many": "premier à {{count}} sets",
+    "live": "En direct",
+    "paused": "En pause",
+    "visit": "Volée",
+    "checkout": "Checkout",
+    "average": "Moy.",
+    "darts_in_leg": "Fléchettes dans le leg",
+    "legs": "Legs",
+    "sets": "Sets",
+    "bust": "Bust",
+    "leg_won": "Leg pour {{name}}",
+    "match_won": "{{name}} gagne le match",
+    "fullscreen": "Plein écran",
+    "exit_fullscreen": "Quitter le plein écran",
+    "standings": "Classement",
+    "remaining": "Restant",
+    "open": "Ouvrir sur un second écran"
+  },
+  "correction": {
+    "label": "Correction",
+    "hint": "Saisis le nouveau total · Entrée valide · Échap garde {{score}}",
+    "how_thrown": "{{name}} {{score}} – comment ce score a été lancé ?",
+    "how_thrown_label": "Comment {{name}} a lancé le {{score}} ?",
+    "pick": "Lancé : {{darts}}",
+    "other": "Autre…",
+    "title": "Corriger la volée – {{name}}, volée {{n}}",
+    "booked": "Enregistré : {{score}}",
+    "mode": "Corriger par",
+    "tab_sum": "Total",
+    "tab_darts": "Fléchettes",
+    "new_sum": "Total corrigé",
+    "remove_dart": "Retirer {{dart}}",
+    "save": "Appliquer",
+    "edit_visit": "Corriger la volée {{score}}",
+    "typed": "Total saisi – zones inconnues",
+    "error_invalid": "Ce total est impossible avec trois fléchettes.",
+    "error_no_darts": "Choisis au moins une fléchette.",
+    "error_not_found": "Cette volée n'existe plus.",
+    "error_finished_leg": "Dans un leg terminé, tu peux seulement indiquer comment le même total a été lancé. Pour un autre total, annule les volées jusqu'à celle-ci.",
+    "error_checkout": "Cela terminerait le leg. Pour un finish : annule et saisis-le à nouveau."
+  },
+  "account_hub": {
+    "title": "Compte",
+    "summary": "Connecté en tant que",
+    "back": "Vers le compte",
+    "plan_lifetime": "Licence à vie",
+    "plan_active": "Abonnement actif",
+    "plan_trial_one": "Essai : {{count}} jour restant",
+    "plan_trial_other": "Essai : {{count}} jours restants",
+    "plan_trial_many": "Essai : {{count}} jours restants",
+    "plan_none": "Gratuit",
+    "upgrade": "Passer à Premium",
+    "group_account": "Compte",
+    "profile": "Profil et connexion",
+    "profile_desc": "Nom, e-mail, mot de passe, suppression du compte",
+    "subscription": "Abonnement et licence",
+    "group_app": "App",
+    "settings": "Paramètres",
+    "settings_desc": "Thème, son, vibration, aides de jeu",
+    "group_help": "Aide",
+    "guide": "Guide",
+    "guide_desc": "Modes de jeu, saisie et statistiques expliqués",
+    "shortcuts": "Raccourcis clavier",
+    "shortcuts_desc": "Compte plus vite au clavier",
+    "contact": "Contact",
+    "contact_desc": "Envoie une question ou une idée",
+    "bug": "Signaler un bug",
+    "bug_desc": "Quelque chose ne marche pas comme prévu",
+    "group_admin": "Administration",
+    "admin": "Administration",
+    "admin_desc": "Utilisateurs, signalements de bugs, debug flags",
+    "changelog": "Changelog",
+    "changelog_desc": "Les nouveautés de l'app (en anglais)"
+  },
+  "plan": {
+    "premium": "Premium",
+    "see_premium": "Voir Premium",
+    "later": "Plus tard",
+    "back_home": "Retour à l'accueil",
+    "gate_title": "Premium",
+    "gate_body": "Avec un abonnement ou la licence à vie, tout est débloqué :",
+    "gate_online": "Les matchs en ligne sont réservés à Premium",
+    "gate_tournaments": "Les tournois sont réservés à Premium",
+    "gate_scoreboard": "Le tableau des scores TV est réservé à Premium",
+    "gate_training": "Ce mode d'entraînement est réservé à Premium",
+    "gate_heatmap": "Les heatmaps sont réservées à Premium",
+    "gate_players": "Plus de joueurs avec Premium",
+    "gate_match_players": "Plus de joueurs par partie avec Premium",
+    "gate_bot_level": "Des bots plus forts avec Premium",
+    "gate_history": "L'historique complet des matchs est réservé à Premium",
+    "gate_export": "Les rapports sont réservés à Premium",
+    "heatmap_locked_body": "Tes fléchettes continuent d'être enregistrées. Avec Premium, tu vois tout de suite où elles atterrissent.",
+    "limit_title": "Premium",
+    "limit_generic": "Ceci fait partie de Premium.",
+    "limit_players": "Avec la formule gratuite, tu peux créer {{limit}} joueurs à toi. Premium n'a pas de limite.",
+    "limit_match_players": "Avec la formule gratuite, {{limit}} joueurs par partie. Premium permet jusqu'à 8.",
+    "limit_bot_level": "Avec la formule gratuite, les bots vont jusqu'au niveau {{limit}}. Premium va jusqu'à 10.",
+    "limit_training": "Avec la formule gratuite, les doubles et Around the Clock sont ouverts. Premium débloque les six modes d'entraînement.",
+    "limit_tournaments": "Les tournois sont réservés à Premium.",
+    "limit_online": "Les matchs en ligne sont réservés à Premium.",
+    "limit_heatmap": "Les heatmaps sont réservées à Premium.",
+    "limit_export": "Les rapports CSV, Excel et PDF sont réservés à Premium. La sauvegarde de tes données (JSON) dans les paramètres reste gratuite.",
+    "limit_scoreboard": "Le tableau des scores TV est réservé à Premium.",
+    "limit_history": "L'historique complet des matchs est réservé à Premium.",
+    "free_match_hint": "Gratuit : {{count}} par partie",
+    "history_hint": "Avec la formule gratuite, tu vois tes {{count}} dernières parties.",
+    "free_title": "Gratuit",
+    "free_price": "0 €, pour toujours",
+    "your_plan": "Ta formule actuelle",
+    "free_body": "Après les 30 jours, l'app reste utilisable :",
+    "account_free_title": "Tu es sur la formule gratuite",
+    "account_free_body": "Voici ce qu'ajoute Premium :",
+    "premium_match_players": "Jusqu'à 8 joueurs par partie",
+    "premium_players": "Autant de joueurs à toi que tu veux",
+    "premium_bots": "Bots jusqu'au niveau 10",
+    "premium_online": "Matchs en ligne",
+    "premium_tournaments": "Tournois",
+    "premium_training": "Les 6 modes d'entraînement",
+    "premium_heatmap": "Heatmaps : où tes fléchettes atterrissent",
+    "premium_history": "L'historique complet des matchs",
+    "premium_export": "Rapports CSV, Excel et PDF",
+    "premium_scoreboard": "Tableau des scores TV sur un second écran",
+    "free_modes": "X01, Cricket, Around the Clock et Shanghai",
+    "free_players": "3 joueurs à toi, 2 par partie",
+    "free_bots": "Bots jusqu'au niveau 5",
+    "free_training": "Doubles et Around the Clock à l'entraînement",
+    "free_stats": "Statistiques et tes 20 dernières parties",
+    "free_achievements": "Tous les succès"
+  },
+  "changelog": {
+    "title": "Changelog",
+    "subtitle": "What changed in State of the Dart"
+  }
+}

@@ -3,6 +3,9 @@ import fs from 'fs';
 import path from 'path';
 import de from '../../i18n/locales/de.json';
 import en from '../../i18n/locales/en.json';
+import it_ from '../../i18n/locales/it.json';
+import es from '../../i18n/locales/es.json';
+import fr from '../../i18n/locales/fr.json';
 import { scanLiterals, scanLanguageForks } from './scanLiterals';
 
 const SRC = path.resolve(__dirname, '../..');
@@ -76,6 +79,39 @@ describe('i18n guard', () => {
     const ph = (v: unknown) => (typeof v === 'string' ? [...v.matchAll(/\{\{\s*(\w+)/g)].map(m => m[1]).sort().join(',') : '');
     const off = [...DE.keys()].filter(k => EN.has(k) && ph(DE.get(k)) !== ph(EN.get(k)));
     expect(off).toEqual([]);
+  });
+
+  // Italian, Spanish, French (0.50.0): the same keys as English (plus the
+  // `_many` plural forms those languages have), same placeholders and tags.
+  const OTHERS = { it: flat(it_ as Tree), es: flat(es as Tree), fr: flat(fr as Tree) };
+  const base = (k: string) => k.replace(/_many$/, '_other');
+  for (const [lng, m] of Object.entries(OTHERS)) {
+    it(`${lng}: every English key is translated, nothing extra`, () => {
+      const missing = [...EN.keys()].filter(k => !m.has(k));
+      const extra = [...m.keys()].filter(k => !EN.has(base(k)));
+      expect({ missing: missing.slice(0, 20), extra: extra.slice(0, 20) }).toEqual({ missing: [], extra: [] });
+    });
+    it(`${lng}: placeholders and tags match English`, () => {
+      const ph = (v: unknown) => (typeof v === 'string' ? [...v.matchAll(/\{\{\s*(\w+)|<\/?\w+\s*\/?>/g)].map(x => x[1] ?? x[0]).sort().join(',') : '');
+      const off = [...m.keys()].filter(k => EN.has(base(k)) && ph(m.get(k)) !== ph(EN.get(base(k))));
+      expect(off.slice(0, 20)).toEqual([]);
+    });
+    it(`${lng}: really translated, not English copied over`, () => {
+      const strings = [...m.entries()].filter(([k, v]) => typeof v === 'string' && (v as string).length > 25 && EN.has(k));
+      const same = strings.filter(([k, v]) => v === EN.get(k));
+      expect(strings.length).toBeGreaterThan(800);
+      expect(same.length / strings.length).toBeLessThan(0.05);
+    });
+  }
+
+  it('it/es/fr load on demand, never with the main bundle', () => {
+    for (const f of CODE) {
+      if (rel(f) === 'i18n/config.ts') continue;
+      expect(fs.readFileSync(f, 'utf8'), rel(f)).not.toMatch(/from ['"][./]*i18n\/locales\/(it|es|fr)\.json['"]/);
+    }
+    const cfg = fs.readFileSync(path.join(SRC, 'i18n/config.ts'), 'utf8');
+    expect(cfg).not.toMatch(/^import .*locales\/(it|es|fr)/m);
+    expect(cfg).toMatch(/import\('\.\/locales\/it\.json'\)/);
   });
 
   it('the scanner catches what it is meant to catch (cross-check)', () => {

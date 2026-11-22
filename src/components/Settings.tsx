@@ -1,3 +1,4 @@
+import { APP_LANGUAGES, type AppLanguage } from '../i18n/languages';
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Moon, Sun, Volume2, Bell, Globe, User, Play, Download, Upload, Smartphone, Palette, Check, Sparkles, AlertCircle, ChevronDown } from 'lucide-react';
@@ -402,15 +403,12 @@ const Settings: React.FC<SettingsProps> = ({ darkMode, setDarkMode }) => {
                 {t('settings_page.language_label')}
               </h3>
 
-              <Select<'de' | 'en'>
+              <Select<AppLanguage>
                 value={settings.language}
                 onChange={(language) => updateSettings({ language })}
                 size="lg"
                 aria-label={t('settings_page.language_label')}
-                options={[
- { value:'de', label:' Deutsch' },
- { value:'en', label:' English' },
-                ]}
+                options={APP_LANGUAGES.map(l => ({ value: l.code, label: l.label }))}
               />
 
               <p className="m3-body-medium text-on-surface-variant mt-2">

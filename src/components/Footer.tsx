@@ -75,7 +75,9 @@ const Footer: React.FC = () => {
         </div>
 
         <p className="m3-label-medium text-on-surface-variant">
-          {t('footer.version', { version: packageJson.version })}
+          <Link to="/changelog" className="hover:text-on-surface transition-colors inline-flex items-center min-h-6 underline-offset-2 hover:underline" data-testid="footer-changelog">
+            {t('footer.version', { version: packageJson.version })}
+          </Link>
         </p>
       </div>
     </footer>

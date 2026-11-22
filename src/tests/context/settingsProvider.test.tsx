@@ -7,7 +7,7 @@ vi.mock('../../services/api', () => ({
   api: { settings: { get: (...a: unknown[]) => get(...a), update: (...a: unknown[]) => update(...a) } },
 }));
 vi.mock('../../context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'u1' } }) }));
-vi.mock('../../i18n/config', () => ({ default: { changeLanguage: vi.fn().mockResolvedValue(undefined) } }));
+vi.mock('../../i18n/config', () => ({ default: { changeLanguage: vi.fn().mockResolvedValue(undefined) }, changeAppLanguage: vi.fn().mockResolvedValue(undefined) }));
 
 import { SettingsProvider, useSettings } from '../../context/SettingsContext';
 

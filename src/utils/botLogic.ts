@@ -274,7 +274,7 @@ export function createAdaptiveBotPlayer(
     // active when the bot is created (it used to be German for everyone).
     name: i18n.t('bots.player_name', {
       number: botNumber,
-      level: i18n.language?.startsWith('de') ? (config?.nameDE || preset.nameDE) : (config?.name || preset.name),
+      level: config ? i18n.t(`bots.adaptive.${config.category}.name`) : i18n.language?.startsWith('de') ? preset.nameDE : preset.name,
     }),
     avatar: config?.icon || 'robot',
     createdAt: new Date(),

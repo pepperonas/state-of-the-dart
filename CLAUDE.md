@@ -574,8 +574,16 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 - Admin Panel has a "Debug Flags" section with status workflow: `open → investigating → resolved/dismissed`
 - "Copy for AI" button formats the entire flag (logs, state, browser info) as structured text for AI analysis
 
+### Public changelog (0.50.0)
+- `/changelog` (public route, English only, `lang="en"`) renders `src/data/publicChangelog.ts`. **Every release a player would notice adds an entry at the top** — `publicChangelog.test.tsx` fails if the first entry is not the `package.json` version.
+- Write for players: what they see or can do. Never security fixes, infrastructure, admin tools, costs, prices, payment providers, mail, data or backups — a forbidden-word test guards it. Leave a security fix out entirely rather than saying "security fix".
+- Linked from the footer version number and Account → Help.
+
 ### Internationalization
-- react-i18next with `de.json` and `en.json` in `src/i18n/locales/`. `<html lang>` follows the active language (`i18n/config.ts`, `languageChanged` listener).
+- react-i18next, five languages (0.50.0): `de`, `en` bundled; `it`, `es`, `fr` load on demand — always switch with `changeAppLanguage()` (`i18n/config.ts`), never `i18n.changeLanguage` directly, or the lazy file is never fetched. The list is `i18n/languages.ts` (`APP_LANGUAGES`, `languageFromBrowser`: signed out the browser decides, unknown → English). Missing keys in it/es/fr fall back to English. `<html lang>` follows the active language.
+- **A new key goes into all five files.** German is the source for wording; translate en/it/es/fr. The guard fails on a missing key, a placeholder/tag mismatch or a file that is mostly English. Plural `_other` keys get a `_many` twin in it/es/fr (same text) — those languages have that CLDR form.
+- Never import it/es/fr JSON statically (guarded) — each is ~150 KB.
+- The unit setup and Playwright (`locale: 'de-DE'`) pin the browser to German, since tests read German labels.
 - Always use `t('namespace.key')` for user-facing text, never hardcode strings. Add every key to BOTH files.
 - Namespaces: the old feature ones (`common`, `game`, `stats`, …) plus one per component since 0.14.0 (`stats_overview`, `game_screen`, `guide`, …). Reuse `common.*` where it fits.
 - **Guarded** by `src/tests/i18n/i18nGuard.test.ts` (scanner `scanLiterals.ts`, TypeScript AST): no literal text in JSX — children, readable attributes (`aria-label`, `title`, `placeholder`, `alt`, `label`) and strings reaching JSX through `?:`/`&&`/`??`; no `language === 'de' ? 'text' : 'text'` forks (locale codes and data fields like `nameDE` are fine); identical keys and `{{placeholders}}` in both languages; every static `t('a.b')`/`i18nKey` exists. Keys built at runtime (template literals) are not checked — keep those few.
