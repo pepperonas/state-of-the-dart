@@ -1,10 +1,13 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dart } from '../../types/index';
+import { BOARD_ROUTE, BOARD_ALT } from './boardColors';
 
 interface DartboardProps {
   onDartHit?: (dart: Dart) => void;
   highlightedSegments?: string[];
+  /** Beds of the alternative checkout, in a second colour (bug report 21.02.). */
+  alternativeSegments?: string[];
   interactive?: boolean;
   size?: number;
 }
@@ -12,6 +15,7 @@ interface DartboardProps {
 const Dartboard: React.FC<DartboardProps> = ({ 
   onDartHit, 
   highlightedSegments = [], 
+  alternativeSegments = [],
   interactive = true,
   size = 400 
 }) => {
@@ -79,10 +83,17 @@ const Dartboard: React.FC<DartboardProps> = ({
     return `M ${x1} ${y1} L ${x2} ${y2} A ${outerRadius} ${outerRadius} 0 0 1 ${x3} ${y3} L ${x4} ${y4} A ${innerRadius} ${innerRadius} 0 0 0 ${x1} ${y1} Z`;
   };
   
-  const isHighlighted = (segment: number, multiplier: number) => {
-    const notation = multiplier === 3 ? `T${segment}` : multiplier === 2 ? `D${segment}` : `S${segment}`;
-    return highlightedSegments.includes(notation);
-  };
+  const notationOf = (segment: number, multiplier: number) =>
+    multiplier === 3 ? `T${segment}` : multiplier === 2 ? `D${segment}` : `S${segment}`;
+  const isHighlighted = (segment: number, multiplier: number) => highlightedSegments.includes(notationOf(segment, multiplier));
+  // The main route wins where both routes use the same bed.
+  const isAlternative = (segment: number, multiplier: number) =>
+    !isHighlighted(segment, multiplier) && alternativeSegments.includes(notationOf(segment, multiplier));
+  /** Gold = suggested route, blue = alternative, else the board's own colour. */
+  const fillOf = (segment: number, multiplier: number, base: string) =>
+    isHighlighted(segment, multiplier) ? BOARD_ROUTE : isAlternative(segment, multiplier) ? BOARD_ALT : base;
+  // The checkout table writes the outer bull as '25'.
+  const outerBull = (list: string[]) => list.includes('OB') || list.includes('25');
   
   return (
     <svg
@@ -114,41 +125,41 @@ const Dartboard: React.FC<DartboardProps> = ({
             {/* Double ring */}
             <path
               d={getSegmentPath(index, radius * 0.85, radius * 0.95)}
-              fill={isHighlighted(number, 2) ? '#ffd700' : isEven ? '#e30613' : '#00a651'}
+              fill={fillOf(number, 2, isEven ? '#e30613' : '#00a651')}
               stroke="#c0c0c0"
               strokeWidth="1"
               onClick={() => handleSegmentClick(number, 2, 'double')}
-              className={segmentClass(isHighlighted(number, 2))}
+              className={segmentClass(isHighlighted(number, 2) || isAlternative(number, 2))}
             />
             
             {/* Outer single */}
             <path
               d={getSegmentPath(index, radius * 0.53, radius * 0.85)}
-              fill={isHighlighted(number, 1) ? '#ffd700' : isEven ? '#000000' : '#f4f1e8'}
+              fill={fillOf(number, 1, isEven ? '#000000' : '#f4f1e8')}
               stroke="#c0c0c0"
               strokeWidth="1"
               onClick={() => handleSegmentClick(number, 1, 'single')}
-              className={segmentClass(isHighlighted(number, 1))}
+              className={segmentClass(isHighlighted(number, 1) || isAlternative(number, 1))}
             />
             
             {/* Triple ring */}
             <path
               d={getSegmentPath(index, radius * 0.43, radius * 0.53)}
-              fill={isHighlighted(number, 3) ? '#ffd700' : isEven ? '#e30613' : '#00a651'}
+              fill={fillOf(number, 3, isEven ? '#e30613' : '#00a651')}
               stroke="#c0c0c0"
               strokeWidth="1"
               onClick={() => handleSegmentClick(number, 3, 'triple')}
-              className={segmentClass(isHighlighted(number, 3))}
+              className={segmentClass(isHighlighted(number, 3) || isAlternative(number, 3))}
             />
             
             {/* Inner single */}
             <path
               d={getSegmentPath(index, radius * 0.12, radius * 0.43)}
-              fill={isHighlighted(number, 1) ? '#ffd700' : isEven ? '#000000' : '#f4f1e8'}
+              fill={fillOf(number, 1, isEven ? '#000000' : '#f4f1e8')}
               stroke="#c0c0c0"
               strokeWidth="1"
               onClick={() => handleSegmentClick(number, 1, 'single')}
-              className={segmentClass(isHighlighted(number, 1))}
+              className={segmentClass(isHighlighted(number, 1) || isAlternative(number, 1))}
             />
             
             {/* Number label */}
@@ -173,11 +184,11 @@ const Dartboard: React.FC<DartboardProps> = ({
         cx={radius}
         cy={radius}
         r={radius * 0.12}
-        fill={highlightedSegments.includes('OB') ? '#ffd700' : '#00a651'}
+        fill={outerBull(highlightedSegments) ? BOARD_ROUTE : outerBull(alternativeSegments) ? BOARD_ALT : '#00a651'}
         stroke="#c0c0c0"
         strokeWidth="1"
         onClick={() => handleBullClick(true)}
-        className={segmentClass(highlightedSegments.includes('OB'))}
+        className={segmentClass(outerBull(highlightedSegments) || outerBull(alternativeSegments))}
       />
       
       {/* Inner bull (50 points) - red center */}
@@ -185,11 +196,11 @@ const Dartboard: React.FC<DartboardProps> = ({
         cx={radius}
         cy={radius}
         r={radius * 0.055}
-        fill={highlightedSegments.includes('Bull') ? '#ffd700' : '#e30613'}
+        fill={highlightedSegments.includes('Bull') ? BOARD_ROUTE : alternativeSegments.includes('Bull') ? BOARD_ALT : '#e30613'}
         stroke="#c0c0c0"
         strokeWidth="1"
         onClick={() => handleBullClick(false)}
-        className={segmentClass(highlightedSegments.includes('Bull'))}
+        className={segmentClass(highlightedSegments.includes('Bull') || alternativeSegments.includes('Bull'))}
       />
     </svg>
   );

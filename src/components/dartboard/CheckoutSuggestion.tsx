@@ -1,3 +1,4 @@
+import { BOARD_ALT } from './boardColors';
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Target } from 'lucide-react';
@@ -54,7 +55,9 @@ const CheckoutSuggestion: React.FC<CheckoutSuggestionProps> = ({ suggestion, alt
       {alternatives && alternatives.length > 0 && alternatives.map((alt, altIndex) => (
         <div key={altIndex} className="bg-secondary-container text-on-secondary-container rounded-m3-lg p-3">
           <div className="flex items-center gap-2 mb-2">
-            <Target className="text-primary" size={16} />
+            {altIndex === 0
+              ? <span aria-hidden="true" data-testid="alt-swatch" className="w-3 h-3 rounded-full shrink-0" style={{ background: BOARD_ALT }} />
+              : <Target className="text-primary" size={16} />}
             <span className="m3-title-small">
               {t('game.alternative', 'Alternative')}
             </span>

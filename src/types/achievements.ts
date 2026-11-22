@@ -33,6 +33,8 @@ export interface Achievement {
     matchMode?: 'exact' | 'below'; // below = strictly under target (lower-better metrics)
   };
   hidden?: boolean; // Hidden until unlocked
+  /** No longer awarded (see RETIRED_ACHIEVEMENTS); shown only to players who have it. */
+  retired?: boolean;
   rarity?: 'common' | 'rare' | 'epic' | 'legendary';
   scope?: AchievementScope; // Explicit override; computed by getAchievementScope() when absent
 }
@@ -936,17 +938,6 @@ export const ACHIEVEMENTS: Achievement[] = [
     points: 40,
     requirement: { type: 'special', target: 1, metric: 'three_triples' },
     rarity: 'rare',
-  },
-  {
-    id: 'perfect_visit',
-    name: 'Perfekter Visit',
-    description: 'Treffe alle 3 Darts im gleichen Segment',
-    category: 'scoring',
-    tier: 'bronze',
-    icon: 'sparkle',
-    points: 30,
-    requirement: { type: 'special', target: 1, metric: 'same_segment' },
-    rarity: 'common',
   },
   {
     id: 'unlucky',
@@ -4129,7 +4120,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'score_consecutive_60',
-    name: 'Konstanter Scorer',
+    name: 'Sechziger-Maschine',
     description: 'Wirf 500-mal 60+ in einem Visit',
     category: 'consistency',
     tier: 'silver',
@@ -5318,9 +5309,33 @@ ACHIEVEMENTS
   .filter(a => a.requirement.metric === 'achievements_unlocked' && a.requirement.type === 'special')
   .forEach(a => { a.requirement.target = ACHIEVEMENTS.length; });
 
+/**
+ * Achievements that are no longer awarded. They count toward nothing (not the
+ * total, not "all achievements"), but a player who unlocked one keeps it and
+ * still sees it.
+ *
+ * - perfect_visit (0.49.3, bug report 06.03.): checked exactly the condition
+ *   of "Three in a Bed" (three darts on one number), so both always came
+ *   together. 8 players had it at the time.
+ */
+export const RETIRED_ACHIEVEMENTS: Achievement[] = [
+  {
+    id: 'perfect_visit',
+    name: 'Perfekter Visit',
+    description: 'Treffe alle 3 Darts im gleichen Segment',
+    category: 'scoring',
+    tier: 'bronze',
+    icon: 'sparkle',
+    points: 30,
+    requirement: { type: 'special', target: 1, metric: 'same_segment' },
+    rarity: 'common',
+    retired: true,
+  },
+];
+
 // Helper functions
 export const getAchievementById = (id: string): Achievement | undefined => {
-  return ACHIEVEMENTS.find(a => a.id === id);
+  return ACHIEVEMENTS.find(a => a.id === id) ?? RETIRED_ACHIEVEMENTS.find(a => a.id === id);
 };
 
 export const getAchievementsByCategory = (category: AchievementCategory): Achievement[] => {

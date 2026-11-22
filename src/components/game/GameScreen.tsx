@@ -51,6 +51,7 @@ import { lastVisits, dartsInLeg } from '../../utils/arena';
 import { haptic } from '../../utils/haptics';
 import { useWakeLock } from '../../hooks/useWakeLock';
 import { getCheckoutAlternatives } from '../../data/checkoutTable';
+import { scopeStats, matchScopeStats, type ScopeStats } from '../../utils/scopeStats';
 import { PersonalBests, createEmptyPersonalBests, updatePersonalBests } from '../../types/personalBests';
 import audioSystem from '../../utils/audio';
 import { api } from '../../services/api';
@@ -900,6 +901,10 @@ const GameScreen: React.FC = () => {
           hadBustInLeg: playerThrowsInLeg.some(t => t.isBust),
           isBust: visit.bust,
           isCheckoutAttempt: visit.previousRemaining <= 170 && visit.previousRemaining > 0,
+          visitKey: `${state.currentMatch?.id}:${currentLeg.id}:${currentPlayer.playerId}:${playerThrowsInLeg.length + 1}`,
+          previousScores: (state.currentMatch?.legs ?? []).flatMap(l => l.throws)
+            .filter(t => t.playerId === currentPlayer.playerId)
+            .map(t => (t.isBust ? 0 : t.score)),
         }
       );
     }
@@ -1682,6 +1687,11 @@ const GameScreen: React.FC = () => {
     rank: ranks.get(p.playerId) ?? null,
   }));
   const outRule = outRuleOf(state.currentMatch.settings);
+  // The first alternative route: on the board in a second colour, and on
+  // phones (one pane, no alternatives list) under the route (bug report 21.02.).
+  const checkoutAlternative = settings.showCheckoutHints && state.checkoutSuggestion?.length && outRule === 'double'
+    ? getCheckoutAlternatives(remaining, 3 - state.currentThrow.length, true)[0] ?? null
+    : null;
   const spotPlayers: SpotPlayer[] = state.currentMatch.players.map((p, i) => ({
     player: p,
     avatar: players.find(x => x.id === p.playerId)?.avatar,
@@ -1735,6 +1745,7 @@ const GameScreen: React.FC = () => {
       // The route belongs to the player at the oche — not to the thrower the
       // hero card still shows for a moment after the visit.
       checkoutRoute={settings.showCheckoutHints && shownPlayerIndex === state.currentPlayerIndex ? state.checkoutSuggestion : null}
+      checkoutAlternative={panes === 1 && shownPlayerIndex === state.currentPlayerIndex ? checkoutAlternative : null}
       checkoutMax={maxFinish(outRule)}
       // A tablet in portrait with five players and more takes the phone's
       // compact hero: the big one pushed the field off the screen (0.45.0).
@@ -1799,6 +1810,7 @@ const GameScreen: React.FC = () => {
       <Dartboard
         onDartHit={handleDartHit}
         highlightedSegments={dartboardHighlights}
+        alternativeSegments={checkoutAlternative ?? undefined}
         size={480}
       />
       {/* Miss Button */}
@@ -1820,17 +1832,33 @@ const GameScreen: React.FC = () => {
   // Every player side by side — the old panel showed only the player up.
   const heatmapTurnId = state.currentMatch.legs.reduce((n, l) => n + l.throws.length, 0);
   const heatmapPlayerId = heatmapPlayer(heatmapPick, heatmapTurnId, state.currentMatch.players[state.currentPlayerIndex]?.playerId);
+  // Current leg or whole match (bug report 21.02.); legs won always count the match.
+  const startScoreOf = state.currentMatch.settings.startScore || 501;
+  const statsOf = (p: MatchPlayer): ScopeStats => statsView === 'leg'
+    ? scopeStats([currentLeg], p.playerId, startScoreOf)
+    : matchScopeStats(p);
   const statRows: { label: string; value: (p: MatchPlayer) => string }[] = [
-    { label: t('game_screen.stat_average'), value: p => p.matchAverage.toFixed(2) },
-    { label: t('game_screen.stat_highest'), value: p => String(p.matchHighestScore) },
-    { label: '180', value: p => String(p.match180s) },
-    { label: '140+', value: p => String(p.match140Plus) },
-    { label: '100+', value: p => String(p.match100Plus) },
-    { label: t('game_screen.stat_checkout'), value: p => `${p.checkoutAttempts > 0 ? ((p.checkoutsHit / p.checkoutAttempts) * 100).toFixed(1) : '0.0'}%` },
+    { label: t('game_screen.stat_average'), value: p => statsOf(p).average.toFixed(2) },
+    { label: t('game_screen.stat_highest'), value: p => String(statsOf(p).highest) },
+    { label: '180', value: p => String(statsOf(p).s180) },
+    { label: '140+', value: p => String(statsOf(p).s140) },
+    { label: '100+', value: p => String(statsOf(p).s100) },
+    { label: t('game_screen.stat_checkout'), value: p => { const x = statsOf(p); return `${x.checkoutAttempts > 0 ? ((x.checkoutsHit / x.checkoutAttempts) * 100).toFixed(1) : '0.0'}%`; } },
     { label: t('game.legs'), value: p => String(p.legsWon) },
   ];
   const statsTable = (
-    <div className="overflow-x-auto -mx-1">
+    <div>
+    <SegmentedButton<'leg' | 'match'>
+      className="mb-3"
+      label={t('game.stats_scope')}
+      value={statsView}
+      onChange={setStatsView}
+      options={[
+        { value: 'leg', label: t('game.current_leg') },
+        { value: 'match', label: t('game.whole_match') },
+      ]}
+    />
+    <div className="overflow-x-auto -mx-1" data-testid="stats-table" data-scope={statsView}>
       <table className="w-full m3-body-medium tabular-nums border-separate border-spacing-x-1 border-spacing-y-0.5">
         <thead>
           <tr>
@@ -1866,6 +1894,7 @@ const GameScreen: React.FC = () => {
           ))}
         </tbody>
       </table>
+    </div>
     </div>
   );
   const historyBody = (

@@ -345,7 +345,8 @@ All game modes except Online Multiplayer persist state to localStorage and appea
 - Known limits: streak refs live in the hook and reset when the game screen remounts; distinct checkout values are counted per session (progress keeps the maximum); a throw-level undo cannot take an unlock back; Cricket/ATC/Shanghai are not stored as matches, so "all modes tried" cannot see them.
 
 ### Achievement System Persistence
-- 463 achievements defined in `src/types/achievements.ts` (frontend is source of truth for definitions)
+- 462 achievements defined in `src/types/achievements.ts` (frontend is source of truth for definitions); retired ones live in `RETIRED_ACHIEVEMENTS` — never awarded or counted, but `getAchievementById` still finds them so holders keep seeing them (0.49.3: `perfect_visit`)
+- Increments carry the visit position as `visitKey` (match:leg:player:visit) and count once per metric — undo + re-entry used to count a visit twice. Score streaks (`score_60_plus` etc.) are computed from the match's own visits via `trailingRun`, so an undone visit leaves the streak.
 - DB table `player_achievements` stores unlock records and progress (no FK to legacy achievements table)
 - Achievement IDs use underscores (`first_game`, `ton_80` = first 180, `max_out` = ten 180s) — legacy DB had dashes (`first-180`), don't mix. ⚠️ `first_180`/`ten_180s` are NOT ids. Check an id exists before using it in a test: an unknown id is a silent no-op in `unlockAchievement`, so the test asserts nothing.
 - `AchievementContext` unlock flow: save to localStorage immediately, then API call with retry (2 attempts + pending queue)

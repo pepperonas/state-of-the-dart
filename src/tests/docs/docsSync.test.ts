@@ -53,7 +53,8 @@ describe('README badges state the truth', () => {
   });
 
   it('the achievement count matches the definitions', () => {
-    const defined = (read('src/types/achievements.ts').match(/^ {4}id: '/gm) || []).length;
+    // Retired achievements (RETIRED_ACHIEVEMENTS) are not part of the count.
+    const defined = (read('src/types/achievements.ts').split('export const RETIRED_ACHIEVEMENTS')[0].match(/^ {4}id: '/gm) || []).length;
     expect(defined).toBeGreaterThan(400);
     for (const [name, md] of [['DE', README_DE], ['EN', README_EN]] as const) {
       expect(badgeValue(md, 'Achievements'), `${name} README`).toBe(String(defined));

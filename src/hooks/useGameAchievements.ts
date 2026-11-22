@@ -16,14 +16,31 @@ interface MatchContext {
   hadBustInLeg?: boolean;
   isBust?: boolean;
   isCheckoutAttempt?: boolean;
+  /** Position of the visit (match:leg:player:visit) — counts once (0.49.3). */
+  visitKey?: string;
+  /**
+   * The player's earlier visit scores in this match, oldest first. Streaks are
+   * computed from them instead of a running counter, so an undone visit
+   * leaves the streak too (0.49.3). Busts are 0.
+   */
+  previousScores?: number[];
 }
+
+/** Length of the run of scores ≥ min ending with `current` (0 when current < min). */
+export const trailingRun = (previous: number[], current: number, min: number): number => {
+  if (current < min) return 0;
+  let n = 1;
+  for (let i = previous.length - 1; i >= 0 && previous[i] >= min; i--) n++;
+  return n;
+};
 
 /**
  * Custom hook for checking and unlocking achievements during gameplay.
  * Covers throw-level, leg-level, match-level, calendar/time, and pattern checks.
  */
 export const useGameAchievements = () => {
-  const { checkAchievement, checkStreakProgress, unlockAchievement } = useAchievements();
+  const { checkAchievement: checkAchievementRaw, checkStreakProgress, unlockAchievement } = useAchievements();
+  const checkAchievement = checkAchievementRaw;
 
   // Track consecutive 180 count for streak detection
   const consecutive180CountRef = useRef<Record<string, number>>({});
@@ -92,6 +109,11 @@ export const useGameAchievements = () => {
     gameId?: string,
     matchContext?: MatchContext
   ) => {
+    // One position counts once (undo + re-entry); see CheckOptions.visitKey.
+    const visitKey = matchContext?.visitKey;
+    const checkAchievement: typeof checkAchievementRaw = (pid, metric, value, gid, opts) =>
+      checkAchievementRaw(pid, metric, value, gid, visitKey ? { ...opts, visitKey } : opts);
+
     // Typed totals (numpad) carry reconstructed darts: patterns of single darts
     // are only judged on darts that were actually entered bed by bed.
     const exact = hasExactDarts(darts);
@@ -125,6 +147,13 @@ export const useGameAchievements = () => {
 
     // Track consecutive score streaks for streak achievements
     const streaks = scoreStreaksRef.current[playerId] || { s60: 0, s100: 0, s45: 0 };
+    // From the match's own visits when known (an undone visit is gone from them).
+    const prev = matchContext?.previousScores;
+    if (prev) {
+      streaks.s60 = trailingRun(prev, score, 60) - (score >= 60 ? 1 : 0);
+      streaks.s100 = trailingRun(prev, score, 100) - (score >= 100 ? 1 : 0);
+      streaks.s45 = trailingRun(prev, score, 45) - (score >= 45 ? 1 : 0);
+    }
     if (score >= 60) {
       streaks.s60++;
       checkStreakProgress(playerId, 'score_60_plus', streaks.s60, gameId);
@@ -253,7 +282,7 @@ export const useGameAchievements = () => {
       // Same segment: all 3 darts same number
       if (segments[0] === segments[1] && segments[1] === segments[2] && segments[0] > 0) {
         checkAchievement(playerId, 'three_same_number', 1, gameId);
-        checkAchievement(playerId, 'same_segment', 1, gameId);
+        // 'same_segment' (Perfekter Visit) is retired: it was this same condition.
       }
 
       // Robin Hood: all 3 darts same segment AND same multiplier
@@ -419,7 +448,7 @@ export const useGameAchievements = () => {
     } else if (isCheckout) {
       // Already reset above in checkout block
     }
-  }, [checkAchievement, checkStreakProgress]);
+  }, [checkAchievementRaw, checkStreakProgress]);
 
   // ==================== LEG-LEVEL CHECKS ====================
   const checkLegAchievements = useCallback((

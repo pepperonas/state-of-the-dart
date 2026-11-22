@@ -1,3 +1,4 @@
+import { BOARD_ALT } from '../dartboard/boardColors';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { animate, motion, useMotionValue, useReducedMotion } from 'framer-motion';
@@ -34,6 +35,8 @@ export interface HeroCardProps {
   onEditVisit?: (throwId: string) => void;
   /** Checkout route for the darts left (only when one exists). */
   checkoutRoute?: string[] | null;
+  /** A second route, for phones without the alternatives panel (bug report 21.02.). */
+  checkoutAlternative?: string[] | null;
   /** Remaining score at which a finish is possible (170 double out, 180 otherwise). */
   checkoutMax?: number;
   size?: HeroSize;
@@ -82,7 +85,7 @@ const visitTone = (v: { score: number; bust: boolean }) =>
  */
 const HeroCard: React.FC<HeroCardProps> = ({
   player, avatar, remaining, rank, average, legsWon, setsWon, showSets = false, legsToWin,
-  dartsInLeg, visits, checkoutRoute, checkoutMax = 170, size = 'regular', fireHost = null,
+  dartsInLeg, visits, checkoutRoute, checkoutAlternative, checkoutMax = 170, size = 'regular', fireHost = null,
   onRemove, removeLabel, previousRemaining, turnKey, onEditVisit, arrived = false, isCurrent = true,
 }) => {
   const { t } = useTranslation();
@@ -270,6 +273,21 @@ const HeroCard: React.FC<HeroCardProps> = ({
             ))}
           </span>
         </motion.div>
+      )}
+      {checkoutRoute && checkoutRoute.length > 0 && checkoutAlternative && checkoutAlternative.length > 0 && (
+        <div
+          data-testid="checkout-alternative"
+          aria-label={`${t('game.alternative')}: ${checkoutAlternative.join(' ')}`}
+          className="flex items-center gap-2 mt-1.5 px-3 py-1.5 rounded-m3-md bg-secondary-container text-on-secondary-container"
+        >
+          <span aria-hidden="true" className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: BOARD_ALT }} />
+          <span className="m3-label-medium">{t('game.alternative')}</span>
+          <span className="flex gap-1.5 ml-auto">
+            {checkoutAlternative.map((d, i) => (
+              <span key={`${i}-${d}`} className="px-2 py-0.5 rounded-m3-sm bg-surface text-on-surface m3-label-medium tabular-nums">{d}</span>
+            ))}
+          </span>
+        </div>
       )}
 
       {/* The details fade in once the card has arrived. */}

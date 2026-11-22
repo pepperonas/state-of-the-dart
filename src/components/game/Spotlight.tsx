@@ -7,7 +7,7 @@ import HeroCard, { type HeroCardProps, type HeroSize } from './HeroCard';
 import PlayerRow, { type PlayerRowProps } from './PlayerRow';
 import { rowDensity, nextPlayerId } from './spotlightLayout';
 
-export type SpotPlayer = Omit<HeroCardProps, 'size' | 'fireHost' | 'checkoutRoute' | 'checkoutMax' | 'onRemove' | 'removeLabel' | 'previousRemaining' | 'turnKey' | 'onEditVisit'>;
+export type SpotPlayer = Omit<HeroCardProps, 'size' | 'fireHost' | 'checkoutRoute' | 'checkoutAlternative' | 'checkoutMax' | 'onRemove' | 'removeLabel' | 'previousRemaining' | 'turnKey' | 'onEditVisit'>;
 
 interface SpotlightProps {
   players: SpotPlayer[];
@@ -15,6 +15,7 @@ interface SpotlightProps {
   showSets: boolean;
   legsToWin?: number;
   checkoutRoute?: string[] | null;
+  checkoutAlternative?: string[] | null;
   checkoutMax?: number;
   size: HeroSize;
   flames: boolean;
@@ -38,7 +39,7 @@ interface SpotlightProps {
  * into its row — one continuous movement instead of a highlight jumping.
  */
 const Spotlight: React.FC<SpotlightProps> = ({
-  players, activeIndex, showSets, legsToWin, checkoutRoute, checkoutMax, size, flames,
+  players, activeIndex, showSets, legsToWin, checkoutRoute, checkoutAlternative, checkoutMax, size, flames,
   rowsFirst = false, rowColumns = 1, onRemove, removeLabel, onEditVisit, currentId,
 }) => {
   const { t } = useTranslation();
@@ -87,6 +88,7 @@ const Spotlight: React.FC<SpotlightProps> = ({
       showSets={showSets}
       legsToWin={legsToWin}
       checkoutRoute={checkoutRoute}
+      checkoutAlternative={checkoutAlternative}
       checkoutMax={checkoutMax}
       size={size}
       fireHost={flames ? fireHost : null}
