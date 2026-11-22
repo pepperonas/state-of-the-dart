@@ -175,3 +175,28 @@ describe('AchievementProvider — unlock rules', () => {
     expect(unlockedIds('p2')).toContain('first_game');
   });
 });
+
+/**
+ * Bug report 27.02.: undo + re-entry counted a visit twice. An increment for
+ * the same metric and visit position counts once (0.49.3).
+ */
+describe('AchievementProvider — one visit position counts once', () => {
+  const counted = (metric: string) =>
+    Math.max(0, ...Object.entries(ctx.getPlayerProgress('p1').progress as Record<string, { current: number }>)
+      .filter(([id]) => ACHIEVEMENTS.find(a => a.id === id)?.requirement.metric === metric)
+      .map(([, p]) => p.current));
+
+  it('re-entering the same visit does not add again; the next visit does', async () => {
+    render(<AchievementProvider><Grab /></AchievementProvider>);
+    await act(async () => {});
+    await act(async () => { ctx.checkAchievement('p1', 'score_60_plus', 1, 'm', { visitKey: 'm:l1:p1:1' }); });
+    expect(counted('score_60_plus')).toBe(1);
+    await act(async () => { ctx.checkAchievement('p1', 'score_60_plus', 1, 'm', { visitKey: 'm:l1:p1:1' }); });
+    expect(counted('score_60_plus')).toBe(1);
+    await act(async () => { ctx.checkAchievement('p1', 'score_60_plus', 1, 'm', { visitKey: 'm:l1:p1:2' }); });
+    expect(counted('score_60_plus')).toBe(2);
+    // Without a key (old callers) it keeps adding.
+    await act(async () => { ctx.checkAchievement('p1', 'score_60_plus', 1, 'm'); });
+    expect(counted('score_60_plus')).toBe(3);
+  });
+});

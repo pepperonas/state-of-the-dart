@@ -12,7 +12,7 @@
  */
 export const LANDING_FACTS = {
   /** ACHIEVEMENTS.length in src/types/achievements.ts */
-  achievements: 463,
+  achievements: 462,
   /** Playable match modes: X01, Cricket, Around the Clock, Shanghai, Online */
   gameModes: 5,
   /** Entries in TrainingMenu */

@@ -12,6 +12,8 @@
  * - CUMULATIVE_METRICS completeness
  */
 import { describe, it, expect } from 'vitest';
+import fs from 'fs';
+import path from 'path';
 import {
   ACHIEVEMENTS,
   Achievement,
@@ -22,6 +24,8 @@ import {
   getScopeColor,
   getAchievementsByScope,
   METRIC_BASE_SCOPE,
+  RETIRED_ACHIEVEMENTS,
+  getAchievementById,
 } from '../../types/achievements';
 
 // Import CUMULATIVE_METRICS by reading the source (we can't import it directly since it's a const in context)
@@ -75,8 +79,8 @@ const LOWER_IS_BETTER_METRICS = new Set([
 
 describe('Achievement Definitions', () => {
   describe('Total Count', () => {
-    it('should have exactly 463 achievements', () => {
-      expect(ACHIEVEMENTS.length).toBe(463);
+    it('should have exactly 462 achievements (perfect_visit retired in 0.49.3)', () => {
+      expect(ACHIEVEMENTS.length).toBe(462);
     });
   });
 
@@ -629,4 +633,24 @@ describe('Achievement Scope System', () => {
     expect(total).toBe(ACHIEVEMENTS.length);
     console.log('Scope distribution:', distribution);
   });
+
+  // Bug report 06.03.: "Perfekter Visit" checked the same condition as "Three in a Bed".
+  describe('retired achievements', () => {
+    it('are not in the list that is awarded, counted or shown to everyone', () => {
+      expect(RETIRED_ACHIEVEMENTS.map(a => a.id)).toContain('perfect_visit');
+      for (const r of RETIRED_ACHIEVEMENTS) {
+        expect(r.retired).toBe(true);
+        expect(ACHIEVEMENTS.some(a => a.id === r.id), r.id).toBe(false);
+      }
+    });
+    it('stay findable by id, so a player who has one still sees it', () => {
+      expect(getAchievementById('perfect_visit')?.retired).toBe(true);
+    });
+    it('are never checked any more', () => {
+      const hook = fs.readFileSync(path.resolve(__dirname, '../../hooks/useGameAchievements.ts'), 'utf8')
+        .replace(/\/\/.*$/gm, '');
+      for (const r of RETIRED_ACHIEVEMENTS) expect(hook, r.requirement.metric).not.toContain(`'${r.requirement.metric}'`);
+    });
+  });
 });
+

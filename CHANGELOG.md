@@ -7,6 +7,33 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.49.3] - 2026-11-22
+
+Every open bug report was checked against the code; eleven were already
+fixed, these five were not.
+
+### Fixed
+- **Undo + re-entry counted a visit twice** for every visit achievement
+  (counts like "500× 60+" and streaks like "10× 60+ in a row" — bug report
+  27.02.). Increments now carry the visit's position (`visitKey`) and count
+  once; score streaks are computed from the match's own visits
+  (`trailingRun`), so an undone visit leaves the streak.
+- **"Three in a Bed" and "Perfekter Visit" always came together** — they
+  checked the same condition (bug report 06.03.). "Perfekter Visit" is
+  retired (`RETIRED_ACHIEVEMENTS`): no longer awarded or counted (462
+  achievements), the 8 players who have it keep and still see it.
+- Two achievements were named "Konstanter Scorer"; the 500× one is now
+  "Sechziger-Maschine" / "Sixty Machine".
+
+### Added
+- **Statistics table in a game: current leg or whole match** (bug report
+  21.02.), like history, chart and heatmap. `utils/scopeStats.ts` uses the
+  match totals' buckets.
+- **Alternative checkout in a second colour** (four bug reports, 21./22.02.):
+  the board marks the first alternative in blue (route gold, route wins a
+  shared bed, `'25'` = outer bull); phones show it under the route on the
+  hero card; the alternatives list carries the blue swatch as legend.
+
 ## [0.49.2] - 2026-11-20
 
 ### Fixed — registration mails never arrived at Gmail

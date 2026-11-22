@@ -35,6 +35,8 @@ const PlayerProfile: React.FC = () => {
     if (!playerId) return [];
     return getUnlockedAchievements(playerId);
   }, [playerId, getUnlockedAchievements]);
+  // Retired achievements stay visible but do not count toward the total.
+  const activeUnlocked = achievements.filter(a => !a.retired).length;
 
   const achievementProgress = useMemo(() => {
     if (!playerId) return null;
@@ -131,9 +133,9 @@ const PlayerProfile: React.FC = () => {
       { skill: t('player_profile.skill_checkout'), value: stats.checkoutPercentage || 0, max: 100 },
       { skill: '180s', value: Math.min((stats.total180s / 20) * 100, 100), max: 100 },
       { skill: t('player_profile.skill_consistency'), value: stats.gamesPlayed > 0 ? (stats.gamesWon / stats.gamesPlayed) * 100 : 0, max: 100 },
-      { skill: t('player_profile.skill_achievements'), value: achievementProgress ? (achievementProgress.unlockedAchievements.length / ACHIEVEMENTS.length) * 100 : 0, max: 100 },
+      { skill: t('player_profile.skill_achievements'), value: achievementProgress ? (activeUnlocked / ACHIEVEMENTS.length) * 100 : 0, max: 100 },
     ];
-  }, [player, achievementProgress, t]);
+  }, [player, achievementProgress, activeUnlocked, t]);
 
   // Heatmap data
   const heatmapData = useMemo(() => {
@@ -202,7 +204,7 @@ const PlayerProfile: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2 text-success">
                   <Award size={18} />
-                  <span className="m3-label-large">{t('player_profile.achievements_count', { unlocked: achievements.length, total: ACHIEVEMENTS.length })}</span>
+                  <span className="m3-label-large">{t('player_profile.achievements_count', { unlocked: activeUnlocked, total: ACHIEVEMENTS.length })}</span>
                 </div>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -455,7 +457,7 @@ const PlayerProfile: React.FC = () => {
           <Card variant="elevated" className="p-6 mb-6">
             <h2 className="m3-title-large text-on-surface mb-4 flex items-center gap-2">
               <Award className="text-tertiary" size={24} />
-              {t('player_profile.recent_achievements', { unlocked: achievements.length, total: ACHIEVEMENTS.length })}
+              {t('player_profile.recent_achievements', { unlocked: activeUnlocked, total: ACHIEVEMENTS.length })}
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
               {achievements.slice(0, 10).map((achievement) => (

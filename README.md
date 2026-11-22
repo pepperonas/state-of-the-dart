@@ -9,7 +9,7 @@
 
   # 🎯 State of the Dart
 
-  > **Das Dart-Zählsystem für Kneipe, Keller und Verein: X01, Cricket, Shanghai und Training mit Live-Statistik, Heatmaps, 463 Achievements, Online-Multiplayer und TV-Scoreboard — eine installierbare Web-App für Handy, Tablet, Laptop und Fernseher.**
+  > **Das Dart-Zählsystem für Kneipe, Keller und Verein: X01, Cricket, Shanghai und Training mit Live-Statistik, Heatmaps, 462 Achievements, Online-Multiplayer und TV-Scoreboard — eine installierbare Web-App für Handy, Tablet, Laptop und Fernseher.**
 
   Summe tippen, Enter — der nächste Spieler ist sofort dran. Die große Karte zeigt, wer am Zug ist, den Rest, den Checkout-Weg und den Platz im Leg; eine 180 bekommt den Bildschirm, und der Fernseher zeigt alles live mit. Läuft offline, synchronisiert über das eigene Konto, ohne Werbung.
 
@@ -44,7 +44,7 @@
   - 🎉 **Feedback-Leiter:** Funken ab 100, 180-Moment, Leg-Rückblick, neue Bestwerte live, Vibration je Stufe
   - 🎡 **Glücksrad** für den Anwurf mit echter Physik
   - 📊 **Statistik & Heatmaps** feldgenau, Verlauf, Vergleich, Bestenlisten
-  - 🏆 **463 Achievements** in fünf Stufen mit eigenen Formen
+  - 🏆 **462 Achievements** in fünf Stufen mit eigenen Formen
   - 🎮 **Cricket, Around the Clock, Shanghai, 6 Trainingsmodi, Turniere, Online-Multiplayer**
   - 🔊 **Caller mit 609 Sprachdateien** · 🌍 Deutsch und Englisch · ♿ WCAG 2.1 AA geprüft
   - 📴 **Offline-first PWA** mit Konto-Sync, Fortsetzen nach Refresh, keine Werbung
@@ -56,11 +56,11 @@
   <!-- ── Headline metrics ─────────────────────────────────────── -->
   <p>
     <a href="https://github.com/pepperonas/state-of-the-dart" title="Lines of code — measured by scripts/count-loc.mjs, checked by the docs test">
-      <img src="https://img.shields.io/badge/lines_of_code-~62k-2b3137?style=for-the-badge&logo=typescript&logoColor=white" height="64" alt="Lines of code" />
+      <img src="https://img.shields.io/badge/lines_of_code-~63k-2b3137?style=for-the-badge&logo=typescript&logoColor=white" height="64" alt="Lines of code" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml" title="Vitest unit and component tests, all passing">
-      <img src="https://img.shields.io/badge/Unit_Tests-1387-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
+      <img src="https://img.shields.io/badge/Unit_Tests-1400-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml" title="Playwright end-to-end tests against a real backend">
@@ -71,7 +71,7 @@
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.49.2-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.49.3-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
@@ -140,7 +140,7 @@
   ![i18n keys](https://img.shields.io/badge/i18n_keys-2709-26A69A?style=flat-square)
 
   <!-- ── Content ──────────────────────────────────────────────── -->
-  ![Achievements](https://img.shields.io/badge/Achievements-463-FFD700?style=flat-square)
+  ![Achievements](https://img.shields.io/badge/Achievements-462-FFD700?style=flat-square)
   ![Game Modes](https://img.shields.io/badge/Game_Modes-5-orange?style=flat-square)
   ![Training Modes](https://img.shields.io/badge/Training_Modes-6-orange?style=flat-square)
   ![Custom Icons](https://img.shields.io/badge/Custom_Icons-70-8b5cf6?style=flat-square)
@@ -186,7 +186,7 @@
   </tr>
   <tr>
     <td><img src="docs/media/mockup-stats.png" alt="Statistik und Einblicke" /><br><sub><b>Statistik</b> — Übersicht, Heatmap und Einblicke während des Spiels</sub></td>
-    <td><img src="docs/media/mockup-achievements.png" alt="Achievements und Rangliste" /><br><sub><b>Achievements</b> — 463 Erfolge und Ranglisten</sub></td>
+    <td><img src="docs/media/mockup-achievements.png" alt="Achievements und Rangliste" /><br><sub><b>Achievements</b> — 462 Erfolge und Ranglisten</sub></td>
   </tr>
 </table>
 
@@ -300,7 +300,7 @@
 - **Automatische Synchronisation** - Stats werden automatisch nach jedem Match aktualisiert
 
 ### 🏆 Achievements & Gamification (Komplett-Rewrite in v0.4.0)
-- **463 Achievements** - In 8 Kategorien (Erste Schritte, Scoring, Checkout, Training, Konsistenz, Spezial, Meisterschaft, Fails)
+- **462 Achievements** - In 8 Kategorien (Erste Schritte, Scoring, Checkout, Training, Konsistenz, Spezial, Meisterschaft, Fails)
 - **Achievement-Synchronisation** - Achievements werden automatisch in der Datenbank gespeichert und bleiben erhalten
 - **Tier-System** - Bronze, Silber, Gold, Platin, Diamant
 - **Seltenheitsstufen** - Common, Rare, Epic, Legendary Achievements
@@ -614,7 +614,7 @@ state-of-the-dart/
 
 ### 6. Achievements freischalten
 - Spiele Matches um Achievements zu verdienen
-- 463 Achievements in 8 Kategorien
+- 462 Achievements in 8 Kategorien
 - Erhalte Hinweise, wenn du kurz vor einem Achievement stehst
 
 ---
@@ -664,7 +664,7 @@ Alle Charts werden mit der Recharts-Library erstellt.
 
 ## 🏆 Achievement-System
 
-463 Achievements in 8 Kategorien und 7 Scopes:
+462 Achievements in 8 Kategorien und 7 Scopes:
 
 ### Kategorien
 1. **Erste Schritte** (15+) - Rookie bis Millennium
@@ -753,7 +753,7 @@ Die App kann auf Desktop (Chrome/Edge), iOS (Safari) und Android (Chrome) instal
 
 ### React-Memo
 - `Dartboard`, `PlayerScore` als `React.memo`
-- 463 Achievement-Cards einzeln memoized (`AchievementCard`)
+- 462 Achievement-Cards einzeln memoized (`AchievementCard`)
 - Hot-Path-Handler in `GameScreen` mit `useCallback`/`useMemo`
 
 ### Service Worker
@@ -875,7 +875,7 @@ Siehe [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) für Details.
 - [x] Erweiterte Statistiken mit 10+ Charts
 - [x] Export/Import (JSON/CSV)
 - [x] PWA mit Offline-Support
-- [x] Achievement-System (463 Achievements, AAA-Notifications)
+- [x] Achievement-System (462 Achievements, AAA-Notifications)
 - [x] Spielerprofile & Personal Bests
 - [x] Bestenlisten
 - [x] Spielervergleich (bis zu 4 Spieler)
@@ -928,6 +928,10 @@ Contributions sind willkommen! Bitte:
 ---
 
 ## 📝 Changelog
+
+### v0.49.3 (22. November 2026) - Fehlermeldungen abgearbeitet
+
+Alle offenen Fehlermeldungen wurden mit dem aktuellen Code verglichen, elf waren schon behoben. Die übrigen fünf: Wer eine Aufnahme zurücknahm und neu eingab, bekam sie bei den Erfolgen doppelt gezählt, auch bei Serien wie „10× hintereinander 60+“. Jetzt zählt jede Aufnahme einmal, und eine zurückgenommene fällt aus der Serie. „Perfekter Visit“ prüfte genau dasselbe wie „Three in a Bed“ und kam immer mit, er wird nicht mehr vergeben (wer ihn hat, behält ihn; jetzt 462 Erfolge). Der zweite „Konstanter Scorer“ heißt jetzt „Sechziger-Maschine“. Die Statistik-Tabelle im Spiel lässt sich auf das aktuelle Leg umschalten. Und der alternative Finish-Weg erscheint auf der Scheibe in Blau und am Handy unter dem Finish-Vorschlag.
 
 ### v0.49.2 (20. November 2026) - Registrierungsmails kommen an
 

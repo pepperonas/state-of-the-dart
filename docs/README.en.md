@@ -9,7 +9,7 @@
 
   # 🎯 State of the Dart
 
-  > **The dart scorer for the pub, the basement and the club: X01, Cricket, Shanghai and training with live stats, heatmaps, 463 achievements, online multiplayer and a TV scoreboard — one installable web app for phone, tablet, laptop and TV.**
+  > **The dart scorer for the pub, the basement and the club: X01, Cricket, Shanghai and training with live stats, heatmaps, 462 achievements, online multiplayer and a TV scoreboard — one installable web app for phone, tablet, laptop and TV.**
 
   Type the total, press Enter — the next player is up at once. The big card shows who is at the oche, the remaining score, the checkout route and the place in the leg; a 180 takes the screen, and the TV follows every visit live. Works offline, syncs through your account, no ads.
 
@@ -44,7 +44,7 @@
   - 🎉 **Feedback ladder:** sparks from 100, the 180 moment, a leg recap, personal bests live, haptics per level
   - 🎡 **Wheel of fortune** for the throw-off, with real physics
   - 📊 **Stats & heatmaps** bed-accurate, history, comparison, leaderboards
-  - 🏆 **463 achievements** in five tiers with their own shapes
+  - 🏆 **462 achievements** in five tiers with their own shapes
   - 🎮 **Cricket, Around the Clock, Shanghai, 6 training modes, tournaments, online multiplayer**
   - 🔊 **Caller with 609 voice files** · 🌍 German and English · ♿ WCAG 2.1 AA checked
   - 📴 **Offline-first PWA** with account sync, resume after a refresh, no ads
@@ -56,11 +56,11 @@
   <!-- ── Headline metrics ─────────────────────────────────────── -->
   <p>
     <a href="https://github.com/pepperonas/state-of-the-dart" title="Lines of code — measured by scripts/count-loc.mjs, checked by the docs test">
-      <img src="https://img.shields.io/badge/lines_of_code-~62k-2b3137?style=for-the-badge&logo=typescript&logoColor=white" height="64" alt="Lines of code" />
+      <img src="https://img.shields.io/badge/lines_of_code-~63k-2b3137?style=for-the-badge&logo=typescript&logoColor=white" height="64" alt="Lines of code" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/test.yml" title="Vitest unit and component tests, all passing">
-      <img src="https://img.shields.io/badge/Unit_Tests-1387-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
+      <img src="https://img.shields.io/badge/Unit_Tests-1400-2ea043?style=for-the-badge&logo=vitest&logoColor=white" height="64" alt="Unit tests" />
     </a>
     &nbsp;
     <a href="https://github.com/pepperonas/state-of-the-dart/actions/workflows/e2e.yml" title="Playwright end-to-end tests against a real backend">
@@ -71,7 +71,7 @@
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="../LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="../CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.49.2-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="../CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.49.3-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
@@ -140,7 +140,7 @@
   ![i18n keys](https://img.shields.io/badge/i18n_keys-2709-26A69A?style=flat-square)
 
   <!-- ── Content ──────────────────────────────────────────────── -->
-  ![Achievements](https://img.shields.io/badge/Achievements-463-FFD700?style=flat-square)
+  ![Achievements](https://img.shields.io/badge/Achievements-462-FFD700?style=flat-square)
   ![Game Modes](https://img.shields.io/badge/Game_Modes-5-orange?style=flat-square)
   ![Training Modes](https://img.shields.io/badge/Training_Modes-6-orange?style=flat-square)
   ![Custom Icons](https://img.shields.io/badge/Custom_Icons-70-8b5cf6?style=flat-square)
@@ -186,7 +186,7 @@
   </tr>
   <tr>
     <td><img src="media/mockup-stats.png" alt="Statistics and insights" /><br><sub><b>Statistics</b> — overview, heatmap and insights during the match</sub></td>
-    <td><img src="media/mockup-achievements.png" alt="Achievements and leaderboard" /><br><sub><b>Achievements</b> — 463 achievements and leaderboards</sub></td>
+    <td><img src="media/mockup-achievements.png" alt="Achievements and leaderboard" /><br><sub><b>Achievements</b> — 462 achievements and leaderboards</sub></td>
   </tr>
 </table>
 
@@ -740,7 +740,7 @@ See [DEPLOYMENT_VPS.md](DEPLOYMENT_VPS.md) for complete deployment guide includi
 - [x] Advanced Statistics with 10+ Charts
 - [x] Export/Import (JSON/CSV/Excel/PDF)
 - [x] PWA with Offline Support
-- [x] Achievement System (463 achievements)
+- [x] Achievement System (462 achievements)
 - [x] Player Profiles & Personal Bests
 - [x] Leaderboards
 - [x] Player Comparison (up to 4 players)

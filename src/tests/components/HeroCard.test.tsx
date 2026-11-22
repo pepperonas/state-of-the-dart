@@ -37,6 +37,15 @@ describe('HeroCard', () => {
     expect(visits).toHaveTextContent('140');
   });
 
+  // Bug report 21.02.: phones have no alternatives panel; the hero shows the second route.
+  it('shows an alternative route under the route, never alone', () => {
+    const { rerender } = render(<HeroCard {...hero({ remaining: 76, checkoutRoute: ['T20', 'D8'], checkoutAlternative: ['T16', 'D14'] })} />);
+    expect(screen.getByTestId('checkout-alternative')).toHaveTextContent('T16');
+    expect(screen.getByTestId('checkout-alternative')).toHaveTextContent('D14');
+    rerender(<HeroCard {...hero({ remaining: 76, checkoutRoute: null, checkoutAlternative: ['T16', 'D14'] })} />);
+    expect(screen.queryByTestId('checkout-alternative')).toBeNull();
+  });
+
   it('shows the checkout route only when there is one', () => {
     const { rerender } = render(<HeroCard {...hero()} />);
     expect(screen.queryByTestId('checkout-route')).toBeNull();

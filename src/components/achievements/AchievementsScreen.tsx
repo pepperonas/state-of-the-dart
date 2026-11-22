@@ -68,7 +68,8 @@ const AchievementsScreen: React.FC = () => {
   }, [selectedPlayerId, getLockedAchievements]);
 
   const filteredAchievements = useMemo(() => {
-    let achievements = showOnlyUnlocked ? unlockedAchievements : ACHIEVEMENTS;
+    // A retired achievement shows only for players who have it.
+    let achievements = showOnlyUnlocked ? unlockedAchievements : [...ACHIEVEMENTS, ...unlockedAchievements.filter(a => a.retired)];
 
     if (filterCategory !== 'all') {
       achievements = achievements.filter(a => a.category === filterCategory);
@@ -99,7 +100,7 @@ const AchievementsScreen: React.FC = () => {
 
   const completionPercentage = useMemo(() => {
     if (ACHIEVEMENTS.length === 0) return 0;
-    return Math.round((unlockedAchievements.length / ACHIEVEMENTS.length) * 100);
+    return Math.round((unlockedAchievements.filter(a => !a.retired).length / ACHIEVEMENTS.length) * 100);
   }, [unlockedAchievements]);
 
 
@@ -167,7 +168,7 @@ const AchievementsScreen: React.FC = () => {
             <div className="flex justify-between m3-label-medium text-on-surface-variant mb-2">
               <span>{t('achievements.total_progress')}</span>
               <span data-testid="achievements-total">
-                {unlockedAchievements.length}/{ACHIEVEMENTS.length}
+                {unlockedAchievements.filter(a => !a.retired).length}/{ACHIEVEMENTS.length}
               </span>
             </div>
             <div className="w-full bg-surface-container-highest rounded-m3-full h-3">

@@ -4,7 +4,7 @@ import path from 'path';
 import type { TFunction } from 'i18next';
 import de from '../../i18n/locales/de.json';
 import en from '../../i18n/locales/en.json';
-import { ACHIEVEMENTS } from '../../types/achievements';
+import { ACHIEVEMENTS, RETIRED_ACHIEVEMENTS } from '../../types/achievements';
 import { achievementDescription, achievementName } from '../../utils/achievementText';
 import i18n from '../../i18n/config';
 
@@ -28,7 +28,8 @@ describe('achievement texts', () => {
   });
 
   it('the locale files hold no achievement that no longer exists', () => {
-    const ids = new Set(ACHIEVEMENTS.map(a => a.id));
+    // Retired ones are still shown to players who have them, so they keep their texts.
+    const ids = new Set([...ACHIEVEMENTS, ...RETIRED_ACHIEVEMENTS].map(a => a.id));
     expect(Object.keys(DE).filter(id => !ids.has(id))).toEqual([]);
     expect(Object.keys(EN).filter(id => !ids.has(id))).toEqual([]);
   });

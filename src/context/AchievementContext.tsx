@@ -63,6 +63,12 @@ export interface CheckOptions {
   mode?: CheckMode;
   /** Checkout attempts behind a checkout-percentage value (tiers ask for a minimum). */
   attempts?: number;
+  /**
+   * The visit's position (match, leg, player, visit number). An increment for
+   * the same metric and position counts once: undo + re-entry of a visit used
+   * to count it twice (bug report 27.02., fixed 0.49.3).
+   */
+  visitKey?: string;
 }
 
 interface AchievementContextType {
@@ -641,6 +647,9 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
     checkMetaAchievements(playerId);
   }, [isAchievementUnlocked, saveProgressForPlayer, queueNotification, checkMetaAchievements, enqueuePendingUnlock]);
 
+  // Increments already counted per visit position (see CheckOptions.visitKey).
+  const countedVisitsRef = useRef<Set<string>>(new Set());
+
   // Check achievements based on metrics
   const checkAchievement = useCallback((
     playerId: string,
@@ -651,6 +660,11 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
   ) => {
     if (botIdsRef.current.has(playerId)) return;
     const mode = options?.mode ?? (CUMULATIVE_METRICS.has(metric) ? 'increment' : 'absolute');
+    if (mode === 'increment' && options?.visitKey) {
+      const key = `${playerId}|${metric}|${options.visitKey}`;
+      if (countedVisitsRef.current.has(key)) return;
+      countedVisitsRef.current.add(key);
+    }
 
     const relevantAchievements = ACHIEVEMENTS.filter(a => a.requirement.metric === metric && a.requirement.type !== 'streak');
     const progressUpdates: Record<string, { current: number; target: number; percentage: number }> = {};
