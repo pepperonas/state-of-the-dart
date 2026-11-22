@@ -64,6 +64,7 @@ const lazyWithRetry = (componentImport: () => Promise<any>) =>
 
 // Lazy load heavy components
 const AccountHub = lazyWithRetry(() => import('./components/account/AccountHub'));
+const ChangelogPage = lazyWithRetry(() => import('./components/changelog/ChangelogPage'));
 const Landing = lazyWithRetry(() => import('./components/landing/Landing'));
 const GameScreen = lazyWithRetry(() => import('./components/game/GameScreen'));
 const ScoreboardScreen = lazyWithRetry(() => import('./components/game/ScoreboardScreen'));
@@ -390,6 +391,8 @@ function AppContent() {
                         </ProtectedRoute>
                       } />
                       
+                      {/* Public: the footer's version number links here, signed in or not. */}
+                      <Route path="/changelog" element={<ChangelogPage />} />
                       <Route path="/me" element={
                         <ProtectedRoute>
                           <AccountHub />

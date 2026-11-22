@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  User, Settings, CreditCard, BookOpen, Keyboard, Mail, Bug, Shield, LogOut, ChevronRight, Crown, Clock,
-} from 'lucide-react';
+  User, Settings, CreditCard, BookOpen, Keyboard, Mail, Bug, Shield, LogOut, ChevronRight, Crown, Clock, History } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import PageShell from '../common/PageShell';
 import Button from '../common/Button';
@@ -69,6 +68,7 @@ const AccountHub: React.FC = () => {
         { id: 'shortcuts', icon: Keyboard, label: t('account_hub.shortcuts'), description: t('account_hub.shortcuts_desc'), onSelect: openShortcuts },
         { id: 'contact', icon: Mail, label: t('account_hub.contact'), description: t('account_hub.contact_desc'), onSelect: () => setContact(true) },
         { id: 'bug', icon: Bug, label: t('account_hub.bug'), description: t('account_hub.bug_desc'), onSelect: () => setBug(true) },
+        { id: 'changelog', icon: History, label: t('account_hub.changelog'), description: t('account_hub.changelog_desc'), onSelect: () => navigate('/changelog') },
       ],
     },
     ...(user.isAdmin

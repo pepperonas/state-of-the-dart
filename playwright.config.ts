@@ -37,6 +37,8 @@ export default defineConfig({
 
   use: {
     baseURL: 'http://localhost:4173',
+    // The suite reads German labels; signed-out pages follow the browser language (0.50.0).
+    locale: 'de-DE',
     trace: 'on-first-retry',
     video: 'retain-on-failure',
     screenshot: 'only-on-failure',

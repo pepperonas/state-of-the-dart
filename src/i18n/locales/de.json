@@ -1017,7 +1017,7 @@
       },
       "language": {
         "title": "Sprache",
-        "text": "Verfügbare Sprachen: <b>Deutsch</b> und <b>English</b>."
+        "text": "Verfügbare Sprachen: <b>Deutsch</b>, <b>English</b>, <b>Italiano</b>, <b>Español</b> und <b>Français</b>."
       },
       "pwa": {
         "title": "Progressive Web App (PWA)",
@@ -2374,7 +2374,21 @@
     "report_title": "Matchverlauf"
   },
   "bots": {
-    "player_name": "Bot {{number}} ({{level}})"
+    "player_name": "Bot {{number}} ({{level}})",
+    "adaptive": {
+      "beginner": {
+        "name": "Neuling",
+        "description": "Einfacher als du - gut zum Üben"
+      },
+      "regular": {
+        "name": "Stammspieler",
+        "description": "Passt zu deinem Können"
+      },
+      "pro": {
+        "name": "Profi",
+        "description": "Herausfordernder Gegner"
+      }
+    }
   },
   "activity": {
     "none": "Keine Aktivität in den letzten {{days}} Tagen",
@@ -4311,7 +4325,9 @@
     "bug_desc": "Etwas funktioniert nicht wie erwartet",
     "group_admin": "Verwaltung",
     "admin": "Admin-Panel",
-    "admin_desc": "Nutzer, Fehlermeldungen, Debug-Flags"
+    "admin_desc": "Nutzer, Fehlermeldungen, Debug-Flags",
+    "changelog": "Changelog",
+    "changelog_desc": "Was sich in der App geändert hat (auf Englisch)"
   },
   "plan": {
     "premium": "Premium",
@@ -4367,5 +4383,9 @@
     "free_training": "Doppel und Around the Clock im Training",
     "free_stats": "Statistik und die letzten 20 Spiele",
     "free_achievements": "Alle Erfolge"
+  },
+  "changelog": {
+    "title": "Changelog",
+    "subtitle": "What changed in State of the Dart"
   }
 }

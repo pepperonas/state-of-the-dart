@@ -1,3 +1,4 @@
+import type { AppLanguage } from '../i18n/languages';
 export interface Player {
   id: string;
   name: string;
@@ -345,7 +346,7 @@ export type AppTheme = 'modern' | 'modern-light';
 
 export interface AppSettings {
   theme: AppTheme;
-  language: 'de' | 'en';
+  language: AppLanguage;
   soundVolume: number; // Deprecated: kept for backward compatibility
   callerVolume?: number; // Volume for caller sounds (scores, checkouts)
   effectsVolume?: number; // Volume for effects (UI sounds, game events)

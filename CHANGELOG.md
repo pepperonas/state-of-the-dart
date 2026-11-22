@@ -7,6 +7,31 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.50.0] - 2026-11-22
+
+### Added
+- **Italian, Spanish and French** besides German and English (all ~3,100
+  strings, achievements included). Chosen in the settings
+  (`i18n/languages.ts`), saved with the account. The three files load on
+  demand (`changeAppLanguage` in `i18n/config.ts`) — the main bundle does not
+  grow. Missing keys fall back to English. `_many` plural forms added.
+- Signed out, the app starts in the browser's language (unknown → English).
+- **Public changelog in the app** (`/changelog`, English only):
+  `src/data/publicChangelog.ts`, written for players — nothing about
+  security, infrastructure, admin tools, costs or prices (a test enforces a
+  forbidden-word list and that the current version has an entry). Reached
+  from the footer version number and Account → Help.
+- The adaptive bot names (Beginner/Regular/Pro) are translated instead of
+  German/English only.
+
+### Fixed
+- Changing the language saved only after its strings had loaded; navigating
+  away right after picking lost the choice. Both run at once now.
+
+### Notes
+- The legal pages stay German (binding version). Emoji avatar search labels
+  exist in German and English only.
+
 ## [0.49.3] - 2026-11-22
 
 Every open bug report was checked against the code; eleven were already

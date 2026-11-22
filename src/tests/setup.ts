@@ -43,3 +43,7 @@ const createLocalStorageMock = () => {
 };
 
 global.localStorage = createLocalStorageMock() as unknown as Storage;
+
+// The app follows the browser language when nobody is signed in (0.50.0);
+// the suite reads German labels, so the test browser speaks German.
+Object.defineProperty(window.navigator, 'languages', { value: ['de-DE', 'de'], configurable: true });
