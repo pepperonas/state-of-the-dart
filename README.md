@@ -46,7 +46,7 @@
   - 📊 **Statistik & Heatmaps** feldgenau, Verlauf, Vergleich, Bestenlisten
   - 🏆 **462 Achievements** in fünf Stufen mit eigenen Formen
   - 🎮 **Cricket, Around the Clock, Shanghai, 6 Trainingsmodi, Turniere, Online-Multiplayer**
-  - 🔊 **Caller mit 609 Sprachdateien** · 🌍 Deutsch und Englisch · ♿ WCAG 2.1 AA geprüft
+  - 🔊 **Caller mit 609 Sprachdateien** · 🌍 Deutsch, Englisch, Italienisch, Spanisch und Französisch · ♿ WCAG 2.1 AA geprüft
   - 📴 **Offline-first PWA** mit Konto-Sync, Fortsetzen nach Refresh, keine Werbung
 
   ### 🧰 Tech-Stack
@@ -137,7 +137,7 @@
   ![API routes](https://img.shields.io/badge/API_route_modules-14-339933?style=flat-square&logo=express&logoColor=white)
   ![App routes](https://img.shields.io/badge/App_routes-37-8957e5?style=flat-square)
   ![Contexts](https://img.shields.io/badge/React_contexts-6-61DAFB?style=flat-square)
-  ![i18n keys](https://img.shields.io/badge/i18n_keys-2709-26A69A?style=flat-square)
+  ![i18n keys](https://img.shields.io/badge/i18n_keys-3033-26A69A?style=flat-square)
 
   <!-- ── Content ──────────────────────────────────────────────── -->
   ![Achievements](https://img.shields.io/badge/Achievements-462-FFD700?style=flat-square)
@@ -148,7 +148,7 @@
   ![Audio Files](https://img.shields.io/badge/Audio_Files-609-e11d48?style=flat-square)
   ![Check rules](https://img.shields.io/badge/In%2FOut-single_%C2%B7_double_%C2%B7_triple-orange?style=flat-square)
   ![TV scoreboard](https://img.shields.io/badge/TV_scoreboard-live-0ea5e9?style=flat-square)
-  ![i18n](https://img.shields.io/badge/i18n-DE_%7C_EN-informational?style=flat-square)
+  ![i18n](https://img.shields.io/badge/i18n-DE_%7C_EN_%7C_IT_%7C_ES_%7C_FR-informational?style=flat-square)
   ![Mobile](https://img.shields.io/badge/Mobile-optimized-success?style=flat-square)
   ![Offline](https://img.shields.io/badge/Offline-first-0ea5e9?style=flat-square)
   ![No ads](https://img.shields.io/badge/Ads-none-334155?style=flat-square)
