@@ -634,7 +634,7 @@ Static landing page at `website/` — separate Vite build (plain HTML + one CSS 
 - Nginx config at `/etc/nginx/sites-available/stateofthedart.celox.io` with SSL via Let's Encrypt
 - **Looks like the game (since 2026-11-23):** `website/src/styles.css` copies the dark token values from `src/styles/m3.css` (raspberry, rosé surfaces, gold) and the fonts from `public/fonts` (Bangers + Roboto Flex, self-hosted, no Google). Dark only, like the game's default. If the app's palette or fonts change, carry them over by hand.
 - Hero = the at-the-oche card as plain HTML; its numbers must add up (501 − 360 in 6 darts = 141, average 180, route T20 T19 D12).
-- Images in `website/public/shots/` are app screenshots (`npx playwright test -c tools/screenshots` → `magick … -resize 1440x -quality 80`). Refresh after a visible UI change. `public/images/og-image.jpg` is rendered from the hero (1200×630); bump its `?v=` when replaced.
+- Images in `website/public/shots/` are app screenshots (`npx playwright test -c tools/screenshots` → `magick … -resize 1440x -quality 80`). Refresh after a visible UI change. `website/public/images/og-image.jpg` is rendered from the hero (1200×630); bump its `?v=` when replaced.
 - Free/premium wording must match `plan.*` in `de.json` — never "100 % kostenlos" again.
 
 ## README media (0.31.2)
