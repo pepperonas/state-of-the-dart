@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { BOARD_ORDER } from '../../utils/heatmap';
-import { RINGS, NUMBER_RADIUS, bedAngles, bedShape, wedgePath, discPath } from '../../utils/boardGeometry';
+import { RINGS, bedAngles, bedShape } from '../../utils/boardGeometry';
+import BoardFace from '../dartboard/BoardFace';
 import AnimatedNumber from '../common/AnimatedNumber';
 import { buildDemoFrames, DEMO_AVERAGE, DEMO_DARTS, STILL_FRAME_INDEX, type DemoDart } from './legScript';
 
@@ -13,9 +13,6 @@ import { buildDemoFrames, DEMO_AVERAGE, DEMO_DARTS, STILL_FRAME_INDEX, type Demo
  * legScript (tested). Runs only while on screen; reduced motion gets one
  * still frame.
  */
-
-// Regulation board colours — the board is the subject, not a theme surface.
-const BOARD = { black: '#1b1a1c', cream: '#efe6cf', red: '#d7263d', green: '#1f8a4c', wire: '#9a9aa0', surround: '#121113' };
 
 const pt = (r: number, deg: number) => {
   const a = (deg * Math.PI) / 180;
@@ -32,59 +29,50 @@ const landing = (d: DemoDart, n: number) => {
   return pt(r, mid);
 };
 
-const Board: React.FC = React.memo(() => (
-  <g>
-    <circle r={124} fill={BOARD.surround} />
-    {BOARD_ORDER.map((seg, i) => {
-      const { start, end } = bedAngles(seg);
-      const dark = i % 2 === 0;
-      const single = dark ? BOARD.black : BOARD.cream;
-      const ring = dark ? BOARD.red : BOARD.green;
-      return (
-        <g key={seg}>
-          <path d={wedgePath(start, end, RINGS.outerBull, RINGS.tripleInner)} fill={single} />
-          <path d={wedgePath(start, end, RINGS.tripleInner, RINGS.tripleOuter)} fill={ring} />
-          <path d={wedgePath(start, end, RINGS.tripleOuter, RINGS.doubleInner)} fill={single} />
-          <path d={wedgePath(start, end, RINGS.doubleInner, RINGS.doubleOuter)} fill={ring} />
-        </g>
-      );
-    })}
-    <path d={discPath(RINGS.bull, RINGS.outerBull)} fill={BOARD.green} fillRule="evenodd" />
-    <path d={discPath(0, RINGS.bull)} fill={BOARD.red} />
-    {/* Spider wire */}
-    <g stroke={BOARD.wire} strokeWidth={0.45} fill="none" opacity={0.7}>
-      {[RINGS.outerBull, RINGS.tripleInner, RINGS.tripleOuter, RINGS.doubleInner, RINGS.doubleOuter].map(r => <circle key={r} r={r} />)}
-      {BOARD_ORDER.map(seg => {
-        const a = pt(RINGS.outerBull, bedAngles(seg).start);
-        const b = pt(RINGS.doubleOuter, bedAngles(seg).start);
-        return <line key={seg} x1={a.x} y1={a.y} x2={b.x} y2={b.y} />;
-      })}
+/**
+ * A steel-tip dart stuck in the board, seen from the oche: the tip at (0,0),
+ * the dart rising up and to the right towards the viewer, so the flights are
+ * drawn larger than the barrel (perspective). Drawn along +x, then tilted.
+ * Parts: steel point, knurled tungsten barrel, shaft, three flights (two seen
+ * at an angle, one edge-on).
+ */
+const DART_TILT = -62;
+const DartBody: React.FC<{ id: string }> = ({ id }) => (
+  <g transform={`scale(1.55) rotate(${DART_TILT})`}>
+    {/* point — mostly in the board, a short glint shows */}
+    <path d="M0 0 L5.5 -0.55 L5.5 0.55 Z" fill={`url(#${id}-steel)`} />
+    {/* barrel: tapered, tungsten, grip rings */}
+    <path d="M5 -1.05 C9 -1.5 15 -1.75 18.5 -1.45 L18.5 1.45 C15 1.75 9 1.5 5 1.05 Z" fill={`url(#${id}-barrel)`} />
+    <g stroke="#2b2d32" strokeWidth={0.32} opacity={0.85}>
+      {[8, 9.2, 10.4, 11.6, 12.8, 14].map(x => <line key={x} x1={x} y1={-1.55} x2={x} y2={1.55} />)}
     </g>
-    {BOARD_ORDER.map(seg => {
-      const { start, end } = bedAngles(seg);
-      const p = pt(NUMBER_RADIUS, (start + end) / 2);
-      return (
-        <text key={seg} x={p.x} y={p.y} textAnchor="middle" dominantBaseline="central" fill="#f4f1ea"
-          style={{ fontFamily: 'var(--sotd-font-display)', fontSize: 12, letterSpacing: '0.02em' }}>
-          {seg}
-        </text>
-      );
-    })}
-    {/* Soft light from above-left, so the board sits in the arena. */}
-    <circle r={124} fill="url(#legdemo-light)" pointerEvents="none" />
-  </g>
-));
-Board.displayName = 'Board';
-
-/** A dart stuck in the board: the tip at (0,0), barrel and flight towards the viewer. */
-const Dart: React.FC = () => (
-  <g transform="scale(1.7)">
-    <line x1={0} y1={0} x2={9} y2={-11} stroke="#2a2a2e" strokeWidth={2.6} strokeLinecap="round" />
-    <line x1={0} y1={0} x2={9} y2={-11} stroke="#d9dbe0" strokeWidth={1.6} strokeLinecap="round" />
-    <polygon points="8,-10 21,-15 15,-23" fill="var(--m3-tertiary)" stroke="#2a1608" strokeWidth={0.6} />
-    <polygon points="8,-10 13,-24 6,-19" fill="var(--m3-primary)" stroke="#2a1608" strokeWidth={0.6} />
+    <path d="M6 -0.7 C10 -1.05 15 -1.15 18 -0.95" stroke="#ffffff" strokeOpacity={0.55} strokeWidth={0.35} fill="none" />
+    {/* shaft */}
+    <path d="M18.5 -0.9 L27 -1.05 L27 1.05 L18.5 0.9 Z" fill="#1d1c21" />
+    <path d="M18.5 -0.55 L27 -0.65" stroke="#ffffff" strokeOpacity={0.25} strokeWidth={0.3} />
+    {/* flights: the far one darker, the near one bright, the third edge-on */}
+    <path d="M22 -0.6 L24.6 -5 Q26 -7.5 29 -8.1 L35 -9 L35.5 -0.6 Z" fill="var(--m3-primary-container)" stroke="#0e0a0b" strokeWidth={0.35} strokeLinejoin="round" />
+    <path d="M22 0.6 L25 6 Q26.6 9 30 9.8 L36.5 11.2 L36.5 0.6 Z" fill="var(--m3-primary)" stroke="#0e0a0b" strokeWidth={0.35} strokeLinejoin="round" />
+    <path d="M23.5 1.4 L35.5 1.4" stroke="#ffffff" strokeOpacity={0.35} strokeWidth={0.5} />
+    <path d="M28 5.2 L34.5 7" stroke="var(--m3-tertiary)" strokeWidth={0.9} strokeLinecap="round" />
+    <path d="M22 0 L36 0" stroke="#0e0a0b" strokeWidth={1.1} strokeLinecap="round" />
+    <path d="M22 0 L36 0" stroke="var(--m3-tertiary)" strokeWidth={0.5} strokeLinecap="round" />
   </g>
 );
+
+/** The dart's shadow on the board: light from above-left, so it falls down-right of the dart. */
+const DartShadow: React.FC<{ id: string }> = ({ id }) => (
+  <g transform={`scale(1.55) rotate(${DART_TILT + 14})`} filter={`url(#${id}-blur)`} opacity={0.5}>
+    <path d="M1 0 L19 -1.4 L27 -1 L27 1 L19 1.4 Z" fill="#000000" />
+    <path d="M22 0 L27 7 L35 8.5 L35 -7 L27 -6 Z" fill="#000000" />
+  </g>
+);
+
+/** Invisible square centred on the tip, so framer's transform origin (bbox centre) is the tip. */
+const TipAnchor = () => <rect x={-60} y={-60} width={120} height={120} fill="none" />;
+
+/** Flight in, strike, then the flights shiver and settle — keyframe times share one clock. */
+const FLIGHT = { duration: 0.9, times: [0, 0.34, 0.48, 0.62, 0.76, 0.9, 1], ease: 'easeOut' as const };
 
 const LegDemo: React.FC = () => {
   const { t } = useTranslation();
@@ -125,18 +113,27 @@ const LegDemo: React.FC = () => {
 
       <svg viewBox="-134 -134 268 276" className="w-full max-w-[26rem] mx-auto h-auto" aria-hidden="true">
         <defs>
-          <radialGradient id="legdemo-light" cx="30%" cy="22%" r="80%">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity={0.14} />
-            <stop offset="55%" stopColor="#ffffff" stopOpacity={0} />
-            <stop offset="100%" stopColor="#000000" stopOpacity={0.35} />
-          </radialGradient>
           <filter id="legdemo-shadow" x="-30%" y="-30%" width="160%" height="160%">
             <feGaussianBlur stdDeviation="7" />
           </filter>
+          <filter id="legdemo-dart-blur" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="0.9" />
+          </filter>
+          <linearGradient id="legdemo-dart-barrel" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#5d6067" />
+            <stop offset="28%" stopColor="#d6d9de" />
+            <stop offset="55%" stopColor="#8b8f97" />
+            <stop offset="100%" stopColor="#3a3c42" />
+          </linearGradient>
+          <linearGradient id="legdemo-dart-steel" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#9fa3aa" />
+            <stop offset="45%" stopColor="#f2f3f5" />
+            <stop offset="100%" stopColor="#6c7077" />
+          </linearGradient>
         </defs>
         {/* The board hangs a little off the wall. */}
         <circle r={122} cy={9} fill="#000000" opacity={0.45} filter="url(#legdemo-shadow)" />
-        <Board />
+        <BoardFace />
         {/* The beds of this visit light up gold. */}
         {frame.darts.map((d, i) =>
           bedShape(d.segment, d.multiplier).map((s, k) => (
@@ -148,16 +145,32 @@ const LegDemo: React.FC = () => {
           {frame.darts.map((d, i) => {
             const p = landing(d, frame.darts.filter((o, j) => j < i && o.label === d.label).length);
             return (
-              <g key={`dart-${visitKey}-${i}`} transform={`translate(${p.x} ${p.y})`}>
+              <motion.g key={`dart-${visitKey}-${i}`} exit={{ opacity: 0, transition: { duration: 0.25 } }}>
+                <g transform={`translate(${p.x} ${p.y})`}>
                 <motion.g
-                  initial={reduce ? false : { x: 34, y: -40, scale: 1.5, opacity: 0 }}
-                  animate={{ x: 0, y: 0, scale: 1, opacity: 1 }}
-                  exit={{ opacity: 0, transition: { duration: 0.25 } }}
-                  transition={{ type: 'spring', stiffness: 520, damping: 30 }}
+                  initial={reduce ? false : { opacity: 0, scale: 0.6 }}
+                  animate={reduce ? { opacity: 1 } : { opacity: [0, 0, 1, 1, 1, 1, 1], scale: [0.6, 0.6, 1, 1, 1, 1, 1] }}
+                  transition={FLIGHT}
                 >
-                  <Dart />
+                  <TipAnchor />
+                  <DartShadow id="legdemo-dart" />
                 </motion.g>
-              </g>
+                <motion.g
+                  initial={reduce ? false : { x: 26, y: 70, scale: 2.8, rotate: 10, opacity: 0 }}
+                  animate={reduce ? { x: 0, y: 0, scale: 1, rotate: 0, opacity: 1 } : {
+                    x: [26, 0, 0, 0, 0, 0, 0],
+                    y: [70, 0, 0, 0, 0, 0, 0],
+                    scale: [2.8, 1, 1.04, 1, 1, 1, 1],
+                    rotate: [10, 0, 7, -4.5, 2.5, -1, 0],
+                    opacity: [0, 1, 1, 1, 1, 1, 1],
+                  }}
+                  transition={FLIGHT}
+                >
+                  <TipAnchor />
+                  <DartBody id="legdemo-dart" />
+                </motion.g>
+                </g>
+              </motion.g>
             );
           })}
         </AnimatePresence>
