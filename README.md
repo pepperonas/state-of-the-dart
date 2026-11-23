@@ -71,7 +71,7 @@
   <!-- ── Highlights ───────────────────────────────────────────── -->
   <p>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" /></a>
-    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.50.0-3b82f6?style=for-the-badge" alt="Version" /></a>
+    <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/Version-0.51.0-3b82f6?style=for-the-badge" alt="Version" /></a>
     <a href="https://stateofthedart.com"><img src="https://img.shields.io/badge/PWA-installable_%C2%B7_offline-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white" alt="PWA" /></a>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" /></a>
@@ -928,6 +928,10 @@ Contributions sind willkommen! Bitte:
 ---
 
 ## 📝 Changelog
+
+### v0.51.0 (23. November 2026) - Eine Dartscheibe, echte Pfeile
+
+Die Eingabe-Scheibe im Spiel ist jetzt dieselbe wie auf der Startseite: echte Turniermaße, Turnierfarben, Drahtnetz, die Zahlen in der Spielschrift und ein weiches Licht von oben links. Jedes Feld lässt sich weiter antippen, der Finish-Weg leuchtet wie bisher gold, die Alternative blau. Die Pfeile in der Demo auf der Startseite sehen jetzt wie echte Steeldarts aus: Stahlspitze, gerändelter Wolfram-Barrel, Schaft, Flights in Perspektive und ein Schatten auf der Scheibe. Jeder Pfeil fliegt heran, schlägt ein und wippt kurz nach.
 
 ### v0.50.0 (22. November 2026) - Italienisch, Spanisch, Französisch und ein Changelog
 

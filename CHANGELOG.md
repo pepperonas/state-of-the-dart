@@ -7,6 +7,19 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.51.0] - 2026-11-23
+
+### Changed
+- **One dartboard everywhere:** the landing page's regulation board (WDF
+  geometry from `boardGeometry`, board colours, spider wire, Bangers numbers,
+  soft light) is now `components/dartboard/BoardFace.tsx` and also draws the
+  in-game input board (`Dartboard.tsx`). Every bed stays a tap target; gold
+  route, blue alternative and the breathing hint are unchanged.
+- **Realistic darts in the landing demo:** steel point, knurled tungsten
+  barrel, shaft, three flights in perspective and a soft shadow on the board.
+  A dart flies in from the oche, strikes and shivers before it settles
+  (reduced motion: still).
+
 ### Changed
 - **Landing page (stateofthedart.celox.io) in the game's look:** same colours,
   fonts (Bangers + Roboto Flex, self-hosted) and shapes as the app, dark like

@@ -8,6 +8,15 @@ export interface PublicRelease { version: string; date: string /* YYYY-MM-DD */;
 
 export const PUBLIC_CHANGELOG: PublicRelease[] = [
   {
+    version: '0.51.0',
+    date: '2026-11-23',
+    title: 'A better dartboard',
+    items: [
+      'The board you tap in a game is now the same as on the start page: regulation sizes and colours, a wire spider and a softer light.',
+      'The darts in the start page demo now look like real steel-tip darts and settle with a little shiver after they land.',
+    ],
+  },
+  {
     version: '0.50.0',
     date: '2026-11-22',
     title: 'Italian, Spanish and French',

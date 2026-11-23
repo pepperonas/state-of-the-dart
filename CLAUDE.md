@@ -105,6 +105,7 @@ Express routes in `server/src/routes/`, registered in `server/src/index.ts`:
 - Checkout suggestions: `src/data/checkoutTable.ts`
 - Bot AI: `src/utils/botLogic.ts` (10 difficulty levels)
 - Audio: `src/utils/audio.ts` (dart caller, 400+ sound files). **Gotcha**: `announceCheckout(legOrSetNumber, finishType)` expects the **match-scoped leg/set sequence** (1, 2, 3 …), **not** the checkout score — `gameshot/legs/{N}.mp3` says "and the Nth leg". For `'match'` the number is ignored; only `texts/gameshotandthematch.mp3` plays. `announceBust(thrownScore?)` plays the thrown score first (`caller/{N}.mp3`) and then `caller/0.mp3` ("No score").
+- Board: `components/dartboard/BoardFace.tsx` (0.51.0) is the one board drawing — landing demo and the input `Dartboard` both use it (centre (0,0), double wire at 100, surround 124; `bed(segment, multiplier, zone)` overrides fill/class/click per bed). Don't draw a second board.
 - Heatmaps: `src/utils/heatmap.ts` (data) + `src/utils/boardGeometry.ts` (WDF ring radii, bed paths) + `components/dartboard/DartboardHeatmap.tsx`. ⚠️ **No throw coordinates exist** — a `Dart` is a bed, not a point. The heatmap colours whole beds (`--m3-heat-1…6` ramp, square-root `heatLevel`); never reintroduce a scatter cloud. Keys arrive as `20-3` (stored, match history) and `3x20` (old live), bulls as 25/50 — always go through `normalizeHeatmapKey`/`aggregateBeds` (bulls once landed on the 6). Totals include misses in every source. The SVG is `role="img"`; the bed list is the keyboard path.
 - Export: `src/utils/exportImport.ts` (CSV, XLSX, PDF, JSON). `exportMatchHistoryExcel` and `exportMatchHistoryPDF` are **async** — they `await import('xlsx')` / `import('jspdf')` internally so the libs only download on user action
 - Screenshots: `src/utils/screenshot.ts` (html2canvas dynamically imported on first call; excludes z-50+ modals)
@@ -621,6 +622,7 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 
 ## In-app landing (0.48.0)
 - `/` signed out = `components/landing/Landing.tsx`; `/willkommen` only redirects. Sign-up/in is on the page (`JoinPanel`, twice) — keep it there.
+- `LegDemo` darts (0.51.0): `DartBody` is drawn along +x and tilted; a transparent `TipAnchor` square centred on the tip makes framer's bbox-centre transform origin the tip, so scale/rotate pivot there. Keep it as big as the dart.
 - `LegDemo` + `legScript`: the demo leg's numbers are computed and pinned (`legScript.test.ts`); change the visits there, never type a score into the component. It runs only while intersecting; reduced motion shows `STILL_FRAME_INDEX`.
 - Screens in `public/landing/*.webp` come from the screenshot run (`npx playwright test -c tools/screenshots`, its git-ignored `out/` folder), converted with `magick … -resize 1440x -quality 80`. Refresh them after a visible game-screen change.
 
