@@ -7,6 +7,13 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Changed
+- **Landing page (stateofthedart.celox.io) in the game's look:** same colours,
+  fonts (Bangers + Roboto Flex, self-hosted) and shapes as the app, dark like
+  the game. Hero shows the at-the-oche card with a checkout route; fresh app
+  screenshots; a free/premium section instead of "100 % kostenlos"; five
+  languages named; new link preview image; old indigo screenshots removed.
+
 ## [0.50.0] - 2026-11-22
 
 ### Added
