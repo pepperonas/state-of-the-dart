@@ -626,12 +626,16 @@ Each achievement has a computed **scope** (round/leg/match/career/training/event
 
 ## Website (Landing Page)
 
-Static landing page at `website/` — separate Vite + Tailwind CSS build (not React).
+Static landing page at `website/` — separate Vite build (plain HTML + one CSS file, not React).
 - **URL**: https://stateofthedart.celox.io
 - **VPS path**: `/var/www/stateofthedart-landing`
 - **Build**: `cd website && npm run build`
-- **Deploy**: `scp -r website/dist/* root@69.62.121.168:/var/www/stateofthedart-landing/`
+- **Deploy**: `rsync -az --delete website/dist/ celox:/var/www/stateofthedart-landing/` (`--delete` so removed images go too; the folder holds nothing but the build)
 - Nginx config at `/etc/nginx/sites-available/stateofthedart.celox.io` with SSL via Let's Encrypt
+- **Looks like the game (since 2026-11-23):** `website/src/styles.css` copies the dark token values from `src/styles/m3.css` (raspberry, rosé surfaces, gold) and the fonts from `public/fonts` (Bangers + Roboto Flex, self-hosted, no Google). Dark only, like the game's default. If the app's palette or fonts change, carry them over by hand.
+- Hero = the at-the-oche card as plain HTML; its numbers must add up (501 − 360 in 6 darts = 141, average 180, route T20 T19 D12).
+- Images in `website/public/shots/` are app screenshots (`npx playwright test -c tools/screenshots` → `magick … -resize 1440x -quality 80`). Refresh after a visible UI change. `public/images/og-image.jpg` is rendered from the hero (1200×630); bump its `?v=` when replaced.
+- Free/premium wording must match `plan.*` in `de.json` — never "100 % kostenlos" again.
 
 ## README media (0.31.2)
 - `npx playwright test -c tools/screenshots` captures the app (seeded backend, own config — not part of the E2E suite; vitest excludes `tools/screenshots/**`), `node tools/screenshots/compose.mjs` builds the mockups and the 1280×640 social preview into `docs/media/` (HTML device frames rendered by Chromium, pngquant). Raw captures stay in the git-ignored `tools/screenshots/out/`; the README uses `docs/media/` only.
