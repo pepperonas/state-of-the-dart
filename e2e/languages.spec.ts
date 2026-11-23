@@ -51,7 +51,7 @@ test('the app switches to Italian, Spanish and French and remembers it', async (
     await expect(page).toHaveURL(/\/changelog$/);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Changelog');
     await expect(page.getByTestId('changelog')).toHaveAttribute('lang', 'en');
-    await expect(page.getByTestId('changelog-release').first()).toContainText('Italian, Spanish and French');
+    await expect(page.getByTestId('changelog-release').filter({ hasText: 'Italian, Spanish and French' })).toHaveCount(1);
   } finally {
     await page.goto('/settings');
     await pickLanguage(page, /Language/, 'Deutsch');
